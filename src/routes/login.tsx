@@ -21,18 +21,26 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-background p-12">
-        <img
-          src={logo}
-          alt="MedFlow-IA"
-          width={1024}
-          height={1024}
-          className="w-auto max-w-md h-auto"
-        />
+      <div className="hidden lg:flex flex-1 bg-brand-gradient relative overflow-hidden">
+        <div className="relative z-10 p-12 flex flex-col justify-between text-primary-foreground">
+          <div className="text-sm font-medium opacity-80">MedFlow-IA · Plataforma Operacional</div>
+          <div>
+            <h2 className="text-4xl font-semibold leading-tight max-w-md">
+              Inteligência que conecta. Operação que transforma.
+            </h2>
+            <p className="mt-4 text-base opacity-80 max-w-md">
+              Escalas, plantões e indicadores clínicos em tempo real, em um único fluxo.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6 py-10 bg-background">
         <div className="w-full max-w-sm">
+          <div className="flex justify-center mb-8 bg-surface rounded-2xl p-6 border border-border">
+            <img src={logo} alt="MedFlow-IA" style={{ height: "6.25rem" }} className="w-auto" />
+          </div>
+
           <h1 className="text-2xl font-semibold tracking-tight text-center">Entrar</h1>
           <p className="text-sm text-muted-foreground text-center mt-1">
             Acesse sua operação hospitalar
