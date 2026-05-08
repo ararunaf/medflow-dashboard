@@ -22,21 +22,8 @@ function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       <div className="hidden lg:flex flex-1 bg-brand-gradient relative overflow-hidden">
-        <div className="relative z-10 p-12 flex flex-col justify-between w-full text-primary-foreground">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 ring-1 ring-white/20 shadow-xl">
-              <img
-                src={logo}
-                alt="MedFlow-IA"
-                className="h-40 w-auto drop-shadow-lg"
-                width={1024}
-                height={1024}
-              />
-            </div>
-            <div className="text-sm font-medium opacity-80">
-              Plataforma Operacional
-            </div>
-          </div>
+        <div className="relative z-10 p-12 flex flex-col justify-between text-primary-foreground">
+          <div className="text-sm font-medium opacity-80">MedFlow-IA · Plataforma Operacional</div>
           <div>
             <h2 className="text-4xl font-semibold leading-tight max-w-md">
               Inteligência que conecta. Operação que transforma.
