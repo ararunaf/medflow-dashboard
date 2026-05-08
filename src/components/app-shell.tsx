@@ -4,13 +4,20 @@ import { cn } from "@/lib/utils";
 import logo from "@/assets/logo-medflow.png";
 import type { ReactNode } from "react";
 
-const navItems = [
+type NavItem = {
+  to: "/" | "/escalas" | "/plantoes" | "/financeiro" | "/perfil";
+  label: string;
+  icon: typeof Home;
+  exact?: boolean;
+};
+
+const navItems: NavItem[] = [
   { to: "/", label: "Home", icon: Home, exact: true },
   { to: "/escalas", label: "Escalas", icon: CalendarDays },
   { to: "/plantoes", label: "Plantões", icon: Stethoscope },
   { to: "/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/perfil", label: "Perfil", icon: User },
-] as const;
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
