@@ -1,11 +1,20 @@
 // Captures the original Error out-of-band so server.ts can recover the stack
 // when h3 has already swallowed the throw into a generic 500 Response.
 
+import { logRuntime } from "@/lib/monitoring/channels/runtime";
+import { initServerErrorMonitoring } from "@/lib/monitoring/server-bootstrap";
+
+initServerErrorMonitoring();
+
 let lastCapturedError: { error: unknown; at: number } | undefined;
 const TTL_MS = 5_000;
 
 function record(error: unknown) {
   lastCapturedError = { error, at: Date.now() };
+  logRuntime("uncaught_exception", {
+    err: error,
+    metadata: { source: "error-capture" },
+  });
 }
 
 if (typeof globalThis.addEventListener === "function") {

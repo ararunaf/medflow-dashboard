@@ -1,0 +1,41 @@
+# Validação de release — disparo manual apenas (não faz deploy)
+name: Release validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: "Pular build (apenas checks)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+defaults:
+  run:
+    working-directory: MedFlow-IA
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_ANON_KEY: placeholder_anon_key_for_ci_build_only
+      VITE_MEDFLOW_APP_URL: https://app.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: MedFlow-IA/package-lock.json
+      - run: npm ci
+      - name: Production validate
+        run: |
+          if [ "${{ inputs.skip_build }}" = "true" ]; then
+            npm run production-validate:fast
+          else
+            npm run production-validate
+          fi

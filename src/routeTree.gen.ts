@@ -9,16 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TissRouteImport } from './routes/tiss'
+import { Route as SiteRouteImport } from './routes/site'
 import { Route as PlantoesRouteImport } from './routes/plantoes'
+import { Route as PilotoRouteImport } from './routes/piloto'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as OperacaoRouteImport } from './routes/operacao'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LancamentoRouteImport } from './routes/lancamento'
+import { Route as InstituicaoRouteImport } from './routes/instituicao'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as ExecutivoRouteImport } from './routes/executivo'
 import { Route as EscalasRouteImport } from './routes/escalas'
+import { Route as CentralRouteImport } from './routes/central'
+import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRedefinirSenhaRouteImport } from './routes/login.redefinir-senha'
+import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-senha'
+import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
+import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
+import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
 
+const TissRoute = TissRouteImport.update({
+  id: '/tiss',
+  path: '/tiss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteRoute = SiteRouteImport.update({
+  id: '/site',
+  path: '/site',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlantoesRoute = PlantoesRouteImport.update({
   id: '/plantoes',
   path: '/plantoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PilotoRoute = PilotoRouteImport.update({
+  id: '/piloto',
+  path: '/piloto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -26,9 +55,24 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OperacaoRoute = OperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LancamentoRoute = LancamentoRouteImport.update({
+  id: '/lancamento',
+  path: '/lancamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstituicaoRoute = InstituicaoRouteImport.update({
+  id: '/instituicao',
+  path: '/instituicao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -36,9 +80,24 @@ const FinanceiroRoute = FinanceiroRouteImport.update({
   path: '/financeiro',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExecutivoRoute = ExecutivoRouteImport.update({
+  id: '/executivo',
+  path: '/executivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EscalasRoute = EscalasRouteImport.update({
   id: '/escalas',
   path: '/escalas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CentralRoute = CentralRouteImport.update({
+  id: '/central',
+  path: '/central',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AjudaRoute = AjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,69 +105,217 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRedefinirSenhaRoute = LoginRedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => LoginRoute,
+} as any)
+const LoginEsqueciSenhaRoute = LoginEsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => LoginRoute,
+} as any)
+const FinanceiroFechamentoOperacionalRoute =
+  FinanceiroFechamentoOperacionalRouteImport.update({
+    id: '/fechamento-operacional',
+    path: '/fechamento-operacional',
+    getParentRoute: () => FinanceiroRoute,
+  } as any)
+const FinanceiroDashboardExecutivoRoute =
+  FinanceiroDashboardExecutivoRouteImport.update({
+    id: '/dashboard-executivo',
+    path: '/dashboard-executivo',
+    getParentRoute: () => FinanceiroRoute,
+  } as any)
+const FinanceiroConciliacaoOperacionalRoute =
+  FinanceiroConciliacaoOperacionalRouteImport.update({
+    id: '/conciliacao-operacional',
+    path: '/conciliacao-operacional',
+    getParentRoute: () => FinanceiroRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ajuda': typeof AjudaRoute
+  '/central': typeof CentralRoute
   '/escalas': typeof EscalasRoute
-  '/financeiro': typeof FinanceiroRoute
-  '/login': typeof LoginRoute
+  '/executivo': typeof ExecutivoRoute
+  '/financeiro': typeof FinanceiroRouteWithChildren
+  '/instituicao': typeof InstituicaoRoute
+  '/lancamento': typeof LancamentoRoute
+  '/login': typeof LoginRouteWithChildren
+  '/operacao': typeof OperacaoRoute
   '/perfil': typeof PerfilRoute
+  '/piloto': typeof PilotoRoute
   '/plantoes': typeof PlantoesRoute
+  '/site': typeof SiteRoute
+  '/tiss': typeof TissRoute
+  '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
+  '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
+  '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
+  '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
+  '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ajuda': typeof AjudaRoute
+  '/central': typeof CentralRoute
   '/escalas': typeof EscalasRoute
-  '/financeiro': typeof FinanceiroRoute
-  '/login': typeof LoginRoute
+  '/executivo': typeof ExecutivoRoute
+  '/financeiro': typeof FinanceiroRouteWithChildren
+  '/instituicao': typeof InstituicaoRoute
+  '/lancamento': typeof LancamentoRoute
+  '/login': typeof LoginRouteWithChildren
+  '/operacao': typeof OperacaoRoute
   '/perfil': typeof PerfilRoute
+  '/piloto': typeof PilotoRoute
   '/plantoes': typeof PlantoesRoute
+  '/site': typeof SiteRoute
+  '/tiss': typeof TissRoute
+  '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
+  '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
+  '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
+  '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
+  '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ajuda': typeof AjudaRoute
+  '/central': typeof CentralRoute
   '/escalas': typeof EscalasRoute
-  '/financeiro': typeof FinanceiroRoute
-  '/login': typeof LoginRoute
+  '/executivo': typeof ExecutivoRoute
+  '/financeiro': typeof FinanceiroRouteWithChildren
+  '/instituicao': typeof InstituicaoRoute
+  '/lancamento': typeof LancamentoRoute
+  '/login': typeof LoginRouteWithChildren
+  '/operacao': typeof OperacaoRoute
   '/perfil': typeof PerfilRoute
+  '/piloto': typeof PilotoRoute
   '/plantoes': typeof PlantoesRoute
+  '/site': typeof SiteRoute
+  '/tiss': typeof TissRoute
+  '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
+  '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
+  '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
+  '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
+  '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ajuda'
+    | '/central'
     | '/escalas'
+    | '/executivo'
     | '/financeiro'
+    | '/instituicao'
+    | '/lancamento'
     | '/login'
+    | '/operacao'
     | '/perfil'
+    | '/piloto'
     | '/plantoes'
+    | '/site'
+    | '/tiss'
+    | '/financeiro/conciliacao-operacional'
+    | '/financeiro/dashboard-executivo'
+    | '/financeiro/fechamento-operacional'
+    | '/login/esqueci-senha'
+    | '/login/redefinir-senha'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/escalas' | '/financeiro' | '/login' | '/perfil' | '/plantoes'
+  to:
+    | '/'
+    | '/ajuda'
+    | '/central'
+    | '/escalas'
+    | '/executivo'
+    | '/financeiro'
+    | '/instituicao'
+    | '/lancamento'
+    | '/login'
+    | '/operacao'
+    | '/perfil'
+    | '/piloto'
+    | '/plantoes'
+    | '/site'
+    | '/tiss'
+    | '/financeiro/conciliacao-operacional'
+    | '/financeiro/dashboard-executivo'
+    | '/financeiro/fechamento-operacional'
+    | '/login/esqueci-senha'
+    | '/login/redefinir-senha'
   id:
     | '__root__'
     | '/'
+    | '/ajuda'
+    | '/central'
     | '/escalas'
+    | '/executivo'
     | '/financeiro'
+    | '/instituicao'
+    | '/lancamento'
     | '/login'
+    | '/operacao'
     | '/perfil'
+    | '/piloto'
     | '/plantoes'
+    | '/site'
+    | '/tiss'
+    | '/financeiro/conciliacao-operacional'
+    | '/financeiro/dashboard-executivo'
+    | '/financeiro/fechamento-operacional'
+    | '/login/esqueci-senha'
+    | '/login/redefinir-senha'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AjudaRoute: typeof AjudaRoute
+  CentralRoute: typeof CentralRoute
   EscalasRoute: typeof EscalasRoute
-  FinanceiroRoute: typeof FinanceiroRoute
-  LoginRoute: typeof LoginRoute
+  ExecutivoRoute: typeof ExecutivoRoute
+  FinanceiroRoute: typeof FinanceiroRouteWithChildren
+  InstituicaoRoute: typeof InstituicaoRoute
+  LancamentoRoute: typeof LancamentoRoute
+  LoginRoute: typeof LoginRouteWithChildren
+  OperacaoRoute: typeof OperacaoRoute
   PerfilRoute: typeof PerfilRoute
+  PilotoRoute: typeof PilotoRoute
   PlantoesRoute: typeof PlantoesRoute
+  SiteRoute: typeof SiteRoute
+  TissRoute: typeof TissRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tiss': {
+      id: '/tiss'
+      path: '/tiss'
+      fullPath: '/tiss'
+      preLoaderRoute: typeof TissRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site': {
+      id: '/site'
+      path: '/site'
+      fullPath: '/site'
+      preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plantoes': {
       id: '/plantoes'
       path: '/plantoes'
       fullPath: '/plantoes'
       preLoaderRoute: typeof PlantoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/piloto': {
+      id: '/piloto'
+      path: '/piloto'
+      fullPath: '/piloto'
+      preLoaderRoute: typeof PilotoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -118,11 +325,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/operacao': {
+      id: '/operacao'
+      path: '/operacao'
+      fullPath: '/operacao'
+      preLoaderRoute: typeof OperacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lancamento': {
+      id: '/lancamento'
+      path: '/lancamento'
+      fullPath: '/lancamento'
+      preLoaderRoute: typeof LancamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instituicao': {
+      id: '/instituicao'
+      path: '/instituicao'
+      fullPath: '/instituicao'
+      preLoaderRoute: typeof InstituicaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -132,11 +360,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceiroRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/executivo': {
+      id: '/executivo'
+      path: '/executivo'
+      fullPath: '/executivo'
+      preLoaderRoute: typeof ExecutivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/escalas': {
       id: '/escalas'
       path: '/escalas'
       fullPath: '/escalas'
       preLoaderRoute: typeof EscalasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/central': {
+      id: '/central'
+      path: '/central'
+      fullPath: '/central'
+      preLoaderRoute: typeof CentralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ajuda': {
+      id: '/ajuda'
+      path: '/ajuda'
+      fullPath: '/ajuda'
+      preLoaderRoute: typeof AjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -146,17 +395,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login/redefinir-senha': {
+      id: '/login/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/login/redefinir-senha'
+      preLoaderRoute: typeof LoginRedefinirSenhaRouteImport
+      parentRoute: typeof LoginRoute
+    }
+    '/login/esqueci-senha': {
+      id: '/login/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/login/esqueci-senha'
+      preLoaderRoute: typeof LoginEsqueciSenhaRouteImport
+      parentRoute: typeof LoginRoute
+    }
+    '/financeiro/fechamento-operacional': {
+      id: '/financeiro/fechamento-operacional'
+      path: '/fechamento-operacional'
+      fullPath: '/financeiro/fechamento-operacional'
+      preLoaderRoute: typeof FinanceiroFechamentoOperacionalRouteImport
+      parentRoute: typeof FinanceiroRoute
+    }
+    '/financeiro/dashboard-executivo': {
+      id: '/financeiro/dashboard-executivo'
+      path: '/dashboard-executivo'
+      fullPath: '/financeiro/dashboard-executivo'
+      preLoaderRoute: typeof FinanceiroDashboardExecutivoRouteImport
+      parentRoute: typeof FinanceiroRoute
+    }
+    '/financeiro/conciliacao-operacional': {
+      id: '/financeiro/conciliacao-operacional'
+      path: '/conciliacao-operacional'
+      fullPath: '/financeiro/conciliacao-operacional'
+      preLoaderRoute: typeof FinanceiroConciliacaoOperacionalRouteImport
+      parentRoute: typeof FinanceiroRoute
+    }
   }
 }
 
+interface FinanceiroRouteChildren {
+  FinanceiroConciliacaoOperacionalRoute: typeof FinanceiroConciliacaoOperacionalRoute
+  FinanceiroDashboardExecutivoRoute: typeof FinanceiroDashboardExecutivoRoute
+  FinanceiroFechamentoOperacionalRoute: typeof FinanceiroFechamentoOperacionalRoute
+}
+
+const FinanceiroRouteChildren: FinanceiroRouteChildren = {
+  FinanceiroConciliacaoOperacionalRoute: FinanceiroConciliacaoOperacionalRoute,
+  FinanceiroDashboardExecutivoRoute: FinanceiroDashboardExecutivoRoute,
+  FinanceiroFechamentoOperacionalRoute: FinanceiroFechamentoOperacionalRoute,
+}
+
+const FinanceiroRouteWithChildren = FinanceiroRoute._addFileChildren(
+  FinanceiroRouteChildren,
+)
+
+interface LoginRouteChildren {
+  LoginEsqueciSenhaRoute: typeof LoginEsqueciSenhaRoute
+  LoginRedefinirSenhaRoute: typeof LoginRedefinirSenhaRoute
+}
+
+const LoginRouteChildren: LoginRouteChildren = {
+  LoginEsqueciSenhaRoute: LoginEsqueciSenhaRoute,
+  LoginRedefinirSenhaRoute: LoginRedefinirSenhaRoute,
+}
+
+const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AjudaRoute: AjudaRoute,
+  CentralRoute: CentralRoute,
   EscalasRoute: EscalasRoute,
-  FinanceiroRoute: FinanceiroRoute,
-  LoginRoute: LoginRoute,
+  ExecutivoRoute: ExecutivoRoute,
+  FinanceiroRoute: FinanceiroRouteWithChildren,
+  InstituicaoRoute: InstituicaoRoute,
+  LancamentoRoute: LancamentoRoute,
+  LoginRoute: LoginRouteWithChildren,
+  OperacaoRoute: OperacaoRoute,
   PerfilRoute: PerfilRoute,
+  PilotoRoute: PilotoRoute,
   PlantoesRoute: PlantoesRoute,
+  SiteRoute: SiteRoute,
+  TissRoute: TissRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

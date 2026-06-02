@@ -16,9 +16,7 @@ export function PageHeader({
         <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground">
           {title}
         </h1>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
       </div>
       {actions && <div className="shrink-0 flex gap-2">{actions}</div>}
     </div>
@@ -56,10 +54,53 @@ export function StatCard({
           </span>
         )}
       </div>
-      <div className={cn("mt-3 text-2xl font-semibold tracking-tight", toneMap[tone])}>
-        {value}
-      </div>
+      <div className={cn("mt-3 text-2xl font-semibold tracking-tight", toneMap[tone])}>{value}</div>
       {hint && <div className="text-xs text-muted-foreground mt-1">{hint}</div>}
+    </div>
+  );
+}
+
+export function SkeletonRow({ height = 56 }: { height?: number }) {
+  return (
+    <div
+      className="rounded-xl bg-card border border-border ring-soft animate-pulse"
+      style={{ height }}
+    />
+  );
+}
+
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-border bg-card/40 p-8 text-center">
+      <p className="text-sm font-medium text-foreground">{title}</p>
+      {description ? <p className="mt-1 text-xs text-muted-foreground">{description}</p> : null}
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
+    </div>
+  );
+}
+
+export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+      <div className="font-medium">Não foi possível carregar.</div>
+      <p className="mt-1 text-xs opacity-80">{message}</p>
+      {onRetry ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-3 inline-flex items-center justify-center rounded-md border border-destructive/40 px-3 py-1.5 text-xs font-medium hover:bg-destructive/10"
+        >
+          Tentar novamente
+        </button>
+      ) : null}
     </div>
   );
 }

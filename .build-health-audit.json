@@ -1,0 +1,104 @@
+﻿{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@cloudflare/vite-plugin": {
+      "name": "@cloudflare/vite-plugin",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "miniflare",
+        "wrangler",
+        "ws"
+      ],
+      "effects": [],
+      "range": "<=0.0.0-fff677e35 || 0.0.7 - 1.37.2",
+      "nodes": [
+        "node_modules/@cloudflare/vite-plugin"
+      ],
+      "fixAvailable": true
+    },
+    "miniflare": {
+      "name": "miniflare",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "ws"
+      ],
+      "effects": [
+        "@cloudflare/vite-plugin",
+        "wrangler"
+      ],
+      "range": "<=0.0.0-fff677e35 || 3.20250204.0 - 4.20260518.0",
+      "nodes": [
+        "node_modules/miniflare"
+      ],
+      "fixAvailable": true
+    },
+    "wrangler": {
+      "name": "wrangler",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "miniflare"
+      ],
+      "effects": [
+        "@cloudflare/vite-plugin"
+      ],
+      "range": "<=0.0.0-kickoff-demo || 3.108.0 - 4.93.0",
+      "nodes": [
+        "node_modules/wrangler"
+      ],
+      "fixAvailable": true
+    },
+    "ws": {
+      "name": "ws",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119108,
+          "name": "ws",
+          "dependency": "ws",
+          "title": "ws: Uninitialized memory disclosure",
+          "url": "https://github.com/advisories/GHSA-58qx-3vcg-4xpx",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-908"
+          ],
+          "cvss": {
+            "score": 4.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": ">=8.0.0 <8.20.1"
+        }
+      ],
+      "effects": [
+        "@cloudflare/vite-plugin",
+        "miniflare"
+      ],
+      "range": "8.0.0 - 8.20.0",
+      "nodes": [
+        "node_modules/ws"
+      ],
+      "fixAvailable": true
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 4,
+      "high": 0,
+      "critical": 0,
+      "total": 4
+    },
+    "dependencies": {
+      "prod": 233,
+      "dev": 146,
+      "optional": 150,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 513
+    }
+  }
+}
