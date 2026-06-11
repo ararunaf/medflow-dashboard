@@ -129,9 +129,12 @@ Evidência visual: calendário exibindo **Hoje** + **Jun** (não mais **Mai** fi
 
 | Item | Valor |
 |------|-------|
-| Commit | _(preenchido pós-deploy)_ |
-| Version ID | _(preenchido pós-deploy)_ |
+| Commit | `cbb5aea` — `fix(escalas): tornar mês do calendário dinâmico` |
+| Version ID | `a75b621a-cf6f-425f-a990-a772fc80ae1f` |
 | URL staging | https://staging.medicflow.app.br/escalas |
+| Workers.dev | https://medflow-ia.calm-waterfall-a03d.workers.dev |
+
+**Nota:** Captura autenticada em staging bloqueada por rate-limit de login no momento da execução. Evidência visual gerada via fixture local (`scripts/render-escalas-calendar-fixture.mjs`) com a mesma lógica `buildDays()` + `monthShortFromDate()`. Bundle staging pós-deploy contém `monthShort` (ver `dist/client/assets/escalas-*.js`).
 
 ---
 
