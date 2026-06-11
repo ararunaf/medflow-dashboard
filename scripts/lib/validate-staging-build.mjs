@@ -2,6 +2,11 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { auditClientBundleBranding } from "./branding-audit.mjs";
 import { STAGING_APP_HOST, STAGING_APP_URL } from "./staging-domain.mjs";
+import {
+  FORBIDDEN_STAGING_BUNDLE_PATTERNS,
+  STAGING_SUPABASE_HOST,
+  STAGING_SUPABASE_URL,
+} from "./staging-supabase.mjs";
 
 /** URLs de dev local do MedFlow — não devem aparecer em build staging. */
 const MEDFLOW_DEV_URL_IN_BUNDLE = /https?:\/\/(?:localhost|127\.0\.0\.1):8080\b/i;
@@ -147,20 +152,104 @@ export function validateStagingBuild(cwd) {
   scanJsForMedflowDevUrl(clientAssets, "dist/client/assets");
   scanJsForMedflowDevUrl(serverAssets, "dist/server/assets");
 
-  const bundleHasStagingHost = (dir) => {
+  const bundleContains = (dir, needle) => {
     if (!existsSync(dir)) return false;
     return readdirSync(dir).some((file) => {
       if (!file.endsWith(".js")) return false;
-      return readFileSync(join(dir, file), "utf8").includes(STAGING_HOST_IN_BUNDLE);
+      return readFileSync(join(dir, file), "utf8").includes(needle);
     });
   };
-  if (bundleHasStagingHost(clientAssets)) {
+
+  const clientHasStagingHost = bundleContains(clientAssets, STAGING_HOST_IN_BUNDLE);
+  const serverHasStagingHost = bundleContains(serverAssets, STAGING_HOST_IN_BUNDLE);
+  if (clientHasStagingHost) {
     passes.push(`Domínio staging (${STAGING_APP_URL}) presente no bundle client`);
   } else {
-    warnings.push(
-      `Domínio ${STAGING_APP_HOST} não detectado em dist/client/assets — confira VITE_MEDFLOW_APP_URL no build`,
+    errors.push(
+      `Domínio ${STAGING_APP_HOST} ausente em dist/client/assets — confira VITE_MEDFLOW_APP_URL e use npm run build:staging`,
     );
   }
+  if (serverHasStagingHost) {
+    passes.push(`Domínio staging (${STAGING_APP_URL}) presente no bundle SSR`);
+  } else {
+    errors.push(
+      `Domínio ${STAGING_APP_HOST} ausente em dist/server/assets — confira VITE_MEDFLOW_APP_URL e use npm run build:staging`,
+    );
+  }
+
+  const clientHasStagingSupabase = bundleContains(clientAssets, STAGING_SUPABASE_HOST);
+  const serverHasStagingSupabase = bundleContains(serverAssets, STAGING_SUPABASE_HOST);
+  if (clientHasStagingSupabase) {
+    passes.push(`Supabase staging (${STAGING_SUPABASE_URL}) presente no bundle client`);
+  } else {
+    errors.push(
+      `Supabase staging (${STAGING_SUPABASE_HOST}) ausente em dist/client/assets — use npm run build:staging com .env.staging real`,
+    );
+  }
+  if (serverHasStagingSupabase) {
+    passes.push(`Supabase staging (${STAGING_SUPABASE_URL}) presente no bundle SSR`);
+  } else {
+    errors.push(
+      `Supabase staging (${STAGING_SUPABASE_HOST}) ausente em dist/server/assets — use npm run build:staging com .env.staging real`,
+    );
+  }
+
+  const markerPath = join(cwd, "dist", ".staging-build-marker.json");
+  const bundleLooksLikeStaging =
+    clientHasStagingHost && serverHasStagingHost && clientHasStagingSupabase && serverHasStagingSupabase;
+  if (!existsSync(markerPath)) {
+    errors.push(
+      "dist/.staging-build-marker.json ausente — rode npm run build:staging (não npm run build) antes do deploy staging",
+    );
+  } else if (!bundleLooksLikeStaging) {
+    errors.push(
+      "Marcador staging inconsistente com o bundle — dist foi gerado por build production ou env incorreto; rode npm run build:staging",
+    );
+  } else {
+    try {
+      const marker = JSON.parse(readFileSync(markerPath, "utf8"));
+      if (marker.mode !== "staging" || marker.viteMode !== "staging") {
+        errors.push(
+          `Marcador de build inválido (mode=${marker.mode}) — use npm run build:staging antes do deploy staging`,
+        );
+      } else if (marker.supabaseHost !== STAGING_SUPABASE_HOST) {
+        errors.push(
+          `Marcador staging com supabaseHost=${marker.supabaseHost} — esperado ${STAGING_SUPABASE_HOST}`,
+        );
+      } else {
+        passes.push("Marcador dist/.staging-build-marker.json confirma build --mode staging");
+      }
+    } catch {
+      errors.push("dist/.staging-build-marker.json ilegível — refaça npm run build:staging");
+    }
+  }
+
+  const EMPTY_SUPABASE_ENV_IN_BUNDLE =
+    /(?:url|anonKey|VITE_SUPABASE_URL|VITE_SUPABASE_ANON_KEY)\s*[:=]\s*["'`]{2}/i;
+  const scanJsForForbiddenBundleContent = (dir, label) => {
+    if (!existsSync(dir)) return;
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith(".js")) continue;
+      // Chunks vendor (@supabase, etc.) contêm JSDoc com example.com — não são env embutido.
+      if (VENDOR_CHUNK_PREFIXES.some((p) => file.startsWith(p))) continue;
+      const content = readFileSync(join(dir, file), "utf8");
+      for (const rule of FORBIDDEN_STAGING_BUNDLE_PATTERNS) {
+        if (rule.pattern.test(content)) {
+          errors.push(
+            `${label}: ${rule.id} detectado em ${file} — use npm run build:staging (não npm run build) antes do deploy staging`,
+          );
+        }
+        rule.pattern.lastIndex = 0;
+      }
+      if (EMPTY_SUPABASE_ENV_IN_BUNDLE.test(content)) {
+        errors.push(
+          `${label}: variável Supabase vazia em ${file} — preencha .env.staging antes de npm run build:staging`,
+        );
+      }
+    }
+  };
+  scanJsForForbiddenBundleContent(clientAssets, "dist/client/assets");
+  scanJsForForbiddenBundleContent(serverAssets, "dist/server/assets");
 
   const brandingBundle = auditClientBundleBranding(cwd);
   if (!brandingBundle.skipped) {

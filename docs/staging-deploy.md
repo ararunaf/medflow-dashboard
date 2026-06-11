@@ -68,14 +68,26 @@ npm run staging-validate
 
 ## Deploy manual (Cloudflare Workers)
 
+**Este é o único comando permitido para staging:**
+
 ```bash
-npm run build:staging
-npm run deploy:preview   # dry-run
-# Após revisão explícita:
-npm run deploy
+npm run deploy:staging
 ```
 
-Confirme no painel que o Custom Domain `staging.medicflow.app.br` está vinculado ao worker.
+O script `deploy:staging` executa automaticamente, nesta ordem, e **aborta** se qualquer etapa falhar:
+
+1. `env-check:staging` — `.env.staging` sem placeholders
+2. `build:staging` — `vite build --mode staging` + marcador de build
+3. `validate-staging-build` — bundle deve conter `utodixhxrvegzafcldpu.supabase.co` e **não** placeholders
+4. `wrangler deploy`
+
+Dry-run (sem publicar):
+
+```bash
+npm run deploy:staging:preview
+```
+
+**Nunca** use `npm run deploy`, `npm run build` ou `wrangler deploy` isolado para publicar em `staging.medicflow.app.br`.
 
 ## Smoke pós-deploy
 

@@ -98,7 +98,7 @@ if (ssr.status !== 0) exitCode = 1;
 section("Próximos passos");
 console.log("  1. Preencha .env.staging com credenciais reais do projeto Supabase staging");
 console.log("  2. npm run env-check:staging");
-console.log("  3. npm run build:staging && wrangler deploy (manual, após revisão)");
+console.log("  3. npm run deploy:staging  ← único comando permitido para publicar staging");
 console.log(
   `  4. Smoke HTTP: npm run smoke-check -- --url=${STAGING_APP_URL}  (paths: ${artifacts.smokePaths.join(", ")})\n`,
 );
