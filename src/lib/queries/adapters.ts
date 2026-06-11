@@ -78,6 +78,12 @@ export function formatDayMonth(iso: string): string {
   return `${pad2(d.getDate())} ${MONTHS_PT_SHORT[d.getMonth()]}`;
 }
 
+/** Abreviação do mês (pt-BR) a partir de uma data local — reutiliza MONTHS_PT_SHORT. */
+export function monthShortFromDate(d: Date): string {
+  if (Number.isNaN(d.getTime())) return "—";
+  return MONTHS_PT_SHORT[d.getMonth()];
+}
+
 export function formatTime(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";

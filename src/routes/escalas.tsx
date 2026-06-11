@@ -8,7 +8,12 @@ import { Filter } from "lucide-react";
 import { shiftsRangeQueryOptions, useShiftsRangeQuery } from "@/hooks/use-operations";
 import type { ShiftListItem } from "@/lib/operations/api";
 import type { EscalasOpsSearch } from "@/lib/operations/actions";
-import { formatDayMonth, formatTimeRange, shiftStatusToBadge } from "@/lib/queries/adapters";
+import {
+  formatDayMonth,
+  formatTimeRange,
+  monthShortFromDate,
+  shiftStatusToBadge,
+} from "@/lib/queries/adapters";
 import { describeError } from "@/lib/queries/result";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +41,8 @@ export const Route = createFileRoute("/escalas")({
 
 const RANGE_DAYS = 14;
 
-function buildDays(): { iso: string; day: number; isToday: boolean }[] {
-  const out: { iso: string; day: number; isToday: boolean }[] = [];
+function buildDays(): { iso: string; day: number; monthShort: string; isToday: boolean }[] {
+  const out: { iso: string; day: number; monthShort: string; isToday: boolean }[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   for (let i = 0; i < RANGE_DAYS; i++) {
@@ -46,6 +51,7 @@ function buildDays(): { iso: string; day: number; isToday: boolean }[] {
     out.push({
       iso: d.toISOString().slice(0, 10),
       day: d.getDate(),
+      monthShort: monthShortFromDate(d),
       isToday: i === 0,
     });
   }
@@ -126,7 +132,7 @@ function EscalasPage() {
                     : "bg-muted text-foreground hover:bg-accent/30"
                 }`}
               >
-                <span className="opacity-70">{d.isToday ? "Hoje" : "Mai"}</span>
+                <span className="opacity-70">{d.isToday ? "Hoje" : d.monthShort}</span>
                 <span className="text-base font-semibold">{d.day}</span>
               </button>
             );
