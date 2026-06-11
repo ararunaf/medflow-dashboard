@@ -66,18 +66,18 @@ Componente reutilizável: `ia-badge.tsx`
 
 ---
 
-## Screenshots (captura manual em staging)
+## Screenshots (capturados em staging — 11/06/2026)
 
-Capturar em `docs/screenshots/` com perfil `coordinator`, resolução 1920×1080:
+Gerados em `docs/screenshots/` via `scripts/capture-ia-screenshots.mjs`, perfil manager, resolução 1920×1080:
 
-| # | Arquivo sugerido | Conteúdo |
-|---|------------------|----------|
-| 1 | `12-menu-central-ia.png` | Sidebar com item **Central de IA** destacado |
-| 2 | `13-dashboard-ia-card.png` | Home — card **IA Operacional** com contadores |
-| 3 | `14-central-ia-operacional.png` | `/central` — título + Copilot no topo |
-| 4 | `15-copilot-topo.png` | Close-up painel **Copiloto operacional (IA)** |
+| # | Arquivo | Conteúdo | Status |
+|---|---------|----------|--------|
+| 1 | `12-menu-central-ia.png` | Sidebar com item **Central de IA** destacado | ✅ |
+| 2 | `13-dashboard-ia-card.png` | Home — card **IA Operacional** com contadores | ✅ |
+| 3 | `14-central-ia-operacional.png` | `/central` — título + Copilot no topo | ✅ |
+| 4 | `15-copilot-topo.png` | Close-up painel **Copiloto operacional (IA)** | ✅ |
 
-> Screenshots devem ser gerados após deploy em staging. Referência legada: `11-central-operacional.png`.
+> Referência legada: `11-central-operacional.png`. Deploy: Version ID `9de09ca4-1482-4185-b594-d15dc4564f64`.
 
 ---
 
