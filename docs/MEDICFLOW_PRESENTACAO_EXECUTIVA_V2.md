@@ -25,7 +25,16 @@
 |------|--------------|
 | **Formato** | 16:9 · 1920×1080 |
 | **Tempo total** | 30–40 min + Q&A |
-| **Screenshots** | `docs/screenshots/` (12 telas validadas em staging) |
+| **Screenshots** | `docs/screenshots/` (16 telas validadas em staging — inclui 4 da Sprint IA-Visível) |
+
+### Sprint IA-Visível — mapeamento de screenshots (11/06/2026)
+
+| Arquivo | Slide(s) | Uso obrigatório |
+|---------|----------|-----------------|
+| `screenshots/12-menu-central-ia.png` | **Slide 12** (1ª opção lateral) · **Slide 4** (callout discoverability) | Menu lateral com item **Central de IA** — evidência de IA visível para managers |
+| `screenshots/13-dashboard-ia-card.png` | **Slide 1** (hero alternativo) · **Slide 4** (1ª opção) | Card **IA Operacional** na Home — primeira impressão em demo |
+| `screenshots/14-central-ia-operacional.png` | **Slide 12** (2ª opção) · **Slide 7** (substitui `11-central-operacional.png`) | Central de IA Operacional — painéis principais e branding |
+| `screenshots/15-copilot-topo.png` | **Slide 12** (3ª opção) · **Slide 11** (callout IA) | Copiloto operacional (IA) no topo — wow factor em reunião |
 | **Diagramas** | Exportar Mermaid via [mermaid.live](https://mermaid.live) ou [MEDICFLOW_DIAGRAMAS_EXECUTIVOS.md](./MEDICFLOW_DIAGRAMAS_EXECUTIVOS.md) |
 | **Paleta** | Azul `#0369A1` · Verde `#059669` · Vermelho `#DC2626` · Fundo `#F8FAFC` |
 
@@ -68,9 +77,9 @@ Estabelecer credibilidade imediata, posicionar o produto para audiência investo
 
 | Prioridade | Arquivo | Uso |
 |------------|---------|-----|
-| **1ª opção** | `screenshots/02-dashboard.png` | Hero em mockup de laptop/tablet |
-| **2ª opção** | `screenshots/01-login.png` | White-label no login (multi-tenant) |
-| **3ª opção** | Composição | Logo + `02-dashboard.png` side-by-side |
+| **1ª opção** | `screenshots/13-dashboard-ia-card.png` | Hero com card **IA Operacional** visível (Sprint IA-Visível) |
+| **2ª opção** | `screenshots/02-dashboard.png` | Dashboard operacional clássico |
+| **3ª opção** | `screenshots/01-login.png` | White-label no login (multi-tenant) |
 
 ### Fala do apresentador
 
@@ -249,9 +258,9 @@ Apresentar a solução com clareza, evidências do produto implementado e posici
 
 | Prioridade | Arquivo | Uso |
 |------------|---------|-----|
-| **1ª opção** | `screenshots/02-dashboard.png` | Dashboard operacional do dia |
-| **2ª opção** | `screenshots/07-configuracoes-instituicao.png` | White-label multi-tenant |
-| **3ª opção** | Composição 3 telas | `02-dashboard.png` + `09-tiss.png` + `06-relatorios-dashboard-executivo.png` |
+| **1ª opção** | `screenshots/13-dashboard-ia-card.png` | Home com card **IA Operacional** + CTA **Abrir Central de IA** |
+| **2ª opção** | `screenshots/12-menu-central-ia.png` | Menu lateral — item **Central de IA** para managers |
+| **3ª opção** | Composição 3 telas | `13-dashboard-ia-card.png` + `14-central-ia-operacional.png` + `09-tiss.png` |
 
 ### Fala do apresentador
 
@@ -433,7 +442,7 @@ Humanizar a proposta com persona concreta e mostrar transformação As-Is → To
 | Prioridade | Arquivo | Uso |
 |------------|---------|-----|
 | **1ª opção** | `screenshots/06-relatorios-dashboard-executivo.png` | KPIs para diretoria |
-| **2ª opção** | `screenshots/11-central-operacional.png` | Cobertura proativa |
+| **2ª opção** | `screenshots/14-central-ia-operacional.png` | Central de IA Operacional — cobertura proativa |
 | **3ª opção** | Composição | `03-agenda-escalas.png` + `09-tiss.png` |
 
 ### Fala do apresentador
@@ -677,8 +686,8 @@ Apresentar visão consolidada para diretoria e investidores — argumento de val
 | Prioridade | Arquivo | Uso |
 |------------|---------|-----|
 | **1ª opção** | `screenshots/06-relatorios-dashboard-executivo.png` | Dashboard executivo |
-| **2ª opção** | Composição side-by-side | Dashboard + `11-central-operacional.png` |
-| **3ª opção** | `/executivo` (live demo) | Narrativa comercial ao vivo |
+| **2ª opção** | `screenshots/15-copilot-topo.png` | Copiloto IA — narrativa executiva para diretoria |
+| **3ª opção** | Composição side-by-side | `06-relatorios-dashboard-executivo.png` + `14-central-ia-operacional.png` |
 
 ### Fala do apresentador
 
@@ -735,9 +744,9 @@ MedicFlow-AI = OPERAÇÃO + TISS MVP + FECHAMENTO
 
 | Prioridade | Arquivo | Uso |
 |------------|---------|-----|
-| **1ª opção** | `screenshots/07-configuracoes-instituicao.png` | White-label (#8) |
-| **2ª opção** | `screenshots/11-central-operacional.png` | Central RT (#3) |
-| **3ª opção** | Composição 4 telas | Evidências visuais dos diferenciais |
+| **1ª opção** | `screenshots/12-menu-central-ia.png` | Discoverability — **Central de IA** no menu (#6) |
+| **2ª opção** | `screenshots/14-central-ia-operacional.png` | Central de IA Operacional + tempo real (#3, #6) |
+| **3ª opção** | `screenshots/15-copilot-topo.png` | Copiloto GPT no topo — diferencial competitivo (#6) |
 
 ### Fala do apresentador
 
@@ -745,7 +754,7 @@ MedicFlow-AI = OPERAÇÃO + TISS MVP + FECHAMENTO
 >
 > *"Diferencial #10 — transparência — é venda consultiva. Mostramos gaps documentados porque clientes enterprise e investidores valorizam honestidade."*
 >
-> *"IA operacional é add-on opcional — upside, não requisito."*
+> *"IA operacional agora é visível desde o primeiro login: menu **Central de IA**, card na Home e Copiloto no topo da central. É add-on de valor — mas já aparece nos primeiros 3 minutos da demo."*
 
 **Tempo sugerido:** 2–3 minutos
 
