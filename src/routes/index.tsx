@@ -1,6 +1,7 @@
 ﻿import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
+import { OperationalIaHomeCard } from "@/components/operational/operational-ia-home-card";
 import { PilotHomeBanner } from "@/components/pilot-launch/pilot-home-banner";
 import {
   operationalReadinessQueryOptions,
@@ -20,11 +21,13 @@ import {
 import { Activity, CalendarCheck, Stethoscope, Users, AlertTriangle, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useClientMounted } from "@/hooks/use-client-mounted";
-import { useDashboardQuery } from "@/hooks/use-operations";
-import { dashboardQueryOptions } from "@/hooks/use-operations";
+import {
+  operationalCommandCenterQueryOptions,
+} from "@/hooks/use-operational-metrics";
+import { useDashboardQuery, dashboardQueryOptions } from "@/hooks/use-operations";
 import { formatTime, shiftStatusToBadge } from "@/lib/queries/adapters";
 import { describeError } from "@/lib/queries/result";
-import { can } from "@/lib/auth/rbac";
+import { can, isOperationalManager } from "@/lib/auth/rbac";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,6 +40,9 @@ export const Route = createFileRoute("/")({
     await Promise.all([
       context.queryClient.prefetchQuery(dashboardQueryOptions()).catch(() => undefined),
       context.queryClient.prefetchQuery(operationalReadinessQueryOptions()).catch(() => undefined),
+      context.queryClient
+        .prefetchQuery(operationalCommandCenterQueryOptions())
+        .catch(() => undefined),
     ]);
   },
   component: HomePage,
@@ -65,6 +71,7 @@ function HomePage() {
   const readiness = useOperationalReadinessQuery();
   const canExec = can(auth.profile?.role ?? null, "financial_closing:read");
   const canPilot = can(auth.profile?.role ?? null, "tenant_settings:read");
+  const canSeeIa = isOperationalManager(auth.profile?.role ?? null);
   const tenantId = auth.tenantId ?? undefined;
   const manualFlags = usePilotManualFlags(tenantId);
 
@@ -135,7 +142,7 @@ function HomePage() {
               to="/central"
               className="text-xs font-medium text-primary hover:underline whitespace-nowrap"
             >
-              Central operacional →
+              Central de IA →
             </Link>
           </div>
         }
@@ -179,6 +186,12 @@ function HomePage() {
           tone={dashboard.data?.metrics.availableForShifts ? "success" : "warning"}
         />
       </div>
+
+      {canSeeIa ? (
+        <div className="mt-4">
+          <OperationalIaHomeCard />
+        </div>
+      ) : null}
 
       <div className="mt-6 grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-xl bg-card border border-border ring-soft">
@@ -256,7 +269,7 @@ function HomePage() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Os contadores e a central operacional atualizam automaticamente via Supabase
+                Os contadores e a Central de IA Operacional atualizam automaticamente via Supabase
                 Realtime (invalidação TanStack Query).
               </p>
             </div>

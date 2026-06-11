@@ -1,0 +1,33 @@
+﻿
+Name                                                     Length LastWriteTime      
+----                                                     ------ -------------      
+20250512000000_init_enterprise.sql                         5665 26/05/2026 22:13:06
+20250512000001_operational_scheduling.sql                 15761 26/05/2026 22:13:06
+20250512000002_operational_rbac_state.sql                 22050 26/05/2026 22:13:06
+20250512000003_operational_events_timeline.sql             3215 26/05/2026 22:13:06
+20250512000004_operational_analytics_rollups.sql           4306 26/05/2026 22:13:06
+20250512000005_operational_recommendation_feedback.sql     8172 26/05/2026 22:13:06
+20250513000000_operational_action_proposals.sql            6504 26/05/2026 22:13:06
+20250513000001_operational_execution_sandbox.sql           3231 26/05/2026 22:13:06
+20250513120000_operational_mutation_executions.sql         5462 26/05/2026 22:13:06
+20250513130000_operational_orchestrations_layer.sql       10673 26/05/2026 22:13:06
+20250513150000_operational_agent_governance.sql            5144 26/05/2026 22:13:06
+20250513160000_operational_agent_coordination.sql          4167 26/05/2026 22:13:06
+20250513170000_operational_memory_learning.sql             6911 26/05/2026 22:13:06
+20250513180000_operational_policy_intelligence.sql        11614 26/05/2026 22:13:06
+20250513190000_strategic_operational_planning.sql          8527 26/05/2026 22:13:06
+20250513201000_tiss_operational_foundation.sql            19302 26/05/2026 22:13:06
+20250513210000_tiss_returns_denials_appeals.sql           19644 26/05/2026 22:13:06
+20250513220000_medical_payouts_foundation.sql             14909 26/05/2026 22:13:06
+20250513230000_financial_operational_closing.sql          16666 26/05/2026 22:13:06
+20250514100000_operational_reconciliation_foundation.sql  16981 26/05/2026 22:13:06
+20250514120000_tenant_settings_branding_readiness.sql      7085 26/05/2026 22:13:06
+20250515130000_operational_observability_v1.sql            5298 26/05/2026 22:13:06
+20250515140000_pilot_execution_v1.sql                     10026 26/05/2026 22:13:06
+20250517171500_bootstrap_system_admin.sql                  3279 26/05/2026 22:13:06
+20250517181000_fix_system_admin_auth_tokens.sql             559 26/05/2026 22:13:06
+20250524120000_backfill_tenant_settings_gaps.sql            457 26/05/2026 22:13:06
+20250525120000_security_audit_logs.sql                     2128 26/05/2026 22:13:06
+20250525180000_rebrand_tenant_display_names.sql             861 26/05/2026 22:13:06
+
+

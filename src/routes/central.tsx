@@ -27,7 +27,7 @@ function parseOpsFocus(raw: unknown): CentralOpsSearch["opsFocus"] | undefined {
 export const Route = createFileRoute("/central")({
   head: () => ({
     meta: [
-      { title: brandPageTitle("Central operacional") },
+      { title: brandPageTitle("Central de IA Operacional") },
       { name: "description", content: "Command center e indicadores em tempo real." },
     ],
   }),

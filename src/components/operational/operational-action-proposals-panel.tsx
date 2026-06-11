@@ -13,6 +13,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { OperationalLiveChrome } from "@/components/operational/operational-live-chrome";
+import { IaBadge } from "@/components/operational/ia-badge";
 import {
   OperationalSandboxPreview,
   OperationalSandboxRunButton,
@@ -407,9 +408,12 @@ export function OperationalActionProposalsPanel(props: {
           <div className="flex items-center gap-2 min-w-0">
             <ClipboardList className="h-4 w-4 text-primary shrink-0" />
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-foreground">
-                Propostas operacionais (IA supervisionada)
-              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-sm font-semibold text-foreground">
+                  Propostas operacionais (IA supervisionada)
+                </h2>
+                <IaBadge />
+              </div>
               <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                 Governança humana · sem execução automática · auditável
               </p>

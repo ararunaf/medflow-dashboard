@@ -1,0 +1,720 @@
+﻿Listagem de caminhos de pasta para o volume SISTEMA
+O número de série do volume é 00000042 A09F:1FFE
+C:\USERS\USER\ONEDRIVE\DOCUMENTOS\MEDFLOW-IA\MEDFLOW-IA\SRC
+|   router.tsx
+|   routeTree.gen.ts
+|   server.ts
+|   start.ts
+|   styles.css
+|   
++---assets
+|   \---branding
+|       |   README.md
+|       |   
+|       +---logos
+|       |       logo-medicflow-ai (2).png
+|       |       logo-medicflow-ai.png
+|       |       
+|       \---opengraph
++---components
+|   |   app-shell.tsx
+|   |   auth-fallback.tsx
+|   |   auth-sync.tsx
+|   |   branding-loading.tsx
+|   |   deployment-fallback.tsx
+|   |   global-error-boundary.tsx
+|   |   offline-fallback.tsx
+|   |   operational-heartbeat.tsx
+|   |   operational-readiness-indicator.tsx
+|   |   production-warning-banner.tsx
+|   |   realtime-provider.tsx
+|   |   route-pending-fallback.tsx
+|   |   tenant-branding-provider.tsx
+|   |   toast-host.tsx
+|   |   ui-kit.tsx
+|   |   
+|   +---executive
+|   |       executive-dashboard-view.tsx
+|   |       
+|   +---financial-closing
+|   |       financial-closing-workbench.tsx
+|   |       
+|   +---operational
+|   |       command-center-view.tsx
+|   |       operational-action-proposals-panel.tsx
+|   |       operational-active-agents-panel.tsx
+|   |       operational-adaptive-prioritization-panel.tsx
+|   |       operational-agent-coordination-panel.tsx
+|   |       operational-alert-feed.tsx
+|   |       operational-analytics-panel.tsx
+|   |       operational-copilot-context-panel.tsx
+|   |       operational-copilot-gpt-panel.tsx
+|   |       operational-live-chrome.tsx
+|   |       operational-memory-panel.tsx
+|   |       operational-orchestration-panel.tsx
+|   |       operational-policy-intelligence-panel.tsx
+|   |       operational-quick-actions.tsx
+|   |       operational-recommendations-panel.tsx
+|   |       operational-sandbox-preview.tsx
+|   |       operational-scoring-panel.tsx
+|   |       operational-strategic-planning-panel.tsx
+|   |       operational-supervised-execution-panel.tsx
+|   |       operational-timeline-feed.tsx
+|   |       
+|   +---operational-reconciliation
+|   |       reconciliation-workbench.tsx
+|   |       
+|   +---pilot-launch
+|   |       contextual-hint-banner.tsx
+|   |       deployment-checklist-panel.tsx
+|   |       guided-demo-panel.tsx
+|   |       guided-demo-strip.tsx
+|   |       help-article-drawer.tsx
+|   |       onboarding-wizard-panel.tsx
+|   |       pilot-adoption-tracker.tsx
+|   |       pilot-execution-panel.tsx
+|   |       pilot-feedback-drawer.tsx
+|   |       pilot-feedback-shell.tsx
+|   |       pilot-home-banner.tsx
+|   |       pilot-launch-status-card.tsx
+|   |       pilot-support-panel.tsx
+|   |       progress-bar.tsx
+|   |       
+|   +---production-release
+|   |       production-loading-shell.tsx
+|   |       release-checklist-section.tsx
+|   |       smoke-test-panel.tsx
+|   |       
+|   +---tiss
+|   |       medical-payout-panels.tsx
+|   |       
+|   \---ui
+|           avatar.tsx
+|           button.tsx
+|           input.tsx
+|           label.tsx
+|           switch.tsx
+|           
++---hooks
+|       use-client-mounted.ts
+|       use-commercial-readiness.ts
+|       use-debounced-value.ts
+|       use-executive-dashboard.ts
+|       use-financial-closing.ts
+|       use-medical-payout-foundation.ts
+|       use-online-status.ts
+|       use-operational-action-proposals.ts
+|       use-operational-agent-coordination.ts
+|       use-operational-agents.ts
+|       use-operational-alerts.ts
+|       use-operational-analytics.ts
+|       use-operational-copilot-derived.ts
+|       use-operational-execution-sandbox.ts
+|       use-operational-metrics.ts
+|       use-operational-monitoring.ts
+|       use-operational-mutation-execution.ts
+|       use-operational-mutations.ts
+|       use-operational-orchestration.ts
+|       use-operational-realtime.ts
+|       use-operational-reconciliation.ts
+|       use-operational-timeline-signals.ts
+|       use-operational-timeline.ts
+|       use-operations.ts
+|       use-pilot-execution.ts
+|       use-pilot-manual-flags.ts
+|       use-production-release.ts
+|       use-tiss-foundation.ts
+|       use-toast.ts
+|       
++---lib
+|   |   database.types.ts
+|   |   error-capture.ts
+|   |   error-page.ts
+|   |   utils.ts
+|   |   
+|   +---assets
+|   |       branding.ts
+|   |       index.ts
+|   |       
+|   +---auth
+|   |       get-auth-context.ts
+|   |       password-reset.ts
+|   |       rbac.ts
+|   |       route-guard.ts
+|   |       types.ts
+|   |       
+|   +---commercial
+|   |   \---api
+|   |           commercial-server.ts
+|   |           
+|   +---domain
+|   |   |   multi-tenant.ts
+|   |   |   
+|   |   \---operations
+|   |           enums.ts
+|   |           errors.ts
+|   |           index.ts
+|   |           realtime.ts
+|   |           status.ts
+|   |           validation.ts
+|   |           
+|   +---env
+|   |       medflow-domains.ts
+|   |       public-env-validation.ts
+|   |       startup-checks.ts
+|   |       startup-diagnostics.ts
+|   |       
+|   +---errors
+|   |       auth-actions.ts
+|   |       classify.ts
+|   |       create-query-client.ts
+|   |       index.ts
+|   |       messages.ts
+|   |       query-timeout.ts
+|   |       types.ts
+|   |       
+|   +---executive-dashboard
+|   |   \---api
+|   |           executive-dashboard-server.ts
+|   |           
+|   +---financial-closing
+|   |   \---api
+|   |           financial-closing-server.ts
+|   |           
+|   +---medical-payout
+|   |   \---api
+|   |           medical-payout-server.ts
+|   |           
+|   +---monitoring
+|   |   |   client-bootstrap.ts
+|   |   |   emit.ts
+|   |   |   index.ts
+|   |   |   normalize.ts
+|   |   |   registry.ts
+|   |   |   server-bootstrap.ts
+|   |   |   types.ts
+|   |   |   
+|   |   +---channels
+|   |   |       auth.ts
+|   |   |       client.ts
+|   |   |       runtime.ts
+|   |   |       ssr.ts
+|   |   |       
+|   |   \---sinks
+|   |           console.ts
+|   |           error-tracker.ts
+|   |           index.ts
+|   |           
+|   +---observability
+|   |       report-operational-failure-client.ts
+|   |       
+|   +---operational
+|   |       constants.ts
+|   |       
+|   +---operational-observability
+|   |   \---api
+|   |           operational-observability-server.ts
+|   |           
+|   +---operational-reconciliation
+|   |   \---api
+|   |           reconciliation-server.ts
+|   |           
+|   +---operations
+|   |   +---action-proposals
+|   |   |       index.ts
+|   |   |       proposal-audit-helpers.ts
+|   |   |       proposal-builders.ts
+|   |   |       proposal-validators.ts
+|   |   |       proposal-workflow.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---actions
+|   |   |       alert-action-map.ts
+|   |   |       contextual-navigation.ts
+|   |   |       index.ts
+|   |   |       operational-action-registry.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---adaptive-prioritization
+|   |   |       adaptation-boundaries.ts
+|   |   |       adaptive-guidance-helpers.ts
+|   |   |       adaptive-orchestration-adapters.ts
+|   |   |       adaptive-prioritization-service.ts
+|   |   |       adaptive-signals.ts
+|   |   |       historical-weighting-engine.ts
+|   |   |       index.ts
+|   |   |       supervised-adjustment-registry.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---agents
+|   |   |   |   contracts.ts
+|   |   |   |   governance.ts
+|   |   |   |   orchestration-adapter.ts
+|   |   |   |   registry.ts
+|   |   |   |   scoped-reasoning-engine.ts
+|   |   |   |   
+|   |   |   \---coordination
+|   |   |           conflict-resolution.ts
+|   |   |           coordination-engine.ts
+|   |   |           delegation.ts
+|   |   |           policies.ts
+|   |   |           shared-context-bus.ts
+|   |   |           types.ts
+|   |   |           
+|   |   +---alerts
+|   |   |   |   engine.ts
+|   |   |   |   factories.ts
+|   |   |   |   index.ts
+|   |   |   |   rules-evaluators.ts
+|   |   |   |   severity.ts
+|   |   |   |   thresholds.ts
+|   |   |   |   types.ts
+|   |   |   |   
+|   |   |   \---adapters
+|   |   |           command-center-snapshot.ts
+|   |   |           
+|   |   +---analytics
+|   |   |       index.ts
+|   |   |       kpi-aggregators.ts
+|   |   |       kpi-registry.ts
+|   |   |       operational-analytics-service.ts
+|   |   |       operational-summaries.ts
+|   |   |       trend-adapters.ts
+|   |   |       
+|   |   +---api
+|   |   |   |   assignments.ts
+|   |   |   |   availability.ts
+|   |   |   |   index.ts
+|   |   |   |   operational-action-proposals.ts
+|   |   |   |   operational-adaptive-prioritization.ts
+|   |   |   |   operational-agent-coordination.ts
+|   |   |   |   operational-agents.ts
+|   |   |   |   operational-copilot-gpt.ts
+|   |   |   |   operational-execution-sandbox.ts
+|   |   |   |   operational-memory.ts
+|   |   |   |   operational-mutation-execution.ts
+|   |   |   |   operational-orchestration.ts
+|   |   |   |   operational-policy-intelligence.ts
+|   |   |   |   operational-strategic-planning.ts
+|   |   |   |   operational-timeline.ts
+|   |   |   |   recommendation-feedback.ts
+|   |   |   |   schedules.ts
+|   |   |   |   shifts.ts
+|   |   |   |   swaps.ts
+|   |   |   |   
+|   |   |   \---queries
+|   |   |           assignments.ts
+|   |   |           availability.ts
+|   |   |           command-center.ts
+|   |   |           dashboard.ts
+|   |   |           index.ts
+|   |   |           operational-action-proposals.ts
+|   |   |           operational-analytics.ts
+|   |   |           profile.ts
+|   |   |           shifts.ts
+|   |   |           swaps.ts
+|   |   |           
+|   |   +---copilot-context
+|   |   |       context-bundle-builders.ts
+|   |   |       context-registry.ts
+|   |   |       context-summarizers.ts
+|   |   |       index.ts
+|   |   |       operational-copilot-context-service.ts
+|   |   |       operational-narrative-helpers.ts
+|   |   |       semantic-adapters.ts
+|   |   |       semantic-operational-helpers.ts
+|   |   |       timeline-context-adapter.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---copilot-gpt
+|   |   |       ai-summary-adapters.ts
+|   |   |       index.ts
+|   |   |       operational-copilot-gpt-validator.ts
+|   |   |       operational-copilot-narrative-layer.ts
+|   |   |       operational-explanation-helpers.ts
+|   |   |       operational-gpt-context-builder.ts
+|   |   |       operational-gpt-prompt.ts
+|   |   |       operational-gpt-tool-executor.ts
+|   |   |       operational-gpt-tool-registry.ts
+|   |   |       operational-gpt-tool-safety.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---execution-sandbox
+|   |   |       dry-run-simulators.ts
+|   |   |       impact-analyzers.ts
+|   |   |       index.ts
+|   |   |       rollback-preview.ts
+|   |   |       safety-evaluators.ts
+|   |   |       simulation-validators.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---feedback
+|   |   |       effectiveness-evaluators.ts
+|   |   |       feedback-adapters.ts
+|   |   |       feedback-summary-layer.ts
+|   |   |       index.ts
+|   |   |       learning-signal-helpers.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---metrics
+|   |   |       operational-metrics-factory.ts
+|   |   |       status-helpers.ts
+|   |   |       
+|   |   +---mutation-execution
+|   |   |       execution-audit-helpers.ts
+|   |   |       execution-validators.ts
+|   |   |       index.ts
+|   |   |       rollback-executor.ts
+|   |   |       transactional-mutation-applier.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---operational-memory
+|   |   |       effectiveness-engine.ts
+|   |   |       explainability-builders.ts
+|   |   |       historical-adapters.ts
+|   |   |       index.ts
+|   |   |       learning-registry.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---orchestration
+|   |   |       dependency-graph.ts
+|   |   |       index.ts
+|   |   |       narrative.ts
+|   |   |       planner.ts
+|   |   |       policy-engine.ts
+|   |   |       rollback-engine.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---policy-intelligence
+|   |   |       adaptive-governance-evaluator.ts
+|   |   |       adaptive-governance-registry.ts
+|   |   |       governance-analysis-engine.ts
+|   |   |       index.ts
+|   |   |       orchestration-policy-analyzer.ts
+|   |   |       policy-insight-engine.ts
+|   |   |       rollback-pattern-analyzer.ts
+|   |   |       supervised-policy-review-layer.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---recommendations
+|   |   |       forecast-baseline.ts
+|   |   |       index.ts
+|   |   |       mitigation-helpers.ts
+|   |   |       operational-guidance-helpers.ts
+|   |   |       operational-guidance-registry.ts
+|   |   |       operational-recommendation-service.ts
+|   |   |       recommendation-adapters.ts
+|   |   |       recommendation-evaluators.ts
+|   |   |       recommendation-factories.ts
+|   |   |       recommendation-registry.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---scoring
+|   |   |   |   analytics-payload-scoring.ts
+|   |   |   |   index.ts
+|   |   |   |   normalization.ts
+|   |   |   |   operational-scoring-service.ts
+|   |   |   |   operational-state-evaluator.ts
+|   |   |   |   risk-evaluator.ts
+|   |   |   |   score-calculators.ts
+|   |   |   |   scoring-registry.ts
+|   |   |   |   types.ts
+|   |   |   |   weighting.ts
+|   |   |   |   
+|   |   |   \---adapters
+|   |   |           command-center-adapter.ts
+|   |   |           
+|   |   +---strategic-planning
+|   |   |       index.ts
+|   |   |       mitigation-roadmap-builder.ts
+|   |   |       operational-readiness-engine.ts
+|   |   |       orchestration-capacity-analyzer.ts
+|   |   |       strategic-governance-preparation-engine.ts
+|   |   |       strategic-operational-planning-engine.ts
+|   |   |       strategic-planning-loader.ts
+|   |   |       supervised-strategic-review-layer.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---timeline
+|   |   |       audit-helpers.ts
+|   |   |       event-registry.ts
+|   |   |       factories.ts
+|   |   |       index.ts
+|   |   |       timeline-adapters.ts
+|   |   |       
+|   |   \---types
+|   |           command-center-core.ts
+|   |           
+|   +---pilot-execution
+|   |   |   module-from-path.ts
+|   |   |   
+|   |   \---api
+|   |           pilot-execution-server.ts
+|   |           
+|   +---production-release
+|   |   \---api
+|   |           production-release-server.ts
+|   |           
+|   +---queries
+|   |       adapters.ts
+|   |       keys.ts
+|   |       result.ts
+|   |       
+|   +---realtime
+|   |       manager.ts
+|   |       suppression.ts
+|   |       types.ts
+|   |       
+|   +---routes
+|   |       finance-access.ts
+|   |       
+|   +---security
+|   |       auth-security-server.ts
+|   |       brute-force.ts
+|   |       csp.ts
+|   |       rate-limit.ts
+|   |       request-client.ts
+|   |       safe-external-links.ts
+|   |       sanitize-input.ts
+|   |       secure-redirects.ts
+|   |       security-audit-hash.ts
+|   |       security-audit-types.ts
+|   |       session-audit-server.ts
+|   |       session-validation.ts
+|   |       upload-validation.ts
+|   |       
+|   +---server
+|   |       fn-helpers.ts
+|   |       health-checks.ts
+|   |       operational-auth.ts
+|   |       operational-gpt-openai.ts
+|   |       security-audit-writer.ts
+|   |       supabase-admin.ts
+|   |       supabase.ts
+|   |       
+|   +---services
+|   |   +---backup-readiness
+|   |   |       backup-readiness-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---commercial-landing
+|   |   |       commercial-landing-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---demo-seed
+|   |   |       demo-seed-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---deployment-checklist
+|   |   |       deployment-checklist-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---deployment-readiness
+|   |   |       deployment-readiness-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---executive-dashboard
+|   |   |       executive-dashboard-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---export
+|   |   |       export-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---financial-closing
+|   |   |       competence-lock-service.ts
+|   |   |       financial-audit-service.ts
+|   |   |       financial-closing-service.ts
+|   |   |       index.ts
+|   |   |       operational-consolidation-service.ts
+|   |   |       snapshot-service.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---guided-demo
+|   |   |       guided-demo-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---help-center
+|   |   |       help-center-service.ts
+|   |   |       index.ts
+|   |   |       
+|   |   +---medical-payout
+|   |   |       index.ts
+|   |   |       payout-audit-service.ts
+|   |   |       payout-calculation-service.ts
+|   |   |       payout-service.ts
+|   |   |       production-service.ts
+|   |   |       retention-service.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---onboarding
+|   |   |       index.ts
+|   |   |       onboarding-service.ts
+|   |   |       
+|   |   +---onboarding-progress
+|   |   |       index.ts
+|   |   |       onboarding-progress-service.ts
+|   |   |       
+|   |   +---onboarding-wizard
+|   |   |       index.ts
+|   |   |       onboarding-wizard-service.ts
+|   |   |       tenant-validation.ts
+|   |   |       
+|   |   +---operational-backup
+|   |   |       index.ts
+|   |   |       operational-backup-export-service.ts
+|   |   |       
+|   |   +---operational-error
+|   |   |       index.ts
+|   |   |       operational-error-service.ts
+|   |   |       
+|   |   +---operational-health
+|   |   |       index.ts
+|   |   |       operational-health-service.ts
+|   |   |       
+|   |   +---operational-monitoring
+|   |   |       index.ts
+|   |   |       operational-monitoring-service.ts
+|   |   |       
+|   |   +---operational-notifications
+|   |   |       index.ts
+|   |   |       operational-notification-service.ts
+|   |   |       
+|   |   +---operations
+|   |   |       assignments.ts
+|   |   |       availability.ts
+|   |   |       index.ts
+|   |   |       operational-action-proposal-service.ts
+|   |   |       operational-adaptive-prioritization-service.ts
+|   |   |       operational-agent-coordination-service.ts
+|   |   |       operational-agent-service.ts
+|   |   |       operational-event-queries.ts
+|   |   |       operational-event-service.ts
+|   |   |       operational-execution-sandbox-service.ts
+|   |   |       operational-feedback-service.ts
+|   |   |       operational-memory-service.ts
+|   |   |       operational-mutation-execution-service.ts
+|   |   |       operational-orchestration-service.ts
+|   |   |       operational-policy-intelligence-service.ts
+|   |   |       operational-strategic-planning-service.ts
+|   |   |       schedules.ts
+|   |   |       scheduling.ts
+|   |   |       shifts.ts
+|   |   |       swaps.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---pilot-deployment
+|   |   |       index.ts
+|   |   |       pilot-deployment-snapshot-service.ts
+|   |   |       
+|   |   +---pilot-execution
+|   |   |       feature-flag-service.ts
+|   |   |       incident-tracking-service.ts
+|   |   |       index.ts
+|   |   |       operational-adoption-service.ts
+|   |   |       pilot-analytics-service.ts
+|   |   |       pilot-execution-types.ts
+|   |   |       pilot-feedback-service.ts
+|   |   |       
+|   |   +---pilot-support
+|   |   |       index.ts
+|   |   |       pilot-support-service.ts
+|   |   |       
+|   |   +---production-validation
+|   |   |       index.ts
+|   |   |       production-validation-service.ts
+|   |   |       
+|   |   +---readiness-check
+|   |   |       index.ts
+|   |   |       readiness-check-service.ts
+|   |   |       
+|   |   +---reconciliation
+|   |   |       index.ts
+|   |   |       operational-divergence-service.ts
+|   |   |       reconciliation-audit-service.ts
+|   |   |       reconciliation-import-service.ts
+|   |   |       reconciliation-matching-service.ts
+|   |   |       reconciliation-service.ts
+|   |   |       types.ts
+|   |   |       
+|   |   +---release-checklist
+|   |   |       index.ts
+|   |   |       release-checklist-service.ts
+|   |   |       
+|   |   +---release-readiness
+|   |   |       index.ts
+|   |   |       release-readiness-service.ts
+|   |   |       
+|   |   +---reporting
+|   |   |       index.ts
+|   |   |       reporting-service.ts
+|   |   |       
+|   |   +---resilience
+|   |   |       index.ts
+|   |   |       resilience-service.ts
+|   |   |       
+|   |   +---security-validation
+|   |   |       index.ts
+|   |   |       security-validation-service.ts
+|   |   |       
+|   |   +---smoke-test
+|   |   |       index.ts
+|   |   |       smoke-test-service.ts
+|   |   |       
+|   |   +---tenant-branding
+|   |   |       index.ts
+|   |   |       tenant-branding-service.ts
+|   |   |       
+|   |   +---tenant-settings
+|   |   |       index.ts
+|   |   |       tenant-settings-service.ts
+|   |   |       
+|   |   \---tiss
+|   |           batch-service.ts
+|   |           billing-foundation-service.ts
+|   |           denial-appeal-service.ts
+|   |           denial-audit-service.ts
+|   |           denial-service.ts
+|   |           guide-service.ts
+|   |           index.ts
+|   |           insurance-service.ts
+|   |           operational-loss-service.ts
+|   |           return-processing-service.ts
+|   |           tuss-service.ts
+|   |           types.ts
+|   |           xml-export-service.ts
+|   |           
+|   +---supabase
+|   |       browser.ts
+|   |       config.ts
+|   |       
+|   +---tiss
+|   |   \---api
+|   |           tiss-server.ts
+|   |           
+|   \---toast
+|           bus.ts
+|           
+\---routes
+        ajuda.tsx
+        central.tsx
+        escalas.tsx
+        executivo.tsx
+        financeiro.conciliacao-operacional.tsx
+        financeiro.dashboard-executivo.tsx
+        financeiro.fechamento-operacional.tsx
+        financeiro.tsx
+        index.tsx
+        instituicao.tsx
+        lancamento.tsx
+        login.esqueci-senha.tsx
+        login.redefinir-senha.tsx
+        login.tsx
+        operacao.tsx
+        perfil.tsx
+        piloto.tsx
+        plantoes.tsx
+        site.tsx
+        tiss.tsx
+        __root.tsx
+        

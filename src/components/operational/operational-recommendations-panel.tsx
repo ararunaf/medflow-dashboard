@@ -29,6 +29,7 @@ import type { OperationalRecommendationBundle } from "@/lib/operations/recommend
 import type { OperationalRecommendationState } from "@/lib/operations/recommendations/types";
 import type { OperationalRecommendationType } from "@/lib/operations/recommendations/types";
 import { OperationalLiveChrome } from "@/components/operational/operational-live-chrome";
+import { IaBadge } from "@/components/operational/ia-badge";
 import { submitOperationalRecommendationFeedbackFn } from "@/lib/operations/api";
 import { opsKeys } from "@/lib/queries/keys";
 import { emptyOperationalRecommendationFeedbackOverlay } from "@/lib/services/operations/operational-feedback-service";
@@ -185,7 +186,10 @@ export function OperationalRecommendationsPanel(props: {
         <div className="flex items-start gap-2 min-w-0">
           <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-foreground">Recomendações operacionais</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm font-semibold text-foreground">Recomendações operacionais</h2>
+              <IaBadge />
+            </div>
             <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
               {bundle.summary.headline}
             </p>
@@ -197,6 +201,7 @@ export function OperationalRecommendationsPanel(props: {
             projectionClass(bundle.forecast.projection),
           )}
         >
+          <IaBadge className="mr-0.5" />
           <ShieldAlert className="h-3 w-3 opacity-80" />
           {PROJECTION_LABEL[bundle.forecast.projection]}
         </span>

@@ -157,8 +157,8 @@ export function CommandCenterView(props: {
   return (
     <>
       <PageHeader
-        title="Central operacional"
-        subtitle="Indicadores vivos do tenant — atualizados via Supabase Realtime."
+        title="Central de IA Operacional"
+        subtitle="Indicadores vivos do tenant — inteligência operacional em tempo real."
         actions={
           <div className="flex flex-col items-end gap-2">
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -223,6 +223,20 @@ export function CommandCenterView(props: {
             </div>
           </OperationalLiveChrome>
 
+          <OperationalCopilotContextPanel
+            snapshot={d}
+            alerts={opsAlerts.alerts}
+            isFetching={query.isFetching}
+            className="mb-4 scroll-mt-24"
+          />
+
+          <OperationalCopilotGptPanel
+            snapshot={d}
+            alerts={opsAlerts.alerts}
+            isFetching={query.isFetching}
+            className="mb-4 scroll-mt-24"
+          />
+
           <OperationalQuickActions
             alerts={opsAlerts.alerts}
             snapshot={d}
@@ -271,20 +285,6 @@ export function CommandCenterView(props: {
             canGovern={!!canAudit}
             isFetching={query.isFetching}
             orchestrationActiveCount={d.orchestrationActiveCount}
-            className="mb-4"
-          />
-
-          <OperationalCopilotContextPanel
-            snapshot={d}
-            alerts={opsAlerts.alerts}
-            isFetching={query.isFetching}
-            className="mb-4"
-          />
-
-          <OperationalCopilotGptPanel
-            snapshot={d}
-            alerts={opsAlerts.alerts}
-            isFetching={query.isFetching}
             className="mb-4"
           />
 

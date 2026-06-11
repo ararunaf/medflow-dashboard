@@ -37,7 +37,7 @@ export const guided_demo_steps: GuidedDemoStep[] = [
   },
   {
     id: "executive",
-    title: "Central operacional",
+    title: "Central de IA Operacional",
     highlight: "Indicadores e foco de pressão assistencial.",
     to: "/central",
     context: "Ideal para narrativa de gestão assistencial em tempo real.",

@@ -161,7 +161,7 @@ function ExecutivoPage() {
           </div>
           <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            Central operacional
+            Central de IA Operacional
             <ArrowRight className="h-3.5 w-3.5 ml-auto text-muted-foreground" />
           </div>
         </Link>

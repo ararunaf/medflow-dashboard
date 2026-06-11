@@ -14,6 +14,7 @@ import {
   HelpCircle,
   Rocket,
   Flag,
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRANDING, defaultLogoUrl as defaultLogo } from "@/lib/assets";
@@ -21,7 +22,7 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { GuidedDemoStrip } from "@/components/pilot-launch/guided-demo-strip";
 import { PilotFeedbackShell } from "@/components/pilot-launch/pilot-feedback-shell";
-import { can } from "@/lib/auth/rbac";
+import { can, isOperationalManager } from "@/lib/auth/rbac";
 import { useTenantBranding } from "@/components/tenant-branding-provider";
 import type { UserRole } from "@/lib/database.types";
 
@@ -31,7 +32,7 @@ type NavItem = {
   icon: typeof Home;
   exact?: boolean;
   /** Se definido, exige capability; caso contrário, sempre visível com sessão. */
-  require?: "financial" | "tenant_settings_read";
+  require?: "financial" | "tenant_settings_read" | "operational_manager";
 };
 
 function navForRole(role: UserRole | null | undefined): NavItem[] {
@@ -41,6 +42,7 @@ function navForRole(role: UserRole | null | undefined): NavItem[] {
     { to: "/lancamento", label: "Go-live", icon: Flag, require: "tenant_settings_read" },
     { to: "/ajuda", label: "Ajuda", icon: HelpCircle },
     { to: "/executivo", label: "Executivo", icon: Sparkles, require: "financial" },
+    { to: "/central", label: "Central de IA", icon: Brain, require: "operational_manager" },
     { to: "/escalas", label: "Escalas", icon: CalendarDays },
     { to: "/plantoes", label: "Plantões", icon: Stethoscope },
     { to: "/financeiro", label: "Financeiro", icon: Wallet, require: "financial" },
@@ -68,6 +70,9 @@ function navForRole(role: UserRole | null | undefined): NavItem[] {
     }
     if (item.require === "tenant_settings_read") {
       return can(role, "tenant_settings:read");
+    }
+    if (item.require === "operational_manager") {
+      return isOperationalManager(role);
     }
     return true;
   });

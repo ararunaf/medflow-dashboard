@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Bell, Info, ShieldAlert } from "lucide-react";
 import { EmptyState } from "@/components/ui-kit";
+import { IaBadge } from "@/components/operational/ia-badge";
 import { operationalLinkProps, primaryActionForAlertRuleId } from "@/lib/operations/actions";
 import type { OperationalAlert, OperationalAlertSeverity } from "@/lib/operations/alerts/types";
 import { cn } from "@/lib/utils";
@@ -155,7 +156,8 @@ export function OperationalAlertFeedHeader({ count }: { count: number }) {
   return (
     <div className="flex items-center gap-2">
       <Bell className="h-4 w-4 text-muted-foreground" />
-      <span>Alertas operacionais</span>
+      <span>Alertas inteligentes</span>
+      <IaBadge />
       {count > 0 ? (
         <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
           ({count})
