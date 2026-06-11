@@ -4,6 +4,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { ListTree, MessageSquareText, Send, Sparkles, Wand2, Wrench } from "lucide-react";
+import { IaBadge } from "@/components/operational/ia-badge";
 import { OperationalLiveChrome } from "@/components/operational/operational-live-chrome";
 import { useOperationalCopilotDerived } from "@/hooks/use-operational-copilot-derived";
 import { useToast } from "@/hooks/use-toast";
@@ -151,7 +152,10 @@ export function OperationalCopilotGptPanel(props: {
           <div className="flex items-center gap-2">
             <MessageSquareText className="h-4 w-4 text-primary" />
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Copiloto operacional (IA)</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-sm font-semibold text-foreground">Copiloto operacional (IA)</h2>
+                <IaBadge />
+              </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 Read-only + proposta supervisionada (sem mutações operacionais) · fingerprint{" "}
                 {derived.payload.fingerprint}

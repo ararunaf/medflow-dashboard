@@ -10,6 +10,8 @@ import { describeError } from "@/lib/queries/result";
 import { assertFinancialReadAccess } from "@/lib/routes/finance-access";
 import { onboardingIds, readQuickStartStep, writeQuickStartStep } from "@/lib/services/onboarding";
 import { useTenantBranding } from "@/components/tenant-branding-provider";
+import { IaBadge } from "@/components/operational/ia-badge";
+import { IaLegend } from "@/components/operational/ia-legend";
 import { ArrowRight, Building2, ClipboardCheck, LayoutDashboard, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useClientMounted } from "@/hooks/use-client-mounted";
@@ -162,10 +164,12 @@ function ExecutivoPage() {
           <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
             Central de IA Operacional
+            <IaBadge />
             <ArrowRight className="h-3.5 w-3.5 ml-auto text-muted-foreground" />
           </div>
         </Link>
       </div>
+      <IaLegend className="mt-3" />
 
       <div className="mt-6 grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-xl bg-card border border-border ring-soft">

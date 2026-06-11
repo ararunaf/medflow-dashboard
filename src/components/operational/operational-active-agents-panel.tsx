@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Bot, CheckCircle2, Lock, RefreshCw, Shield, Unlock } from "lucide-react";
+import { IaBadge } from "@/components/operational/ia-badge";
 import { OperationalLiveChrome } from "@/components/operational/operational-live-chrome";
 import { EmptyState, ErrorState } from "@/components/ui-kit";
 import {
@@ -113,7 +114,10 @@ export function OperationalActiveAgentsPanel(props: { enabled: boolean; classNam
           <div className="flex items-center gap-2 min-w-0">
             <Bot className="h-4 w-4 text-primary shrink-0" />
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-foreground">Agentes operacionais ativos</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-sm font-semibold text-foreground">Agentes operacionais ativos</h2>
+                <IaBadge />
+              </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">
                 Domínios escopados · governança explícita · sem execução autônoma
               </p>

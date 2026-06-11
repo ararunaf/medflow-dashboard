@@ -15,6 +15,8 @@ import {
   OperationalAlertFeedHeader,
   OperationalAlertHeaderBadges,
 } from "@/components/operational/operational-alert-feed";
+import { IaBadge } from "@/components/operational/ia-badge";
+import { IaLegend } from "@/components/operational/ia-legend";
 import { OperationalAnalyticsPanel } from "@/components/operational/operational-analytics-panel";
 import { OperationalQuickActions } from "@/components/operational/operational-quick-actions";
 import { OperationalCopilotContextPanel } from "@/components/operational/operational-copilot-context-panel";
@@ -162,6 +164,7 @@ export function CommandCenterView(props: {
         actions={
           <div className="flex flex-col items-end gap-2">
             <div className="flex flex-wrap items-center justify-end gap-2">
+              <IaBadge />
               <OperationalAlertHeaderBadges counts={opsAlerts.counts} />
               <OperationalLivePulse />
             </div>
@@ -171,6 +174,7 @@ export function CommandCenterView(props: {
           </div>
         }
       />
+      <IaLegend className="mb-4 -mt-2" />
 
       {query.isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

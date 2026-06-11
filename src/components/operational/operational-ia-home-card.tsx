@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Bell, ClipboardList, Lightbulb, Sparkles } from "lucide-react";
+import { ArrowRight, Bell, Brain, ClipboardList, Lightbulb } from "lucide-react";
 import type { ReactNode } from "react";
 import { IaBadge } from "@/components/operational/ia-badge";
 import { SkeletonRow } from "@/components/ui-kit";
@@ -29,10 +29,14 @@ export function OperationalIaHomeCard() {
   const loading = cc.isLoading || proposals.isLoading;
 
   return (
-    <div className="rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] via-card to-card ring-soft">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4">
+    <div className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] via-card to-card ring-soft">
+      <div
+        className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500/70 via-violet-400/50 to-violet-500/70"
+        aria-hidden
+      />
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4 pt-5">
         <div className="flex items-start gap-2 min-w-0">
-          <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
+          <Brain className="h-4 w-4 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-sm font-semibold text-foreground">IA Operacional</h2>

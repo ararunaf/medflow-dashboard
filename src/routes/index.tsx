@@ -2,6 +2,7 @@
 import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
 import { OperationalIaHomeCard } from "@/components/operational/operational-ia-home-card";
+import { IaLegend } from "@/components/operational/ia-legend";
 import { PilotHomeBanner } from "@/components/pilot-launch/pilot-home-banner";
 import {
   operationalReadinessQueryOptions,
@@ -190,6 +191,7 @@ function HomePage() {
       {canSeeIa ? (
         <div className="mt-4">
           <OperationalIaHomeCard />
+          <IaLegend className="mt-2 px-1" />
         </div>
       ) : null}
 
