@@ -1,6 +1,7 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
+import { HelpCenterExecutive } from "@/components/help-center/help-center-executive";
 import { HelpArticleDrawer } from "@/components/pilot-launch/help-article-drawer";
 import { PageHeader } from "@/components/ui-kit";
 import {
@@ -35,7 +36,11 @@ export const Route = createFileRoute("/ajuda")({
   head: () => ({
     meta: [
       { title: brandPageTitle("Central de ajuda") },
-      { name: "description", content: "FAQ operacional, guias rápidos e documentação inicial." },
+      {
+        name: "description",
+        content:
+          "Centro de treinamento, onboarding e materiais institucionais do MedicFlow-AI — workflow, apresentação corporativa e Central de IA.",
+      },
     ],
   }),
   component: AjudaPage,
@@ -68,13 +73,23 @@ function AjudaPage() {
     <AppShell>
       <PageHeader
         title="Central de ajuda"
-        subtitle="FAQ operacional, guias rápidos, passos iniciais e documentação para piloto V1."
+        subtitle="Centro de treinamento, onboarding comercial e materiais institucionais da plataforma."
         actions={
           <Link to="/piloto" className="text-xs font-medium text-primary hover:underline">
             Implantação piloto →
           </Link>
         }
       />
+
+      <HelpCenterExecutive />
+
+      <div className="mb-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Biblioteca operacional
+        </span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
