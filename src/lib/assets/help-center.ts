@@ -1,7 +1,7 @@
 /** Assets estáticos da Central de Ajuda institucional (servidos via /public/help). */
 export const HELP_CENTER_ASSETS = {
-  workflowImage: "/help/workflow-operacional-executivo.png",
-  workflowDownloadName: "MedicFlow-AI-Workflow-Operacional.png",
+  workflowImage: "/help/fluxo-operacional-completo-medicflow.png",
+  workflowDownloadName: "Fluxo Operacional Completo MedicFlow.png",
   presentation: {
     title: "MedicFlow-AI Corporativo Premium",
     fileName: "medicflow-ai-corporativo-premium",

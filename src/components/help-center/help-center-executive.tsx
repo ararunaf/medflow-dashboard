@@ -105,7 +105,7 @@ export function HelpCenterExecutive() {
         </p>
         <ImagePreviewCard
           src={workflowImage}
-          alt="Workflow Operacional da Plataforma MedicFlow-AI"
+          alt="Fluxo Operacional Completo MedicFlow-AI"
           downloadName={workflowDownloadName}
           onExpand={() => setLightboxOpen(true)}
         />
@@ -226,7 +226,7 @@ export function HelpCenterExecutive() {
       <ImageLightbox
         open={lightboxOpen}
         src={workflowImage}
-        alt="Workflow Operacional da Plataforma MedicFlow-AI"
+        alt="Fluxo Operacional Completo MedicFlow-AI"
         downloadName={workflowDownloadName}
         onClose={() => setLightboxOpen(false)}
       />

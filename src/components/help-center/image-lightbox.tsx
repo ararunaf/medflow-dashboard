@@ -58,18 +58,20 @@ export function ImageLightbox(props: {
           </button>
         </div>
       </div>
-      <button
-        type="button"
-        className="flex-1 overflow-auto p-4 flex items-center justify-center min-h-0 cursor-zoom-out"
+      <div
+        className="flex-1 overflow-auto p-4 min-h-0"
         onClick={onClose}
+        role="presentation"
       >
-        <img
-          src={src}
-          alt={alt}
-          className="max-w-full max-h-full object-contain"
-          onClick={(e) => e.stopPropagation()}
-        />
-      </button>
+        <div className="flex min-h-full min-w-full items-center justify-center">
+          <img
+            src={src}
+            alt={alt}
+            className="max-w-none w-auto h-auto object-contain cursor-zoom-out"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -83,20 +85,22 @@ export function ImagePreviewCard(props: {
   const { src, alt, downloadName, onExpand } = props;
 
   return (
-    <div className="relative group rounded-xl border border-border bg-muted/20 overflow-hidden">
+    <div className="relative group w-full rounded-xl border border-border bg-muted/20 overflow-hidden">
       <button
         type="button"
         onClick={onExpand}
         className="block w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         aria-label={`Ampliar ${alt}`}
       >
-        <img
-          src={src}
-          alt={alt}
-          className="w-full h-auto object-contain max-h-[420px] mx-auto"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+        <div className="flex w-full items-center justify-center bg-muted/10 min-h-[220px] sm:min-h-[480px] lg:min-h-[700px]">
+          <img
+            src={src}
+            alt={alt}
+            className="w-full h-auto max-w-full object-contain max-h-[220px] sm:max-h-[480px] lg:max-h-[700px]"
+            loading="lazy"
+          />
+        </div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white">
             <ZoomIn className="h-3.5 w-3.5" />
             Clique para ampliar

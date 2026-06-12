@@ -1,0 +1,50 @@
+{
+  "url": "https://staging.medicflow.app.br/ajuda",
+  "validatedAt": "2026-06-12T16:08:00.000Z",
+  "auth": {
+    "email": "admin.teste@medicflow.app.br",
+    "tenant": "medflow-v1-demo"
+  },
+  "sections": {
+    "workflow": true,
+    "workflowImage": true,
+    "workflowAmpliar": true,
+    "workflowDownloadBtn": true,
+    "apresentacao": true,
+    "apresentacaoCard": true,
+    "apresentacaoVisualizar": true,
+    "apresentacaoDownload": true,
+    "ia": true,
+    "primeirosPassos": true
+  },
+  "links": {
+    "workflowDownload": {
+      "url": "https://staging.medicflow.app.br/help/workflow-operacional-executivo.png",
+      "status": 200,
+      "ok": true
+    },
+    "pptVisualizar": {
+      "url": "https://staging.medicflow.app.br/help/medicflow-ai-corporativo-premium.pdf",
+      "status": 200,
+      "ok": true
+    },
+    "pptDownload": {
+      "url": "https://staging.medicflow.app.br/help/medicflow-ai-corporativo-premium.pptx",
+      "status": 200,
+      "ok": true
+    }
+  },
+  "functions": {
+    "workflowVisualizar": true,
+    "workflowDownload": true,
+    "pptVisualizar": true,
+    "pptDownload": true
+  },
+  "screenshots": [
+    "docs/screenshots/help-center-certificacao/01-ajuda-completa.png",
+    "docs/screenshots/help-center-certificacao/02-workflow-operacional.png",
+    "docs/screenshots/help-center-certificacao/03-apresentacao-corporativa.png",
+    "docs/screenshots/help-center-certificacao/04-central-ia.png",
+    "docs/screenshots/help-center-certificacao/05-primeiros-passos.png"
+  ]
+}
