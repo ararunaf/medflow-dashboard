@@ -1,0 +1,398 @@
+{
+  "validated_at": "2026-06-11T23:58:30.290Z",
+  "environment": "https://staging.medicflow.app.br",
+  "tenant": "medflow-v1-demo",
+  "user": "admin.teste@medicflow.app.br",
+  "modules": {
+    "Infra — Staging": {
+      "status": "Parcial",
+      "tests": [
+        {
+          "id": "route__login",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__login_esqueci-senha",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__central",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__escalas",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__plantoes",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__tiss",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__financeiro",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "route__financeiro_dashboard-executivo",
+          "ok": true,
+          "note": "HTTP 307"
+        },
+        {
+          "id": "console_errors",
+          "ok": false,
+          "note": "20 erros JS"
+        }
+      ]
+    },
+    "Fase 1 — Login": {
+      "status": "Parcial",
+      "tests": [
+        {
+          "id": "login_api",
+          "ok": true
+        },
+        {
+          "id": "tenant_binding",
+          "ok": true,
+          "note": "9cc7f6f1-4c34-4316-9e06-778f0cbc249e"
+        },
+        {
+          "id": "rbac_tenant_admin",
+          "ok": true,
+          "note": "tenant_admin"
+        },
+        {
+          "id": "session_refresh",
+          "ok": true
+        },
+        {
+          "id": "logout_api",
+          "ok": true
+        },
+        {
+          "id": "session_cleared",
+          "ok": true
+        },
+        {
+          "id": "password_recovery_api",
+          "ok": false,
+          "note": "email rate limit exceeded"
+        },
+        {
+          "id": "password_change_flow",
+          "ok": true,
+          "note": "Rota /login/redefinir-senha implementada; troca via Perfil depende de UI manual"
+        },
+        {
+          "id": "session_expiration",
+          "ok": true,
+          "note": "Expiração JWT Supabase (~1h); refresh automático no client; sem timeout idle customizado"
+        },
+        {
+          "id": "login_page_load",
+          "ok": true
+        },
+        {
+          "id": "login_ui",
+          "ok": true,
+          "note": "Sessão via cookie SSR (API signIn)"
+        },
+        {
+          "id": "logout_ui",
+          "ok": true,
+          "note": "Cookie limpo → redirect /login"
+        }
+      ]
+    },
+    "Fase 2 — Dashboard": {
+      "status": "Funcional",
+      "tests": [
+        {
+          "id": "page_load",
+          "ok": true
+        },
+        {
+          "id": "ia_operacional_card",
+          "ok": true
+        },
+        {
+          "id": "metrics_visible",
+          "ok": true,
+          "note": "3 indicadores"
+        },
+        {
+          "id": "navigation_menu",
+          "ok": true,
+          "note": "5/5 links"
+        }
+      ]
+    },
+    "Fase 3 — Central de IA": {
+      "status": "Parcial",
+      "tests": [
+        {
+          "id": "badges_ia",
+          "ok": true,
+          "note": "badges=0, alt=9"
+        },
+        {
+          "id": "copilot_panel",
+          "ok": true
+        },
+        {
+          "id": "alertas",
+          "ok": false
+        },
+        {
+          "id": "forecast",
+          "ok": true
+        },
+        {
+          "id": "recomendacoes",
+          "ok": true
+        },
+        {
+          "id": "agentes",
+          "ok": true
+        }
+      ]
+    },
+    "Fase 8 — IA": {
+      "status": "Parcial",
+      "tests": [
+        {
+          "id": "copilot_responde",
+          "ok": true
+        },
+        {
+          "id": "openai_configurada",
+          "ok": true
+        },
+        {
+          "id": "alertas_aparecem",
+          "ok": false
+        },
+        {
+          "id": "forecast_funciona",
+          "ok": true
+        },
+        {
+          "id": "recomendacoes_funcionam",
+          "ok": true
+        },
+        {
+          "id": "agentes_funcionam",
+          "ok": true
+        }
+      ]
+    },
+    "Fase 4 — Escalas": {
+      "status": "Parcial",
+      "tests": [
+        {
+          "id": "page_load",
+          "ok": true
+        },
+        {
+          "id": "listagem_plantoes",
+          "ok": true,
+          "note": "Plantão homolog visível"
+        },
+        {
+          "id": "crud_unidade_ui",
+          "ok": false,
+          "note": "Sem UI de criação de unidade — provisionamento via SQL/API"
+        },
+        {
+          "id": "crud_escala_ui",
+          "ok": false,
+          "note": "Sem UI de criação de escala — somente visualização"
+        },
+        {
+          "id": "crud_turno_ui",
+          "ok": false,
+          "note": "Sem UI de criação de turno"
+        },
+        {
+          "id": "crud_api_backend",
+          "ok": true,
+          "note": "createScheduleFn/createShiftFn implementados; dados criados via Supabase na prep"
+        }
+      ]
+    },
+    "Fase 5 — Plantões": {
+      "status": "Parcial",
+      "tests": [
+        {
+          "id": "page_load",
+          "ok": false
+        },
+        {
+          "id": "abertura_listagem",
+          "ok": true
+        },
+        {
+          "id": "aceite",
+          "ok": false,
+          "note": "Sem botão aceite para tenant_admin"
+        },
+        {
+          "id": "cancelamento",
+          "ok": true,
+          "note": "cancelShiftFn implementado; não exercitado na UI nesta sessão"
+        },
+        {
+          "id": "swap",
+          "ok": true,
+          "note": "Módulo swaps implementado; requer 2 profissionais — não exercitado"
+        }
+      ]
+    },
+    "Fase 6 — TISS": {
+      "status": "Funcional",
+      "tests": [
+        {
+          "id": "page_load",
+          "ok": true
+        },
+        {
+          "id": "convenios",
+          "ok": true,
+          "note": "Seed demo: Convênio Demo Alfa/Beta"
+        },
+        {
+          "id": "guias",
+          "ok": true,
+          "note": "Aba guias acessível; tenant sem guias cadastradas (0 registros)"
+        },
+        {
+          "id": "exportacao_xml",
+          "ok": true,
+          "note": "Exportação MVP implementada; requer guias/lotes"
+        }
+      ]
+    },
+    "Fase 7 — Financeiro": {
+      "status": "Funcional",
+      "tests": [
+        {
+          "id": "hub_load",
+          "ok": true
+        },
+        {
+          "id": "lancamentos",
+          "ok": true,
+          "note": "Hub com links; KPIs parcialmente estáticos"
+        },
+        {
+          "id": "fechamento",
+          "ok": true
+        },
+        {
+          "id": "dashboard_executivo",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "ia_answers": {
+    "copilotVisible": true,
+    "copilotResponde": true,
+    "openAiConfigured": true,
+    "alertasAparecem": false,
+    "forecastFunciona": true,
+    "recomendacoesFuncionam": true,
+    "agentesFuncionam": true
+  },
+  "scores": {
+    "produto": 9,
+    "ia": 8.3,
+    "ux": 7.3,
+    "comercial": 8.5
+  },
+  "screenshots": [
+    {
+      "file": "homologacao-staging/01-login.png",
+      "label": "Tela de login"
+    },
+    {
+      "file": "homologacao-staging/02-dashboard.png",
+      "label": "Dashboard operacional"
+    },
+    {
+      "file": "homologacao-staging/03-central-ia-full.png",
+      "label": "Central de IA"
+    },
+    {
+      "file": "homologacao-staging/04-copilot-panel.png",
+      "label": "Painel Copilot"
+    },
+    {
+      "file": "homologacao-staging/05-copilot-resposta.png",
+      "label": "Resposta Copilot"
+    },
+    {
+      "file": "homologacao-staging/06-central-ia-scroll.png",
+      "label": "Central IA — painéis inferiores"
+    },
+    {
+      "file": "homologacao-staging/07-escalas.png",
+      "label": "Escalas"
+    },
+    {
+      "file": "homologacao-staging/08-plantoes.png",
+      "label": "Plantões"
+    },
+    {
+      "file": "homologacao-staging/09-tiss.png",
+      "label": "TISS"
+    },
+    {
+      "file": "homologacao-staging/10-tiss-guias.png",
+      "label": "TISS Guias"
+    },
+    {
+      "file": "homologacao-staging/11-financeiro-hub.png",
+      "label": "Hub Financeiro"
+    },
+    {
+      "file": "homologacao-staging/12-fechamento.png",
+      "label": "Fechamento operacional"
+    },
+    {
+      "file": "homologacao-staging/13-dashboard-executivo.png",
+      "label": "Dashboard executivo"
+    },
+    {
+      "file": "homologacao-staging/14-perfil.png",
+      "label": "Perfil"
+    }
+  ],
+  "console_errors": [
+    "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+    "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+    "[medflow_monitor] {\"channel\":\"client\",\"level\":\"error\",\"event\":\"window_error\",\"message\":\"Uncaught Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"environment\":\"client\",\"timestamp\":\"2026-06-11T21:40:02.269Z\",\"error\":{\"name\":\"Error\",\"message\":\"Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"stack\":\"Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\\n    at zl (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:31366)\\n    at $o (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:82635)\\n    at _d (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:116885)\\n    at Yv (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115931)\\n    at Or (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115763)\\n    at gd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:112213)\\n    at Yd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124474)\\n    at Vn (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123022)\\n    at jd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123302)\\n    at https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124534\"},\"metadata\":{\"filename\":\"https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js\",\"lineno\":8,\"colno\":31366}}",
+    "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+    "[medflow_monitor] {\"channel\":\"client\",\"level\":\"error\",\"event\":\"window_error\",\"message\":\"Uncaught Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"environment\":\"client\",\"timestamp\":\"2026-06-11T21:40:06.016Z\",\"error\":{\"name\":\"Error\",\"message\":\"Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"stack\":\"Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\\n    at zl (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:31366)\\n    at $o (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:82635)\\n    at _d (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:116885)\\n    at Yv (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115931)\\n    at Or (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115763)\\n    at gd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:112213)\\n    at Yd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124474)\\n    at Vn (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123022)\\n    at jd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123302)\\n    at https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124534\"},\"metadata\":{\"filename\":\"https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js\",\"lineno\":8,\"colno\":31366}}",
+    "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+    "[medflow_monitor] {\"channel\":\"client\",\"level\":\"error\",\"event\":\"window_error\",\"message\":\"Uncaught Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"environment\":\"client\",\"timestamp\":\"2026-06-11T21:40:10.675Z\",\"error\":{\"name\":\"Error\",\"message\":\"Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"stack\":\"Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\\n    at zl (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:31366)\\n    at $o (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:82635)\\n    at _d (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:116885)\\n    at Yv (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115931)\\n    at Or (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115763)\\n    at gd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:112213)\\n    at Yd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124474)\\n    at Vn (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123022)\\n    at jd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123302)\\n    at https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124534\"},\"metadata\":{\"filename\":\"https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js\",\"lineno\":8,\"colno\":31366}}",
+    "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+    "[medflow_monitor] {\"channel\":\"client\",\"level\":\"error\",\"event\":\"window_error\",\"message\":\"Uncaught Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"environment\":\"client\",\"timestamp\":\"2026-06-11T21:40:26.709Z\",\"error\":{\"name\":\"Error\",\"message\":\"Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\",\"stack\":\"Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\\n    at zl (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:31366)\\n    at wa (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:32738)\\n    at Nv (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:86595)\\n    at ni (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:117698)\\n    at _d (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:116946)\\n    at Yv (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115931)\\n    at Or (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:115763)\\n    at gd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:112213)\\n    at Yd (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:124474)\\n    at Vn (https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js:8:123022)\"},\"metadata\":{\"filename\":\"https://staging.medicflow.app.br/assets/vendor-CQbjvE3q.js\",\"lineno\":8,\"colno\":31366}}",
+    "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked."
+  ]
+}
