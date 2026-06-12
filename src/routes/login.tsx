@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AuthFallback } from "@/components/auth-fallback";
+import { LoginBrandingPanel } from "@/components/login-branding-panel";
 import { Button } from "@/components/ui/button";
 import { parseLoginReason } from "@/lib/errors/auth-actions";
 import { Input } from "@/components/ui/input";
@@ -70,21 +71,7 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      <div className="hidden lg:flex flex-1 bg-brand-gradient relative overflow-hidden">
-        <div className="relative z-10 p-12 flex flex-col justify-between text-primary-foreground">
-          <div className="text-sm font-medium opacity-80">
-            {BRANDING.productName} · Plataforma Operacional
-          </div>
-          <div>
-            <h2 className="text-4xl font-semibold leading-tight max-w-md">
-              Inteligência que conecta. Operação que transforma.
-            </h2>
-            <p className="mt-4 text-base opacity-80 max-w-md">
-              Escalas, plantões e indicadores clínicos em tempo real, em um único fluxo.
-            </p>
-          </div>
-        </div>
-      </div>
+      <LoginBrandingPanel />
 
       <div className="flex-1 flex items-center justify-center px-6 py-10 bg-background">
         <div className="w-full max-w-sm">
