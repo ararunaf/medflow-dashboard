@@ -150,17 +150,18 @@ Fonte: `node scripts/migration-validate.mjs` — 01/07/2026.
 
 ### E2 — Commit e publicação
 
-Preencher após push:
-
 ```
-Commit: <hash>
+Commit: 2bab23d6c9a4c2817d143f859ab162dfb4512aca
+Mensagem: chore(rebuild-prep): versionar migration RAG #29 e resolver seed CLI
 Branch: main
-Remote: origin (medflow-dashboard.git)
-Arquivos: supabase/migrations/20260701120000_knowledge_embeddings_pgvector.sql,
-          supabase/config.toml,
-          docs/MEDICFLOW_REBUILD_PREP.md,
-          docs/MEDICFLOW_SECRETS_INVENTORY.md,
-          docs/MEDICFLOW_REBUILD_FINAL_CHECKLIST.md
+Remote: origin → https://github.com/ararunaf/medflow-dashboard.git
+Push: 422c773..2bab23d  main → main (01/07/2026)
+Arquivos:
+  - supabase/migrations/20260701120000_knowledge_embeddings_pgvector.sql
+  - supabase/config.toml
+  - docs/MEDICFLOW_REBUILD_PREP.md
+  - docs/MEDICFLOW_SECRETS_INVENTORY.md
+  - docs/MEDICFLOW_REBUILD_FINAL_CHECKLIST.md
 ```
 
 ---
