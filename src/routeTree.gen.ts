@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TissRouteImport } from './routes/tiss'
 import { Route as SiteRouteImport } from './routes/site'
+import { Route as ProcessamentoRouteImport } from './routes/processamento'
 import { Route as PlantoesRouteImport } from './routes/plantoes'
 import { Route as PilotoRouteImport } from './routes/piloto'
 import { Route as PerfilRouteImport } from './routes/perfil'
@@ -22,6 +23,8 @@ import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as ExecutivoRouteImport } from './routes/executivo'
 import { Route as EscalasRouteImport } from './routes/escalas'
 import { Route as CentralRouteImport } from './routes/central'
+import { Route as CapturaRouteImport } from './routes/captura'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRedefinirSenhaRouteImport } from './routes/login.redefinir-senha'
@@ -29,6 +32,7 @@ import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-se
 import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
 import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
 import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
+import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
 
 const TissRoute = TissRouteImport.update({
   id: '/tiss',
@@ -38,6 +42,11 @@ const TissRoute = TissRouteImport.update({
 const SiteRoute = SiteRouteImport.update({
   id: '/site',
   path: '/site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessamentoRoute = ProcessamentoRouteImport.update({
+  id: '/processamento',
+  path: '/processamento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlantoesRoute = PlantoesRouteImport.update({
@@ -95,6 +104,16 @@ const CentralRoute = CentralRouteImport.update({
   path: '/central',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CapturaRoute = CapturaRouteImport.update({
+  id: '/captura',
+  path: '/captura',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AjudaRoute = AjudaRouteImport.update({
   id: '/ajuda',
   path: '/ajuda',
@@ -133,10 +152,17 @@ const FinanceiroConciliacaoOperacionalRoute =
     path: '/conciliacao-operacional',
     getParentRoute: () => FinanceiroRoute,
   } as any)
+const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
+  id: '/revisao/$sessionId',
+  path: '/revisao/$sessionId',
+  getParentRoute: () => CapturaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ajuda': typeof AjudaRoute
+  '/analytics': typeof AnalyticsRoute
+  '/captura': typeof CapturaRouteWithChildren
   '/central': typeof CentralRoute
   '/escalas': typeof EscalasRoute
   '/executivo': typeof ExecutivoRoute
@@ -148,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof PerfilRoute
   '/piloto': typeof PilotoRoute
   '/plantoes': typeof PlantoesRoute
+  '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
@@ -155,10 +182,13 @@ export interface FileRoutesByFullPath {
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
+  '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ajuda': typeof AjudaRoute
+  '/analytics': typeof AnalyticsRoute
+  '/captura': typeof CapturaRouteWithChildren
   '/central': typeof CentralRoute
   '/escalas': typeof EscalasRoute
   '/executivo': typeof ExecutivoRoute
@@ -170,6 +200,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/piloto': typeof PilotoRoute
   '/plantoes': typeof PlantoesRoute
+  '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
@@ -177,11 +208,14 @@ export interface FileRoutesByTo {
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
+  '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ajuda': typeof AjudaRoute
+  '/analytics': typeof AnalyticsRoute
+  '/captura': typeof CapturaRouteWithChildren
   '/central': typeof CentralRoute
   '/escalas': typeof EscalasRoute
   '/executivo': typeof ExecutivoRoute
@@ -193,6 +227,7 @@ export interface FileRoutesById {
   '/perfil': typeof PerfilRoute
   '/piloto': typeof PilotoRoute
   '/plantoes': typeof PlantoesRoute
+  '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
@@ -200,12 +235,15 @@ export interface FileRoutesById {
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
+  '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/ajuda'
+    | '/analytics'
+    | '/captura'
     | '/central'
     | '/escalas'
     | '/executivo'
@@ -217,6 +255,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/piloto'
     | '/plantoes'
+    | '/processamento'
     | '/site'
     | '/tiss'
     | '/financeiro/conciliacao-operacional'
@@ -224,10 +263,13 @@ export interface FileRouteTypes {
     | '/financeiro/fechamento-operacional'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
+    | '/captura/revisao/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/ajuda'
+    | '/analytics'
+    | '/captura'
     | '/central'
     | '/escalas'
     | '/executivo'
@@ -239,6 +281,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/piloto'
     | '/plantoes'
+    | '/processamento'
     | '/site'
     | '/tiss'
     | '/financeiro/conciliacao-operacional'
@@ -246,10 +289,13 @@ export interface FileRouteTypes {
     | '/financeiro/fechamento-operacional'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
+    | '/captura/revisao/$sessionId'
   id:
     | '__root__'
     | '/'
     | '/ajuda'
+    | '/analytics'
+    | '/captura'
     | '/central'
     | '/escalas'
     | '/executivo'
@@ -261,6 +307,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/piloto'
     | '/plantoes'
+    | '/processamento'
     | '/site'
     | '/tiss'
     | '/financeiro/conciliacao-operacional'
@@ -268,11 +315,14 @@ export interface FileRouteTypes {
     | '/financeiro/fechamento-operacional'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
+    | '/captura/revisao/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AjudaRoute: typeof AjudaRoute
+  AnalyticsRoute: typeof AnalyticsRoute
+  CapturaRoute: typeof CapturaRouteWithChildren
   CentralRoute: typeof CentralRoute
   EscalasRoute: typeof EscalasRoute
   ExecutivoRoute: typeof ExecutivoRoute
@@ -284,6 +334,7 @@ export interface RootRouteChildren {
   PerfilRoute: typeof PerfilRoute
   PilotoRoute: typeof PilotoRoute
   PlantoesRoute: typeof PlantoesRoute
+  ProcessamentoRoute: typeof ProcessamentoRoute
   SiteRoute: typeof SiteRoute
   TissRoute: typeof TissRoute
 }
@@ -302,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/site'
       fullPath: '/site'
       preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/processamento': {
+      id: '/processamento'
+      path: '/processamento'
+      fullPath: '/processamento'
+      preLoaderRoute: typeof ProcessamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plantoes': {
@@ -381,6 +439,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CentralRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/captura': {
+      id: '/captura'
+      path: '/captura'
+      fullPath: '/captura'
+      preLoaderRoute: typeof CapturaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ajuda': {
       id: '/ajuda'
       path: '/ajuda'
@@ -430,8 +502,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceiroConciliacaoOperacionalRouteImport
       parentRoute: typeof FinanceiroRoute
     }
+    '/captura/revisao/$sessionId': {
+      id: '/captura/revisao/$sessionId'
+      path: '/revisao/$sessionId'
+      fullPath: '/captura/revisao/$sessionId'
+      preLoaderRoute: typeof CapturaRevisaoSessionIdRouteImport
+      parentRoute: typeof CapturaRoute
+    }
   }
 }
+
+interface CapturaRouteChildren {
+  CapturaRevisaoSessionIdRoute: typeof CapturaRevisaoSessionIdRoute
+}
+
+const CapturaRouteChildren: CapturaRouteChildren = {
+  CapturaRevisaoSessionIdRoute: CapturaRevisaoSessionIdRoute,
+}
+
+const CapturaRouteWithChildren =
+  CapturaRoute._addFileChildren(CapturaRouteChildren)
 
 interface FinanceiroRouteChildren {
   FinanceiroConciliacaoOperacionalRoute: typeof FinanceiroConciliacaoOperacionalRoute
@@ -464,6 +554,8 @@ const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaRoute: AjudaRoute,
+  AnalyticsRoute: AnalyticsRoute,
+  CapturaRoute: CapturaRouteWithChildren,
   CentralRoute: CentralRoute,
   EscalasRoute: EscalasRoute,
   ExecutivoRoute: ExecutivoRoute,
@@ -475,6 +567,7 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilRoute: PerfilRoute,
   PilotoRoute: PilotoRoute,
   PlantoesRoute: PlantoesRoute,
+  ProcessamentoRoute: ProcessamentoRoute,
   SiteRoute: SiteRoute,
   TissRoute: TissRoute,
 }

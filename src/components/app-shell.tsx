@@ -15,6 +15,9 @@ import {
   Rocket,
   Flag,
   Brain,
+  ScanLine,
+  Layers,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRANDING, defaultLogoUrl as defaultLogo } from "@/lib/assets";
@@ -59,6 +62,9 @@ function navForRole(role: UserRole | null | undefined): NavItem[] {
       require: "financial",
     },
     { to: "/tiss", label: "TISS", icon: FileText },
+    { to: "/captura", label: "Captura", icon: ScanLine, require: "financial" },
+    { to: "/processamento", label: "Processamento", icon: Layers, require: "financial" },
+    { to: "/analytics", label: "Analytics", icon: BarChart3, require: "financial" },
     { to: "/instituicao", label: "Instituição", icon: Building2 },
     { to: "/operacao", label: "Painel ops", icon: Radio, require: "tenant_settings_read" },
     { to: "/perfil", label: "Perfil", icon: User },

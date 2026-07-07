@@ -1,4 +1,4 @@
-import "./lib/error-capture";
+﻿import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
@@ -10,6 +10,7 @@ import { checkRateLimit, rateLimitKey } from "./lib/security/rate-limit";
 import { getClientIpFromRequest } from "./lib/security/request-client";
 import { logStartupDiagnostics } from "./lib/env/startup-diagnostics";
 import { isHealthPath, resolveHealthResponse } from "./lib/server/health-checks";
+import { handleCaptureHttpRequest } from "./lib/capture/api/capture-http-router";
 
 initServerErrorMonitoring();
 
@@ -68,7 +69,7 @@ function isCatastrophicSsrErrorBody(body: string, responseStatus: number): boole
 }
 
 // h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
+// {"unhandled":true,"message":"HTTPError"} ÔÇö try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -104,7 +105,7 @@ function loginPageRateLimitResponse(isProduction: boolean, retryAfterMs: number)
   const retrySec = Math.max(1, Math.ceil(retryAfterMs / 1000));
   return applySecurityHeaders(
     new Response(
-      `Muitas requisições à página de login. Tente novamente em ${retrySec} segundo(s).`,
+      `Muitas requisi├º├Áes ├á p├ígina de login. Tente novamente em ${retrySec} segundo(s).`,
       {
         status: 429,
         headers: {
@@ -126,6 +127,11 @@ export default {
     if (isHealthPath(url.pathname)) {
       const healthResponse = await resolveHealthResponse(url.pathname);
       return applySecurityHeaders(healthResponse, isProduction);
+    }
+
+    const captureResponse = await handleCaptureHttpRequest(request);
+    if (captureResponse) {
+      return applySecurityHeaders(captureResponse, isProduction);
     }
 
     if (url.pathname === "/login") {

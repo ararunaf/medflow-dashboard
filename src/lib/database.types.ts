@@ -3649,6 +3649,139 @@ export type Database = {
           },
         ];
       };
+      knowledge_embeddings: {
+        Row: {
+          id: string;
+          tenant_id: string | null;
+          document_id: string;
+          domain: string;
+          classification: string;
+          agent_affinity: string[];
+          source_path: string;
+          chunk_index: number;
+          content: string;
+          content_hash: string;
+          embedding: string | null;
+          embedding_model: string | null;
+          metadata: Json;
+          version: string;
+          language: string;
+          indexed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          tenant_id?: string | null;
+          document_id: string;
+          domain: string;
+          classification: string;
+          agent_affinity?: string[];
+          source_path: string;
+          chunk_index?: number;
+          content: string;
+          content_hash: string;
+          embedding?: string | null;
+          embedding_model?: string | null;
+          metadata?: Json;
+          version: string;
+          language?: string;
+          indexed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string | null;
+          document_id?: string;
+          domain?: string;
+          classification?: string;
+          agent_affinity?: string[];
+          source_path?: string;
+          chunk_index?: number;
+          content?: string;
+          content_hash?: string;
+          embedding?: string | null;
+          embedding_model?: string | null;
+          metadata?: Json;
+          version?: string;
+          language?: string;
+          indexed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_embeddings_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      knowledge_index_runs: {
+        Row: {
+          id: string;
+          tenant_id: string | null;
+          mode: string;
+          source_path: string;
+          documents_processed: number;
+          chunks_processed: number;
+          chunks_embedded: number;
+          chunks_skipped: number;
+          embedding_model: string;
+          embedding_dimensions: number;
+          status: string;
+          error_message: string | null;
+          started_at: string;
+          completed_at: string | null;
+          metadata: Json;
+        };
+        Insert: {
+          id?: string;
+          tenant_id?: string | null;
+          mode: string;
+          source_path: string;
+          documents_processed?: number;
+          chunks_processed?: number;
+          chunks_embedded?: number;
+          chunks_skipped?: number;
+          embedding_model: string;
+          embedding_dimensions?: number;
+          status?: string;
+          error_message?: string | null;
+          started_at?: string;
+          completed_at?: string | null;
+          metadata?: Json;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string | null;
+          mode?: string;
+          source_path?: string;
+          documents_processed?: number;
+          chunks_processed?: number;
+          chunks_embedded?: number;
+          chunks_skipped?: number;
+          embedding_model?: string;
+          embedding_dimensions?: number;
+          status?: string;
+          error_message?: string | null;
+          started_at?: string;
+          completed_at?: string | null;
+          metadata?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_index_runs_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -3691,6 +3824,24 @@ export type Database = {
       get_latest_operational_recommendation_feedback_for_ids: {
         Args: { p_ids: string[] };
         Returns: Json;
+      };
+      match_knowledge_embeddings: {
+        Args: {
+          query_embedding: string;
+          match_count?: number;
+          filter_domain?: string | null;
+          filter_classification?: string | null;
+          similarity_threshold?: number;
+        };
+        Returns: {
+          id: string;
+          document_id: string;
+          domain: string;
+          classification: string;
+          content: string;
+          metadata: Json;
+          similarity: number;
+        }[];
       };
     };
     Enums: {
