@@ -19,6 +19,7 @@ export type DomainErrorCode =
   | "schedule_archived"
   | "swap_window_closed"
   | "swap_not_owner"
+  | "not_implemented"
   | "internal_error";
 
 export type DomainErrorDetails = Readonly<Record<string, string | number | boolean | null>>;

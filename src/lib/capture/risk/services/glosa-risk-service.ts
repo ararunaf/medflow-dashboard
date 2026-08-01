@@ -7,15 +7,13 @@
  * nem Learning Loop.
  */
 import { NotFoundError, ValidationError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { loadAuditReport } from "../../audit/infrastructure/audit-storage";
 import type { AuditReport } from "../../audit/types/audit-report";
 import { loadContractIntelligenceReport } from "../../contract/infrastructure/contract-intelligence-storage";
 import type { ContractIntelligenceReport } from "../../contract/types/contract-intelligence-report";
-import {
-  appendCaptureEvent,
-  buildCaptureEvent,
-} from "../../infrastructure/capture-events";
+import { appendCaptureEvent, buildCaptureEvent } from "../../infrastructure/capture-events";
 import { getCaptureSession } from "../../infrastructure/capture-session-store";
 import { loadLearningMetrics } from "../../learning/infrastructure/learning-storage";
 import { loadStructuredGuide } from "../../parser/infrastructure/parser-storage";
@@ -42,11 +40,11 @@ export type RunGlosaRiskResult = {
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);
@@ -55,7 +53,7 @@ async function persistSessionMetadata(
 
 function sessionSummaryFromMetadata(
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): RiskSessionSummary | null {
   const risk = metadata.riskAssessment;
   if (!risk || typeof risk !== "object") return null;
@@ -87,7 +85,7 @@ export class GlosaRiskService {
     guide: StructuredGuide,
     auditReport: AuditReport,
     contractReport: ContractIntelligenceReport,
-    metadata: Record<string, unknown>,
+    metadata: JsonObject,
   ): Promise<RunGlosaRiskResult> {
     const start = Date.now();
 
@@ -220,7 +218,8 @@ export class GlosaRiskService {
     const allContributions: Array<{ factorId: string; label: string; contribution: number }> = [];
 
     for (const row of data ?? []) {
-      const summary = sessionSummaryFromMetadata(row.id, row.metadata as Record<string, unknown>);
+      const meta = (row.metadata ?? {}) as JsonObject;
+      const summary = sessionSummaryFromMetadata(row.id, meta);
       if (summary) sessions.push(summary);
     }
 

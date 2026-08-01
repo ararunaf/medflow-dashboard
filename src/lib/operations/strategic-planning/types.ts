@@ -2,7 +2,7 @@
  * Tipos da camada de planejamento operacional estratégico supervisionado.
  * Determinísticos, auditáveis e delimitados — sem autonomia de execução.
  */
-import type { OperationalStrategicPlanningLifecycleState } from "@/lib/database.types";
+import type { JsonObject, OperationalStrategicPlanningLifecycleState } from "@/lib/database.types";
 
 export type StrategicStressLevel = "low" | "moderate" | "high";
 
@@ -105,7 +105,7 @@ export type StrategicPlanningCycleDto = {
   fingerprint: string;
   lifecycleState: OperationalStrategicPlanningLifecycleState;
   strategicNarrative: string;
-  stressDigest: Record<string, unknown>;
+  stressDigest: JsonObject;
   computedAt: string;
 };
 

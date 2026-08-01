@@ -1,12 +1,15 @@
 import { useCallback, useState } from "react";
 import { createCaptureSessionFn } from "@/lib/capture/api/capture-server";
-import { describeError } from "@/lib/queries/result";
-import { uploadCaptureFile, retryCaptureUpload, cancelCapture, getPreviewUrl } from "../services/storage-service";
+import type { CaptureSessionDetail } from "@/lib/capture/types";
+import type { MutationResult } from "@/lib/operations/api";
+import { describeError, unwrap } from "@/lib/queries/result";
 import {
-  createLocalPreviewUrl,
-  fileToBase64,
-  revokeLocalPreviewUrl,
-} from "../utils/file-format";
+  uploadCaptureFile,
+  retryCaptureUpload,
+  cancelCapture,
+  getPreviewUrl,
+} from "../services/storage-service";
+import { createLocalPreviewUrl, fileToBase64, revokeLocalPreviewUrl } from "../utils/file-format";
 import type { CapturePhase } from "../types";
 import { CapturePhaseMachine } from "../services/state-machine";
 
@@ -41,15 +44,20 @@ export function useCaptureUpload(options: {
         let sessionId = retrySessionId;
 
         if (!sessionId) {
-          const createRes = await createCaptureSessionFn({ data: { channel } });
-          if (!createRes.ok) throw new Error(createRes.error.message);
-          sessionId = createRes.data.session.id;
+          const createRes = (await createCaptureSessionFn({
+            data: { channel },
+          })) as MutationResult<{ session: CaptureSessionDetail }>;
+          const created = unwrap<{ session: CaptureSessionDetail }>(createRes);
+          sessionId = created.session.id;
           options.onSessionCreated?.(sessionId);
         }
 
+        // After create/retry branch, sessionId is always defined for the happy path.
+        const activeSessionId = sessionId as string;
+
         const result = retrySessionId
-          ? await retryCaptureUpload(sessionId, file)
-          : await uploadCaptureFile(sessionId, file);
+          ? await retryCaptureUpload(activeSessionId, file)
+          : await uploadCaptureFile(activeSessionId, file);
 
         machine.transition("uploaded", "storage_complete");
         machine.transition("preprocessing", "auto_preprocess");
@@ -63,13 +71,13 @@ export function useCaptureUpload(options: {
         }
 
         try {
-          const remoteUrl = await getPreviewUrl(sessionId);
+          const remoteUrl = await getPreviewUrl(activeSessionId);
           options.onPreviewUrl?.(remoteUrl);
         } catch {
           // preview remoto opcional se storage ainda propagando
         }
 
-        return { sessionId, ...result, file, base64: await fileToBase64(file) };
+        return { ...result, file, base64: await fileToBase64(file) };
       } catch (err) {
         const message = describeError(err).message;
         try {
@@ -87,16 +95,19 @@ export function useCaptureUpload(options: {
     [machine, options],
   );
 
-  const cancel = useCallback(async (sessionId: string) => {
-    setBusy(true);
-    try {
-      await cancelCapture(sessionId);
-      machine.transition("cancelled", "user_cancelled");
-      options.onPhaseChange?.("cancelled");
-    } finally {
-      setBusy(false);
-    }
-  }, [machine, options]);
+  const cancel = useCallback(
+    async (sessionId: string) => {
+      setBusy(true);
+      try {
+        await cancelCapture(sessionId);
+        machine.transition("cancelled", "user_cancelled");
+        options.onPhaseChange?.("cancelled");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [machine, options],
+  );
 
   const cleanup = useCallback(() => {
     if (localPreview) revokeLocalPreviewUrl(localPreview);

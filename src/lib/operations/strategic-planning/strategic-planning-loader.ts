@@ -1,5 +1,8 @@
-import type { Database } from "@/lib/database.types";
-import type { OperationalStrategicPlanningLifecycleState } from "@/lib/database.types";
+import type {
+  Database,
+  JsonObject,
+  OperationalStrategicPlanningLifecycleState,
+} from "@/lib/database.types";
 import { isOperationalManager } from "@/lib/auth/rbac";
 import { mapPostgresError } from "@/lib/domain/operations/errors";
 import { composeStrategicOperationalPlanningBundle } from "@/lib/operations/strategic-planning/strategic-operational-planning-engine";
@@ -21,7 +24,7 @@ function rowToDto(row: CycleRow): StrategicPlanningCycleDto {
     fingerprint: row.fingerprint,
     lifecycleState: row.lifecycle_state as OperationalStrategicPlanningLifecycleState,
     strategicNarrative: row.strategic_narrative,
-    stressDigest: (row.stress_digest_json ?? {}) as Record<string, unknown>,
+    stressDigest: (row.stress_digest_json ?? {}) as JsonObject,
     computedAt: row.computed_at,
   };
 }

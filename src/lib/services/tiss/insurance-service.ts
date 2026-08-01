@@ -1,5 +1,6 @@
 import { assertCan } from "@/lib/auth/rbac";
 import { mapPostgresError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import type { InsuranceContractRow, InsuranceProviderRow, InsuranceRuleRow } from "./types";
 
@@ -111,7 +112,7 @@ export async function listInsuranceRules(
 
 export async function createInsuranceRule(
   ctx: ServiceCtx,
-  input: { insurance_contract_id: string; name: string; parameters?: Record<string, unknown> },
+  input: { insurance_contract_id: string; name: string; parameters?: JsonObject },
 ): Promise<InsuranceRuleRow> {
   assertCan(ctx.role, "tiss:write");
   const { data, error } = await ctx.client
@@ -120,7 +121,7 @@ export async function createInsuranceRule(
       tenant_id: ctx.tenantId,
       insurance_contract_id: input.insurance_contract_id,
       name: input.name.trim(),
-      parameters: input.parameters ?? {},
+      parameters: (input.parameters ?? {}) as Json,
     })
     .select("*")
     .single();

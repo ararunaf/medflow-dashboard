@@ -76,9 +76,13 @@ export const runSmokeTestsFn = createServerFn({ method: "POST" })
     return runMutation(async (ctx) => {
       const sessionCheck = validateSessionState({
         userId: ctx.userId,
-        profile: { tenant_id: ctx.tenantId, role: ctx.role } as {
-          tenant_id: string;
-          role: string;
+        profile: {
+          id: ctx.userId,
+          tenant_id: ctx.tenantId,
+          full_name: "",
+          role: ctx.role,
+          avatar_url: null,
+          created_at: "",
         },
       });
       if (!sessionCheck.ok) {
@@ -107,24 +111,20 @@ export const exportBackupByKindFn = createServerFn({ method: "POST" })
     }
     return { kind };
   })
-  .handler(
-    async ({
-      data,
-    }): Promise<MutationResult<Awaited<ReturnType<typeof buildBackupExportByKind>>>> => {
-      return runMutation(async (ctx) => {
-        const rl = checkRateLimit(rateLimitKey(ctx.userId, `backup_${data.kind}`), {
-          max: 12,
-          windowMs: 60_000,
-        });
-        if (!rl.allowed) {
-          throw new ValidationError("Limite de exportações — tente novamente em instantes.", {
-            field: "rate_limit",
-          });
-        }
-        return buildBackupExportByKind(ctx, data.kind);
+  .handler((async ({ data }: { data: { kind: BackupExportKind } }) => {
+    return runMutation(async (ctx) => {
+      const rl = checkRateLimit(rateLimitKey(ctx.userId, `backup_${data.kind}`), {
+        max: 12,
+        windowMs: 60_000,
       });
-    },
-  );
+      if (!rl.allowed) {
+        throw new ValidationError("Limite de exportações — tente novamente em instantes.", {
+          field: "rate_limit",
+        });
+      }
+      return buildBackupExportByKind(ctx, data.kind);
+    });
+  }) as never);
 
 /** Landing pública — sem auth. */
 export const getPublicLandingContentFn = createServerFn({ method: "GET" }).handler(async () => {

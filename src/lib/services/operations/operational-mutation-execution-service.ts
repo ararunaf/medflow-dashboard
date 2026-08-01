@@ -5,7 +5,7 @@
  * - Idempotência por `idempotency_key` e lock lógico (uma execução ativa por proposta).
  * - Compensação em falha via `rollbackAppliedSteps` (atribuições pendentes + marcos de timeline).
  */
-import type { Database } from "@/lib/database.types";
+import type { Database, Json, JsonObject } from "@/lib/database.types";
 import { isOperationalManager } from "@/lib/auth/rbac";
 import {
   ConflictError,
@@ -69,7 +69,7 @@ function rowToDto(row: ExecutionRow): OperationalMutationExecutionDto {
       row.explainability_json &&
       typeof row.explainability_json === "object" &&
       !Array.isArray(row.explainability_json)
-        ? (row.explainability_json as Record<string, unknown>)
+        ? (row.explainability_json as JsonObject)
         : {},
     appliedStepsJson: Array.isArray(row.applied_steps_json)
       ? (row.applied_steps_json as AppliedForwardStep[])
@@ -78,16 +78,16 @@ function rowToDto(row: ExecutionRow): OperationalMutationExecutionDto {
       row.result_payload &&
       typeof row.result_payload === "object" &&
       !Array.isArray(row.result_payload)
-        ? (row.result_payload as Record<string, unknown>)
+        ? (row.result_payload as JsonObject)
         : {},
     rollbackPayload:
       row.rollback_payload &&
       typeof row.rollback_payload === "object" &&
       !Array.isArray(row.rollback_payload)
-        ? (row.rollback_payload as Record<string, unknown>)
+        ? (row.rollback_payload as JsonObject)
         : {},
     affectedEntitiesJson: Array.isArray(row.affected_entities_json)
-      ? row.affected_entities_json
+      ? (row.affected_entities_json as Json[])
       : [],
     startedAt: row.started_at,
     finishedAt: row.finished_at,

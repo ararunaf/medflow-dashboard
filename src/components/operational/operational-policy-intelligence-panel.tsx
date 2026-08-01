@@ -45,10 +45,10 @@ export function OperationalPolicyIntelligencePanel(props: {
 }) {
   const { layer, canGovern, isFetching, className } = props;
   const qc = useQueryClient();
-  const { toast } = useToast();
+  const toast = useToast();
 
   const runAnalysis = useMutation({
-    mutationFn: async () =>
+    mutationFn: async (): Promise<{ cycleId: string; skippedDuplicate?: boolean }> =>
       unwrap(
         (await runOperationalPolicyIntelligenceAnalysisFn()) as MutationResult<{
           cycleId: string;
@@ -58,19 +58,15 @@ export function OperationalPolicyIntelligencePanel(props: {
     onSuccess: async (data) => {
       await qc.invalidateQueries({ queryKey: opsKeys.commandCenter() });
       await qc.invalidateQueries({ queryKey: opsKeys.timeline() });
-      toast({
-        title: data.skippedDuplicate ? "Análise já atualizada" : "Análise registrada",
-        description: data.skippedDuplicate
+      toast.success(
+        data.skippedDuplicate ? "Análise já atualizada" : "Análise registrada",
+        data.skippedDuplicate
           ? "Fingerprint idêntico nos últimos minutos — evitamos tempestade de governança."
           : `Ciclo ${data.cycleId.slice(0, 8)}… persistido com recomendações supervisionadas.`,
-      });
+      );
     },
     onError: (e: unknown) => {
-      toast({
-        title: "Falha na análise",
-        description: e instanceof Error ? e.message : String(e),
-        variant: "destructive",
-      });
+      toast.error("Falha na análise", e instanceof Error ? e.message : String(e));
     },
   });
 
@@ -82,14 +78,10 @@ export function OperationalPolicyIntelligencePanel(props: {
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: opsKeys.commandCenter() });
       await qc.invalidateQueries({ queryKey: opsKeys.timeline() });
-      toast({ title: "Recomendação atualizada", description: "Estado de governança registrado." });
+      toast.success("Recomendação atualizada", "Estado de governança registrado.");
     },
     onError: (e: unknown) => {
-      toast({
-        title: "Não foi possível atualizar",
-        description: e instanceof Error ? e.message : String(e),
-        variant: "destructive",
-      });
+      toast.error("Não foi possível atualizar", e instanceof Error ? e.message : String(e));
     },
   });
 
@@ -101,17 +93,10 @@ export function OperationalPolicyIntelligencePanel(props: {
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: opsKeys.commandCenter() });
       await qc.invalidateQueries({ queryKey: opsKeys.timeline() });
-      toast({
-        title: "Ciclo atualizado",
-        description: "Estado do ciclo de policy intelligence salvo.",
-      });
+      toast.success("Ciclo atualizado", "Estado do ciclo de policy intelligence salvo.");
     },
     onError: (e: unknown) => {
-      toast({
-        title: "Não foi possível atualizar o ciclo",
-        description: e instanceof Error ? e.message : String(e),
-        variant: "destructive",
-      });
+      toast.error("Não foi possível atualizar o ciclo", e instanceof Error ? e.message : String(e));
     },
   });
 

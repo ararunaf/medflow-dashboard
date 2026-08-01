@@ -1,6 +1,7 @@
 import type { OperationalForecastProjection } from "@/lib/operations/recommendations/types";
 import type { OperationalHealthState } from "@/lib/operations/scoring/types";
 import type {
+  JsonObject,
   OperationalMemoryKind,
   OperationalMemoryState,
   OperationalMemorySubjectKind,
@@ -33,7 +34,7 @@ export type OperationalMemoryInsight = {
   effectivenessScore: number | null;
   learningSignals: OperationalMemoryLearningSignals;
   explainability: OperationalMemoryExplainability;
-  references: Record<string, unknown>;
+  references: JsonObject;
   createdAt: string;
 };
 

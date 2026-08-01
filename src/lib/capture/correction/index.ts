@@ -8,11 +8,9 @@ export type {
   CorrectionProposalStore,
   CorrectionProposalSummaryMeta,
   CorrectionSource,
+  UpdateCorrectionProposalInput,
 } from "./types/correction-proposal";
-export {
-  CORRECTION_PROPOSAL_STATUSES,
-  CORRECTION_SOURCES,
-} from "./types/correction-proposal";
+export { CORRECTION_PROPOSAL_STATUSES, CORRECTION_SOURCES } from "./types/correction-proposal";
 
 export {
   CorrectionProposalEngine,
@@ -42,5 +40,4 @@ export {
   decideProposalInStore,
   proposalDecisionEventType,
   type GenerateCorrectionProposalsResult,
-  type UpdateCorrectionProposalInput,
 } from "./services/correction-assistant-service";

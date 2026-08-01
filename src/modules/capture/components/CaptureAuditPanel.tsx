@@ -132,14 +132,13 @@ export function CaptureAuditPanel({
         <p className="text-xs text-muted-foreground">Aguardando auditoria preventiva…</p>
       ) : null}
 
-      {summary?.error ? (
-        <p className="text-sm text-destructive">{summary.error}</p>
-      ) : null}
+      {summary?.error ? <p className="text-sm text-destructive">{summary.error}</p> : null}
 
       {report && filteredFindings.length === 0 ? (
         <div className="flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          Nenhum finding neste filtro — {totalFindings === 0 ? "guia aprovada." : "todos filtrados."}
+          Nenhum finding neste filtro —{" "}
+          {totalFindings === 0 ? "guia aprovada." : "todos filtrados."}
         </div>
       ) : null}
 
@@ -252,10 +251,16 @@ function FindingRow({
       <p className="text-xs text-muted-foreground">
         Campo: <code className="font-mono">{finding.field}</code>
         {finding.detectedValue != null ? (
-          <> · Valor: <code className="font-mono">{finding.detectedValue}</code></>
+          <>
+            {" "}
+            · Valor: <code className="font-mono">{finding.detectedValue}</code>
+          </>
         ) : null}
         {finding.expectedValue != null ? (
-          <> · Esperado: <code className="font-mono">{finding.expectedValue}</code></>
+          <>
+            {" "}
+            · Esperado: <code className="font-mono">{finding.expectedValue}</code>
+          </>
         ) : null}
       </p>
       <p className="text-xs text-primary/80">{finding.suggestedCorrection}</p>

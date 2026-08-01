@@ -3,7 +3,7 @@
  * Falhas de auditoria são registradas no console e nunca interrompem o fluxo principal.
  */
 import { isOperationalManager } from "@/lib/auth/rbac";
-import type { Database } from "@/lib/database.types";
+import type { Database, JsonObject } from "@/lib/database.types";
 import { PermissionError } from "@/lib/domain/operations/errors";
 import type { ServiceCtx } from "./types";
 
@@ -30,14 +30,14 @@ export type CriticalAlertObservationInput = {
   eventType: "critical_alert_generated";
   entityId: string;
   description: string;
-  metadata?: Record<string, unknown>;
+  metadata?: JsonObject;
 };
 
 export type OperationalActionObservationInput = {
   eventType: "operational_action_triggered";
   entityId: string;
   description: string;
-  metadata?: Record<string, unknown>;
+  metadata?: JsonObject;
 };
 
 export type TimelineObservationInput =

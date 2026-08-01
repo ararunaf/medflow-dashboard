@@ -94,7 +94,7 @@ export const appendOperationalTimelineObservationFn = createServerFn({ method: "
     const description = requireString(obj.description, "description");
     const meta =
       obj.metadata != null && typeof obj.metadata === "object" && !Array.isArray(obj.metadata)
-        ? (obj.metadata as Record<string, unknown>)
+        ? (obj.metadata as import("@/lib/database.types").JsonObject)
         : undefined;
     if (eventType === "critical_alert_generated") {
       return { eventType, entityId, description, metadata: meta };

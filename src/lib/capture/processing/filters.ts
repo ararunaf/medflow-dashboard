@@ -3,11 +3,7 @@
  */
 import type { ProcessingCenterFilters, ProcessingGuideItem, ProcessingQueueId } from "./types";
 
-function matchesPeriod(
-  createdAt: string,
-  periodFrom?: string,
-  periodTo?: string,
-): boolean {
+function matchesPeriod(createdAt: string, periodFrom?: string, periodTo?: string): boolean {
   const created = new Date(createdAt).getTime();
   if (periodFrom) {
     const from = new Date(periodFrom).getTime();
@@ -50,9 +46,7 @@ export function applyProcessingFilters(
   });
 }
 
-export function countByQueue(
-  items: ProcessingGuideItem[],
-): Record<ProcessingQueueId, number> {
+export function countByQueue(items: ProcessingGuideItem[]): Record<ProcessingQueueId, number> {
   const counts: Record<ProcessingQueueId, number> = {
     ocr_pendente: 0,
     parser: 0,

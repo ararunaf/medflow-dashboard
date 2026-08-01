@@ -25,11 +25,7 @@ export function evaluateRouteGuard(pathname: string, auth: AuthContext): RouteGu
   if (auth.user && !auth.profile && !isPublic) {
     return { allowed: false, redirectTo: "/login" };
   }
-  if (
-    auth.user &&
-    auth.profile &&
-    (pathname === "/login" || pathname === "/login/esqueci-senha")
-  ) {
+  if (auth.user && auth.profile && (pathname === "/login" || pathname === "/login/esqueci-senha")) {
     return { allowed: false, redirectTo: "/" };
   }
 

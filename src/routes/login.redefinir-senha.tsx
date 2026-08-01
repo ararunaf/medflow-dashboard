@@ -76,7 +76,12 @@ function ResetPasswordPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-10 bg-background">
         <div className="w-full max-w-sm">
           <div className="flex justify-center mb-8 bg-surface rounded-2xl p-6 border border-border">
-            <img src={logo} alt={BRANDING.productName} style={{ height: "6.25rem" }} className="w-auto" />
+            <img
+              src={logo}
+              alt={BRANDING.productName}
+              style={{ height: "6.25rem" }}
+              className="w-auto"
+            />
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-center">Redefinir senha</h1>
@@ -93,6 +98,7 @@ function ResetPasswordPage() {
               </p>
               <Link
                 to="/login/esqueci-senha"
+                search={{ reason: null }}
                 className="block text-center text-sm text-primary hover:text-primary/90"
               >
                 Solicitar novo link
@@ -130,7 +136,7 @@ function ResetPasswordPage() {
                     return;
                   }
                   await supabase.auth.signOut({ scope: "local" });
-                  await navigate({ to: "/login" });
+                  await navigate({ to: "/login", search: { reason: null } });
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Erro ao redefinir senha.");
                 } finally {
@@ -177,6 +183,7 @@ function ResetPasswordPage() {
 
           <Link
             to="/login"
+            search={{ reason: null }}
             className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground"
           >
             Voltar para login

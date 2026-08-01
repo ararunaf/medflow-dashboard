@@ -3,6 +3,8 @@
  * Sem OCR — apenas contratos de domínio e state machine.
  */
 
+import type { JsonObject } from "@/lib/database.types";
+
 export const CAPTURE_SESSION_STATUSES = [
   "CREATED",
   "UPLOADED",
@@ -57,7 +59,7 @@ export type CaptureSessionRecord = {
   correlationId: string | null;
   targetEntityType: string | null;
   targetEntityId: string | null;
-  metadata: Record<string, unknown>;
+  metadata: JsonObject;
   statusHistory: CaptureStatusHistoryEntry[];
   createdBy: string;
   createdAt: string;
@@ -77,7 +79,7 @@ export type CaptureDocumentRecord = {
   storagePathThumbnail: string | null;
   storagePathAudit: string | null;
   pageCount: number;
-  metadata: Record<string, unknown>;
+  metadata: JsonObject;
   createdAt: string;
 };
 
@@ -90,7 +92,7 @@ export type CreateCaptureSessionInput = {
   correlationId?: string;
   targetEntityType?: string;
   targetEntityId?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: JsonObject;
 };
 
 export type UploadCaptureFileInput = {

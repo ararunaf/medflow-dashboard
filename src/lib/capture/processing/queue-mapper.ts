@@ -75,9 +75,7 @@ export function resolveProcessingQueue(
     return "ocr_pendente";
   }
 
-  if (
-    hasReviewContext(metadata) && review.approvalStatus === "em_revisao"
-  ) {
+  if (hasReviewContext(metadata) && review.approvalStatus === "em_revisao") {
     return "aguardando_revisao";
   }
 

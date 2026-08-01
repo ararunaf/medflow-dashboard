@@ -18,7 +18,10 @@ import type { ReviewWorkspaceController } from "../hooks/useReviewWorkspace";
 import { downloadAuditReportJson } from "../services/audit-client";
 import { downloadContractIntelligenceJson } from "../services/contract-client";
 import { downloadRiskAssessmentJson } from "../services/risk-client";
-import { downloadCorrectionProposalsJson, fetchCaptureCorrectionProposals } from "../services/correction-client";
+import {
+  downloadCorrectionProposalsJson,
+  fetchCaptureCorrectionProposals,
+} from "../services/correction-client";
 import { downloadOcrJson } from "../services/ocr-client";
 import { downloadStructuredGuideJson } from "../services/parser-client";
 import { useCallback, useState } from "react";
@@ -194,8 +197,8 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
             <section className="rounded-lg border bg-card p-4 shadow-sm">
               <h2 className="text-sm font-semibold">Documento Original</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Visualize a guia no painel lateral. Use os demais painéis para revisar OCR,
-                campos estruturados, auditoria e correções de forma sincronizada.
+                Visualize a guia no painel lateral. Use os demais painéis para revisar OCR, campos
+                estruturados, auditoria e correções de forma sincronizada.
               </p>
             </section>
           ) : null}
@@ -262,7 +265,9 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
               onStoreUpdated={(store) => {
                 setCorrectionStore(store);
                 void fetchCaptureCorrectionProposals(sessionId)
-                  .then((data) => setCorrectionStore(data.store))
+                  .then((data) => {
+                    if (data.store) setCorrectionStore(data.store);
+                  })
                   .catch(() => undefined);
               }}
               onError={setError}

@@ -6,7 +6,14 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { nitro } from "nitro/vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { defineConfig, loadEnv, mergeConfig, type Plugin, type UserConfig } from "vite";
+import {
+  defineConfig,
+  loadEnv,
+  mergeConfig,
+  type Plugin,
+  type PluginOption,
+  type UserConfig,
+} from "vite";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -95,7 +102,7 @@ function applyWatchDebounceDefaults(config: UserConfig): UserConfig {
 }
 
 export default defineConfig(({ command, mode }) => {
-  const plugins: Plugin[] = [
+  const plugins: PluginOption[] = [
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
     devServerFnErrorLogger(),

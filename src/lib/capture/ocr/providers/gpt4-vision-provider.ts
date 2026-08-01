@@ -7,6 +7,7 @@
  */
 import { DomainError } from "@/lib/domain/operations/errors";
 import type { OcrProvider, OcrProviderExtractInput, OcrProviderHealth } from "../types/provider";
+import type { RawOcrResult } from "../types/raw-ocr-result";
 import { CAPTURE_OCR_MAX_BYTES, CAPTURE_OCR_SUPPORTED_MIMES } from "./shared";
 
 export class Gpt4VisionProvider implements OcrProvider {
@@ -30,7 +31,7 @@ export class Gpt4VisionProvider implements OcrProvider {
     };
   }
 
-  async extract(_input: OcrProviderExtractInput) {
+  async extract(_input: OcrProviderExtractInput): Promise<RawOcrResult> {
     throw new DomainError(
       "not_implemented",
       "GPT-4o Vision OCR não implementado nesta sprint. Use azure_document_intelligence.",

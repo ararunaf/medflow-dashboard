@@ -198,7 +198,7 @@ function PerfilPage() {
             } catch {
               // sem config -> apenas redireciona
             }
-            await navigate({ to: "/login" });
+            await navigate({ to: "/login", search: { reason: null } });
           }}
         >
           <LogOut className="h-4 w-4" /> Sair da conta

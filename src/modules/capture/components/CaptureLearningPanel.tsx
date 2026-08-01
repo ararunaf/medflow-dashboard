@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import {
-  BarChart3,
-  Brain,
-  Lightbulb,
-  RefreshCw,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { BarChart3, Brain, Lightbulb, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { LearningDashboardView } from "@/lib/capture/learning";
 import { fetchCaptureLearningDashboard } from "../services/learning-client";
@@ -74,9 +67,7 @@ export function CaptureLearningPanel() {
         </Button>
       </div>
 
-      {error ? (
-        <p className="text-sm text-destructive">{error}</p>
-      ) : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {!dashboard && busy ? (
         <p className="text-sm text-muted-foreground">Carregando métricas…</p>
@@ -240,15 +231,7 @@ export function CaptureLearningPanel() {
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: ReactNode;
-}) {
+function MetricCard({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
   return (
     <div className="rounded-md border bg-muted/30 px-3 py-2">
       <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -284,9 +267,7 @@ function RankingList({
           {items.map((item) => (
             <li key={item.key} className="text-sm">
               <span className="font-mono font-medium">{item.primary}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
-                {item.secondary}
-              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">{item.secondary}</span>
             </li>
           ))}
         </ul>

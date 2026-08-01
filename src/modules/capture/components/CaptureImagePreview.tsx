@@ -34,22 +34,46 @@ export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureI
         <div className="flex items-center gap-1 shrink-0">
           {!isPdf ? (
             <>
-              <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={zoomOut}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={zoomOut}
+              >
                 <ZoomOut className="h-4 w-4" />
               </Button>
               <span className="text-xs text-muted-foreground w-10 text-center">
                 {Math.round(zoom * 100)}%
               </span>
-              <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={zoomIn}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={zoomIn}
+              >
                 <ZoomIn className="h-4 w-4" />
               </Button>
-              <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={rotate}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={rotate}
+              >
                 <RotateCw className="h-4 w-4" />
               </Button>
             </>
           ) : null}
           {onDownload ? (
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onDownload}
+            >
               <Download className="h-4 w-4" />
             </Button>
           ) : null}

@@ -47,7 +47,12 @@ function ForgotPasswordPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-10 bg-background">
         <div className="w-full max-w-sm">
           <div className="flex justify-center mb-8 bg-surface rounded-2xl p-6 border border-border">
-            <img src={logo} alt={BRANDING.productName} style={{ height: "6.25rem" }} className="w-auto" />
+            <img
+              src={logo}
+              alt={BRANDING.productName}
+              style={{ height: "6.25rem" }}
+              className="w-auto"
+            />
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-center">Esqueci minha senha</h1>
@@ -123,6 +128,7 @@ function ForgotPasswordPage() {
 
           <Link
             to="/login"
+            search={{ reason: null }}
             className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground"
           >
             Voltar para login

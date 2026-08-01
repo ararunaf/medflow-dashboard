@@ -154,7 +154,7 @@ function LancamentoPage() {
 
       {q.isLoading ? <ProductionLoadingShell rows={4} /> : null}
       {q.isError ? (
-        <ErrorState message={describeError(q.error)} onRetry={() => void q.refetch()} />
+        <ErrorState message={describeError(q.error).message} onRetry={() => void q.refetch()} />
       ) : null}
 
       {q.data && releaseBundle ? (
@@ -193,7 +193,7 @@ function LancamentoPage() {
                     report.results.map((r) => r.label).join(" · "),
                   );
                 })
-                .catch((err) => toast.error("Smoke tests", describeError(err)));
+                .catch((err) => toast.error("Smoke tests", describeError(err).message));
             }}
           />
 
@@ -248,7 +248,7 @@ function LancamentoPage() {
                             );
                             toast.success("Export concluído", kind);
                           })
-                          .catch((err) => toast.error("Export", describeError(err)));
+                          .catch((err) => toast.error("Export", describeError(err).message));
                       }}
                     >
                       Export {kind}

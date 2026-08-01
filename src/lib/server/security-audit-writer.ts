@@ -2,6 +2,7 @@
  * Persistencia de eventos de seguranca (auth, login, sessao, SSR, tenant).
  * Server-only — requer SUPABASE_SERVICE_ROLE_KEY para gravar no Postgres.
  */
+import type { Json } from "@/lib/database.types";
 import { clampMessage } from "@/lib/services/resilience/resilience-service";
 import { hashAuditEmail, hashAuditIp } from "@/lib/security/security-audit-hash";
 import type { SecurityAuditInput } from "@/lib/security/security-audit-types";
@@ -9,9 +10,9 @@ import { getAdminSupabase } from "./supabase-admin";
 
 const METADATA_MAX_KEYS = 24;
 
-function clampMetadata(meta: Record<string, unknown>): Record<string, unknown> {
+function clampMetadata(meta: Record<string, unknown>): Json {
   const entries = Object.entries(meta).slice(0, METADATA_MAX_KEYS);
-  const out: Record<string, unknown> = {};
+  const out: Record<string, Json | undefined> = {};
   for (const [k, v] of entries) {
     if (k.length > 64) continue;
     if (typeof v === "string" && v.length > 256) {
@@ -22,7 +23,7 @@ function clampMetadata(meta: Record<string, unknown>): Record<string, unknown> {
       out[k] = v;
     }
   }
-  return out;
+  return out as Json;
 }
 
 function consoleAuditLine(payload: Record<string, unknown>): void {
@@ -71,8 +72,7 @@ export async function writeSecurityAudit(input: SecurityAuditInput): Promise<voi
     return;
   }
 
-  const isDev =
-    typeof import.meta !== "undefined" && import.meta.env?.DEV === true;
+  const isDev = typeof import.meta !== "undefined" && import.meta.env?.DEV === true;
   if (isDev || import.meta.env?.VITE_MEDFLOW_DEBUG === "1") {
     consoleAuditLine({ ...consolePayload, persisted: true });
   }

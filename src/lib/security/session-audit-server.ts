@@ -25,9 +25,7 @@ export const reportSessionAuditFn = createServerFn({ method: "POST" })
       throw new Error("eventType inválido.");
     }
     const reason =
-      typeof o.reason === "string" && o.reason.length > 0
-        ? o.reason.slice(0, 128)
-        : undefined;
+      typeof o.reason === "string" && o.reason.length > 0 ? o.reason.slice(0, 128) : undefined;
     return { eventType, reason };
   })
   .handler(async ({ data }): Promise<{ ok: true }> => {

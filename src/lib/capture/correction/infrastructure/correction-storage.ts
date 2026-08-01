@@ -13,10 +13,7 @@ import type {
 
 export const CORRECTION_PROPOSALS_FILENAME = "correction_proposals.json";
 
-export function buildCorrectionProposalsStoragePath(
-  tenantId: string,
-  sessionId: string,
-): string {
+export function buildCorrectionProposalsStoragePath(tenantId: string, sessionId: string): string {
   return `${tenantId}/${sessionId}/audit/${CORRECTION_PROPOSALS_FILENAME}`;
 }
 

@@ -10,10 +10,7 @@ import {
   type CaptureStoragePaths,
 } from "../types";
 
-export function buildCaptureStoragePaths(
-  tenantId: string,
-  captureId: string,
-): CaptureStoragePaths {
+export function buildCaptureStoragePaths(tenantId: string, captureId: string): CaptureStoragePaths {
   const base = `${tenantId}/${captureId}`;
   return {
     original: `${base}/original`,

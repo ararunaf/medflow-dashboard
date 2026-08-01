@@ -58,23 +58,16 @@ export function CaptureOcrPanel({
       <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
         <Metric label="Status OCR" value={statusLabel(status, phase)} />
         <Metric label="Provider" value={provider ?? "—"} />
-        <Metric
-          label="Tempo"
-          value={processingTimeMs != null ? `${processingTimeMs} ms` : "—"}
-        />
+        <Metric label="Tempo" value={processingTimeMs != null ? `${processingTimeMs} ms` : "—"} />
         <Metric
           label="Confidence"
-          value={
-            averageConfidence != null ? `${(averageConfidence * 100).toFixed(1)}%` : "—"
-          }
+          value={averageConfidence != null ? `${(averageConfidence * 100).toFixed(1)}%` : "—"}
         />
         <Metric label="Páginas" value={pageCount != null ? String(pageCount) : "—"} />
         <Metric label="Palavras" value={wordCount != null ? String(wordCount) : "—"} />
       </dl>
 
-      {summary?.error ? (
-        <p className="text-sm text-destructive">{summary.error}</p>
-      ) : null}
+      {summary?.error ? <p className="text-sm text-destructive">{summary.error}</p> : null}
 
       {previewText ? (
         <div className="space-y-2">

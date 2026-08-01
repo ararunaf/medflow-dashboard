@@ -46,10 +46,7 @@ export function CaptureRiskPanel({
   busy?: boolean;
 }) {
   const showPanel =
-    phase === "auditing" ||
-    phase === "completed" ||
-    summary != null ||
-    report != null;
+    phase === "auditing" || phase === "completed" || summary != null || report != null;
 
   const assessment = report?.assessment;
   const status = summary?.status ?? (report ? "completed" : "pending");

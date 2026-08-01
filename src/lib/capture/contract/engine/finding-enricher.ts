@@ -16,10 +16,7 @@ function ruleMatchesFinding(rule: ContractRule, finding: AuditFinding): boolean 
   return false;
 }
 
-function findMatchingRules(
-  finding: AuditFinding,
-  rules: ContractRule[],
-): ContractRule[] {
+function findMatchingRules(finding: AuditFinding, rules: ContractRule[]): ContractRule[] {
   return rules
     .filter((rule) => ruleMatchesFinding(rule, finding))
     .sort((a, b) => b.priority - a.priority);
@@ -99,10 +96,7 @@ function buildEnrichment(
     );
   }
 
-  const totalFinancial = rules.reduce(
-    (sum, r) => sum + (r.estimatedFinancialImpactCents ?? 0),
-    0,
-  );
+  const totalFinancial = rules.reduce((sum, r) => sum + (r.estimatedFinancialImpactCents ?? 0), 0);
 
   return {
     expandedJustification: primary
@@ -126,8 +120,7 @@ export function enrichFinding(
 
   return {
     finding,
-    enrichment:
-      matchedRules.length > 0 ? buildEnrichment(finding, matchedRules, context) : null,
+    enrichment: matchedRules.length > 0 ? buildEnrichment(finding, matchedRules, context) : null,
     matchedRuleIds: matchedRules.map((r) => r.ruleId),
   };
 }
@@ -151,8 +144,5 @@ export function computeAverageDenialRisk(findings: EnrichedAuditFinding[]): numb
 }
 
 export function computeTotalFinancialImpact(findings: EnrichedAuditFinding[]): number {
-  return findings.reduce(
-    (sum, f) => sum + (f.enrichment?.estimatedFinancialImpactCents ?? 0),
-    0,
-  );
+  return findings.reduce((sum, f) => sum + (f.enrichment?.estimatedFinancialImpactCents ?? 0), 0);
 }

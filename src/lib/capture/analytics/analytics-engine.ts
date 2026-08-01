@@ -15,6 +15,7 @@ import { buildExecutiveKpis } from "./aggregators/executive";
 import { buildQualityIndicators } from "./aggregators/quality";
 import { buildOperatorComparisons } from "./aggregators/operators";
 import { buildAnalyticsTrends } from "./aggregators/trends";
+import type { CaptureSessionStatus } from "../types";
 import type { AnalyticsQueryInput, AnalyticsSnapshot } from "./types";
 
 type DbSessionRow = {
@@ -47,10 +48,7 @@ async function loadAnalyticsSessionRows(ctx: ServiceCtx): Promise<DbSessionRow[]
 }
 
 export class AnalyticsEngine {
-  async loadSnapshot(
-    ctx: ServiceCtx,
-    input: AnalyticsQueryInput = {},
-  ): Promise<AnalyticsSnapshot> {
+  async loadSnapshot(ctx: ServiceCtx, input: AnalyticsQueryInput = {}): Promise<AnalyticsSnapshot> {
     assertAnalyticsAccess(ctx);
 
     const filters = input.filters ?? {};
@@ -62,7 +60,12 @@ export class AnalyticsEngine {
       loadLearningMetrics(ctx),
     ]);
 
-    const allRecords = rows.map(mapSessionToAnalyticsRecord);
+    const allRecords = rows.map((row) =>
+      mapSessionToAnalyticsRecord({
+        ...row,
+        status: row.status as CaptureSessionStatus,
+      }),
+    );
     const records = applyAnalyticsFilters(allRecords, filters);
 
     return {

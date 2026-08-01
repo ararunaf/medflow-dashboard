@@ -3,11 +3,9 @@
  * MEDICFLOW-TISS-PARSER-01
  */
 import { NotFoundError, ValidationError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import {
-  appendCaptureEvent,
-  buildCaptureEvent,
-} from "../../infrastructure/capture-events";
+import { appendCaptureEvent, buildCaptureEvent } from "../../infrastructure/capture-events";
 import {
   getCaptureSession,
   transitionCaptureSession,
@@ -30,11 +28,11 @@ export type RunCaptureParserResult = {
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);

@@ -17,15 +17,9 @@ export const CAPTURE_PHASE_ORDER: readonly CapturePhase[] = [
   "completed",
 ] as const;
 
-const PHASE_INDEX = new Map<CapturePhase, number>(
-  CAPTURE_PHASE_ORDER.map((p, i) => [p, i]),
-);
+const PHASE_INDEX = new Map<CapturePhase, number>(CAPTURE_PHASE_ORDER.map((p, i) => [p, i]));
 
-const TERMINAL_PHASES: ReadonlySet<CapturePhase> = new Set([
-  "completed",
-  "failed",
-  "cancelled",
-]);
+const TERMINAL_PHASES: ReadonlySet<CapturePhase> = new Set(["completed", "failed", "cancelled"]);
 
 /** Transições válidas além do avanço linear (+1). */
 const EXTRA_TRANSITIONS: ReadonlyMap<CapturePhase, readonly CapturePhase[]> = new Map([

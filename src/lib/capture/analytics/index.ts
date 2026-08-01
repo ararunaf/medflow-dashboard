@@ -25,7 +25,4 @@ export { buildExecutiveKpis } from "./aggregators/executive";
 export { buildQualityIndicators } from "./aggregators/quality";
 export { buildOperatorComparisons } from "./aggregators/operators";
 export { buildAnalyticsTrends } from "./aggregators/trends";
-export {
-  buildAnalyticsExportSections,
-  buildAnalyticsSummaryCsvRows,
-} from "./export-builder";
+export { buildAnalyticsExportSections, buildAnalyticsSummaryCsvRows } from "./export-builder";

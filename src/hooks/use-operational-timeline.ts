@@ -2,8 +2,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   listOperationalTimelinePageFn,
   type ListOperationalTimelineInput,
+  type OperationalTimelinePage,
 } from "@/lib/operations/api";
 import type { TimelineScope } from "@/lib/operations/timeline";
+import type { QueryResult } from "@/lib/server/fn-helpers";
 import { opsKeys } from "@/lib/queries/keys";
 import { unwrap } from "@/lib/queries/result";
 
@@ -29,9 +31,9 @@ export function useOperationalTimelineInfinite(base: Omit<ListOperationalTimelin
       entityType ?? null,
     ] as const,
     initialPageParam: undefined as { createdAt: string; id: string } | undefined,
-    queryFn: async ({ pageParam }) =>
+    queryFn: async ({ pageParam }): Promise<OperationalTimelinePage> =>
       unwrap(
-        await listOperationalTimelinePageFn({
+        (await listOperationalTimelinePageFn({
           data: {
             scope: base.scope,
             limit,
@@ -39,7 +41,7 @@ export function useOperationalTimelineInfinite(base: Omit<ListOperationalTimelin
             entityType,
             cursor: pageParam,
           },
-        }),
+        })) as QueryResult<OperationalTimelinePage>,
       ),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     staleTime: 15_000,

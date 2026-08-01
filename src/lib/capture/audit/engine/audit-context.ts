@@ -35,8 +35,7 @@ export function buildAuditContext(
 
   const isPresent = (code: string): boolean => !isMissing(code);
 
-  const isGuideType = (...types: StructuredGuide["guideType"][]) =>
-    types.includes(guide.guideType);
+  const isGuideType = (...types: StructuredGuide["guideType"][]) => types.includes(guide.guideType);
 
   const allProcedureCodes = (): string[] => {
     const codes: string[] = [];

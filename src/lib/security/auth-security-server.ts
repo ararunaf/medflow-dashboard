@@ -96,8 +96,7 @@ export const recordLoginOutcomeFn = createServerFn({ method: "POST" })
     const o = requireObject(raw, "payload");
     const email = sanitizeEmail(requireString(o.email, "email"));
     const success = o.success === true;
-    const reason =
-      typeof o.reason === "string" ? (o.reason as LoginOutcomeReason) : undefined;
+    const reason = typeof o.reason === "string" ? (o.reason as LoginOutcomeReason) : undefined;
     const tenantId = typeof o.tenantId === "string" ? o.tenantId : undefined;
     const tenantSlug = typeof o.tenantSlug === "string" ? o.tenantSlug.slice(0, 64) : undefined;
     const profileId = typeof o.profileId === "string" ? o.profileId : undefined;

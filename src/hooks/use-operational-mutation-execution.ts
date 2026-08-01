@@ -3,7 +3,10 @@ import {
   executeSupervisedOperationalMutationsFn,
   listOperationalMutationExecutionsForProposalFn,
   rollbackSupervisedOperationalMutationExecutionFn,
+  type ExecuteSupervisedOperationalMutationsResult,
+  type OperationalMutationExecutionDto,
 } from "@/lib/operations/api";
+import type { MutationResult, QueryResult } from "@/lib/server/fn-helpers";
 import { opsKeys } from "@/lib/queries/keys";
 import { unwrap } from "@/lib/queries/result";
 
@@ -13,11 +16,11 @@ export function useOperationalMutationExecutionsQuery(opts: {
 }) {
   return useQuery({
     queryKey: opsKeys.mutationExecutions(opts.proposalId),
-    queryFn: async () =>
+    queryFn: async (): Promise<OperationalMutationExecutionDto[]> =>
       unwrap(
-        await listOperationalMutationExecutionsForProposalFn({
+        (await listOperationalMutationExecutionsForProposalFn({
           data: { proposalId: opts.proposalId },
-        }),
+        })) as QueryResult<OperationalMutationExecutionDto[]>,
       ),
     staleTime: 12_000,
     enabled: opts.enabled && opts.proposalId.length > 0,
@@ -36,9 +39,12 @@ export function useOperationalMutationExecutionMutations(proposalId: string) {
   const qc = useQueryClient();
 
   const execute = useMutation({
-    mutationFn: async (input: { sandboxRunId: string; approvalConfirmed: boolean }) =>
+    mutationFn: async (input: {
+      sandboxRunId: string;
+      approvalConfirmed: boolean;
+    }): Promise<ExecuteSupervisedOperationalMutationsResult> =>
       unwrap(
-        await executeSupervisedOperationalMutationsFn({
+        (await executeSupervisedOperationalMutationsFn({
           data: {
             proposalId,
             sandboxRunId: input.sandboxRunId,
@@ -48,14 +54,18 @@ export function useOperationalMutationExecutionMutations(proposalId: string) {
                 ? crypto.randomUUID()
                 : `idem-${Date.now()}-${Math.random().toString(16).slice(2)}`,
           },
-        }),
+        })) as MutationResult<ExecuteSupervisedOperationalMutationsResult>,
       ),
     onSuccess: () => invalidateExecutionUniverse(qc, proposalId),
   });
 
   const rollback = useMutation({
-    mutationFn: async (executionId: string) =>
-      unwrap(await rollbackSupervisedOperationalMutationExecutionFn({ data: { executionId } })),
+    mutationFn: async (executionId: string): Promise<OperationalMutationExecutionDto> =>
+      unwrap(
+        (await rollbackSupervisedOperationalMutationExecutionFn({
+          data: { executionId },
+        })) as MutationResult<OperationalMutationExecutionDto>,
+      ),
     onSuccess: () => invalidateExecutionUniverse(qc, proposalId),
   });
 

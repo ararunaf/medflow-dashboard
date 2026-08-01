@@ -65,7 +65,7 @@ type CreateCaptureBody = {
   correlationId?: string;
   targetEntityType?: string;
   targetEntityId?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: import("@/lib/database.types").JsonObject;
   file?: {
     name: string;
     mimeType: string;
@@ -87,16 +87,14 @@ async function handlePostCapture(ctx: ServiceCtx, request: Request): Promise<Res
     correlationId: body.correlationId,
     targetEntityType: body.targetEntityType,
     targetEntityId: body.targetEntityId,
-    metadata: body.metadata,
+    metadata: body.metadata as CreateCaptureSessionInput["metadata"],
   };
 
   const session = await createCaptureSession(ctx, input);
 
   if (body.file) {
     const bytes = decodeBase64ToBytes(body.file.base64Content);
-    const checksum =
-      body.file.checksumSha256 ??
-      createHash("sha256").update(bytes).digest("hex");
+    const checksum = body.file.checksumSha256 ?? createHash("sha256").update(bytes).digest("hex");
 
     const result = await uploadCaptureDocument(ctx, {
       sessionId: session.id,

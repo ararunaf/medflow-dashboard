@@ -22,9 +22,7 @@ import {
 import { Activity, CalendarCheck, Stethoscope, Users, AlertTriangle, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useClientMounted } from "@/hooks/use-client-mounted";
-import {
-  operationalCommandCenterQueryOptions,
-} from "@/hooks/use-operational-metrics";
+import { operationalCommandCenterQueryOptions } from "@/hooks/use-operational-metrics";
 import { useDashboardQuery, dashboardQueryOptions } from "@/hooks/use-operations";
 import { formatTime, shiftStatusToBadge } from "@/lib/queries/adapters";
 import { describeError } from "@/lib/queries/result";

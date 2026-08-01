@@ -160,7 +160,9 @@ export async function checkDatabase(): Promise<HealthCheckDetail> {
     const anon = createClient<Database>(cfg.url, cfg.anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { error } = await anon.from("tenant_settings").select("tenant_id", { head: true, count: "exact" });
+    const { error } = await anon
+      .from("tenant_settings")
+      .select("tenant_id", { head: true, count: "exact" });
     if (error) {
       return {
         ok: false as const,

@@ -19,9 +19,7 @@ function ruleLabel(ruleId: string): string {
   return `Regra ${ruleId}`;
 }
 
-export function generateRecommendations(
-  metrics: LearningMetricsStore,
-): LearningRecommendation[] {
+export function generateRecommendations(metrics: LearningMetricsStore): LearningRecommendation[] {
   const recommendations: LearningRecommendation[] = [];
   let counter = 0;
 
@@ -93,7 +91,8 @@ export function generateRecommendations(
     recommendations.push({
       id: nextId(),
       severity: "info",
-      message: "Nenhuma decisão registrada ainda. Aceite, edite ou rejeite propostas para alimentar o learning loop.",
+      message:
+        "Nenhuma decisão registrada ainda. Aceite, edite ou rejeite propostas para alimentar o learning loop.",
     });
   } else if (metrics.globalAverageConfidence >= HIGH_CONFIDENCE_THRESHOLD) {
     recommendations.push({

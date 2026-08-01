@@ -62,9 +62,7 @@ export const ASS_003: AuditRule = {
   suggestedCorrection: "Verifique as assinaturas obrigatórias conforme operadora.",
   evaluate: (ctx) => {
     const assinaturaFields = ctx.guide.groups.assinaturas ?? [];
-    const missing = assinaturaFields.filter(
-      (f) => f.status === "missing" || f.value == null,
-    );
+    const missing = assinaturaFields.filter((f) => f.status === "missing" || f.value == null);
     if (missing.length > 0) {
       return makeFinding(ASS_003, ctx, {
         field: missing[0]!.code,

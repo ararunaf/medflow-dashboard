@@ -2,7 +2,11 @@
  * ContractKnowledgeRegistry — registro versionado de regras contratuais.
  * MEDICFLOW-CONTRACT-INTELLIGENCE-01
  */
-import type { ContractKnowledgeRegistry, ContractRegistryVersion, ContractRule } from "../types/contract-rule";
+import type {
+  ContractKnowledgeRegistry,
+  ContractRegistryVersion,
+  ContractRule,
+} from "../types/contract-rule";
 import { DEFAULT_CONTRACT_REGISTRY, DEFAULT_CONTRACT_RULES } from "./default-contract-rules";
 
 export class ContractKnowledgeRegistryStore {
@@ -56,10 +60,7 @@ export class ContractKnowledgeRegistryStore {
     return DEFAULT_CONTRACT_RULES.filter((r) => r.operator === "*");
   }
 
-  getActiveContractVersion(
-    operatorAns: string,
-    tenantId?: string,
-  ): ContractRegistryVersion | null {
+  getActiveContractVersion(operatorAns: string, tenantId?: string): ContractRegistryVersion | null {
     const normalized = operatorAns.replace(/\D/g, "").padStart(6, "0").slice(-6);
     const now = new Date();
 
@@ -96,4 +97,8 @@ export function getDefaultContractRegistry(): ContractKnowledgeRegistryStore {
   return defaultStore;
 }
 
-export { DEFAULT_CONTRACT_REGISTRY, DEFAULT_CONTRACT_RULES, CONTRACT_RULE_COUNT } from "./default-contract-rules";
+export {
+  DEFAULT_CONTRACT_REGISTRY,
+  DEFAULT_CONTRACT_RULES,
+  CONTRACT_RULE_COUNT,
+} from "./default-contract-rules";

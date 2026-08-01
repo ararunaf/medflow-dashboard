@@ -1,12 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  BookOpen,
-  FileJson,
-  Scale,
-  Shield,
-  TrendingDown,
-  AlertTriangle,
-} from "lucide-react";
+import { BookOpen, FileJson, Scale, Shield, TrendingDown, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
   ContractIntelligenceReport,
@@ -99,10 +92,7 @@ export function CaptureContractPanel({
   const [showRules, setShowRules] = useState(true);
 
   const showPanel =
-    phase === "auditing" ||
-    phase === "completed" ||
-    summary != null ||
-    report != null;
+    phase === "auditing" || phase === "completed" || summary != null || report != null;
 
   const enrichedFindings = useMemo(
     () => report?.findings.filter((f) => f.enrichment != null) ?? [],
@@ -163,7 +153,9 @@ export function CaptureContractPanel({
                 Operadora
               </div>
               <p className="mt-1 text-sm font-medium">
-                {report.context.operator.name ?? report.context.operator.ansCode ?? "Não identificada"}
+                {report.context.operator.name ??
+                  report.context.operator.ansCode ??
+                  "Não identificada"}
               </p>
               <p className="text-xs text-muted-foreground">
                 {operatorResolved ? "Identificada" : "Não resolvida — regras genéricas"}
@@ -222,10 +214,7 @@ export function CaptureContractPanel({
             {showRules ? (
               <ul className="mt-2 space-y-1.5" data-testid="applied-rules-list">
                 {report.appliedRules.map((rule) => (
-                  <li
-                    key={rule.ruleId}
-                    className="rounded border bg-muted/30 px-2 py-1.5 text-xs"
-                  >
+                  <li key={rule.ruleId} className="rounded border bg-muted/30 px-2 py-1.5 text-xs">
                     <span className="font-mono font-medium">{rule.ruleId}</span>
                     <span className="text-muted-foreground"> — {rule.description}</span>
                     <span className="ml-1 text-[10px] text-muted-foreground">

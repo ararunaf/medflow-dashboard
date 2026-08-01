@@ -17,8 +17,7 @@ export function logAuth(event: string, options: MonitorLogOptions = {}): void {
 
 /** Emite log de auth e persiste auditoria de segurança (server-only, best-effort). */
 export async function logAuthAndAudit(input: SecurityAuditInput): Promise<void> {
-  const level =
-    input.outcome === "error" || input.outcome === "failure" ? "error" : "warn";
+  const level = input.outcome === "error" || input.outcome === "failure" ? "error" : "warn";
 
   logAuth(input.eventType, {
     level,

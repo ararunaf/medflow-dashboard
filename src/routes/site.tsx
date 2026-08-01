@@ -48,7 +48,11 @@ function SiteLandingPage() {
             </span>
           </div>
           <nav className="flex items-center gap-3 text-sm">
-            <Link to="/login" className="text-muted-foreground hover:text-foreground">
+            <Link
+              to="/login"
+              search={{ reason: null }}
+              className="text-muted-foreground hover:text-foreground"
+            >
               Entrar
             </Link>
             <a
@@ -79,6 +83,7 @@ function SiteLandingPage() {
               </a>
               <Link
                 to="/login"
+                search={{ reason: null }}
                 className="inline-flex items-center gap-2 rounded-lg border border-primary-foreground/30 px-5 py-2.5 text-sm font-medium hover:bg-primary-foreground/10"
               >
                 Acessar plataforma

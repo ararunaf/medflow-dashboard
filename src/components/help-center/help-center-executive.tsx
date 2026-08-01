@@ -88,8 +88,8 @@ export function HelpCenterExecutive() {
             cooperativas médicas e grupos de plantonistas.
           </p>
           <p>
-            Ela integra operação, escalas, plantões, TISS, financeiro e inteligência operacional
-            em um único ambiente.
+            Ela integra operação, escalas, plantões, TISS, financeiro e inteligência operacional em
+            um único ambiente.
           </p>
         </div>
       </HelpSection>
@@ -170,10 +170,7 @@ export function HelpCenterExecutive() {
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 mb-5">
           {IA_FEATURES.map((feature) => (
-            <li
-              key={feature}
-              className="flex items-center gap-2 text-sm text-foreground"
-            >
+            <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
               <CheckCircle2 className="h-4 w-4 text-violet-600 dark:text-violet-400 shrink-0" />
               {feature}
             </li>

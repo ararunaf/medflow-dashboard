@@ -1,7 +1,15 @@
 /**
  * Utilitários compartilhados entre provedores OCR.
  */
-import type { OcrBoundingBox, OcrCoordinates, OcrLine, OcrPage, OcrWord, RawOcrResult } from "../types/raw-ocr-result";
+import type { JsonObject } from "@/lib/database.types";
+import type {
+  OcrBoundingBox,
+  OcrCoordinates,
+  OcrLine,
+  OcrPage,
+  OcrWord,
+  RawOcrResult,
+} from "../types/raw-ocr-result";
 
 export function polygonToBoundingBox(polygon: number[]): OcrBoundingBox {
   if (!polygon.length) return { x: 0, y: 0, width: 0, height: 0 };
@@ -38,7 +46,7 @@ export function buildRawOcrResult(params: {
   provider: string;
   providerVersion: string;
   processingTimeMs: number;
-  metadata?: Record<string, unknown>;
+  metadata?: JsonObject;
 }): RawOcrResult {
   const confidences = params.pages.flatMap((p) => p.words.map((w) => w.confidence));
   return {
@@ -50,7 +58,7 @@ export function buildRawOcrResult(params: {
     processingTimeMs: params.processingTimeMs,
     wordCount: countWords(params.pages),
     pageCount: params.pages.length,
-    metadata: params.metadata ?? {},
+    metadata: (params.metadata ?? {}) as JsonObject,
   };
 }
 
@@ -96,7 +104,12 @@ export function resolveAzureConfig(): { endpoint: string; apiKey: string } | nul
     (typeof process !== "undefined" && process.env?.MEDFLOW_AZURE_DOCUMENT_INTELLIGENCE_KEY) ||
     (typeof process !== "undefined" && process.env?.AZURE_DOCUMENT_INTELLIGENCE_KEY);
 
-  if (typeof endpoint === "string" && endpoint.length > 0 && typeof apiKey === "string" && apiKey.length > 0) {
+  if (
+    typeof endpoint === "string" &&
+    endpoint.length > 0 &&
+    typeof apiKey === "string" &&
+    apiKey.length > 0
+  ) {
     return { endpoint: endpoint.replace(/\/$/, ""), apiKey };
   }
   return null;

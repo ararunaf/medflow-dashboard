@@ -38,9 +38,7 @@ export function CaptureDropZone({
     >
       <Upload className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="mt-3 text-sm font-medium">Arraste arquivos aqui</p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        PDF, JPEG, PNG, WebP ou TIFF — até 25 MB
-      </p>
+      <p className="mt-1 text-xs text-muted-foreground">PDF, JPEG, PNG, WebP ou TIFF — até 25 MB</p>
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Button

@@ -1,5 +1,8 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+/** Object map compatible with Supabase Json / TanStack Start serialization. */
+export type JsonObject = { [key: string]: Json | undefined };
+
 export type UserRole =
   | "super_admin"
   | "tenant_admin"
@@ -385,6 +388,204 @@ export type Database = {
             foreignKeyName: "tenant_settings_tenant_id_fkey";
             columns: ["tenant_id"];
             isOneToOne: true;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      capture_documents: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          session_id: string;
+          original_filename: string;
+          mime_type: string;
+          byte_length: number;
+          checksum_sha256: string;
+          storage_path_original: string;
+          storage_path_processed: string | null;
+          storage_path_thumbnail: string | null;
+          storage_path_audit: string | null;
+          page_count: number;
+          metadata: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          updated_by: string | null;
+          deleted_at: string | null;
+          deleted_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          session_id: string;
+          original_filename: string;
+          mime_type: string;
+          byte_length: number;
+          checksum_sha256: string;
+          storage_path_original: string;
+          storage_path_processed?: string | null;
+          storage_path_thumbnail?: string | null;
+          storage_path_audit?: string | null;
+          page_count?: number;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          session_id?: string;
+          original_filename?: string;
+          mime_type?: string;
+          byte_length?: number;
+          checksum_sha256?: string;
+          storage_path_original?: string;
+          storage_path_processed?: string | null;
+          storage_path_thumbnail?: string | null;
+          storage_path_audit?: string | null;
+          page_count?: number;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capture_documents_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "capture_documents_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "capture_sessions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      capture_pages: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          session_id: string;
+          document_id: string;
+          page_number: number;
+          storage_path_original: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          session_id: string;
+          document_id: string;
+          page_number: number;
+          storage_path_original?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          session_id?: string;
+          document_id?: string;
+          page_number?: number;
+          storage_path_original?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capture_pages_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "capture_pages_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "capture_sessions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "capture_pages_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "capture_documents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      capture_sessions: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          status: string;
+          channel: string;
+          correlation_id: string | null;
+          target_entity_type: string | null;
+          target_entity_id: string | null;
+          metadata: Json;
+          status_history: Json;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+          updated_by: string | null;
+          deleted_at: string | null;
+          deleted_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          status?: string;
+          channel: string;
+          correlation_id?: string | null;
+          target_entity_type?: string | null;
+          target_entity_id?: string | null;
+          metadata?: Json;
+          status_history?: Json;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          status?: string;
+          channel?: string;
+          correlation_id?: string | null;
+          target_entity_type?: string | null;
+          target_entity_id?: string | null;
+          metadata?: Json;
+          status_history?: Json;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capture_sessions_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
             referencedRelation: "tenants";
             referencedColumns: ["id"];
           },
@@ -1398,7 +1599,7 @@ export type Database = {
           event_type: OperationalEventType;
           severity: OperationalEventSeverity;
           description: string;
-          metadata: Record<string, unknown>;
+          metadata: Json;
           created_at: string;
         };
         Insert: {
@@ -1410,7 +1611,7 @@ export type Database = {
           event_type: OperationalEventType;
           severity?: OperationalEventSeverity;
           description?: string;
-          metadata?: Record<string, unknown>;
+          metadata?: Json;
           created_at?: string;
         };
         Update: {
@@ -1422,7 +1623,7 @@ export type Database = {
           event_type?: OperationalEventType;
           severity?: OperationalEventSeverity;
           description?: string;
-          metadata?: Record<string, unknown>;
+          metadata?: Json;
           created_at?: string;
         };
         Relationships: [
@@ -3038,7 +3239,7 @@ export type Database = {
           denial_id: string;
           action: string;
           actor_profile_id: string;
-          payload: Record<string, unknown>;
+          payload: Json;
           created_at: string;
         };
         Insert: {
@@ -3047,7 +3248,7 @@ export type Database = {
           denial_id: string;
           action: string;
           actor_profile_id: string;
-          payload?: Record<string, unknown>;
+          payload?: Json;
           created_at?: string;
         };
         Update: {
@@ -3056,7 +3257,7 @@ export type Database = {
           denial_id?: string;
           action?: string;
           actor_profile_id?: string;
-          payload?: Record<string, unknown>;
+          payload?: Json;
           created_at?: string;
         };
         Relationships: [

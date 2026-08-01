@@ -38,7 +38,11 @@ export function AnalyticsExportBar({ snapshot, disabled }: AnalyticsExportBarPro
 
   function exportCsvSummary() {
     const rows = buildAnalyticsSummaryCsvRows(snapshot!);
-    downloadCsv(`medicflow-analytics-resumo-${stamp}.csv`, ["metric", "value", "generated_at"], rows);
+    downloadCsv(
+      `medicflow-analytics-resumo-${stamp}.csv`,
+      ["metric", "value", "generated_at"],
+      rows,
+    );
   }
 
   function exportCsvFull() {
@@ -48,9 +52,7 @@ export function AnalyticsExportBar({ snapshot, disabled }: AnalyticsExportBarPro
       for (const row of section.rows) {
         flat.push({
           section: section.title,
-          ...Object.fromEntries(
-            Object.entries(row).map(([k, v]) => [k, String(v ?? "")]),
-          ),
+          ...Object.fromEntries(Object.entries(row).map(([k, v]) => [k, String(v ?? "")])),
         });
       }
     }

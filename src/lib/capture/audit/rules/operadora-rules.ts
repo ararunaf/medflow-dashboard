@@ -15,7 +15,8 @@ export const OPR_001: AuditRule = {
   field: "operator_ans_code",
   message: "Registro ANS da operadora não informado.",
   suggestedCorrection: "Informe o registro ANS da operadora (6 dígitos).",
-  evaluate: (ctx) => (ctx.isMissing("operator_ans_code") ? missingFieldFinding(OPR_001, ctx) : null),
+  evaluate: (ctx) =>
+    ctx.isMissing("operator_ans_code") ? missingFieldFinding(OPR_001, ctx) : null,
 };
 
 export const OPR_002: AuditRule = {

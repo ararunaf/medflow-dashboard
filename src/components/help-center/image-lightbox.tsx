@@ -58,11 +58,7 @@ export function ImageLightbox(props: {
           </button>
         </div>
       </div>
-      <div
-        className="flex-1 overflow-auto p-4 min-h-0"
-        onClick={onClose}
-        role="presentation"
-      >
+      <div className="flex-1 overflow-auto p-4 min-h-0" onClick={onClose} role="presentation">
         <div className="flex min-h-full min-w-full items-center justify-center">
           <img
             src={src}

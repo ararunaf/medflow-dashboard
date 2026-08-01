@@ -57,9 +57,7 @@ export function CaptureRiskDashboard() {
         <h2 className="text-sm font-semibold">Dashboard — Risco de Glosa</h2>
       </div>
 
-      {error ? (
-        <p className="text-sm text-destructive">{error}</p>
-      ) : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {!dashboard && busy ? (
         <p className="text-sm text-muted-foreground">Carregando indicadores…</p>
@@ -80,11 +78,7 @@ export function CaptureRiskDashboard() {
               icon={AlertTriangle}
               accent="text-orange-600"
             />
-            <MetricCard
-              label="Total avaliadas"
-              value={dashboard.totalAssessed}
-              icon={TrendingUp}
-            />
+            <MetricCard label="Total avaliadas" value={dashboard.totalAssessed} icon={TrendingUp} />
             <MetricCard
               label="Risco médio/baixo"
               value={dashboard.mediumCount + dashboard.lowCount}

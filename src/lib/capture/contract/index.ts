@@ -2,7 +2,11 @@
  * Motor de Inteligência Contratual — exports públicos.
  * MEDICFLOW-CONTRACT-INTELLIGENCE-01
  */
-export type { ContractRule, ContractKnowledgeRegistry, ContractRegistryVersion } from "./types/contract-rule";
+export type {
+  ContractRule,
+  ContractKnowledgeRegistry,
+  ContractRegistryVersion,
+} from "./types/contract-rule";
 export type {
   OperatorResolution,
   ContractResolution,

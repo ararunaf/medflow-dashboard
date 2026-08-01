@@ -3,6 +3,8 @@
  * MEDICFLOW-OCR-IMPLEMENTATION-01
  */
 
+import type { JsonObject } from "@/lib/database.types";
+
 export type OcrBoundingBox = {
   x: number;
   y: number;
@@ -48,7 +50,7 @@ export type RawOcrResult = {
   processingTimeMs: number;
   wordCount: number;
   pageCount: number;
-  metadata: Record<string, unknown>;
+  metadata: JsonObject;
 };
 
 export type OcrResultSummary = {

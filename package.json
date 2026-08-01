@@ -15,7 +15,7 @@
     "deploy:preview": "npm run build && wrangler deploy --dry-run",
     "deploy:staging:preview": "node scripts/deploy-staging.mjs --dry-run",
     "validate-staging-build": "node scripts/validate-staging-build.mjs",
-    "lint": "eslint .",
+    "lint": "eslint src vite.config.ts eslint.config.js",
     "format": "prettier --write .",
     "env-check": "node scripts/env-check.mjs",
     "env-check:staging": "node scripts/env-check.mjs --staging",

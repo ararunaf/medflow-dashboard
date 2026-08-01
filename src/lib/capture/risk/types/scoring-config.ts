@@ -64,7 +64,13 @@ export const RISK_LEVEL_THRESHOLDS: Array<{ min: number; level: RiskLevel }> = [
 ];
 
 /** Risco base por tipo de guia — procedimentos complexos elevam exposição */
-export const GUIDE_TYPE_BASE_RISK: Partial<Record<TissGuideType, number>> = {
+export type GuideTypeRiskKey =
+  | TissGuideType
+  | "guia_resumo_internacao"
+  | "guia_tratamento_odontologico"
+  | "desconhecido";
+
+export const GUIDE_TYPE_BASE_RISK: Partial<Record<GuideTypeRiskKey, number>> = {
   guia_sadt: 8,
   guia_honorario: 6,
   guia_consulta: 3,

@@ -16,7 +16,8 @@ export function makeFinding(
     field: overrides.field ?? rule.field,
     severity: overrides.severity ?? rule.severity,
     status: "open",
-    message: overrides.message ?? (typeof rule.message === "function" ? rule.message(ctx) : rule.message),
+    message:
+      overrides.message ?? (typeof rule.message === "function" ? rule.message(ctx) : rule.message),
     detectedValue: overrides.detectedValue ?? ctx.getValue(rule.field),
     expectedValue: overrides.expectedValue ?? null,
     confidence: overrides.confidence ?? fieldConfidence(ctx, overrides.field ?? rule.field),
@@ -25,7 +26,11 @@ export function makeFinding(
   };
 }
 
-export function missingFieldFinding(rule: AuditRule, ctx: AuditRuleContext, field?: string): Omit<AuditFinding, "id"> {
+export function missingFieldFinding(
+  rule: AuditRule,
+  ctx: AuditRuleContext,
+  field?: string,
+): Omit<AuditFinding, "id"> {
   const code = field ?? rule.field;
   return makeFinding(rule, ctx, {
     field: code,

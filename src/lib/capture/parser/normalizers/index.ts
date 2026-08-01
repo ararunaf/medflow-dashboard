@@ -4,6 +4,8 @@
  */
 
 export function stripInvalidChars(value: string): string {
+  // Intentional: strip ASCII control characters from OCR/parser input.
+  // eslint-disable-next-line no-control-regex -- control-char scrubbing is the purpose of this helper
   return value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
 }
 
@@ -21,7 +23,7 @@ export function normalizeCns(value: string): string | null {
 
 export function normalizeCrm(value: string): string | null {
   const cleaned = stripInvalidChars(value).toUpperCase();
-  const slashMatch = cleaned.match(/^(\d{1,6})\s*[\/\\-]\s*([A-Z]{2})$/);
+  const slashMatch = cleaned.match(/^(\d{1,6})\s*[/\\-]\s*([A-Z]{2})$/);
   if (slashMatch) {
     const num = slashMatch[1]!.padStart(6, "0");
     return `${slashMatch[2]}-${num}`;
@@ -44,7 +46,7 @@ export function normalizeCro(value: string): string | null {
   if (match) {
     return `${match[1]}-${match[2]!.padStart(6, "0")}`;
   }
-  const slashMatch = cleaned.match(/^(\d{1,6})\s*[\/\\-]\s*([A-Z]{2})$/);
+  const slashMatch = cleaned.match(/^(\d{1,6})\s*[/\\-]\s*([A-Z]{2})$/);
   if (slashMatch) {
     return `${slashMatch[2]}-${slashMatch[1]!.padStart(6, "0")}`;
   }
@@ -53,7 +55,7 @@ export function normalizeCro(value: string): string | null {
 
 export function normalizeDate(value: string): string | null {
   const cleaned = stripInvalidChars(value);
-  const brMatch = cleaned.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  const brMatch = cleaned.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$/);
   if (brMatch) {
     const day = brMatch[1]!.padStart(2, "0");
     const month = brMatch[2]!.padStart(2, "0");
@@ -171,7 +173,10 @@ const NORMALIZERS: Record<NormalizerType, (value: string) => string | null> = {
   text: (v) => stripInvalidChars(v) || null,
 };
 
-export function applyNormalizer(type: NormalizerType, rawValue: string): {
+export function applyNormalizer(
+  type: NormalizerType,
+  rawValue: string,
+): {
   value: string | null;
   normalized: boolean;
 } {

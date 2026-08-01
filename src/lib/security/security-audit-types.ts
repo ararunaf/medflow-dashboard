@@ -1,9 +1,4 @@
-export type SecurityAuditCategory =
-  | "auth"
-  | "login_attempt"
-  | "session"
-  | "ssr"
-  | "tenant_access";
+export type SecurityAuditCategory = "auth" | "login_attempt" | "session" | "ssr" | "tenant_access";
 
 export type SecurityAuditOutcome = "success" | "failure" | "blocked" | "error";
 

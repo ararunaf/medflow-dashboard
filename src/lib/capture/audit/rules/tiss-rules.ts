@@ -19,9 +19,7 @@ export const TISS_001: AuditRule = {
   suggestedCorrection: "Revise os campos duplicados e confirme o valor correto.",
   evaluate: (ctx) => {
     const dupes = Object.values(ctx.guide.fields).filter(
-      (f) =>
-        f.status === "duplicate" &&
-        (f.value == null || f.confidence < 0.85),
+      (f) => f.status === "duplicate" && (f.value == null || f.confidence < 0.85),
     );
     if (dupes.length > 0) {
       return makeFinding(TISS_001, ctx, {
@@ -45,9 +43,7 @@ export const TISS_002: AuditRule = {
   suggestedCorrection: "Verifique se os valores estão nos campos corretos da guia.",
   evaluate: (ctx) => {
     const misplaced = Object.values(ctx.guide.fields).filter(
-      (f) =>
-        f.status === "out_of_position" &&
-        (f.value == null || f.confidence < 0.85),
+      (f) => f.status === "out_of_position" && (f.value == null || f.confidence < 0.85),
     );
     if (misplaced.length > 0) {
       return makeFinding(TISS_002, ctx, {

@@ -3,6 +3,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { createHash } from "node:crypto";
+import type { JsonObject } from "@/lib/database.types";
 import {
   optionalString,
   requireObject,
@@ -30,10 +31,7 @@ import {
   runCaptureParser,
 } from "../parser/services/tiss-parser-service";
 import { getStructuredGuideSignedUrl } from "../parser/infrastructure/parser-storage";
-import {
-  getCaptureAuditReport,
-  runCaptureAudit,
-} from "../audit/services/preventive-audit-service";
+import { getCaptureAuditReport, runCaptureAudit } from "../audit/services/preventive-audit-service";
 import {
   getCaptureContractIntelligenceReport,
   runCaptureContractIntelligence,
@@ -295,7 +293,7 @@ export const getCaptureOcrResultFn = createServerFn({ method: "GET" })
     return runQuery(async (ctx) => {
       const ocr = await getCaptureOcrResult(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
-      const summary = (status.metadata?.ocr as Record<string, unknown> | undefined) ?? null;
+      const summary = (status.metadata?.ocr as JsonObject | undefined) ?? null;
       return { ocr, summary, metadata: status.metadata };
     });
   });
@@ -339,8 +337,7 @@ export const getCaptureStructuredGuideFn = createServerFn({ method: "GET" })
     return runQuery(async (ctx) => {
       const guide = await getCaptureStructuredGuide(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
-      const summary =
-        (status.metadata?.parser as Record<string, unknown> | undefined) ?? null;
+      const summary = (status.metadata?.parser as JsonObject | undefined) ?? null;
       return { guide, summary, metadata: status.metadata };
     });
   });
@@ -384,8 +381,7 @@ export const getCaptureAuditReportFn = createServerFn({ method: "GET" })
     return runQuery(async (ctx) => {
       const report = await getCaptureAuditReport(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
-      const summary =
-        (status.metadata?.audit as Record<string, unknown> | undefined) ?? null;
+      const summary = (status.metadata?.audit as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
     });
   });
@@ -416,8 +412,7 @@ export const getCaptureContractIntelligenceReportFn = createServerFn({ method: "
     return runQuery(async (ctx) => {
       const report = await getCaptureContractIntelligenceReport(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
-      const summary =
-        (status.metadata?.contractIntelligence as Record<string, unknown> | undefined) ?? null;
+      const summary = (status.metadata?.contractIntelligence as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
     });
   });
@@ -461,8 +456,7 @@ export const getCaptureRiskAssessmentReportFn = createServerFn({ method: "GET" }
     return runQuery(async (ctx) => {
       const report = await getCaptureRiskAssessmentReport(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
-      const summary =
-        (status.metadata?.riskAssessment as Record<string, unknown> | undefined) ?? null;
+      const summary = (status.metadata?.riskAssessment as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
     });
   });
@@ -480,10 +474,9 @@ export const getCaptureRiskAssessmentJsonDownloadFn = createServerFn({ method: "
     return runQuery(async (ctx) => getRiskAssessmentSignedUrl(ctx, data.sessionId));
   });
 
-export const getCaptureRiskDashboardFn = createServerFn({ method: "GET" })
-  .handler(async () => {
-    return runQuery(async (ctx) => getCaptureRiskDashboard(ctx));
-  });
+export const getCaptureRiskDashboardFn = createServerFn({ method: "GET" }).handler(async () => {
+  return runQuery(async (ctx) => getCaptureRiskDashboard(ctx));
+});
 
 export const getCaptureAuditReportJsonDownloadFn = createServerFn({ method: "GET" })
   .inputValidator((raw: unknown) => ({
@@ -524,8 +517,7 @@ export const getCaptureCorrectionProposalsFn = createServerFn({ method: "GET" })
     return runQuery(async (ctx) => {
       const store = await getCaptureCorrectionProposals(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
-      const summary =
-        (status.metadata?.correction as Record<string, unknown> | undefined) ?? null;
+      const summary = (status.metadata?.correction as JsonObject | undefined) ?? null;
       return { store, summary, metadata: status.metadata };
     });
   });
@@ -558,20 +550,17 @@ export const updateCaptureCorrectionProposalFn = createServerFn({ method: "POST"
     });
   });
 
-export const getCaptureLearningDashboardFn = createServerFn({ method: "GET" })
-  .handler(async () => {
-    return runQuery(async (ctx) => getCaptureLearningDashboard(ctx));
-  });
+export const getCaptureLearningDashboardFn = createServerFn({ method: "GET" }).handler(async () => {
+  return runQuery(async (ctx) => getCaptureLearningDashboard(ctx));
+});
 
-export const getCaptureLearningMetricsFn = createServerFn({ method: "GET" })
-  .handler(async () => {
-    return runQuery(async (ctx) => getCaptureLearningMetrics(ctx));
-  });
+export const getCaptureLearningMetricsFn = createServerFn({ method: "GET" }).handler(async () => {
+  return runQuery(async (ctx) => getCaptureLearningMetrics(ctx));
+});
 
-export const getCaptureLearningRecordsFn = createServerFn({ method: "GET" })
-  .handler(async () => {
-    return runQuery(async (ctx) => getCaptureLearningRecords(ctx));
-  });
+export const getCaptureLearningRecordsFn = createServerFn({ method: "GET" }).handler(async () => {
+  return runQuery(async (ctx) => getCaptureLearningRecords(ctx));
+});
 
 export const getCaptureCorrectionProposalsJsonDownloadFn = createServerFn({ method: "GET" })
   .inputValidator((raw: unknown) => ({

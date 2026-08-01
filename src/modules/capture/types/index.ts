@@ -2,6 +2,8 @@
  * Tipos de domínio — módulo Captura Inteligente (MEDICFLOW-CAPTURE-PIPELINE-01).
  */
 
+import type { JsonObject } from "@/lib/database.types";
+
 /** Fases do pipeline de captura (UI + domínio). */
 export const CAPTURE_PHASES = [
   "idle",
@@ -78,6 +80,9 @@ export const CAPTURE_PIPELINE_EVENT_TYPES = [
   "contract_intelligence_started",
   "contract_intelligence_finished",
   "contract_intelligence_failed",
+  "risk_assessment_started",
+  "risk_assessment_finished",
+  "risk_assessment_failed",
 ] as const;
 
 export type CapturePipelineEventType = (typeof CAPTURE_PIPELINE_EVENT_TYPES)[number];
@@ -86,7 +91,13 @@ export type CapturePipelineEvent = {
   type: CapturePipelineEventType;
   sessionId: string;
   at: string;
-  payload?: Record<string, unknown>;
+  payload?: JsonObject;
 };
 
-export type { OcrProvider, OcrCapabilities, OcrHealth, OcrExtractInput, OcrExtractResult } from "./ocr-provider";
+export type {
+  OcrProvider,
+  OcrCapabilities,
+  OcrHealth,
+  OcrExtractInput,
+  OcrExtractResult,
+} from "./ocr-provider";

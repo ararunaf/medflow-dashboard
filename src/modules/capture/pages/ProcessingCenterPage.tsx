@@ -49,7 +49,10 @@ export function ProcessingCenterPage({ initialQueue }: ProcessingCenterPageProps
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Layers className="h-4 w-4" />
           <span>
-            Fluxo: <strong className="text-foreground">Fila → Workspace → Correção → Aprovação → Próxima Guia</strong>
+            Fluxo:{" "}
+            <strong className="text-foreground">
+              Fila → Workspace → Correção → Aprovação → Próxima Guia
+            </strong>
           </span>
         </div>
 
@@ -76,8 +79,8 @@ export function ProcessingCenterPage({ initialQueue }: ProcessingCenterPageProps
             {center.list ? (
               <>
                 Exibindo <strong className="text-foreground">{center.list.items.length}</strong> de{" "}
-                <strong className="text-foreground">{center.list.total}</strong> guias — ordenadas por
-                prioridade operacional
+                <strong className="text-foreground">{center.list.total}</strong> guias — ordenadas
+                por prioridade operacional
               </>
             ) : (
               "Carregando fila…"

@@ -40,7 +40,7 @@ export function assertPolicyChecksAllowExecution(safety: ExecutionSafetyEvaluati
   const failed = safety.policyChecks.filter((c) => c.status === "fail");
   if (failed.length > 0) {
     throw new ValidationError("Policy checks com falha — execução bloqueada.", {
-      failed: failed.map((f) => ({ id: f.id, detail: f.detail })),
+      failed: failed.map((f) => `${f.id}:${f.detail}`).join("; "),
     });
   }
 }
@@ -50,7 +50,7 @@ export function parseSimulationResultSnapshot(
 ): OperationalSimulationResult {
   if (raw.schemaVersion !== "1.0.0") {
     throw new ValidationError("Versão de snapshot de simulação incompatível.", {
-      schemaVersion: raw.schemaVersion,
+      schemaVersion: raw.schemaVersion == null ? null : String(raw.schemaVersion),
     });
   }
   if (typeof raw.simulationId !== "string") {

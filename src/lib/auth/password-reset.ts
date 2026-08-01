@@ -4,7 +4,6 @@ import { getInstitutionalDomain } from "@/lib/env/startup-checks";
 export function getPasswordResetRedirectUrl(): string {
   const configured = getInstitutionalDomain()?.replace(/\/$/, "");
   const base =
-    configured ??
-    (typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : "");
+    configured ?? (typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : "");
   return `${base}/login/redefinir-senha`;
 }

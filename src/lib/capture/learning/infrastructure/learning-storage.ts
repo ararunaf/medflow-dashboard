@@ -32,11 +32,7 @@ export function buildLearningMetricsStoragePath(tenantId: string): string {
   return `${buildLearningStorageBasePath(tenantId)}/${LEARNING_METRICS_FILENAME}`;
 }
 
-async function uploadJson(
-  ctx: ServiceCtx,
-  storagePath: string,
-  payload: unknown,
-): Promise<void> {
+async function uploadJson(ctx: ServiceCtx, storagePath: string, payload: unknown): Promise<void> {
   const body = JSON.stringify(payload, null, 2);
   const { error } = await ctx.client.storage
     .from(CLINICAL_DOCUMENTS_BUCKET)
@@ -47,10 +43,7 @@ async function uploadJson(
   if (error) throw error;
 }
 
-async function downloadJson<T>(
-  ctx: ServiceCtx,
-  storagePath: string,
-): Promise<T | null> {
+async function downloadJson<T>(ctx: ServiceCtx, storagePath: string): Promise<T | null> {
   const { data, error } = await ctx.client.storage
     .from(CLINICAL_DOCUMENTS_BUCKET)
     .download(storagePath);
@@ -60,9 +53,7 @@ async function downloadJson<T>(
   return JSON.parse(text) as T;
 }
 
-export async function loadLearningRecords(
-  ctx: ServiceCtx,
-): Promise<LearningRecordsStore> {
+export async function loadLearningRecords(ctx: ServiceCtx): Promise<LearningRecordsStore> {
   const storagePath = buildLearningRecordsStoragePath(ctx.tenantId);
   const store = await downloadJson<LearningRecordsStore>(ctx, storagePath);
   if (!store) return buildEmptyRecordsStore(ctx.tenantId);
@@ -78,9 +69,7 @@ export async function persistLearningRecords(
   return { storagePath };
 }
 
-export async function loadLearningMetrics(
-  ctx: ServiceCtx,
-): Promise<LearningMetricsStore | null> {
+export async function loadLearningMetrics(ctx: ServiceCtx): Promise<LearningMetricsStore | null> {
   const storagePath = buildLearningMetricsStoragePath(ctx.tenantId);
   return downloadJson<LearningMetricsStore>(ctx, storagePath);
 }

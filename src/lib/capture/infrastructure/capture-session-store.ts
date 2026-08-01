@@ -3,11 +3,9 @@
  */
 import { NotFoundError, PermissionError, ValidationError } from "@/lib/domain/operations/errors";
 import { can } from "@/lib/auth/rbac";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import {
-  POST_UPLOAD_AUTO_STATUSES,
-  assertCaptureTransition,
-} from "../state-machine";
+import { POST_UPLOAD_AUTO_STATUSES, assertCaptureTransition } from "../state-machine";
 import type {
   CaptureDocumentRecord,
   CaptureSessionDetail,
@@ -40,7 +38,7 @@ type DbSessionRow = {
   correlation_id: string | null;
   target_entity_type: string | null;
   target_entity_id: string | null;
-  metadata: Record<string, unknown> | null;
+  metadata: JsonObject | null;
   status_history: CaptureStatusHistoryEntry[] | null;
   created_by: string;
   created_at: string;
@@ -61,7 +59,7 @@ type DbDocumentRow = {
   storage_path_thumbnail: string | null;
   storage_path_audit: string | null;
   page_count: number;
-  metadata: Record<string, unknown> | null;
+  metadata: JsonObject | null;
   created_at: string;
 };
 
@@ -74,7 +72,7 @@ function mapSession(row: DbSessionRow): CaptureSessionRecord {
     correlationId: row.correlation_id,
     targetEntityType: row.target_entity_type,
     targetEntityId: row.target_entity_id,
-    metadata: row.metadata ?? {},
+    metadata: (row.metadata ?? {}) as JsonObject,
     statusHistory: row.status_history ?? [],
     createdBy: row.created_by,
     createdAt: row.created_at,
@@ -96,7 +94,7 @@ function mapDocument(row: DbDocumentRow): CaptureDocumentRecord {
     storagePathThumbnail: row.storage_path_thumbnail,
     storagePathAudit: row.storage_path_audit,
     pageCount: row.page_count,
-    metadata: row.metadata ?? {},
+    metadata: (row.metadata ?? {}) as JsonObject,
     createdAt: row.created_at,
   };
 }
@@ -110,11 +108,11 @@ function assertBillingAccess(ctx: ServiceCtx): void {
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);
@@ -124,12 +122,12 @@ async function persistSessionMetadata(
 async function emitPipelineEvent(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
   eventType: Parameters<typeof buildCaptureEvent>[0],
-  payload?: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+  payload?: JsonObject,
+): Promise<JsonObject> {
   const event = buildCaptureEvent(eventType, sessionId, payload);
-  const updated = appendCaptureEvent(metadata, event);
+  const updated = appendCaptureEvent(metadata, event) as JsonObject;
   await persistSessionMetadata(ctx, sessionId, updated);
   return updated;
 }
@@ -166,8 +164,8 @@ export async function createCaptureSession(
       correlation_id: input.correlationId ?? null,
       target_entity_type: input.targetEntityType ?? null,
       target_entity_id: input.targetEntityId ?? null,
-      metadata: initialMetadata,
-      status_history: initialHistory,
+      metadata: initialMetadata as Json,
+      status_history: initialHistory as unknown as Json,
       created_by: ctx.actorProfileId,
     })
     .select("*")
@@ -225,7 +223,7 @@ export async function getCaptureSessionStatus(
   sessionId: string;
   status: CaptureSessionStatus;
   statusHistory: CaptureStatusHistoryEntry[];
-  metadata: Record<string, unknown>;
+  metadata: JsonObject;
   updatedAt: string;
 }> {
   const detail = await getCaptureSession(ctx, sessionId);
@@ -268,8 +266,8 @@ export async function transitionCaptureSession(
     .from("capture_sessions")
     .update({
       status: toStatus,
-      status_history: statusHistory,
-      metadata,
+      status_history: statusHistory as Json,
+      metadata: metadata as Json,
       updated_by: ctx.actorProfileId,
     })
     .eq("tenant_id", ctx.tenantId)
@@ -287,7 +285,7 @@ export async function advancePostUploadPipeline(
   ctx: ServiceCtx,
   sessionId: string,
 ): Promise<CaptureSessionRecord> {
-  let session = await getCaptureSession(ctx, sessionId);
+  let session: CaptureSessionRecord = await getCaptureSession(ctx, sessionId);
 
   if (session.status === "CREATED") {
     session = await transitionCaptureSession(ctx, sessionId, "UPLOADED", "file_received");
@@ -304,7 +302,7 @@ export async function advancePostUploadPipeline(
     ...session.metadata,
     capturePhase: "waiting_ocr",
     readyForOcr: true,
-  });
+  } as JsonObject);
 
   const refreshed = await getCaptureSession(ctx, sessionId);
   return {
@@ -319,7 +317,7 @@ export async function advancePostUploadPipeline(
       ...refreshed.metadata,
       capturePhase: "waiting_ocr",
       readyForOcr: true,
-    },
+    } as JsonObject,
     statusHistory: refreshed.statusHistory,
     createdBy: refreshed.createdBy,
     createdAt: refreshed.createdAt,
@@ -383,7 +381,7 @@ async function storeDocumentFile(
       storage_path_original: storagePath,
       storage_path_audit: auditPath,
       page_count: 1,
-      metadata: { version: input.version },
+      metadata: { version: input.version } as Json,
       created_by: ctx.actorProfileId,
     })
     .select("*")
@@ -405,7 +403,7 @@ async function storeDocumentFile(
   await persistSessionMetadata(ctx, input.sessionId, {
     ...updatedSession.metadata,
     documentVersion: input.version,
-  });
+  } as JsonObject);
 
   return {
     session: updatedSession,
@@ -433,10 +431,9 @@ export async function uploadCaptureDocument(
 
   const session = await getCaptureSession(ctx, input.sessionId);
   if (session.status !== "CREATED" && session.status !== "UPLOADED") {
-    throw new ValidationError(
-      "Upload permitido apenas em sessões CREATED ou UPLOADED.",
-      { status: session.status },
-    );
+    throw new ValidationError("Upload permitido apenas em sessões CREATED ou UPLOADED.", {
+      status: session.status,
+    });
   }
 
   const version = nextDocumentVersion(session.metadata);
@@ -518,7 +515,7 @@ export async function cancelCaptureSession(
     .from("capture_sessions")
     .update({
       status: "ARCHIVED",
-      metadata,
+      metadata: metadata as Json,
       updated_by: ctx.actorProfileId,
     })
     .eq("tenant_id", ctx.tenantId)
@@ -539,7 +536,7 @@ export async function markCaptureSessionFailed(
   assertBillingAccess(ctx);
   const session = await getCaptureSession(ctx, sessionId);
   const metadata = appendCaptureEvent(
-    { ...session.metadata, capturePhase: "failed", failureReason: reason },
+    { ...session.metadata, capturePhase: "failed", failureReason: reason } as JsonObject,
     buildFailedEvent(sessionId, reason),
   );
   await persistSessionMetadata(ctx, sessionId, metadata);
@@ -568,16 +565,14 @@ export async function getCaptureDocumentSignedUrl(
       download: disposition === "attachment" ? doc.originalFilename : false,
     });
 
-  if (error || !data?.signedUrl) throw error ?? new NotFoundError("Arquivo no storage", doc.storagePathOriginal);
+  if (error || !data?.signedUrl)
+    throw error ?? new NotFoundError("Arquivo no storage", doc.storagePathOriginal);
 
   const expiresAt = new Date(Date.now() + SIGNED_URL_TTL_SECONDS * 1000).toISOString();
   return { signedUrl: data.signedUrl, expiresAt, filename: doc.originalFilename };
 }
 
-export async function softDeleteCaptureSession(
-  ctx: ServiceCtx,
-  sessionId: string,
-): Promise<void> {
+export async function softDeleteCaptureSession(ctx: ServiceCtx, sessionId: string): Promise<void> {
   assertBillingAccess(ctx);
 
   const now = new Date().toISOString();

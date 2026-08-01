@@ -1,5 +1,9 @@
 import { ValidationError } from "@/lib/domain/operations/errors";
-import type { OperationalActionKind, OperationalActionProposalState } from "@/lib/database.types";
+import type {
+  JsonObject,
+  OperationalActionKind,
+  OperationalActionProposalState,
+} from "@/lib/database.types";
 import type { OperationalProposalReference } from "./types";
 
 const ACTION_KINDS: ReadonlySet<OperationalActionKind> = new Set([
@@ -28,7 +32,10 @@ const MAX_PAYLOAD_KEYS = 24;
 
 export function expectOperationalActionKind(raw: unknown, field: string): OperationalActionKind {
   if (typeof raw !== "string" || !ACTION_KINDS.has(raw as OperationalActionKind)) {
-    throw new ValidationError(`Campo ${field}: tipo de ação operacional inválido.`, { field, raw });
+    throw new ValidationError(`Campo ${field}: tipo de ação operacional inválido.`, {
+      field,
+      raw: raw == null ? null : String(raw),
+    });
   }
   return raw as OperationalActionKind;
 }
@@ -81,12 +88,12 @@ export function clampProposalText(input: {
   };
 }
 
-export function parseProposalPayload(raw: unknown): Record<string, unknown> {
+export function parseProposalPayload(raw: unknown): JsonObject {
   if (raw == null) return {};
   if (typeof raw !== "object" || Array.isArray(raw)) {
     throw new ValidationError("payload deve ser um objeto JSON pequeno.", { field: "payload" });
   }
-  const o = raw as Record<string, unknown>;
+  const o = raw as JsonObject;
   const keys = Object.keys(o);
   if (keys.length > MAX_PAYLOAD_KEYS) {
     throw new ValidationError(`payload: no máximo ${MAX_PAYLOAD_KEYS} chaves.`, {

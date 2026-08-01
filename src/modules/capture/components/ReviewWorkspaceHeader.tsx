@@ -4,7 +4,8 @@ import { REVIEW_APPROVAL_LABELS } from "@/lib/capture/review/review-workspace-se
 
 const APPROVAL_STYLES = {
   em_revisao: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-  aguardando_correcoes: "bg-yellow-500/10 text-yellow-800 dark:text-yellow-400 border-yellow-500/20",
+  aguardando_correcoes:
+    "bg-yellow-500/10 text-yellow-800 dark:text-yellow-400 border-yellow-500/20",
   aprovada: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
   reprovada: "bg-destructive/10 text-destructive border-destructive/20",
 } as const;
@@ -22,7 +23,11 @@ type ReviewWorkspaceHeaderProps = {
   metrics: ReviewWorkspaceHeaderMetrics;
 };
 
-export function ReviewWorkspaceHeader({ sessionId, filename, metrics }: ReviewWorkspaceHeaderProps) {
+export function ReviewWorkspaceHeader({
+  sessionId,
+  filename,
+  metrics,
+}: ReviewWorkspaceHeaderProps) {
   const ApprovalIcon = APPROVAL_ICONS[metrics.approvalStatus];
 
   return (
@@ -34,8 +39,7 @@ export function ReviewWorkspaceHeader({ sessionId, filename, metrics }: ReviewWo
             <h1 className="text-lg font-semibold">Workspace de Revisão</h1>
           </div>
           <p className="mt-1 text-sm text-muted-foreground truncate max-w-xl">
-            {filename ?? "Guia TISS"} ·{" "}
-            <span className="font-mono text-xs">{sessionId}</span>
+            {filename ?? "Guia TISS"} · <span className="font-mono text-xs">{sessionId}</span>
           </p>
         </div>
         <span

@@ -65,7 +65,9 @@ function extractGuideType(metadata: Record<string, unknown>): string | null {
   return null;
 }
 
-function extractGlosaRuleHits(metadata: Record<string, unknown>): Array<{ ruleId: string; count: number }> {
+function extractGlosaRuleHits(
+  metadata: Record<string, unknown>,
+): Array<{ ruleId: string; count: number }> {
   const events = metadata.captureEvents;
   if (!Array.isArray(events)) return [];
 

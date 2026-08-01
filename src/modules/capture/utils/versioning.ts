@@ -1,1 +1,4 @@
-export { buildVersionedObjectKey, nextDocumentVersion } from "@/lib/capture/infrastructure/versioning";
+export {
+  buildVersionedObjectKey,
+  nextDocumentVersion,
+} from "@/lib/capture/infrastructure/versioning";

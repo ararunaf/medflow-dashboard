@@ -1,4 +1,8 @@
-import { runStartupChecks, type StartupCheckResult, getInstitutionalDomain } from "@/lib/env/startup-checks";
+import {
+  runStartupChecks,
+  type StartupCheckResult,
+  getInstitutionalDomain,
+} from "@/lib/env/startup-checks";
 import { isStagingBuildMode, STAGING_APP_URL } from "@/lib/env/medflow-domains";
 
 export type StartupDiagnosticScope = "server" | "client";

@@ -24,9 +24,7 @@ const STATUS_INDEX = new Map<CaptureSessionStatus, number>(
 );
 
 /** Estados terminais — não permitem avanço adicional (exceto já ARCHIVED). */
-export const TERMINAL_CAPTURE_STATUSES: ReadonlySet<CaptureSessionStatus> = new Set([
-  "ARCHIVED",
-]);
+export const TERMINAL_CAPTURE_STATUSES: ReadonlySet<CaptureSessionStatus> = new Set(["ARCHIVED"]);
 
 /**
  * Transições automáticas pós-upload (infraestrutura).
@@ -57,8 +55,11 @@ export function isValidCaptureTransition(
   const fromIdx = captureStatusIndex(from);
   const toIdx = captureStatusIndex(to);
 
-  // Avanço linear (+1) ou salto controlado para ARCHIVED
-  return toIdx === fromIdx + 1 || (to === "ARCHIVED" && fromIdx >= 0);
+  // Avanço linear (+1). ARCHIVED already handled above; cast keeps the check intentional under narrowing.
+  return (
+    toIdx === fromIdx + 1 ||
+    ((to as CaptureSessionStatus | "ARCHIVED") === "ARCHIVED" && fromIdx >= 0)
+  );
 }
 
 export function assertCaptureTransition(
@@ -70,9 +71,7 @@ export function assertCaptureTransition(
   }
 }
 
-export function nextCaptureStatus(
-  current: CaptureSessionStatus,
-): CaptureSessionStatus | null {
+export function nextCaptureStatus(current: CaptureSessionStatus): CaptureSessionStatus | null {
   const idx = captureStatusIndex(current);
   if (idx >= CAPTURE_STATUS_ORDER.length - 1) return null;
   return CAPTURE_STATUS_ORDER[idx + 1] ?? null;

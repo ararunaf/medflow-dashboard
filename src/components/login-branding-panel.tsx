@@ -4,8 +4,7 @@ const LOGIN_PANEL_DESCRIPTION =
   "Escalas, plantões e indicadores clínicos em tempo real, em um único fluxo.";
 
 /** Card de logomarca — mesmo padrão visual do painel direito (`login.tsx`). */
-const LOGIN_LOGO_CARD =
-  "flex justify-center bg-surface rounded-2xl border border-border w-full";
+const LOGIN_LOGO_CARD = "flex justify-center bg-surface rounded-2xl border border-border w-full";
 
 /** Painel esquerdo de branding nas telas de autenticação (desktop/tablet ≥ lg). */
 export function LoginBrandingPanel() {

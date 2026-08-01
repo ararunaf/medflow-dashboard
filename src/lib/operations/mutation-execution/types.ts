@@ -1,4 +1,4 @@
-import type { OperationalMutationExecutionState } from "@/lib/database.types";
+import type { Json, JsonObject, OperationalMutationExecutionState } from "@/lib/database.types";
 import type {
   OperationalSimulationResult,
   PolicyCheckResult,
@@ -32,11 +32,11 @@ export type OperationalMutationExecutionDto = {
   idempotencyKey: string | null;
   blockReason: string | null;
   policyChecksSnapshot: PolicyCheckResult[];
-  explainabilityJson: Record<string, unknown>;
+  explainabilityJson: JsonObject;
   appliedStepsJson: AppliedForwardStep[];
-  resultPayload: Record<string, unknown>;
-  rollbackPayload: Record<string, unknown>;
-  affectedEntitiesJson: unknown[];
+  resultPayload: JsonObject;
+  rollbackPayload: JsonObject;
+  affectedEntitiesJson: Json[];
   startedAt: string | null;
   finishedAt: string | null;
   createdAt: string;

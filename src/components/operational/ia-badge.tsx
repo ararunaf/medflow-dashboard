@@ -2,8 +2,7 @@ import { Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Tooltip padrão para superfícies de inteligência operacional. */
-export const IA_TOOLTIP =
-  "Recurso apoiado por Inteligência Artificial do MedicFlow-AI";
+export const IA_TOOLTIP = "Recurso apoiado por Inteligência Artificial do MedicFlow-AI";
 
 /** Badge compacto com ícone Brain — identidade visual global de IA. */
 export function IaBadge({ className }: { className?: string }) {

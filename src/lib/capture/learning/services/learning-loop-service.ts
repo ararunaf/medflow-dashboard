@@ -6,10 +6,8 @@
  * Não altera Correction Assistant, OCR, Parser ou Auditoria.
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import {
-  appendCaptureEvent,
-  buildCaptureEvent,
-} from "../../infrastructure/capture-events";
+import { appendCaptureEvent, buildCaptureEvent } from "../../infrastructure/capture-events";
+import type { Json, JsonObject } from "@/lib/database.types";
 import { getCaptureSession } from "../../infrastructure/capture-session-store";
 import type {
   CorrectionProposal,
@@ -39,11 +37,11 @@ import type {
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);
@@ -65,25 +63,17 @@ export class LearningLoopService {
     proposal: CorrectionProposal,
     proposalGeneratedAt?: string,
   ): Promise<RecordLearningDecisionResult> {
-    const record = this.engine.proposalToRecord(
-      proposal,
-      sessionId,
-      proposalGeneratedAt,
-    );
+    const record = this.engine.proposalToRecord(proposal, sessionId, proposalGeneratedAt);
     if (!record) {
       const existingStore = await loadLearningRecords(ctx);
       const metrics =
-        (await loadLearningMetrics(ctx)) ??
-        this.engine.calculateMetrics(existingStore);
+        (await loadLearningMetrics(ctx)) ?? this.engine.calculateMetrics(existingStore);
       return { record: null, store: existingStore, metrics };
     }
 
     let store = await loadLearningRecords(ctx);
     store = appendRecordIfNew(store, record);
-    const { metrics, recordsPath, metricsPath } = await persistLearningArtifacts(
-      ctx,
-      store,
-    );
+    const { metrics, recordsPath, metricsPath } = await persistLearningArtifacts(ctx, store);
 
     const detail = await getCaptureSession(ctx, sessionId);
     const summary = buildLearningSummaryFromStore(store, recordsPath, metricsPath);
@@ -112,8 +102,7 @@ export class LearningLoopService {
     if (!proposal) {
       const existingStore = await loadLearningRecords(ctx);
       const metrics =
-        (await loadLearningMetrics(ctx)) ??
-        this.engine.calculateMetrics(existingStore);
+        (await loadLearningMetrics(ctx)) ?? this.engine.calculateMetrics(existingStore);
       return { record: null, store: existingStore, metrics };
     }
     return this.recordDecisionFromProposal(ctx, sessionId, proposal, store.generatedAt);
@@ -167,29 +156,18 @@ export async function recordCaptureLearningDecision(
   store: CorrectionProposalStore,
   input: UpdateCorrectionProposalInput,
 ): Promise<RecordLearningDecisionResult> {
-  return getDefaultLearningLoopService().recordDecisionFromUpdate(
-    ctx,
-    sessionId,
-    store,
-    input,
-  );
+  return getDefaultLearningLoopService().recordDecisionFromUpdate(ctx, sessionId, store, input);
 }
 
-export async function getCaptureLearningDashboard(
-  ctx: ServiceCtx,
-): Promise<LearningDashboardView> {
+export async function getCaptureLearningDashboard(ctx: ServiceCtx): Promise<LearningDashboardView> {
   return getDefaultLearningLoopService().getDashboard(ctx);
 }
 
-export async function getCaptureLearningMetrics(
-  ctx: ServiceCtx,
-): Promise<LearningMetricsStore> {
+export async function getCaptureLearningMetrics(ctx: ServiceCtx): Promise<LearningMetricsStore> {
   return getDefaultLearningLoopService().getMetrics(ctx);
 }
 
-export async function getCaptureLearningRecords(
-  ctx: ServiceCtx,
-): Promise<LearningRecordsStore> {
+export async function getCaptureLearningRecords(ctx: ServiceCtx): Promise<LearningRecordsStore> {
   return getDefaultLearningLoopService().getRecords(ctx);
 }
 

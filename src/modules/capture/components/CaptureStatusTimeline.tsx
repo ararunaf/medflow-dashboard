@@ -1,7 +1,4 @@
-import {
-  CAPTURE_PHASE_LABELS,
-  CAPTURE_TIMELINE_PHASES,
-} from "../services/state-machine";
+import { CAPTURE_PHASE_LABELS, CAPTURE_TIMELINE_PHASES } from "../services/state-machine";
 import type { CapturePhase, CapturePipelineEvent } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -34,17 +31,14 @@ export function CaptureStatusTimeline({
       <ol className="relative border-l border-border ml-3 space-y-4">
         {CAPTURE_TIMELINE_PHASES.map((step, idx) => {
           const done = idx < currentIdx || phase === "completed";
-          const active = idx === currentIdx && !["failed", "cancelled", "completed"].includes(phase);
+          const active =
+            idx === currentIdx && !["failed", "cancelled", "completed"].includes(phase);
           const event = events.find((e) => eventMatchesPhase(e.type, step));
           return (
             <li key={step} className="ml-6">
               <span
                 className={`absolute -left-1.5 flex h-3 w-3 items-center justify-center rounded-full ring-4 ring-background ${
-                  done
-                    ? "bg-primary"
-                    : active
-                      ? "bg-primary animate-pulse"
-                      : "bg-muted"
+                  done ? "bg-primary" : active ? "bg-primary animate-pulse" : "bg-muted"
                 }`}
               />
               <h3

@@ -13,10 +13,7 @@ import type {
 
 export const CONTRACT_INTELLIGENCE_FILENAME = "contract_intelligence_report.json";
 
-export function buildContractIntelligenceStoragePath(
-  tenantId: string,
-  sessionId: string,
-): string {
+export function buildContractIntelligenceStoragePath(tenantId: string, sessionId: string): string {
   return `${tenantId}/${sessionId}/audit/${CONTRACT_INTELLIGENCE_FILENAME}`;
 }
 

@@ -6,10 +6,7 @@
  * Nunca altera automaticamente os dados da guia.
  */
 import type { AuditFinding } from "../../audit/types/audit-finding";
-import type {
-  CorrectionProposal,
-  CorrectionSource,
-} from "../types/correction-proposal";
+import type { CorrectionProposal, CorrectionSource } from "../types/correction-proposal";
 
 export const CORRECTION_ENGINE_VERSION = "correction_assistant_v1";
 
@@ -121,6 +118,5 @@ export function generateCorrectionProposals(
   findings: AuditFinding[],
   sessionId: string,
 ): CorrectionProposal[] {
-  return getDefaultCorrectionProposalEngine().generateFromFindings(findings, sessionId)
-    .proposals;
+  return getDefaultCorrectionProposalEngine().generateFromFindings(findings, sessionId).proposals;
 }

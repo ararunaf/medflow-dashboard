@@ -1,3 +1,4 @@
+import type { JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { assertCan } from "@/lib/auth/rbac";
 import {
@@ -9,7 +10,7 @@ import {
 export type OperationalBackupBundle = {
   generated_at: string;
   tenant_id: string;
-  tenant_settings: Record<string, unknown> | null;
+  tenant_settings: JsonObject | null;
   recent_errors: Awaited<ReturnType<typeof listRecentOperationalErrors>>;
   recent_logs: Awaited<ReturnType<typeof listRecentOperationalLogs>>;
   health_metrics: Awaited<ReturnType<typeof listRecentHealthMetrics>>;
@@ -28,7 +29,7 @@ export async function buildOperationalBackupBundle(
   return {
     generated_at: new Date().toISOString(),
     tenant_id: ctx.tenantId,
-    tenant_settings: settings ? { ...settings } : null,
+    tenant_settings: settings ? ({ ...settings } as JsonObject) : null,
     recent_errors,
     recent_logs,
     health_metrics,

@@ -3,11 +3,9 @@
  * MEDICFLOW-PREVENTIVE-AUDIT-01
  */
 import { NotFoundError, ValidationError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import {
-  appendCaptureEvent,
-  buildCaptureEvent,
-} from "../../infrastructure/capture-events";
+import { appendCaptureEvent, buildCaptureEvent } from "../../infrastructure/capture-events";
 import { getCaptureSession } from "../../infrastructure/capture-session-store";
 import { loadStructuredGuide } from "../../parser/infrastructure/parser-storage";
 import type { StructuredGuide } from "../../parser/types/structured-guide";
@@ -28,11 +26,11 @@ export type RunCaptureAuditResult = {
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);
@@ -46,14 +44,11 @@ export class PreventiveAuditService {
     ctx: ServiceCtx,
     sessionId: string,
     guide: StructuredGuide,
-    metadata: Record<string, unknown>,
+    metadata: JsonObject,
   ): Promise<RunCaptureAuditResult> {
     const start = Date.now();
 
-    metadata = appendCaptureEvent(
-      metadata,
-      buildCaptureEvent("audit_started", sessionId),
-    );
+    metadata = appendCaptureEvent(metadata, buildCaptureEvent("audit_started", sessionId));
     await persistSessionMetadata(ctx, sessionId, metadata);
 
     try {

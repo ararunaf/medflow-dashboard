@@ -1,4 +1,7 @@
-import type { SecurityAuditEventType, SecurityAuditInput } from "@/lib/security/security-audit-types";
+import type {
+  SecurityAuditEventType,
+  SecurityAuditInput,
+} from "@/lib/security/security-audit-types";
 import { emitMonitor } from "../emit";
 import { messageFromError, normalizeMonitorError } from "../normalize";
 import type { MonitorLogOptions } from "../types";

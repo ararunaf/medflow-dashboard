@@ -10,9 +10,7 @@ function resolveErrorTrackingDsn(): string | undefined {
   if (fromVite?.trim()) return fromVite.trim();
 
   const fromProcess =
-    typeof process !== "undefined"
-      ? process.env?.MEDFLOW_ERROR_TRACKING_DSN?.trim()
-      : undefined;
+    typeof process !== "undefined" ? process.env?.MEDFLOW_ERROR_TRACKING_DSN?.trim() : undefined;
   if (fromProcess) return fromProcess;
 
   return undefined;

@@ -19,17 +19,18 @@ export class OcrProviderNotFoundError extends DomainError {
 
 export class OcrFallbackNotImplementedError extends DomainError {
   constructor(fromProvider: string, toProvider: string) {
-    super(
-      "not_implemented",
-      `Fallback OCR não implementado: ${fromProvider} → ${toProvider}`,
-      { fromProvider, toProvider },
-    );
+    super("not_implemented", `Fallback OCR não implementado: ${fromProvider} → ${toProvider}`, {
+      fromProvider,
+      toProvider,
+    });
     this.name = "OcrFallbackNotImplementedError";
   }
 }
 
 export class OcrOrchestrator {
-  private readonly config: Required<Pick<OcrOrchestratorConfig, "primaryProviderId" | "timeoutMs">> &
+  private readonly config: Required<
+    Pick<OcrOrchestratorConfig, "primaryProviderId" | "timeoutMs">
+  > &
     Pick<OcrOrchestratorConfig, "fallbackProviderIds">;
 
   constructor(
@@ -60,7 +61,10 @@ export class OcrOrchestrator {
    * Executa OCR via provider primário.
    * Fallback para GPT/Tesseract lança OcrFallbackNotImplementedError nesta sprint.
    */
-  async execute(input: OcrOrchestratorInput, preferredProviderId?: string): Promise<OcrOrchestratorResult> {
+  async execute(
+    input: OcrOrchestratorInput,
+    preferredProviderId?: string,
+  ): Promise<OcrOrchestratorResult> {
     const providerId = preferredProviderId ?? this.config.primaryProviderId;
     const provider = this.selectProvider(providerId);
     const started = Date.now();

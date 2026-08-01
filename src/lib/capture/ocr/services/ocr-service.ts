@@ -4,11 +4,9 @@
  * MEDICFLOW-OCR-IMPLEMENTATION-01
  */
 import { NotFoundError, ValidationError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import {
-  appendCaptureEvent,
-  buildCaptureEvent,
-} from "../../infrastructure/capture-events";
+import { appendCaptureEvent, buildCaptureEvent } from "../../infrastructure/capture-events";
 import {
   getCaptureSession,
   transitionCaptureSession,
@@ -31,11 +29,11 @@ export type RunCaptureOcrResult = {
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);
@@ -45,7 +43,7 @@ async function persistSessionMetadata(
 async function emitOcrEvent(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
   eventType:
     | "ocr_started"
     | "ocr_finished"
@@ -53,18 +51,15 @@ async function emitOcrEvent(
     | "provider_used"
     | "processing_time"
     | "average_confidence",
-  payload?: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+  payload?: JsonObject,
+): Promise<JsonObject> {
   const event = buildCaptureEvent(eventType, sessionId, payload);
   const updated = appendCaptureEvent(metadata, event);
   await persistSessionMetadata(ctx, sessionId, updated);
   return updated;
 }
 
-async function downloadDocumentBytes(
-  ctx: ServiceCtx,
-  storagePath: string,
-): Promise<Uint8Array> {
+async function downloadDocumentBytes(ctx: ServiceCtx, storagePath: string): Promise<Uint8Array> {
   const { data, error } = await ctx.client.storage
     .from(CLINICAL_DOCUMENTS_BUCKET)
     .download(storagePath);
@@ -181,10 +176,16 @@ export function getDefaultOcrService(): OcrService {
   return defaultService;
 }
 
-export async function runCaptureOcr(ctx: ServiceCtx, sessionId: string): Promise<RunCaptureOcrResult> {
+export async function runCaptureOcr(
+  ctx: ServiceCtx,
+  sessionId: string,
+): Promise<RunCaptureOcrResult> {
   return getDefaultOcrService().runCaptureOcr(ctx, sessionId);
 }
 
-export async function getCaptureOcrResult(ctx: ServiceCtx, sessionId: string): Promise<RawOcrResult | null> {
+export async function getCaptureOcrResult(
+  ctx: ServiceCtx,
+  sessionId: string,
+): Promise<RawOcrResult | null> {
   return getDefaultOcrService().getOcrResult(ctx, sessionId);
 }

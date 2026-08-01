@@ -113,7 +113,7 @@ export class AzureDocumentIntelligenceProvider implements OcrProvider {
         "Ocp-Apim-Subscription-Key": config.apiKey,
         "Content-Type": input.mimeType,
       },
-      body: input.fileBytes,
+      body: input.fileBytes as unknown as BodyInit,
     });
 
     if (!analyzeRes.ok && analyzeRes.status !== 202) {
@@ -123,8 +123,7 @@ export class AzureDocumentIntelligenceProvider implements OcrProvider {
     }
 
     const operationLocation =
-      analyzeRes.headers.get("operation-location") ??
-      analyzeRes.headers.get("Operation-Location");
+      analyzeRes.headers.get("operation-location") ?? analyzeRes.headers.get("Operation-Location");
 
     if (!operationLocation) {
       throw new DomainError("internal_error", "Azure não retornou Operation-Location.");
@@ -149,7 +148,10 @@ export class AzureDocumentIntelligenceProvider implements OcrProvider {
     });
   }
 
-  private async pollResult(apiKey: string, operationLocation: string): Promise<AzureAnalyzeResponse> {
+  private async pollResult(
+    apiKey: string,
+    operationLocation: string,
+  ): Promise<AzureAnalyzeResponse> {
     for (let i = 0; i < this.maxPolls; i++) {
       const res = await this.fetchFn(operationLocation, {
         headers: { "Ocp-Apim-Subscription-Key": apiKey },

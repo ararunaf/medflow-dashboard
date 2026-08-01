@@ -1,4 +1,5 @@
 import { assertCan } from "@/lib/auth/rbac";
+import type { Database } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { clampJsonMetadata, clampMessage } from "@/lib/services/resilience/resilience-service";
 import type {
@@ -6,6 +7,8 @@ import type {
   ReportPilotIncidentInput,
   UpdatePilotIncidentInput,
 } from "./pilot-execution-types";
+
+type PilotIncidentUpdate = Database["public"]["Tables"]["pilot_incidents"]["Update"];
 
 function contextFields(ctx?: PilotContext) {
   return {
@@ -54,7 +57,7 @@ export async function listPilotIncidents(ctx: ServiceCtx, limit = 50) {
 
 export async function updatePilotIncident(ctx: ServiceCtx, input: UpdatePilotIncidentInput) {
   assertCan(ctx.role, "tenant_settings:write");
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const patch: PilotIncidentUpdate = { updated_at: new Date().toISOString() };
   if (input.incidentStatus) patch.incident_status = input.incidentStatus;
   if (input.followUpStatus) patch.follow_up_status = input.followUpStatus;
   if (input.resolutionNotes !== undefined) {

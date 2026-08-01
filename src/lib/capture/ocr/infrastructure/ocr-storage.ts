@@ -79,7 +79,9 @@ export function buildOcrSummaryFromResult(
   };
 }
 
-export function buildOcrSummaryFromMetadata(metadata: Record<string, unknown>): OcrResultSummary | null {
+export function buildOcrSummaryFromMetadata(
+  metadata: Record<string, unknown>,
+): OcrResultSummary | null {
   const ocr = metadata.ocr as OcrResultSummary | undefined;
   if (!ocr || typeof ocr !== "object") return null;
   return ocr;

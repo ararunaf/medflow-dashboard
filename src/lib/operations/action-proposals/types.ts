@@ -1,4 +1,8 @@
-import type { OperationalActionKind, OperationalActionProposalState } from "@/lib/database.types";
+import type {
+  JsonObject,
+  OperationalActionKind,
+  OperationalActionProposalState,
+} from "@/lib/database.types";
 
 export type OperationalProposalReferenceKind =
   | "score"
@@ -28,7 +32,7 @@ export type OperationalActionProposalDto = {
   summary: string;
   operationalRationale: string;
   references: OperationalProposalReference[];
-  payload: Record<string, unknown>;
+  payload: JsonObject;
   source: OperationalActionProposalSource;
   gptCorrelationId: string | null;
   contextFingerprint: string | null;
@@ -48,7 +52,7 @@ export type SubmitOperationalActionProposalFromGptInput = {
   summary: string;
   operationalRationale: string;
   references: OperationalProposalReference[];
-  payload?: Record<string, unknown>;
+  payload?: JsonObject;
   /** Se true, entra direto na fila de confirmação (ainda sem execução). */
   requestImmediateConfirmation?: boolean;
   contextFingerprint?: string | null;

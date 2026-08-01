@@ -6,7 +6,11 @@ export type { AuditRule, AuditRuleCategory, AuditSeverity } from "./types/audit-
 export { ALL_AUDIT_RULES, getRulesByCategory, getRuleById, AUDIT_RULE_COUNT } from "./rules";
 export { AUDIT_RULE_CATEGORIES, AUDIT_SEVERITIES } from "./types/audit-rule";
 
-export type { AuditFinding, AuditFindingStatus, CorrectionProposal } from "./types/audit-finding";
+export type {
+  AuditFinding,
+  AuditFindingStatus,
+  CorrectionProposal as AuditCorrectionProposal,
+} from "./types/audit-finding";
 export { AUDIT_FINDING_STATUSES } from "./types/audit-finding";
 
 export type {
@@ -27,7 +31,11 @@ export {
 } from "./engine/preventive-audit-engine";
 
 export { buildAuditContext, type AuditRuleContext } from "./engine/audit-context";
-export { calculateAuditScore, buildReportSummary, countBySeverity } from "./engine/score-calculator";
+export {
+  calculateAuditScore,
+  buildReportSummary,
+  countBySeverity,
+} from "./engine/score-calculator";
 
 export {
   AUDIT_REPORT_FILENAME,

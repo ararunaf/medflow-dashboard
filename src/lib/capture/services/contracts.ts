@@ -36,10 +36,7 @@ export type CaptureSignedUrlResult = {
 export interface CaptureStorageService {
   buildStoragePaths(tenantId: string, captureId: string): CaptureStoragePaths;
 
-  uploadOriginal(
-    ctx: ServiceCtx,
-    input: UploadCaptureFileInput,
-  ): Promise<CaptureUploadResult>;
+  uploadOriginal(ctx: ServiceCtx, input: UploadCaptureFileInput): Promise<CaptureUploadResult>;
 
   createSignedUploadUrl(
     ctx: ServiceCtx,
@@ -51,14 +48,14 @@ export interface CaptureStorageService {
 
 /** Orquestração de sessões e transições de estado. */
 export interface CaptureSessionService {
-  createSession(
-    ctx: ServiceCtx,
-    input: CreateCaptureSessionInput,
-  ): Promise<CaptureSessionRecord>;
+  createSession(ctx: ServiceCtx, input: CreateCaptureSessionInput): Promise<CaptureSessionRecord>;
 
   getSession(ctx: ServiceCtx, sessionId: string): Promise<CaptureSessionDetail>;
 
-  getSessionStatus(ctx: ServiceCtx, sessionId: string): Promise<{
+  getSessionStatus(
+    ctx: ServiceCtx,
+    sessionId: string,
+  ): Promise<{
     sessionId: string;
     status: CaptureSessionStatus;
     statusHistory: CaptureSessionRecord["statusHistory"];

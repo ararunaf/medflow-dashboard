@@ -36,10 +36,20 @@ export function isOperationalError(err: unknown): err is OperationalError {
  * Garante o sucesso do server result ou lança `OperationalError`.
  * Use em `queryFn` e dentro de `mutationFn` para que TanStack Query
  * capture o erro de domínio normalmente.
+ *
+ * Overload com `unknown` cobre server functions cuja tipagem de retorno
+ * colapsa para `unknown` (serialização TanStack), sem degradar a
+ * inferência genérica nos call-sites tipados.
  */
-export function unwrap<T>(result: QueryResult<T> | MutationResult<T>): T {
-  if (result.ok) return result.data;
-  throw new OperationalError(result.error.code, result.error.message, result.error.details ?? null);
+export function unwrap<T>(result: QueryResult<T> | MutationResult<T>): T;
+export function unwrap<T>(result: unknown): T;
+export function unwrap<T>(result: QueryResult<T> | MutationResult<T> | unknown): T {
+  const r = result as QueryResult<T> | MutationResult<T>;
+  if (r && typeof r === "object" && "ok" in r) {
+    if (r.ok) return r.data;
+    throw new OperationalError(r.error.code, r.error.message, r.error.details ?? null);
+  }
+  throw new OperationalError("internal_error", "Resposta de servidor inválida.", null);
 }
 
 /** Mapeia códigos de domínio para mensagens curtas de UI. */

@@ -31,9 +31,7 @@ export function runStartupChecks(): StartupCheckResult {
       id: "production_domain",
       ok:
         !publicEnv.isProductionBuild ||
-        (isStagingBuildMode()
-          ? isStagingAppUrl(getInstitutionalDomain())
-          : true),
+        (isStagingBuildMode() ? isStagingAppUrl(getInstitutionalDomain()) : true),
       label: isStagingBuildMode() ? "Domínio staging" : "Domínio institucional (produção)",
       detail: getInstitutionalDomain()
         ? `VITE_MEDFLOW_APP_URL=${getInstitutionalDomain()}`

@@ -68,9 +68,7 @@ export function buildQualityIndicators(
       .sort((a, b) => b.count - a.count) ?? [];
 
   const topGlosaRules =
-    fromLearning.length > 0
-      ? fromLearning.slice(0, 10)
-      : fromSessions.slice(0, 10);
+    fromLearning.length > 0 ? fromLearning.slice(0, 10) : fromSessions.slice(0, 10);
 
   const topCorrectedFields =
     learningMetrics?.byField
@@ -93,9 +91,7 @@ export function buildQualityIndicators(
     rejectionRate: hasLearning
       ? Math.round(learningMetrics.globalRejectRate * 1000) / 10
       : sessionRates.rejectionRate,
-    ocrAccuracyAvg: avg(
-      records.map((r) => r.ocrConfidence).filter((v): v is number => v != null),
-    ),
+    ocrAccuracyAvg: avg(records.map((r) => r.ocrConfidence).filter((v): v is number => v != null)),
     parserAccuracyAvg: avg(
       records.map((r) => r.parserConfidence).filter((v): v is number => v != null),
     ),

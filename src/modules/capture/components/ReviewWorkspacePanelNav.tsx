@@ -1,4 +1,14 @@
-import { FileText, ScanText, Table2, ShieldCheck, BookOpen, ShieldAlert, Wrench, Brain, CheckSquare } from "lucide-react";
+import {
+  FileText,
+  ScanText,
+  Table2,
+  ShieldCheck,
+  BookOpen,
+  ShieldAlert,
+  Wrench,
+  Brain,
+  CheckSquare,
+} from "lucide-react";
 import type { ReviewPanelId } from "@/lib/capture/review";
 import { REVIEW_PANEL_LABELS } from "@/lib/capture/review/review-workspace-service";
 import { cn } from "@/lib/utils";

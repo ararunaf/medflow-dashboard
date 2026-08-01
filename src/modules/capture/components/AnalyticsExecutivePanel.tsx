@@ -38,10 +38,27 @@ export function AnalyticsExecutivePanel({ kpis, busy }: AnalyticsExecutivePanelP
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-        <StatCard label="Guias processadas" value={kpis.totalGuidesProcessed} icon={<BarChart3 className="h-4 w-4" />} />
-        <StatCard label="Aprovadas" value={kpis.guidesApproved} icon={<CheckCircle2 className="h-4 w-4" />} tone="success" />
-        <StatCard label="Reprovadas" value={kpis.guidesRejected} icon={<XCircle className="h-4 w-4" />} />
-        <StatCard label="Em revisão" value={kpis.guidesInReview} icon={<Clock className="h-4 w-4" />} />
+        <StatCard
+          label="Guias processadas"
+          value={kpis.totalGuidesProcessed}
+          icon={<BarChart3 className="h-4 w-4" />}
+        />
+        <StatCard
+          label="Aprovadas"
+          value={kpis.guidesApproved}
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          tone="success"
+        />
+        <StatCard
+          label="Reprovadas"
+          value={kpis.guidesRejected}
+          icon={<XCircle className="h-4 w-4" />}
+        />
+        <StatCard
+          label="Em revisão"
+          value={kpis.guidesInReview}
+          icon={<Clock className="h-4 w-4" />}
+        />
         <StatCard
           label="Críticas"
           value={kpis.guidesCritical}

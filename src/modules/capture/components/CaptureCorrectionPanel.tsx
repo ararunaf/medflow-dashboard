@@ -1,12 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import {
-  Check,
-  FileJson,
-  Pencil,
-  Sparkles,
-  X,
-  XCircle,
-} from "lucide-react";
+import { Check, FileJson, Pencil, Sparkles, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
   CorrectionProposal,
@@ -82,11 +75,7 @@ export function CaptureCorrectionPanel({
   );
 
   const handleDecision = useCallback(
-    async (
-      proposalId: string,
-      action: "accept" | "edit" | "reject",
-      editedValue?: string,
-    ) => {
+    async (proposalId: string, action: "accept" | "edit" | "reject", editedValue?: string) => {
       setActingId(proposalId);
       try {
         const updated = await decideCaptureCorrectionProposal(sessionId, {
@@ -131,8 +120,8 @@ export function CaptureCorrectionPanel({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Analise cada sugestão e decida: aceitar, editar ou rejeitar. Nenhuma correção é
-        aplicada automaticamente na guia nesta versão.
+        Analise cada sugestão e decida: aceitar, editar ou rejeitar. Nenhuma correção é aplicada
+        automaticamente na guia nesta versão.
       </p>
 
       {store ? (
@@ -153,9 +142,7 @@ export function CaptureCorrectionPanel({
         </p>
       ) : null}
 
-      {summary?.error ? (
-        <p className="text-sm text-destructive">{summary.error}</p>
-      ) : null}
+      {summary?.error ? <p className="text-sm text-destructive">{summary.error}</p> : null}
 
       {proposals.length === 0 && store ? (
         <div className="rounded-md border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">
@@ -172,9 +159,7 @@ export function CaptureCorrectionPanel({
               busy={actingId === proposal.proposalId}
               onAccept={() => void handleDecision(proposal.proposalId, "accept")}
               onReject={() => void handleDecision(proposal.proposalId, "reject")}
-              onEdit={(value) =>
-                void handleDecision(proposal.proposalId, "edit", value)
-              }
+              onEdit={(value) => void handleDecision(proposal.proposalId, "edit", value)}
             />
           ))}
         </ul>
@@ -206,9 +191,7 @@ function ProposalRow({
   onEdit: (value: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState(
-    proposal.editedValue ?? proposal.suggestedValue ?? "",
-  );
+  const [editValue, setEditValue] = useState(proposal.editedValue ?? proposal.suggestedValue ?? "");
 
   const isPending = proposal.status === "pending";
   const displayValue =
@@ -239,7 +222,8 @@ function ProposalRow({
           </span>
         ) : null}
         <span className={`text-xs font-medium ${confidenceStyle(proposal.confidence)}`}>
-          Confiança {Math.round(proposal.confidence * 100)}% ({confidenceLabel(proposal.confidence)})
+          Confiança {Math.round(proposal.confidence * 100)}% ({confidenceLabel(proposal.confidence)}
+          )
         </span>
       </div>
 

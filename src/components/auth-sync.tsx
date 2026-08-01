@@ -21,10 +21,10 @@ export function AuthSync() {
       const lostSession =
         event === "SIGNED_OUT" ||
         (event === "TOKEN_REFRESHED" && !session) ||
-        event === "USER_DELETED";
+        (event as string) === "USER_DELETED";
 
       const invalidToken =
-        event === "TOKEN_REFRESH_FAILED" ||
+        (event as string) === "TOKEN_REFRESH_FAILED" ||
         (typeof event === "string" && /invalid/i.test(event) && !session);
 
       if (lostSession || invalidToken) {

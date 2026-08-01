@@ -3,9 +3,15 @@ import { buildReviewHeaderMetrics } from "@/lib/capture/review/review-workspace-
 import type { ReviewPanelId, ReviewApprovalStatus } from "@/lib/capture/review";
 import type { ReviewWorkspaceSnapshot } from "@/lib/capture/review/review-workspace-store";
 import type { AuditReport, AuditReportSummaryMeta } from "@/lib/capture/audit";
-import type { ContractIntelligenceReport, ContractIntelligenceSummaryMeta } from "@/lib/capture/contract";
+import type {
+  ContractIntelligenceReport,
+  ContractIntelligenceSummaryMeta,
+} from "@/lib/capture/contract";
 import type { RiskAssessmentReport, RiskAssessmentSummaryMeta } from "@/lib/capture/risk";
-import type { CorrectionProposalStore, CorrectionProposalSummaryMeta } from "@/lib/capture/correction";
+import type {
+  CorrectionProposalStore,
+  CorrectionProposalSummaryMeta,
+} from "@/lib/capture/correction";
 import type { OcrResultSummary, RawOcrResult } from "@/lib/capture/ocr";
 import type { StructuredGuide, StructuredGuideSummary } from "@/lib/capture/parser";
 import { dbStatusToPhase } from "../utils/status-map";

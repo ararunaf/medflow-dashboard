@@ -82,10 +82,7 @@ export class ContractKnowledgeEngine {
       };
     }
 
-    const version = this.registry.getActiveContractVersion(
-      operator.ansCode,
-      options.tenantId,
-    );
+    const version = this.registry.getActiveContractVersion(operator.ansCode, options.tenantId);
 
     if (!version) {
       return {
@@ -143,7 +140,8 @@ export class ContractKnowledgeEngine {
         return false;
       }
       if (rule.procedureType !== "*") {
-        const matchesDefault = rule.procedureType === PROCEDURE_TYPE_BY_GUIDE[attendanceType.guideType];
+        const matchesDefault =
+          rule.procedureType === PROCEDURE_TYPE_BY_GUIDE[attendanceType.guideType];
         const matchesProcedure = attendanceType.procedureTypes.some(
           (pt) => pt === rule.procedureType || pt.startsWith(rule.procedureType),
         );

@@ -52,9 +52,7 @@ export function proposalToLearningRecord(
   if (!action || !proposal.decidedAt) return null;
 
   const decidedAtMs = new Date(proposal.decidedAt).getTime();
-  const generatedAtMs = proposalGeneratedAt
-    ? new Date(proposalGeneratedAt).getTime()
-    : decidedAtMs;
+  const generatedAtMs = proposalGeneratedAt ? new Date(proposalGeneratedAt).getTime() : decidedAtMs;
   const timeToDecisionMs = Math.max(0, decidedAtMs - generatedAtMs);
 
   return {
@@ -131,13 +129,9 @@ function computeRates(records: LearningRecord[]) {
   const accepted = records.filter((r) => r.accepted).length;
   const edited = records.filter((r) => r.edited).length;
   const rejected = records.filter((r) => r.rejected).length;
-  const avgConfidence =
-    records.reduce((sum, r) => sum + r.confidence, 0) / total;
-  const times = records
-    .map((r) => r.timeToDecisionMs ?? 0)
-    .filter((t) => t >= 0);
-  const avgTime =
-    times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
+  const avgConfidence = records.reduce((sum, r) => sum + r.confidence, 0) / total;
+  const times = records.map((r) => r.timeToDecisionMs ?? 0).filter((t) => t >= 0);
+  const avgTime = times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
 
   return {
     acceptanceRate: roundRate(accepted / total),
@@ -149,9 +143,7 @@ function computeRates(records: LearningRecord[]) {
   };
 }
 
-export function calculateRuleMetrics(
-  records: LearningRecord[],
-): RuleMetrics[] {
+export function calculateRuleMetrics(records: LearningRecord[]): RuleMetrics[] {
   const byRule = new Map<string, LearningRecord[]>();
   for (const record of records) {
     const list = byRule.get(record.ruleId) ?? [];
@@ -171,9 +163,7 @@ export function calculateRuleMetrics(
     .sort((a, b) => b.usageCount - a.usageCount);
 }
 
-export function calculateFieldMetrics(
-  records: LearningRecord[],
-): FieldMetrics[] {
+export function calculateFieldMetrics(records: LearningRecord[]): FieldMetrics[] {
   const byField = new Map<string, LearningRecord[]>();
   for (const record of records) {
     const list = byField.get(record.field) ?? [];
@@ -196,9 +186,7 @@ export function calculateFieldMetrics(
     .sort((a, b) => b.usageCount - a.usageCount);
 }
 
-export function calculateTemporalEvolution(
-  records: LearningRecord[],
-): TemporalBucket[] {
+export function calculateTemporalEvolution(records: LearningRecord[]): TemporalBucket[] {
   const byDay = new Map<string, LearningRecord[]>();
   for (const record of records) {
     const day = record.timestamp.slice(0, 10);
@@ -222,9 +210,7 @@ export function calculateTemporalEvolution(
     });
 }
 
-export function calculateMetricsFromRecords(
-  store: LearningRecordsStore,
-): LearningMetricsStore {
+export function calculateMetricsFromRecords(store: LearningRecordsStore): LearningMetricsStore {
   const { records } = store;
   const global = computeRates(records);
 

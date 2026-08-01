@@ -43,10 +43,7 @@ function severityPriority(severity: AuditSeverity): CorrectionPriority {
   return "baixa";
 }
 
-function maxSeverity(
-  a: AuditSeverity | null,
-  b: AuditSeverity,
-): AuditSeverity {
+function maxSeverity(a: AuditSeverity | null, b: AuditSeverity): AuditSeverity {
   if (!a) return b;
   return SEVERITY_ORDER[b] > SEVERITY_ORDER[a] ? b : a;
 }
@@ -255,10 +252,7 @@ export function scoreGlosaRisk(input: RiskScorerInput): RiskScorerResult {
   const categoryMap = new Map<AuditRuleCategory, CategoryRiskScore>();
   for (const fr of findingRisks) {
     const existing = categoryMap.get(fr.category);
-    const cappedScore = Math.min(
-      CATEGORY_SCORE_CAPS[fr.category] ?? 50,
-      fr.riskScore,
-    );
+    const cappedScore = Math.min(CATEGORY_SCORE_CAPS[fr.category] ?? 50, fr.riskScore);
     if (!existing) {
       categoryMap.set(fr.category, {
         category: fr.category,
@@ -337,9 +331,7 @@ export function scoreGlosaRisk(input: RiskScorerInput): RiskScorerResult {
       return b.riskScore - a.riskScore;
     })
     .map((fr, index) => {
-      const finding = openFindings.find(
-        (f) => f.ruleId === fr.ruleId && f.field === fr.field,
-      );
+      const finding = openFindings.find((f) => f.ruleId === fr.ruleId && f.field === fr.field);
       return {
         rank: index + 1,
         ruleId: fr.ruleId,
@@ -403,9 +395,7 @@ function buildRecommendations(
   }
 
   if (parserConfidence < CONFIDENCE_RISK_THRESHOLD) {
-    recs.push(
-      "Confiança do parser abaixo do limiar — revisar campos extraídos manualmente.",
-    );
+    recs.push("Confiança do parser abaixo do limiar — revisar campos extraídos manualmente.");
   }
 
   return recs;

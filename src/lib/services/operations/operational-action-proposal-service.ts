@@ -2,6 +2,7 @@ import { mapPostgresError, PermissionError, ValidationError } from "@/lib/domain
 import { expectUuid } from "@/lib/domain/operations/validation";
 import { isOperationalManager } from "@/lib/auth/rbac";
 import type {
+  JsonObject,
   OperationalActionKind,
   OperationalActionProposalAuditEvent,
   OperationalActionProposalState,
@@ -84,7 +85,7 @@ function rowToDto(row: ProposalRow): OperationalActionProposalDto {
     references: adaptReferences(row.references_json),
     payload:
       row.payload_json && typeof row.payload_json === "object" && !Array.isArray(row.payload_json)
-        ? (row.payload_json as Record<string, unknown>)
+        ? (row.payload_json as JsonObject)
         : {},
     source: (row.source === "gpt_tool" ? "gpt_tool" : "manual") as OperationalActionProposalSource,
     gptCorrelationId: row.gpt_correlation_id,

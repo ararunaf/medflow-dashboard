@@ -1,5 +1,8 @@
 import type { OperatorComparisonRow } from "@/lib/capture/analytics";
-import { formatFinancialImpact, formatProcessingDuration } from "@/lib/capture/processing/dashboard";
+import {
+  formatFinancialImpact,
+  formatProcessingDuration,
+} from "@/lib/capture/processing/dashboard";
 import { Building2 } from "lucide-react";
 
 type AnalyticsOperatorsPanelProps = {
@@ -52,9 +55,7 @@ export function AnalyticsOperatorsPanel({ operators, busy }: AnalyticsOperatorsP
                   <td className="px-3 py-2 text-right tabular-nums">
                     {formatFinancialImpact(row.financialValue)}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
-                    {row.avgRiskScore ?? "—"}
-                  </td>
+                  <td className="px-3 py-2 text-right tabular-nums">{row.avgRiskScore ?? "—"}</td>
                   <td className="px-3 py-2 text-right">
                     {formatProcessingDuration(row.avgProcessingTimeMs)}
                   </td>

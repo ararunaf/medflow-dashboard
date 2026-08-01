@@ -110,7 +110,7 @@ export const reportOperationalIncidentFn = createServerFn({ method: "POST" })
       }
       return {
         kind: "error" as const,
-        severity: sev,
+        severity: sev as "operational" | "critical",
         source,
         errorCode: optionalString(o.errorCode, "errorCode"),
         message: optionalString(o.message, "message") ?? "Erro operacional",
@@ -124,7 +124,7 @@ export const reportOperationalIncidentFn = createServerFn({ method: "POST" })
     }
     return {
       kind: "log" as const,
-      level,
+      level: level as "info" | "warning" | "error",
       category: optionalString(o.category, "category") ?? "client",
       message: optionalString(o.message, "message") ?? "Evento operacional",
     };

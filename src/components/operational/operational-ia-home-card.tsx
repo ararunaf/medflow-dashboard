@@ -7,6 +7,7 @@ import { useOperationalActionProposalsQuery } from "@/hooks/use-operational-acti
 import { useOperationalAlerts } from "@/hooks/use-operational-alerts";
 import { useOperationalCommandCenterQuery } from "@/hooks/use-operational-metrics";
 import type { OperationalActionProposalState } from "@/lib/database.types";
+import type { OperationalActionProposalDto } from "@/lib/operations/action-proposals";
 
 const PENDING_PROPOSAL_STATES: OperationalActionProposalState[] = [
   "suggested",
@@ -19,11 +20,11 @@ export function OperationalIaHomeCard() {
   const opsAlerts = useOperationalAlerts(cc.data);
   const proposals = useOperationalActionProposalsQuery({ enabled: true });
 
-  const activeAlerts =
-    opsAlerts.counts.critical + opsAlerts.counts.warning + opsAlerts.counts.info;
+  const activeAlerts = opsAlerts.counts.critical + opsAlerts.counts.warning + opsAlerts.counts.info;
   const recommendations = cc.data?.recommendations.items.length ?? 0;
-  const pendingProposals = (proposals.data ?? []).filter((p) =>
-    PENDING_PROPOSAL_STATES.includes(p.state),
+  const proposalRows = (proposals.data ?? []) as OperationalActionProposalDto[];
+  const pendingProposals = proposalRows.filter((p) =>
+    PENDING_PROPOSAL_STATES.includes(p.effectiveState),
   ).length;
 
   const loading = cc.isLoading || proposals.isLoading;
@@ -49,6 +50,7 @@ export function OperationalIaHomeCard() {
         </div>
         <Link
           to="/central"
+          search={{ opsFocus: undefined }}
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
         >
           Abrir Central de IA

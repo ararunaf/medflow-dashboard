@@ -21,10 +21,7 @@ import {
   downloadStructuredGuideJson,
   fetchCaptureStructuredGuide,
 } from "../services/parser-client";
-import {
-  downloadAuditReportJson,
-  fetchCaptureAuditReport,
-} from "../services/audit-client";
+import { downloadAuditReportJson, fetchCaptureAuditReport } from "../services/audit-client";
 import {
   downloadCorrectionProposalsJson,
   fetchCaptureCorrectionProposals,
@@ -52,8 +49,9 @@ export function CapturaPage() {
   const [structuredGuide, setStructuredGuide] = useState<StructuredGuide | null>(null);
   const [auditSummary, setAuditSummary] = useState<AuditReportSummaryMeta | null>(null);
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
-  const [correctionSummary, setCorrectionSummary] =
-    useState<CorrectionProposalSummaryMeta | null>(null);
+  const [correctionSummary, setCorrectionSummary] = useState<CorrectionProposalSummaryMeta | null>(
+    null,
+  );
   const [correctionStore, setCorrectionStore] = useState<CorrectionProposalStore | null>(null);
   const [ocrBusy, setOcrBusy] = useState(false);
   const [parserBusy, setParserBusy] = useState(false);
@@ -138,7 +136,7 @@ export function CapturaPage() {
         const result = await processFile(
           file,
           channel,
-          phase === "failed" ? sessionId ?? undefined : undefined,
+          phase === "failed" ? (sessionId ?? undefined) : undefined,
         );
         const id = result.sessionId;
         setSessionId(id);
@@ -220,7 +218,8 @@ export function CapturaPage() {
 
   const displayPreview = previewUrl ?? localPreview ?? view.previewUrl;
   const displayPhase = sessionId ? view.phase : phase;
-  const displayFile = view.file ?? (filename ? { name: filename, mimeType: "", byteLength: 0, version: 1 } : null);
+  const displayFile =
+    view.file ?? (filename ? { name: filename, mimeType: "", byteLength: 0, version: 1 } : null);
 
   return (
     <AppShell>
@@ -292,9 +291,7 @@ export function CapturaPage() {
 
       {sessionId ? (
         <section className="mt-8 space-y-6">
-          <p className="text-xs text-muted-foreground font-mono truncate">
-            Sessão: {sessionId}
-          </p>
+          <p className="text-xs text-muted-foreground font-mono truncate">Sessão: {sessionId}</p>
           <CaptureOcrPanel
             phase={displayPhase}
             summary={ocrSummary}

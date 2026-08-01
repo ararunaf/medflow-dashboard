@@ -66,7 +66,9 @@ export function validatePublicEnv(): PublicEnvStatus {
   }
   if (isStagingBuild && appUrl) {
     if (isLocalhostUrl(appUrl)) {
-      warnings.push(`VITE_MEDFLOW_APP_URL não pode usar localhost em staging — use ${STAGING_APP_URL}.`);
+      warnings.push(
+        `VITE_MEDFLOW_APP_URL não pode usar localhost em staging — use ${STAGING_APP_URL}.`,
+      );
     } else if (!isStagingAppUrl(appUrl)) {
       warnings.push(`VITE_MEDFLOW_APP_URL deve ser ${STAGING_APP_URL} em builds staging.`);
     }

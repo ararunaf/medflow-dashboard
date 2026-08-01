@@ -76,7 +76,12 @@ function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-10 bg-background">
         <div className="w-full max-w-sm">
           <div className="flex justify-center mb-8 bg-surface rounded-2xl p-6 border border-border">
-            <img src={logo} alt={BRANDING.productName} style={{ height: "6.25rem" }} className="w-auto" />
+            <img
+              src={logo}
+              alt={BRANDING.productName}
+              style={{ height: "6.25rem" }}
+              className="w-auto"
+            />
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-center">Entrar</h1>
@@ -250,6 +255,7 @@ function LoginPage() {
                 <Label htmlFor="password">Senha</Label>
                 <Link
                   to="/login/esqueci-senha"
+                  search={{ reason: null }}
                   className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap"
                 >
                   Esqueci minha senha?

@@ -2,7 +2,7 @@
  * Fábricas de payloads de eventos operacionais — metadata normalizado para
  * consultas de timeline (shift_id, professional_id, etc.).
  */
-import type { OperationalEventSeverity } from "@/lib/database.types";
+import type { JsonObject, OperationalEventSeverity } from "@/lib/database.types";
 import type {
   ShiftAssignmentRow,
   ShiftRow,
@@ -27,7 +27,7 @@ export type OperationalEventPayload = {
     | "operational_action_triggered";
   severity: OperationalEventSeverity;
   description: string;
-  metadata: Record<string, unknown>;
+  metadata: JsonObject;
 };
 
 export function shiftCreatedEvent(shift: ShiftRow): OperationalEventPayload {

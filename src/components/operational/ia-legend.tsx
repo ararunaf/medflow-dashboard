@@ -10,10 +10,7 @@ export function IaLegend({ className }: { className?: string }) {
         className,
       )}
     >
-      <Brain
-        className="h-3 w-3 shrink-0 text-violet-600 dark:text-violet-400"
-        aria-hidden
-      />
+      <Brain className="h-3 w-3 shrink-0 text-violet-600 dark:text-violet-400" aria-hidden />
       <span>Recursos identificados com este símbolo utilizam Inteligência Artificial.</span>
     </p>
   );

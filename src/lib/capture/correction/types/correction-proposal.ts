@@ -56,3 +56,9 @@ export type CorrectionProposalSummaryMeta = {
   storagePath?: string;
   error?: string;
 };
+
+export type UpdateCorrectionProposalInput = {
+  proposalId: string;
+  action: "accept" | "edit" | "reject";
+  editedValue?: string;
+};

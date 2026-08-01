@@ -11,11 +11,7 @@ import type { RiskLevel } from "../risk/types/risk-assessment";
 import { applyProcessingFilters, countByQueue } from "./filters";
 import { buildProcessingDashboard } from "./dashboard";
 import { resolveProcessingQueue } from "./queue-mapper";
-import {
-  computePriorityScore,
-  isCriticalGuide,
-  sortByPriority,
-} from "./prioritizer";
+import { computePriorityScore, isCriticalGuide, sortByPriority } from "./prioritizer";
 import type {
   ProcessingCenterListResult,
   ProcessingCenterQueryInput,

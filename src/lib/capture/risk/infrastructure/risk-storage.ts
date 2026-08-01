@@ -6,17 +6,11 @@
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
-import type {
-  RiskAssessmentReport,
-  RiskAssessmentSummaryMeta,
-} from "../types/risk-assessment";
+import type { RiskAssessmentReport, RiskAssessmentSummaryMeta } from "../types/risk-assessment";
 
 export const RISK_ASSESSMENT_FILENAME = "risk_assessment.json";
 
-export function buildRiskAssessmentStoragePath(
-  tenantId: string,
-  sessionId: string,
-): string {
+export function buildRiskAssessmentStoragePath(tenantId: string, sessionId: string): string {
   return `${tenantId}/${sessionId}/audit/${RISK_ASSESSMENT_FILENAME}`;
 }
 

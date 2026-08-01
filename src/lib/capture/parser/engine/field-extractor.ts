@@ -2,7 +2,12 @@
  * Extração de campos TISS a partir de linhas OCR.
  * MEDICFLOW-TISS-PARSER-01
  */
-import type { OcrBoundingBox, OcrLine, OcrPage, RawOcrResult } from "../../ocr/types/raw-ocr-result";
+import type {
+  OcrBoundingBox,
+  OcrLine,
+  OcrPage,
+  RawOcrResult,
+} from "../../ocr/types/raw-ocr-result";
 import { applyNormalizer } from "../normalizers";
 import type { TemplateFieldDef } from "../templates";
 import type {
@@ -70,10 +75,17 @@ function buildPosition(line: IndexedOcrLine): StructuredFieldPosition {
   };
 }
 
-function extractValueFromLine(lineText: string, labelPattern: RegExp, valuePattern?: RegExp): string | null {
+function extractValueFromLine(
+  lineText: string,
+  labelPattern: RegExp,
+  valuePattern?: RegExp,
+): string | null {
   const match = lineText.match(labelPattern);
   if (!match) return null;
-  const afterLabel = lineText.slice(match.index! + match[0].length).replace(/^[\s:.\-–—]+/, "").trim();
+  const afterLabel = lineText
+    .slice(match.index! + match[0].length)
+    .replace(/^[\s:.\-–—]+/, "")
+    .trim();
   if (afterLabel.length > 0) {
     if (valuePattern) {
       const valMatch = afterLabel.match(valuePattern);
@@ -84,7 +96,11 @@ function extractValueFromLine(lineText: string, labelPattern: RegExp, valuePatte
   return null;
 }
 
-function findValueOnNextLine(lines: IndexedOcrLine[], startIdx: number, valuePattern?: RegExp): {
+function findValueOnNextLine(
+  lines: IndexedOcrLine[],
+  startIdx: number,
+  valuePattern?: RegExp,
+): {
   rawValue: string;
   line: IndexedOcrLine;
   confidence: number;
@@ -105,7 +121,9 @@ function findValueOnNextLine(lines: IndexedOcrLine[], startIdx: number, valuePat
 }
 
 function looksLikeLabel(text: string): boolean {
-  return /[:]$/.test(text.trim()) || /^(nome|data|cpf|cnpj|crm|cid|tuss|cns|senha|guia)/i.test(text);
+  return (
+    /[:]$/.test(text.trim()) || /^(nome|data|cpf|cnpj|crm|cid|tuss|cns|senha|guia)/i.test(text)
+  );
 }
 
 function determineStatus(
@@ -188,17 +206,19 @@ export function extractFields(
 
     const uniqueCandidates = dedupeCandidatesByLine(candidates);
     const distinctLineCandidates = uniqueCandidates.filter(
-      (c, idx, arr) => arr.findIndex((x) => x.line.lineIndex === c.line.lineIndex && x.rawValue === c.rawValue) === idx,
+      (c, idx, arr) =>
+        arr.findIndex((x) => x.line.lineIndex === c.line.lineIndex && x.rawValue === c.rawValue) ===
+        idx,
     );
     const isDuplicate =
       distinctLineCandidates.length > 1 &&
       new Set(distinctLineCandidates.map((c) => c.line.lineIndex)).size > 1;
     const best = distinctLineCandidates.sort((a, b) => b.confidence - a.confidence)[0];
 
-    let rawValue: string | null = best?.rawValue ?? null;
-    let confidence = best?.confidence ?? 0;
-    let position: StructuredFieldPosition | null = best ? buildPosition(best.line) : null;
-    let ocrOrigin = best
+    const rawValue: string | null = best?.rawValue ?? null;
+    const confidence = best?.confidence ?? 0;
+    const position: StructuredFieldPosition | null = best ? buildPosition(best.line) : null;
+    const ocrOrigin = best
       ? {
           lineText: best.line.text,
           wordTexts: best.line.words,
@@ -268,7 +288,7 @@ function extractProcedureLines(
   const procedureLines: StructuredProcedureLine[] = [];
   const tussPattern = /\b(\d{8})\b/;
   const tussPatternShort = /\b(\d{6,7})\b/;
-  const datePattern = /\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/;
+  const datePattern = /\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}/;
   const valuePattern = /R?\$?\s*([\d.,]+)/;
   const skipPattern = /^(registro\s*ans|cnpj|crm|cpf|cns|guia|senha|nome|operadora|data\s)/i;
 

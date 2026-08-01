@@ -1,15 +1,13 @@
 /**
  * Emissão de eventos do pipeline de captura (persistidos em metadata.captureEvents).
  */
-import type {
-  CapturePipelineEvent,
-  CapturePipelineEventType,
-} from "@/modules/capture/types";
+import type { JsonObject } from "@/lib/database.types";
+import type { CapturePipelineEvent, CapturePipelineEventType } from "@/modules/capture/types";
 
 export function buildCaptureEvent(
   type: CapturePipelineEventType,
   sessionId: string,
-  payload?: Record<string, unknown>,
+  payload?: JsonObject,
 ): CapturePipelineEvent {
   return {
     type,
@@ -19,17 +17,14 @@ export function buildCaptureEvent(
   };
 }
 
-export function appendCaptureEvent(
-  metadata: Record<string, unknown>,
-  event: CapturePipelineEvent,
-): Record<string, unknown> {
+export function appendCaptureEvent(metadata: JsonObject, event: CapturePipelineEvent): JsonObject {
   const existing = Array.isArray(metadata.captureEvents)
     ? (metadata.captureEvents as CapturePipelineEvent[])
     : [];
   return {
     ...metadata,
     captureEvents: [...existing, event],
-  };
+  } as JsonObject;
 }
 
 export function eventForDbStatusTransition(

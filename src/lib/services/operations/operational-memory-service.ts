@@ -1,4 +1,4 @@
-import type { Database, Json } from "@/lib/database.types";
+import type { Database, Json, JsonObject } from "@/lib/database.types";
 import type { OperationalMutationExecutionState } from "@/lib/database.types";
 import type { OperationalRecommendationFeedbackType } from "@/lib/database.types";
 import { isOperationalManager } from "@/lib/auth/rbac";
@@ -55,9 +55,9 @@ function asLearningSignals(v: unknown): OperationalMemoryLearningSignals {
   return v as OperationalMemoryLearningSignals;
 }
 
-function asRefs(v: unknown): Record<string, unknown> {
+function asRefs(v: unknown): JsonObject {
   if (!v || typeof v !== "object" || Array.isArray(v)) return {};
-  return v as Record<string, unknown>;
+  return v as JsonObject;
 }
 
 function rowToInsight(row: MemoryRow): OperationalMemoryInsight {

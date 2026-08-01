@@ -9,8 +9,7 @@ import { getSupabasePublicConfig } from "@/lib/supabase/config";
 let adminClient: SupabaseClient<Database> | null | undefined;
 
 function resolveServiceRoleKey(): string | null {
-  const key =
-    (typeof process !== "undefined" && process.env?.SUPABASE_SERVICE_ROLE_KEY) || null;
+  const key = (typeof process !== "undefined" && process.env?.SUPABASE_SERVICE_ROLE_KEY) || null;
   return typeof key === "string" && key.length > 0 ? key : null;
 }
 

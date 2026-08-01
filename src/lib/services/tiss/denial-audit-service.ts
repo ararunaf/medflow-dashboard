@@ -1,5 +1,5 @@
 import { mapPostgresError } from "@/lib/domain/operations/errors";
-import type { Database, Json } from "@/lib/database.types";
+import type { Database, Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 
 type AuditInsert = Database["public"]["Tables"]["tiss_denial_audit"]["Insert"];
@@ -20,7 +20,7 @@ export async function appendDenialAudit(
   input: {
     denial_id: string;
     action: DenialAuditAction;
-    payload?: Record<string, unknown>;
+    payload?: JsonObject;
     soft?: boolean;
   },
 ): Promise<void> {

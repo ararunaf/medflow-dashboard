@@ -4,6 +4,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { ValidationError, mapPostgresError } from "@/lib/domain/operations/errors";
 import type {
+  Json,
+  JsonObject,
   TissAppealStatus,
   TissDenialStatus,
   TissDenialType,
@@ -217,9 +219,13 @@ export const createInsuranceProviderFn = createServerFn({ method: "POST" })
       ansCode: expectOptionalString(o.ansCode, "ansCode", 32),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createInsuranceProvider(ctx, { name: data.name, ans_code: data.ansCode || undefined }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createInsuranceProvider(ctx, {
+          name: data.name,
+          ans_code: data.ansCode || undefined,
+        })) as Json,
     );
   });
 
@@ -232,13 +238,14 @@ export const createInsuranceContractFn = createServerFn({ method: "POST" })
       name: expectOptionalString(o.name, "name", 120),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createInsuranceContract(ctx, {
-        insurance_provider_id: data.insuranceProviderId,
-        contract_number: data.contractNumber,
-        name: data.name || undefined,
-      }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createInsuranceContract(ctx, {
+          insurance_provider_id: data.insuranceProviderId,
+          contract_number: data.contractNumber,
+          name: data.name || undefined,
+        })) as Json,
     );
   });
 
@@ -250,17 +257,18 @@ export const createInsuranceRuleFn = createServerFn({ method: "POST" })
       name: expectNonEmptyString(o.name, "name"),
       parameters:
         typeof o.parameters === "object" && o.parameters !== null && !Array.isArray(o.parameters)
-          ? (o.parameters as Record<string, unknown>)
+          ? (o.parameters as JsonObject)
           : {},
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createInsuranceRule(ctx, {
-        insurance_contract_id: data.insuranceContractId,
-        name: data.name,
-        parameters: data.parameters,
-      }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createInsuranceRule(ctx, {
+          insurance_contract_id: data.insuranceContractId,
+          name: data.name,
+          parameters: data.parameters,
+        })) as Json,
     );
   });
 
@@ -275,15 +283,16 @@ export const createTussProcedureFn = createServerFn({ method: "POST" })
       defaultValue: typeof o.defaultValue === "number" ? o.defaultValue : 0,
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createTussProcedure(ctx, {
-        code: data.code,
-        description: data.description,
-        specialty: data.specialty,
-        operational_group: data.operationalGroup,
-        default_value: data.defaultValue,
-      }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createTussProcedure(ctx, {
+          code: data.code,
+          description: data.description,
+          specialty: data.specialty,
+          operational_group: data.operationalGroup,
+          default_value: data.defaultValue,
+        })) as Json,
     );
   });
 
@@ -302,16 +311,17 @@ export const createTissGuideFn = createServerFn({ method: "POST" })
       attendanceDate: expectDateISO(o.attendanceDate, "attendanceDate"),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createTissGuide(ctx, {
-        guide_type: data.guideType,
-        patient_name: data.patientName,
-        insurance_provider_id: data.insuranceProviderId,
-        insurance_contract_id: data.insuranceContractId,
-        professional_id: data.professionalId,
-        attendance_date: data.attendanceDate,
-      }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createTissGuide(ctx, {
+          guide_type: data.guideType,
+          patient_name: data.patientName,
+          insurance_provider_id: data.insuranceProviderId,
+          insurance_contract_id: data.insuranceContractId,
+          professional_id: data.professionalId,
+          attendance_date: data.attendanceDate,
+        })) as Json,
     );
   });
 
@@ -323,8 +333,10 @@ export const setTissGuideStatusFn = createServerFn({ method: "POST" })
       status: expectTissGuideStatus(o.status, "status"),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) => setTissGuideStatus(ctx, data.guideId, data.status));
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) => (await setTissGuideStatus(ctx, data.guideId, data.status)) as Json,
+    );
   });
 
 export const addTissGuideItemFn = createServerFn({ method: "POST" })
@@ -347,15 +359,16 @@ export const addTissGuideItemFn = createServerFn({ method: "POST" })
       executionDate: expectDateISO(o.executionDate, "executionDate"),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      addTissGuideItem(ctx, {
-        guide_id: data.guideId,
-        procedure_id: data.procedureId,
-        quantity: data.quantity,
-        unit_value: data.unitValue,
-        execution_date: data.executionDate,
-      }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await addTissGuideItem(ctx, {
+          guide_id: data.guideId,
+          procedure_id: data.procedureId,
+          quantity: data.quantity,
+          unit_value: data.unitValue,
+          execution_date: data.executionDate,
+        })) as Json,
     );
   });
 
@@ -373,8 +386,8 @@ export const createTissBatchFn = createServerFn({ method: "POST" })
     const o = requireObject(raw);
     return { competence: expectDateISO(o.competence, "competence") };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) => createTissBatch(ctx, data.competence));
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(async (ctx) => (await createTissBatch(ctx, data.competence)) as Json);
   });
 
 export const assignGuideToBatchFn = createServerFn({ method: "POST" })
@@ -405,8 +418,8 @@ export const closeTissBatchFn = createServerFn({ method: "POST" })
     const o = requireObject(raw);
     return { batchId: expectUuid(o.batchId, "batchId") };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) => closeTissBatch(ctx, data.batchId));
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(async (ctx) => (await closeTissBatch(ctx, data.batchId)) as Json);
   });
 
 export const exportTissBatchXmlFn = createServerFn({ method: "POST" })
@@ -466,9 +479,13 @@ export const createTissReturnFn = createServerFn({ method: "POST" })
       returnReference: expectNonEmptyString(o.returnReference, "returnReference", 120),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createTissReturn(ctx, { batch_id: data.batchId, return_reference: data.returnReference }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createTissReturn(ctx, {
+          batch_id: data.batchId,
+          return_reference: data.returnReference,
+        })) as Json,
     );
   });
 
@@ -480,9 +497,10 @@ export const updateTissReturnStatusFn = createServerFn({ method: "POST" })
       status: expectTissReturnStatus(o.status, "status"),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      updateTissReturnStatus(ctx, data.returnId, { status: data.status }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await updateTissReturnStatus(ctx, data.returnId, { status: data.status })) as Json,
     );
   });
 
@@ -515,17 +533,18 @@ export const createTissDenialFn = createServerFn({ method: "POST" })
           : undefined,
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createTissDenial(ctx, {
-        return_id: data.returnId,
-        guide_id: data.guideId,
-        denial_type: data.denialType,
-        denial_reason_code: data.denialReasonCode || undefined,
-        denial_reason_description: data.denialReasonDescription || undefined,
-        denied_value: data.deniedValue,
-        status: data.status,
-      }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createTissDenial(ctx, {
+          return_id: data.returnId,
+          guide_id: data.guideId,
+          denial_type: data.denialType,
+          denial_reason_code: data.denialReasonCode || undefined,
+          denial_reason_description: data.denialReasonDescription || undefined,
+          denied_value: data.deniedValue,
+          status: data.status,
+        })) as Json,
     );
   });
 
@@ -569,8 +588,10 @@ export const updateTissDenialStatusFn = createServerFn({ method: "POST" })
     }
     return { denialId: expectUuid(o.denialId, "denialId"), patch };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) => updateTissDenialStatus(ctx, data.denialId, data.patch));
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) => (await updateTissDenialStatus(ctx, data.denialId, data.patch)) as Json,
+    );
   });
 
 export const createTissDenialAppealFn = createServerFn({ method: "POST" })
@@ -581,9 +602,13 @@ export const createTissDenialAppealFn = createServerFn({ method: "POST" })
       appealReason: expectNonEmptyString(o.appealReason, "appealReason", 2000),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      createTissDenialAppeal(ctx, { denial_id: data.denialId, appeal_reason: data.appealReason }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await createTissDenialAppeal(ctx, {
+          denial_id: data.denialId,
+          appeal_reason: data.appealReason,
+        })) as Json,
     );
   });
 
@@ -595,8 +620,11 @@ export const updateTissDenialAppealStatusFn = createServerFn({ method: "POST" })
       appealStatus: expectTissAppealStatus(o.appealStatus, "appealStatus"),
     };
   })
-  .handler(async ({ data }): Promise<MutationResult<unknown>> => {
-    return runMutation((ctx) =>
-      updateTissDenialAppealStatus(ctx, data.appealId, { appeal_status: data.appealStatus }),
+  .handler(async ({ data }): Promise<MutationResult<Json>> => {
+    return runMutation(
+      async (ctx) =>
+        (await updateTissDenialAppealStatus(ctx, data.appealId, {
+          appeal_status: data.appealStatus,
+        })) as Json,
     );
   });

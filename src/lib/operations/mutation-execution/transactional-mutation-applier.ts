@@ -25,7 +25,7 @@ async function insertOperationalEventReturningId(
     entityType: "shift" | "swap" | "coordinator_action";
     entityId: string;
     description: string;
-    metadata: Record<string, unknown>;
+    metadata: import("@/lib/database.types").JsonObject;
     severity?: "info" | "warning" | "critical";
   },
 ): Promise<string> {
@@ -39,7 +39,7 @@ async function insertOperationalEventReturningId(
       event_type: "operational_action_triggered",
       severity: input.severity ?? "info",
       description: input.description.slice(0, 4000),
-      metadata: input.metadata,
+      metadata: input.metadata as import("@/lib/database.types").Json,
     })
     .select("id")
     .single();

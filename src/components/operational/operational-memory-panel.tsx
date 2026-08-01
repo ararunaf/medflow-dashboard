@@ -47,21 +47,17 @@ export function OperationalMemoryPanel(props: {
 }) {
   const { memory, canGovern, isFetching, className } = props;
   const qc = useQueryClient();
-  const { toast } = useToast();
+  const toast = useToast();
   const patchState = useMutation({
     mutationFn: async (input: { memoryEntryId: string; nextState: "validated" | "archived" }) =>
       unwrap(await patchOperationalMemoryStateFn({ data: input })),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: opsKeys.commandCenter() });
       await qc.invalidateQueries({ queryKey: opsKeys.timeline() });
-      toast({ title: "Memória atualizada", description: "Estado registrado com sucesso." });
+      toast.success("Memória atualizada", "Estado registrado com sucesso.");
     },
     onError: (e: unknown) => {
-      toast({
-        title: "Não foi possível atualizar",
-        description: e instanceof Error ? e.message : String(e),
-        variant: "destructive",
-      });
+      toast.error("Não foi possível atualizar", e instanceof Error ? e.message : String(e));
     },
   });
 

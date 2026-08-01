@@ -7,9 +7,7 @@ function operatorKey(r: AnalyticsSessionRecord): string {
   return r.operatorName ?? r.operatorAnsCode ?? "Não identificada";
 }
 
-function mergeErrors(
-  records: AnalyticsSessionRecord[],
-): Array<{ ruleId: string; count: number }> {
+function mergeErrors(records: AnalyticsSessionRecord[]): Array<{ ruleId: string; count: number }> {
   const map = new Map<string, number>();
   for (const r of records) {
     for (const hit of r.glosaRuleHits) {
@@ -58,9 +56,8 @@ export function buildOperatorComparisons(
     rows.push({
       operator,
       guideCount: group.length,
-      financialValue: Math.round(
-        group.reduce((s, r) => s + r.estimatedFinancialImpact, 0) * 100,
-      ) / 100,
+      financialValue:
+        Math.round(group.reduce((s, r) => s + r.estimatedFinancialImpact, 0) * 100) / 100,
       avgRiskScore: avgRiskScore(group),
       topErrors: mergeErrors(group),
       avgProcessingTimeMs: avgProcessingTimeMs(group),

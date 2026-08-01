@@ -74,9 +74,9 @@ function asLearningSignals(v: unknown): OperationalMemoryInsight["learningSignal
   return v as OperationalMemoryInsight["learningSignals"];
 }
 
-function asRefs(v: unknown): Record<string, unknown> {
+function asRefs(v: unknown): import("@/lib/database.types").JsonObject {
   if (!v || typeof v !== "object" || Array.isArray(v)) return {};
-  return v as Record<string, unknown>;
+  return v as import("@/lib/database.types").JsonObject;
 }
 
 function rowToInsight(row: MemoryRow): OperationalMemoryInsight {
@@ -182,7 +182,7 @@ export type PolicyIntelligenceCycleDto = {
   lifecycleState: SupervisedPolicyLifecycleState;
   governanceNarrative: string;
   findings: OperationalPolicyFinding[];
-  signalDigest: Record<string, unknown>;
+  signalDigest: import("@/lib/database.types").JsonObject;
   computedAt: string;
 };
 
@@ -284,7 +284,8 @@ export async function loadOperationalPolicyIntelligenceLayerSummary(
         lifecycleState: cycleRow.lifecycle_state as SupervisedPolicyLifecycleState,
         governanceNarrative: cycleRow.governance_narrative,
         findings,
-        signalDigest: (cycleRow.signal_digest_json ?? {}) as Record<string, unknown>,
+        signalDigest: (cycleRow.signal_digest_json ??
+          {}) as import("@/lib/database.types").JsonObject,
         computedAt: cycleRow.computed_at,
       },
       recommendations,

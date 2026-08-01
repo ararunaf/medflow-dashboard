@@ -47,7 +47,7 @@ export function usePublicLandingQuery() {
 export function useRunSmokeTestsMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async () =>
+    mutationFn: async (): Promise<SmokeTestReport> =>
       unwrap((await runSmokeTestsFn({ data: {} })) as MutationResult<SmokeTestReport>),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: opsKeys.productionRelease() });

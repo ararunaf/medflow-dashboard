@@ -95,7 +95,7 @@ function rowToDto(row: ProposalRow): OperationalActionProposalDto {
     references: adaptReferences(row.references_json),
     payload:
       row.payload_json && typeof row.payload_json === "object" && !Array.isArray(row.payload_json)
-        ? (row.payload_json as Record<string, unknown>)
+        ? (row.payload_json as import("@/lib/database.types").JsonObject)
         : {},
     source: (row.source === "gpt_tool" ? "gpt_tool" : "manual") as OperationalActionProposalSource,
     gptCorrelationId: row.gpt_correlation_id,

@@ -350,21 +350,25 @@ function ConveniosPanel({
                   Contratos
                 </div>
                 <div className="space-y-1 max-h-48 overflow-y-auto">
-                  {(contractsQ.data ?? []).map(
-                    (c: { id: string; contract_number: string; name: string }) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setSelContract(c.id)}
-                        className={cn(
-                          "w-full text-left rounded-md border px-2 py-1.5 text-xs",
-                          selContract === c.id ? "border-primary" : "border-border",
-                        )}
-                      >
-                        {c.contract_number} {c.name ? `— ${c.name}` : ""}
-                      </button>
-                    ),
-                  )}
+                  {(
+                    (contractsQ.data ?? []) as Array<{
+                      id: string;
+                      contract_number: string;
+                      name: string;
+                    }>
+                  ).map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSelContract(c.id)}
+                      className={cn(
+                        "w-full text-left rounded-md border px-2 py-1.5 text-xs",
+                        selContract === c.id ? "border-primary" : "border-border",
+                      )}
+                    >
+                      {c.contract_number} {c.name ? `— ${c.name}` : ""}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div>
@@ -396,7 +400,7 @@ function ConveniosPanel({
                   Salvar regra
                 </button>
                 <ul className="mt-2 text-xs text-muted-foreground space-y-1 max-h-32 overflow-y-auto">
-                  {(rulesQ.data ?? []).map((r: { id: string; name: string }) => (
+                  {((rulesQ.data ?? []) as Array<{ id: string; name: string }>).map((r) => (
                     <li key={r.id}>{r.name}</li>
                   ))}
                 </ul>
@@ -789,8 +793,11 @@ function LotesPanel({
                       type="button"
                       className="text-xs font-medium text-primary"
                       onClick={() =>
-                        m.exportBatchXml.mutateAsync({ batchId: b.id }).then(({ xml }) => {
-                          const blob = new Blob([xml], { type: "application/xml;charset=utf-8" });
+                        m.exportBatchXml.mutateAsync({ batchId: b.id }).then((raw) => {
+                          const { xml } = raw as { xml: string };
+                          const blob = new Blob([xml], {
+                            type: "application/xml;charset=utf-8",
+                          });
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement("a");
                           a.href = url;

@@ -30,13 +30,11 @@ export function AnalyticsDashboardPage() {
               disabled={analytics.busy}
               onClick={() => void analytics.refresh()}
             >
-              <RefreshCw
-                className={analytics.busy ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
-              />
+              <RefreshCw className={analytics.busy ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
               Atualizar
             </Button>
             <Button type="button" variant="outline" size="sm" className="gap-1.5" asChild>
-              <Link to="/processamento">
+              <Link to="/processamento" search={{ queue: undefined }}>
                 <Layers className="h-3.5 w-3.5" />
                 Processamento
               </Link>
@@ -64,7 +62,10 @@ export function AnalyticsDashboardPage() {
           onClear={analytics.clearFilters}
         />
 
-        <AnalyticsExecutivePanel kpis={analytics.snapshot?.executive ?? null} busy={analytics.busy} />
+        <AnalyticsExecutivePanel
+          kpis={analytics.snapshot?.executive ?? null}
+          busy={analytics.busy}
+        />
         <AnalyticsQualityPanel
           quality={analytics.snapshot?.quality ?? null}
           busy={analytics.busy}

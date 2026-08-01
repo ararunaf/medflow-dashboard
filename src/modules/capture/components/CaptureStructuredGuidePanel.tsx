@@ -35,8 +35,7 @@ export function CaptureStructuredGuidePanel({
 
   const status = summary?.status ?? (guide ? "completed" : "pending");
   const guideType = guide?.guideType ?? summary?.guideType;
-  const guideTypeConfidence =
-    guide?.classification.confidence ?? summary?.guideTypeConfidence;
+  const guideTypeConfidence = guide?.classification.confidence ?? summary?.guideTypeConfidence;
   const overallConfidence = guide?.metadata.overallConfidence ?? summary?.overallConfidence;
   const fieldsFound = guide?.metadata.fieldsFound ?? summary?.fieldsFound;
   const fieldsMissing = guide?.metadata.fieldsMissing ?? summary?.fieldsMissing;
@@ -69,17 +68,11 @@ export function CaptureStructuredGuidePanel({
         <Metric label="Tipo de Guia" value={guideTypeLabel(guideType)} />
         <Metric
           label="Conf. Tipo"
-          value={
-            guideTypeConfidence != null
-              ? `${(guideTypeConfidence * 100).toFixed(1)}%`
-              : "—"
-          }
+          value={guideTypeConfidence != null ? `${(guideTypeConfidence * 100).toFixed(1)}%` : "—"}
         />
         <Metric
           label="Conf. Geral"
-          value={
-            overallConfidence != null ? `${(overallConfidence * 100).toFixed(1)}%` : "—"
-          }
+          value={overallConfidence != null ? `${(overallConfidence * 100).toFixed(1)}%` : "—"}
         />
         <Metric label="Encontrados" value={fieldsFound != null ? String(fieldsFound) : "—"} />
         <Metric label="Ausentes" value={fieldsMissing != null ? String(fieldsMissing) : "—"} />
@@ -96,9 +89,7 @@ export function CaptureStructuredGuidePanel({
         />
       </dl>
 
-      {summary?.error ? (
-        <p className="text-sm text-destructive">{summary.error}</p>
-      ) : null}
+      {summary?.error ? <p className="text-sm text-destructive">{summary.error}</p> : null}
 
       {!guide && phase === "ocr_completed" && status === "pending" ? (
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -113,14 +104,13 @@ export function CaptureStructuredGuidePanel({
 }
 
 function FieldGroupsView({ guide }: { guide: StructuredGuide }) {
-  const groups = Object.entries(guide.groups).filter(
-    ([, fields]) => fields.length > 0,
-  ) as [StructuredFieldGroup, StructuredField[]][];
+  const groups = Object.entries(guide.groups).filter(([, fields]) => fields.length > 0) as [
+    StructuredFieldGroup,
+    StructuredField[],
+  ][];
 
   if (groups.length === 0) {
-    return (
-      <p className="text-xs text-muted-foreground">Nenhum campo identificado no documento.</p>
-    );
+    return <p className="text-xs text-muted-foreground">Nenhum campo identificado no documento.</p>;
   }
 
   return (
@@ -157,10 +147,7 @@ function FieldGroupsView({ guide }: { guide: StructuredGuide }) {
           </h3>
           <div className="space-y-2">
             {guide.procedures.map((proc) => (
-              <div
-                key={proc.lineNumber}
-                className="rounded-md border border-border p-3 space-y-1"
-              >
+              <div key={proc.lineNumber} className="rounded-md border border-border p-3 space-y-1">
                 <p className="text-xs font-medium text-muted-foreground">
                   Linha {proc.lineNumber} — conf. {(proc.confidence * 100).toFixed(0)}%
                 </p>
@@ -182,12 +169,8 @@ function FieldRow({ field, compact }: { field: StructuredField; compact?: boolea
       {!compact ? (
         <>
           <td className="px-3 py-2 font-medium">{field.label}</td>
-          <td className="px-3 py-2 font-mono break-all">
-            {field.value ?? field.rawValue ?? "—"}
-          </td>
-          <td className="px-3 py-2 font-mono">
-            {(field.confidence * 100).toFixed(0)}%
-          </td>
+          <td className="px-3 py-2 font-mono break-all">{field.value ?? field.rawValue ?? "—"}</td>
+          <td className="px-3 py-2 font-mono">{(field.confidence * 100).toFixed(0)}%</td>
           <td className="px-3 py-2">
             <StatusBadge status={field.status} />
           </td>
@@ -206,13 +189,7 @@ function FieldRow({ field, compact }: { field: StructuredField; compact?: boolea
   );
 }
 
-function StatusBadge({
-  status,
-  className,
-}: {
-  status: StructuredFieldStatus;
-  className?: string;
-}) {
+function StatusBadge({ status, className }: { status: StructuredFieldStatus; className?: string }) {
   const config: Record<
     StructuredFieldStatus,
     { label: string; className: string; icon: typeof CheckCircle2 }

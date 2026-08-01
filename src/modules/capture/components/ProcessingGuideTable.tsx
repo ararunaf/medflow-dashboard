@@ -35,7 +35,10 @@ function riskBadgeClass(level: ProcessingGuideItem["riskLevel"]): string {
 export function ProcessingGuideTable({ items, busy, activeQueue }: ProcessingGuideTableProps) {
   if (busy && items.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center" data-testid="guide-table-loading">
+      <p
+        className="text-sm text-muted-foreground py-8 text-center"
+        data-testid="guide-table-loading"
+      >
         Carregando fila…
       </p>
     );
@@ -92,9 +95,7 @@ export function ProcessingGuideTable({ items, busy, activeQueue }: ProcessingGui
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-xs">
-                  {PROCESSING_QUEUE_LABELS[item.queue]}
-                </td>
+                <td className="px-3 py-2 text-xs">{PROCESSING_QUEUE_LABELS[item.queue]}</td>
                 <td className="px-3 py-2 text-xs truncate max-w-[8rem]">
                   {item.operatorName ?? item.operatorAnsCode ?? "—"}
                 </td>

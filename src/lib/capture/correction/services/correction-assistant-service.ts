@@ -3,11 +3,9 @@
  * MEDICFLOW-CORRECTION-ASSISTANT-01
  */
 import { NotFoundError, ValidationError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import {
-  appendCaptureEvent,
-  buildCaptureEvent,
-} from "../../infrastructure/capture-events";
+import { appendCaptureEvent, buildCaptureEvent } from "../../infrastructure/capture-events";
 import { getCaptureSession } from "../../infrastructure/capture-session-store";
 import { loadAuditReport } from "../../audit/infrastructure/audit-storage";
 import {
@@ -23,6 +21,7 @@ import type {
   CorrectionProposal,
   CorrectionProposalStatus,
   CorrectionProposalStore,
+  UpdateCorrectionProposalInput,
 } from "../types/correction-proposal";
 
 export type GenerateCorrectionProposalsResult = {
@@ -31,30 +30,23 @@ export type GenerateCorrectionProposalsResult = {
   proposalCount: number;
 };
 
-export type UpdateCorrectionProposalInput = {
-  proposalId: string;
-  action: "accept" | "edit" | "reject";
-  editedValue?: string;
-};
+export type { UpdateCorrectionProposalInput };
 
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
-    .update({ metadata, updated_by: ctx.actorProfileId })
+    .update({ metadata: metadata as Json, updated_by: ctx.actorProfileId })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", sessionId)
     .is("deleted_at", null);
   if (error) throw error;
 }
 
-function buildStore(
-  sessionId: string,
-  proposals: CorrectionProposal[],
-): CorrectionProposalStore {
+function buildStore(sessionId: string, proposals: CorrectionProposal[]): CorrectionProposalStore {
   return {
     version: "correction_proposals_v1",
     sessionId,
@@ -75,10 +67,9 @@ export function decideProposalInStore(
 
   const current = store.proposals[index]!;
   if (current.status !== "pending" && current.status !== "edited") {
-    throw new ValidationError(
-      `Proposta ${input.proposalId} já foi decidida (${current.status}).`,
-      { status: current.status },
-    );
+    throw new ValidationError(`Proposta ${input.proposalId} já foi decidida (${current.status}).`, {
+      status: current.status,
+    });
   }
 
   const decidedAt = new Date().toISOString();
@@ -122,7 +113,7 @@ export class CorrectionAssistantService {
   async generateFromSession(
     ctx: ServiceCtx,
     sessionId: string,
-    metadata: Record<string, unknown>,
+    metadata: JsonObject,
   ): Promise<GenerateCorrectionProposalsResult> {
     const auditDone =
       metadata.audit &&
@@ -179,10 +170,7 @@ export class CorrectionAssistantService {
     return this.generateFromSession(ctx, sessionId, detail.metadata ?? {});
   }
 
-  async getProposals(
-    ctx: ServiceCtx,
-    sessionId: string,
-  ): Promise<CorrectionProposalStore | null> {
+  async getProposals(ctx: ServiceCtx, sessionId: string): Promise<CorrectionProposalStore | null> {
     return loadCorrectionProposals(ctx, sessionId);
   }
 
@@ -212,13 +200,16 @@ export class CorrectionAssistantService {
     const summary = buildCorrectionSummaryFromStore(nextStore, storagePath);
 
     const detail = await getCaptureSession(ctx, sessionId);
-    let metadata = appendCaptureEvent(detail.metadata ?? {}, buildCaptureEvent(eventType, sessionId, {
-      proposalId: updated.proposalId,
-      findingId: updated.findingId,
-      field: updated.field,
-      status: updated.status,
-      editedValue: updated.editedValue,
-    }));
+    let metadata = appendCaptureEvent(
+      detail.metadata ?? {},
+      buildCaptureEvent(eventType, sessionId, {
+        proposalId: updated.proposalId,
+        findingId: updated.findingId,
+        field: updated.field,
+        status: updated.status,
+        editedValue: updated.editedValue,
+      }),
+    );
 
     metadata = { ...metadata, correction: summary };
     await persistSessionMetadata(ctx, sessionId, metadata);

@@ -29,7 +29,8 @@ export const PAT_002: AuditRule = {
   field: "beneficiary_card_number",
   message: "Número da carteirinha não informado.",
   suggestedCorrection: "Informe o número da carteirinha do beneficiário.",
-  evaluate: (ctx) => (ctx.isMissing("beneficiary_card_number") ? missingFieldFinding(PAT_002, ctx) : null),
+  evaluate: (ctx) =>
+    ctx.isMissing("beneficiary_card_number") ? missingFieldFinding(PAT_002, ctx) : null,
 };
 
 export const PAT_003: AuditRule = {

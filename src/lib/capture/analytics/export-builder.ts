@@ -97,14 +97,7 @@ export function buildAnalyticsExportSections(snapshot: AnalyticsSnapshot): Repor
     },
     {
       title: "Comparativo por Operadora",
-      columns: [
-        "Rank",
-        "Operadora",
-        "Guias",
-        "Valor",
-        "Risco médio",
-        "Tempo médio",
-      ],
+      columns: ["Rank", "Operadora", "Guias", "Valor", "Risco médio", "Tempo médio"],
       rows: operators.map((o) => ({
         Rank: String(o.operationalRank),
         Operadora: o.operator,

@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/lib/database.types";
-import type { QueryResult } from "@/lib/server/fn-helpers";
+import type { MutationResult, QueryResult } from "@/lib/server/fn-helpers";
 import {
   addTissGuideItemFn,
   assignGuideToBatchFn,
@@ -98,7 +98,7 @@ export function useTissMutations() {
 
   const createProvider = useMutation({
     mutationFn: async (input: { name: string; ansCode?: string }) =>
-      unwrap(await createInsuranceProviderFn({ data: input })),
+      unwrap((await createInsuranceProviderFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createContract = useMutation({
@@ -106,7 +106,7 @@ export function useTissMutations() {
       insuranceProviderId: string;
       contractNumber: string;
       name?: string;
-    }) => unwrap(await createInsuranceContractFn({ data: input })),
+    }) => unwrap((await createInsuranceContractFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createRule = useMutation({
@@ -114,7 +114,7 @@ export function useTissMutations() {
       insuranceContractId: string;
       name: string;
       parameters?: Record<string, unknown>;
-    }) => unwrap(await createInsuranceRuleFn({ data: input })),
+    }) => unwrap((await createInsuranceRuleFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createProcedure = useMutation({
@@ -124,7 +124,7 @@ export function useTissMutations() {
       specialty?: string;
       operationalGroup?: string;
       defaultValue?: number;
-    }) => unwrap(await createTussProcedureFn({ data: input })),
+    }) => unwrap((await createTussProcedureFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createGuide = useMutation({
@@ -135,12 +135,12 @@ export function useTissMutations() {
       insuranceContractId?: string | null;
       professionalId: string;
       attendanceDate: string;
-    }) => unwrap(await createTissGuideFn({ data: input })),
+    }) => unwrap((await createTissGuideFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const setGuideStatus = useMutation({
     mutationFn: async (input: { guideId: string; status: string }) =>
-      unwrap(await setTissGuideStatusFn({ data: input })),
+      unwrap((await setTissGuideStatusFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const addGuideItem = useMutation({
@@ -150,37 +150,37 @@ export function useTissMutations() {
       quantity?: number;
       unitValue: number;
       executionDate: string;
-    }) => unwrap(await addTissGuideItemFn({ data: input })),
+    }) => unwrap((await addTissGuideItemFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const removeGuideItem = useMutation({
     mutationFn: async (input: { itemId: string }) =>
-      unwrap(await removeTissGuideItemFn({ data: input })),
+      unwrap((await removeTissGuideItemFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createBatch = useMutation({
     mutationFn: async (input: { competence: string }) =>
-      unwrap(await createTissBatchFn({ data: input })),
+      unwrap((await createTissBatchFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const assignGuide = useMutation({
     mutationFn: async (input: { guideId: string; batchId: string }) =>
-      unwrap(await assignGuideToBatchFn({ data: input })),
+      unwrap((await assignGuideToBatchFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const removeGuideFromBatch = useMutation({
     mutationFn: async (input: { guideId: string }) =>
-      unwrap(await removeGuideFromBatchFn({ data: input })),
+      unwrap((await removeGuideFromBatchFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const closeBatch = useMutation({
     mutationFn: async (input: { batchId: string }) =>
-      unwrap(await closeTissBatchFn({ data: input })),
+      unwrap((await closeTissBatchFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const exportBatchXml = useMutation({
     mutationFn: async (input: { batchId: string }) =>
-      unwrap(await exportTissBatchXmlFn({ data: input })),
+      unwrap((await exportTissBatchXmlFn({ data: input })) as MutationResult<unknown>),
     onSuccess: (_data, vars) => {
       inv();
       void qc.invalidateQueries({ queryKey: opsKeys.tissBatchExports(vars.batchId) });
@@ -189,12 +189,12 @@ export function useTissMutations() {
 
   const createReturn = useMutation({
     mutationFn: async (input: { batchId: string; returnReference: string }) =>
-      unwrap(await createTissReturnFn({ data: input })),
+      unwrap((await createTissReturnFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const updateReturnStatus = useMutation({
     mutationFn: async (input: { returnId: string; status: string }) =>
-      unwrap(await updateTissReturnStatusFn({ data: input })),
+      unwrap((await updateTissReturnStatusFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createDenial = useMutation({
@@ -206,7 +206,7 @@ export function useTissMutations() {
       denialReasonDescription?: string;
       deniedValue: number;
       status?: string;
-    }) => unwrap(await createTissDenialFn({ data: input })),
+    }) => unwrap((await createTissDenialFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const updateDenial = useMutation({
@@ -216,17 +216,17 @@ export function useTissMutations() {
       deniedValue?: number;
       denialReasonCode?: string;
       denialReasonDescription?: string;
-    }) => unwrap(await updateTissDenialStatusFn({ data: input })),
+    }) => unwrap((await updateTissDenialStatusFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const createAppeal = useMutation({
     mutationFn: async (input: { denialId: string; appealReason: string }) =>
-      unwrap(await createTissDenialAppealFn({ data: input })),
+      unwrap((await createTissDenialAppealFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
   const updateAppealStatus = useMutation({
     mutationFn: async (input: { appealId: string; appealStatus: string }) =>
-      unwrap(await updateTissDenialAppealStatusFn({ data: input })),
+      unwrap((await updateTissDenialAppealStatusFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });
 

@@ -3,6 +3,7 @@
  * MEDICFLOW-REVIEW-WORKSPACE-01 — sem alteração de infraestrutura/migrations.
  */
 import { ValidationError } from "@/lib/domain/operations/errors";
+import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { getCaptureAuditReport } from "../audit/services/preventive-audit-service";
 import { getCaptureContractIntelligenceReport } from "../contract/services/contract-intelligence-service";
@@ -33,13 +34,13 @@ const VALID_APPROVAL_STATUSES = new Set<ReviewApprovalStatus>([
 async function persistReviewMetadata(
   ctx: ServiceCtx,
   sessionId: string,
-  metadata: Record<string, unknown>,
+  metadata: JsonObject,
   review: ReviewWorkspaceMetadata,
 ): Promise<void> {
   const { error } = await ctx.client
     .from("capture_sessions")
     .update({
-      metadata: { ...metadata, review },
+      metadata: { ...metadata, review } as Json,
       updated_by: ctx.actorProfileId,
     })
     .eq("tenant_id", ctx.tenantId)
@@ -60,7 +61,12 @@ async function ensureReviewStatus(
   if (!reviewable.includes(currentStatus)) return currentStatus;
 
   try {
-    const session = await transitionCaptureSession(ctx, sessionId, "REVIEW", "review_workspace_entered");
+    const session = await transitionCaptureSession(
+      ctx,
+      sessionId,
+      "REVIEW",
+      "review_workspace_entered",
+    );
     return session.status;
   } catch {
     return currentStatus;
@@ -87,7 +93,7 @@ function targetDbStatusForApproval(
 export type ReviewWorkspaceSnapshot = {
   sessionId: string;
   sessionStatus: CaptureSessionStatus;
-  metadata: Record<string, unknown>;
+  metadata: JsonObject;
   review: ReviewWorkspaceMetadata;
   file: {
     name: string;
@@ -96,17 +102,19 @@ export type ReviewWorkspaceSnapshot = {
     checksumSha256?: string;
   } | null;
   ocr: Awaited<ReturnType<typeof getCaptureOcrResult>> | null;
-  ocrSummary: Record<string, unknown> | null;
+  ocrSummary: JsonObject | null;
   structuredGuide: Awaited<ReturnType<typeof getCaptureStructuredGuide>> | null;
-  parserSummary: Record<string, unknown> | null;
+  parserSummary: JsonObject | null;
   auditReport: Awaited<ReturnType<typeof getCaptureAuditReport>> | null;
-  auditSummary: Record<string, unknown> | null;
-  contractIntelligenceReport: Awaited<ReturnType<typeof getCaptureContractIntelligenceReport>> | null;
-  contractIntelligenceSummary: Record<string, unknown> | null;
+  auditSummary: JsonObject | null;
+  contractIntelligenceReport: Awaited<
+    ReturnType<typeof getCaptureContractIntelligenceReport>
+  > | null;
+  contractIntelligenceSummary: JsonObject | null;
   riskAssessmentReport: Awaited<ReturnType<typeof getCaptureRiskAssessmentReport>> | null;
-  riskAssessmentSummary: Record<string, unknown> | null;
+  riskAssessmentSummary: JsonObject | null;
   correctionStore: Awaited<ReturnType<typeof getCaptureCorrectionProposals>> | null;
-  correctionSummary: Record<string, unknown> | null;
+  correctionSummary: JsonObject | null;
 };
 
 export async function getReviewWorkspaceSnapshot(
@@ -182,19 +190,18 @@ export async function getReviewWorkspaceSnapshot(
         }
       : null,
     ocr,
-    ocrSummary: (status.metadata.ocr as Record<string, unknown> | undefined) ?? null,
+    ocrSummary: (status.metadata.ocr as JsonObject | undefined) ?? null,
     structuredGuide,
-    parserSummary: (status.metadata.parser as Record<string, unknown> | undefined) ?? null,
+    parserSummary: (status.metadata.parser as JsonObject | undefined) ?? null,
     auditReport,
-    auditSummary: (status.metadata.audit as Record<string, unknown> | undefined) ?? null,
+    auditSummary: (status.metadata.audit as JsonObject | undefined) ?? null,
     contractIntelligenceReport,
     contractIntelligenceSummary:
-      (status.metadata.contractIntelligence as Record<string, unknown> | undefined) ?? null,
+      (status.metadata.contractIntelligence as JsonObject | undefined) ?? null,
     riskAssessmentReport,
-    riskAssessmentSummary:
-      (status.metadata.riskAssessment as Record<string, unknown> | undefined) ?? null,
+    riskAssessmentSummary: (status.metadata.riskAssessment as JsonObject | undefined) ?? null,
     correctionStore,
-    correctionSummary: (status.metadata.correction as Record<string, unknown> | undefined) ?? null,
+    correctionSummary: (status.metadata.correction as JsonObject | undefined) ?? null,
   };
 }
 

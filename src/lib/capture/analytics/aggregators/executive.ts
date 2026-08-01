@@ -2,7 +2,7 @@
  * Agregações executivas e financeiras — MEDICFLOW-ANALYTICS-01.
  */
 import { RISK_LEVELS } from "../../risk/types/risk-assessment";
-import type { AnalyticsSessionRecord, ExecutiveKpis } from "./types";
+import type { AnalyticsSessionRecord, ExecutiveKpis } from "../types";
 
 function countByKey(
   records: AnalyticsSessionRecord[],
@@ -38,7 +38,7 @@ export function buildExecutiveKpis(records: AnalyticsSessionRecord[]): Executive
       r.queue === "correcao",
   ).length;
 
-  const riskDistribution = RISK_LEVELS.map((level) => ({
+  const riskDistribution: ExecutiveKpis["riskDistribution"] = RISK_LEVELS.map((level) => ({
     level,
     count: records.filter((r) => r.riskLevel === level).length,
   }));
@@ -62,9 +62,8 @@ export function buildExecutiveKpis(records: AnalyticsSessionRecord[]): Executive
     ).length,
     guidesInReview: inReview,
     guidesCritical: records.filter((r) => r.isCritical).length,
-    financialRiskImpact: Math.round(
-      records.reduce((s, r) => s + r.estimatedFinancialImpact, 0) * 100,
-    ) / 100,
+    financialRiskImpact:
+      Math.round(records.reduce((s, r) => s + r.estimatedFinancialImpact, 0) * 100) / 100,
     potentialSavingsFromCorrections: estimatePotentialSavings(records),
     riskDistribution,
   };

@@ -4,7 +4,13 @@ import {
   getCaptureSessionFn,
   getCaptureSessionStatusFn,
 } from "@/lib/capture/api/capture-server";
-import type { CaptureSessionStatus } from "@/lib/capture/types";
+import type {
+  CaptureSessionDetail,
+  CaptureSessionStatus,
+  CaptureStatusHistoryEntry,
+} from "@/lib/capture/types";
+import type { QueryResult } from "@/lib/operations/api";
+import { unwrap } from "@/lib/queries/result";
 import { dbStatusToPhase } from "../utils/status-map";
 import { listCaptureEvents } from "../services/capture-events";
 import type { CapturePhase, CapturePipelineEvent, CaptureSessionView } from "../types";
@@ -27,21 +33,37 @@ export function useCaptureSession(sessionId: string | null) {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async (id: string) => {
-    const res = await getCaptureSessionStatusFn({ data: { sessionId: id } });
+    const res = (await getCaptureSessionStatusFn({
+      data: { sessionId: id },
+    })) as QueryResult<{
+      sessionId: string;
+      status: CaptureSessionStatus;
+      statusHistory: CaptureStatusHistoryEntry[];
+      metadata: Record<string, unknown>;
+      updatedAt: string;
+    }>;
     if (!res.ok) {
       setView((v) => ({ ...v, error: res.error.message }));
       return;
     }
 
-    const phase = dbStatusToPhase(res.data.status, res.data.metadata);
-    const events = listCaptureEvents(res.data.metadata ?? {});
+    type StatusData = {
+      sessionId: string;
+      status: CaptureSessionStatus;
+      statusHistory: CaptureStatusHistoryEntry[];
+      metadata: Record<string, unknown>;
+      updatedAt: string;
+    };
+    const data = unwrap<StatusData>(res);
+    const phase = dbStatusToPhase(data.status, data.metadata);
+    const events = listCaptureEvents(data.metadata ?? {});
 
-    setStatus(res.data.status);
+    setStatus(data.status);
     setView((v) => ({
       ...v,
       sessionId: id,
       phase,
-      statusHistory: res.data.statusHistory.map((h) => ({
+      statusHistory: data.statusHistory.map((h) => ({
         from: h.from,
         to: h.to,
         at: h.at,
@@ -53,9 +75,12 @@ export function useCaptureSession(sessionId: string | null) {
   }, []);
 
   const loadDetail = useCallback(async (id: string) => {
-    const res = await getCaptureSessionFn({ data: { sessionId: id } });
+    const res = (await getCaptureSessionFn({
+      data: { sessionId: id },
+    })) as QueryResult<CaptureSessionDetail>;
     if (!res.ok) return;
-    const doc = res.data.documents[res.data.documents.length - 1];
+    const detail = unwrap<CaptureSessionDetail>(res);
+    const doc = detail.documents[detail.documents.length - 1];
     if (doc) {
       setView((v) => ({
         ...v,
@@ -66,7 +91,7 @@ export function useCaptureSession(sessionId: string | null) {
           checksumSha256: doc.checksumSha256,
           version: (doc.metadata?.version as number) ?? 1,
         },
-        channel: res.data.channel,
+        channel: detail.channel,
       }));
     }
   }, []);

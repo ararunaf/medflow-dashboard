@@ -9,11 +9,16 @@ export default tseslint.config(
   {
     ignores: [
       "dist/**",
+      "dist.bak.20260525175838/**",
       ".output/**",
       ".vinxi/**",
       ".tanstack/**",
       ".wrangler/**",
       "node_modules/**",
+      "node_modules.bak.20260525110519/**",
+      "=docs/**",
+      "knowledge/**",
+      "supabase/**",
       "**/routeTree.gen.ts",
     ],
   },
