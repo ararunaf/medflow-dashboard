@@ -1,0 +1,87 @@
+/**
+ * Ports — Canonical Execution Orchestrator Foundation (EPC-24).
+ */
+export type { CanonicalExecutionOrchestratorPort } from "./canonical-execution-orchestrator-port";
+
+export type {
+  CanonicalExecutionContext,
+  CanonicalExecutionOrchestratorCapabilities,
+  CanonicalExecutionOrchestratorHealth,
+  CanonicalExecutionOrchestratorProviderId,
+  CanonicalExecutionOrchestratorProviderOptions,
+  CanonicalExecutionRecord,
+  CanonicalExecutionRecordKind,
+  CanonicalExecutionRequest,
+  CanonicalExecutionResult,
+  CanonicalExecutionStatus,
+  CanonicalExecutionStep,
+  CanonicalExecutionStepName,
+  CanonicalExecutionTrace,
+  FoundationOrchestratedPort,
+  FoundationPortContract,
+  FoundationPortRef,
+  FoundationPortRegistry,
+  FoundationPortStepDescriptor,
+  GetExecutionInput,
+  GetExecutionResult,
+  ListExecutionsInput,
+  ListExecutionsResult,
+  ExecutionContext,
+  ExecutionContextPort,
+  ExecutionEventBus,
+  ExecutionEventBusPort,
+  ExecutionLifecycle,
+  ExecutionRegistryEntry,
+  ExecutionRegistryPort,
+  ExecutionStateMachinePort,
+  ExecutionTrace,
+  ExecutionTracePort,
+  ExecutionCapabilityRegistry,
+  ExecutionCapabilityRegistryPort,
+  ExecutionDependencyRegistry,
+  ExecutionDependencyRegistryPort,
+  ExecutionPolicyRegistry,
+  ExecutionPolicyRegistryPort,
+  ExecutionConstraintRegistry,
+  ExecutionConstraintRegistryPort,
+  ExecutionRequirementRegistry,
+  ExecutionRequirementRegistryPort,
+  ExecutionResourceRegistry,
+  ExecutionResourceRegistryPort,
+  ExecutionEnvironmentRegistry,
+  ExecutionEnvironmentRegistryPort,
+  CanonicalQueue,
+  ExecutionQueuePort,
+  PipelineResolverPort,
+  StartExecutionInput,
+  StartExecutionResult,
+} from "./types";
+
+export {
+  FOUNDATION_PORT_CHAIN,
+  ORCHESTRATED_FOUNDATION_PORT_CONTRACTS,
+  ORCHESTRATED_FOUNDATION_PORTS,
+} from "./foundation-ports";
+
+export {
+  CANONICAL_EXECUTION_STEPS,
+  CANONICAL_ORCHESTRATED_COMPONENTS,
+  CANONICAL_ORCHESTRATION_PIPELINE,
+  CANONICAL_STRUCTURAL_CHAIN,
+  FUTURE_PORT_INTEGRATION_NOTES,
+  createCanonicalExecutionSteps,
+} from "./pipeline";
+
+export {
+  createCorrelationId,
+  createExecutionId,
+  createResultId,
+  createStepId,
+  createTraceId,
+  resetAllCanonicalExecutionIdSequences,
+  resetCorrelationIdSequence,
+  resetExecutionIdSequence,
+  resetResultIdSequence,
+  resetStepIdSequence,
+  resetTraceIdSequence,
+} from "./identity";
