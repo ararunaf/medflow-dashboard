@@ -25,7 +25,6 @@ export * from "./operational-policy-intelligence";
 export * from "./operational-strategic-planning";
 export * from "./queries";
 export * from "./operational-timeline";
-export * from "./knowledge-vector-search";
 export type {
   MutationResult,
   MutationError,
