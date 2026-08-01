@@ -1,0 +1,1 @@
+/** * Demo — TISS Mapping Foundation (EPC-21). */export {  getTISSMappingHealthSummary,  type TISSMappingHealthSummary,} from "./tiss-mapping-health-query";

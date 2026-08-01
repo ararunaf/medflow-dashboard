@@ -1,0 +1,52 @@
+export type { DocumentIdentityPort } from "./document-identity-port";
+export type {
+  CreateDocumentInput,
+  CreateDocumentResult,
+  DocumentAttachment,
+  DocumentCanonicalIdentity,
+  DocumentChecksum,
+  DocumentFingerprint,
+  DocumentHash,
+  DocumentId,
+  DocumentIdentity,
+  DocumentIdentityCapabilities,
+  DocumentIdentityHealth,
+  DocumentIdentityProviderId,
+  DocumentIdentityProviderOptions,
+  DocumentImage,
+  DocumentImageReference,
+  DocumentMetadataReference,
+  DocumentPage,
+  DocumentSource,
+  DocumentStatus,
+  DocumentStorageReference,
+  DocumentTag,
+  DocumentType,
+  DocumentVersion,
+  GetDocumentInput,
+  GetDocumentResult,
+  ListDocumentsInput,
+  ListDocumentsResult,
+  PageId,
+} from "./types";
+
+export {
+  createDocumentUuid,
+  defineCanonicalIdentity,
+  defineChecksum,
+  defineFingerprint,
+  defineHash,
+  getCorrelationId,
+  getExternalId,
+  getOrigin,
+  getSourceId,
+  hasCanonicalIdentity,
+} from "./identity";
+
+export {
+  findPageById,
+  findPageBySequence,
+  getPageCount,
+  resequencePages,
+  sortPagesBySequence,
+} from "./pages";
