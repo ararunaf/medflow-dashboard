@@ -19,6 +19,7 @@
  * Sprint 13: injeta ExecutionResourceRegistryPort para registro estrutural de recursos.
  * Sprint 14: injeta ExecutionEnvironmentRegistryPort para registro estrutural de ambientes.
  * INF-01: injeta ExecutionQueuePort para infraestrutura estrutural de filas.
+ * INF-02: injeta ExecutionWorkerPort para infraestrutura estrutural de Workers.
  */
 import type { ExecutionCapabilityRegistryPort } from "../../execution-capability-registry/ports/execution-capability-registry-port";
 import type { ExecutionConstraintRegistryPort } from "../../execution-constraint-registry/ports/execution-constraint-registry-port";
@@ -26,6 +27,7 @@ import type { ExecutionContextPort } from "../../execution-context/ports/executi
 import type { ExecutionDependencyRegistryPort } from "../../execution-dependency-registry/ports/execution-dependency-registry-port";
 import type { ExecutionEnvironmentRegistryPort } from "../../execution-environment-registry/ports/execution-environment-registry-port";
 import type { ExecutionQueuePort } from "../../message-queue/ports/execution-queue-port";
+import type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
 import type { ExecutionPolicyRegistryPort } from "../../execution-policy-registry/ports/execution-policy-registry-port";
 import type { ExecutionRegistryPort } from "../../execution-registry/ports/execution-registry-port";
@@ -79,6 +81,8 @@ export type CanonicalExecutionOrchestratorFactoryOptions = {
   executionEnvironmentRegistry?: ExecutionEnvironmentRegistryPort;
   /** Message Queue — infraestrutura estrutural de filas (INF-01). */
   executionQueue?: ExecutionQueuePort;
+  /** Worker Foundation — infraestrutura estrutural de Workers (INF-02). */
+  executionWorker?: ExecutionWorkerPort;
   /** Registry opcional de Ports Foundation (DI estrutural legado — sem invocação). */
   foundationPorts?: FoundationPortRegistry;
 };
@@ -103,6 +107,7 @@ export class CanonicalExecutionOrchestratorFactory {
   private readonly executionResourceRegistry?: ExecutionResourceRegistryPort;
   private readonly executionEnvironmentRegistry?: ExecutionEnvironmentRegistryPort;
   private readonly executionQueue?: ExecutionQueuePort;
+  private readonly executionWorker?: ExecutionWorkerPort;
   private readonly foundationPorts?: FoundationPortRegistry;
 
   constructor(options: CanonicalExecutionOrchestratorFactoryOptions = {}) {
@@ -122,6 +127,7 @@ export class CanonicalExecutionOrchestratorFactory {
     this.executionResourceRegistry = options.executionResourceRegistry;
     this.executionEnvironmentRegistry = options.executionEnvironmentRegistry;
     this.executionQueue = options.executionQueue;
+    this.executionWorker = options.executionWorker;
     this.foundationPorts = options.foundationPorts;
   }
 
@@ -157,6 +163,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionResourceRegistry: this.executionResourceRegistry,
           executionEnvironmentRegistry: this.executionEnvironmentRegistry,
           executionQueue: this.executionQueue,
+          executionWorker: this.executionWorker,
           foundationPorts: this.foundationPorts,
         });
       case "mock":
@@ -177,6 +184,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionResourceRegistry: this.executionResourceRegistry,
           executionEnvironmentRegistry: this.executionEnvironmentRegistry,
           executionQueue: this.executionQueue,
+          executionWorker: this.executionWorker,
           foundationPorts: this.foundationPorts,
         });
       case "test":
@@ -197,6 +205,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionResourceRegistry: this.executionResourceRegistry,
           executionEnvironmentRegistry: this.executionEnvironmentRegistry,
           executionQueue: this.executionQueue,
+          executionWorker: this.executionWorker,
           foundationPorts: this.foundationPorts,
         });
       default: {

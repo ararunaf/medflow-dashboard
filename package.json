@@ -93,6 +93,7 @@
     "enterprise:execution-resource-registry:test": "npx tsx --test scripts/enterprise/tests/execution-resource-registry-engine.test.ts",
     "enterprise:execution-environment-registry:test": "npx tsx --test scripts/enterprise/tests/execution-environment-registry-engine.test.ts",
     "enterprise:message-queue:test": "npx tsx --test scripts/enterprise/tests/message-queue-engine.test.ts",
+    "enterprise:worker-foundation:test": "npx tsx --test scripts/enterprise/tests/worker-foundation-engine.test.ts",
     "auth-validate": "node scripts/auth-validate.mjs",
     "security-logs-validate": "node scripts/security-logs-validate.mjs",
     "security-headers-validate": "node scripts/security-headers-validate.mjs",

@@ -19,6 +19,7 @@
  * Sprint 13: registro estrutural de recursos exclusivo via ExecutionResourceRegistryPort.
  * Sprint 14: registro estrutural de ambientes exclusivo via ExecutionEnvironmentRegistryPort.
  * INF-01: infraestrutura estrutural de filas exclusiva via ExecutionQueuePort.
+ * INF-02: infraestrutura estrutural de Workers exclusiva via ExecutionWorkerPort.
  * Nenhum Port Foundation é chamado diretamente pelo Orchestrator.
  */
 import { createExecutionCapabilityRegistryPort } from "../../execution-capability-registry/providers/create-execution-capability-registry-port";
@@ -34,6 +35,8 @@ import { createExecutionEnvironmentRegistryPort } from "../../execution-environm
 import type { ExecutionEnvironmentRegistryPort } from "../../execution-environment-registry/ports/execution-environment-registry-port";
 import { createExecutionQueuePort } from "../../message-queue/providers/message-queue-provider";
 import type { ExecutionQueuePort } from "../../message-queue/ports/execution-queue-port";
+import { createExecutionWorkerPort } from "../../worker-foundation/providers/execution-worker-provider";
+import type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
 import { createExecutionEventBusPort } from "../../execution-event-bus/providers/create-execution-event-bus-port";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
 import { createExecutionPolicyRegistryPort } from "../../execution-policy-registry/providers/create-execution-policy-registry-port";
@@ -93,6 +96,7 @@ import {
   attachResourceRegistryToExecutionContext,
   attachStateMachineToExecutionContext,
   attachTraceToExecutionContext,
+  attachWorkerToExecutionContext,
   buildRequest,
   createExecutionContextFromRequest,
   createExecutionEventBusForContext,
@@ -112,6 +116,7 @@ import {
   registerPolicyRegistryForContext,
   registerRequirementRegistryForContext,
   registerResourceRegistryForContext,
+  registerWorkerForContext,
   resolvePipelineComposition,
   runStructuralPipeline,
   stepsFromPipelineResolution,
@@ -210,6 +215,12 @@ export type DefaultCanonicalExecutionOrchestratorRuntime = {
    */
   executionQueue?: ExecutionQueuePort;
   /**
+   * Worker Foundation — infraestrutura estrutural de Workers (INF-02).
+   * Default: createExecutionWorkerPort().
+   * Nenhum Worker é executado / iniciado nesta sprint.
+   */
+  executionWorker?: ExecutionWorkerPort;
+  /**
    * Registry opcional de Ports Foundation (type-safe DI legado).
    * Nesta fundação os Ports NÃO são invocados — resolução via Pipeline Resolver.
    */
@@ -242,6 +253,7 @@ function defaultRuntime(): DefaultCanonicalExecutionOrchestratorRuntime {
     executionResourceRegistry: createExecutionResourceRegistryPort(),
     executionEnvironmentRegistry: createExecutionEnvironmentRegistryPort(),
     executionQueue: createExecutionQueuePort(),
+    executionWorker: createExecutionWorkerPort(),
   };
 }
 
@@ -276,6 +288,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
   private readonly executionResourceRegistryPort: ExecutionResourceRegistryPort;
   private readonly executionEnvironmentRegistryPort: ExecutionEnvironmentRegistryPort;
   private readonly executionQueuePort: ExecutionQueuePort;
+  private readonly executionWorkerPort: ExecutionWorkerPort;
 
   constructor(runtime: DefaultCanonicalExecutionOrchestratorRuntime = defaultRuntime()) {
     this.runtime = runtime;
@@ -302,6 +315,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
     this.executionEnvironmentRegistryPort =
       runtime.executionEnvironmentRegistry ?? createExecutionEnvironmentRegistryPort();
     this.executionQueuePort = runtime.executionQueue ?? createExecutionQueuePort();
+    this.executionWorkerPort = runtime.executionWorker ?? createExecutionWorkerPort();
   }
 
   /** Acesso estrutural ao store (testes / demo). */
@@ -375,6 +389,10 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
     return this.executionQueuePort;
   }
 
+  getExecutionWorkerPort(): ExecutionWorkerPort {
+    return this.executionWorkerPort;
+  }
+
   /** Acesso estrutural ao registry de Ports (testes — sem invocação de negócio). */
   getFoundationPorts(): FoundationPortRegistry | undefined {
     return this.runtime.foundationPorts;
@@ -422,6 +440,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
     const resourceRegistryHealth = await this.executionResourceRegistryPort.health();
     const environmentRegistryHealth = await this.executionEnvironmentRegistryPort.health();
     const messageQueueHealth = await this.executionQueuePort.health();
+    const workerHealth = await this.executionWorkerPort.health();
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
     return {
       ok:
@@ -439,12 +458,13 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
         requirementRegistryHealth.ok &&
         resourceRegistryHealth.ok &&
         environmentRegistryHealth.ok &&
-        messageQueueHealth.ok,
+        messageQueueHealth.ok &&
+        workerHealth.ok,
       provider: "default",
       latencyMs: Math.max(0, Math.round(end - start)),
       message:
         storeHealth.message ??
-        "DefaultCanonicalExecutionOrchestratorStore pronto (Context + Resolver + State Machine + Event Bus + Registry + Trace + Capability Registry + Dependency Registry + Policy Registry + Constraint Registry + Requirement Registry + Resource Registry + Environment Registry + Message Queue — INF-01).",
+        "DefaultCanonicalExecutionOrchestratorStore pronto (Context + Resolver + State Machine + Event Bus + Registry + Trace + Capability Registry + Dependency Registry + Policy Registry + Constraint Registry + Requirement Registry + Resource Registry + Environment Registry + Message Queue — INF-01 + Worker Foundation — INF-02).",
       foundationPortRefCount: ORCHESTRATED_FOUNDATION_PORTS.length,
       ...storeCounts(this.store),
     };
@@ -741,6 +761,34 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
       stamp,
     );
 
+    // 27. Resolver Worker Foundation (infraestrutura estrutural — sem execução / threads / background jobs).
+    const executionWorker = await registerWorkerForContext(this.executionWorkerPort, {
+      executionId,
+      correlationId,
+      contextId: executionId,
+      stateMachineId: lifecycle.stateMachineId,
+      eventBusId: eventBus.eventBusId,
+      executionRegistryId: registryEntry.executionRegistryId,
+      executionTraceId: executionTrace.executionTraceId,
+      executionCapabilityRegistryId: capabilityRegistry.executionCapabilityRegistryId,
+      executionDependencyRegistryId: dependencyRegistry.executionDependencyRegistryId,
+      executionPolicyRegistryId: policyRegistry.executionPolicyRegistryId,
+      executionConstraintRegistryId: constraintRegistry.executionConstraintRegistryId,
+      executionRequirementRegistryId: requirementRegistry.executionRequirementRegistryId,
+      executionResourceRegistryId: resourceRegistry.executionResourceRegistryId,
+      executionEnvironmentRegistryId: environmentRegistry.executionEnvironmentRegistryId,
+      executionMessageQueueId: messageQueue.executionMessageQueueId,
+      pipelineId: pipelineResolution.pipelineId,
+    });
+
+    // 28. Anexar executionWorkerId ao Context (referência estrutural — sem execução).
+    await attachWorkerToExecutionContext(
+      this.executionContextPort,
+      executionId,
+      executionWorker,
+      stamp,
+    );
+
     // Transições estruturais de ciclo de vida (sem Engines / sem ações de negócio).
     lifecycle = await transitionExecutionState(
       this.executionStateMachinePort,
@@ -755,7 +803,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
       "pipeline-resolving",
     );
 
-    // 27. Anexar composição ao Execution Context (IDs de estágio separados dos steps).
+    // 29. Anexar composição ao Execution Context (IDs de estágio separados dos steps).
     await attachPipelineToExecutionContext(
       this.executionContextPort,
       executionId,
@@ -776,7 +824,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
       "structural-walk",
     );
 
-    // 28. Percurso estrutural (sem Engines) + projeção legada.
+    // 30. Percurso estrutural (sem Engines) + projeção legada.
     const pending = stepsFromPipelineResolution(pipelineResolution, stepIdFactory);
     const { steps, refs } = runStructuralPipeline(pending, request, stamp);
 
@@ -787,7 +835,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
       "structural-finalize",
     );
 
-    // 27. Finalizar / enriquecer Execution Context estruturalmente (transporte).
+    // 31. Finalizar / enriquecer Execution Context estruturalmente (transporte).
     const executionContext: ExecutionContext = await finalizeExecutionContext(
       this.executionContextPort,
       executionId,
@@ -861,7 +909,7 @@ export class DefaultCanonicalExecutionOrchestratorAdapter implements CanonicalEx
       result,
       trace,
       code: "started",
-      message: `canonical execution completed structurally — Context via ExecutionContextPort, pipeline via PipelineResolverPort, lifecycle via ExecutionStateMachinePort (${lifecycle.stateMachineId} → ${lifecycle.currentState.status}), event bus via ExecutionEventBusPort (${eventBus.eventBusId}, events not delivered), registry via ExecutionRegistryPort (${registryEntry.executionRegistryId}, no persistence), trace via ExecutionTracePort (${executionTrace.executionTraceId}, no logs/telemetry), capability registry via ExecutionCapabilityRegistryPort (${capabilityRegistry.executionCapabilityRegistryId}, no execution/discovery), dependency registry via ExecutionDependencyRegistryPort (${dependencyRegistry.executionDependencyRegistryId}, no resolution/ordering), policy registry via ExecutionPolicyRegistryPort (${policyRegistry.executionPolicyRegistryId}, no interpretation/evaluation), constraint registry via ExecutionConstraintRegistryPort (${constraintRegistry.executionConstraintRegistryId}, no validation/blocking), requirement registry via ExecutionRequirementRegistryPort (${requirementRegistry.executionRequirementRegistryId}, no validation/preconditions), resource registry via ExecutionResourceRegistryPort (${resourceRegistry.executionResourceRegistryId}, no allocation/reservation/load-balancing), environment registry via ExecutionEnvironmentRegistryPort (${environmentRegistry.executionEnvironmentRegistryId}, no selection/provisioning/activation), message queue via ExecutionQueuePort (${messageQueue.executionMessageQueueId}, no publishing/consumers/workers), engines not invoked`,
+      message: `canonical execution completed structurally — Context via ExecutionContextPort, pipeline via PipelineResolverPort, lifecycle via ExecutionStateMachinePort (${lifecycle.stateMachineId} → ${lifecycle.currentState.status}), event bus via ExecutionEventBusPort (${eventBus.eventBusId}, events not delivered), registry via ExecutionRegistryPort (${registryEntry.executionRegistryId}, no persistence), trace via ExecutionTracePort (${executionTrace.executionTraceId}, no logs/telemetry), capability registry via ExecutionCapabilityRegistryPort (${capabilityRegistry.executionCapabilityRegistryId}, no execution/discovery), dependency registry via ExecutionDependencyRegistryPort (${dependencyRegistry.executionDependencyRegistryId}, no resolution/ordering), policy registry via ExecutionPolicyRegistryPort (${policyRegistry.executionPolicyRegistryId}, no interpretation/evaluation), constraint registry via ExecutionConstraintRegistryPort (${constraintRegistry.executionConstraintRegistryId}, no validation/blocking), requirement registry via ExecutionRequirementRegistryPort (${requirementRegistry.executionRequirementRegistryId}, no validation/preconditions), resource registry via ExecutionResourceRegistryPort (${resourceRegistry.executionResourceRegistryId}, no allocation/reservation/load-balancing), environment registry via ExecutionEnvironmentRegistryPort (${environmentRegistry.executionEnvironmentRegistryId}, no selection/provisioning/activation), message queue via ExecutionQueuePort (${messageQueue.executionMessageQueueId}, no publishing/consumers/workers), worker foundation via ExecutionWorkerPort (${executionWorker.executionWorkerId}, no execution/threads/background jobs), engines not invoked`,
     };
   }
 

@@ -215,6 +215,10 @@ export type CanonicalExecutionOrchestratorCapabilities = {
   dependsOnExecutionQueue: true;
   /** Message Queue utilizado exclusivamente de forma estrutural (sem publicação / consumo / workers). */
   usesExecutionQueueStructurally: true;
+  /** Infraestrutura estrutural de Workers via ExecutionWorkerPort (INF-02). */
+  dependsOnExecutionWorker: true;
+  /** Worker Foundation utilizado exclusivamente de forma estrutural (sem execução / threads / background jobs). */
+  usesExecutionWorkerStructurally: true;
   /** Explicitamente sem OCR real nesta fundação. */
   implementsOcr: false;
   /** Explicitamente sem AI nesta fundação. */
@@ -302,3 +306,7 @@ export type { ExecutionEnvironmentRegistry } from "../../execution-environment-r
 /** Re-export tipado do Message Queue / ExecutionQueuePort (DI estrutural — INF-01). */
 export type { ExecutionQueuePort } from "../../message-queue/ports/execution-queue-port";
 export type { CanonicalQueue } from "../../message-queue/ports/models";
+
+/** Re-export tipado do Worker Foundation / ExecutionWorkerPort (DI estrutural — INF-02). */
+export type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
+export type { CanonicalWorker } from "../../worker-foundation/ports/models";

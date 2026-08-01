@@ -28,6 +28,7 @@
  * EPC-24 Sprint 13: registro estrutural de recursos via ExecutionResourceRegistryPort.
  * EPC-24 Sprint 14: registro estrutural de ambientes via ExecutionEnvironmentRegistryPort.
  * INF-01: infraestrutura estrutural de filas via ExecutionQueuePort.
+ * INF-02: infraestrutura estrutural de Workers via ExecutionWorkerPort.
  * O Orchestrator NÃO conhece a sequência dos módulos — solicita ao Resolver.
  * O Execution Context é o único objeto de transporte da execução.
  * O ciclo de vida é obtido exclusivamente via Execution State Machine.
@@ -42,6 +43,7 @@
  * O Resource Registry representa estruturalmente recursos — sem alocação/reserva/balanceamento nesta sprint.
  * O Environment Registry representa estruturalmente ambientes — sem seleção/provisionamento/ativação nesta sprint.
  * O Message Queue representa estruturalmente filas — sem publicação/consumo/workers nesta sprint.
+ * O Worker Foundation representa estruturalmente Workers — sem execução/threads/background jobs nesta sprint.
  * NÃO implementa regras TISS, validações ANS, OCR, IA, parser XML,
  * contratos específicos, operadoras, banco, APIs, UI ou migrations.
  */

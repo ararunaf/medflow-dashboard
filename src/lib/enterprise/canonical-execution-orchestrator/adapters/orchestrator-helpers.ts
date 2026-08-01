@@ -15,9 +15,10 @@
  * Sprint 13: registro estrutural de recursos exclusivo via ExecutionResourceRegistryPort.
  * Sprint 14: registro estrutural de ambientes exclusivo via ExecutionEnvironmentRegistryPort.
  * INF-01: infraestrutura estrutural de filas exclusiva via ExecutionQueuePort.
+ * INF-02: infraestrutura estrutural de Workers exclusiva via ExecutionWorkerPort.
  * Somente orquestração de estado in-memory.
  * Sem OCR. Sem IA. Sem Mapping. Sem regras. Sem validações.
- * Sem entrega de eventos. Sem filas reais. Sem Pub/Sub. Sem workers.
+ * Sem entrega de eventos. Sem filas reais. Sem Pub/Sub. Sem workers reais.
  * Sem persistência real. Sem banco. Sem logs. Sem telemetria.
  * Sem descoberta automática. Sem carregamento dinâmico. Sem execução de capacidades.
  * Sem resolução de dependências. Sem ordenação. Sem DAG.
@@ -47,6 +48,8 @@ import type { ExecutionEnvironmentRegistryPort } from "../../execution-environme
 import type { ExecutionEnvironmentRegistry } from "../../execution-environment-registry/ports/models";
 import type { ExecutionQueuePort } from "../../message-queue/ports/execution-queue-port";
 import type { CanonicalQueue } from "../../message-queue/ports/models";
+import type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
+import type { CanonicalWorker } from "../../worker-foundation/ports/models";
 import type { ExecutionResourceRegistryPort } from "../../execution-resource-registry/ports/execution-resource-registry-port";
 import type { ExecutionResourceRegistry } from "../../execution-resource-registry/ports/models";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
@@ -1586,6 +1589,129 @@ export async function attachMessageQueueToExecutionContext(
 }
 
 /**
+ * Obtém / cria estruturalmente o Worker Foundation para a execução.
+ * Infraestrutura controlada exclusivamente via ExecutionWorkerPort.
+ * Nenhum Worker iniciado. Nenhuma thread. Nenhum background job. Nenhuma Engine.
+ */
+export async function registerWorkerForContext(
+  workerPort: ExecutionWorkerPort,
+  input: {
+    executionId: string;
+    correlationId?: string;
+    contextId?: string;
+    stateMachineId?: string;
+    eventBusId?: string;
+    executionRegistryId?: string;
+    executionTraceId?: string;
+    executionCapabilityRegistryId?: string;
+    executionDependencyRegistryId?: string;
+    executionPolicyRegistryId?: string;
+    executionConstraintRegistryId?: string;
+    executionRequirementRegistryId?: string;
+    executionResourceRegistryId?: string;
+    executionEnvironmentRegistryId?: string;
+    executionMessageQueueId?: string;
+    pipelineId?: string;
+    executionWorkerId?: string;
+  },
+): Promise<CanonicalWorker> {
+  const resolved = await workerPort.registerWorker({
+    executionWorkerId: input.executionWorkerId,
+    executionId: input.executionId,
+    correlationId: input.correlationId,
+    contextId: input.contextId,
+    stateMachineId: input.stateMachineId,
+    eventBusId: input.eventBusId,
+    executionRegistryId: input.executionRegistryId,
+    executionTraceId: input.executionTraceId,
+    executionCapabilityRegistryId: input.executionCapabilityRegistryId,
+    executionDependencyRegistryId: input.executionDependencyRegistryId,
+    executionPolicyRegistryId: input.executionPolicyRegistryId,
+    executionConstraintRegistryId: input.executionConstraintRegistryId,
+    executionRequirementRegistryId: input.executionRequirementRegistryId,
+    executionResourceRegistryId: input.executionResourceRegistryId,
+    executionEnvironmentRegistryId: input.executionEnvironmentRegistryId,
+    executionMessageQueueId: input.executionMessageQueueId,
+    pipelineId: input.pipelineId,
+    key: "structural-execution-worker",
+    name: "Structural Execution Worker",
+    createIfMissing: true,
+    structuralNotes:
+      "Worker Foundation registered structurally — no execution, no threads, no background jobs, no engines",
+    tags: ["worker-foundation", "foundation", "structural"],
+  });
+
+  if (!resolved.ok || !resolved.worker) {
+    throw new Error(resolved.message ?? "ExecutionWorkerPort failed to resolve structural worker");
+  }
+
+  return resolved.worker;
+}
+
+/**
+ * Anexa referência estrutural do Worker Foundation ao Execution Context (transporte).
+ * Anexa apenas executionWorkerId.
+ * Nenhum Worker iniciado. Nenhuma thread. Nenhum background job.
+ */
+export async function attachWorkerToExecutionContext(
+  executionContextPort: ExecutionContextPort,
+  contextId: string,
+  worker: CanonicalWorker,
+  stamp: string,
+): Promise<ExecutionContext> {
+  const updated = await executionContextPort.updateContext({
+    contextId,
+    appendReferences: [
+      {
+        name: "executionWorkerId",
+        value: worker.executionWorkerId,
+        notes: "Execution Worker reference — worker obtained exclusively via ExecutionWorkerPort",
+      },
+    ],
+    appendHistory: [
+      {
+        event: "execution-worker-attached",
+        phase: "created",
+        status: "pending",
+        occurredAt: stamp,
+        notes:
+          "Worker Foundation attached structurally — no execution, no threads, no background jobs, no engines",
+        attributes: {
+          executionWorkerId: worker.executionWorkerId,
+          executionPerformed: false,
+          threadsSpawned: false,
+          backgroundJobsStarted: false,
+          concurrencyEnabled: false,
+          messagesConsumed: false,
+          processingPerformed: false,
+          realWorkerBackend: false,
+          enginesInvoked: false,
+        },
+      },
+    ],
+    metadata: {
+      kind: "execution-context-metadata",
+      customAttributes: {
+        executionWorkerId: worker.executionWorkerId,
+        executionPerformed: false,
+        threadsSpawned: false,
+        backgroundJobsStarted: false,
+        concurrencyEnabled: false,
+        messagesConsumed: false,
+        processingPerformed: false,
+        realWorkerBackend: false,
+      },
+    },
+  });
+
+  if (!updated.ok || !updated.context) {
+    throw new Error(updated.message ?? "ExecutionContextPort failed to attach execution worker");
+  }
+
+  return updated.context;
+}
+
+/**
  * Anexa a composição do Pipeline Resolver ao Execution Context (estrutural).
  * O Resolver permanece independente do conteúdo do Context.
  */
@@ -1798,6 +1924,8 @@ export function foundationCapabilitiesBase(adapterId: string) {
     usesExecutionEnvironmentRegistryStructurally: true as const,
     dependsOnExecutionQueue: true as const,
     usesExecutionQueueStructurally: true as const,
+    dependsOnExecutionWorker: true as const,
+    usesExecutionWorkerStructurally: true as const,
     implementsOcr: false as const,
     implementsAi: false as const,
     implementsXmlParser: false as const,
