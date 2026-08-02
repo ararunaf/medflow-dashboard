@@ -5,7 +5,10 @@
  * Preserva todos os artefatos anteriores do pipeline (OCR, parser, audit, correction).
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
+import {
+  captureStorageDownload,
+  captureStorageUpload,
+} from "../../infrastructure/enterprise-storage-bridge";
 import {
   buildEmptyRecordsStore,
   calculateMetricsFromRecords,
@@ -34,22 +37,18 @@ export function buildLearningMetricsStoragePath(tenantId: string): string {
 
 async function uploadJson(ctx: ServiceCtx, storagePath: string, payload: unknown): Promise<void> {
   const body = JSON.stringify(payload, null, 2);
-  const { error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(storagePath, new TextEncoder().encode(body), {
-      contentType: "application/json",
-      upsert: true,
-    });
-  if (error) throw error;
+  await captureStorageUpload(ctx, {
+    key: storagePath,
+    body: new TextEncoder().encode(body),
+    contentType: "application/json",
+    upsert: true,
+  });
 }
 
 async function downloadJson<T>(ctx: ServiceCtx, storagePath: string): Promise<T | null> {
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .download(storagePath);
-
-  if (error || !data) return null;
-  const text = await data.text();
+  const body = await captureStorageDownload(ctx, { key: storagePath });
+  if (!body) return null;
+  const text = new TextDecoder().decode(body);
   return JSON.parse(text) as T;
 }
 

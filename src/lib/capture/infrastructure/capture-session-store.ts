@@ -21,11 +21,11 @@ import {
   eventForDbStatusTransition,
 } from "./capture-events";
 import {
-  CLINICAL_DOCUMENTS_BUCKET,
   buildAuditManifestKey,
   buildOriginalObjectKey,
   validateCaptureUpload,
 } from "./storage-paths";
+import { captureStorageSignedUrl, captureStorageUpload } from "./enterprise-storage-bridge";
 import { buildVersionedObjectKey, nextDocumentVersion } from "./versioning";
 
 const SIGNED_URL_TTL_SECONDS = 3600;
@@ -343,14 +343,13 @@ async function storeDocumentFile(
       : buildOriginalObjectKey(ctx.tenantId, input.sessionId, input.filename);
   const auditPath = buildAuditManifestKey(ctx.tenantId, input.sessionId);
 
-  const { error: uploadErr } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(storagePath, input.fileBytes, {
-      contentType: input.mimeType,
-      upsert: input.version > 1,
-    });
-
-  if (uploadErr) throw uploadErr;
+  await captureStorageUpload(ctx, {
+    key: storagePath,
+    body: input.fileBytes,
+    contentType: input.mimeType,
+    upsert: input.version > 1,
+    sessionId: input.sessionId,
+  });
 
   const auditManifest = JSON.stringify({
     sessionId: input.sessionId,
@@ -362,12 +361,13 @@ async function storeDocumentFile(
     note: "capture_pipeline_v1",
   });
 
-  await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(auditPath, new TextEncoder().encode(auditManifest), {
-      contentType: "application/json",
-      upsert: true,
-    });
+  await captureStorageUpload(ctx, {
+    key: auditPath,
+    body: new TextEncoder().encode(auditManifest),
+    contentType: "application/json",
+    upsert: true,
+    sessionId: input.sessionId,
+  });
 
   const { data: doc, error: docErr } = await ctx.client
     .from("capture_documents")
@@ -559,17 +559,15 @@ export async function getCaptureDocumentSignedUrl(
 
   if (!doc) throw new NotFoundError("Documento de captura", documentId ?? sessionId);
 
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .createSignedUrl(doc.storagePathOriginal, SIGNED_URL_TTL_SECONDS, {
-      download: disposition === "attachment" ? doc.originalFilename : false,
-    });
+  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
+    key: doc.storagePathOriginal,
+    expiresInSeconds: SIGNED_URL_TTL_SECONDS,
+    downloadFilename: disposition === "attachment" ? doc.originalFilename : undefined,
+    documentId: doc.id,
+    sessionId,
+  });
 
-  if (error || !data?.signedUrl)
-    throw error ?? new NotFoundError("Arquivo no storage", doc.storagePathOriginal);
-
-  const expiresAt = new Date(Date.now() + SIGNED_URL_TTL_SECONDS * 1000).toISOString();
-  return { signedUrl: data.signedUrl, expiresAt, filename: doc.originalFilename };
+  return { signedUrl, expiresAt, filename: doc.originalFilename };
 }
 
 export async function softDeleteCaptureSession(ctx: ServiceCtx, sessionId: string): Promise<void> {

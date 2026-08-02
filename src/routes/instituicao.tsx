@@ -11,6 +11,7 @@ import {
 import { can } from "@/lib/auth/rbac";
 import { reportOperationalFailureClient } from "@/lib/observability/report-operational-failure-client";
 import { describeError } from "@/lib/queries/result";
+import { productStorageUploadPublic } from "@/lib/capture/infrastructure/enterprise-storage-bridge";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import { Activity, ImagePlus, RefreshCw, Server, ShieldCheck } from "lucide-react";
@@ -92,20 +93,26 @@ function InstituicaoPage() {
     const sb = getBrowserSupabase();
     const ext = file.name.split(".").pop()?.toLowerCase() || "png";
     const path = `${auth.tenantId}/${kind}-${Date.now()}.${ext}`;
-    const { error: upErr } = await sb.storage.from("tenant-branding").upload(path, file, {
-      upsert: true,
-      contentType: file.type || "image/png",
-    });
-    if (upErr) {
-      toast.error("Falha no upload", upErr.message);
+    let url: string;
+    try {
+      const body = new Uint8Array(await file.arrayBuffer());
+      const uploaded = await productStorageUploadPublic(sb, {
+        key: path,
+        body,
+        contentType: file.type || "image/png",
+        container: "tenant-branding",
+        upsert: true,
+      });
+      url = uploaded.publicUrl;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error("Falha no upload", message);
       void reportOperationalFailureClient({
         source: "upload",
-        err: new Error(upErr.message),
+        err: err instanceof Error ? err : new Error(message),
       });
       return;
     }
-    const { data } = sb.storage.from("tenant-branding").getPublicUrl(path);
-    const url = data.publicUrl;
     const patch =
       kind === "logo"
         ? { logo_url: url }

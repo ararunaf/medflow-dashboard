@@ -9,6 +9,7 @@
 import { createStorageManagerRuntimeSessionId } from "../ports/identity";
 import type { StorageManagerRuntimePort } from "../ports/storage-manager-runtime-port";
 import type { CanonicalStorageSession } from "../ports/models";
+import { createStorageProviderPort } from "../../storage-provider/providers/create-storage-provider-port";
 import type {
   CoordinateStorageInput,
   CoordinateStorageResult,
@@ -17,10 +18,15 @@ import type {
   ListStorageManagerRuntimeSessionsInput,
   ListStorageManagerRuntimeSessionsResult,
   ListStorageProviderReferencesResult,
+  StorageManagerDeleteInput,
+  StorageManagerDownloadInput,
+  StorageManagerMetadataInput,
+  StorageManagerProviderOperationResult,
   StorageManagerRuntimeCapabilities,
   StorageManagerRuntimeEnterpriseDeps,
   StorageManagerRuntimeHealth,
   StorageManagerRuntimeProviderId,
+  StorageManagerUploadInput,
 } from "../ports/types";
 import { STRUCTURAL_STORAGE_PROVIDER_REFERENCES } from "../ports/types";
 import { InMemoryStorageManagerRuntimeStore, type StorageManagerRuntimeStore } from "../store";
@@ -86,20 +92,23 @@ export class MockStorageManagerRuntimeAdapter implements StorageManagerRuntimePo
       usesDocumentClassificationRuntime: Boolean(this.delegate),
       usesOCRRuntime: Boolean(this.delegate),
       usesCaptureEngineRuntime: Boolean(this.delegate),
+      usesStorageProviderPort: Boolean(this.delegate),
       supportsVersioning: false,
       supportsRetentionPolicy: false,
       supportsEncryption: false,
       supportsCompression: false,
       supportsDeduplication: false,
       supportsCloudStorage: false,
-      supportsLocalStorage: false,
+      supportsLocalStorage: true,
       supportsImmutableStorage: false,
-      implementsRealStorage: false,
-      implementsUpload: false,
-      implementsDownload: false,
+      implementsRealStorage: true,
+      implementsUpload: true,
+      implementsDownload: true,
+      implementsDelete: true,
+      implementsMetadata: true,
       implementsVersioning: false,
       implementsRetention: false,
-      implementsPhysicalFileWrite: false,
+      implementsPhysicalFileWrite: true,
       implementsExternalProviderCall: false,
     };
   }
@@ -110,17 +119,39 @@ export class MockStorageManagerRuntimeAdapter implements StorageManagerRuntimePo
       return {
         ...health,
         provider: this.providerId,
-        realStorageAvailable: false,
-        realUploadAvailable: false,
       };
     }
     return {
       ok: this.healthy,
       provider: this.providerId,
       message: this.message,
-      realStorageAvailable: false,
-      realUploadAvailable: false,
+      realStorageAvailable: true,
+      realUploadAvailable: true,
     };
+  }
+
+  async upload(input: StorageManagerUploadInput): Promise<StorageManagerProviderOperationResult> {
+    if (this.delegate) return this.delegate.upload(input);
+    return createStorageProviderPort({ provider: "mock" }).upload(input);
+  }
+
+  async download(
+    input: StorageManagerDownloadInput,
+  ): Promise<StorageManagerProviderOperationResult> {
+    if (this.delegate) return this.delegate.download(input);
+    return createStorageProviderPort({ provider: "mock" }).download(input);
+  }
+
+  async delete(input: StorageManagerDeleteInput): Promise<StorageManagerProviderOperationResult> {
+    if (this.delegate) return this.delegate.delete(input);
+    return createStorageProviderPort({ provider: "mock" }).delete(input);
+  }
+
+  async metadata(
+    input: StorageManagerMetadataInput,
+  ): Promise<StorageManagerProviderOperationResult> {
+    if (this.delegate) return this.delegate.metadata(input);
+    return createStorageProviderPort({ provider: "mock" }).metadata(input);
   }
 
   async coordinateStorage(input: CoordinateStorageInput): Promise<CoordinateStorageResult> {

@@ -1,17 +1,16 @@
 /**
- * Enterprise Storage Manager Runtime — Document Intelligence Platform (DIP-05).
+ * Enterprise Storage Manager Runtime — Document Intelligence Platform (DIP-05 / STORAGE-01).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → Document Classification Runtime
  *     → StorageManagerRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Storage Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → StorageProviderPort
+ *     → Storage Provider Adapter
+ *     → Storage Backend
  *
- * DIP-05: infraestrutura oficial de coordenação de armazenamento documental —
- * sem armazenamento real, sem upload, sem download, sem versionamento funcional,
- * sem retenção automática, sem Providers externos, sem I/O de arquivo físico.
+ * STORAGE-01: persistência documental exclusivamente via StorageProviderPort.
  */
 export type {
   CanonicalStorageCapabilities,
@@ -24,6 +23,7 @@ export type {
   CanonicalStorageRequest,
   CanonicalStorageResult,
   CanonicalStorageSession,
+  CanonicalStoredDocument,
   CoordinateStorageInput,
   CoordinateStorageResult,
   GetStorageManagerRuntimeSessionInput,
@@ -31,6 +31,10 @@ export type {
   ListStorageManagerRuntimeSessionsInput,
   ListStorageManagerRuntimeSessionsResult,
   ListStorageProviderReferencesResult,
+  StorageManagerDeleteInput,
+  StorageManagerDownloadInput,
+  StorageManagerMetadataInput,
+  StorageManagerProviderOperationResult,
   StorageManagerRuntimeCapabilities,
   StorageManagerRuntimeEnterpriseDeps,
   StorageManagerRuntimeHealth,
@@ -38,6 +42,7 @@ export type {
   StorageManagerRuntimeProviderId,
   StorageManagerRuntimeProviderOptions,
   StorageManagerRuntimeSessionStatus,
+  StorageManagerUploadInput,
 } from "./ports";
 
 export {

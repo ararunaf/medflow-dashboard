@@ -14,7 +14,7 @@ import {
   getCaptureSession,
   transitionCaptureSession,
 } from "../../infrastructure/capture-session-store";
-import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
+import { captureStorageDownload } from "../../infrastructure/enterprise-storage-bridge";
 import {
   buildOcrSummaryFromResult,
   loadOcrResult,
@@ -63,14 +63,9 @@ async function emitOcrEvent(
 }
 
 async function downloadDocumentBytes(ctx: ServiceCtx, storagePath: string): Promise<Uint8Array> {
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .download(storagePath);
-
-  if (error || !data) throw new NotFoundError("Arquivo de captura", storagePath);
-
-  const buffer = await data.arrayBuffer();
-  return new Uint8Array(buffer);
+  const body = await captureStorageDownload(ctx, { key: storagePath });
+  if (!body) throw new NotFoundError("Arquivo de captura", storagePath);
+  return body;
 }
 
 export class OcrService {

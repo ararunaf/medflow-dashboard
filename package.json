@@ -73,6 +73,7 @@
     "enterprise:document-classification-runtime:test": "npx tsx --test scripts/enterprise/tests/document-classification-runtime-engine.test.ts",
     "enterprise:document-classification-provider:test": "npx tsx --test scripts/enterprise/tests/document-classification-provider-engine.test.ts",
     "enterprise:storage-manager-runtime:test": "npx tsx --test scripts/enterprise/tests/storage-manager-runtime-engine.test.ts",
+    "enterprise:storage-provider:test": "npx tsx --test scripts/enterprise/tests/storage-provider-engine.test.ts",
     "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
     "enterprise:ai-provider-runtime:test": "npx tsx --test scripts/enterprise/tests/ai-provider-runtime-engine.test.ts",
 

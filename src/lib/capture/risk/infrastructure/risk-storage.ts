@@ -5,7 +5,11 @@
  * Preserva audit_report.json, contract_intelligence_report.json e demais artefatos.
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
+import {
+  captureStorageDownload,
+  captureStorageSignedUrl,
+  captureStorageUpload,
+} from "../../infrastructure/enterprise-storage-bridge";
 import type { RiskAssessmentReport, RiskAssessmentSummaryMeta } from "../types/risk-assessment";
 
 export const RISK_ASSESSMENT_FILENAME = "risk_assessment.json";
@@ -22,14 +26,13 @@ export async function persistRiskAssessmentReport(
   const storagePath = buildRiskAssessmentStoragePath(ctx.tenantId, sessionId);
   const payload = JSON.stringify(report, null, 2);
 
-  const { error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(storagePath, new TextEncoder().encode(payload), {
-      contentType: "application/json",
-      upsert: true,
-    });
-
-  if (error) throw error;
+  await captureStorageUpload(ctx, {
+    key: storagePath,
+    body: new TextEncoder().encode(payload),
+    contentType: "application/json",
+    upsert: true,
+    sessionId,
+  });
   return { storagePath };
 }
 
@@ -38,13 +41,9 @@ export async function loadRiskAssessmentReport(
   sessionId: string,
 ): Promise<RiskAssessmentReport | null> {
   const storagePath = buildRiskAssessmentStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .download(storagePath);
-
-  if (error || !data) return null;
-
-  const text = await data.text();
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  if (!body) return null;
+  const text = new TextDecoder().decode(body);
   return JSON.parse(text) as RiskAssessmentReport;
 }
 
@@ -54,19 +53,16 @@ export async function getRiskAssessmentSignedUrl(
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
   const storagePath = buildRiskAssessmentStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .createSignedUrl(storagePath, ttlSeconds, {
-      download: RISK_ASSESSMENT_FILENAME,
-    });
-
-  if (error || !data?.signedUrl) {
-    throw error ?? new Error("Relatório de risco de glosa não encontrado.");
-  }
+  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
+    key: storagePath,
+    expiresInSeconds: ttlSeconds,
+    downloadFilename: RISK_ASSESSMENT_FILENAME,
+    sessionId,
+  });
 
   return {
-    signedUrl: data.signedUrl,
-    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+    signedUrl,
+    expiresAt,
     filename: RISK_ASSESSMENT_FILENAME,
   };
 }

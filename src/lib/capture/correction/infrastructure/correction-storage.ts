@@ -5,7 +5,11 @@
  * Preserva ocr_result.json, structured_guide.json e audit_report.json.
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
+import {
+  captureStorageDownload,
+  captureStorageSignedUrl,
+  captureStorageUpload,
+} from "../../infrastructure/enterprise-storage-bridge";
 import type {
   CorrectionProposalStore,
   CorrectionProposalSummaryMeta,
@@ -25,14 +29,13 @@ export async function persistCorrectionProposals(
   const storagePath = buildCorrectionProposalsStoragePath(ctx.tenantId, sessionId);
   const payload = JSON.stringify(store, null, 2);
 
-  const { error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(storagePath, new TextEncoder().encode(payload), {
-      contentType: "application/json",
-      upsert: true,
-    });
-
-  if (error) throw error;
+  await captureStorageUpload(ctx, {
+    key: storagePath,
+    body: new TextEncoder().encode(payload),
+    contentType: "application/json",
+    upsert: true,
+    sessionId,
+  });
   return { storagePath };
 }
 
@@ -41,13 +44,9 @@ export async function loadCorrectionProposals(
   sessionId: string,
 ): Promise<CorrectionProposalStore | null> {
   const storagePath = buildCorrectionProposalsStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .download(storagePath);
-
-  if (error || !data) return null;
-
-  const text = await data.text();
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  if (!body) return null;
+  const text = new TextDecoder().decode(body);
   return JSON.parse(text) as CorrectionProposalStore;
 }
 
@@ -57,19 +56,16 @@ export async function getCorrectionProposalsSignedUrl(
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
   const storagePath = buildCorrectionProposalsStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .createSignedUrl(storagePath, ttlSeconds, {
-      download: CORRECTION_PROPOSALS_FILENAME,
-    });
-
-  if (error || !data?.signedUrl) {
-    throw error ?? new Error("Correction proposals não encontradas.");
-  }
+  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
+    key: storagePath,
+    expiresInSeconds: ttlSeconds,
+    downloadFilename: CORRECTION_PROPOSALS_FILENAME,
+    sessionId,
+  });
 
   return {
-    signedUrl: data.signedUrl,
-    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+    signedUrl,
+    expiresAt,
     filename: CORRECTION_PROPOSALS_FILENAME,
   };
 }

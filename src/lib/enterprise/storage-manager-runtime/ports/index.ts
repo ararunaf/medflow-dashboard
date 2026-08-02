@@ -11,6 +11,7 @@ export type {
   CanonicalStorageRequest,
   CanonicalStorageResult,
   CanonicalStorageSession,
+  CanonicalStoredDocument,
   CoordinateStorageInput,
   CoordinateStorageResult,
   GetStorageManagerRuntimeSessionInput,
@@ -18,12 +19,17 @@ export type {
   ListStorageManagerRuntimeSessionsInput,
   ListStorageManagerRuntimeSessionsResult,
   ListStorageProviderReferencesResult,
+  StorageManagerDeleteInput,
+  StorageManagerDownloadInput,
+  StorageManagerMetadataInput,
+  StorageManagerProviderOperationResult,
   StorageManagerRuntimeCapabilities,
   StorageManagerRuntimeEnterpriseDeps,
   StorageManagerRuntimeHealth,
   StorageManagerRuntimeProviderId,
   StorageManagerRuntimeProviderOptions,
   StorageManagerRuntimeSessionStatus,
+  StorageManagerUploadInput,
 } from "./types";
 
 export {

@@ -32,6 +32,7 @@ import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/
 import { createOCRRuntimePort } from "../../../src/lib/enterprise/ocr-runtime/index.ts";
 import { createDocumentClassificationProviderPort } from "../../../src/lib/enterprise/document-classification-provider/index.ts";
 import { createDocumentClassificationRuntimePort } from "../../../src/lib/enterprise/document-classification-runtime/index.ts";
+import { createStorageProviderPort } from "../../../src/lib/enterprise/storage-provider/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import {
   createEnterpriseRuntime,
@@ -114,39 +115,35 @@ function enterpriseDeps() {
       getDocumentClassificationProviderPort: () => documentClassificationProviderPort,
     },
   });
+  const storageProviderPort = createStorageProviderPort({ provider: "mock" });
   return {
     orchestratorPort,
     ocrRuntimePort,
     documentClassificationRuntimePort,
+    storageProviderPort,
     deps: {
       getOrchestratorPort: () => orchestratorPort,
       getDocumentClassificationRuntimePort: () => documentClassificationRuntimePort,
+      getStorageProviderPort: () => storageProviderPort,
     },
   };
 }
 
-function assertNoRealStorageCapabilities(
+function assertStorageProviderCapabilities(
   caps: ReturnType<StorageManagerRuntimePort["capabilities"]>,
 ) {
+  assert.equal(caps.usesStorageProviderPort, true);
+  assert.equal(caps.implementsRealStorage, true);
+  assert.equal(caps.implementsUpload, true);
+  assert.equal(caps.implementsDownload, true);
+  assert.equal(caps.implementsDelete, true);
+  assert.equal(caps.implementsMetadata, true);
   assert.equal(caps.supportsVersioning, false);
-  assert.equal(caps.supportsRetentionPolicy, false);
-  assert.equal(caps.supportsEncryption, false);
-  assert.equal(caps.supportsCompression, false);
-  assert.equal(caps.supportsDeduplication, false);
-  assert.equal(caps.supportsCloudStorage, false);
-  assert.equal(caps.supportsLocalStorage, false);
-  assert.equal(caps.supportsImmutableStorage, false);
-  assert.equal(caps.implementsRealStorage, false);
-  assert.equal(caps.implementsUpload, false);
-  assert.equal(caps.implementsDownload, false);
-  assert.equal(caps.implementsVersioning, false);
   assert.equal(caps.implementsRetention, false);
-  assert.equal(caps.implementsPhysicalFileWrite, false);
-  assert.equal(caps.implementsExternalProviderCall, false);
 }
 
 describe("DIP-05 StorageManagerRuntimePort contract", () => {
-  it("mock adapter satisfaz o Port e responde healthy sem armazenamento real", async () => {
+  it("mock adapter satisfaz o Port e responde healthy (STORAGE-01 ops via Provider)", async () => {
     const port: StorageManagerRuntimePort = new MockStorageManagerRuntimeAdapter({
       provider: "mock",
     });
@@ -155,13 +152,15 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     const health = await port.health();
     assert.equal(health.ok, true);
     assert.equal(health.provider, "mock");
-    assert.equal(health.realStorageAvailable, false);
-    assert.equal(health.realUploadAvailable, false);
+    assert.equal(health.realStorageAvailable, true);
+    assert.equal(health.realUploadAvailable, true);
 
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_STORAGE_MANAGER_RUNTIME_ADAPTER_ID);
     assert.equal(caps.supportsCoordinateStorage, true);
-    assertNoRealStorageCapabilities(caps);
+    assert.equal(caps.implementsRealStorage, true);
+    assert.equal(caps.implementsUpload, true);
+    assert.equal(caps.implementsDownload, true);
   });
 
   it("default adapter exige enterpriseDeps (sem implementação paralela)", () => {
@@ -173,7 +172,7 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     );
   });
 
-  it("default adapter coordena via Orchestrator + Classification Runtime (sem armazenamento real)", async () => {
+  it("default adapter coordena via Orchestrator + Classification Runtime + StorageProviderPort", async () => {
     resetAllStorageManagerRuntimeIdSequences();
     const { deps, orchestratorPort, documentClassificationRuntimePort } = enterpriseDeps();
     const port = new DefaultStorageManagerRuntimeAdapter({ enterpriseDeps: deps });
@@ -182,7 +181,7 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     assert.equal(port.capabilities().adapterId, DEFAULT_STORAGE_MANAGER_RUNTIME_ADAPTER_ID);
     assert.equal(port.capabilities().usesCanonicalExecutionOrchestrator, true);
     assert.equal(port.capabilities().usesDocumentClassificationRuntime, true);
-    assertNoRealStorageCapabilities(port.capabilities());
+    assertStorageProviderCapabilities(port.capabilities());
 
     const result = await port.coordinateStorage(sampleRequest());
     assert.equal(result.ok, true);
@@ -271,10 +270,11 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     const summary = await getStorageManagerRuntimeHealthSummary(port);
     assert.equal(summary.architectureLayer, "application");
     assert.equal(summary.health.ok, true);
-    assert.equal(summary.health.realStorageAvailable, false);
-    assert.equal(summary.health.realUploadAvailable, false);
+    assert.equal(summary.health.realStorageAvailable, true);
+    assert.equal(summary.health.realUploadAvailable, true);
     assert.equal(summary.capabilities.supportsCoordinateStorage, true);
-    assertNoRealStorageCapabilities(summary.capabilities);
+    assert.equal(summary.capabilities.implementsRealStorage, true);
+    assert.equal(summary.capabilities.implementsUpload, true);
   });
 
   it("coordinateStorage rejeita input inválido", async () => {
@@ -309,7 +309,7 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     assert.equal(createStorageManagerRuntimeSessionId(), "dip-storage-session-1");
   });
 
-  it("lista referências estruturais de Storage Providers sem conexão", async () => {
+  it("lista Storage Providers — supabase/mock ready (STORAGE-01), demais estruturais", async () => {
     const port = createStorageManagerRuntimePort({ provider: "mock" });
     const refs = await port.listProviderReferences();
     assert.equal(refs.ok, true);
@@ -325,13 +325,18 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
       "sharepoint",
       "supabase-storage",
     ]);
-    for (const ref of refs.references) {
+    const supabase = refs.references.find((r) => r.providerReferenceId === "supabase-storage");
+    const mock = refs.references.find((r) => r.providerReferenceId === "mock-storage");
+    assert.equal(supabase?.status, "ready");
+    assert.equal(supabase?.implementsRealStorage, true);
+    assert.equal(mock?.status, "ready");
+    assert.equal(mock?.implementsRealStorage, true);
+    const structural = refs.references.filter(
+      (r) => r.providerReferenceId !== "supabase-storage" && r.providerReferenceId !== "mock-storage",
+    );
+    for (const ref of structural) {
       assert.equal(ref.connected, false);
       assert.equal(ref.implementsRealStorage, false);
-      assert.equal(ref.implementsUpload, false);
-      assert.equal(ref.implementsDownload, false);
-      assert.equal(ref.implementsVersioning, false);
-      assert.equal(ref.implementsRetention, false);
       assert.equal(ref.status, "structural-reference-only");
     }
   });
@@ -354,11 +359,13 @@ describe("DIP-05 integração Enterprise / Capture / OCR / Classification / Orch
     assert.equal(health.orchestratorOk, true);
 
     const storageHealth = await storageManagerRuntime.health();
-    assert.equal(storageHealth.realStorageAvailable, false);
-    assert.equal(storageHealth.realUploadAvailable, false);
+    assert.equal(storageHealth.realStorageAvailable, true);
+    assert.equal(storageHealth.realUploadAvailable, true);
+    assert.equal(storageHealth.storageProviderOk, true);
+    assert.equal(runtime.getStorageProviderPort().providerId, "supabase");
   });
 
-  it("fluxo captura passa pelo Storage Manager Runtime sem armazenamento real", async () => {
+  it("fluxo captura passa pelo Storage Manager Runtime + StorageProviderPort", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -417,7 +424,11 @@ describe("DIP-05 integração Enterprise / Capture / OCR / Classification / Orch
 
     assert.equal(
       runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage,
-      false,
+      true,
+    );
+    assert.equal(
+      runtime.getStorageManagerRuntimePort().capabilities().usesStorageProviderPort,
+      true,
     );
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsStorageManager, false);
     assert.equal(
@@ -443,8 +454,8 @@ describe("DIP-05 integração Enterprise / Capture / OCR / Classification / Orch
   });
 });
 
-describe("DIP-05 ausência de armazenamento real / upload / integrações externas", () => {
-  it("fonte do módulo Storage Manager Runtime não contém storage real nem HTTP", () => {
+describe("DIP-05 / STORAGE-01 — Storage Manager usa apenas StorageProviderPort", () => {
+  it("fonte do Storage Manager Runtime não contém SDKs de vendor diretos", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/storage-manager-runtime");
     const files = [
       "adapters/default-storage-manager-runtime-adapter.ts",
@@ -462,8 +473,6 @@ describe("DIP-05 ausência de armazenamento real / upload / integrações extern
       /from ["']@aws-sdk\/client-s3/i,
       /from ["']@azure\/storage-blob/i,
       /from ["']@google-cloud\/storage/i,
-      /\.upload\s*\(/,
-      /\.download\s*\(/,
       /\.putObject\s*\(/,
       /\.getObject\s*\(/,
       /createWriteStream\s*\(/,
@@ -474,6 +483,7 @@ describe("DIP-05 ausência de armazenamento real / upload / integrações extern
       /blob\.core\.windows\.net/i,
       /storage\.googleapis\.com/i,
       /s3\.amazonaws\.com/i,
+      /storage\.from\s*\(/,
     ];
 
     for (const rel of files) {
@@ -491,13 +501,13 @@ describe("DIP-05 ausência de armazenamento real / upload / integrações extern
       join(moduleDir, "adapters/default-storage-manager-runtime-adapter.ts"),
       "utf8",
     );
-    assert.match(defaultAdapter, /health\/capabilities/);
-    assert.match(defaultAdapter, /PROIBIDO:/);
-    assert.equal(/\.upload\s*\(/.test(defaultAdapter), false);
+    assert.match(defaultAdapter, /getStorageProviderPort/);
+    assert.match(defaultAdapter, /StorageProviderPort/);
     assert.equal(/\.putObject\s*\(/.test(defaultAdapter), false);
+    assert.equal(/storage\.from\s*\(/.test(defaultAdapter), false);
   });
 
-  it("coordinateStorage não produz blobUri, signedUrl nem bytes armazenados", async () => {
+  it("coordinateStorage sem executeUpload não executa upload real", async () => {
     const { deps } = enterpriseDeps();
     const port = createStorageManagerRuntimePort({
       provider: "default",
@@ -508,7 +518,6 @@ describe("DIP-05 ausência de armazenamento real / upload / integrações extern
     const sessionJson = JSON.stringify(result.session);
     assert.equal(/"blobUri"\s*:/i.test(sessionJson), false);
     assert.equal(/"signedUrl"\s*:/i.test(sessionJson), false);
-    assert.equal(/"etag"\s*:/i.test(sessionJson), false);
     assert.equal(/"byteLength"\s*:/i.test(sessionJson), false);
     assert.equal(/"uploadedBytes"\s*:/i.test(sessionJson), false);
     assert.equal(result.realStorageExecuted, false);

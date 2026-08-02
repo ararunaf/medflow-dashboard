@@ -147,8 +147,13 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(storageSession.session?.realUploadExecuted, false);
     assert.equal(
       runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage,
-      false,
+      true,
     );
+    assert.equal(
+      runtime.getStorageManagerRuntimePort().capabilities().usesStorageProviderPort,
+      true,
+    );
+    assert.equal(runtime.getStorageProviderPort().providerId, "supabase");
 
     const searchSession = await runtime.getDocumentSearchRuntimePort().getSession({
       runtimeSessionId: result.documentSearchRuntimeSessionId!,

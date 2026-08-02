@@ -3,7 +3,11 @@
  * MEDICFLOW-TISS-PARSER-01
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
+import {
+  captureStorageDownload,
+  captureStorageSignedUrl,
+  captureStorageUpload,
+} from "../../infrastructure/enterprise-storage-bridge";
 import type { StructuredGuide, StructuredGuideSummary } from "../types/structured-guide";
 
 export const STRUCTURED_GUIDE_FILENAME = "structured_guide.json";
@@ -20,14 +24,13 @@ export async function persistStructuredGuide(
   const storagePath = buildStructuredGuideStoragePath(ctx.tenantId, sessionId);
   const payload = JSON.stringify(guide, null, 2);
 
-  const { error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(storagePath, new TextEncoder().encode(payload), {
-      contentType: "application/json",
-      upsert: true,
-    });
-
-  if (error) throw error;
+  await captureStorageUpload(ctx, {
+    key: storagePath,
+    body: new TextEncoder().encode(payload),
+    contentType: "application/json",
+    upsert: true,
+    sessionId,
+  });
   return { storagePath };
 }
 
@@ -36,13 +39,9 @@ export async function loadStructuredGuide(
   sessionId: string,
 ): Promise<StructuredGuide | null> {
   const storagePath = buildStructuredGuideStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .download(storagePath);
-
-  if (error || !data) return null;
-
-  const text = await data.text();
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  if (!body) return null;
+  const text = new TextDecoder().decode(body);
   return JSON.parse(text) as StructuredGuide;
 }
 
@@ -52,17 +51,16 @@ export async function getStructuredGuideSignedUrl(
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
   const storagePath = buildStructuredGuideStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .createSignedUrl(storagePath, ttlSeconds, { download: STRUCTURED_GUIDE_FILENAME });
-
-  if (error || !data?.signedUrl) {
-    throw error ?? new Error("Structured guide não encontrado.");
-  }
+  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
+    key: storagePath,
+    expiresInSeconds: ttlSeconds,
+    downloadFilename: STRUCTURED_GUIDE_FILENAME,
+    sessionId,
+  });
 
   return {
-    signedUrl: data.signedUrl,
-    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+    signedUrl,
+    expiresAt,
     filename: STRUCTURED_GUIDE_FILENAME,
   };
 }

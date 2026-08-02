@@ -1,8 +1,12 @@
 /**
- * Persistência de resultados OCR no bucket clinical-documents.
+ * Persistência de resultados OCR via StorageProviderPort (STORAGE-01).
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { CLINICAL_DOCUMENTS_BUCKET } from "../../infrastructure/storage-paths";
+import {
+  captureStorageDownload,
+  captureStorageSignedUrl,
+  captureStorageUpload,
+} from "../../infrastructure/enterprise-storage-bridge";
 import type { OcrResultSummary, RawOcrResult } from "../types/raw-ocr-result";
 
 export const OCR_RESULT_FILENAME = "ocr_result.json";
@@ -19,14 +23,14 @@ export async function persistOcrResult(
   const storagePath = buildOcrResultStoragePath(ctx.tenantId, sessionId);
   const payload = JSON.stringify(result, null, 2);
 
-  const { error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .upload(storagePath, new TextEncoder().encode(payload), {
-      contentType: "application/json",
-      upsert: true,
-    });
+  await captureStorageUpload(ctx, {
+    key: storagePath,
+    body: new TextEncoder().encode(payload),
+    contentType: "application/json",
+    upsert: true,
+    sessionId,
+  });
 
-  if (error) throw error;
   return { storagePath };
 }
 
@@ -35,13 +39,9 @@ export async function loadOcrResult(
   sessionId: string,
 ): Promise<RawOcrResult | null> {
   const storagePath = buildOcrResultStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .download(storagePath);
-
-  if (error || !data) return null;
-
-  const text = await data.text();
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  if (!body) return null;
+  const text = new TextDecoder().decode(body);
   return JSON.parse(text) as RawOcrResult;
 }
 
@@ -51,15 +51,16 @@ export async function getOcrResultSignedUrl(
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
   const storagePath = buildOcrResultStoragePath(ctx.tenantId, sessionId);
-  const { data, error } = await ctx.client.storage
-    .from(CLINICAL_DOCUMENTS_BUCKET)
-    .createSignedUrl(storagePath, ttlSeconds, { download: OCR_RESULT_FILENAME });
-
-  if (error || !data?.signedUrl) throw error ?? new Error("OCR result não encontrado.");
+  const signed = await captureStorageSignedUrl(ctx, {
+    key: storagePath,
+    expiresInSeconds: ttlSeconds,
+    downloadFilename: OCR_RESULT_FILENAME,
+    sessionId,
+  });
 
   return {
-    signedUrl: data.signedUrl,
-    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+    signedUrl: signed.signedUrl,
+    expiresAt: signed.expiresAt,
     filename: OCR_RESULT_FILENAME,
   };
 }

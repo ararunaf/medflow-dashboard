@@ -57,7 +57,7 @@ export class StorageManagerRuntimeFactory {
         if (!enterpriseDeps) {
           throw new Error(
             'StorageManagerRuntime provider "default" exige enterpriseDeps ' +
-              "(getOrchestratorPort + getDocumentClassificationRuntimePort). " +
+              "(getOrchestratorPort + getDocumentClassificationRuntimePort + getStorageProviderPort). " +
               "Use createEnterpriseRuntime() / DI do composition root.",
           );
         }

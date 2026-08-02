@@ -19,6 +19,7 @@ import type { DocumentSearchRuntimePort } from "../document-search-runtime/ports
 import type { OCRRuntimePort } from "../ocr-runtime/ports/ocr-runtime-port";
 import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
 import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports/storage-manager-runtime-port";
+import type { StorageProviderPort } from "../storage-provider/ports/storage-provider-port";
 import type { AIProviderPort } from "../ai-provider/ports/ai-provider-port";
 import type { AIProviderRuntimePort } from "../ai-provider-runtime/ports/ai-provider-runtime-port";
 
@@ -40,6 +41,7 @@ export type EnterpriseRuntimeHealth = {
   documentClassificationRuntimeOk?: boolean;
   documentClassificationProviderOk?: boolean;
   storageManagerRuntimeOk?: boolean;
+  storageProviderOk?: boolean;
   documentSearchRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -70,7 +72,7 @@ export type RegisterCaptureDocumentIntakeResult = {
   /** DIP-04 — sessão Classification Runtime (coordenação estrutural, sem classificação real). */
   classificationRuntimeSessionId?: string;
   classificationExecutionId?: string;
-  /** DIP-05 — sessão Storage Manager Runtime (coordenação estrutural, sem armazenamento real). */
+  /** DIP-05 / STORAGE-01 — sessão Storage Manager Runtime. */
   storageManagerRuntimeSessionId?: string;
   storageExecutionId?: string;
   /** DIP-06 — sessão Document Search Runtime (coordenação estrutural, sem busca real). */
@@ -97,6 +99,7 @@ export type EnterpriseRuntimeOptions = {
   ocrProviderPort?: OCRProviderPort;
   documentClassificationProviderPort?: DocumentClassificationProviderPort;
   documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
+  storageProviderPort?: StorageProviderPort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   documentSearchRuntimePort?: DocumentSearchRuntimePort;
   aiProviderPort?: AIProviderPort;
@@ -119,9 +122,10 @@ export type EnterpriseRuntimeOptions = {
  * - expor AI Provider Runtime (ARCH-02 / DIP-07)
  * - expor bridge estrutural para o produto
  *
- * NÃO contém regras de negócio. NÃO executa storage/busca reais.
+ * NÃO contém regras de negócio. NÃO executa busca real.
  * OCR: exclusivamente via OCRRuntimePort → OCRProviderPort.
  * Classification: exclusivamente via DocumentClassificationRuntimePort → ProviderPort (CLASS-01).
+ * Storage: exclusivamente via StorageManagerRuntimePort → StorageProviderPort (STORAGE-01).
  * IA: exclusivamente via AIProviderRuntimePort → AIProviderPort.
  */
 export interface EnterpriseRuntime {
@@ -151,8 +155,11 @@ export interface EnterpriseRuntime {
   /** Resolve DocumentClassificationProviderPort (CLASS-01) — Adapter oficial. */
   getDocumentClassificationProviderPort(): DocumentClassificationProviderPort;
 
-  /** Resolve StorageManagerRuntimePort (DIP-05). */
+  /** Resolve StorageManagerRuntimePort (DIP-05 / STORAGE-01). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
+
+  /** Resolve StorageProviderPort (STORAGE-01) — Adapter oficial. */
+  getStorageProviderPort(): StorageProviderPort;
 
   /** Resolve DocumentSearchRuntimePort (DIP-06). */
   getDocumentSearchRuntimePort(): DocumentSearchRuntimePort;
@@ -173,7 +180,7 @@ export interface EnterpriseRuntime {
    *     → DocumentClassificationRuntimePort → Orchestrator
    *     → DocumentClassificationRuntimePort → DocumentClassificationProviderPort (CLASS-01)
    *     → StorageManagerRuntimePort → Orchestrator
-   *     → Storage Provider Adapter (referência estrutural)
+   *     → StorageProviderPort → Storage Provider Adapter (STORAGE-01)
    *     → DocumentSearchRuntimePort → Orchestrator
    *     → Search Provider Adapter (referência estrutural)
    *

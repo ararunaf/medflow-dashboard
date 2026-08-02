@@ -1,12 +1,21 @@
 /**
- * Modelos canônicos do Storage Manager Runtime — DIP-05.
+ * Modelos canônicos do Storage Manager Runtime — DIP-05 / STORAGE-01.
  *
- * Representação estrutural da sessão de armazenamento documental na
- * Document Intelligence Platform.
- * Sem armazenamento real. Sem upload. Sem download. Sem versionamento funcional.
- * Sem retenção automática. Sem criptografia executada. Sem compressão executada.
- * Sem deduplicação. Sem I/O de arquivo físico. Sem Providers reais.
+ * Modelos canônicos de persistência (STORAGE-01 — sem paralelos):
+ *   CanonicalStorageResult
+ *   CanonicalStorageMetadata
+ *   CanonicalStoredDocument
+ *
+ * Reexportados do Storage Provider oficial.
+ * Sessão / request / referência estrutural permanecem no Runtime.
  */
+import type {
+  CanonicalStorageMetadata,
+  CanonicalStorageResult as StorageProviderCanonicalResult,
+  CanonicalStoredDocument,
+} from "../../storage-provider/ports/canonical";
+
+export type { CanonicalStorageMetadata, CanonicalStoredDocument };
 
 /** Status estrutural da sessão de storage no Runtime. */
 export type StorageManagerRuntimeSessionStatus =
@@ -14,7 +23,8 @@ export type StorageManagerRuntimeSessionStatus =
   | "coordinating"
   | "coordinated"
   | "deferred"
-  | "failed";
+  | "failed"
+  | "completed";
 
 /** Identidade canônica do documento no storage (referências opacas). */
 export type CanonicalStorageIdentity = {
@@ -22,17 +32,6 @@ export type CanonicalStorageIdentity = {
   documentId: string;
   documentKind?: string;
   version?: string;
-};
-
-/** Metadados canônicos estruturais da sessão de storage. */
-export type CanonicalStorageMetadata = {
-  kind: "canonical-storage-metadata";
-  sessionId: string;
-  tenantRef?: string;
-  correlationId?: string;
-  channel?: string;
-  tags?: readonly string[];
-  customAttributes?: Readonly<Record<string, string | number | boolean | null>>;
 };
 
 /** Referência canônica opaca a artefatos Enterprise / produto / OCR / classificação / captura. */
@@ -47,47 +46,49 @@ export type CanonicalStorageReference = {
   executionId?: string;
   captureRuntimeSessionId?: string;
   captureExecutionId?: string;
-  /** DIP-03 — referência estrutural à sessão OCR Runtime (sem OCR real). */
+  /** DIP-03 — referência estrutural à sessão OCR Runtime. */
   ocrRuntimeSessionId?: string;
   ocrExecutionId?: string;
-  /** DIP-04 — referência estrutural à sessão Classification Runtime (sem classificação real). */
+  /** DIP-04 — referência estrutural à sessão Classification Runtime. */
   classificationRuntimeSessionId?: string;
   classificationExecutionId?: string;
-  /** Referência estrutural ao Storage Provider futuro (nunca executado). */
+  /** Referência ao Storage Provider (STORAGE-01). */
   providerReferenceId?: CanonicalStorageProviderReferenceId;
 };
 
 /**
  * Capacidades canônicas tecnológicas do Storage Manager Runtime (modelo de domínio).
- * Todas FALSE / informativas — nenhuma capacidade é executada (DIP-05).
  */
 export type CanonicalStorageCapabilities = {
   kind: "canonical-storage-capabilities";
-  supportsVersioning: false;
-  supportsRetentionPolicy: false;
-  supportsEncryption: false;
-  supportsCompression: false;
-  supportsDeduplication: false;
-  supportsCloudStorage: false;
-  supportsLocalStorage: false;
-  supportsImmutableStorage: false;
+  supportsVersioning: boolean;
+  supportsRetentionPolicy: boolean;
+  supportsEncryption: boolean;
+  supportsCompression: boolean;
+  supportsDeduplication: boolean;
+  supportsCloudStorage: boolean;
+  supportsLocalStorage: boolean;
+  supportsImmutableStorage: boolean;
   declared?: readonly string[];
 };
 
-/** Configuração canônica estrutural do storage (sem armazenamento). */
+/** Configuração canônica estrutural do storage. */
 export type CanonicalStorageConfiguration = {
   kind: "canonical-storage-configuration";
-  /** Provider futuro referenciado estruturalmente — sem bind / sem HTTP / sem upload. */
   preferredProviderReference?: CanonicalStorageProviderReferenceId;
   contentTypeHint?: string;
   channel?: string;
   priority?: "LOW" | "NORMAL" | "HIGH" | (string & {});
   notes?: string;
+  /** Quando true, coordinateStorage executa upload via StorageProviderPort. */
+  executeUpload?: boolean;
+  /** Corpo opcional para upload durante coordinateStorage. */
+  bodyBase64?: string;
 };
 
 /**
- * Referências estruturais a Storage Providers futuros.
- * NÃO são implementações. NÃO conectam serviços externos. NÃO fazem upload.
+ * Referências a Storage Providers.
+ * STORAGE-01: supabase-storage / mock-storage podem executar via StorageProviderPort.
  */
 export type CanonicalStorageProviderReferenceId =
   | "supabase-storage"
@@ -99,19 +100,19 @@ export type CanonicalStorageProviderReferenceId =
   | "local-storage"
   | "mock-storage";
 
-/** Descritor estrutural de um Storage Provider futuro. */
+/** Descritor de um Storage Provider (estrutural ou executável). */
 export type CanonicalStorageProviderReference = {
   kind: "canonical-storage-provider-reference";
   providerReferenceId: CanonicalStorageProviderReferenceId;
   displayName: string;
   vendor: string;
-  status: "structural-reference-only";
-  implementsRealStorage: false;
-  implementsUpload: false;
-  implementsDownload: false;
-  implementsVersioning: false;
-  implementsRetention: false;
-  connected: false;
+  status: "structural-reference-only" | "ready";
+  implementsRealStorage: boolean;
+  implementsUpload: boolean;
+  implementsDownload: boolean;
+  implementsVersioning: boolean;
+  implementsRetention: boolean;
+  connected: boolean;
 };
 
 /** Pedido canônico de coordenação de storage via Runtime. */
@@ -134,29 +135,37 @@ export type CanonicalStorageSession = {
   executionId?: string;
   providerReferenceId?: CanonicalStorageProviderReferenceId;
   storageProviderAdapterId?: string;
+  storedDocument?: CanonicalStoredDocument;
   createdAt: string;
   updatedAt: string;
   message?: string;
   code?: string;
   errors?: readonly string[];
-  /** Sempre false nesta sprint — coordenação sem armazenamento. */
-  realStorageExecuted?: false;
-  /** Sempre false nesta sprint — sem upload. */
-  realUploadExecuted?: false;
+  realStorageExecuted?: boolean;
+  realUploadExecuted?: boolean;
 };
 
-/** Resultado canônico da coordenação via Storage Manager Runtime. */
+/**
+ * Resultado canônico — STORAGE-01.
+ * Une coordenação do Runtime + resultado do StorageProviderPort.
+ */
 export type CanonicalStorageResult = {
   kind: "canonical-storage-result";
   ok: boolean;
+  operation?: StorageProviderCanonicalResult["operation"];
+  requestId?: string;
   runtimeSessionId?: string;
   session?: CanonicalStorageSession;
   executionId?: string;
   providerReferenceId?: CanonicalStorageProviderReferenceId;
+  providerId?: string;
+  storedDocument?: CanonicalStoredDocument;
+  metadata?: CanonicalStorageMetadata;
+  body?: Uint8Array;
   message?: string;
   code?: string;
-  /** Sempre false nesta sprint. */
-  realStorageExecuted?: false;
-  /** Sempre false nesta sprint. */
-  realUploadExecuted?: false;
+  realStorageExecuted?: boolean;
+  realUploadExecuted?: boolean;
+  realDownloadExecuted?: boolean;
+  realDeleteExecuted?: boolean;
 };

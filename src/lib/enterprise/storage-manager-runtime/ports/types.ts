@@ -1,20 +1,25 @@
 /**
- * Tipos vendor-agnósticos do Storage Manager Runtime — DIP-05.
+ * Tipos vendor-agnósticos do Storage Manager Runtime — DIP-05 / STORAGE-01.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → Document Classification Runtime
  *     → StorageManagerRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Storage Provider Adapter (referência estrutural)
- *     → Provider futuro
- *
- * Este componente NÃO armazena arquivos. NÃO faz upload/download.
- * NÃO integra Supabase/Azure/AWS/GCS/SharePoint/NAS.
- * Coordena estruturalmente via Ports oficiais.
+ *     → StorageProviderPort
+ *     → Storage Provider Adapter
+ *     → Storage Backend
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { DocumentClassificationRuntimePort } from "../../document-classification-runtime/ports/document-classification-runtime-port";
+import type { StorageProviderPort } from "../../storage-provider/ports/storage-provider-port";
+import type {
+  StorageDeleteInput as ProviderDeleteInput,
+  StorageDownloadInput as ProviderDownloadInput,
+  StorageMetadataInput as ProviderMetadataInput,
+  StorageProviderOperationResult,
+  StorageUploadInput as ProviderUploadInput,
+} from "../../storage-provider/ports/types";
 import type {
   CanonicalStorageProviderReference,
   CanonicalStorageProviderReferenceId,
@@ -35,6 +40,7 @@ export type {
   CanonicalStorageRequest,
   CanonicalStorageResult,
   CanonicalStorageSession,
+  CanonicalStoredDocument,
   StorageManagerRuntimeSessionStatus,
 } from "./models";
 
@@ -49,13 +55,14 @@ export type StorageManagerRuntimeHealth = {
   message?: string;
   enterpriseOrchestratorOk?: boolean;
   documentClassificationRuntimeOk?: boolean;
-  realStorageAvailable: false;
-  realUploadAvailable: false;
+  storageProviderOk?: boolean;
+  realStorageAvailable: boolean;
+  realUploadAvailable: boolean;
 };
 
 /**
  * Capacidades declaradas pelo adapter (Port level).
- * Capacidades tecnológicas de storage permanecem FALSE — nenhuma é executada.
+ * STORAGE-01: upload/download/delete/metadata via StorageProviderPort = TRUE.
  */
 export type StorageManagerRuntimeCapabilities = {
   provider: StorageManagerRuntimeProviderId;
@@ -71,22 +78,24 @@ export type StorageManagerRuntimeCapabilities = {
   usesDocumentClassificationRuntime: boolean;
   usesOCRRuntime: boolean;
   usesCaptureEngineRuntime: boolean;
-  /** Capacidades tecnológicas — informativas / FALSE (DIP-05). */
-  supportsVersioning: false;
-  supportsRetentionPolicy: false;
-  supportsEncryption: false;
-  supportsCompression: false;
-  supportsDeduplication: false;
-  supportsCloudStorage: false;
-  supportsLocalStorage: false;
-  supportsImmutableStorage: false;
-  implementsRealStorage: false;
-  implementsUpload: false;
-  implementsDownload: false;
-  implementsVersioning: false;
-  implementsRetention: false;
-  implementsPhysicalFileWrite: false;
-  implementsExternalProviderCall: false;
+  usesStorageProviderPort: boolean;
+  supportsVersioning: boolean;
+  supportsRetentionPolicy: boolean;
+  supportsEncryption: boolean;
+  supportsCompression: boolean;
+  supportsDeduplication: boolean;
+  supportsCloudStorage: boolean;
+  supportsLocalStorage: boolean;
+  supportsImmutableStorage: boolean;
+  implementsRealStorage: boolean;
+  implementsUpload: boolean;
+  implementsDownload: boolean;
+  implementsDelete: boolean;
+  implementsMetadata: boolean;
+  implementsVersioning: boolean;
+  implementsRetention: boolean;
+  implementsPhysicalFileWrite: boolean;
+  implementsExternalProviderCall: boolean;
 };
 
 /**
@@ -96,10 +105,13 @@ export type StorageManagerRuntimeCapabilities = {
 export type StorageManagerRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
   /**
-   * Document Classification Runtime (DIP-04) — hop anterior na cadeia estrutural.
-   * NUNCA invocar classificação real; apenas health / sessão estrutural.
+   * Document Classification Runtime (DIP-04) — hop anterior na cadeia.
    */
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
+  /**
+   * Storage Provider Port (STORAGE-01) — único caminho autorizado de I/O.
+   */
+  getStorageProviderPort(): StorageProviderPort;
 };
 
 export type GetStorageManagerRuntimeSessionInput = {
@@ -135,9 +147,16 @@ export type ListStorageProviderReferencesResult = {
   references: readonly CanonicalStorageProviderReference[];
 };
 
-/** Alias tipado da operação principal (coordenação estrutural — sem armazenamento real). */
+/** Alias tipado da operação principal. */
 export type CoordinateStorageInput = CanonicalStorageRequest;
 export type CoordinateStorageResult = CanonicalStorageResult;
+
+/** Operações STORAGE-01 delegadas ao StorageProviderPort. */
+export type StorageManagerUploadInput = ProviderUploadInput;
+export type StorageManagerDownloadInput = ProviderDownloadInput;
+export type StorageManagerDeleteInput = ProviderDeleteInput;
+export type StorageManagerMetadataInput = ProviderMetadataInput;
+export type StorageManagerProviderOperationResult = StorageProviderOperationResult;
 
 /** Opções de resolução do StorageManagerRuntimePort. */
 export type StorageManagerRuntimeProviderOptions = {
@@ -149,7 +168,7 @@ export type StorageManagerRuntimeProviderOptions = {
   enterpriseDeps?: StorageManagerRuntimeEnterpriseDeps;
 };
 
-/** Catálogo estrutural de Storage Providers futuros (sem conexão). */
+/** Catálogo de Storage Providers (STORAGE-01: supabase/mock ready). */
 export const STRUCTURAL_STORAGE_PROVIDER_REFERENCES: readonly CanonicalStorageProviderReference[] =
   [
     {
@@ -157,13 +176,13 @@ export const STRUCTURAL_STORAGE_PROVIDER_REFERENCES: readonly CanonicalStoragePr
       providerReferenceId: "supabase-storage",
       displayName: "Supabase Storage",
       vendor: "Supabase",
-      status: "structural-reference-only",
-      implementsRealStorage: false,
-      implementsUpload: false,
-      implementsDownload: false,
+      status: "ready",
+      implementsRealStorage: true,
+      implementsUpload: true,
+      implementsDownload: true,
       implementsVersioning: false,
       implementsRetention: false,
-      connected: false,
+      connected: true,
     },
     {
       kind: "canonical-storage-provider-reference",
@@ -248,13 +267,13 @@ export const STRUCTURAL_STORAGE_PROVIDER_REFERENCES: readonly CanonicalStoragePr
       providerReferenceId: "mock-storage",
       displayName: "Mock Storage",
       vendor: "MedicFlow Enterprise",
-      status: "structural-reference-only",
-      implementsRealStorage: false,
-      implementsUpload: false,
-      implementsDownload: false,
+      status: "ready",
+      implementsRealStorage: true,
+      implementsUpload: true,
+      implementsDownload: true,
       implementsVersioning: false,
       implementsRetention: false,
-      connected: false,
+      connected: true,
     },
   ] as const;
 
