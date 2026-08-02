@@ -3,6 +3,7 @@ export type { DocumentSearchRuntimePort } from "./document-search-runtime-port";
 export type {
   CanonicalSearchCapabilities,
   CanonicalSearchConfiguration,
+  CanonicalSearchDocument,
   CanonicalSearchIdentity,
   CanonicalSearchMetadata,
   CanonicalSearchProviderReference,
@@ -24,6 +25,8 @@ export type {
   ListDocumentSearchRuntimeSessionsInput,
   ListDocumentSearchRuntimeSessionsResult,
   ListSearchProviderReferencesResult,
+  RuntimeSearchInput,
+  RuntimeSearchResult,
 } from "./types";
 
 export {

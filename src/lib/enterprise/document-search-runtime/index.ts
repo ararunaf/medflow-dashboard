@@ -6,16 +6,16 @@
  *     → OCR Runtime → Document Classification Runtime
  *     → Storage Manager Runtime → DocumentSearchRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Search Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → SearchProviderPort → DefaultSearchProviderAdapter (SEARCH-01)
+ *     → StorageProviderPort → Backend oficial
  *
- * DIP-06: infraestrutura oficial de coordenação de pesquisa documental —
- * sem busca real, sem indexação, sem vetores, sem embeddings, sem RAG, sem IA,
- * sem Providers externos, sem consultas reais.
+ * DIP-06 / SEARCH-01: infraestrutura oficial de pesquisa documental —
+ * busca exclusivamente via SearchProviderPort; sem motores externos diretos.
  */
 export type {
   CanonicalSearchCapabilities,
   CanonicalSearchConfiguration,
+  CanonicalSearchDocument,
   CanonicalSearchIdentity,
   CanonicalSearchMetadata,
   CanonicalSearchProviderReference,
@@ -38,6 +38,8 @@ export type {
   ListDocumentSearchRuntimeSessionsInput,
   ListDocumentSearchRuntimeSessionsResult,
   ListSearchProviderReferencesResult,
+  RuntimeSearchInput,
+  RuntimeSearchResult,
 } from "./ports";
 
 export {

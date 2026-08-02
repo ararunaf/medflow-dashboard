@@ -18,6 +18,7 @@ import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports
 import type { DocumentSearchRuntimePort } from "../document-search-runtime/ports/document-search-runtime-port";
 import type { OCRRuntimePort } from "../ocr-runtime/ports/ocr-runtime-port";
 import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
+import type { SearchProviderPort } from "../search-provider/ports/search-provider-port";
 import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports/storage-manager-runtime-port";
 import type { StorageProviderPort } from "../storage-provider/ports/storage-provider-port";
 import type { AIProviderPort } from "../ai-provider/ports/ai-provider-port";
@@ -42,6 +43,7 @@ export type EnterpriseRuntimeHealth = {
   documentClassificationProviderOk?: boolean;
   storageManagerRuntimeOk?: boolean;
   storageProviderOk?: boolean;
+  searchProviderOk?: boolean;
   documentSearchRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -101,6 +103,7 @@ export type EnterpriseRuntimeOptions = {
   documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
   storageProviderPort?: StorageProviderPort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
+  searchProviderPort?: SearchProviderPort;
   documentSearchRuntimePort?: DocumentSearchRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -161,7 +164,10 @@ export interface EnterpriseRuntime {
   /** Resolve StorageProviderPort (STORAGE-01) — Adapter oficial. */
   getStorageProviderPort(): StorageProviderPort;
 
-  /** Resolve DocumentSearchRuntimePort (DIP-06). */
+  /** Resolve SearchProviderPort (SEARCH-01) — Adapter oficial. */
+  getSearchProviderPort(): SearchProviderPort;
+
+  /** Resolve DocumentSearchRuntimePort (DIP-06 / SEARCH-01). */
   getDocumentSearchRuntimePort(): DocumentSearchRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */
@@ -182,7 +188,7 @@ export interface EnterpriseRuntime {
    *     → StorageManagerRuntimePort → Orchestrator
    *     → StorageProviderPort → Storage Provider Adapter (STORAGE-01)
    *     → DocumentSearchRuntimePort → Orchestrator
-   *     → Search Provider Adapter (referência estrutural)
+   *     → SearchProviderPort → Search Provider Adapter (SEARCH-01)
    *
    * Best-effort: nunca lança para o produto; falhas retornam ok:false.
    */

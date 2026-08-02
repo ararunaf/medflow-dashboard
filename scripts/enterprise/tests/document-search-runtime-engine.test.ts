@@ -34,6 +34,7 @@ import { createDocumentClassificationProviderPort } from "../../../src/lib/enter
 import { createDocumentClassificationRuntimePort } from "../../../src/lib/enterprise/document-classification-runtime/index.ts";
 import { createStorageManagerRuntimePort } from "../../../src/lib/enterprise/storage-manager-runtime/index.ts";
 import { createStorageProviderPort } from "../../../src/lib/enterprise/storage-provider/index.ts";
+import { createSearchProviderPort } from "../../../src/lib/enterprise/search-provider/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import {
   createEnterpriseRuntime,
@@ -126,14 +127,20 @@ function enterpriseDeps() {
       getStorageProviderPort: () => storageProviderPort,
     },
   });
+  const searchProviderPort = createSearchProviderPort({
+    provider: "storage-backed",
+    storageProviderPort,
+  });
   return {
     orchestratorPort,
     ocrRuntimePort,
     documentClassificationRuntimePort,
     storageManagerRuntimePort,
+    searchProviderPort,
     deps: {
       getOrchestratorPort: () => orchestratorPort,
       getStorageManagerRuntimePort: () => storageManagerRuntimePort,
+      getSearchProviderPort: () => searchProviderPort,
     },
   };
 }
@@ -186,7 +193,7 @@ describe("DIP-06 DocumentSearchRuntimePort contract", () => {
     );
   });
 
-  it("default adapter coordena via Orchestrator + Storage Manager Runtime (sem busca real)", async () => {
+  it("default adapter coordena via Orchestrator + Storage Manager + SearchProviderPort", async () => {
     resetAllDocumentSearchRuntimeIdSequences();
     const { deps, orchestratorPort, storageManagerRuntimePort } = enterpriseDeps();
     const port = new DefaultDocumentSearchRuntimeAdapter({ enterpriseDeps: deps });
@@ -198,7 +205,12 @@ describe("DIP-06 DocumentSearchRuntimePort contract", () => {
     assert.equal(port.capabilities().usesDocumentClassificationRuntime, true);
     assert.equal(port.capabilities().usesOCRRuntime, true);
     assert.equal(port.capabilities().usesCaptureEngineRuntime, true);
-    assertNoRealSearchCapabilities(port.capabilities());
+    assert.equal(port.capabilities().usesSearchProviderAdapter, true);
+    assert.equal(port.capabilities().implementsRealSearch, true);
+    assert.equal(port.capabilities().supportsSearch, true);
+    assert.equal(port.capabilities().implementsExternalProviderCall, false);
+    assert.equal(port.capabilities().supportsSemanticSearch, false);
+    assert.equal(port.capabilities().supportsVectorSearch, false);
 
     const result = await port.coordinateSearch(sampleRequest());
     assert.equal(result.ok, true);
@@ -210,6 +222,7 @@ describe("DIP-06 DocumentSearchRuntimePort contract", () => {
     assert.equal(result.session?.realSearchExecuted, false);
     assert.equal(result.session?.realIndexingExecuted, false);
     assert.equal(result.providerReferenceId, "mock-search");
+    assert.ok(result.session?.searchProviderAdapterId);
 
     const storedExec = await orchestratorPort.getExecution({
       executionId: result.executionId!,
@@ -370,11 +383,12 @@ describe("DIP-06 integração Enterprise / Capture / OCR / Classification / Stor
     assert.equal(health.orchestratorOk, true);
 
     const searchHealth = await documentSearchRuntime.health();
-    assert.equal(searchHealth.realSearchAvailable, false);
-    assert.equal(searchHealth.realIndexingAvailable, false);
+    assert.equal(searchHealth.realSearchAvailable, true);
+    assert.equal(searchHealth.realIndexingAvailable, true);
+    assert.equal(health.searchProviderOk, true);
   });
 
-  it("fluxo captura passa pelo Document Search Runtime sem busca real", async () => {
+  it("fluxo captura passa pelo Document Search Runtime (coordenação; busca via search())", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -441,7 +455,7 @@ describe("DIP-06 integração Enterprise / Capture / OCR / Classification / Stor
 
     assert.equal(
       runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch,
-      false,
+      true,
     );
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsSearch, false);
     assert.equal(
@@ -472,8 +486,8 @@ describe("DIP-06 integração Enterprise / Capture / OCR / Classification / Stor
   });
 });
 
-describe("DIP-06 ausência de busca real / indexação / integrações externas", () => {
-  it("fonte do módulo Document Search Runtime não contém busca real nem HTTP", () => {
+describe("DIP-06 / SEARCH-01 — sem motores externos; busca só via SearchProviderPort", () => {
+  it("fonte do módulo Document Search Runtime não contém motores externos nem HTTP", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/document-search-runtime");
     const files = [
       "adapters/default-document-search-runtime-adapter.ts",
@@ -490,24 +504,26 @@ describe("DIP-06 ausência de busca real / indexação / integrações externas"
       /from ["']@elastic\/elasticsearch/i,
       /from ["']@opensearch-project\/opensearch/i,
       /from ["']@azure\/search-documents/i,
-      /\.search\s*\(/,
-      /\.index\s*\(/,
       /\.bulk\s*\(/,
       /createIndex\s*\(/,
-      /embed(ding)?s?\s*\(/i,
       /vectorSearch\s*\(/i,
       /fetch\s*\(/,
       /https?:\/\//,
       /elasticsearch\.com/i,
       /opensearch\.org/i,
       /search\.windows\.net/i,
+      /storage\.from\s*\(/,
+      /from ["']@supabase/i,
     ];
 
     for (const rel of files) {
       const source = readFileSync(join(moduleDir, rel), "utf8");
+      const codeWithoutComments = source
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
       for (const pattern of forbidden) {
         assert.equal(
-          pattern.test(source),
+          pattern.test(codeWithoutComments),
           false,
           `Padrão proibido ${pattern} encontrado em ${rel}`,
         );
@@ -518,10 +534,10 @@ describe("DIP-06 ausência de busca real / indexação / integrações externas"
       join(moduleDir, "adapters/default-document-search-runtime-adapter.ts"),
       "utf8",
     );
-    assert.match(defaultAdapter, /health\/capabilities/);
-    assert.match(defaultAdapter, /PROIBIDO:/);
-    assert.equal(/\.search\s*\(/.test(defaultAdapter), false);
-    assert.equal(/\.index\s*\(/.test(defaultAdapter), false);
+    assert.match(defaultAdapter, /getSearchProviderPort/);
+    assert.match(defaultAdapter, /searchProvider\.search/);
+    assert.equal(/from ["']@elastic/.test(defaultAdapter), false);
+    assert.equal(/createSearchProviderPort/.test(defaultAdapter), false);
   });
 
   it("coordinateSearch não produz hits, scores, embeddings nem índices", async () => {

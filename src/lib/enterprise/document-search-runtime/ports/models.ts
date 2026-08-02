@@ -1,11 +1,14 @@
 /**
- * Modelos canônicos do Document Search Runtime — DIP-06.
+ * Modelos canônicos do Document Search Runtime — DIP-06 / SEARCH-01.
  *
- * Representação estrutural da sessão de pesquisa documental na
- * Document Intelligence Platform.
- * Sem busca real. Sem indexação. Sem Elasticsearch/OpenSearch/PostgreSQL FTS.
- * Sem vetores. Sem embeddings. Sem RAG. Sem IA. Sem Providers reais.
+ * Representação da sessão de pesquisa documental na Document Intelligence Platform.
+ * Busca real exclusivamente via SearchProviderPort (SEARCH-01).
+ * Sem Elastic/OpenSearch/Azure Search/Supabase/S3/FS diretos.
  */
+
+import type { CanonicalSearchDocument } from "../../search-provider/ports/canonical";
+
+export type { CanonicalSearchDocument };
 
 /** Status estrutural da sessão de search no Runtime. */
 export type DocumentSearchRuntimeSessionStatus =
@@ -31,6 +34,8 @@ export type CanonicalSearchMetadata = {
   correlationId?: string;
   channel?: string;
   tags?: readonly string[];
+  patientId?: string;
+  competencia?: string;
   customAttributes?: Readonly<Record<string, string | number | boolean | null>>;
 };
 
@@ -55,7 +60,7 @@ export type CanonicalSearchReference = {
   /** DIP-05 — referência estrutural à sessão Storage Manager Runtime (sem armazenamento real). */
   storageManagerRuntimeSessionId?: string;
   storageExecutionId?: string;
-  /** Referência estrutural ao Search Provider futuro (nunca executado). */
+  /** Referência ao Search Provider (SEARCH-01). */
   providerReferenceId?: CanonicalSearchProviderReferenceId;
 };
 
@@ -140,13 +145,13 @@ export type CanonicalSearchSession = {
   message?: string;
   code?: string;
   errors?: readonly string[];
-  /** Sempre false nesta sprint — coordenação sem busca. */
-  realSearchExecuted?: false;
-  /** Sempre false nesta sprint — sem indexação. */
-  realIndexingExecuted?: false;
+  documents?: readonly CanonicalSearchDocument[];
+  /** true quando search() executou via SearchProviderPort. */
+  realSearchExecuted?: boolean;
+  realIndexingExecuted?: boolean;
 };
 
-/** Resultado canônico da coordenação via Document Search Runtime. */
+/** Resultado canônico da coordenação / busca via Document Search Runtime. */
 export type CanonicalSearchResult = {
   kind: "canonical-search-result";
   ok: boolean;
@@ -154,10 +159,11 @@ export type CanonicalSearchResult = {
   session?: CanonicalSearchSession;
   executionId?: string;
   providerReferenceId?: CanonicalSearchProviderReferenceId;
+  documents?: readonly CanonicalSearchDocument[];
+  totalCount?: number;
   message?: string;
   code?: string;
-  /** Sempre false nesta sprint. */
-  realSearchExecuted?: false;
-  /** Sempre false nesta sprint. */
-  realIndexingExecuted?: false;
+  /** true quando search() executou via SearchProviderPort. */
+  realSearchExecuted?: boolean;
+  realIndexingExecuted?: boolean;
 };

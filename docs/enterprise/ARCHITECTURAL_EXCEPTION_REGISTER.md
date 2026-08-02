@@ -85,11 +85,11 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | Prioridade **Baixa** | **24** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02) | **4** |
 | Criticidade **Não bloqueante** | **50** |
-| Status **Resolvida** | **5** |
+| Status **Resolvida** | **6** |
 | Status **Planejada** | **3** |
 | Status **Aceita** | **44** |
-| Status **Aberta** | **2** |
-| Pendentes (Aberta + Aceita + Planejada) | **49** |
+| Status **Aberta** | **1** |
+| Pendentes (Aberta + Aceita + Planejada) | **48** |
 
 ### Bloqueantes — estado atual
 
@@ -148,7 +148,7 @@ STORAGE-GATE-01 autorizou SEARCH-01 **com risco aceito** da ressalva Alta de con
 | AER-GA03A-R1 | Escape hatch `getAIProviderPort()` | GATE-ARCH-03A | Architecture | Média | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-GA03A-R2 | OCR dual-path pós-ARCH-02 | GATE-ARCH-03A | Architecture | Alta | Não bloqueante | **Resolvida** | OCR-01 / OCR-GATE-01 |
 | AER-GA03A-R3 | StoragePort não injetado no DIP-05 | GATE-ARCH-03A | Architecture | Média | Não bloqueante | Aceita | STORAGE-CONV-01 / wiring Runtime |
-| AER-GA03A-R4 | Classification/Search sem Provider Port | GATE-ARCH-03A | Architecture | Média | Não bloqueante | Aberta | CLASS-01 (parcial) + SEARCH-01 |
+| AER-GA03A-R4 | Classification/Search sem Provider Port | GATE-ARCH-03A | Architecture | Média | Não bloqueante | **Resolvida** | CLASS-01 + SEARCH-01 |
 | AER-GA03A-R5 | ECS-01 pastas incompletas (8 módulos) | GATE-ARCH-03A | Maintainability | Baixa | Não bloqueante | Aceita | Adequação ECS-01 |
 | AER-GA03A-R6 | Artefatos `.vercel` stale (OpenAI legado) | GATE-ARCH-03A | Infrastructure | Baixa | Não bloqueante | Aberta | Rebuild/redeploy |
 | AER-GA03A-R7 | INF in-memory (reafirmação 03A) | GATE-ARCH-03A | Scalability | Média | Não bloqueante | Aceita | Adapters reais INF |
@@ -170,8 +170,8 @@ STORAGE-GATE-01 autorizou SEARCH-01 **com risco aceito** da ressalva Alta de con
 **Notas de contagem:**
 
 - Prioridades de GATE-ARCH-02 B1–B4 não vieram rotuladas Alta/Média/Baixa na origem; foram mapeadas por severidade do blocker (B1–B3 → Alta; B4 → Média), preservando criticidade **Bloqueante**.
-- AER-GA03A-R4 permanece **Aberta** porque Search Provider ainda não existe (Classification Provider já mitigado em CLASS-01).
-- Resolvidas confirmadas: AER-CORE-GLOBAL-01, AER-GA02-B1, AER-GA02-B3, AER-GA03-A2, AER-GA03A-R2.
+- AER-GA03A-R4 foi **Resolvida** em SEARCH-01 (Classification Provider em CLASS-01; Search Provider em SEARCH-01).
+- Resolvidas confirmadas: AER-CORE-GLOBAL-01, AER-GA02-B1, AER-GA02-B3, AER-GA03-A2, AER-GA03A-R2, AER-GA03A-R4.
 
 ---
 
@@ -346,10 +346,20 @@ Ver tabela resumida (AER-GA03-M5…M9, B10…B13). Todas **Não bloqueantes**, s
 - **AER-GA03A-R1** Escape hatch AI Port — Aceita  
 - **AER-GA03A-R2** OCR dual-path — **Resolvida** (OCR-01)  
 - **AER-GA03A-R3** Storage wiring DIP — Aceita (segue AER-STG-A1)  
-- **AER-GA03A-R4** Classification/Search sem Provider — **Aberta** (Classification mitigada em CLASS-01; Search pendente SEARCH-01)  
+- **AER-GA03A-R4** Classification/Search sem Provider — **Resolvida** (CLASS-01 + SEARCH-01)  
 - **AER-GA03A-R5** ECS pastas incompletas — Aceita  
 - **AER-GA03A-R6** `.vercel` stale — **Aberta** (rebuild/redeploy)  
 - **AER-GA03A-R7** INF in-memory — Aceita (alias temático de AER-INF-STRUCT-01 / AER-GA03-M6)  
+
+##### AER-GA03A-R4 — Resolvida
+- **Título:** Classification/Search sem Provider Port  
+- **Descrição:** Document Classification Runtime e Document Search Runtime não tinham Provider Port oficial; risco de busca/classificação fora da Foundation.  
+- **Origem:** GATE-ARCH-03A  
+- **Categoria:** Architecture  
+- **Prioridade:** Média  
+- **Criticidade:** Não bloqueante  
+- **Status:** **Resolvida** em **CLASS-01** (Classification Provider) + **SEARCH-01** (Search Provider / SearchProviderPort / DefaultSearchProviderAdapter / Storage-backed)  
+- **Evidência:** `src/lib/enterprise/search-provider/`, `enterprise:search-provider:test`, wiring em Enterprise Runtime + Document Search Runtime  
 
 ---
 

@@ -31,6 +31,7 @@ import { createDocumentClassificationProviderPort } from "../../../src/lib/enter
 import { createDocumentClassificationRuntimePort } from "../../../src/lib/enterprise/document-classification-runtime/index.ts";
 import { createStorageManagerRuntimePort } from "../../../src/lib/enterprise/storage-manager-runtime/index.ts";
 import { createStorageProviderPort } from "../../../src/lib/enterprise/storage-provider/index.ts";
+import { createSearchProviderPort } from "../../../src/lib/enterprise/search-provider/index.ts";
 import { createDocumentSearchRuntimePort } from "../../../src/lib/enterprise/document-search-runtime/index.ts";
 import {
   createEnterpriseRuntime,
@@ -115,11 +116,16 @@ function enterpriseDeps() {
       getStorageProviderPort: () => storageProviderPort,
     },
   });
+  const searchProviderPort = createSearchProviderPort({
+    provider: "storage-backed",
+    storageProviderPort,
+  });
   const documentSearchRuntimePort = createDocumentSearchRuntimePort({
     provider: "default",
     enterpriseDeps: {
       getOrchestratorPort: () => orchestratorPort,
       getStorageManagerRuntimePort: () => storageManagerRuntimePort,
+      getSearchProviderPort: () => searchProviderPort,
     },
   });
   return {

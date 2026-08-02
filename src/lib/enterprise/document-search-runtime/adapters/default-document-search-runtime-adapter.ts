@@ -1,14 +1,13 @@
 /**
- * DefaultDocumentSearchRuntimeAdapter — adapter default (DIP-06).
+ * DefaultDocumentSearchRuntimeAdapter — DIP-06 / SEARCH-01.
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
- *   Canonical Execution Orchestrator → Storage Manager Runtime (hop anterior)
- *   → Search Provider Adapter (referência estrutural apenas)
+ *   Canonical Execution Orchestrator → Storage Manager Runtime
+ *   → SearchProviderPort → DefaultSearchProviderAdapter
+ *   → StorageProviderPort → Backend oficial
  *
- * NÃO busca documentos. NÃO indexa.
- * NÃO integra Elasticsearch/OpenSearch/PostgreSQL FTS/Vector DB/Azure AI Search.
- * NÃO implementa embeddings, RAG ou IA.
- * NÃO conecta Search Providers externos.
+ * Busca real exclusivamente via SearchProviderPort.search().
+ * NÃO integra Elastic/OpenSearch/Azure Search/Supabase/S3/FS diretamente.
  */
 import { createDocumentSearchRuntimeSessionId } from "../ports/identity";
 import type { DocumentSearchRuntimePort } from "../ports/document-search-runtime-port";
@@ -24,6 +23,8 @@ import type {
   ListDocumentSearchRuntimeSessionsInput,
   ListDocumentSearchRuntimeSessionsResult,
   ListSearchProviderReferencesResult,
+  RuntimeSearchInput,
+  RuntimeSearchResult,
 } from "../ports/types";
 import {
   STRUCTURAL_SEARCH_PROVIDER_REFERENCES,
@@ -33,7 +34,7 @@ import { InMemoryDocumentSearchRuntimeStore, type DocumentSearchRuntimeStore } f
 
 export const DEFAULT_DOCUMENT_SEARCH_RUNTIME_ADAPTER_ID = "default-enterprise-bridge";
 
-/** Referência estrutural ao Search Provider Adapter (sem Port de execução). */
+/** @deprecated SEARCH-01 — prefer adapterId do SearchProviderPort. */
 export const STRUCTURAL_SEARCH_PROVIDER_ADAPTER_ID = "structural-search-provider-adapter";
 
 export type DefaultDocumentSearchRuntimeAdapterOptions = {
@@ -54,6 +55,7 @@ function foundationCapabilities(): DocumentSearchRuntimeCapabilities {
     provider: "default",
     adapterId: DEFAULT_DOCUMENT_SEARCH_RUNTIME_ADAPTER_ID,
     supportsCoordinateSearch: true,
+    supportsSearch: true,
     supportsGetSession: true,
     supportsListSessions: true,
     supportsHealth: true,
@@ -65,22 +67,30 @@ function foundationCapabilities(): DocumentSearchRuntimeCapabilities {
     usesDocumentClassificationRuntime: true,
     usesOCRRuntime: true,
     usesCaptureEngineRuntime: true,
-    supportsKeywordSearch: false,
-    supportsMetadataSearch: false,
+    usesSearchProviderAdapter: true,
+    supportsKeywordSearch: true,
+    supportsMetadataSearch: true,
     supportsFullTextSearch: false,
     supportsSemanticSearch: false,
     supportsVectorSearch: false,
     supportsBatchSearch: false,
-    supportsRanking: false,
+    supportsRanking: true,
     supportsFacetedSearch: false,
-    implementsRealSearch: false,
-    implementsIndexing: false,
+    implementsRealSearch: true,
+    implementsIndexing: true,
     implementsVectorSearch: false,
     implementsEmbeddings: false,
     implementsRAG: false,
     implementsAI: false,
     implementsExternalProviderCall: false,
   };
+}
+
+function toProviderReferenceId(
+  providerId: string,
+): ReturnType<typeof resolveStructuralSearchProviderReference>["providerReferenceId"] {
+  if (providerId === "mock" || providerId === "test") return "mock-search";
+  return "mock-search";
 }
 
 export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePort {
@@ -96,7 +106,13 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
     if (!options.enterpriseDeps) {
       throw new Error(
         "DefaultDocumentSearchRuntimeAdapter exige enterpriseDeps " +
-          "(Orchestrator + StorageManagerRuntimePort). Implementação paralela é proibida.",
+          "(Orchestrator + StorageManagerRuntimePort + SearchProviderPort). " +
+          "Implementação paralela é proibida.",
+      );
+    }
+    if (typeof options.enterpriseDeps.getSearchProviderPort !== "function") {
+      throw new Error(
+        "DefaultDocumentSearchRuntimeAdapter exige " + "enterpriseDeps.getSearchProviderPort().",
       );
     }
     this.enterpriseDeps = options.enterpriseDeps;
@@ -121,18 +137,24 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
         provider: "default",
         latencyMs: Math.max(0, Math.round(end - start)),
         message: probe.message ?? (probe.ok ? "probe ok" : "probe falhou"),
-        realSearchAvailable: false,
-        realIndexingAvailable: false,
+        realSearchAvailable: probe.ok,
+        realIndexingAvailable: probe.ok,
       };
     }
 
     const storeHealth = this.store.health();
-    const [orchestratorHealth, storageManagerRuntimeHealth] = await Promise.all([
-      this.enterpriseDeps.getOrchestratorPort().health(),
-      this.enterpriseDeps.getStorageManagerRuntimePort().health(),
-    ]);
+    const [orchestratorHealth, storageManagerRuntimeHealth, searchProviderHealth] =
+      await Promise.all([
+        this.enterpriseDeps.getOrchestratorPort().health(),
+        this.enterpriseDeps.getStorageManagerRuntimePort().health(),
+        this.enterpriseDeps.getSearchProviderPort().health(),
+      ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
-    const ok = storeHealth.ok && orchestratorHealth.ok && storageManagerRuntimeHealth.ok;
+    const ok =
+      storeHealth.ok &&
+      orchestratorHealth.ok &&
+      storageManagerRuntimeHealth.ok &&
+      searchProviderHealth.ok;
 
     return {
       ok,
@@ -140,10 +162,11 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
       latencyMs: Math.max(0, Math.round(end - start)),
       enterpriseOrchestratorOk: orchestratorHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
-      realSearchAvailable: false,
-      realIndexingAvailable: false,
+      searchProviderAdapterOk: searchProviderHealth.ok,
+      realSearchAvailable: searchProviderHealth.ok,
+      realIndexingAvailable: searchProviderHealth.ok,
       message: ok
-        ? "Document Search Runtime pronto (Orchestrator + Storage Manager Runtime — sem busca real)."
+        ? "Document Search Runtime pronto (Orchestrator + Storage Manager Runtime + SearchProviderPort)."
         : "Document Search Runtime degradado — ver Ports Enterprise.",
     };
   }
@@ -151,6 +174,8 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
   async coordinateSearch(input: CoordinateSearchInput): Promise<CoordinateSearchResult> {
     const stamp = nowIso(this.now);
     const runtimeSessionId = this.createSessionId();
+    const searchProvider = this.enterpriseDeps.getSearchProviderPort();
+    const providerCaps = searchProvider.capabilities();
 
     if (!input.identity?.documentId || !input.metadata?.sessionId) {
       return {
@@ -166,7 +191,7 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
     const providerReference = resolveStructuralSearchProviderReference(
       input.configuration?.preferredProviderReference ??
         input.reference?.providerReferenceId ??
-        "mock-search",
+        toProviderReferenceId(searchProvider.providerId),
     );
 
     let session: CanonicalSearchSession = {
@@ -175,6 +200,7 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
       status: "pending",
       request: input,
       providerReferenceId: providerReference.providerReferenceId,
+      searchProviderAdapterId: providerCaps.adapterId,
       createdAt: stamp,
       updatedAt: stamp,
       realSearchExecuted: false,
@@ -200,12 +226,14 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
         channel,
         intakeRef: input.metadata.sessionId,
         documentRef: input.identity.documentId,
-        tags: ["dip-06", "document-search-runtime", ...(input.metadata.tags ?? [])],
+        tags: ["dip-06", "search-01", "document-search-runtime", ...(input.metadata.tags ?? [])],
         customAttributes: {
           source: "document-search-runtime-coordination",
           sessionId: input.metadata.sessionId,
           documentId: input.identity.documentId,
           providerReferenceId: providerReference.providerReferenceId,
+          searchProviderId: searchProvider.providerId,
+          searchProviderAdapterId: providerCaps.adapterId,
           captureRuntimeSessionId: input.reference?.captureRuntimeSessionId ?? null,
           ocrRuntimeSessionId: input.reference?.ocrRuntimeSessionId ?? null,
           classificationRuntimeSessionId: input.reference?.classificationRuntimeSessionId ?? null,
@@ -216,7 +244,7 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
         },
         structuralNotes:
           input.structuralNotes ??
-          "DIP-06: Search coordinated structurally via Document Search Runtime (no real search / no indexing).",
+          "SEARCH-01: Search coordinated via Document Search Runtime (execution via search()).",
       });
 
       if (!execution.ok) {
@@ -246,8 +274,6 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
         };
       }
 
-      // Hop estrutural Storage Manager Runtime — health/capabilities apenas.
-      // PROIBIDO: busca / indexação / vetores / embeddings / RAG / IA / HTTP nesta sprint.
       const storageManagerRuntime = this.enterpriseDeps.getStorageManagerRuntimePort();
       const storageCaps = storageManagerRuntime.capabilities();
       const storageHealth = await storageManagerRuntime.health();
@@ -257,7 +283,7 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
           ...session,
           status: "failed",
           executionId: execution.context?.executionId,
-          searchProviderAdapterId: STRUCTURAL_SEARCH_PROVIDER_ADAPTER_ID,
+          searchProviderAdapterId: providerCaps.adapterId,
           updatedAt: nowIso(this.now),
           message: storageHealth.message ?? "Storage Manager Runtime health falhou.",
           code: "STORAGE_MANAGER_RUNTIME_UNHEALTHY",
@@ -280,20 +306,45 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
         };
       }
 
-      // Search Provider Adapter — referência estrutural apenas (health/capabilities simbólicos).
-      // PROIBIDO: query / index / search / vector / embedding / RAG / HTTP / credenciais nesta sprint.
-      // Storage Manager Runtime capabilities consultadas estruturalmente (implementsRealStorage permanece false).
+      const providerHealth = await searchProvider.health();
+      if (!providerHealth.ok) {
+        session = {
+          ...session,
+          status: "failed",
+          executionId: execution.context?.executionId,
+          searchProviderAdapterId: providerCaps.adapterId,
+          updatedAt: nowIso(this.now),
+          message: providerHealth.message ?? "SearchProviderPort health falhou.",
+          code: "SEARCH_PROVIDER_UNHEALTHY",
+          errors: [providerHealth.message ?? "SEARCH_PROVIDER_UNHEALTHY"],
+          realSearchExecuted: false,
+          realIndexingExecuted: false,
+        };
+        this.store.setSession(session);
+        return {
+          kind: "canonical-search-result",
+          ok: false,
+          runtimeSessionId,
+          session,
+          executionId: execution.context?.executionId,
+          providerReferenceId: providerReference.providerReferenceId,
+          message: session.message,
+          code: session.code,
+          realSearchExecuted: false,
+          realIndexingExecuted: false,
+        };
+      }
 
       session = {
         ...session,
         status: "coordinated",
         executionId: execution.context?.executionId,
-        searchProviderAdapterId: STRUCTURAL_SEARCH_PROVIDER_ADAPTER_ID,
+        searchProviderAdapterId: providerCaps.adapterId,
         updatedAt: nowIso(this.now),
         message:
-          "Search coordinated structurally via Document Search Runtime " +
+          "Search coordinated via Document Search Runtime " +
           `(Orchestrator + Storage Manager Runtime adapter=${storageCaps.adapterId} + ` +
-          "Search Provider Adapter reference — no real search / no indexing).",
+          `Search Provider adapter=${providerCaps.adapterId} — execution via search()).`,
         code: "COORDINATED",
         realSearchExecuted: false,
         realIndexingExecuted: false,
@@ -334,6 +385,154 @@ export class DefaultDocumentSearchRuntimeAdapter implements DocumentSearchRuntim
         code: "RUNTIME_BRIDGE_ERROR",
         realSearchExecuted: false,
         realIndexingExecuted: false,
+      };
+    }
+  }
+
+  async search(input: RuntimeSearchInput): Promise<RuntimeSearchResult> {
+    const stamp = nowIso(this.now);
+    const runtimeSessionId = this.createSessionId();
+    const searchProvider = this.enterpriseDeps.getSearchProviderPort();
+    const providerCaps = searchProvider.capabilities();
+    const providerReferenceId = toProviderReferenceId(searchProvider.providerId);
+    const documentId = input.documentId ?? "unknown";
+    const sessionId = input.metadata?.sessionId ?? runtimeSessionId;
+
+    let session: CanonicalSearchSession = {
+      kind: "canonical-search-session",
+      runtimeSessionId,
+      status: "pending",
+      request: {
+        kind: "canonical-search-request",
+        identity: {
+          kind: "canonical-search-identity",
+          documentId,
+          documentKind: input.documentKind ?? "capture-document",
+        },
+        metadata: {
+          kind: "canonical-search-metadata",
+          sessionId,
+          tenantRef: input.tenantRef ?? input.metadata?.tenantRef,
+          correlationId: input.metadata?.correlationId,
+          channel: "document-search-runtime-search",
+          tags: ["search-01", "document-search-runtime", "search"],
+          patientId: input.patientId ?? input.metadata?.patientId,
+          competencia: input.competencia ?? input.metadata?.competencia,
+        },
+        reference: {
+          kind: "canonical-search-reference",
+          storageKey: input.storageKey,
+          storageContainer: input.storageContainer,
+          providerReferenceId,
+        },
+        configuration: {
+          kind: "canonical-search-configuration",
+          preferredProviderReference: providerReferenceId,
+          queryHint: input.query,
+          channel: "document-search-runtime-search",
+          notes: "SEARCH-01: search via SearchProviderPort (storage-backed).",
+        },
+        structuralNotes: "SEARCH-01: Document Search Runtime search → SearchProviderPort.search().",
+      },
+      providerReferenceId,
+      searchProviderAdapterId: providerCaps.adapterId,
+      createdAt: stamp,
+      updatedAt: stamp,
+      realSearchExecuted: false,
+      realIndexingExecuted: false,
+    };
+    this.store.setSession(session);
+
+    try {
+      session = { ...session, status: "coordinating", updatedAt: nowIso(this.now) };
+      this.store.setSession(session);
+
+      try {
+        const orchestrator = this.enterpriseDeps.getOrchestratorPort();
+        const execution = await orchestrator.startExecution({
+          correlationId: input.metadata?.correlationId,
+          tenantRef: input.tenantRef ?? input.metadata?.tenantRef,
+          channel: "document-search-runtime-search",
+          intakeRef: sessionId,
+          documentRef: documentId,
+          tags: ["search-01", "document-search-runtime", "search"],
+          customAttributes: {
+            source: "document-search-runtime-search",
+            requestId: input.requestId ?? null,
+            providerId: searchProvider.providerId,
+            adapterId: providerCaps.adapterId,
+            mode: input.mode,
+          },
+          structuralNotes: "SEARCH-01: Search execution coordinated via Runtime → ProviderPort.",
+        });
+        if (execution.ok) {
+          session = {
+            ...session,
+            executionId: execution.context?.executionId,
+            updatedAt: nowIso(this.now),
+          };
+          this.store.setSession(session);
+        }
+      } catch {
+        // Orchestrator best-effort — SearchProviderPort permanece obrigatório.
+      }
+
+      const providerResult = await searchProvider.search(input);
+
+      session = {
+        ...session,
+        status: providerResult.ok ? "coordinated" : "failed",
+        updatedAt: nowIso(this.now),
+        message: providerResult.message,
+        code: providerResult.code ?? (providerResult.ok ? "SEARCHED" : "SEARCH_FAILED"),
+        documents: providerResult.documents,
+        realSearchExecuted: providerResult.realSearchExecuted,
+        realIndexingExecuted: false,
+        errors: providerResult.ok
+          ? undefined
+          : [providerResult.message ?? providerResult.code ?? "SEARCH_FAILED"],
+      };
+      this.store.setSession(session);
+
+      return {
+        ...providerResult,
+        runtimeSessionId,
+        session,
+        executionId: session.executionId,
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      session = {
+        ...session,
+        status: "failed",
+        updatedAt: nowIso(this.now),
+        message,
+        code: "RUNTIME_BRIDGE_ERROR",
+        errors: [message],
+        realSearchExecuted: false,
+        realIndexingExecuted: false,
+      };
+      this.store.setSession(session);
+      return {
+        kind: "canonical-search-result",
+        ok: false,
+        requestId: input.requestId,
+        documents: [],
+        totalCount: 0,
+        metadata: input.metadata,
+        message,
+        code: "RUNTIME_BRIDGE_ERROR",
+        realSearchExecuted: false,
+        provider: searchProvider.providerId,
+        telemetry: {
+          latencyMs: 0,
+          attempts: 0,
+          cancelled: false,
+          mode: input.mode,
+          hitCount: 0,
+        },
+        runtimeSessionId,
+        session,
       };
     }
   }

@@ -1,21 +1,19 @@
 /**
- * DocumentSearchRuntimePort — contrato único do Document Search Runtime (DIP-06).
+ * DocumentSearchRuntimePort — contrato único do Document Search Runtime (DIP-06 / SEARCH-01).
  *
- * Application / Enterprise Runtime / Capture Engine Runtime / OCR Runtime /
- * Document Classification Runtime / Storage Manager Runtime dependem
- * exclusivamente desta interface para coordenação estrutural de pesquisa documental.
+ * Application / Enterprise Runtime / Capture Engine Runtime dependem
+ * exclusivamente desta interface para pesquisa documental.
  *
- * Fluxo obrigatório (sem implementação paralela / sem busca real):
+ * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → Document Classification Runtime
  *     → Storage Manager Runtime → DocumentSearchRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Search Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → SearchProviderPort → DefaultSearchProviderAdapter
+ *     → StorageProviderPort → Backend oficial
  *
- * NÃO busca documentos. NÃO indexa.
- * NÃO integra Elasticsearch / OpenSearch / PostgreSQL FTS / Vector DB / Azure AI Search.
- * NÃO implementa embeddings, RAG ou IA.
+ * Busca real exclusivamente via SearchProviderPort.
+ * NÃO integra Elastic / OpenSearch / Azure Search / Supabase / S3 / FS diretamente.
  */
 import type {
   CoordinateSearchInput,
@@ -28,6 +26,8 @@ import type {
   ListDocumentSearchRuntimeSessionsInput,
   ListDocumentSearchRuntimeSessionsResult,
   ListSearchProviderReferencesResult,
+  RuntimeSearchInput,
+  RuntimeSearchResult,
 } from "./types";
 
 export interface DocumentSearchRuntimePort {
@@ -37,14 +37,20 @@ export interface DocumentSearchRuntimePort {
   /** Verificação leve de prontidão (consulta Ports Enterprise quando disponíveis). */
   health(): Promise<DocumentSearchRuntimeHealth>;
 
-  /** Capacidades estáticas do adapter ativo (search tecnológico = FALSE). */
+  /** Capacidades estáticas do adapter ativo. */
   capabilities(): DocumentSearchRuntimeCapabilities;
 
   /**
-   * Coordena estruturalmente uma sessão de search via Orchestrator + Storage Manager Runtime.
-   * NÃO busca documentos. NÃO invoca Search Provider real. NÃO indexa.
+   * Coordena uma sessão de search via Orchestrator + Storage Manager Runtime + SearchProviderPort.
+   * Coordenação de cadeia (Capture path) — execução de busca via search().
    */
   coordinateSearch(input: CoordinateSearchInput): Promise<CoordinateSearchResult>;
+
+  /**
+   * Executa busca documental via SearchProviderPort.search() (SEARCH-01).
+   * Único caminho autorizado para busca real.
+   */
+  search(input: RuntimeSearchInput): Promise<RuntimeSearchResult>;
 
   /** Obtém sessão de search por id. */
   getSession(
@@ -56,6 +62,6 @@ export interface DocumentSearchRuntimePort {
     input?: ListDocumentSearchRuntimeSessionsInput,
   ): Promise<ListDocumentSearchRuntimeSessionsResult>;
 
-  /** Lista referências estruturais a Search Providers futuros (sem conexão). */
+  /** Lista referências estruturais a Search Providers (catálogo + Port ativo). */
   listProviderReferences(): Promise<ListSearchProviderReferencesResult>;
 }

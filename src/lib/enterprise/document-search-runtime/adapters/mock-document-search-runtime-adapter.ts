@@ -1,10 +1,10 @@
 /**
- * MockDocumentSearchRuntimeAdapter — DIP-06.
+ * MockDocumentSearchRuntimeAdapter — DIP-06 / SEARCH-01.
  *
  * Voltado para testes e homologação.
  * Quando enterpriseDeps estão presentes, usa Orchestrator + Storage Manager Runtime
- * (mesma cadeia do default). Sem deps, opera somente no store in-memory
- * para isolamento de contrato — sem busca real e sem implementação paralela.
+ * + SearchProviderPort (mesma cadeia do default). Sem deps, opera somente no store
+ * in-memory para isolamento de contrato.
  */
 import { createDocumentSearchRuntimeSessionId } from "../ports/identity";
 import type { DocumentSearchRuntimePort } from "../ports/document-search-runtime-port";
@@ -21,6 +21,8 @@ import type {
   ListDocumentSearchRuntimeSessionsInput,
   ListDocumentSearchRuntimeSessionsResult,
   ListSearchProviderReferencesResult,
+  RuntimeSearchInput,
+  RuntimeSearchResult,
 } from "../ports/types";
 import { STRUCTURAL_SEARCH_PROVIDER_REFERENCES } from "../ports/types";
 import { InMemoryDocumentSearchRuntimeStore, type DocumentSearchRuntimeStore } from "../store";
@@ -55,7 +57,7 @@ export class MockDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePo
     this.providerId = options.provider ?? "mock";
     this.healthy = options.healthy ?? true;
     this.message =
-      options.message ?? `${this.providerId} document-search-runtime ready (no real search).`;
+      options.message ?? `${this.providerId} document-search-runtime ready (SEARCH-01).`;
     this.store = options.store ?? new InMemoryDocumentSearchRuntimeStore();
     this.createSessionId = options.createSessionId ?? createDocumentSearchRuntimeSessionId;
     this.now = options.now;
@@ -76,6 +78,7 @@ export class MockDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePo
       provider: this.providerId,
       adapterId: MOCK_DOCUMENT_SEARCH_RUNTIME_ADAPTER_ID,
       supportsCoordinateSearch: true,
+      supportsSearch: Boolean(this.delegate),
       supportsGetSession: true,
       supportsListSessions: true,
       supportsHealth: true,
@@ -87,16 +90,17 @@ export class MockDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePo
       usesDocumentClassificationRuntime: Boolean(this.delegate),
       usesOCRRuntime: Boolean(this.delegate),
       usesCaptureEngineRuntime: Boolean(this.delegate),
-      supportsKeywordSearch: false,
-      supportsMetadataSearch: false,
+      usesSearchProviderAdapter: Boolean(this.delegate),
+      supportsKeywordSearch: Boolean(this.delegate),
+      supportsMetadataSearch: Boolean(this.delegate),
       supportsFullTextSearch: false,
       supportsSemanticSearch: false,
       supportsVectorSearch: false,
       supportsBatchSearch: false,
-      supportsRanking: false,
+      supportsRanking: Boolean(this.delegate),
       supportsFacetedSearch: false,
-      implementsRealSearch: false,
-      implementsIndexing: false,
+      implementsRealSearch: Boolean(this.delegate),
+      implementsIndexing: Boolean(this.delegate),
       implementsVectorSearch: false,
       implementsEmbeddings: false,
       implementsRAG: false,
@@ -111,8 +115,6 @@ export class MockDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePo
       return {
         ...health,
         provider: this.providerId,
-        realSearchAvailable: false,
-        realIndexingAvailable: false,
       };
     }
     return {
@@ -152,7 +154,7 @@ export class MockDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePo
       searchProviderAdapterId: STRUCTURAL_SEARCH_PROVIDER_ADAPTER_ID,
       createdAt: stamp,
       updatedAt: stamp,
-      message: "Mock search coordinated (store-only; no Enterprise Ports; no real search).",
+      message: "Mock search coordinated (store-only; no Enterprise Ports).",
       code: "MOCK_COORDINATED",
       realSearchExecuted: false,
       realIndexingExecuted: false,
@@ -169,6 +171,30 @@ export class MockDocumentSearchRuntimeAdapter implements DocumentSearchRuntimePo
       code: session.code,
       realSearchExecuted: false,
       realIndexingExecuted: false,
+    };
+  }
+
+  async search(input: RuntimeSearchInput): Promise<RuntimeSearchResult> {
+    if (this.delegate) {
+      return this.delegate.search(input);
+    }
+    return {
+      kind: "canonical-search-result",
+      ok: false,
+      documents: [],
+      totalCount: 0,
+      metadata: input.metadata,
+      message: "Mock store-only adapter não executa search() sem enterpriseDeps.",
+      code: "SEARCH_NOT_AVAILABLE",
+      realSearchExecuted: false,
+      provider: "mock",
+      telemetry: {
+        latencyMs: 0,
+        attempts: 0,
+        cancelled: false,
+        mode: input.mode,
+        hitCount: 0,
+      },
     };
   }
 

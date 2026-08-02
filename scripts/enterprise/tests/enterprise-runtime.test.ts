@@ -164,8 +164,10 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(searchSession.session?.realIndexingExecuted, false);
     assert.equal(
       runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch,
-      false,
+      true,
     );
+    assert.equal(typeof runtime.getSearchProviderPort, "function");
+    assert.equal(runtime.getSearchProviderPort().providerId, "storage-backed");
   });
 
   it("não lança em input inválido — retorna ok:false", async () => {

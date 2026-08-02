@@ -1,19 +1,23 @@
 /**
- * Tipos vendor-agnósticos do Document Search Runtime — DIP-06.
+ * Tipos vendor-agnósticos do Document Search Runtime — DIP-06 / SEARCH-01.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → Document Classification Runtime
  *     → Storage Manager Runtime → DocumentSearchRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Search Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → SearchProviderPort → DefaultSearchProviderAdapter
+ *     → StorageProviderPort → Backend oficial
  *
- * Este componente NÃO busca documentos. NÃO indexa.
- * NÃO integra Elasticsearch/OpenSearch/PostgreSQL FTS/Vector DB/Azure AI Search.
- * Coordena estruturalmente via Ports oficiais.
+ * Busca real exclusivamente via SearchProviderPort.search().
+ * NÃO integra Elastic/OpenSearch/Azure Search/Supabase/S3/FS diretamente.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
+import type { SearchProviderPort } from "../../search-provider/ports/search-provider-port";
+import type {
+  SearchProcessInput,
+  SearchProviderOperationResult,
+} from "../../search-provider/ports/types";
 import type { StorageManagerRuntimePort } from "../../storage-manager-runtime/ports/storage-manager-runtime-port";
 import type {
   CanonicalSearchProviderReference,
@@ -27,6 +31,7 @@ import type {
 export type {
   CanonicalSearchCapabilities,
   CanonicalSearchConfiguration,
+  CanonicalSearchDocument,
   CanonicalSearchIdentity,
   CanonicalSearchMetadata,
   CanonicalSearchProviderReference,
@@ -49,18 +54,21 @@ export type DocumentSearchRuntimeHealth = {
   message?: string;
   enterpriseOrchestratorOk?: boolean;
   storageManagerRuntimeOk?: boolean;
-  realSearchAvailable: false;
-  realIndexingAvailable: false;
+  searchProviderAdapterOk?: boolean;
+  /** true quando SearchProviderPort pode executar busca. */
+  realSearchAvailable: boolean;
+  realIndexingAvailable: boolean;
 };
 
 /**
  * Capacidades declaradas pelo adapter (Port level).
- * Capacidades tecnológicas de search permanecem FALSE — nenhuma é executada.
+ * Runtime permanece desacoplado de motores externos — busca só no SearchProviderPort.
  */
 export type DocumentSearchRuntimeCapabilities = {
   provider: DocumentSearchRuntimeProviderId;
   adapterId: string;
   supportsCoordinateSearch: boolean;
+  supportsSearch: boolean;
   supportsGetSession: boolean;
   supportsListSessions: boolean;
   supportsHealth: boolean;
@@ -72,17 +80,18 @@ export type DocumentSearchRuntimeCapabilities = {
   usesDocumentClassificationRuntime: boolean;
   usesOCRRuntime: boolean;
   usesCaptureEngineRuntime: boolean;
-  /** Capacidades tecnológicas — informativas / FALSE (DIP-06). */
-  supportsKeywordSearch: false;
-  supportsMetadataSearch: false;
-  supportsFullTextSearch: false;
+  usesSearchProviderAdapter: boolean;
+  supportsKeywordSearch: boolean;
+  supportsMetadataSearch: boolean;
+  supportsFullTextSearch: boolean;
   supportsSemanticSearch: false;
   supportsVectorSearch: false;
   supportsBatchSearch: false;
-  supportsRanking: false;
+  supportsRanking: boolean;
   supportsFacetedSearch: false;
-  implementsRealSearch: false;
-  implementsIndexing: false;
+  /** Runtime pode acionar busca real via SearchProviderPort.search(). */
+  implementsRealSearch: boolean;
+  implementsIndexing: boolean;
   implementsVectorSearch: false;
   implementsEmbeddings: false;
   implementsRAG: false;
@@ -98,9 +107,20 @@ export type DocumentSearchRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
   /**
    * Storage Manager Runtime (DIP-05) — hop anterior na cadeia estrutural.
-   * NUNCA invocar storage real; apenas health / sessão estrutural.
    */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
+  /** SearchProviderPort oficial — search()/health()/capabilities (SEARCH-01). */
+  getSearchProviderPort(): SearchProviderPort;
+};
+
+/** Input tipado da operação search() (SEARCH-01). */
+export type RuntimeSearchInput = SearchProcessInput;
+
+/** Resultado tipado da operação search() (SEARCH-01). */
+export type RuntimeSearchResult = SearchProviderOperationResult & {
+  runtimeSessionId?: string;
+  session?: CanonicalSearchSession;
+  executionId?: string;
 };
 
 export type GetDocumentSearchRuntimeSessionInput = {

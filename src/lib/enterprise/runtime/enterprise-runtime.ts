@@ -11,10 +11,11 @@
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
- *   → Search Provider Adapter (referência estrutural)
+ *   → SearchProviderPort → DefaultSearchProviderAdapter (SEARCH-01)
  *   → AIProviderRuntimePort → Orchestrator → AIProviderPort → Adapter → OpenAI.
  * OCR: exclusivamente via OCR Runtime → OCRProviderPort (OCR-01) — sem bypass HTTP Azure.
  * Storage: exclusivamente via Storage Manager Runtime → StorageProviderPort (STORAGE-01).
+ * Search: exclusivamente via Document Search Runtime → SearchProviderPort (SEARCH-01).
  * IA: exclusivamente via AI Provider Runtime (ARCH-02) — sem bypass HTTP.
  */
 import { createAIProviderPort } from "../ai-provider/providers/create-ai-provider-port";
@@ -36,6 +37,8 @@ import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/prov
 import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
 import { createDocumentSearchRuntimePort } from "../document-search-runtime/providers/create-document-search-runtime-port";
 import type { DocumentSearchRuntimePort } from "../document-search-runtime/ports/document-search-runtime-port";
+import { createSearchProviderPort } from "../search-provider/providers/create-search-provider-port";
+import type { SearchProviderPort } from "../search-provider/ports/search-provider-port";
 import { createOCRProviderPort } from "../ocr-provider/providers/create-ocr-provider-port";
 import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
 import { createOCRRuntimePort } from "../ocr-runtime/providers/create-ocr-runtime-port";
@@ -67,6 +70,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly documentClassificationRuntimePort: DocumentClassificationRuntimePort;
   private readonly storageProviderPort: StorageProviderPort;
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
+  private readonly searchProviderPort: SearchProviderPort;
   private readonly documentSearchRuntimePort: DocumentSearchRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
@@ -125,6 +129,13 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getStorageProviderPort: () => this.storageProviderPort,
         },
       });
+    // SEARCH-01: Search Provider oficial atrás do SearchProviderPort — sem bypass no produto.
+    this.searchProviderPort =
+      options.searchProviderPort ??
+      createSearchProviderPort({
+        provider: "storage-backed",
+        storageProviderPort: this.storageProviderPort,
+      });
     this.documentSearchRuntimePort =
       options.documentSearchRuntimePort ??
       createDocumentSearchRuntimePort({
@@ -132,6 +143,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         enterpriseDeps: {
           getOrchestratorPort: () => this.orchestratorPort,
           getStorageManagerRuntimePort: () => this.storageManagerRuntimePort,
+          getSearchProviderPort: () => this.searchProviderPort,
         },
       });
     this.captureEngineRuntimePort =
@@ -200,6 +212,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.storageProviderPort;
   }
 
+  getSearchProviderPort(): SearchProviderPort {
+    return this.searchProviderPort;
+  }
+
   getDocumentSearchRuntimePort(): DocumentSearchRuntimePort {
     return this.documentSearchRuntimePort;
   }
@@ -225,6 +241,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       classificationRuntimeHealth,
       storageProviderHealth,
       storageManagerRuntimeHealth,
+      searchProviderHealth,
       documentSearchRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -239,6 +256,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.documentClassificationRuntimePort.health(),
       this.storageProviderPort.health(),
       this.storageManagerRuntimePort.health(),
+      this.searchProviderPort.health(),
       this.documentSearchRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -255,6 +273,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       classificationRuntimeHealth.ok &&
       storageProviderHealth.ok &&
       storageManagerRuntimeHealth.ok &&
+      searchProviderHealth.ok &&
       documentSearchRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -272,11 +291,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       documentClassificationRuntimeOk: classificationRuntimeHealth.ok,
       storageProviderOk: storageProviderHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
+      searchProviderOk: searchProviderHealth.ok,
       documentSearchRuntimeOk: documentSearchRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (AIProviderRuntime + DocumentSearchRuntime + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
@@ -292,7 +312,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
    *   → OCRRuntimePort.coordinateOcr (estrutural — sem OCR real)
    *   → DocumentClassificationRuntimePort.coordinateClassification (CLASS-01 Provider via classify())
    *   → StorageManagerRuntimePort.coordinateStorage → StorageProviderPort (STORAGE-01)
-   *   → DocumentSearchRuntimePort.coordinateSearch (estrutural — sem busca real)
+   *   → DocumentSearchRuntimePort.coordinateSearch → SearchProviderPort (SEARCH-01)
    */
   async registerCaptureDocumentIntake(
     input: RegisterCaptureDocumentIntakeInput,
