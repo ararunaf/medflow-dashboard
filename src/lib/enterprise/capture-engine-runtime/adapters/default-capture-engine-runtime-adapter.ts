@@ -1,12 +1,13 @@
 /**
- * DefaultCaptureEngineRuntimeAdapter — adapter default (DIP-02).
+ * DefaultCaptureEngineRuntimeAdapter — adapter default (DIP-02 / DIP-03).
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
  *   Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação existente
+ *   → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
  *
  * NÃO reimplementa intake. NÃO cria adapters paralelos.
- * NÃO executa OCR, IA, XML, TISS, parser, classificação, Workflow,
+ * NÃO executa OCR real, IA, XML, TISS, parser, classificação, Workflow,
  * Rule Engine, Storage Manager, versionamento ou busca.
  */
 import { createCaptureRuntimeSessionId } from "../ports/identity";
@@ -53,6 +54,7 @@ function foundationCapabilities(): CaptureEngineRuntimeCapabilities {
     usesCanonicalExecutionOrchestrator: true,
     usesDocumentIntakeRuntime: true,
     usesDocumentIntakePort: true,
+    usesOCRRuntime: true,
     implementsOcr: false,
     implementsAi: false,
     implementsXml: false,
@@ -80,7 +82,7 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
     if (!options.enterpriseDeps) {
       throw new Error(
         "DefaultCaptureEngineRuntimeAdapter exige enterpriseDeps " +
-          "(Orchestrator + DocumentIntakeRuntime). Implementação paralela é proibida.",
+          "(Orchestrator + DocumentIntakeRuntime + OCRRuntime). Implementação paralela é proibida.",
       );
     }
     this.enterpriseDeps = options.enterpriseDeps;
@@ -288,6 +290,68 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         };
       }
 
+      // DIP-03 — coordenação estrutural via OCR Runtime (sem OCR real / sem process()).
+      const ocrRuntime = this.enterpriseDeps.getOCRRuntimePort();
+      const ocrResult = await ocrRuntime.coordinateOcr({
+        kind: "canonical-ocr-request",
+        identity: {
+          kind: "canonical-ocr-identity",
+          documentId: input.identity.documentId,
+          documentKind: input.identity.documentKind ?? "capture-document",
+          version: input.identity.version,
+        },
+        metadata: {
+          kind: "canonical-ocr-metadata",
+          sessionId: input.metadata.sessionId,
+          tenantRef: input.metadata.tenantRef,
+          correlationId: input.metadata.correlationId,
+          channel,
+          tags: ["dip-03", "capture-engine-runtime", "ocr-runtime", ...(input.metadata.tags ?? [])],
+          customAttributes: {
+            sessionId: input.metadata.sessionId,
+            documentId: input.identity.documentId,
+            captureRuntimeSessionId: runtimeSessionId,
+            captureExecutionId: execution.context?.executionId ?? null,
+            intakeId: intakeResult.intakeId ?? null,
+            ...(input.metadata.customAttributes ?? {}),
+          },
+        },
+        reference: {
+          kind: "canonical-ocr-reference",
+          storageKey: input.reference?.storageKey,
+          storageContainer: input.reference?.storageContainer ?? "clinical-documents",
+          storageProvider: input.reference?.storageProvider ?? "product-capture",
+          metadataId: input.reference?.metadataId ?? input.metadata.sessionId,
+          metadataNamespace: input.reference?.metadataNamespace ?? "product.capture",
+          intakeId: intakeResult.intakeId,
+          executionId: execution.context?.executionId,
+          captureRuntimeSessionId: runtimeSessionId,
+          captureExecutionId: execution.context?.executionId,
+          providerReferenceId: "mock",
+        },
+        capabilities: {
+          kind: "canonical-ocr-capabilities",
+          supportsPdf: false,
+          supportsImage: false,
+          supportsBatch: false,
+          supportsStreaming: false,
+          supportsHandwriting: false,
+          supportsTables: false,
+          supportsForms: false,
+          supportsConfidenceScore: false,
+          declared: ["capture-engine-runtime", "ocr-runtime-structural"],
+        },
+        configuration: {
+          kind: "canonical-ocr-configuration",
+          preferredProviderReference: "mock",
+          channel,
+          priority: input.configuration?.priority ?? "NORMAL",
+          notes: "DIP-03: structural OCR coordination from Capture Engine Runtime (no real OCR).",
+        },
+        structuralNotes:
+          "DIP-03: OCR coordinated from Capture Engine Runtime (no real OCR / no external providers).",
+      });
+
       session = {
         ...session,
         status: "registered",
@@ -295,8 +359,12 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         executionId: execution.context?.executionId,
         intakeRuntimeSessionId: intakeResult.runtimeSessionId,
         intakeExecutionId: intakeResult.executionId,
+        ocrRuntimeSessionId: ocrResult.runtimeSessionId,
+        ocrExecutionId: ocrResult.executionId,
         updatedAt: nowIso(this.now),
-        message: "Capture registered via Capture Engine Runtime Ports.",
+        message: ocrResult.ok
+          ? "Capture registered via Capture Engine Runtime Ports (+ OCR Runtime structural)."
+          : "Capture registered; OCR Runtime coordination reported non-ok (no real OCR).",
         code: "REGISTERED",
       };
       this.store.setSession(session);
@@ -309,6 +377,8 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         intakeId: intakeResult.intakeId,
         executionId: execution.context?.executionId,
         intakeRuntimeSessionId: intakeResult.runtimeSessionId,
+        ocrRuntimeSessionId: ocrResult.runtimeSessionId,
+        ocrExecutionId: ocrResult.executionId,
         message: session.message,
         code: session.code,
       };

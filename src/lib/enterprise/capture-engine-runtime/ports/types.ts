@@ -1,16 +1,18 @@
 /**
- * Tipos vendor-agnósticos do Capture Engine Runtime — DIP-02.
+ * Tipos vendor-agnósticos do Capture Engine Runtime — DIP-02 / DIP-03.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
  *     → Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação
+ *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
  *
  * Este componente NÃO reimplementa intake nem processamento documental.
- * Coordena via Ports oficiais.
+ * NÃO executa OCR. Coordena via Ports oficiais.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { DocumentIntakeRuntimePort } from "../../document-intake-runtime/ports/document-intake-runtime-port";
+import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
 import type {
   CanonicalCaptureRequest,
   CanonicalCaptureResult,
@@ -58,6 +60,7 @@ export type CaptureEngineRuntimeCapabilities = {
   usesCanonicalExecutionOrchestrator: boolean;
   usesDocumentIntakeRuntime: boolean;
   usesDocumentIntakePort: boolean;
+  usesOCRRuntime: boolean;
   implementsOcr: false;
   implementsAi: false;
   implementsXml: false;
@@ -78,6 +81,8 @@ export type CaptureEngineRuntimeCapabilities = {
 export type CaptureEngineRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
   getDocumentIntakeRuntimePort(): DocumentIntakeRuntimePort;
+  /** DIP-03 — coordenação estrutural OCR (sem OCR real). */
+  getOCRRuntimePort(): OCRRuntimePort;
 };
 
 export type GetCaptureRuntimeSessionInput = {

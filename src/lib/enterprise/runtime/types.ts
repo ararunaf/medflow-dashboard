@@ -1,5 +1,5 @@
 /**
- * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02.
+ * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03.
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
  * Sem regras de negócio. Sem OCR/IA/XML/TISS reais. Sem filas/workers reais.
@@ -10,6 +10,8 @@ import type { DocumentIntakePort } from "../document-intake/ports/document-intak
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
 import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
+import type { OCRRuntimePort } from "../ocr-runtime/ports/ocr-runtime-port";
+import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -24,6 +26,8 @@ export type EnterpriseRuntimeHealth = {
   orchestratorOk: boolean;
   documentIntakeRuntimeOk?: boolean;
   captureEngineRuntimeOk?: boolean;
+  ocrRuntimeOk?: boolean;
+  ocrProviderOk?: boolean;
 };
 
 /**
@@ -45,6 +49,9 @@ export type RegisterCaptureDocumentIntakeResult = {
   intakeId?: string;
   executionId?: string;
   runtimeSessionId?: string;
+  /** DIP-03 — sessão OCR Runtime (coordenação estrutural, sem OCR real). */
+  ocrRuntimeSessionId?: string;
+  ocrExecutionId?: string;
   intake?: CreateIntakeResult;
   execution?: StartExecutionResult;
   message?: string;
@@ -62,6 +69,8 @@ export type EnterpriseRuntimeOptions = {
   orchestratorPort?: CanonicalExecutionOrchestratorPort;
   documentIntakeRuntimePort?: DocumentIntakeRuntimePort;
   captureEngineRuntimePort?: CaptureEngineRuntimePort;
+  ocrRuntimePort?: OCRRuntimePort;
+  ocrProviderPort?: OCRProviderPort;
 };
 
 /**
@@ -73,9 +82,10 @@ export type EnterpriseRuntimeOptions = {
  * - inicializar Canonical Execution Orchestrator
  * - expor Document Intake Runtime (DIP-01)
  * - expor Capture Engine Runtime (DIP-02)
+ * - expor OCR Runtime (DIP-03)
  * - expor bridge estrutural para o produto
  *
- * NÃO contém regras de negócio.
+ * NÃO contém regras de negócio. NÃO executa OCR real.
  */
 export interface EnterpriseRuntime {
   readonly runtimeId: EnterpriseRuntimeId;
@@ -92,12 +102,16 @@ export interface EnterpriseRuntime {
   /** Resolve CaptureEngineRuntimePort (DIP-02). */
   getCaptureEngineRuntimePort(): CaptureEngineRuntimePort;
 
+  /** Resolve OCRRuntimePort (DIP-03). */
+  getOCRRuntimePort(): OCRRuntimePort;
+
   /**
-   * Bridge oficial Captura → Foundation (DIP-02).
+   * Bridge oficial Captura → Foundation (DIP-02 / DIP-03).
    *
    * Fluxo:
    *   Produto → Runtime → CaptureEngineRuntimePort
    *     → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → Adapter
+   *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
    *
    * Best-effort: nunca lança para o produto; falhas retornam ok:false.
    */

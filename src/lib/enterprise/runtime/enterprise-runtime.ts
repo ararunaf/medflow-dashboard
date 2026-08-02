@@ -1,10 +1,12 @@
 /**
- * DefaultEnterpriseRuntime — composição oficial da Foundation (ARCH-01 / DIP-01 / DIP-02).
+ * DefaultEnterpriseRuntime — composição oficial da Foundation
+ * (ARCH-01 / DIP-01 / DIP-02 / DIP-03).
  *
  * Ponto único de acesso do produto aos Ports Enterprise.
  * Bridge Captura → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime
- *   → DocumentIntakePort → Adapter → Implementação existente.
- * Não executa OCR, IA, parser, TISS, filas ou workers reais.
+ *   → DocumentIntakePort → Adapter → Implementação existente
+ *   → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural).
+ * Não executa OCR real, IA, parser, TISS, filas ou workers reais.
  */
 import { createCanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/providers/create-canonical-execution-orchestrator-port";
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -15,6 +17,10 @@ import { createDocumentIntakePort } from "../document-intake/providers/create-do
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
 import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
+import { createOCRProviderPort } from "../ocr-provider/providers/create-ocr-provider-port";
+import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
+import { createOCRRuntimePort } from "../ocr-runtime/providers/create-ocr-runtime-port";
+import type { OCRRuntimePort } from "../ocr-runtime/ports/ocr-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -32,6 +38,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly documentIntakePort: DocumentIntakePort;
   private readonly orchestratorPort: CanonicalExecutionOrchestratorPort;
   private readonly documentIntakeRuntimePort: DocumentIntakeRuntimePort;
+  private readonly ocrProviderPort: OCRProviderPort;
+  private readonly ocrRuntimePort: OCRRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
 
   constructor(options: EnterpriseRuntimeOptions = {}) {
@@ -49,6 +57,17 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOrchestratorPort: () => this.orchestratorPort,
         },
       });
+    this.ocrProviderPort =
+      options.ocrProviderPort ?? createOCRProviderPort({ provider: "default" });
+    this.ocrRuntimePort =
+      options.ocrRuntimePort ??
+      createOCRRuntimePort({
+        provider: "default",
+        enterpriseDeps: {
+          getOrchestratorPort: () => this.orchestratorPort,
+          getOCRProviderPort: () => this.ocrProviderPort,
+        },
+      });
     this.captureEngineRuntimePort =
       options.captureEngineRuntimePort ??
       createCaptureEngineRuntimePort({
@@ -56,6 +75,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         enterpriseDeps: {
           getOrchestratorPort: () => this.orchestratorPort,
           getDocumentIntakeRuntimePort: () => this.documentIntakeRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
         },
       });
   }
@@ -76,18 +96,35 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.captureEngineRuntimePort;
   }
 
+  getOCRRuntimePort(): OCRRuntimePort {
+    return this.ocrRuntimePort;
+  }
+
   async health(): Promise<EnterpriseRuntimeHealth> {
     const start = nowMs();
-    const [intakeHealth, orchestratorHealth, intakeRuntimeHealth, captureRuntimeHealth] =
-      await Promise.all([
-        this.documentIntakePort.health(),
-        this.orchestratorPort.health(),
-        this.documentIntakeRuntimePort.health(),
-        this.captureEngineRuntimePort.health(),
-      ]);
+    const [
+      intakeHealth,
+      orchestratorHealth,
+      intakeRuntimeHealth,
+      captureRuntimeHealth,
+      ocrRuntimeHealth,
+      ocrProviderHealth,
+    ] = await Promise.all([
+      this.documentIntakePort.health(),
+      this.orchestratorPort.health(),
+      this.documentIntakeRuntimePort.health(),
+      this.captureEngineRuntimePort.health(),
+      this.ocrRuntimePort.health(),
+      this.ocrProviderPort.health(),
+    ]);
     const end = nowMs();
     const ok =
-      intakeHealth.ok && orchestratorHealth.ok && intakeRuntimeHealth.ok && captureRuntimeHealth.ok;
+      intakeHealth.ok &&
+      orchestratorHealth.ok &&
+      intakeRuntimeHealth.ok &&
+      captureRuntimeHealth.ok &&
+      ocrRuntimeHealth.ok &&
+      ocrProviderHealth.ok;
     return {
       ok,
       runtimeId: this.runtimeId,
@@ -96,18 +133,21 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       orchestratorOk: orchestratorHealth.ok,
       documentIntakeRuntimeOk: intakeRuntimeHealth.ok,
       captureEngineRuntimeOk: captureRuntimeHealth.ok,
+      ocrRuntimeOk: ocrRuntimeHealth.ok,
+      ocrProviderOk: ocrProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
 
   /**
-   * Integração ARCH-01 / DIP-01 / DIP-02: Captura upload → Capture Engine Runtime.
+   * Integração ARCH-01 / DIP-01 / DIP-02 / DIP-03: Captura upload → Capture Engine Runtime → OCR Runtime.
    *
    * Produto → Runtime → CaptureEngineRuntimePort
    *   → Orchestrator.startExecution → DocumentIntakeRuntime.registerIntake
    *   → DocumentIntakePort.createIntake
+   *   → OCRRuntimePort.coordinateOcr (estrutural — sem OCR real)
    */
   async registerCaptureDocumentIntake(
     input: RegisterCaptureDocumentIntakeInput,
@@ -137,7 +177,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           tenantRef: input.tenantRef,
           correlationId,
           channel,
-          tags: ["arch-01", "dip-01", "dip-02", "capture", channel],
+          tags: ["arch-01", "dip-01", "dip-02", "dip-03", "capture", channel],
           customAttributes: {
             source: "capture-upload",
             sessionId: input.sessionId,
@@ -154,17 +194,23 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         },
         capabilities: {
           kind: "canonical-capture-capabilities",
-          declared: ["capture-upload-bridge", "capture-engine-runtime", "document-intake-runtime"],
+          declared: [
+            "capture-upload-bridge",
+            "capture-engine-runtime",
+            "document-intake-runtime",
+            "ocr-runtime",
+          ],
         },
         configuration: {
           kind: "canonical-capture-configuration",
           sourceType: "UPLOAD",
           channel,
           priority: "NORMAL",
-          notes: "DIP-02 bridge: capture upload registered via Capture Engine Runtime (no OCR/IA).",
+          notes:
+            "DIP-03 bridge: capture upload registered via Capture Engine Runtime + OCR Runtime (no real OCR).",
         },
         structuralNotes:
-          "DIP-02 bridge: capture upload registered via Capture Engine Runtime (no OCR/IA).",
+          "DIP-03 bridge: capture upload registered via Capture Engine Runtime + OCR Runtime (no real OCR).",
       };
 
       const result = await this.captureEngineRuntimePort.registerCapture(request);
@@ -175,6 +221,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           intakeId: result.intakeId,
           executionId: result.executionId,
           runtimeSessionId: result.runtimeSessionId,
+          ocrRuntimeSessionId: result.ocrRuntimeSessionId,
+          ocrExecutionId: result.ocrExecutionId,
           message: result.message ?? "Capture Engine Runtime falhou.",
           code: result.code ?? "CAPTURE_RUNTIME_FAILED",
         };
@@ -195,6 +243,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         intakeId: result.intakeId,
         executionId: result.executionId,
         runtimeSessionId: result.runtimeSessionId,
+        ocrRuntimeSessionId: result.ocrRuntimeSessionId,
+        ocrExecutionId: result.ocrExecutionId,
         intake: intake
           ? {
               ok: intake.ok,
@@ -205,7 +255,9 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
             }
           : undefined,
         execution: execution,
-        message: result.message ?? "Capture document registered via Capture Engine Runtime.",
+        message:
+          result.message ??
+          "Capture document registered via Capture Engine Runtime + OCR Runtime (structural).",
         code: result.code,
       };
     } catch (err) {

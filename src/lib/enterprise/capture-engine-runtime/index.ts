@@ -1,14 +1,15 @@
 /**
- * Enterprise Capture Engine Runtime — Document Intelligence Platform (DIP-02).
+ * Enterprise Capture Engine Runtime — Document Intelligence Platform (DIP-02 / DIP-03).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
  *     → Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação existente
+ *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
  *
- * DIP-02: componente funcional oficial de captura — sem OCR, IA, XML, TISS,
+ * DIP-02/03: componente funcional oficial de captura — sem OCR real, IA, XML, TISS,
  * parser, classificação documental, Storage Manager, versionamento, busca,
- * Workflow novo ou Rule Engine novo.
+ * Workflow novo ou Rule Engine novo. DIP-03 coordena OCR Runtime estruturalmente.
  */
 export type {
   CanonicalCaptureCapabilities,

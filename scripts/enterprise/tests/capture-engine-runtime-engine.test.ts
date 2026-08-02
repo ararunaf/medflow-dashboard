@@ -25,6 +25,8 @@ import {
 import { createDocumentIntakePort } from "../../../src/lib/enterprise/document-intake/index.ts";
 import { createDocumentIntakeRuntimePort } from "../../../src/lib/enterprise/document-intake-runtime/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
+import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/index.ts";
+import { createOCRRuntimePort } from "../../../src/lib/enterprise/ocr-runtime/index.ts";
 import {
   createEnterpriseRuntime,
   resetEnterpriseRuntimeForTests,
@@ -80,13 +82,23 @@ function enterpriseDeps() {
       getOrchestratorPort: () => orchestratorPort,
     },
   });
+  const ocrProviderPort = createOCRProviderPort({ provider: "mock" });
+  const ocrRuntimePort = createOCRRuntimePort({
+    provider: "default",
+    enterpriseDeps: {
+      getOrchestratorPort: () => orchestratorPort,
+      getOCRProviderPort: () => ocrProviderPort,
+    },
+  });
   return {
     documentIntakePort,
     orchestratorPort,
     documentIntakeRuntimePort,
+    ocrRuntimePort,
     deps: {
       getDocumentIntakeRuntimePort: () => documentIntakeRuntimePort,
       getOrchestratorPort: () => orchestratorPort,
+      getOCRRuntimePort: () => ocrRuntimePort,
     },
   };
 }
@@ -121,10 +133,15 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     );
   });
 
-  it("default adapter registra via Orchestrator + DocumentIntakeRuntime", async () => {
+  it("default adapter registra via Orchestrator + DocumentIntakeRuntime + OCRRuntime", async () => {
     resetAllCaptureEngineRuntimeIdSequences();
-    const { deps, documentIntakePort, orchestratorPort, documentIntakeRuntimePort } =
-      enterpriseDeps();
+    const {
+      deps,
+      documentIntakePort,
+      orchestratorPort,
+      documentIntakeRuntimePort,
+      ocrRuntimePort,
+    } = enterpriseDeps();
     const port = new DefaultCaptureEngineRuntimeAdapter({ enterpriseDeps: deps });
 
     assert.equal(port.providerId, "default");
@@ -132,6 +149,8 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     assert.equal(port.capabilities().usesDocumentIntakeRuntime, true);
     assert.equal(port.capabilities().usesCanonicalExecutionOrchestrator, true);
     assert.equal(port.capabilities().usesDocumentIntakePort, true);
+    assert.equal(port.capabilities().usesOCRRuntime, true);
+    assert.equal(port.capabilities().implementsOcr, false);
 
     const result = await port.registerCapture(sampleRequest());
     assert.equal(result.ok, true);
@@ -139,7 +158,15 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     assert.ok(result.executionId);
     assert.ok(result.runtimeSessionId);
     assert.ok(result.intakeRuntimeSessionId);
+    assert.ok(result.ocrRuntimeSessionId);
     assert.equal(result.session?.status, "registered");
+
+    const ocrSession = await ocrRuntimePort.getSession({
+      runtimeSessionId: result.ocrRuntimeSessionId!,
+    });
+    assert.equal(ocrSession.ok, true);
+    assert.equal(ocrSession.session?.status, "coordinated");
+    assert.equal(ocrSession.session?.realOcrExecuted, false);
 
     const storedIntake = await documentIntakePort.getIntake({ intakeId: result.intakeId! });
     assert.equal(storedIntake.ok, true);
@@ -267,7 +294,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.equal(health.orchestratorOk, true);
   });
 
-  it("registerCaptureDocumentIntake usa Capture Engine + Orchestrator + DocumentIntakeRuntime", async () => {
+  it("registerCaptureDocumentIntake usa Capture Engine + Orchestrator + DocumentIntakeRuntime + OCRRuntime", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -284,6 +311,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.ok(result.intakeId);
     assert.ok(result.executionId);
     assert.ok(result.runtimeSessionId);
+    assert.ok(result.ocrRuntimeSessionId);
     assert.equal(result.intake?.ok, true);
     assert.equal(result.execution?.ok, true);
     assert.equal(result.intake?.intake?.sourceType, "UPLOAD");
@@ -294,6 +322,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.equal(captureSessions.ok, true);
     assert.equal(captureSessions.sessions.length, 1);
     assert.equal(captureSessions.sessions[0]?.status, "registered");
+    assert.ok(captureSessions.sessions[0]?.ocrRuntimeSessionId);
 
     const intakeSessions = await runtime.getDocumentIntakeRuntimePort().listSessions({
       sessionId: "sess-arch-dip-02",
@@ -301,6 +330,14 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.equal(intakeSessions.ok, true);
     assert.equal(intakeSessions.sessions.length, 1);
     assert.equal(intakeSessions.sessions[0]?.status, "registered");
+
+    const ocrSessions = await runtime.getOCRRuntimePort().listSessions({
+      sessionId: "sess-arch-dip-02",
+    });
+    assert.equal(ocrSessions.ok, true);
+    assert.equal(ocrSessions.sessions.length, 1);
+    assert.equal(ocrSessions.sessions[0]?.status, "coordinated");
+    assert.equal(ocrSessions.sessions[0]?.realOcrExecuted, false);
 
     const stored = await runtime.getDocumentIntakePort().getIntake({
       intakeId: result.intakeId!,
@@ -325,6 +362,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.ok(!keys.some((k) => /adapter/i.test(k)));
     assert.equal(typeof runtime.getCaptureEngineRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentIntakeRuntimePort, "function");
+    assert.equal(typeof runtime.getOCRRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });

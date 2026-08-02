@@ -55,7 +55,7 @@ export class CaptureEngineRuntimeFactory {
         if (!enterpriseDeps) {
           throw new Error(
             'CaptureEngineRuntime provider "default" exige enterpriseDeps ' +
-              "(getOrchestratorPort + getDocumentIntakeRuntimePort). " +
+              "(getOrchestratorPort + getDocumentIntakeRuntimePort + getOCRRuntimePort). " +
               "Use createEnterpriseRuntime() / DI do composition root.",
           );
         }

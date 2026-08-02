@@ -1,5 +1,5 @@
 /**
- * CaptureEngineRuntimePort — contrato único do Capture Engine Runtime (DIP-02).
+ * CaptureEngineRuntimePort — contrato único do Capture Engine Runtime (DIP-02 / DIP-03).
  *
  * Application / Enterprise Runtime dependem exclusivamente desta interface
  * para o fluxo funcional de captura na Document Intelligence Platform.
@@ -8,8 +8,9 @@
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
  *     → Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação existente
+ *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
  *
- * NÃO implementa OCR, IA, XML, TISS, parser, classificação, Workflow,
+ * NÃO implementa OCR real, IA, XML, TISS, parser, classificação, Workflow,
  * Rule Engine, Storage Manager, versionamento ou busca.
  */
 import type {
