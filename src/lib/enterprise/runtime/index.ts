@@ -1,11 +1,12 @@
 /**
- * Enterprise Runtime — ARCH-01 / DIP-01 Enterprise Runtime Integration.
+ * Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 Enterprise Runtime Integration.
  *
  * Ponto único de acesso da aplicação à Enterprise Foundation.
  *
  * Fluxo oficial:
- *   Produto → Enterprise Runtime → DocumentIntakeRuntimePort
- *     → Canonical Orchestrator → DocumentIntakePort → Adapter → Implementação
+ *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
+ *     → Canonical Orchestrator → DocumentIntakeRuntime
+ *     → DocumentIntakePort → Adapter → Implementação
  *
  * Sem regras de negócio. Sem OCR/IA/XML/TISS reais. Sem filas/workers reais.
  */

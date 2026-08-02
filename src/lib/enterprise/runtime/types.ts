@@ -1,10 +1,11 @@
 /**
- * Tipos do Enterprise Runtime — ARCH-01 / DIP-01.
+ * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02.
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
  * Sem regras de negócio. Sem OCR/IA/XML/TISS reais. Sem filas/workers reais.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
+import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
@@ -22,6 +23,7 @@ export type EnterpriseRuntimeHealth = {
   documentIntakeOk: boolean;
   orchestratorOk: boolean;
   documentIntakeRuntimeOk?: boolean;
+  captureEngineRuntimeOk?: boolean;
 };
 
 /**
@@ -59,6 +61,7 @@ export type EnterpriseRuntimeOptions = {
   documentIntakePort?: DocumentIntakePort;
   orchestratorPort?: CanonicalExecutionOrchestratorPort;
   documentIntakeRuntimePort?: DocumentIntakeRuntimePort;
+  captureEngineRuntimePort?: CaptureEngineRuntimePort;
 };
 
 /**
@@ -69,6 +72,7 @@ export type EnterpriseRuntimeOptions = {
  * - disponibilizar Adapters via factories
  * - inicializar Canonical Execution Orchestrator
  * - expor Document Intake Runtime (DIP-01)
+ * - expor Capture Engine Runtime (DIP-02)
  * - expor bridge estrutural para o produto
  *
  * NÃO contém regras de negócio.
@@ -85,12 +89,15 @@ export interface EnterpriseRuntime {
   /** Resolve DocumentIntakeRuntimePort (DIP-01). */
   getDocumentIntakeRuntimePort(): DocumentIntakeRuntimePort;
 
+  /** Resolve CaptureEngineRuntimePort (DIP-02). */
+  getCaptureEngineRuntimePort(): CaptureEngineRuntimePort;
+
   /**
-   * Bridge oficial Captura → Foundation (DIP-01).
+   * Bridge oficial Captura → Foundation (DIP-02).
    *
    * Fluxo:
-   *   Produto → Runtime → DocumentIntakeRuntimePort
-   *     → Orchestrator (coordena) → DocumentIntakePort → Adapter
+   *   Produto → Runtime → CaptureEngineRuntimePort
+   *     → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → Adapter
    *
    * Best-effort: nunca lança para o produto; falhas retornam ok:false.
    */

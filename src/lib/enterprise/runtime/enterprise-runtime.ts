@@ -1,17 +1,20 @@
 /**
- * DefaultEnterpriseRuntime — composição oficial da Foundation (ARCH-01 / DIP-01).
+ * DefaultEnterpriseRuntime — composição oficial da Foundation (ARCH-01 / DIP-01 / DIP-02).
  *
  * Ponto único de acesso do produto aos Ports Enterprise.
- * Bridge Captura → DocumentIntakeRuntimePort → Orchestrator → DocumentIntakePort.
+ * Bridge Captura → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime
+ *   → DocumentIntakePort → Adapter → Implementação existente.
  * Não executa OCR, IA, parser, TISS, filas ou workers reais.
  */
 import { createCanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/providers/create-canonical-execution-orchestrator-port";
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
+import { createCaptureEngineRuntimePort } from "../capture-engine-runtime/providers/create-capture-engine-runtime-port";
+import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
+import type { CanonicalCaptureRequest } from "../capture-engine-runtime/ports/models";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
 import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
-import type { CanonicalDocumentIntakeRequest } from "../document-intake-runtime/ports/models";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -29,6 +32,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly documentIntakePort: DocumentIntakePort;
   private readonly orchestratorPort: CanonicalExecutionOrchestratorPort;
   private readonly documentIntakeRuntimePort: DocumentIntakeRuntimePort;
+  private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
 
   constructor(options: EnterpriseRuntimeOptions = {}) {
     this.runtimeId = options.runtimeId ?? "default";
@@ -45,6 +49,15 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOrchestratorPort: () => this.orchestratorPort,
         },
       });
+    this.captureEngineRuntimePort =
+      options.captureEngineRuntimePort ??
+      createCaptureEngineRuntimePort({
+        provider: "default",
+        enterpriseDeps: {
+          getOrchestratorPort: () => this.orchestratorPort,
+          getDocumentIntakeRuntimePort: () => this.documentIntakeRuntimePort,
+        },
+      });
   }
 
   getDocumentIntakePort(): DocumentIntakePort {
@@ -59,15 +72,22 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.documentIntakeRuntimePort;
   }
 
+  getCaptureEngineRuntimePort(): CaptureEngineRuntimePort {
+    return this.captureEngineRuntimePort;
+  }
+
   async health(): Promise<EnterpriseRuntimeHealth> {
     const start = nowMs();
-    const [intakeHealth, orchestratorHealth, intakeRuntimeHealth] = await Promise.all([
-      this.documentIntakePort.health(),
-      this.orchestratorPort.health(),
-      this.documentIntakeRuntimePort.health(),
-    ]);
+    const [intakeHealth, orchestratorHealth, intakeRuntimeHealth, captureRuntimeHealth] =
+      await Promise.all([
+        this.documentIntakePort.health(),
+        this.orchestratorPort.health(),
+        this.documentIntakeRuntimePort.health(),
+        this.captureEngineRuntimePort.health(),
+      ]);
     const end = nowMs();
-    const ok = intakeHealth.ok && orchestratorHealth.ok && intakeRuntimeHealth.ok;
+    const ok =
+      intakeHealth.ok && orchestratorHealth.ok && intakeRuntimeHealth.ok && captureRuntimeHealth.ok;
     return {
       ok,
       runtimeId: this.runtimeId,
@@ -75,17 +95,19 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       documentIntakeOk: intakeHealth.ok,
       orchestratorOk: orchestratorHealth.ok,
       documentIntakeRuntimeOk: intakeRuntimeHealth.ok,
+      captureEngineRuntimeOk: captureRuntimeHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
 
   /**
-   * Integração ARCH-01 / DIP-01: Captura upload → Document Intake Runtime.
+   * Integração ARCH-01 / DIP-01 / DIP-02: Captura upload → Capture Engine Runtime.
    *
-   * Produto → Runtime → DocumentIntakeRuntimePort
-   *   → Orchestrator.startExecution → DocumentIntakePort.createIntake
+   * Produto → Runtime → CaptureEngineRuntimePort
+   *   → Orchestrator.startExecution → DocumentIntakeRuntime.registerIntake
+   *   → DocumentIntakePort.createIntake
    */
   async registerCaptureDocumentIntake(
     input: RegisterCaptureDocumentIntakeInput,
@@ -102,33 +124,28 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       const correlationId = input.correlationId ?? undefined;
       const channel = input.channel ?? "capture-upload";
 
-      const request: CanonicalDocumentIntakeRequest = {
-        kind: "canonical-document-intake-request",
+      const request: CanonicalCaptureRequest = {
+        kind: "canonical-capture-request",
         identity: {
-          kind: "canonical-document-intake-identity",
+          kind: "canonical-capture-identity",
           documentId: input.documentId,
           documentKind: "capture-document",
         },
         metadata: {
-          kind: "canonical-document-intake-metadata",
+          kind: "canonical-capture-metadata",
           sessionId: input.sessionId,
           tenantRef: input.tenantRef,
           correlationId,
           channel,
-          tags: ["arch-01", "dip-01", "capture", channel],
+          tags: ["arch-01", "dip-01", "dip-02", "capture", channel],
           customAttributes: {
             source: "capture-upload",
             sessionId: input.sessionId,
             documentId: input.documentId,
           },
         },
-        source: {
-          kind: "canonical-document-intake-source",
-          sourceType: "UPLOAD",
-          channel,
-        },
         reference: {
-          kind: "canonical-document-intake-reference",
+          kind: "canonical-capture-reference",
           storageKey: input.storagePath,
           storageContainer: "clinical-documents",
           storageProvider: "product-capture",
@@ -136,14 +153,21 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           metadataNamespace: "product.capture",
         },
         capabilities: {
-          kind: "canonical-document-intake-capabilities",
-          declared: ["capture-upload-bridge", "document-intake-runtime"],
+          kind: "canonical-capture-capabilities",
+          declared: ["capture-upload-bridge", "capture-engine-runtime", "document-intake-runtime"],
+        },
+        configuration: {
+          kind: "canonical-capture-configuration",
+          sourceType: "UPLOAD",
+          channel,
+          priority: "NORMAL",
+          notes: "DIP-02 bridge: capture upload registered via Capture Engine Runtime (no OCR/IA).",
         },
         structuralNotes:
-          "DIP-01 bridge: capture upload registered via Document Intake Runtime (no OCR/IA).",
+          "DIP-02 bridge: capture upload registered via Capture Engine Runtime (no OCR/IA).",
       };
 
-      const result = await this.documentIntakeRuntimePort.registerIntake(request);
+      const result = await this.captureEngineRuntimePort.registerCapture(request);
 
       if (!result.ok) {
         return {
@@ -151,12 +175,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           intakeId: result.intakeId,
           executionId: result.executionId,
           runtimeSessionId: result.runtimeSessionId,
-          message: result.message ?? "Document Intake Runtime falhou.",
-          code: result.code ?? "INTAKE_RUNTIME_FAILED",
+          message: result.message ?? "Capture Engine Runtime falhou.",
+          code: result.code ?? "CAPTURE_RUNTIME_FAILED",
         };
       }
 
-      // Rehidrata resultados dos Ports oficiais para compatibilidade ARCH-01.
+      // Rehidrata resultados dos Ports oficiais para compatibilidade ARCH-01 / DIP-01.
       const intake =
         result.intakeId != null
           ? await this.documentIntakePort.getIntake({ intakeId: result.intakeId })
@@ -181,7 +205,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
             }
           : undefined,
         execution: execution,
-        message: result.message ?? "Capture document registered via Document Intake Runtime.",
+        message: result.message ?? "Capture document registered via Capture Engine Runtime.",
         code: result.code,
       };
     } catch (err) {

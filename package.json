@@ -68,6 +68,8 @@
     "enterprise:contract:test": "npx tsx --test scripts/enterprise/tests/contract-engine.test.ts",
     "enterprise:document-intake:test": "npx tsx --test scripts/enterprise/tests/document-intake-engine.test.ts",
     "enterprise:document-intake-runtime:test": "npx tsx --test scripts/enterprise/tests/document-intake-runtime-engine.test.ts",
+    "enterprise:capture-engine-runtime:test": "npx tsx --test scripts/enterprise/tests/capture-engine-runtime-engine.test.ts",
+
     "enterprise:document-processor:test": "npx tsx --test scripts/enterprise/tests/document-processor-engine.test.ts",
     "enterprise:processing-provider:test": "npx tsx --test scripts/enterprise/tests/processing-provider-engine.test.ts",
     "enterprise:ocr-provider:test": "npx tsx --test scripts/enterprise/tests/ocr-provider-engine.test.ts",

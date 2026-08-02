@@ -1,7 +1,9 @@
 /**
- * Bridge Captura → Enterprise Runtime (ARCH-01).
+ * Bridge Captura → Enterprise Runtime (ARCH-01 / DIP-02).
  *
  * Side-effect estrutural após upload bem-sucedido.
+ * Fluxo: Produto → Enterprise Runtime → CaptureEngineRuntimePort
+ *   → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort.
  * NÃO altera OCR, parser, auditoria, UI, APIs ou regras de negócio.
  * Falhas são engolidas — o fluxo de Captura permanece válido.
  */

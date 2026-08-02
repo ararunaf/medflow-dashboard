@@ -245,7 +245,7 @@ describe("DIP-01 integração Enterprise Runtime", () => {
     assert.equal(health.orchestratorOk, true);
   });
 
-  it("registerCaptureDocumentIntake usa DocumentIntakeRuntime + Orchestrator + DocumentIntakePort", async () => {
+  it("registerCaptureDocumentIntake continua usando DocumentIntakeRuntime via Capture Engine", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -273,6 +273,13 @@ describe("DIP-01 integração Enterprise Runtime", () => {
     assert.equal(sessions.sessions.length, 1);
     assert.equal(sessions.sessions[0]?.status, "registered");
 
+    const captureSessions = await runtime.getCaptureEngineRuntimePort().listSessions({
+      sessionId: "sess-arch-dip",
+    });
+    assert.equal(captureSessions.ok, true);
+    assert.equal(captureSessions.sessions.length, 1);
+    assert.equal(captureSessions.sessions[0]?.status, "registered");
+
     const stored = await runtime.getDocumentIntakePort().getIntake({
       intakeId: result.intakeId!,
     });
@@ -289,6 +296,8 @@ describe("DIP-01 integração Enterprise Runtime", () => {
     const keys = Object.keys(runtime);
     assert.ok(!keys.some((k) => /adapter/i.test(k)));
     assert.equal(typeof runtime.getDocumentIntakeRuntimePort, "function");
+    assert.equal(typeof runtime.getCaptureEngineRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });
+
