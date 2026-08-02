@@ -1,14 +1,17 @@
 /**
- * DefaultEnterpriseRuntime — composição oficial da Foundation (ARCH-01).
+ * DefaultEnterpriseRuntime — composição oficial da Foundation (ARCH-01 / DIP-01).
  *
  * Ponto único de acesso do produto aos Ports Enterprise.
- * Coordena via Canonical Execution Orchestrator; registra Intake via DocumentIntakePort.
+ * Bridge Captura → DocumentIntakeRuntimePort → Orchestrator → DocumentIntakePort.
  * Não executa OCR, IA, parser, TISS, filas ou workers reais.
  */
 import { createCanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/providers/create-canonical-execution-orchestrator-port";
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
+import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
+import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
+import type { CanonicalDocumentIntakeRequest } from "../document-intake-runtime/ports/models";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -25,6 +28,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   readonly runtimeId;
   private readonly documentIntakePort: DocumentIntakePort;
   private readonly orchestratorPort: CanonicalExecutionOrchestratorPort;
+  private readonly documentIntakeRuntimePort: DocumentIntakeRuntimePort;
 
   constructor(options: EnterpriseRuntimeOptions = {}) {
     this.runtimeId = options.runtimeId ?? "default";
@@ -32,6 +36,15 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       options.documentIntakePort ?? createDocumentIntakePort({ provider: "default" });
     this.orchestratorPort =
       options.orchestratorPort ?? createCanonicalExecutionOrchestratorPort({ provider: "default" });
+    this.documentIntakeRuntimePort =
+      options.documentIntakeRuntimePort ??
+      createDocumentIntakeRuntimePort({
+        provider: "default",
+        enterpriseDeps: {
+          getDocumentIntakePort: () => this.documentIntakePort,
+          getOrchestratorPort: () => this.orchestratorPort,
+        },
+      });
   }
 
   getDocumentIntakePort(): DocumentIntakePort {
@@ -42,31 +55,37 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.orchestratorPort;
   }
 
+  getDocumentIntakeRuntimePort(): DocumentIntakeRuntimePort {
+    return this.documentIntakeRuntimePort;
+  }
+
   async health(): Promise<EnterpriseRuntimeHealth> {
     const start = nowMs();
-    const [intakeHealth, orchestratorHealth] = await Promise.all([
+    const [intakeHealth, orchestratorHealth, intakeRuntimeHealth] = await Promise.all([
       this.documentIntakePort.health(),
       this.orchestratorPort.health(),
+      this.documentIntakeRuntimePort.health(),
     ]);
     const end = nowMs();
-    const ok = intakeHealth.ok && orchestratorHealth.ok;
+    const ok = intakeHealth.ok && orchestratorHealth.ok && intakeRuntimeHealth.ok;
     return {
       ok,
       runtimeId: this.runtimeId,
       latencyMs: Math.max(0, Math.round(end - start)),
       documentIntakeOk: intakeHealth.ok,
       orchestratorOk: orchestratorHealth.ok,
+      documentIntakeRuntimeOk: intakeRuntimeHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (DocumentIntake + Canonical Orchestrator)."
+        ? "Enterprise Runtime pronto (DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
 
   /**
-   * Integração ARCH-01: Captura upload → Orchestrator → DocumentIntakePort.
+   * Integração ARCH-01 / DIP-01: Captura upload → Document Intake Runtime.
    *
-   * 1. Orchestrator.startExecution — coordenação estrutural (sem Engines reais)
-   * 2. DocumentIntakePort.createIntake — registro canônico com refs opacas
+   * Produto → Runtime → DocumentIntakeRuntimePort
+   *   → Orchestrator.startExecution → DocumentIntakePort.createIntake
    */
   async registerCaptureDocumentIntake(
     input: RegisterCaptureDocumentIntakeInput,
@@ -83,84 +102,87 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       const correlationId = input.correlationId ?? undefined;
       const channel = input.channel ?? "capture-upload";
 
-      // FASE 4 — passagem obrigatória pelo Canonical Execution Orchestrator (somente coordena).
-      const execution = await this.orchestratorPort.startExecution({
-        correlationId,
-        tenantRef: input.tenantRef,
-        channel,
-        intakeRef: input.sessionId,
-        documentRef: input.documentId,
-        tags: ["arch-01", "capture", "document-intake"],
-        customAttributes: {
-          source: "capture-upload",
-          sessionId: input.sessionId,
+      const request: CanonicalDocumentIntakeRequest = {
+        kind: "canonical-document-intake-request",
+        identity: {
+          kind: "canonical-document-intake-identity",
           documentId: input.documentId,
+          documentKind: "capture-document",
         },
-        structuralNotes:
-          "ARCH-01 bridge: capture upload registered via Enterprise Runtime (no OCR/IA execution).",
-      });
-
-      if (!execution.ok) {
-        return {
-          ok: false,
-          execution,
-          executionId: execution.context?.executionId,
-          message: execution.message ?? "Orchestrator startExecution falhou.",
-          code: execution.code ?? "ORCHESTRATOR_FAILED",
-        };
-      }
-
-      const intake = await this.documentIntakePort.createIntake({
-        intake: {
-          sourceType: "UPLOAD",
-          priority: "NORMAL",
-          documentIdentityReference: {
-            documentId: input.documentId,
-            kind: "capture-document",
-          },
-          storageReference: input.storagePath
-            ? {
-                key: input.storagePath,
-                container: "clinical-documents",
-                provider: "product-capture",
-              }
-            : undefined,
-          metadataReference: {
-            id: input.sessionId,
-            kind: "capture-session",
-            namespace: "product.capture",
-          },
-          tags: ["arch-01", "capture", channel],
+        metadata: {
+          kind: "canonical-document-intake-metadata",
+          sessionId: input.sessionId,
+          tenantRef: input.tenantRef,
+          correlationId,
+          channel,
+          tags: ["arch-01", "dip-01", "capture", channel],
           customAttributes: {
+            source: "capture-upload",
             sessionId: input.sessionId,
             documentId: input.documentId,
-            tenantRef: input.tenantRef ?? null,
-            correlationId: correlationId ?? null,
-            executionId: execution.context?.executionId ?? null,
           },
-          capabilities: ["capture-upload-bridge"],
         },
-      });
+        source: {
+          kind: "canonical-document-intake-source",
+          sourceType: "UPLOAD",
+          channel,
+        },
+        reference: {
+          kind: "canonical-document-intake-reference",
+          storageKey: input.storagePath,
+          storageContainer: "clinical-documents",
+          storageProvider: "product-capture",
+          metadataId: input.sessionId,
+          metadataNamespace: "product.capture",
+        },
+        capabilities: {
+          kind: "canonical-document-intake-capabilities",
+          declared: ["capture-upload-bridge", "document-intake-runtime"],
+        },
+        structuralNotes:
+          "DIP-01 bridge: capture upload registered via Document Intake Runtime (no OCR/IA).",
+      };
 
-      if (!intake.ok) {
+      const result = await this.documentIntakeRuntimePort.registerIntake(request);
+
+      if (!result.ok) {
         return {
           ok: false,
-          intake,
-          intakeId: intake.intakeId,
-          execution,
-          executionId: execution.context?.executionId,
-          message: intake.message ?? "DocumentIntake createIntake falhou.",
-          code: intake.code ?? "INTAKE_FAILED",
+          intakeId: result.intakeId,
+          executionId: result.executionId,
+          runtimeSessionId: result.runtimeSessionId,
+          message: result.message ?? "Document Intake Runtime falhou.",
+          code: result.code ?? "INTAKE_RUNTIME_FAILED",
         };
       }
+
+      // Rehidrata resultados dos Ports oficiais para compatibilidade ARCH-01.
+      const intake =
+        result.intakeId != null
+          ? await this.documentIntakePort.getIntake({ intakeId: result.intakeId })
+          : undefined;
+      const execution =
+        result.executionId != null
+          ? await this.orchestratorPort.getExecution({ executionId: result.executionId })
+          : undefined;
 
       return {
         ok: true,
-        intakeId: intake.intakeId,
-        executionId: execution.context?.executionId,
-        intake,
-        execution,
-        message: "Capture document registered via Enterprise Runtime Ports.",
+        intakeId: result.intakeId,
+        executionId: result.executionId,
+        runtimeSessionId: result.runtimeSessionId,
+        intake: intake
+          ? {
+              ok: intake.ok,
+              intakeId: result.intakeId!,
+              intake: intake.intake,
+              message: intake.message,
+              code: intake.code,
+            }
+          : undefined,
+        execution: execution,
+        message: result.message ?? "Capture document registered via Document Intake Runtime.",
+        code: result.code,
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

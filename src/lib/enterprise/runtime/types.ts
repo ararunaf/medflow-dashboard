@@ -1,5 +1,5 @@
 /**
- * Tipos do Enterprise Runtime — ARCH-01.
+ * Tipos do Enterprise Runtime — ARCH-01 / DIP-01.
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
  * Sem regras de negócio. Sem OCR/IA/XML/TISS reais. Sem filas/workers reais.
@@ -8,6 +8,7 @@ import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
+import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -20,6 +21,7 @@ export type EnterpriseRuntimeHealth = {
   message?: string;
   documentIntakeOk: boolean;
   orchestratorOk: boolean;
+  documentIntakeRuntimeOk?: boolean;
 };
 
 /**
@@ -40,6 +42,7 @@ export type RegisterCaptureDocumentIntakeResult = {
   ok: boolean;
   intakeId?: string;
   executionId?: string;
+  runtimeSessionId?: string;
   intake?: CreateIntakeResult;
   execution?: StartExecutionResult;
   message?: string;
@@ -55,6 +58,7 @@ export type EnterpriseRuntimeOptions = {
    */
   documentIntakePort?: DocumentIntakePort;
   orchestratorPort?: CanonicalExecutionOrchestratorPort;
+  documentIntakeRuntimePort?: DocumentIntakeRuntimePort;
 };
 
 /**
@@ -64,6 +68,7 @@ export type EnterpriseRuntimeOptions = {
  * - resolver Providers / Ports
  * - disponibilizar Adapters via factories
  * - inicializar Canonical Execution Orchestrator
+ * - expor Document Intake Runtime (DIP-01)
  * - expor bridge estrutural para o produto
  *
  * NÃO contém regras de negócio.
@@ -77,11 +82,15 @@ export interface EnterpriseRuntime {
   /** Resolve CanonicalExecutionOrchestratorPort (EPC-24). */
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
 
+  /** Resolve DocumentIntakeRuntimePort (DIP-01). */
+  getDocumentIntakeRuntimePort(): DocumentIntakeRuntimePort;
+
   /**
-   * Bridge oficial Captura → Foundation.
+   * Bridge oficial Captura → Foundation (DIP-01).
    *
    * Fluxo:
-   *   Produto → Runtime → Orchestrator (coordena) → DocumentIntakePort → Adapter
+   *   Produto → Runtime → DocumentIntakeRuntimePort
+   *     → Orchestrator (coordena) → DocumentIntakePort → Adapter
    *
    * Best-effort: nunca lança para o produto; falhas retornam ok:false.
    */

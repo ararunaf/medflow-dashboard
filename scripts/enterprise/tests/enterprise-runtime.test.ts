@@ -16,22 +16,25 @@ import { createDocumentIntakePort } from "../../../src/lib/enterprise/document-i
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 
 describe("ARCH-01 Enterprise Runtime", () => {
-  it("cria runtime com Ports DocumentIntake + Orchestrator", async () => {
+  it("cria runtime com Ports DocumentIntake + Orchestrator + DocumentIntakeRuntime", async () => {
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.runtimeId, "test");
 
     const intake = runtime.getDocumentIntakePort();
     const orchestrator = runtime.getOrchestratorPort();
+    const intakeRuntime = runtime.getDocumentIntakeRuntimePort();
     assert.ok(intake);
     assert.ok(orchestrator);
+    assert.ok(intakeRuntime);
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
     assert.equal(health.documentIntakeOk, true);
     assert.equal(health.orchestratorOk, true);
+    assert.equal(health.documentIntakeRuntimeOk, true);
   });
 
-  it("registerCaptureDocumentIntake passa pelo Orchestrator e DocumentIntakePort", async () => {
+  it("registerCaptureDocumentIntake passa pelo DocumentIntakeRuntime → Orchestrator → DocumentIntakePort", async () => {
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     const result = await runtime.registerCaptureDocumentIntake({
       sessionId: "sess-arch-01",
@@ -45,6 +48,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(result.ok, true);
     assert.ok(result.intakeId);
     assert.ok(result.executionId);
+    assert.ok(result.runtimeSessionId);
     assert.equal(result.intake?.ok, true);
     assert.equal(result.execution?.ok, true);
     assert.equal(result.intake?.intake?.sourceType, "UPLOAD");
@@ -60,6 +64,12 @@ describe("ARCH-01 Enterprise Runtime", () => {
       executionId: result.executionId!,
     });
     assert.equal(execution.ok, true);
+
+    const session = await runtime.getDocumentIntakeRuntimePort().getSession({
+      runtimeSessionId: result.runtimeSessionId!,
+    });
+    assert.equal(session.ok, true);
+    assert.equal(session.session?.status, "registered");
   });
 
   it("não lança em input inválido — retorna ok:false", async () => {
@@ -111,6 +121,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.ok(!keys.some((k) => /adapter/i.test(k)));
     assert.equal(typeof runtime.getDocumentIntakePort, "function");
     assert.equal(typeof runtime.getOrchestratorPort, "function");
+    assert.equal(typeof runtime.getDocumentIntakeRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });
