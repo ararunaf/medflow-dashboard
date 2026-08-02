@@ -1,5 +1,5 @@
 /**
- * Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06 Integration.
+ * Enterprise Runtime — ARCH-01 / DIP-01…DIP-06 / ARCH-02 (DIP-07) Integration.
  *
  * Ponto único de acesso da aplicação à Enterprise Foundation.
  *
@@ -14,10 +14,11 @@
  *     → Storage Provider Adapter (referência estrutural)
  *     → DocumentSearchRuntimePort → Orchestrator
  *     → Search Provider Adapter (referência estrutural)
+ *     → AIProviderRuntimePort → Orchestrator → AIProviderPort → Adapter → OpenAI
  *
- * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
- */
-export type {
+ * Sem regras de negócio. Sem OCR/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
+ * IA: exclusivamente via AI Provider Runtime (ARCH-02).
+ */ export type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
   EnterpriseRuntimeId,

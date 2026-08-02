@@ -1,6 +1,6 @@
 /**
  * DefaultEnterpriseRuntime — composição oficial da Foundation
- * (ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06).
+ * (ARCH-01 / DIP-01…DIP-06 / ARCH-02 DIP-07).
  *
  * Ponto único de acesso do produto aos Ports Enterprise.
  * Bridge Captura → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime
@@ -11,9 +11,15 @@
  *   → StorageManagerRuntimePort → Orchestrator
  *   → Storage Provider Adapter (referência estrutural)
  *   → DocumentSearchRuntimePort → Orchestrator
- *   → Search Provider Adapter (referência estrutural).
- * Não executa OCR real, classificação real, storage real, busca real, IA, parser, TISS, filas ou workers reais.
+ *   → Search Provider Adapter (referência estrutural)
+ *   → AIProviderRuntimePort → Orchestrator → AIProviderPort → Adapter → OpenAI.
+ * Não executa OCR real, classificação real, storage real, busca real, parser, TISS, filas ou workers reais.
+ * IA: exclusivamente via AI Provider Runtime (ARCH-02) — sem bypass HTTP.
  */
+import { createAIProviderPort } from "../ai-provider/providers/create-ai-provider-port";
+import type { AIProviderPort } from "../ai-provider/ports/ai-provider-port";
+import { createAIProviderRuntimePort } from "../ai-provider-runtime/providers/create-ai-provider-runtime-port";
+import type { AIProviderRuntimePort } from "../ai-provider-runtime/ports/ai-provider-runtime-port";
 import { createCanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/providers/create-canonical-execution-orchestrator-port";
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import { createCaptureEngineRuntimePort } from "../capture-engine-runtime/providers/create-capture-engine-runtime-port";
@@ -56,6 +62,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly documentSearchRuntimePort: DocumentSearchRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
+  private readonly aiProviderPort: AIProviderPort;
+  private readonly aiProviderRuntimePort: AIProviderRuntimePort;
 
   constructor(options: EnterpriseRuntimeOptions = {}) {
     this.runtimeId = options.runtimeId ?? "default";
@@ -123,6 +131,17 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getDocumentSearchRuntimePort: () => this.documentSearchRuntimePort,
         },
       });
+    // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
+    this.aiProviderPort = options.aiProviderPort ?? createAIProviderPort({ provider: "openai" });
+    this.aiProviderRuntimePort =
+      options.aiProviderRuntimePort ??
+      createAIProviderRuntimePort({
+        provider: "default",
+        enterpriseDeps: {
+          getOrchestratorPort: () => this.orchestratorPort,
+          getAIProviderPort: () => this.aiProviderPort,
+        },
+      });
   }
 
   getDocumentIntakePort(): DocumentIntakePort {
@@ -157,6 +176,14 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.documentSearchRuntimePort;
   }
 
+  getAIProviderPort(): AIProviderPort {
+    return this.aiProviderPort;
+  }
+
+  getAIProviderRuntimePort(): AIProviderRuntimePort {
+    return this.aiProviderRuntimePort;
+  }
+
   async health(): Promise<EnterpriseRuntimeHealth> {
     const start = nowMs();
     const [
@@ -169,6 +196,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       classificationRuntimeHealth,
       storageManagerRuntimeHealth,
       documentSearchRuntimeHealth,
+      aiProviderRuntimeHealth,
+      aiProviderHealth,
     ] = await Promise.all([
       this.documentIntakePort.health(),
       this.orchestratorPort.health(),
@@ -179,6 +208,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.documentClassificationRuntimePort.health(),
       this.storageManagerRuntimePort.health(),
       this.documentSearchRuntimePort.health(),
+      this.aiProviderRuntimePort.health(),
+      this.aiProviderPort.health(),
     ]);
     const end = nowMs();
     const ok =
@@ -190,7 +221,9 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       ocrProviderHealth.ok &&
       classificationRuntimeHealth.ok &&
       storageManagerRuntimeHealth.ok &&
-      documentSearchRuntimeHealth.ok;
+      documentSearchRuntimeHealth.ok &&
+      aiProviderRuntimeHealth.ok &&
+      aiProviderHealth.ok;
     return {
       ok,
       runtimeId: this.runtimeId,
@@ -204,8 +237,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       documentClassificationRuntimeOk: classificationRuntimeHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       documentSearchRuntimeOk: documentSearchRuntimeHealth.ok,
+      aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
+      aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (DocumentSearchRuntime + StorageManagerRuntime + DocumentClassificationRuntime + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (AIProviderRuntime + DocumentSearchRuntime + StorageManagerRuntime + DocumentClassificationRuntime + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

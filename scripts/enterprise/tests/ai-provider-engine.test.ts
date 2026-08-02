@@ -32,7 +32,7 @@ import {
   type AIRequest,
 } from "../../../src/lib/enterprise/ai-provider/index.ts";
 
-const VENDOR_STUBS = ["openai", "azure-openai", "gemini", "claude", "ollama", "lm-studio"] as const;
+const VENDOR_STUBS = ["azure-openai", "gemini", "claude", "ollama", "lm-studio"] as const;
 
 describe("EPC-07 AIProviderPort contract", () => {
   it("mock adapter satisfaz o Port e responde healthy", async () => {
@@ -143,9 +143,22 @@ describe("EPC-07 AIProviderPort contract", () => {
     assert.equal(blob.includes("glosa"), false);
   });
 
-  it("todos os stubs vendor implementam o Port sem rede", async () => {
+  it("OpenAI adapter é o caminho oficial (ARCH-02) e não é stub", async () => {
+    const port = new OpenAIAIProviderAdapter();
+    assert.equal(port.providerId, "openai");
+    assert.equal(port.capabilities().adapterId, "openai-chat-completions");
+
+    const health = await port.health();
+    assert.equal(health.ok, true);
+    assert.equal(health.status, "ready");
+
+    const info = port.providerInfo();
+    assert.equal(info.status, "ready");
+    assert.match(info.metadata.description ?? "", /ARCH-02|official|authorized/i);
+  });
+
+  it("stubs vendor restantes implementam o Port sem rede", async () => {
     const adapters: AIProviderPort[] = [
-      new OpenAIAIProviderAdapter(),
       new AzureOpenAIAIProviderAdapter(),
       new GeminiAIProviderAdapter(),
       new ClaudeAIProviderAdapter(),
@@ -153,7 +166,7 @@ describe("EPC-07 AIProviderPort contract", () => {
       new LMStudioAIProviderAdapter(),
     ];
 
-    assert.equal(adapters.length, 6);
+    assert.equal(adapters.length, 5);
 
     for (const port of adapters) {
       const health = await port.health();
@@ -175,7 +188,7 @@ describe("EPC-07 AIProviderPort contract", () => {
 
   it("factory instancia providers registrados sem lógica de negócio", () => {
     const factory = createAIProviderFactory();
-    for (const id of ["mock", "test", ...VENDOR_STUBS] as const) {
+    for (const id of ["mock", "test", "openai", ...VENDOR_STUBS] as const) {
       const port = factory.create({ provider: id });
       assert.equal(port.providerId, id);
     }
@@ -201,7 +214,10 @@ describe("EPC-07 AIProviderPort contract", () => {
     assert.equal(mock.status, "ready");
 
     const stubs = registry.listByStatus("stub");
-    assert.equal(stubs.length, 6);
+    assert.equal(stubs.length, 5);
+    const openai = registry.get("openai");
+    assert.ok(openai);
+    assert.equal(openai.status, "ready");
     assert.equal(registry.supports("openai", "embeddings"), true);
     assert.equal(registry.supports("claude", "embeddings"), false);
   });

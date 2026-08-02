@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * ARCH-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06 — Enterprise Runtime Integration
+ * ARCH-01 / DIP-02…DIP-06 / ARCH-02 (DIP-07) — Enterprise Runtime Integration
  * Prova: Produto → Runtime → CaptureEngine → Orchestrator → DocumentIntakeRuntime
  *        → DocumentIntakePort → OCRRuntime → OCR Provider Adapter (estrutural)
  *        → DocumentClassificationRuntime → Classification Provider Adapter (estrutural)
  *        → StorageManagerRuntime → Storage Provider Adapter (estrutural)
  *        → DocumentSearchRuntime → Search Provider Adapter (estrutural)
+ *        → AIProviderRuntime → AIProviderPort → Adapter → Provider
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -20,7 +21,7 @@ import { createDocumentIntakePort } from "../../../src/lib/enterprise/document-i
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 
 describe("ARCH-01 Enterprise Runtime", () => {
-  it("cria runtime com Ports DocumentIntake + Orchestrator + DocumentIntakeRuntime + CaptureEngineRuntime + OCRRuntime + ClassificationRuntime + StorageManagerRuntime + DocumentSearchRuntime", async () => {
+  it("cria runtime com Ports DocumentIntake + Orchestrator + DocumentIntakeRuntime + CaptureEngineRuntime + OCRRuntime + ClassificationRuntime + StorageManagerRuntime + DocumentSearchRuntime + AIProviderRuntime", async () => {
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.runtimeId, "test");
 
@@ -32,6 +33,8 @@ describe("ARCH-01 Enterprise Runtime", () => {
     const classificationRuntime = runtime.getDocumentClassificationRuntimePort();
     const storageManagerRuntime = runtime.getStorageManagerRuntimePort();
     const documentSearchRuntime = runtime.getDocumentSearchRuntimePort();
+    const aiProvider = runtime.getAIProviderPort();
+    const aiProviderRuntime = runtime.getAIProviderRuntimePort();
     assert.ok(intake);
     assert.ok(orchestrator);
     assert.ok(intakeRuntime);
@@ -40,6 +43,10 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.ok(classificationRuntime);
     assert.ok(storageManagerRuntime);
     assert.ok(documentSearchRuntime);
+    assert.ok(aiProvider);
+    assert.ok(aiProviderRuntime);
+    assert.equal(aiProvider.providerId, "openai");
+    assert.equal(aiProviderRuntime.providerId, "default");
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
@@ -52,6 +59,8 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(health.documentClassificationRuntimeOk, true);
     assert.equal(health.storageManagerRuntimeOk, true);
     assert.equal(health.documentSearchRuntimeOk, true);
+    assert.equal(health.aiProviderRuntimeOk, true);
+    assert.equal(health.aiProviderOk, true);
   });
 
   it("registerCaptureDocumentIntake passa pelo CaptureEngine → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → OCRRuntime → ClassificationRuntime → StorageManagerRuntime → DocumentSearchRuntime", async () => {
@@ -205,6 +214,8 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(typeof runtime.getDocumentClassificationRuntimePort, "function");
     assert.equal(typeof runtime.getStorageManagerRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentSearchRuntimePort, "function");
+    assert.equal(typeof runtime.getAIProviderPort, "function");
+    assert.equal(typeof runtime.getAIProviderRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });

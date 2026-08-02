@@ -1,8 +1,14 @@
 /**
- * Cliente HTTP mínimo para OpenAI (sem SDK) — somente leitura / chat completion.
- * Server-only: mantém a chave fora do bundle do browser.
+ * Bridge produto → Enterprise Foundation para copiloto operacional (ARCH-02).
+ *
+ * NÃO chama OpenAI/HTTP diretamente.
+ * Fluxo obrigatório:
+ *   Produto → Enterprise Runtime → AI Provider Runtime
+ *     → AIProviderPort → Adapter → Provider → OpenAI
  */
 import { DomainError } from "@/lib/domain/operations/errors";
+import { getEnterpriseRuntime } from "@/lib/enterprise/runtime";
+import type { AIRequest, AIResponse } from "@/lib/enterprise/ai-provider";
 import { isOperationalGptToolName } from "@/lib/operations/copilot-gpt/operational-gpt-tool-registry";
 import {
   OPERATIONAL_GPT_MAX_TOOL_CALLS_PER_REQUEST,
@@ -21,24 +27,16 @@ type OpenAiChatMessage =
   | { role: "assistant"; content: string | null; tool_calls?: OpenAiToolCall[] }
   | { role: "tool"; tool_call_id: string; content: string };
 
-type OpenAiChatResponse = {
-  model?: string;
-  choices?: Array<{
-    finish_reason?: string;
-    message?: {
-      role?: string;
-      content?: string | null;
-      tool_calls?: OpenAiToolCall[];
-    };
-  }>;
-  usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-  error?: { message?: string };
+type UsageShape = {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
 };
 
 function mergeUsage(
-  acc: OpenAiChatResponse["usage"] | undefined,
-  next: OpenAiChatResponse["usage"] | undefined,
-): OpenAiChatResponse["usage"] | undefined {
+  acc: UsageShape | undefined,
+  next: UsageShape | undefined,
+): UsageShape | undefined {
   if (!next) return acc;
   if (!acc) return next;
   return {
@@ -48,11 +46,13 @@ function mergeUsage(
   };
 }
 
-function resolveOpenAiApiKey(): string | null {
-  const fromEnv =
-    (typeof process !== "undefined" && process.env && process.env.MEDFLOW_OPENAI_API_KEY) ||
-    (typeof process !== "undefined" && process.env && process.env.OPENAI_API_KEY);
-  return typeof fromEnv === "string" && fromEnv.length > 0 ? fromEnv : null;
+function mapUsage(usage: AIResponse["usage"] | undefined): UsageShape | undefined {
+  if (!usage) return undefined;
+  return {
+    prompt_tokens: usage.promptTokens,
+    completion_tokens: usage.completionTokens,
+    total_tokens: usage.totalTokens,
+  };
 }
 
 export function resolveOperationalOpenAiModel(): string {
@@ -62,46 +62,52 @@ export function resolveOperationalOpenAiModel(): string {
   return typeof m === "string" && m.length > 0 ? m : "gpt-4o-mini";
 }
 
+async function invokeViaEnterprise(request: AIRequest): Promise<AIResponse> {
+  return getEnterpriseRuntime().getAIProviderRuntimePort().invoke(request);
+}
+
+function extractToolCalls(response: AIResponse): OpenAiToolCall[] {
+  const data = response.data;
+  if (!data || typeof data !== "object") return [];
+  const toolCalls = (data as { toolCalls?: OpenAiToolCall[] }).toolCalls;
+  return Array.isArray(toolCalls) ? toolCalls : [];
+}
+
+function extractAssistantContent(response: AIResponse): string | null {
+  const data = response.data;
+  if (data && typeof data === "object" && "assistantContent" in data) {
+    const value = (data as { assistantContent?: string | null }).assistantContent;
+    if (value === null) return null;
+    if (typeof value === "string") return value;
+  }
+  return response.content ?? null;
+}
+
 export async function completeOperationalCopilotChat(input: {
   system: string;
   user: string;
-}): Promise<{ text: string; model: string; usage: OpenAiChatResponse["usage"] }> {
-  const apiKey = resolveOpenAiApiKey();
-  if (!apiKey) {
-    throw new DomainError(
-      "internal_error",
-      "IA operacional não configurada: defina MEDFLOW_OPENAI_API_KEY (ou OPENAI_API_KEY) no ambiente do servidor.",
-    );
-  }
+}): Promise<{ text: string; model: string; usage: UsageShape | undefined }> {
   const model = resolveOperationalOpenAiModel();
-
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.35,
-      max_tokens: 900,
-      messages: [
-        { role: "system", content: input.system },
-        { role: "user", content: input.user },
-      ],
-    }),
+  const response = await invokeViaEnterprise({
+    model,
+    temperature: 0.35,
+    maxTokens: 900,
+    capability: "text-generation",
+    messages: [
+      { role: "system", content: input.system },
+      { role: "user", content: input.user },
+    ],
   });
 
-  const raw = (await res.json()) as OpenAiChatResponse;
-  if (!res.ok) {
-    const msg = raw.error?.message ?? `OpenAI HTTP ${res.status}`;
-    throw new DomainError("internal_error", `Falha ao chamar o modelo: ${msg}`);
+  if (!response.ok) {
+    throw new DomainError("internal_error", response.message ?? "Falha ao chamar o modelo.");
   }
-  const text = raw.choices?.[0]?.message?.content?.trim() ?? "";
+
+  const text = response.content?.trim() ?? "";
   if (!text) {
     throw new DomainError("internal_error", "Resposta vazia do modelo.");
   }
-  return { text, model: raw.model ?? model, usage: raw.usage };
+  return { text, model: response.model ?? model, usage: mapUsage(response.usage) };
 }
 
 export async function completeOperationalCopilotChatWithTools(input: {
@@ -112,17 +118,10 @@ export async function completeOperationalCopilotChatWithTools(input: {
 }): Promise<{
   text: string;
   model: string;
-  usage: OpenAiChatResponse["usage"];
+  usage: UsageShape | undefined;
   toolCallCount: number;
   toolRounds: number;
 }> {
-  const apiKey = resolveOpenAiApiKey();
-  if (!apiKey) {
-    throw new DomainError(
-      "internal_error",
-      "IA operacional não configurada: defina MEDFLOW_OPENAI_API_KEY (ou OPENAI_API_KEY) no ambiente do servidor.",
-    );
-  }
   const model = resolveOperationalOpenAiModel();
 
   const messages: OpenAiChatMessage[] = [
@@ -130,48 +129,43 @@ export async function completeOperationalCopilotChatWithTools(input: {
     { role: "user", content: input.user },
   ];
 
-  let usageAcc: OpenAiChatResponse["usage"] | undefined;
+  let usageAcc: UsageShape | undefined;
   let lastModel = model;
   let toolCallCount = 0;
 
   for (let round = 0; round < OPERATIONAL_GPT_MAX_TOOL_ROUNDS; round++) {
     const forceNoTools = toolCallCount >= OPERATIONAL_GPT_MAX_TOOL_CALLS_PER_REQUEST;
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.3,
-        max_tokens: 1100,
+    const response = await invokeViaEnterprise({
+      model,
+      temperature: 0.3,
+      maxTokens: 1100,
+      capability: "tool-calling",
+      input: {
         messages,
         tools: input.tools,
         tool_choice: forceNoTools ? "none" : "auto",
-      }),
+      },
     });
 
-    const raw = (await res.json()) as OpenAiChatResponse;
-    if (!res.ok) {
-      const msg = raw.error?.message ?? `OpenAI HTTP ${res.status}`;
-      throw new DomainError("internal_error", `Falha ao chamar o modelo: ${msg}`);
+    if (!response.ok) {
+      throw new DomainError("internal_error", response.message ?? "Falha ao chamar o modelo.");
     }
 
-    usageAcc = mergeUsage(usageAcc, raw.usage);
-    lastModel = raw.model ?? model;
+    usageAcc = mergeUsage(usageAcc, mapUsage(response.usage));
+    lastModel = response.model ?? model;
 
-    const msg = raw.choices?.[0]?.message;
-    const text = msg?.content?.trim() ?? "";
+    const assistantContent = extractAssistantContent(response);
+    const text = assistantContent?.trim() ?? "";
+    const toolCalls = extractToolCalls(response);
 
-    if (!forceNoTools && msg?.tool_calls?.length) {
+    if (!forceNoTools && toolCalls.length > 0) {
       messages.push({
         role: "assistant",
-        content: msg.content ?? null,
-        tool_calls: msg.tool_calls,
+        content: assistantContent,
+        tool_calls: toolCalls,
       });
 
-      for (const tc of msg.tool_calls) {
+      for (const tc of toolCalls) {
         const name = tc.function?.name ?? "";
         const argsJson = tc.function?.arguments ?? "{}";
         toolCallCount += 1;

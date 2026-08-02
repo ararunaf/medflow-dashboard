@@ -235,13 +235,30 @@ function runChecks() {
     pass("auth_bearer_health", "Bearer anon apenas em health-check server-side");
   }
 
-  const gptPath = join(root, "src/lib/server/operational-gpt-openai.ts");
-  if (existsSync(gptPath)) {
-    const gpt = read("src/lib/server/operational-gpt-openai.ts");
-    if (gpt.includes("authorization: `Bearer ${apiKey}`") && !gpt.includes("VITE_")) {
-      pass("auth_bearer_openai", "OpenAI Bearer só no servidor (env não-VITE)");
+  // ARCH-02: Bearer OpenAI vive exclusivamente no Adapter oficial (AIProviderPort).
+  const openaiAdapterPath = join(
+    root,
+    "src/lib/enterprise/ai-provider/adapters/openai-ai-provider-adapter.ts",
+  );
+  if (existsSync(openaiAdapterPath)) {
+    const adapter = read("src/lib/enterprise/ai-provider/adapters/openai-ai-provider-adapter.ts");
+    const bridge = existsSync(join(root, "src/lib/server/operational-gpt-openai.ts"))
+      ? read("src/lib/server/operational-gpt-openai.ts")
+      : "";
+    const bearerInAdapter =
+      adapter.includes("authorization: `Bearer ${apiKey}`") && !adapter.includes("VITE_");
+    const bypassInBridge =
+      bridge.includes("api.openai.com") || /\bfetch\s*\(/.test(bridge);
+    if (bearerInAdapter && !bypassInBridge) {
+      pass(
+        "auth_bearer_openai",
+        "OpenAI Bearer só no Adapter oficial AIProviderPort (ARCH-02; env não-VITE)",
+      );
     } else {
-      warn("auth_bearer_openai", "Revisar exposição da chave OpenAI em operational-gpt-openai.ts");
+      warn(
+        "auth_bearer_openai",
+        "Revisar exposição/bypass OpenAI (Adapter oficial vs operational-gpt-openai.ts)",
+      );
     }
   }
 

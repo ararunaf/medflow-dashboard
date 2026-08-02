@@ -1,9 +1,9 @@
 /**
- * AIProviderFactory — instancia o adapter correto (EPC-07).
+ * AIProviderFactory — instancia o adapter correto (EPC-07 / ARCH-02).
  *
- * Sem lógica de negócio. Sem HTTP. Sem chaves de API.
+ * Sem lógica de negócio. HTTP permanece exclusivo do Adapter OpenAI.
  * Posição na arquitetura:
- *   Application → AIProviderPort → Adapter ← Factory ← Registry
+ *   Enterprise Runtime → AI Provider Runtime → AIProviderPort → Adapter ← Factory ← Registry
  */
 import {
   AzureOpenAIAIProviderAdapter,

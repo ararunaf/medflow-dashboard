@@ -142,9 +142,9 @@ describe("EPC-16 selection via AI Provider Framework", () => {
     assert.equal(got.provider?.providerId, "mock");
     assert.equal(got.provider?.adapterId, "mock-deterministic");
 
-    const missing = await port.getProvider({ providerId: "openai" });
-    assert.equal(missing.ok, true);
-    assert.equal(missing.provider?.status, "stub");
+    const openai = await port.getProvider({ providerId: "openai" });
+    assert.equal(openai.ok, true);
+    assert.equal(openai.provider?.status, "ready");
   });
 
   it("selectProvider escolhe preferred quando disponível (FIRST_AVAILABLE)", async () => {

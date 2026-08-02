@@ -21,7 +21,7 @@ function getSharedFactory(): AIProviderFactory {
  * Cria o AIProviderPort para o provedor solicitado.
  *
  * Default da fundação: `mock` (determinístico, sem rede).
- * Stubs vendor são instanciáveis mas NÃO executam chamadas reais.
+ * Provider `openai` usa o Adapter oficial com chat.completions (ARCH-02).
  */
 export function createAIProviderPort(options: AIProviderOptions = {}): AIProviderPort {
   return getSharedFactory().create(options);

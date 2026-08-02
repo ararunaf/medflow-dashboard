@@ -71,7 +71,7 @@ const BUILTIN_REGISTRATIONS: readonly AIProviderRegistration[] = [
   {
     providerId: "openai",
     name: "OpenAI",
-    version: "0.0.0-stub",
+    version: "1.0.0",
     capabilities: [
       "text-generation",
       "structured-output",
@@ -82,9 +82,10 @@ const BUILTIN_REGISTRATIONS: readonly AIProviderRegistration[] = [
       "json-mode",
     ],
     modalities: ["text", "image", "embedding"],
-    status: "stub",
+    status: "ready",
     adapterId: OPENAI_AI_PROVIDER_ADAPTER_ID,
     vendor: "openai",
+    description: "Official OpenAI chat.completions adapter (ARCH-02).",
   },
   {
     providerId: "azure-openai",

@@ -1,8 +1,9 @@
 /**
- * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06.
+ * Tipos do Enterprise Runtime — ARCH-01 / DIP-01…DIP-06 / ARCH-02 (DIP-07).
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
- * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
+ * Sem regras de negócio. Sem OCR/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
+ * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
@@ -15,6 +16,8 @@ import type { DocumentSearchRuntimePort } from "../document-search-runtime/ports
 import type { OCRRuntimePort } from "../ocr-runtime/ports/ocr-runtime-port";
 import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
 import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports/storage-manager-runtime-port";
+import type { AIProviderPort } from "../ai-provider/ports/ai-provider-port";
+import type { AIProviderRuntimePort } from "../ai-provider-runtime/ports/ai-provider-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -34,6 +37,8 @@ export type EnterpriseRuntimeHealth = {
   documentClassificationRuntimeOk?: boolean;
   storageManagerRuntimeOk?: boolean;
   documentSearchRuntimeOk?: boolean;
+  aiProviderRuntimeOk?: boolean;
+  aiProviderOk?: boolean;
 };
 
 /**
@@ -89,6 +94,8 @@ export type EnterpriseRuntimeOptions = {
   documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   documentSearchRuntimePort?: DocumentSearchRuntimePort;
+  aiProviderPort?: AIProviderPort;
+  aiProviderRuntimePort?: AIProviderRuntimePort;
 };
 
 /**
@@ -104,9 +111,11 @@ export type EnterpriseRuntimeOptions = {
  * - expor Document Classification Runtime (DIP-04)
  * - expor Storage Manager Runtime (DIP-05)
  * - expor Document Search Runtime (DIP-06)
+ * - expor AI Provider Runtime (ARCH-02 / DIP-07)
  * - expor bridge estrutural para o produto
  *
  * NÃO contém regras de negócio. NÃO executa OCR/classificação/storage/busca reais.
+ * IA: exclusivamente via AIProviderRuntimePort → AIProviderPort.
  */
 export interface EnterpriseRuntime {
   readonly runtimeId: EnterpriseRuntimeId;
@@ -134,6 +143,12 @@ export interface EnterpriseRuntime {
 
   /** Resolve DocumentSearchRuntimePort (DIP-06). */
   getDocumentSearchRuntimePort(): DocumentSearchRuntimePort;
+
+  /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */
+  getAIProviderPort(): AIProviderPort;
+
+  /** Resolve AIProviderRuntimePort (ARCH-02 / DIP-07). */
+  getAIProviderRuntimePort(): AIProviderRuntimePort;
 
   /**
    * Bridge oficial Captura → Foundation (DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06).

@@ -5,8 +5,8 @@
  * Detalhes de OpenAI / Azure OpenAI / Gemini / Claude / Ollama / LM Studio
  * ficam nos adapters.
  *
- * EPC-07: fundação arquitetural. NÃO implementa OCR, Auditor Inteligente,
- * análise de guias, contratos, prompts clínicos ou chamadas HTTP reais.
+ * ARCH-02: qualquer chamada HTTP a LLM ocorre exclusivamente nos Adapters oficiais
+ * atrás deste Port. Produto NÃO pode chamar providers diretamente.
  */
 import type { AICapabilityId } from "./capabilities";
 import type {
@@ -23,10 +23,10 @@ export interface AIProviderPort {
   /** Identificador estável do provedor por trás do adapter. */
   readonly providerId: AIProviderId;
 
-  /** Invocação genérica (mock/stub nesta sprint — sem rede). */
+  /** Invocação genérica via Adapter oficial (OpenAI real; demais vendors stub). */
   invoke(request: AIRequest): Promise<AIResponse>;
 
-  /** Verificação leve de prontidão do provedor (sem I/O externo na fundação). */
+  /** Verificação leve de prontidão do provedor. */
   health(): Promise<AIProviderHealth>;
 
   /** Capacidades estáticas do adapter ativo. */
@@ -40,7 +40,7 @@ export interface AIProviderPort {
 
   /**
    * Valida configuração estrutural do adapter.
-   * NÃO realiza chamadas de rede nem usa chaves de API reais.
+   * Pode inspecionar presença de chave no ambiente; NÃO realiza chamadas de rede.
    */
   validateConfiguration(): Promise<AIConfigurationValidation>;
 }

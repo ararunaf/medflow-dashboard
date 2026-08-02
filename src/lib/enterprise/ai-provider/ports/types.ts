@@ -142,7 +142,7 @@ export type AIConfigurationValidation = {
 export type AIProviderOptions = {
   /**
    * Provedor desejado. Default da fundação: `mock`.
-   * Stubs vendor existem mas NÃO executam chamadas reais.
+   * OpenAI (ARCH-02) executa chat.completions oficial; demais vendors permanecem stub.
    */
   provider?: AIProviderId;
 };

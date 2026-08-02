@@ -1,16 +1,15 @@
 /**
- * Enterprise AI Providers — Ports & Adapters (EPC-07).
+ * Enterprise AI Providers — Ports & Adapters (EPC-07 / ARCH-02).
  *
  * Fluxo oficial:
- *   Application → AIProviderPort → AIProviderAdapter
- *     → ProviderFactory → ProviderRegistry → Health → Capabilities → Infrastructure
+ *   Produto → Enterprise Runtime → AI Provider Runtime
+ *     → AIProviderPort → Adapter → Provider → OpenAI
  *
  * Domain/Application NÃO devem importar SDKs de OpenAI, Azure, Gemini,
- * Claude, Ollama ou LM Studio. NÃO devem passar conceitos clínicos ao Port.
+ * Claude, Ollama ou LM Studio nem chamar HTTP de LLM diretamente.
  *
- * EPC-07: infraestrutura de integração apenas.
- * NÃO implementa OCR, Auditor Inteligente, TISS, contratos, prompts clínicos,
- * chamadas HTTP reais ou uso de chaves de API.
+ * OpenAI: Adapter oficial com chat.completions (ARCH-02).
+ * Demais vendors: stubs estruturais.
  */
 export type {
   AICapabilityDescriptor,
