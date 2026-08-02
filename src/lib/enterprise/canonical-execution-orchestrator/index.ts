@@ -30,6 +30,7 @@
  * INF-01: infraestrutura estrutural de filas via ExecutionQueuePort.
  * INF-02: infraestrutura estrutural de Workers via ExecutionWorkerPort.
  * INF-03: infraestrutura estrutural de Schedulers via ExecutionSchedulerPort.
+ * INF-04: infraestrutura estrutural de Observabilidade via ExecutionObservabilityPort.
  * O Orchestrator NÃO conhece a sequência dos módulos — solicita ao Resolver.
  * O Execution Context é o único objeto de transporte da execução.
  * O ciclo de vida é obtido exclusivamente via Execution State Machine.

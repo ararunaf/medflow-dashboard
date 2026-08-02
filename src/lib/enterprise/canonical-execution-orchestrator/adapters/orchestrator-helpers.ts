@@ -17,6 +17,7 @@
  * INF-01: infraestrutura estrutural de filas exclusiva via ExecutionQueuePort.
  * INF-02: infraestrutura estrutural de Workers exclusiva via ExecutionWorkerPort.
  * INF-03: infraestrutura estrutural de Schedulers exclusiva via ExecutionSchedulerPort.
+ * INF-04: infraestrutura estrutural de Observabilidade exclusiva via ExecutionObservabilityPort.
  * Somente orquestração de estado in-memory.
  * Sem OCR. Sem IA. Sem Mapping. Sem regras. Sem validações.
  * Sem entrega de eventos. Sem filas reais. Sem Pub/Sub. Sem workers reais.
@@ -53,6 +54,8 @@ import type { ExecutionWorkerPort } from "../../worker-foundation/ports/executio
 import type { CanonicalWorker } from "../../worker-foundation/ports/models";
 import type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/execution-scheduler-port";
 import type { CanonicalSchedule } from "../../scheduler-foundation/ports/models";
+import type { ExecutionObservabilityPort } from "../../observability-foundation/ports/execution-observability-port";
+import type { CanonicalObservation } from "../../observability-foundation/ports/models";
 import type { ExecutionResourceRegistryPort } from "../../execution-resource-registry/ports/execution-resource-registry-port";
 import type { ExecutionResourceRegistry } from "../../execution-resource-registry/ports/models";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
@@ -1845,6 +1848,137 @@ export async function attachSchedulerToExecutionContext(
 }
 
 /**
+ * Resolve Observability Foundation estruturalmente via ExecutionObservabilityPort.
+ * Nenhum log. Nenhuma métrica. Nenhum tracing. Nenhuma transmissão. Nenhum Scheduler iniciado.
+ */
+export async function registerObservabilityForContext(
+  observabilityPort: ExecutionObservabilityPort,
+  input: {
+    executionId: string;
+    correlationId?: string;
+    contextId?: string;
+    stateMachineId?: string;
+    eventBusId?: string;
+    executionRegistryId?: string;
+    executionTraceId?: string;
+    executionCapabilityRegistryId?: string;
+    executionDependencyRegistryId?: string;
+    executionPolicyRegistryId?: string;
+    executionConstraintRegistryId?: string;
+    executionRequirementRegistryId?: string;
+    executionResourceRegistryId?: string;
+    executionEnvironmentRegistryId?: string;
+    executionMessageQueueId?: string;
+    executionWorkerId?: string;
+    executionSchedulerId?: string;
+    pipelineId?: string;
+    executionObservabilityId?: string;
+  },
+): Promise<CanonicalObservation> {
+  const resolved = await observabilityPort.registerObservation({
+    executionObservabilityId: input.executionObservabilityId,
+    executionId: input.executionId,
+    correlationId: input.correlationId,
+    contextId: input.contextId,
+    stateMachineId: input.stateMachineId,
+    eventBusId: input.eventBusId,
+    executionRegistryId: input.executionRegistryId,
+    executionTraceId: input.executionTraceId,
+    executionCapabilityRegistryId: input.executionCapabilityRegistryId,
+    executionDependencyRegistryId: input.executionDependencyRegistryId,
+    executionPolicyRegistryId: input.executionPolicyRegistryId,
+    executionConstraintRegistryId: input.executionConstraintRegistryId,
+    executionRequirementRegistryId: input.executionRequirementRegistryId,
+    executionResourceRegistryId: input.executionResourceRegistryId,
+    executionEnvironmentRegistryId: input.executionEnvironmentRegistryId,
+    executionMessageQueueId: input.executionMessageQueueId,
+    executionWorkerId: input.executionWorkerId,
+    executionSchedulerId: input.executionSchedulerId,
+    pipelineId: input.pipelineId,
+    key: "structural-execution-observability",
+    name: "Structural Execution Observability",
+    createIfMissing: true,
+    structuralNotes:
+      "Observability Foundation registered structurally — no logs, no metrics, no tracing, no transmission, no engines",
+    tags: ["observability-foundation", "foundation", "structural"],
+  });
+
+  if (!resolved.ok || !resolved.observation) {
+    throw new Error(
+      resolved.message ?? "ExecutionObservabilityPort failed to resolve structural observation",
+    );
+  }
+
+  return resolved.observation;
+}
+
+/**
+ * Anexa referência estrutural do Observability Foundation ao Execution Context (transporte).
+ * Anexa apenas executionObservabilityId.
+ * Nenhum log. Nenhuma métrica. Nenhum tracing. Nenhuma transmissão.
+ */
+export async function attachObservabilityToExecutionContext(
+  executionContextPort: ExecutionContextPort,
+  contextId: string,
+  observation: CanonicalObservation,
+  stamp: string,
+): Promise<ExecutionContext> {
+  const updated = await executionContextPort.updateContext({
+    contextId,
+    appendReferences: [
+      {
+        name: "executionObservabilityId",
+        value: observation.executionObservabilityId,
+        notes:
+          "Execution Observability reference — observation obtained exclusively via ExecutionObservabilityPort",
+      },
+    ],
+    appendHistory: [
+      {
+        event: "execution-observability-attached",
+        phase: "created",
+        status: "pending",
+        occurredAt: stamp,
+        notes:
+          "Observability Foundation attached structurally — no logs, no metrics, no tracing, no transmission, no engines",
+        attributes: {
+          executionObservabilityId: observation.executionObservabilityId,
+          loggingPerformed: false,
+          metricsCollected: false,
+          tracingPerformed: false,
+          eventsTransmitted: false,
+          externalIntegrationUsed: false,
+          processingPerformed: false,
+          realObservabilityBackend: false,
+          enginesInvoked: false,
+        },
+      },
+    ],
+    metadata: {
+      kind: "execution-context-metadata",
+      customAttributes: {
+        executionObservabilityId: observation.executionObservabilityId,
+        loggingPerformed: false,
+        metricsCollected: false,
+        tracingPerformed: false,
+        eventsTransmitted: false,
+        externalIntegrationUsed: false,
+        processingPerformed: false,
+        realObservabilityBackend: false,
+      },
+    },
+  });
+
+  if (!updated.ok || !updated.context) {
+    throw new Error(
+      updated.message ?? "ExecutionContextPort failed to attach execution observability",
+    );
+  }
+
+  return updated.context;
+}
+
+/**
  * Anexa a composição do Pipeline Resolver ao Execution Context (estrutural).
  * O Resolver permanece independente do conteúdo do Context.
  */
@@ -2061,6 +2195,8 @@ export function foundationCapabilitiesBase(adapterId: string) {
     usesExecutionWorkerStructurally: true as const,
     dependsOnExecutionScheduler: true as const,
     usesExecutionSchedulerStructurally: true as const,
+    dependsOnExecutionObservability: true as const,
+    usesExecutionObservabilityStructurally: true as const,
     implementsOcr: false as const,
     implementsAi: false as const,
     implementsXmlParser: false as const,

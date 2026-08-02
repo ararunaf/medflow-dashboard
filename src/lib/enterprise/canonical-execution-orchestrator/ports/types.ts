@@ -223,6 +223,10 @@ export type CanonicalExecutionOrchestratorCapabilities = {
   dependsOnExecutionScheduler: true;
   /** Scheduler Foundation utilizado exclusivamente de forma estrutural (sem execução / cron / timers / jobs). */
   usesExecutionSchedulerStructurally: true;
+  /** Infraestrutura estrutural de Observabilidade via ExecutionObservabilityPort (INF-04). */
+  dependsOnExecutionObservability: true;
+  /** Observability Foundation utilizado exclusivamente de forma estrutural (sem logs / métricas / tracing / transmissão). */
+  usesExecutionObservabilityStructurally: true;
   /** Explicitamente sem OCR real nesta fundação. */
   implementsOcr: false;
   /** Explicitamente sem AI nesta fundação. */
