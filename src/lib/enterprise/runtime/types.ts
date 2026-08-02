@@ -1,11 +1,12 @@
 /**
- * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03.
+ * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04.
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
- * Sem regras de negócio. Sem OCR/IA/XML/TISS reais. Sem filas/workers reais.
+ * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação reais. Sem filas/workers reais.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
+import type { DocumentClassificationRuntimePort } from "../document-classification-runtime/ports/document-classification-runtime-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
@@ -28,11 +29,12 @@ export type EnterpriseRuntimeHealth = {
   captureEngineRuntimeOk?: boolean;
   ocrRuntimeOk?: boolean;
   ocrProviderOk?: boolean;
+  documentClassificationRuntimeOk?: boolean;
 };
 
 /**
  * Entrada estrutural para registrar um upload de Captura como Document Intake.
- * Apenas referências opacas — sem interpretação clínica/OCR/TISS.
+ * Apenas referências opacas — sem interpretação clínica/OCR/TISS/classificação.
  */
 export type RegisterCaptureDocumentIntakeInput = {
   sessionId: string;
@@ -52,6 +54,9 @@ export type RegisterCaptureDocumentIntakeResult = {
   /** DIP-03 — sessão OCR Runtime (coordenação estrutural, sem OCR real). */
   ocrRuntimeSessionId?: string;
   ocrExecutionId?: string;
+  /** DIP-04 — sessão Classification Runtime (coordenação estrutural, sem classificação real). */
+  classificationRuntimeSessionId?: string;
+  classificationExecutionId?: string;
   intake?: CreateIntakeResult;
   execution?: StartExecutionResult;
   message?: string;
@@ -71,6 +76,7 @@ export type EnterpriseRuntimeOptions = {
   captureEngineRuntimePort?: CaptureEngineRuntimePort;
   ocrRuntimePort?: OCRRuntimePort;
   ocrProviderPort?: OCRProviderPort;
+  documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
 };
 
 /**
@@ -83,9 +89,10 @@ export type EnterpriseRuntimeOptions = {
  * - expor Document Intake Runtime (DIP-01)
  * - expor Capture Engine Runtime (DIP-02)
  * - expor OCR Runtime (DIP-03)
+ * - expor Document Classification Runtime (DIP-04)
  * - expor bridge estrutural para o produto
  *
- * NÃO contém regras de negócio. NÃO executa OCR real.
+ * NÃO contém regras de negócio. NÃO executa OCR/classificação reais.
  */
 export interface EnterpriseRuntime {
   readonly runtimeId: EnterpriseRuntimeId;
@@ -105,13 +112,18 @@ export interface EnterpriseRuntime {
   /** Resolve OCRRuntimePort (DIP-03). */
   getOCRRuntimePort(): OCRRuntimePort;
 
+  /** Resolve DocumentClassificationRuntimePort (DIP-04). */
+  getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
+
   /**
-   * Bridge oficial Captura → Foundation (DIP-02 / DIP-03).
+   * Bridge oficial Captura → Foundation (DIP-02 / DIP-03 / DIP-04).
    *
    * Fluxo:
    *   Produto → Runtime → CaptureEngineRuntimePort
    *     → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → Adapter
    *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+   *     → DocumentClassificationRuntimePort → Orchestrator
+   *     → Classification Provider Adapter (referência estrutural)
    *
    * Best-effort: nunca lança para o produto; falhas retornam ok:false.
    */

@@ -1,10 +1,11 @@
 /**
- * Modelos canônicos do Capture Engine Runtime — DIP-02 / DIP-03.
+ * Modelos canônicos do Capture Engine Runtime — DIP-02 / DIP-03 / DIP-04.
  *
  * Representação estrutural da sessão de captura na Document Intelligence Platform.
- * Sem OCR real. Sem IA. Sem XML/TISS. Sem parser. Sem classificação documental.
+ * Sem OCR real. Sem IA. Sem XML/TISS. Sem parser. Sem classificação documental real.
  * Sem Storage Manager. Sem versionamento. Sem busca. Sem Workflow. Sem Rule Engine.
  * DIP-03: referencia sessão OCR Runtime estrutural (coordenação apenas).
+ * DIP-04: referencia sessão Document Classification Runtime estrutural (coordenação apenas).
  */
 
 /** Status estrutural da sessão de captura no Runtime. */
@@ -47,6 +48,8 @@ export type CanonicalCaptureReference = {
   intakeRuntimeSessionId?: string;
   /** DIP-03 — referência estrutural à sessão OCR Runtime (sem OCR real). */
   ocrRuntimeSessionId?: string;
+  /** DIP-04 — referência estrutural à sessão Classification Runtime (sem classificação real). */
+  classificationRuntimeSessionId?: string;
 };
 
 /**
@@ -91,6 +94,9 @@ export type CanonicalCaptureSession = {
   /** DIP-03 — sessão OCR Runtime coordenada estruturalmente (sem OCR real). */
   ocrRuntimeSessionId?: string;
   ocrExecutionId?: string;
+  /** DIP-04 — sessão Classification Runtime coordenada estruturalmente (sem classificação real). */
+  classificationRuntimeSessionId?: string;
+  classificationExecutionId?: string;
   createdAt: string;
   updatedAt: string;
   message?: string;
@@ -110,6 +116,9 @@ export type CanonicalCaptureResult = {
   /** DIP-03 — sessão OCR Runtime (coordenação estrutural). */
   ocrRuntimeSessionId?: string;
   ocrExecutionId?: string;
+  /** DIP-04 — sessão Classification Runtime (coordenação estrutural). */
+  classificationRuntimeSessionId?: string;
+  classificationExecutionId?: string;
   message?: string;
   code?: string;
 };

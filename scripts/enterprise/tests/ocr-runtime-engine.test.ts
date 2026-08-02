@@ -312,6 +312,7 @@ describe("DIP-03 integração Enterprise / Capture / Orchestrator", () => {
     assert.ok(result.executionId);
     assert.ok(result.runtimeSessionId);
     assert.ok(result.ocrRuntimeSessionId);
+    assert.ok(result.classificationRuntimeSessionId);
 
     const captureSession = await runtime.getCaptureEngineRuntimePort().getSession({
       runtimeSessionId: result.runtimeSessionId!,
@@ -319,6 +320,10 @@ describe("DIP-03 integração Enterprise / Capture / Orchestrator", () => {
     assert.equal(captureSession.ok, true);
     assert.equal(captureSession.session?.status, "registered");
     assert.equal(captureSession.session?.ocrRuntimeSessionId, result.ocrRuntimeSessionId);
+    assert.equal(
+      captureSession.session?.classificationRuntimeSessionId,
+      result.classificationRuntimeSessionId,
+    );
 
     const ocrSession = await runtime.getOCRRuntimePort().getSession({
       runtimeSessionId: result.ocrRuntimeSessionId!,
@@ -335,6 +340,10 @@ describe("DIP-03 integração Enterprise / Capture / Orchestrator", () => {
     assert.equal(runtime.getOCRRuntimePort().capabilities().implementsRealOcr, false);
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsOcr, false);
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().usesOCRRuntime, true);
+    assert.equal(
+      runtime.getCaptureEngineRuntimePort().capabilities().usesDocumentClassificationRuntime,
+      true,
+    );
   });
 
   it("produto não instancia Adapter OCR diretamente", () => {

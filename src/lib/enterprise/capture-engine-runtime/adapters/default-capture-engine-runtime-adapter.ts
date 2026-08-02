@@ -1,13 +1,15 @@
 /**
- * DefaultCaptureEngineRuntimeAdapter — adapter default (DIP-02 / DIP-03).
+ * DefaultCaptureEngineRuntimeAdapter — adapter default (DIP-02 / DIP-03 / DIP-04).
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
  *   Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação existente
  *   → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+ *   → DocumentClassificationRuntimePort → Orchestrator
+ *     → Classification Provider Adapter (referência estrutural)
  *
  * NÃO reimplementa intake. NÃO cria adapters paralelos.
- * NÃO executa OCR real, IA, XML, TISS, parser, classificação, Workflow,
+ * NÃO executa OCR real, IA, XML, TISS, parser, classificação real, Workflow,
  * Rule Engine, Storage Manager, versionamento ou busca.
  */
 import { createCaptureRuntimeSessionId } from "../ports/identity";
@@ -55,6 +57,7 @@ function foundationCapabilities(): CaptureEngineRuntimeCapabilities {
     usesDocumentIntakeRuntime: true,
     usesDocumentIntakePort: true,
     usesOCRRuntime: true,
+    usesDocumentClassificationRuntime: true,
     implementsOcr: false,
     implementsAi: false,
     implementsXml: false,
@@ -82,7 +85,8 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
     if (!options.enterpriseDeps) {
       throw new Error(
         "DefaultCaptureEngineRuntimeAdapter exige enterpriseDeps " +
-          "(Orchestrator + DocumentIntakeRuntime + OCRRuntime). Implementação paralela é proibida.",
+          "(Orchestrator + DocumentIntakeRuntime + OCRRuntime + DocumentClassificationRuntime). " +
+          "Implementação paralela é proibida.",
       );
     }
     this.enterpriseDeps = options.enterpriseDeps;
@@ -352,6 +356,77 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
           "DIP-03: OCR coordinated from Capture Engine Runtime (no real OCR / no external providers).",
       });
 
+      // DIP-04 — coordenação estrutural via Document Classification Runtime (sem classificação real).
+      const classificationRuntime = this.enterpriseDeps.getDocumentClassificationRuntimePort();
+      const classificationResult = await classificationRuntime.coordinateClassification({
+        kind: "canonical-document-classification-request",
+        identity: {
+          kind: "canonical-document-classification-identity",
+          documentId: input.identity.documentId,
+          documentKind: input.identity.documentKind ?? "capture-document",
+          version: input.identity.version,
+        },
+        metadata: {
+          kind: "canonical-document-classification-metadata",
+          sessionId: input.metadata.sessionId,
+          tenantRef: input.metadata.tenantRef,
+          correlationId: input.metadata.correlationId,
+          channel,
+          tags: [
+            "dip-04",
+            "capture-engine-runtime",
+            "document-classification-runtime",
+            ...(input.metadata.tags ?? []),
+          ],
+          customAttributes: {
+            sessionId: input.metadata.sessionId,
+            documentId: input.identity.documentId,
+            captureRuntimeSessionId: runtimeSessionId,
+            captureExecutionId: execution.context?.executionId ?? null,
+            intakeId: intakeResult.intakeId ?? null,
+            ocrRuntimeSessionId: ocrResult.runtimeSessionId ?? null,
+            ...(input.metadata.customAttributes ?? {}),
+          },
+        },
+        reference: {
+          kind: "canonical-document-classification-reference",
+          storageKey: input.reference?.storageKey,
+          storageContainer: input.reference?.storageContainer ?? "clinical-documents",
+          storageProvider: input.reference?.storageProvider ?? "product-capture",
+          metadataId: input.reference?.metadataId ?? input.metadata.sessionId,
+          metadataNamespace: input.reference?.metadataNamespace ?? "product.capture",
+          intakeId: intakeResult.intakeId,
+          executionId: execution.context?.executionId,
+          captureRuntimeSessionId: runtimeSessionId,
+          captureExecutionId: execution.context?.executionId,
+          ocrRuntimeSessionId: ocrResult.runtimeSessionId,
+          ocrExecutionId: ocrResult.executionId,
+          providerReferenceId: "mock",
+        },
+        capabilities: {
+          kind: "canonical-document-classification-capabilities",
+          supportsMedicalGuideClassification: false,
+          supportsInvoiceClassification: false,
+          supportsContractClassification: false,
+          supportsBatchClassification: false,
+          supportsConfidenceScore: false,
+          supportsMultiLabelClassification: false,
+          supportsCustomModels: false,
+          supportsRuleBasedClassification: false,
+          declared: ["capture-engine-runtime", "document-classification-runtime-structural"],
+        },
+        configuration: {
+          kind: "canonical-document-classification-configuration",
+          preferredProviderReference: "mock",
+          channel,
+          priority: input.configuration?.priority ?? "NORMAL",
+          notes:
+            "DIP-04: structural classification coordination from Capture Engine Runtime (no real classification).",
+        },
+        structuralNotes:
+          "DIP-04: Classification coordinated from Capture Engine Runtime (no real classification / no AI / no ML).",
+      });
+
       session = {
         ...session,
         status: "registered",
@@ -361,10 +436,13 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         intakeExecutionId: intakeResult.executionId,
         ocrRuntimeSessionId: ocrResult.runtimeSessionId,
         ocrExecutionId: ocrResult.executionId,
+        classificationRuntimeSessionId: classificationResult.runtimeSessionId,
+        classificationExecutionId: classificationResult.executionId,
         updatedAt: nowIso(this.now),
-        message: ocrResult.ok
-          ? "Capture registered via Capture Engine Runtime Ports (+ OCR Runtime structural)."
-          : "Capture registered; OCR Runtime coordination reported non-ok (no real OCR).",
+        message:
+          ocrResult.ok && classificationResult.ok
+            ? "Capture registered via Capture Engine Runtime Ports (+ OCR + Classification Runtime structural)."
+            : "Capture registered; OCR/Classification Runtime coordination reported non-ok (no real processing).",
         code: "REGISTERED",
       };
       this.store.setSession(session);
@@ -379,6 +457,8 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         intakeRuntimeSessionId: intakeResult.runtimeSessionId,
         ocrRuntimeSessionId: ocrResult.runtimeSessionId,
         ocrExecutionId: ocrResult.executionId,
+        classificationRuntimeSessionId: classificationResult.runtimeSessionId,
+        classificationExecutionId: classificationResult.executionId,
         message: session.message,
         code: session.code,
       };

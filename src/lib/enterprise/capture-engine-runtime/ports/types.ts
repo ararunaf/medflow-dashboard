@@ -1,16 +1,19 @@
 /**
- * Tipos vendor-agnósticos do Capture Engine Runtime — DIP-02 / DIP-03.
+ * Tipos vendor-agnósticos do Capture Engine Runtime — DIP-02 / DIP-03 / DIP-04.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
  *     → Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação
  *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+ *     → DocumentClassificationRuntimePort → Orchestrator
+ *     → Classification Provider Adapter (referência estrutural)
  *
  * Este componente NÃO reimplementa intake nem processamento documental.
- * NÃO executa OCR. Coordena via Ports oficiais.
+ * NÃO executa OCR nem classificação. Coordena via Ports oficiais.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
+import type { DocumentClassificationRuntimePort } from "../../document-classification-runtime/ports/document-classification-runtime-port";
 import type { DocumentIntakeRuntimePort } from "../../document-intake-runtime/ports/document-intake-runtime-port";
 import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
 import type {
@@ -61,6 +64,7 @@ export type CaptureEngineRuntimeCapabilities = {
   usesDocumentIntakeRuntime: boolean;
   usesDocumentIntakePort: boolean;
   usesOCRRuntime: boolean;
+  usesDocumentClassificationRuntime: boolean;
   implementsOcr: false;
   implementsAi: false;
   implementsXml: false;
@@ -83,6 +87,8 @@ export type CaptureEngineRuntimeEnterpriseDeps = {
   getDocumentIntakeRuntimePort(): DocumentIntakeRuntimePort;
   /** DIP-03 — coordenação estrutural OCR (sem OCR real). */
   getOCRRuntimePort(): OCRRuntimePort;
+  /** DIP-04 — coordenação estrutural de classificação (sem classificação real). */
+  getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
 };
 
 export type GetCaptureRuntimeSessionInput = {
