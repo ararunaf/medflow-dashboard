@@ -1,11 +1,12 @@
 /**
- * Modelos canônicos do Capture Engine Runtime — DIP-02 / DIP-03 / DIP-04.
+ * Modelos canônicos do Capture Engine Runtime — DIP-02 / DIP-03 / DIP-04 / DIP-05.
  *
  * Representação estrutural da sessão de captura na Document Intelligence Platform.
  * Sem OCR real. Sem IA. Sem XML/TISS. Sem parser. Sem classificação documental real.
- * Sem Storage Manager. Sem versionamento. Sem busca. Sem Workflow. Sem Rule Engine.
+ * Sem armazenamento real. Sem versionamento. Sem busca. Sem Workflow. Sem Rule Engine.
  * DIP-03: referencia sessão OCR Runtime estrutural (coordenação apenas).
  * DIP-04: referencia sessão Document Classification Runtime estrutural (coordenação apenas).
+ * DIP-05: referencia sessão Storage Manager Runtime estrutural (coordenação apenas).
  */
 
 /** Status estrutural da sessão de captura no Runtime. */
@@ -50,6 +51,8 @@ export type CanonicalCaptureReference = {
   ocrRuntimeSessionId?: string;
   /** DIP-04 — referência estrutural à sessão Classification Runtime (sem classificação real). */
   classificationRuntimeSessionId?: string;
+  /** DIP-05 — referência estrutural à sessão Storage Manager Runtime (sem armazenamento real). */
+  storageManagerRuntimeSessionId?: string;
 };
 
 /**
@@ -97,6 +100,9 @@ export type CanonicalCaptureSession = {
   /** DIP-04 — sessão Classification Runtime coordenada estruturalmente (sem classificação real). */
   classificationRuntimeSessionId?: string;
   classificationExecutionId?: string;
+  /** DIP-05 — sessão Storage Manager Runtime coordenada estruturalmente (sem armazenamento real). */
+  storageManagerRuntimeSessionId?: string;
+  storageExecutionId?: string;
   createdAt: string;
   updatedAt: string;
   message?: string;
@@ -119,6 +125,9 @@ export type CanonicalCaptureResult = {
   /** DIP-04 — sessão Classification Runtime (coordenação estrutural). */
   classificationRuntimeSessionId?: string;
   classificationExecutionId?: string;
+  /** DIP-05 — sessão Storage Manager Runtime (coordenação estrutural). */
+  storageManagerRuntimeSessionId?: string;
+  storageExecutionId?: string;
   message?: string;
   code?: string;
 };

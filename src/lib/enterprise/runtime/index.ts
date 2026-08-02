@@ -1,5 +1,5 @@
 /**
- * Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 Integration.
+ * Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 Integration.
  *
  * Ponto único de acesso da aplicação à Enterprise Foundation.
  *
@@ -10,8 +10,10 @@
  *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
  *     → DocumentClassificationRuntimePort → Orchestrator
  *     → Classification Provider Adapter (referência estrutural)
+ *     → StorageManagerRuntimePort → Orchestrator
+ *     → Storage Provider Adapter (referência estrutural)
  *
- * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação reais. Sem filas/workers reais.
+ * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação/storage reais. Sem filas/workers reais.
  */
 export type {
   EnterpriseRuntime,

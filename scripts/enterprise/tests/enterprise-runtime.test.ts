@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * ARCH-01 / DIP-02 / DIP-03 / DIP-04 — Enterprise Runtime Integration
+ * ARCH-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 — Enterprise Runtime Integration
  * Prova: Produto → Runtime → CaptureEngine → Orchestrator → DocumentIntakeRuntime
  *        → DocumentIntakePort → OCRRuntime → OCR Provider Adapter (estrutural)
  *        → DocumentClassificationRuntime → Classification Provider Adapter (estrutural)
+ *        → StorageManagerRuntime → Storage Provider Adapter (estrutural)
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -18,7 +19,7 @@ import { createDocumentIntakePort } from "../../../src/lib/enterprise/document-i
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 
 describe("ARCH-01 Enterprise Runtime", () => {
-  it("cria runtime com Ports DocumentIntake + Orchestrator + DocumentIntakeRuntime + CaptureEngineRuntime + OCRRuntime + ClassificationRuntime", async () => {
+  it("cria runtime com Ports DocumentIntake + Orchestrator + DocumentIntakeRuntime + CaptureEngineRuntime + OCRRuntime + ClassificationRuntime + StorageManagerRuntime", async () => {
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.runtimeId, "test");
 
@@ -28,12 +29,14 @@ describe("ARCH-01 Enterprise Runtime", () => {
     const captureRuntime = runtime.getCaptureEngineRuntimePort();
     const ocrRuntime = runtime.getOCRRuntimePort();
     const classificationRuntime = runtime.getDocumentClassificationRuntimePort();
+    const storageManagerRuntime = runtime.getStorageManagerRuntimePort();
     assert.ok(intake);
     assert.ok(orchestrator);
     assert.ok(intakeRuntime);
     assert.ok(captureRuntime);
     assert.ok(ocrRuntime);
     assert.ok(classificationRuntime);
+    assert.ok(storageManagerRuntime);
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
@@ -44,9 +47,10 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(health.ocrRuntimeOk, true);
     assert.equal(health.ocrProviderOk, true);
     assert.equal(health.documentClassificationRuntimeOk, true);
+    assert.equal(health.storageManagerRuntimeOk, true);
   });
 
-  it("registerCaptureDocumentIntake passa pelo CaptureEngine → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → OCRRuntime → ClassificationRuntime", async () => {
+  it("registerCaptureDocumentIntake passa pelo CaptureEngine → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → OCRRuntime → ClassificationRuntime → StorageManagerRuntime", async () => {
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     const result = await runtime.registerCaptureDocumentIntake({
       sessionId: "sess-arch-01",
@@ -63,6 +67,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.ok(result.runtimeSessionId);
     assert.ok(result.ocrRuntimeSessionId);
     assert.ok(result.classificationRuntimeSessionId);
+    assert.ok(result.storageManagerRuntimeSessionId);
     assert.equal(result.intake?.ok, true);
     assert.equal(result.execution?.ok, true);
     assert.equal(result.intake?.intake?.sourceType, "UPLOAD");
@@ -86,6 +91,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(captureSession.session?.status, "registered");
     assert.ok(captureSession.session?.ocrRuntimeSessionId);
     assert.ok(captureSession.session?.classificationRuntimeSessionId);
+    assert.ok(captureSession.session?.storageManagerRuntimeSessionId);
 
     const intakeSessions = await runtime.getDocumentIntakeRuntimePort().listSessions({
       sessionId: "sess-arch-01",
@@ -110,6 +116,18 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(classificationSession.session?.realClassificationExecuted, false);
     assert.equal(
       runtime.getDocumentClassificationRuntimePort().capabilities().implementsRealClassification,
+      false,
+    );
+
+    const storageSession = await runtime.getStorageManagerRuntimePort().getSession({
+      runtimeSessionId: result.storageManagerRuntimeSessionId!,
+    });
+    assert.equal(storageSession.ok, true);
+    assert.equal(storageSession.session?.status, "coordinated");
+    assert.equal(storageSession.session?.realStorageExecuted, false);
+    assert.equal(storageSession.session?.realUploadExecuted, false);
+    assert.equal(
+      runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage,
       false,
     );
   });
@@ -167,6 +185,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(typeof runtime.getCaptureEngineRuntimePort, "function");
     assert.equal(typeof runtime.getOCRRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentClassificationRuntimePort, "function");
+    assert.equal(typeof runtime.getStorageManagerRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });
