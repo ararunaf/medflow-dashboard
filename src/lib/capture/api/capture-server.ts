@@ -24,6 +24,7 @@ import {
   softDeleteCaptureSession,
   uploadCaptureDocument,
 } from "../infrastructure/capture-session-store";
+import { registerCaptureDocumentIntakeBridge } from "../enterprise/register-capture-intake";
 import { getCaptureOcrResult, runCaptureOcr } from "../ocr/services/ocr-service";
 import { getOcrResultSignedUrl } from "../ocr/infrastructure/ocr-storage";
 import {
@@ -104,6 +105,14 @@ export const uploadCaptureFileFn = createServerFn({ method: "POST" })
         byteLength: bytes.length,
         checksumSha256: checksum,
         fileBytes: bytes,
+      });
+
+      // ARCH-01 — Enterprise Runtime bridge (Document Intake via Ports).
+      // Side-effect estrutural; nunca altera o resultado funcional da Captura.
+      void registerCaptureDocumentIntakeBridge({
+        session: uploadResult.session,
+        document: uploadResult.document,
+        tenantId: ctx.tenantId,
       });
 
       try {
@@ -213,6 +222,13 @@ export const retryCaptureUploadFn = createServerFn({ method: "POST" })
         byteLength: bytes.length,
         checksumSha256: checksum,
         fileBytes: bytes,
+      });
+
+      // ARCH-01 — Enterprise Runtime bridge (Document Intake via Ports).
+      void registerCaptureDocumentIntakeBridge({
+        session: uploadResult.session,
+        document: uploadResult.document,
+        tenantId: ctx.tenantId,
       });
 
       try {

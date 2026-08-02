@@ -195,7 +195,7 @@ Operações além de health/capabilities são específicas do componente, mas **
 ### 3.1 Cadeia obrigatória
 
 ```
-Application
+Application (produto / Enterprise Runtime / demo)
     ↓
 Port
     ↓
@@ -210,11 +210,15 @@ Provider       (seleção de implementação)
 Infrastructure (vendor / runtime / I/O)
 ```
 
+> **ARCH-01 (01/08/2026):** a pasta `application/` por componente **não é obrigatória**.  
+> Application de produto = Enterprise Runtime + consumers que dependem apenas de Ports.  
+> `demo/` permanece PoC de fundação. Decisão oficial: [`ECS-01_APPLICATION_LAYER_DECISION.md`](./ECS-01_APPLICATION_LAYER_DECISION.md).
+
 ### 3.2 Regras de dependência
 
 | Camada | Pode depender de | Não pode depender de |
 |--------|------------------|----------------------|
-| Application (demo / futuros consumers) | Port | Adapter concreto, Store, Vendor SDK |
+| Application (Runtime / demo / consumers de produto) | Port (via Runtime) | Adapter concreto, Store, Vendor SDK |
 | Port | Tipos próprios do contrato | Adapter, Store, Vendor, UI, API routes |
 | Adapter | Port, Store (opcional), Runtime puro, Infrastructure | Application, UI, regras clínicas |
 | Store | Tipos do componente | Port consumers, UI, Vendor (salvo store vendor-específico futuro documentado) |

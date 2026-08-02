@@ -14,6 +14,7 @@ import {
   softDeleteCaptureSession,
   uploadCaptureDocument,
 } from "../infrastructure/capture-session-store";
+import { registerCaptureDocumentIntakeBridge } from "../enterprise/register-capture-intake";
 import type { CaptureChannel, CreateCaptureSessionInput } from "../types";
 
 const CAPTURE_PREFIX = "/capture";
@@ -103,6 +104,13 @@ async function handlePostCapture(ctx: ServiceCtx, request: Request): Promise<Res
       byteLength: bytes.length,
       checksumSha256: checksum,
       fileBytes: bytes,
+    });
+
+    // ARCH-01 — Enterprise Runtime bridge (Document Intake via Ports).
+    void registerCaptureDocumentIntakeBridge({
+      session: result.session,
+      document: result.document,
+      tenantId: ctx.tenantId,
     });
 
     return jsonResponse(
