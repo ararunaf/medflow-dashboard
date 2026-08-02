@@ -219,6 +219,10 @@ export type CanonicalExecutionOrchestratorCapabilities = {
   dependsOnExecutionWorker: true;
   /** Worker Foundation utilizado exclusivamente de forma estrutural (sem execução / threads / background jobs). */
   usesExecutionWorkerStructurally: true;
+  /** Infraestrutura estrutural de Schedulers via ExecutionSchedulerPort (INF-03). */
+  dependsOnExecutionScheduler: true;
+  /** Scheduler Foundation utilizado exclusivamente de forma estrutural (sem execução / cron / timers / jobs). */
+  usesExecutionSchedulerStructurally: true;
   /** Explicitamente sem OCR real nesta fundação. */
   implementsOcr: false;
   /** Explicitamente sem AI nesta fundação. */
@@ -310,3 +314,7 @@ export type { CanonicalQueue } from "../../message-queue/ports/models";
 /** Re-export tipado do Worker Foundation / ExecutionWorkerPort (DI estrutural — INF-02). */
 export type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
 export type { CanonicalWorker } from "../../worker-foundation/ports/models";
+
+/** Re-export tipado do Scheduler Foundation / ExecutionSchedulerPort (DI estrutural — INF-03). */
+export type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/execution-scheduler-port";
+export type { CanonicalSchedule } from "../../scheduler-foundation/ports/models";

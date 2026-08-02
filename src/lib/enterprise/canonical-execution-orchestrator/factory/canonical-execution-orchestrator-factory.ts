@@ -20,6 +20,7 @@
  * Sprint 14: injeta ExecutionEnvironmentRegistryPort para registro estrutural de ambientes.
  * INF-01: injeta ExecutionQueuePort para infraestrutura estrutural de filas.
  * INF-02: injeta ExecutionWorkerPort para infraestrutura estrutural de Workers.
+ * INF-03: injeta ExecutionSchedulerPort para infraestrutura estrutural de Schedulers.
  */
 import type { ExecutionCapabilityRegistryPort } from "../../execution-capability-registry/ports/execution-capability-registry-port";
 import type { ExecutionConstraintRegistryPort } from "../../execution-constraint-registry/ports/execution-constraint-registry-port";
@@ -28,6 +29,7 @@ import type { ExecutionDependencyRegistryPort } from "../../execution-dependency
 import type { ExecutionEnvironmentRegistryPort } from "../../execution-environment-registry/ports/execution-environment-registry-port";
 import type { ExecutionQueuePort } from "../../message-queue/ports/execution-queue-port";
 import type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
+import type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/execution-scheduler-port";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
 import type { ExecutionPolicyRegistryPort } from "../../execution-policy-registry/ports/execution-policy-registry-port";
 import type { ExecutionRegistryPort } from "../../execution-registry/ports/execution-registry-port";
@@ -83,6 +85,8 @@ export type CanonicalExecutionOrchestratorFactoryOptions = {
   executionQueue?: ExecutionQueuePort;
   /** Worker Foundation — infraestrutura estrutural de Workers (INF-02). */
   executionWorker?: ExecutionWorkerPort;
+  /** Scheduler Foundation — infraestrutura estrutural de Schedulers (INF-03). */
+  executionScheduler?: ExecutionSchedulerPort;
   /** Registry opcional de Ports Foundation (DI estrutural legado — sem invocação). */
   foundationPorts?: FoundationPortRegistry;
 };
@@ -108,6 +112,7 @@ export class CanonicalExecutionOrchestratorFactory {
   private readonly executionEnvironmentRegistry?: ExecutionEnvironmentRegistryPort;
   private readonly executionQueue?: ExecutionQueuePort;
   private readonly executionWorker?: ExecutionWorkerPort;
+  private readonly executionScheduler?: ExecutionSchedulerPort;
   private readonly foundationPorts?: FoundationPortRegistry;
 
   constructor(options: CanonicalExecutionOrchestratorFactoryOptions = {}) {
@@ -128,6 +133,7 @@ export class CanonicalExecutionOrchestratorFactory {
     this.executionEnvironmentRegistry = options.executionEnvironmentRegistry;
     this.executionQueue = options.executionQueue;
     this.executionWorker = options.executionWorker;
+    this.executionScheduler = options.executionScheduler;
     this.foundationPorts = options.foundationPorts;
   }
 
@@ -164,6 +170,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionEnvironmentRegistry: this.executionEnvironmentRegistry,
           executionQueue: this.executionQueue,
           executionWorker: this.executionWorker,
+          executionScheduler: this.executionScheduler,
           foundationPorts: this.foundationPorts,
         });
       case "mock":
@@ -185,6 +192,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionEnvironmentRegistry: this.executionEnvironmentRegistry,
           executionQueue: this.executionQueue,
           executionWorker: this.executionWorker,
+          executionScheduler: this.executionScheduler,
           foundationPorts: this.foundationPorts,
         });
       case "test":
@@ -206,6 +214,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionEnvironmentRegistry: this.executionEnvironmentRegistry,
           executionQueue: this.executionQueue,
           executionWorker: this.executionWorker,
+          executionScheduler: this.executionScheduler,
           foundationPorts: this.foundationPorts,
         });
       default: {

@@ -16,6 +16,7 @@
  * Sprint 14: registro estrutural de ambientes exclusivo via ExecutionEnvironmentRegistryPort.
  * INF-01: infraestrutura estrutural de filas exclusiva via ExecutionQueuePort.
  * INF-02: infraestrutura estrutural de Workers exclusiva via ExecutionWorkerPort.
+ * INF-03: infraestrutura estrutural de Schedulers exclusiva via ExecutionSchedulerPort.
  * Somente orquestração de estado in-memory.
  * Sem OCR. Sem IA. Sem Mapping. Sem regras. Sem validações.
  * Sem entrega de eventos. Sem filas reais. Sem Pub/Sub. Sem workers reais.
@@ -50,6 +51,8 @@ import type { ExecutionQueuePort } from "../../message-queue/ports/execution-que
 import type { CanonicalQueue } from "../../message-queue/ports/models";
 import type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
 import type { CanonicalWorker } from "../../worker-foundation/ports/models";
+import type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/execution-scheduler-port";
+import type { CanonicalSchedule } from "../../scheduler-foundation/ports/models";
 import type { ExecutionResourceRegistryPort } from "../../execution-resource-registry/ports/execution-resource-registry-port";
 import type { ExecutionResourceRegistry } from "../../execution-resource-registry/ports/models";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
@@ -1712,6 +1715,136 @@ export async function attachWorkerToExecutionContext(
 }
 
 /**
+ * Obtém / cria estruturalmente o Scheduler Foundation para a execução.
+ * Infraestrutura controlada exclusivamente via ExecutionSchedulerPort.
+ * Nenhum Schedule executado. Nenhum cron. Nenhum timer. Nenhum job. Nenhum Worker iniciado.
+ */
+export async function registerSchedulerForContext(
+  schedulerPort: ExecutionSchedulerPort,
+  input: {
+    executionId: string;
+    correlationId?: string;
+    contextId?: string;
+    stateMachineId?: string;
+    eventBusId?: string;
+    executionRegistryId?: string;
+    executionTraceId?: string;
+    executionCapabilityRegistryId?: string;
+    executionDependencyRegistryId?: string;
+    executionPolicyRegistryId?: string;
+    executionConstraintRegistryId?: string;
+    executionRequirementRegistryId?: string;
+    executionResourceRegistryId?: string;
+    executionEnvironmentRegistryId?: string;
+    executionMessageQueueId?: string;
+    executionWorkerId?: string;
+    pipelineId?: string;
+    executionSchedulerId?: string;
+  },
+): Promise<CanonicalSchedule> {
+  const resolved = await schedulerPort.registerSchedule({
+    executionSchedulerId: input.executionSchedulerId,
+    executionId: input.executionId,
+    correlationId: input.correlationId,
+    contextId: input.contextId,
+    stateMachineId: input.stateMachineId,
+    eventBusId: input.eventBusId,
+    executionRegistryId: input.executionRegistryId,
+    executionTraceId: input.executionTraceId,
+    executionCapabilityRegistryId: input.executionCapabilityRegistryId,
+    executionDependencyRegistryId: input.executionDependencyRegistryId,
+    executionPolicyRegistryId: input.executionPolicyRegistryId,
+    executionConstraintRegistryId: input.executionConstraintRegistryId,
+    executionRequirementRegistryId: input.executionRequirementRegistryId,
+    executionResourceRegistryId: input.executionResourceRegistryId,
+    executionEnvironmentRegistryId: input.executionEnvironmentRegistryId,
+    executionMessageQueueId: input.executionMessageQueueId,
+    executionWorkerId: input.executionWorkerId,
+    pipelineId: input.pipelineId,
+    key: "structural-execution-scheduler",
+    name: "Structural Execution Scheduler",
+    createIfMissing: true,
+    structuralNotes:
+      "Scheduler Foundation registered structurally — no execution, no cron, no timers, no jobs, no engines",
+    tags: ["scheduler-foundation", "foundation", "structural"],
+  });
+
+  if (!resolved.ok || !resolved.schedule) {
+    throw new Error(
+      resolved.message ?? "ExecutionSchedulerPort failed to resolve structural schedule",
+    );
+  }
+
+  return resolved.schedule;
+}
+
+/**
+ * Anexa referência estrutural do Scheduler Foundation ao Execution Context (transporte).
+ * Anexa apenas executionSchedulerId.
+ * Nenhum Schedule executado. Nenhum cron. Nenhum timer. Nenhum job.
+ */
+export async function attachSchedulerToExecutionContext(
+  executionContextPort: ExecutionContextPort,
+  contextId: string,
+  schedule: CanonicalSchedule,
+  stamp: string,
+): Promise<ExecutionContext> {
+  const updated = await executionContextPort.updateContext({
+    contextId,
+    appendReferences: [
+      {
+        name: "executionSchedulerId",
+        value: schedule.executionSchedulerId,
+        notes:
+          "Execution Scheduler reference — schedule obtained exclusively via ExecutionSchedulerPort",
+      },
+    ],
+    appendHistory: [
+      {
+        event: "execution-scheduler-attached",
+        phase: "created",
+        status: "pending",
+        occurredAt: stamp,
+        notes:
+          "Scheduler Foundation attached structurally — no execution, no cron, no timers, no jobs, no engines",
+        attributes: {
+          executionSchedulerId: schedule.executionSchedulerId,
+          executionPerformed: false,
+          scheduleExecuted: false,
+          cronUsed: false,
+          timersUsed: false,
+          jobsDispatched: false,
+          workersStarted: false,
+          processingPerformed: false,
+          realSchedulerBackend: false,
+          enginesInvoked: false,
+        },
+      },
+    ],
+    metadata: {
+      kind: "execution-context-metadata",
+      customAttributes: {
+        executionSchedulerId: schedule.executionSchedulerId,
+        executionPerformed: false,
+        scheduleExecuted: false,
+        cronUsed: false,
+        timersUsed: false,
+        jobsDispatched: false,
+        workersStarted: false,
+        processingPerformed: false,
+        realSchedulerBackend: false,
+      },
+    },
+  });
+
+  if (!updated.ok || !updated.context) {
+    throw new Error(updated.message ?? "ExecutionContextPort failed to attach execution scheduler");
+  }
+
+  return updated.context;
+}
+
+/**
  * Anexa a composição do Pipeline Resolver ao Execution Context (estrutural).
  * O Resolver permanece independente do conteúdo do Context.
  */
@@ -1926,6 +2059,8 @@ export function foundationCapabilitiesBase(adapterId: string) {
     usesExecutionQueueStructurally: true as const,
     dependsOnExecutionWorker: true as const,
     usesExecutionWorkerStructurally: true as const,
+    dependsOnExecutionScheduler: true as const,
+    usesExecutionSchedulerStructurally: true as const,
     implementsOcr: false as const,
     implementsAi: false as const,
     implementsXmlParser: false as const,
