@@ -198,11 +198,12 @@ describe("EPC-15 OCRProviderPort contract", () => {
   });
 
   it("BUILTIN_OCR_PROVIDER_COUNT e registry snapshot", () => {
-    assert.equal(BUILTIN_OCR_PROVIDER_COUNT, 3);
+    assert.equal(BUILTIN_OCR_PROVIDER_COUNT, 4);
     const registry = createDefaultOCRProviderRegistry();
     const snap = registry.snapshot();
-    assert.equal(snap.count, 3);
+    assert.equal(snap.count, 4);
     assert.ok(snap.registrations.every((r) => r.capabilities));
+    assert.ok(snap.registrations.some((r) => r.providerId === "azure"));
   });
 
   it("ProviderDescriptor OCR tem campos mínimos e providerType OCR", () => {
@@ -282,9 +283,10 @@ describe("EPC-15 OCRProviderPort contract", () => {
     }
   });
 
-  it("código da fundação não contém integrações HTTP / IA / OCR real / domínio", () => {
+  it("código da fundação não contém integrações HTTP fora do Adapter Azure (OCR-01)", () => {
     const here = dirname(fileURLToPath(import.meta.url));
     const root = join(here, "../../../src/lib/enterprise/ocr-provider");
+    const authorizedHttp = "azure-document-intelligence-adapter.ts";
 
     const files: string[] = [];
     const walk = (dir: string) => {
@@ -300,7 +302,10 @@ describe("EPC-15 OCRProviderPort contract", () => {
 
     for (const file of files) {
       const blob = readFileSync(file, "utf8").toLowerCase();
-      assert.equal(blob.includes("fetch("), false, `fetch em ${file}`);
+      const isAuthorizedAzureAdapter = file.replace(/\\/g, "/").endsWith(authorizedHttp);
+      if (!isAuthorizedAzureAdapter) {
+        assert.equal(blob.includes("fetch("), false, `fetch em ${file}`);
+      }
       assert.equal(blob.includes("axios"), false, `axios em ${file}`);
       assert.equal(blob.includes("https.request"), false, `https em ${file}`);
       for (const token of FORBIDDEN_DOMAIN_TOKENS) {
@@ -356,7 +361,7 @@ describe("EPC-15 OCRProviderPort contract", () => {
   it("OCRFactory class exportada e OCRProviderRegistry listByStatus", () => {
     assert.equal(typeof OCRProviderFactory, "function");
     const registry = createDefaultOCRProviderRegistry();
-    assert.equal(registry.listByStatus("ready").length, 3);
+    assert.equal(registry.listByStatus("ready").length, 4);
     assert.equal(registry.listByStatus("stub").length, 0);
   });
 });

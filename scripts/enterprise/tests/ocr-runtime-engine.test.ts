@@ -98,20 +98,16 @@ function enterpriseDeps() {
   };
 }
 
-function assertNoRealOcrCapabilities(caps: ReturnType<OCRRuntimePort["capabilities"]>) {
-  assert.equal(caps.supportsPdf, false);
-  assert.equal(caps.supportsImage, false);
-  assert.equal(caps.supportsBatch, false);
-  assert.equal(caps.supportsStreaming, false);
-  assert.equal(caps.supportsHandwriting, false);
-  assert.equal(caps.supportsTables, false);
-  assert.equal(caps.supportsForms, false);
-  assert.equal(caps.supportsConfidenceScore, false);
-  assert.equal(caps.implementsRealOcr, false);
+function assertRuntimeDecoupledFromVendors(caps: ReturnType<OCRRuntimePort["capabilities"]>) {
+  /** Runtime permanece desacoplado — Azure só no OCRProviderPort Adapter. */
   assert.equal(caps.implementsAzure, false);
   assert.equal(caps.implementsGoogleVision, false);
   assert.equal(caps.implementsAwsTextract, false);
   assert.equal(caps.implementsTesseract, false);
+  assert.equal(caps.implementsAi, false);
+  assert.equal(caps.implementsClassification, false);
+  assert.equal(caps.implementsXml, false);
+  assert.equal(caps.implementsTiss, false);
 }
 
 describe("DIP-03 OCRRuntimePort contract", () => {
@@ -127,7 +123,8 @@ describe("DIP-03 OCRRuntimePort contract", () => {
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_OCR_RUNTIME_ADAPTER_ID);
     assert.equal(caps.supportsCoordinateOcr, true);
-    assertNoRealOcrCapabilities(caps);
+    assert.equal(caps.supportsProcess, true);
+    assertRuntimeDecoupledFromVendors(caps);
   });
 
   it("default adapter exige enterpriseDeps (sem implementação paralela)", () => {
@@ -139,7 +136,7 @@ describe("DIP-03 OCRRuntimePort contract", () => {
     );
   });
 
-  it("default adapter coordena via Orchestrator + OCR Provider Adapter (sem process)", async () => {
+  it("default adapter coordena via Orchestrator + OCR Provider Adapter", async () => {
     resetAllOCRRuntimeIdSequences();
     const { deps, orchestratorPort, ocrProviderPort } = enterpriseDeps();
     const port = new DefaultOCRRuntimeAdapter({ enterpriseDeps: deps });
@@ -148,7 +145,8 @@ describe("DIP-03 OCRRuntimePort contract", () => {
     assert.equal(port.capabilities().adapterId, DEFAULT_OCR_RUNTIME_ADAPTER_ID);
     assert.equal(port.capabilities().usesCanonicalExecutionOrchestrator, true);
     assert.equal(port.capabilities().usesOCRProviderAdapter, true);
-    assertNoRealOcrCapabilities(port.capabilities());
+    assert.equal(port.capabilities().supportsProcess, true);
+    assertRuntimeDecoupledFromVendors(port.capabilities());
 
     const result = await port.coordinateOcr(sampleRequest());
     assert.equal(result.ok, true);
@@ -230,7 +228,8 @@ describe("DIP-03 OCRRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.health.realOcrAvailable, false);
     assert.equal(summary.capabilities.supportsCoordinateOcr, true);
-    assertNoRealOcrCapabilities(summary.capabilities);
+    assert.equal(summary.capabilities.supportsProcess, true);
+    assertRuntimeDecoupledFromVendors(summary.capabilities);
   });
 
   it("coordinateOcr rejeita input inválido", async () => {
@@ -270,8 +269,13 @@ describe("DIP-03 OCRRuntimePort contract", () => {
     assert.deepEqual(ids, ["aws-textract", "azure", "google-vision", "mock", "tesseract"]);
     for (const ref of refs.references) {
       assert.equal(ref.connected, false);
-      assert.equal(ref.implementsRealOcr, false);
-      assert.equal(ref.status, "structural-reference-only");
+      if (ref.providerReferenceId === "azure") {
+        assert.equal(ref.implementsRealOcr, true);
+        assert.equal(ref.status, "available-via-ocr-provider-port");
+      } else {
+        assert.equal(ref.implementsRealOcr, false);
+        assert.equal(ref.status, "structural-reference-only");
+      }
     }
   });
 });
@@ -291,10 +295,11 @@ describe("DIP-03 integração Enterprise / Capture / Orchestrator", () => {
     assert.equal(health.orchestratorOk, true);
 
     const ocrHealth = await ocrRuntime.health();
-    assert.equal(ocrHealth.realOcrAvailable, false);
+    assert.equal(typeof ocrHealth.realOcrAvailable, "boolean");
+    assert.equal(runtime.getOCRProviderPort().providerId, "azure");
   });
 
-  it("fluxo captura passa pelo OCR Runtime sem OCR real", async () => {
+  it("fluxo captura passa pelo OCR Runtime (coordenação sem bytes)", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -337,9 +342,11 @@ describe("DIP-03 integração Enterprise / Capture / Orchestrator", () => {
     });
     assert.equal(ocrExec.ok, true);
 
-    assert.equal(runtime.getOCRRuntimePort().capabilities().implementsRealOcr, false);
+    assert.equal(runtime.getOCRRuntimePort().capabilities().implementsRealOcr, true);
+    assert.equal(runtime.getOCRRuntimePort().capabilities().implementsAzure, false);
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsOcr, false);
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().usesOCRRuntime, true);
+    assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().supportsProcessOcr, true);
     assert.equal(
       runtime.getCaptureEngineRuntimePort().capabilities().usesDocumentClassificationRuntime,
       true,
@@ -351,13 +358,14 @@ describe("DIP-03 integração Enterprise / Capture / Orchestrator", () => {
     const keys = Object.keys(runtime);
     assert.ok(!keys.some((k) => /adapter/i.test(k)));
     assert.equal(typeof runtime.getOCRRuntimePort, "function");
+    assert.equal(typeof runtime.getOCRProviderPort, "function");
     assert.equal(typeof runtime.getCaptureEngineRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });
 
-describe("DIP-03 ausência de OCR real / integrações externas", () => {
-  it("fonte do módulo OCR Runtime não contém integrações externas nem process OCR", () => {
+describe("DIP-03 / OCR-01 ausência de integrações externas no Runtime", () => {
+  it("fonte do módulo OCR Runtime não contém HTTP Azure / SDKs externos", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/ocr-runtime");
     const files = [
       "adapters/default-ocr-runtime-adapter.ts",
@@ -379,11 +387,8 @@ describe("DIP-03 ausência de OCR real / integrações externas", () => {
       /@azure\/ai-form-recognizer/i,
       /@google-cloud\/vision/i,
       /@aws-sdk\/client-textract/i,
-      /ocrProvider\.process\s*\(/,
-      /getOCRProviderPort\(\)\s*\.process\s*\(/,
-      /\.process\s*\(\s*\{/,
+      /Ocp-Apim-Subscription-Key/i,
       /fetch\s*\(/,
-      /https?:\/\//,
     ];
 
     for (const rel of files) {
@@ -401,9 +406,8 @@ describe("DIP-03 ausência de OCR real / integrações externas", () => {
       join(moduleDir, "adapters/default-ocr-runtime-adapter.ts"),
       "utf8",
     );
-    assert.match(defaultAdapter, /health\/capabilities/);
-    assert.match(defaultAdapter, /PROIBIDO:/);
-    assert.equal(/ocrProvider\.process\s*\(/.test(defaultAdapter), false);
+    assert.match(defaultAdapter, /ocrProvider\.process\s*\(/);
+    assert.match(defaultAdapter, /OCRProviderPort/);
   });
 
   it("coordinateOcr não produz texto extraído nem páginas OCR", async () => {

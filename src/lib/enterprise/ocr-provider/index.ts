@@ -12,8 +12,8 @@
  * Nunca conhece cooperativas, operadoras, contratos, TISS, AI,
  * Workflow ou Rule Engine.
  *
- * EPC-15: fundação do primeiro Processing Provider.
- * NÃO implementa OCR real, HTTP, IA, Upload, Scanner, UI, APIs ou banco.
+ * EPC-15 / OCR-01: Processing Provider oficial.
+ * HTTP Azure exclusivamente em AzureDocumentIntelligenceAdapter.
  */
 export type {
   DocumentProcessingResult,
@@ -50,10 +50,18 @@ export {
 } from "./ports";
 
 export {
+  AZURE_DOCUMENT_INTELLIGENCE_ADAPTER_ID,
+  AZURE_DOCUMENT_INTELLIGENCE_API_VERSION,
+  AZURE_DOCUMENT_INTELLIGENCE_PROVIDER_VERSION,
+  AzureDocumentIntelligenceAdapter,
+  DEFAULT_AZURE_OCR_CAPABILITIES,
   DEFAULT_MOCK_OCR_PROVIDER_VERSION,
   DefaultMockOCRProvider,
   MOCK_OCR_PROVIDER_ADAPTER_ID,
   MockOCRProviderAdapter,
+  resolveAzureDocumentIntelligenceConfig,
+  type AzureDocumentIntelligenceAdapterOptions,
+  type AzureFetchFn,
   type MockOCRProviderAdapterOptions,
 } from "./adapters";
 

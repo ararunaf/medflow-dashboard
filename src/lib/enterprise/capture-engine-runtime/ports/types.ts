@@ -5,7 +5,7 @@
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
  *     → Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação
- *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+ *     → OCRRuntimePort → Orchestrator → OCRProviderPort → Adapter (OCR-01)
  *     → DocumentClassificationRuntimePort → Orchestrator
  *     → Classification Provider Adapter (referência estrutural)
  *     → StorageManagerRuntimePort → Orchestrator
@@ -13,14 +13,15 @@
  *     → DocumentSearchRuntimePort → Orchestrator
  *     → Search Provider Adapter (referência estrutural)
  *
- * Este componente NÃO reimplementa intake nem processamento documental.
- * NÃO executa OCR nem classificação nem armazenamento nem busca. Coordena via Ports oficiais.
+ * Este componente NÃO reimplementa intake nem HTTP Azure.
+ * Coordena OCR via OCRRuntimePort (OCR-01).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { DocumentClassificationRuntimePort } from "../../document-classification-runtime/ports/document-classification-runtime-port";
 import type { DocumentIntakeRuntimePort } from "../../document-intake-runtime/ports/document-intake-runtime-port";
 import type { DocumentSearchRuntimePort } from "../../document-search-runtime/ports/document-search-runtime-port";
 import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
+import type { ProcessOCRInput, ProcessOCRResult } from "../../ocr-runtime/ports/types";
 import type { StorageManagerRuntimePort } from "../../storage-manager-runtime/ports/storage-manager-runtime-port";
 import type {
   CanonicalCaptureRequest,
@@ -61,6 +62,7 @@ export type CaptureEngineRuntimeCapabilities = {
   provider: CaptureEngineRuntimeProviderId;
   adapterId: string;
   supportsRegisterCapture: boolean;
+  supportsProcessOcr: boolean;
   supportsGetSession: boolean;
   supportsListSessions: boolean;
   supportsHealth: boolean;
@@ -73,6 +75,7 @@ export type CaptureEngineRuntimeCapabilities = {
   usesDocumentClassificationRuntime: boolean;
   usesStorageManagerRuntime: boolean;
   usesDocumentSearchRuntime: boolean;
+  /** Capture não implementa OCR — coordena via OCR Runtime. */
   implementsOcr: false;
   implementsAi: false;
   implementsXml: false;
@@ -93,7 +96,7 @@ export type CaptureEngineRuntimeCapabilities = {
 export type CaptureEngineRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
   getDocumentIntakeRuntimePort(): DocumentIntakeRuntimePort;
-  /** DIP-03 — coordenação estrutural OCR (sem OCR real). */
+  /** DIP-03 / OCR-01 — coordenação e execução OCR via OCR Runtime. */
   getOCRRuntimePort(): OCRRuntimePort;
   /** DIP-04 — coordenação estrutural de classificação (sem classificação real). */
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
@@ -131,6 +134,10 @@ export type ListCaptureRuntimeSessionsResult = {
 /** Alias tipado da operação principal. */
 export type RegisterCaptureInput = CanonicalCaptureRequest;
 export type RegisterCaptureResult = CanonicalCaptureResult;
+
+/** OCR-01 — execução OCR coordenada pelo Capture Runtime via OCR Runtime. */
+export type ProcessCaptureOcrInput = ProcessOCRInput;
+export type ProcessCaptureOcrResult = ProcessOCRResult;
 
 /** Opções de resolução do CaptureEngineRuntimePort. */
 export type CaptureEngineRuntimeProviderOptions = {

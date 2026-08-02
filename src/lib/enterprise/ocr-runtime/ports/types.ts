@@ -1,16 +1,16 @@
 /**
- * Tipos vendor-agnósticos do OCR Runtime — DIP-03.
+ * Tipos vendor-agnósticos do OCR Runtime — DIP-03 / OCR-01.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCRRuntimePort → Canonical Execution Orchestrator
- *     → OCR Provider Adapter → Provider futuro
+ *     → OCRProviderPort → AzureDocumentIntelligenceAdapter → Azure
  *
- * Este componente NÃO executa OCR. NÃO extrai texto. NÃO conecta providers.
- * Coordena estruturalmente via Ports oficiais.
+ * Este componente NÃO contém HTTP Azure. Extração real via OCRProviderPort.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { OCRProviderPort } from "../../ocr-provider/ports/ocr-provider-port";
+import type { OCRProcessInput } from "../../ocr-provider/ports/types";
 import type {
   CanonicalOCRProviderReference,
   CanonicalOCRProviderReferenceId,
@@ -45,17 +45,19 @@ export type OCRRuntimeHealth = {
   message?: string;
   enterpriseOrchestratorOk?: boolean;
   ocrProviderAdapterOk?: boolean;
-  realOcrAvailable: false;
+  /** true quando OCRProviderPort pode executar OCR real (ex.: azure). */
+  realOcrAvailable: boolean;
 };
 
 /**
  * Capacidades declaradas pelo adapter (Port level).
- * Capacidades tecnológicas OCR permanecem FALSE — nenhuma é executada.
+ * Runtime permanece desacoplado de vendors — Azure só no OCRProviderPort Adapter.
  */
 export type OCRRuntimeCapabilities = {
   provider: OCRRuntimeProviderId;
   adapterId: string;
   supportsCoordinateOcr: boolean;
+  supportsProcess: boolean;
   supportsGetSession: boolean;
   supportsListSessions: boolean;
   supportsHealth: boolean;
@@ -65,16 +67,17 @@ export type OCRRuntimeCapabilities = {
   usesCanonicalExecutionOrchestrator: boolean;
   usesOCRProviderAdapter: boolean;
   usesCaptureEngineRuntime: boolean;
-  /** Capacidades tecnológicas — informativas / FALSE (DIP-03). */
-  supportsPdf: false;
-  supportsImage: false;
-  supportsBatch: false;
-  supportsStreaming: false;
-  supportsHandwriting: false;
-  supportsTables: false;
-  supportsForms: false;
-  supportsConfidenceScore: false;
-  implementsRealOcr: false;
+  supportsPdf: boolean;
+  supportsImage: boolean;
+  supportsBatch: boolean;
+  supportsStreaming: boolean;
+  supportsHandwriting: boolean;
+  supportsTables: boolean;
+  supportsForms: boolean;
+  supportsConfidenceScore: boolean;
+  /** Runtime pode acionar OCR real via OCRProviderPort.process(). */
+  implementsRealOcr: boolean;
+  /** Runtime NÃO implementa Azure — Adapter do OCRProviderPort implementa. */
   implementsAzure: false;
   implementsGoogleVision: false;
   implementsAwsTextract: false;
@@ -91,10 +94,7 @@ export type OCRRuntimeCapabilities = {
  */
 export type OCRRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
-  /**
-   * Adapter estrutural EPC-15 — health/capabilities/providerInfo apenas.
-   * NUNCA invocar extração real no Provider Adapter nesta sprint.
-   */
+  /** OCRProviderPort oficial — process()/health()/capabilities. */
   getOCRProviderPort(): OCRProviderPort;
 };
 
@@ -129,9 +129,22 @@ export type ListOCRProviderReferencesResult = {
   references: readonly CanonicalOCRProviderReference[];
 };
 
-/** Alias tipado da operação principal (coordenação estrutural — sem OCR real). */
+/** Alias tipado da coordenação OCR. */
 export type CoordinateOCRInput = CanonicalOCRRequest;
 export type CoordinateOCRResult = CanonicalOCRResult;
+
+/** Input de execução OCR real via Runtime (OCR-01). */
+export type ProcessOCRInput = OCRProcessInput & {
+  /** Metadados opcionais para sessão canônica. */
+  documentId?: string;
+  sessionId?: string;
+  tenantRef?: string;
+  correlationId?: string;
+  captureRuntimeSessionId?: string;
+  preferredProviderReference?: CanonicalOCRProviderReferenceId;
+};
+
+export type ProcessOCRResult = CanonicalOCRResult;
 
 /** Opções de resolução do OCRRuntimePort. */
 export type OCRRuntimeProviderOptions = {
@@ -143,15 +156,15 @@ export type OCRRuntimeProviderOptions = {
   enterpriseDeps?: OCRRuntimeEnterpriseDeps;
 };
 
-/** Catálogo estrutural de providers futuros (sem conexão). */
+/** Catálogo de providers referenciados pelo Runtime (HTTP só no Adapter). */
 export const STRUCTURAL_OCR_PROVIDER_REFERENCES: readonly CanonicalOCRProviderReference[] = [
   {
     kind: "canonical-ocr-provider-reference",
     providerReferenceId: "azure",
     displayName: "Azure Document Intelligence",
     vendor: "Microsoft",
-    status: "structural-reference-only",
-    implementsRealOcr: false,
+    status: "available-via-ocr-provider-port",
+    implementsRealOcr: true,
     connected: false,
   },
   {

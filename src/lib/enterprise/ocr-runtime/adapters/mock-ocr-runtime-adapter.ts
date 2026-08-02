@@ -21,6 +21,8 @@ import type {
   OCRRuntimeEnterpriseDeps,
   OCRRuntimeHealth,
   OCRRuntimeProviderId,
+  ProcessOCRInput,
+  ProcessOCRResult,
 } from "../ports/types";
 import { STRUCTURAL_OCR_PROVIDER_REFERENCES } from "../ports/types";
 import { InMemoryOCRRuntimeStore, type OCRRuntimeStore } from "../store";
@@ -72,6 +74,7 @@ export class MockOCRRuntimeAdapter implements OCRRuntimePort {
       provider: this.providerId,
       adapterId: MOCK_OCR_RUNTIME_ADAPTER_ID,
       supportsCoordinateOcr: true,
+      supportsProcess: true,
       supportsGetSession: true,
       supportsListSessions: true,
       supportsHealth: true,
@@ -89,7 +92,7 @@ export class MockOCRRuntimeAdapter implements OCRRuntimePort {
       supportsTables: false,
       supportsForms: false,
       supportsConfidenceScore: false,
-      implementsRealOcr: false,
+      implementsRealOcr: Boolean(this.delegate),
       implementsAzure: false,
       implementsGoogleVision: false,
       implementsAwsTextract: false,
@@ -111,6 +114,49 @@ export class MockOCRRuntimeAdapter implements OCRRuntimePort {
       provider: this.providerId,
       message: this.message,
       realOcrAvailable: false,
+    };
+  }
+
+  async process(input: ProcessOCRInput): Promise<ProcessOCRResult> {
+    if (this.delegate) {
+      return this.delegate.process(input);
+    }
+
+    const stamp = this.now?.() ?? new Date().toISOString();
+    const runtimeSessionId = this.createSessionId();
+    const session: CanonicalOCRSession = {
+      kind: "canonical-ocr-session",
+      runtimeSessionId,
+      status: "completed",
+      request: {
+        kind: "canonical-ocr-request",
+        identity: {
+          kind: "canonical-ocr-identity",
+          documentId: input.documentId ?? "mock-doc",
+        },
+        metadata: {
+          kind: "canonical-ocr-metadata",
+          sessionId: input.sessionId ?? runtimeSessionId,
+        },
+      },
+      providerReferenceId: "mock",
+      ocrProviderAdapterId: MOCK_OCR_RUNTIME_ADAPTER_ID,
+      createdAt: stamp,
+      updatedAt: stamp,
+      message: "Mock OCR Runtime process (store-only; no real OCR).",
+      code: "MOCK_PROCESSED",
+      realOcrExecuted: false,
+    };
+    this.store.setSession(session);
+    return {
+      kind: "canonical-ocr-result",
+      ok: this.healthy,
+      runtimeSessionId,
+      session,
+      providerReferenceId: "mock",
+      message: session.message,
+      code: session.code,
+      realOcrExecuted: false,
     };
   }
 

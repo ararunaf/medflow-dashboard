@@ -1,11 +1,11 @@
 /**
- * OCRProviderFactory — instancia o adapter correto (EPC-15 FASE 3).
+ * OCRProviderFactory — instancia o adapter correto (EPC-15 / OCR-01).
  *
- * Sem lógica de negócio. Sem HTTP. Sem OCR real.
+ * Sem lógica de negócio. HTTP Azure somente no AzureDocumentIntelligenceAdapter.
  * Posição na arquitetura:
  *   Application → OCRProviderPort → Adapter ← Factory ← Registry
  */
-import { MockOCRProviderAdapter } from "../adapters";
+import { AzureDocumentIntelligenceAdapter, MockOCRProviderAdapter } from "../adapters";
 import type { OCRProviderPort } from "../ports/ocr-provider-port";
 import type { OCRProviderId, OCRProviderOptions } from "../ports/types";
 import {
@@ -53,6 +53,8 @@ export class OCRProviderFactory {
         return new MockOCRProviderAdapter({ provider: "test" });
       case "default":
         return new MockOCRProviderAdapter({ provider: "default" });
+      case "azure":
+        return new AzureDocumentIntelligenceAdapter();
       default: {
         const _exhaustive: never = provider;
         throw new Error(`OCR provider desconhecido: ${String(_exhaustive)}`);

@@ -18,6 +18,8 @@ import type {
   GetCaptureRuntimeSessionResult,
   ListCaptureRuntimeSessionsInput,
   ListCaptureRuntimeSessionsResult,
+  ProcessCaptureOcrInput,
+  ProcessCaptureOcrResult,
   RegisterCaptureInput,
   RegisterCaptureResult,
 } from "../ports/types";
@@ -70,6 +72,7 @@ export class MockCaptureEngineRuntimeAdapter implements CaptureEngineRuntimePort
       provider: this.providerId,
       adapterId: MOCK_CAPTURE_ENGINE_RUNTIME_ADAPTER_ID,
       supportsRegisterCapture: true,
+      supportsProcessOcr: true,
       supportsGetSession: true,
       supportsListSessions: true,
       supportsHealth: true,
@@ -105,6 +108,19 @@ export class MockCaptureEngineRuntimeAdapter implements CaptureEngineRuntimePort
       ok: this.healthy,
       provider: this.providerId,
       message: this.message,
+    };
+  }
+
+  async processOcr(input: ProcessCaptureOcrInput): Promise<ProcessCaptureOcrResult> {
+    if (this.delegate) {
+      return this.delegate.processOcr(input);
+    }
+    return {
+      kind: "canonical-ocr-result",
+      ok: this.healthy,
+      message: "Mock Capture processOcr (store-only; no real OCR).",
+      code: "MOCK_OCR",
+      realOcrExecuted: false,
     };
   }
 

@@ -19,6 +19,8 @@ export type {
   GetCaptureRuntimeSessionResult,
   ListCaptureRuntimeSessionsInput,
   ListCaptureRuntimeSessionsResult,
+  ProcessCaptureOcrInput,
+  ProcessCaptureOcrResult,
   RegisterCaptureInput,
   RegisterCaptureResult,
 } from "./types";

@@ -1,9 +1,14 @@
 /**
- * OCRProviderRegistry — catálogo de mecanismos OCR (EPC-15 FASE 3/4).
+ * OCRProviderRegistry — catálogo de mecanismos OCR (EPC-15 / OCR-01).
  *
  * Registra: nome, versão, capacidades, status.
- * Sem lógica de negócio. Sem chamadas de rede. Sem OCR real.
+ * Sem lógica de negócio. Chamadas de rede ficam nos adapters.
  */
+import {
+  AZURE_DOCUMENT_INTELLIGENCE_ADAPTER_ID,
+  AZURE_DOCUMENT_INTELLIGENCE_PROVIDER_VERSION,
+  DEFAULT_AZURE_OCR_CAPABILITIES,
+} from "../adapters/azure-document-intelligence-adapter";
 import {
   DEFAULT_MOCK_OCR_PROVIDER_VERSION,
   MOCK_OCR_PROVIDER_ADAPTER_ID,
@@ -47,6 +52,17 @@ const BUILTIN_REGISTRATIONS: readonly OCRProviderRegistration[] = [
     vendor: "medicflow-enterprise",
     capabilities: DEFAULT_MOCK_OCR_CAPABILITIES,
     description: "Default resolution alias — maps to mock in foundation.",
+  },
+  {
+    providerId: "azure",
+    name: "Azure Document Intelligence",
+    version: AZURE_DOCUMENT_INTELLIGENCE_PROVIDER_VERSION,
+    status: "ready",
+    adapterId: AZURE_DOCUMENT_INTELLIGENCE_ADAPTER_ID,
+    vendor: "microsoft-azure",
+    capabilities: DEFAULT_AZURE_OCR_CAPABILITIES,
+    description:
+      "Official Azure Document Intelligence OCR provider — sole authorized HTTP path (OCR-01).",
   },
 ];
 

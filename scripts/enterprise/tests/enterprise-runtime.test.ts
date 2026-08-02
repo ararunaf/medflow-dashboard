@@ -121,7 +121,10 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(ocrSession.ok, true);
     assert.equal(ocrSession.session?.status, "coordinated");
     assert.equal(ocrSession.session?.realOcrExecuted, false);
-    assert.equal(runtime.getOCRRuntimePort().capabilities().implementsRealOcr, false);
+    assert.equal(runtime.getOCRRuntimePort().capabilities().implementsRealOcr, true);
+    assert.equal(runtime.getOCRRuntimePort().capabilities().implementsAzure, false);
+    assert.equal(runtime.getOCRProviderPort().providerId, "azure");
+    assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsOcr, false);
 
     const classificationSession = await runtime.getDocumentClassificationRuntimePort().getSession({
       runtimeSessionId: result.classificationRuntimeSessionId!,

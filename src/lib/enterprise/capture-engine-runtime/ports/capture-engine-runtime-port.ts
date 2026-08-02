@@ -8,10 +8,11 @@
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
  *     → Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação existente
- *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+ *     → OCRRuntimePort → Orchestrator → OCRProviderPort → Adapter (OCR-01)
  *
- * NÃO implementa OCR real, IA, XML, TISS, parser, classificação, Workflow,
+ * NÃO implementa HTTP Azure, IA, XML, TISS, parser, classificação, Workflow,
  * Rule Engine, Storage Manager, versionamento ou busca.
+ * OCR real é coordenado via OCRRuntimePort.process().
  */
 import type {
   CaptureEngineRuntimeCapabilities,
@@ -21,6 +22,8 @@ import type {
   GetCaptureRuntimeSessionResult,
   ListCaptureRuntimeSessionsInput,
   ListCaptureRuntimeSessionsResult,
+  ProcessCaptureOcrInput,
+  ProcessCaptureOcrResult,
   RegisterCaptureInput,
   RegisterCaptureResult,
 } from "./types";
@@ -40,6 +43,12 @@ export interface CaptureEngineRuntimePort {
    * Ponto único de entrada funcional de captura da Document Intelligence Platform.
    */
   registerCapture(input: RegisterCaptureInput): Promise<RegisterCaptureResult>;
+
+  /**
+   * OCR-01 — coordena execução OCR via OCR Runtime → OCRProviderPort.
+   * Capture permanece desacoplado de Azure/HTTP.
+   */
+  processOcr(input: ProcessCaptureOcrInput): Promise<ProcessCaptureOcrResult>;
 
   /** Obtém sessão de captura por id. */
   getSession(input: GetCaptureRuntimeSessionInput): Promise<GetCaptureRuntimeSessionResult>;

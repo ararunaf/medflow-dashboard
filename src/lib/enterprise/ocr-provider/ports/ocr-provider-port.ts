@@ -3,9 +3,9 @@
  *
  * Application e Domain dependem exclusivamente desta interface.
  * Detalhes de Azure Document Intelligence / Google Document AI / Tesseract
- * ficam em adapters futuros — NÃO implementados nesta sprint.
+ * ficam exclusivamente em adapters (OCR-01: AzureDocumentIntelligenceAdapter).
  *
- * EPC-15: fundação arquitetural do primeiro Processing Provider.
+ * EPC-15 / OCR-01: Processing Provider oficial.
  * O OCR apenas extrai conteúdo. Produz exclusivamente ProcessingOutput.
  * NÃO interpreta, valida, toma decisões ou conhece domínio clínico / TISS.
  */
@@ -26,11 +26,11 @@ export interface OCRProviderPort {
   /**
    * Extração documental genérica.
    * Retorna exclusivamente ProcessingOutput + DocumentProcessingResult canônicos.
-   * Mock/stub nesta sprint — sem OCR real e sem rede.
+   * Azure Adapter (OCR-01) é o único caminho HTTP autorizado.
    */
   process(input: OCRProcessInput): Promise<OCRProcessResult>;
 
-  /** Verificação leve de prontidão (sem I/O externo na fundação). */
+  /** Verificação leve de prontidão. */
   health(): Promise<OCRProviderHealth>;
 
   /** Capacidades estáticas do adapter ativo. */

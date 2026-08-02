@@ -1,16 +1,21 @@
 /**
- * Modelos canônicos do OCR Runtime — DIP-03.
+ * Modelos canônicos do OCR Runtime — DIP-03 / OCR-01.
  *
- * Representação estrutural da sessão OCR na Document Intelligence Platform.
- * Sem OCR real. Sem extração de texto. Sem interpretação documental.
- * Sem Azure / Google Vision / Textract / Tesseract. Sem I/O externo.
+ * Coordenação + execução via OCRProviderPort.
+ * Sem HTTP Azure neste módulo — Adapter OCR-01 é o único caminho HTTP.
  */
+import type {
+  DocumentProcessingResult,
+  ProcessingOutput,
+} from "../../document-processor/ports/types";
 
 /** Status estrutural da sessão OCR no Runtime. */
 export type OCRRuntimeSessionStatus =
   | "pending"
   | "coordinating"
   | "coordinated"
+  | "processing"
+  | "completed"
   | "deferred"
   | "failed";
 
@@ -45,31 +50,30 @@ export type CanonicalOCRReference = {
   executionId?: string;
   captureRuntimeSessionId?: string;
   captureExecutionId?: string;
-  /** Referência estrutural ao provider futuro (nunca executado nesta sprint). */
+  /** Referência estrutural ao provider (OCR-01: azure). */
   providerReferenceId?: CanonicalOCRProviderReferenceId;
 };
 
 /**
  * Capacidades canônicas tecnológicas do OCR Runtime (modelo de domínio).
- * Todas FALSE / informativas — nenhuma capacidade é executada (DIP-03).
+ * Declaração informativa — execução real ocorre via OCRProviderPort.
  */
 export type CanonicalOCRCapabilities = {
   kind: "canonical-ocr-capabilities";
-  supportsPdf: false;
-  supportsImage: false;
-  supportsBatch: false;
-  supportsStreaming: false;
-  supportsHandwriting: false;
-  supportsTables: false;
-  supportsForms: false;
-  supportsConfidenceScore: false;
+  supportsPdf: boolean;
+  supportsImage: boolean;
+  supportsBatch: boolean;
+  supportsStreaming: boolean;
+  supportsHandwriting: boolean;
+  supportsTables: boolean;
+  supportsForms: boolean;
+  supportsConfidenceScore: boolean;
   declared?: readonly string[];
 };
 
-/** Configuração canônica estrutural do OCR (sem processamento). */
+/** Configuração canônica do OCR Runtime. */
 export type CanonicalOCRConfiguration = {
   kind: "canonical-ocr-configuration";
-  /** Provider futuro referenciado estruturalmente — sem bind / sem HTTP. */
   preferredProviderReference?: CanonicalOCRProviderReferenceId;
   languageHint?: string;
   contentTypeHint?: string;
@@ -79,8 +83,8 @@ export type CanonicalOCRConfiguration = {
 };
 
 /**
- * Referências estruturais a providers futuros.
- * NÃO são implementações. NÃO conectam serviços externos.
+ * Referências a providers OCR.
+ * Conexão HTTP ocorre somente no Adapter do OCRProviderPort.
  */
 export type CanonicalOCRProviderReferenceId =
   | "azure"
@@ -89,15 +93,15 @@ export type CanonicalOCRProviderReferenceId =
   | "tesseract"
   | "mock";
 
-/** Descritor estrutural de um provider futuro. */
+/** Descritor estrutural de um provider. */
 export type CanonicalOCRProviderReference = {
   kind: "canonical-ocr-provider-reference";
   providerReferenceId: CanonicalOCRProviderReferenceId;
   displayName: string;
   vendor: string;
-  status: "structural-reference-only";
-  implementsRealOcr: false;
-  connected: false;
+  status: "structural-reference-only" | "available-via-ocr-provider-port";
+  implementsRealOcr: boolean;
+  connected: boolean;
 };
 
 /** Pedido canônico de coordenação OCR via Runtime. */
@@ -125,11 +129,14 @@ export type CanonicalOCRSession = {
   message?: string;
   code?: string;
   errors?: readonly string[];
-  /** Sempre true nesta sprint — coordenação sem execução. */
-  realOcrExecuted?: false;
+  /** true quando OCRProviderPort.process() executou extração. */
+  realOcrExecuted?: boolean;
 };
 
-/** Resultado canônico da coordenação via OCR Runtime. */
+/**
+ * Resultado canônico do OCR Runtime (coordenação e/ou execução).
+ * Quando há OCR real, embute ProcessingOutput / DocumentProcessingResult (EPC-13).
+ */
 export type CanonicalOCRResult = {
   kind: "canonical-ocr-result";
   ok: boolean;
@@ -139,6 +146,9 @@ export type CanonicalOCRResult = {
   providerReferenceId?: CanonicalOCRProviderReferenceId;
   message?: string;
   code?: string;
-  /** Sempre false nesta sprint. */
-  realOcrExecuted?: false;
+  realOcrExecuted?: boolean;
+  /** Resultado canônico EPC-13 (quando process() executou). */
+  processing?: DocumentProcessingResult;
+  /** Saída canônica EPC-13 (quando process() executou). */
+  output?: ProcessingOutput;
 };

@@ -1,13 +1,12 @@
 /**
- * DefaultOCRRuntimeAdapter — adapter default (DIP-03).
+ * DefaultOCRRuntimeAdapter — adapter default (DIP-03 / OCR-01).
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
- *   Canonical Execution Orchestrator → OCR Provider Adapter (estrutural)
+ *   Canonical Execution Orchestrator → OCRProviderPort → Adapter
  *
- * NÃO executa OCR. NÃO invoca extração no OCR Provider Adapter.
- * NÃO conecta Azure / Google Vision / Textract / Tesseract.
- * NÃO extrai texto. NÃO interpreta documentos.
+ * NÃO chama Azure/HTTP diretamente. Todo OCR real passa por OCRProviderPort.process().
  */
+import type { OCRProcessInput } from "../../ocr-provider/ports/types";
 import { createOCRRuntimeSessionId } from "../ports/identity";
 import type { OCRRuntimePort } from "../ports/ocr-runtime-port";
 import type { CanonicalOCRSession } from "../ports/models";
@@ -22,6 +21,8 @@ import type {
   OCRRuntimeCapabilities,
   OCRRuntimeEnterpriseDeps,
   OCRRuntimeHealth,
+  ProcessOCRInput,
+  ProcessOCRResult,
 } from "../ports/types";
 import {
   STRUCTURAL_OCR_PROVIDER_REFERENCES,
@@ -49,6 +50,7 @@ function foundationCapabilities(): OCRRuntimeCapabilities {
     provider: "default",
     adapterId: DEFAULT_OCR_RUNTIME_ADAPTER_ID,
     supportsCoordinateOcr: true,
+    supportsProcess: true,
     supportsGetSession: true,
     supportsListSessions: true,
     supportsHealth: true,
@@ -58,15 +60,15 @@ function foundationCapabilities(): OCRRuntimeCapabilities {
     usesCanonicalExecutionOrchestrator: true,
     usesOCRProviderAdapter: true,
     usesCaptureEngineRuntime: true,
-    supportsPdf: false,
-    supportsImage: false,
+    supportsPdf: true,
+    supportsImage: true,
     supportsBatch: false,
     supportsStreaming: false,
-    supportsHandwriting: false,
-    supportsTables: false,
+    supportsHandwriting: true,
+    supportsTables: true,
     supportsForms: false,
-    supportsConfidenceScore: false,
-    implementsRealOcr: false,
+    supportsConfidenceScore: true,
+    implementsRealOcr: true,
     implementsAzure: false,
     implementsGoogleVision: false,
     implementsAwsTextract: false,
@@ -76,6 +78,24 @@ function foundationCapabilities(): OCRRuntimeCapabilities {
     implementsXml: false,
     implementsTiss: false,
   };
+}
+
+function toProviderReferenceId(
+  providerId: string,
+): ReturnType<typeof resolveStructuralProviderReference>["providerReferenceId"] {
+  switch (providerId) {
+    case "azure":
+    case "google-vision":
+    case "aws-textract":
+    case "tesseract":
+    case "mock":
+      return providerId;
+    case "test":
+    case "default":
+      return "mock";
+    default:
+      return "azure";
+  }
 }
 
 export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
@@ -127,6 +147,8 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
     ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
     const ok = storeHealth.ok && orchestratorHealth.ok && ocrProviderHealth.ok;
+    const providerId = this.enterpriseDeps.getOCRProviderPort().providerId;
+    const realOcrAvailable = providerId === "azure" && ocrProviderHealth.ok;
 
     return {
       ok,
@@ -134,9 +156,9 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
       latencyMs: Math.max(0, Math.round(end - start)),
       enterpriseOrchestratorOk: orchestratorHealth.ok,
       ocrProviderAdapterOk: ocrProviderHealth.ok,
-      realOcrAvailable: false,
+      realOcrAvailable,
       message: ok
-        ? "OCR Runtime pronto (Orchestrator + OCR Provider Adapter estrutural — sem OCR real)."
+        ? "OCR Runtime pronto (Orchestrator + OCRProviderPort — sem bypass HTTP)."
         : "OCR Runtime degradado — ver Ports Enterprise.",
     };
   }
@@ -158,7 +180,7 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
     const providerReference = resolveStructuralProviderReference(
       input.configuration?.preferredProviderReference ??
         input.reference?.providerReferenceId ??
-        "mock",
+        "azure",
     );
 
     let session: CanonicalOCRSession = {
@@ -190,7 +212,7 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
         channel,
         intakeRef: input.metadata.sessionId,
         documentRef: input.identity.documentId,
-        tags: ["dip-03", "ocr-runtime", ...(input.metadata.tags ?? [])],
+        tags: ["ocr-01", "ocr-runtime", ...(input.metadata.tags ?? [])],
         customAttributes: {
           source: "ocr-runtime-coordination",
           sessionId: input.metadata.sessionId,
@@ -202,7 +224,7 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
         },
         structuralNotes:
           input.structuralNotes ??
-          "DIP-03: OCR coordinated structurally via OCR Runtime (no real OCR).",
+          "OCR-01: OCR coordinated via OCR Runtime (execution via process()/OCRProviderPort).",
       });
 
       if (!execution.ok) {
@@ -230,8 +252,6 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
         };
       }
 
-      // Referência estrutural ao OCR Provider Adapter — health/capabilities apenas.
-      // PROIBIDO: extração / HTTP / credenciais / OCR real nesta sprint.
       const ocrProvider = this.enterpriseDeps.getOCRProviderPort();
       const providerCaps = ocrProvider.capabilities();
       const providerHealth = await ocrProvider.health();
@@ -269,7 +289,7 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
         ocrProviderAdapterId: providerCaps.adapterId,
         updatedAt: nowIso(this.now),
         message:
-          "OCR coordinated structurally via OCR Runtime (Orchestrator + Provider Adapter — no real OCR).",
+          "OCR coordinated via OCR Runtime (Orchestrator + OCRProviderPort — execution via process()).",
         code: "COORDINATED",
         realOcrExecuted: false,
       };
@@ -305,6 +325,168 @@ export class DefaultOCRRuntimeAdapter implements OCRRuntimePort {
         session,
         message,
         code: "RUNTIME_BRIDGE_ERROR",
+        realOcrExecuted: false,
+      };
+    }
+  }
+
+  async process(input: ProcessOCRInput): Promise<ProcessOCRResult> {
+    const stamp = nowIso(this.now);
+    const runtimeSessionId = this.createSessionId();
+    const ocrProvider = this.enterpriseDeps.getOCRProviderPort();
+    const providerCaps = ocrProvider.capabilities();
+    const providerReferenceId = toProviderReferenceId(ocrProvider.providerId);
+    const documentId = input.documentId ?? input.documentIdentityReference?.documentId ?? "unknown";
+    const sessionId = input.sessionId ?? String(input.attributes?.sessionId ?? runtimeSessionId);
+
+    let session: CanonicalOCRSession = {
+      kind: "canonical-ocr-session",
+      runtimeSessionId,
+      status: "pending",
+      request: {
+        kind: "canonical-ocr-request",
+        identity: {
+          kind: "canonical-ocr-identity",
+          documentId,
+          documentKind: "capture-document",
+        },
+        metadata: {
+          kind: "canonical-ocr-metadata",
+          sessionId,
+          tenantRef:
+            input.tenantRef ??
+            (input.attributes?.tenantId != null ? String(input.attributes.tenantId) : undefined),
+          correlationId: input.correlationId,
+          channel: "ocr-runtime-process",
+          tags: ["ocr-01", "ocr-runtime", "process"],
+        },
+        reference: {
+          kind: "canonical-ocr-reference",
+          storageKey: String(input.attributes?.storagePath ?? "") || undefined,
+          captureRuntimeSessionId: input.captureRuntimeSessionId,
+          providerReferenceId: input.preferredProviderReference ?? providerReferenceId,
+        },
+        configuration: {
+          kind: "canonical-ocr-configuration",
+          preferredProviderReference: input.preferredProviderReference ?? providerReferenceId,
+          contentTypeHint: input.contentType,
+          languageHint: input.language,
+          channel: "ocr-runtime-process",
+          notes: "OCR-01: process via OCRProviderPort (no direct Azure access).",
+        },
+        structuralNotes: "OCR-01: OCR Runtime process → OCRProviderPort.process().",
+      },
+      providerReferenceId,
+      ocrProviderAdapterId: providerCaps.adapterId,
+      createdAt: stamp,
+      updatedAt: stamp,
+      realOcrExecuted: false,
+    };
+    this.store.setSession(session);
+
+    try {
+      session = { ...session, status: "processing", updatedAt: nowIso(this.now) };
+      this.store.setSession(session);
+
+      try {
+        const orchestrator = this.enterpriseDeps.getOrchestratorPort();
+        const execution = await orchestrator.startExecution({
+          correlationId: input.correlationId,
+          tenantRef: input.tenantRef,
+          channel: "ocr-runtime-process",
+          intakeRef: sessionId,
+          documentRef: documentId,
+          tags: ["ocr-01", "ocr-runtime", "process"],
+          customAttributes: {
+            source: "ocr-runtime-process",
+            requestId: input.requestId ?? null,
+            providerId: ocrProvider.providerId,
+            adapterId: providerCaps.adapterId,
+            captureRuntimeSessionId: input.captureRuntimeSessionId ?? null,
+          },
+          structuralNotes: "OCR-01: OCR execution coordinated via OCR Runtime → OCRProviderPort.",
+        });
+        if (execution.ok) {
+          session = {
+            ...session,
+            executionId: execution.context?.executionId,
+            updatedAt: nowIso(this.now),
+          };
+          this.store.setSession(session);
+        }
+      } catch {
+        // Orchestrator best-effort — OCR Provider Port permanece obrigatório.
+      }
+
+      const processInput: OCRProcessInput = {
+        requestId: input.requestId,
+        contentType: input.contentType,
+        language: input.language,
+        documentIdentityReference: input.documentIdentityReference ?? {
+          documentId,
+          kind: "document",
+        },
+        metadataReference: input.metadataReference,
+        rawDataReference: input.rawDataReference,
+        fileBytes: input.fileBytes,
+        signal: input.signal,
+        timeoutMs: input.timeoutMs,
+        retryCount: input.retryCount,
+        attributes: {
+          ...(input.attributes ?? {}),
+          sessionId,
+          documentId,
+          tenantId: input.tenantRef ?? null,
+          storagePath: input.attributes?.storagePath ?? null,
+        },
+      };
+
+      const providerResult = await ocrProvider.process(processInput);
+
+      session = {
+        ...session,
+        status: providerResult.ok ? "completed" : "failed",
+        updatedAt: nowIso(this.now),
+        message: providerResult.message,
+        code: providerResult.ok ? "OCR_PROCESSED" : "OCR_PROVIDER_FAILED",
+        errors: providerResult.ok ? undefined : [providerResult.message ?? "OCR_PROVIDER_FAILED"],
+        realOcrExecuted: providerResult.simulated !== true,
+      };
+      this.store.setSession(session);
+
+      return {
+        kind: "canonical-ocr-result",
+        ok: providerResult.ok,
+        runtimeSessionId,
+        session,
+        executionId: session.executionId,
+        providerReferenceId,
+        message: providerResult.message,
+        code: session.code,
+        realOcrExecuted: session.realOcrExecuted,
+        processing: providerResult.processing,
+        output: providerResult.output,
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      session = {
+        ...session,
+        status: "failed",
+        updatedAt: nowIso(this.now),
+        message,
+        code: "RUNTIME_PROCESS_ERROR",
+        errors: [message],
+        realOcrExecuted: false,
+      };
+      this.store.setSession(session);
+      return {
+        kind: "canonical-ocr-result",
+        ok: false,
+        runtimeSessionId,
+        session,
+        providerReferenceId,
+        message,
+        code: "RUNTIME_PROCESS_ERROR",
         realOcrExecuted: false,
       };
     }

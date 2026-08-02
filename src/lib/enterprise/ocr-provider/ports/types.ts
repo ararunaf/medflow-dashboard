@@ -35,7 +35,7 @@ export type {
 };
 
 /** Provedores / mecanismos OCR suportados na fundação (extensível). */
-export type OCRProviderId = "mock" | "test" | "default";
+export type OCRProviderId = "mock" | "test" | "default" | "azure";
 
 /** Status operacional declarado no registry. */
 export type OCRProviderStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";
@@ -104,8 +104,8 @@ export type OCRConfigurationValidation = {
 };
 
 /**
- * Input de process() — referências opacas apenas.
- * Sem upload, scanner, bytes de arquivo ou I/O.
+ * Input de process() — referências opacas + payload OCR-01.
+ * Mock ignora bytes/rede. Adapter Azure consome fileBytes via Port.
  */
 export type OCRProcessInput = {
   /** Identificador opcional da operação (trace). */
@@ -120,6 +120,14 @@ export type OCRProcessInput = {
   metadataReference?: ProcessingMetadataReference;
   /** Ref opaca a Storage (sem I/O). */
   rawDataReference?: ProcessingStorageReference;
+  /** Bytes do documento (OCR-01 — Azure Adapter). */
+  fileBytes?: Uint8Array;
+  /** Cancelamento cooperativo (OCR-01). */
+  signal?: AbortSignal;
+  /** Timeout total em ms (OCR-01). */
+  timeoutMs?: number;
+  /** Tentativas adicionais após a primeira falha (OCR-01). */
+  retryCount?: number;
   /** Bag livre — adapters não interpretam domínio. */
   attributes?: Readonly<Record<string, unknown>>;
 };
@@ -140,6 +148,9 @@ export type OCRProcessResult = {
   /** Indica resposta determinística de mock (nunca OCR real / rede). */
   simulated?: boolean;
 };
+
+/** Alias oficial do Adapter Azure (OCR-01). */
+export type AzureOCRProviderId = Extract<OCRProviderId, "azure">;
 
 /** Opções de resolução do OCRProviderPort (provider factory). */
 export type OCRProviderOptions = {

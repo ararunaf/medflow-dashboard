@@ -2,7 +2,8 @@
  * Tipos do Enterprise Runtime — ARCH-01 / DIP-01…DIP-06 / ARCH-02 (DIP-07).
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
- * Sem regras de negócio. Sem OCR/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
+ * Sem regras de negócio. Sem XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
+ * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -60,7 +61,7 @@ export type RegisterCaptureDocumentIntakeResult = {
   intakeId?: string;
   executionId?: string;
   runtimeSessionId?: string;
-  /** DIP-03 — sessão OCR Runtime (coordenação estrutural, sem OCR real). */
+  /** DIP-03 / OCR-01 — sessão OCR Runtime (coordenação; execução via processOcr). */
   ocrRuntimeSessionId?: string;
   ocrExecutionId?: string;
   /** DIP-04 — sessão Classification Runtime (coordenação estrutural, sem classificação real). */
@@ -107,14 +108,15 @@ export type EnterpriseRuntimeOptions = {
  * - inicializar Canonical Execution Orchestrator
  * - expor Document Intake Runtime (DIP-01)
  * - expor Capture Engine Runtime (DIP-02)
- * - expor OCR Runtime (DIP-03)
+ * - expor OCR Runtime (DIP-03 / OCR-01)
  * - expor Document Classification Runtime (DIP-04)
  * - expor Storage Manager Runtime (DIP-05)
  * - expor Document Search Runtime (DIP-06)
  * - expor AI Provider Runtime (ARCH-02 / DIP-07)
  * - expor bridge estrutural para o produto
  *
- * NÃO contém regras de negócio. NÃO executa OCR/classificação/storage/busca reais.
+ * NÃO contém regras de negócio. NÃO executa classificação/storage/busca reais.
+ * OCR: exclusivamente via OCRRuntimePort → OCRProviderPort.
  * IA: exclusivamente via AIProviderRuntimePort → AIProviderPort.
  */
 export interface EnterpriseRuntime {
@@ -132,8 +134,11 @@ export interface EnterpriseRuntime {
   /** Resolve CaptureEngineRuntimePort (DIP-02). */
   getCaptureEngineRuntimePort(): CaptureEngineRuntimePort;
 
-  /** Resolve OCRRuntimePort (DIP-03). */
+  /** Resolve OCRRuntimePort (DIP-03 / OCR-01). */
   getOCRRuntimePort(): OCRRuntimePort;
+
+  /** Resolve OCRProviderPort (EPC-15 / OCR-01) — Adapter oficial. */
+  getOCRProviderPort(): OCRProviderPort;
 
   /** Resolve DocumentClassificationRuntimePort (DIP-04). */
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;

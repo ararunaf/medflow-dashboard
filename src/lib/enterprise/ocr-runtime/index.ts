@@ -6,9 +6,8 @@
  *     → OCRRuntimePort → Canonical Execution Orchestrator
  *     → OCR Provider Adapter → Provider futuro
  *
- * DIP-03: infraestrutura oficial de coordenação OCR — sem OCR real,
- * sem extração de texto, sem interpretação documental, sem Azure /
- * Google Vision / Textract / Tesseract, sem I/O externo.
+ * DIP-03 / OCR-01: infraestrutura oficial de coordenação e execução OCR.
+ * HTTP Azure exclusivamente no AzureDocumentIntelligenceAdapter (OCRProviderPort).
  */
 export type {
   CanonicalOCRCapabilities,
@@ -35,6 +34,8 @@ export type {
   OCRRuntimeProviderId,
   OCRRuntimeProviderOptions,
   OCRRuntimeSessionStatus,
+  ProcessOCRInput,
+  ProcessOCRResult,
 } from "./ports";
 
 export {

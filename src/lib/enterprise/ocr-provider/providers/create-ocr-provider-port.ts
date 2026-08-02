@@ -20,7 +20,7 @@ function getSharedFactory(): OCRProviderFactory {
 /**
  * Cria o OCRProviderPort para o provedor solicitado.
  *
- * Default da fundação: `mock` (determinístico, sem rede, sem OCR real).
+ * Default da factory: `mock`. O Enterprise Runtime (OCR-01) resolve `azure`.
  */
 export function createOCRProviderPort(options: OCRProviderOptions = {}): OCRProviderPort {
   return getSharedFactory().create(options);

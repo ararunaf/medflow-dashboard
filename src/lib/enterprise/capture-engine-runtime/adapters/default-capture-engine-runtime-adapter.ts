@@ -4,7 +4,7 @@
  * Utiliza exclusivamente Ports Enterprise injetados:
  *   Canonical Execution Orchestrator → DocumentIntakeRuntime
  *     → DocumentIntakePort → Adapter → Implementação existente
- *   → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+ *   → OCRRuntimePort → Orchestrator → OCRProviderPort → Adapter (OCR-01)
  *   → DocumentClassificationRuntimePort → Orchestrator
  *     → Classification Provider Adapter (referência estrutural)
  *   → StorageManagerRuntimePort → Orchestrator
@@ -13,8 +13,7 @@
  *     → Search Provider Adapter (referência estrutural)
  *
  * NÃO reimplementa intake. NÃO cria adapters paralelos.
- * NÃO executa OCR real, IA, XML, TISS, parser, classificação real, storage real,
- * Workflow, Rule Engine, versionamento ou busca real.
+ * NÃO chama Azure/HTTP. OCR real exclusivamente via OCRRuntimePort.process().
  */
 import { createCaptureRuntimeSessionId } from "../ports/identity";
 import type { CaptureEngineRuntimePort } from "../ports/capture-engine-runtime-port";
@@ -27,6 +26,8 @@ import type {
   GetCaptureRuntimeSessionResult,
   ListCaptureRuntimeSessionsInput,
   ListCaptureRuntimeSessionsResult,
+  ProcessCaptureOcrInput,
+  ProcessCaptureOcrResult,
   RegisterCaptureInput,
   RegisterCaptureResult,
 } from "../ports/types";
@@ -60,6 +61,7 @@ function foundationCapabilities(): CaptureEngineRuntimeCapabilities {
     usesCanonicalExecutionOrchestrator: true,
     usesDocumentIntakeRuntime: true,
     usesDocumentIntakePort: true,
+    supportsProcessOcr: true,
     usesOCRRuntime: true,
     usesDocumentClassificationRuntime: true,
     usesStorageManagerRuntime: true,
@@ -300,7 +302,7 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         };
       }
 
-      // DIP-03 — coordenação estrutural via OCR Runtime (sem OCR real / sem process()).
+      // OCR-01 — coordenação via OCR Runtime (execução real via processOcr / process).
       const ocrRuntime = this.enterpriseDeps.getOCRRuntimePort();
       const ocrResult = await ocrRuntime.coordinateOcr({
         kind: "canonical-ocr-request",
@@ -316,7 +318,7 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
           tenantRef: input.metadata.tenantRef,
           correlationId: input.metadata.correlationId,
           channel,
-          tags: ["dip-03", "capture-engine-runtime", "ocr-runtime", ...(input.metadata.tags ?? [])],
+          tags: ["ocr-01", "capture-engine-runtime", "ocr-runtime", ...(input.metadata.tags ?? [])],
           customAttributes: {
             sessionId: input.metadata.sessionId,
             documentId: input.identity.documentId,
@@ -337,29 +339,29 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
           executionId: execution.context?.executionId,
           captureRuntimeSessionId: runtimeSessionId,
           captureExecutionId: execution.context?.executionId,
-          providerReferenceId: "mock",
+          providerReferenceId: "azure",
         },
         capabilities: {
           kind: "canonical-ocr-capabilities",
-          supportsPdf: false,
-          supportsImage: false,
+          supportsPdf: true,
+          supportsImage: true,
           supportsBatch: false,
           supportsStreaming: false,
-          supportsHandwriting: false,
-          supportsTables: false,
+          supportsHandwriting: true,
+          supportsTables: true,
           supportsForms: false,
-          supportsConfidenceScore: false,
-          declared: ["capture-engine-runtime", "ocr-runtime-structural"],
+          supportsConfidenceScore: true,
+          declared: ["capture-engine-runtime", "ocr-runtime", "ocr-01"],
         },
         configuration: {
           kind: "canonical-ocr-configuration",
-          preferredProviderReference: "mock",
+          preferredProviderReference: "azure",
           channel,
           priority: input.configuration?.priority ?? "NORMAL",
-          notes: "DIP-03: structural OCR coordination from Capture Engine Runtime (no real OCR).",
+          notes: "OCR-01: OCR coordination from Capture Engine Runtime via OCRProviderPort.",
         },
         structuralNotes:
-          "DIP-03: OCR coordinated from Capture Engine Runtime (no real OCR / no external providers).",
+          "OCR-01: OCR coordinated from Capture Engine Runtime → OCR Runtime → OCRProviderPort.",
       });
 
       // DIP-04 — coordenação estrutural via Document Classification Runtime (sem classificação real).
@@ -647,6 +649,14 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         code: "RUNTIME_BRIDGE_ERROR",
       };
     }
+  }
+
+  async processOcr(input: ProcessCaptureOcrInput): Promise<ProcessCaptureOcrResult> {
+    const ocrRuntime = this.enterpriseDeps.getOCRRuntimePort();
+    return ocrRuntime.process({
+      ...input,
+      preferredProviderReference: input.preferredProviderReference ?? "azure",
+    });
   }
 
   async getSession(input: GetCaptureRuntimeSessionInput): Promise<GetCaptureRuntimeSessionResult> {

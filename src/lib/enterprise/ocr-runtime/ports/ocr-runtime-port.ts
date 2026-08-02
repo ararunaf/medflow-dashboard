@@ -1,16 +1,15 @@
 /**
- * OCRRuntimePort — contrato único do OCR Runtime (DIP-03).
+ * OCRRuntimePort — contrato único do OCR Runtime (DIP-03 / OCR-01).
  *
  * Application / Enterprise Runtime / Capture Engine Runtime dependem
- * exclusivamente desta interface para coordenação estrutural de OCR.
+ * exclusivamente desta interface para coordenação e execução OCR.
  *
- * Fluxo obrigatório (sem implementação paralela / sem OCR real):
+ * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCRRuntimePort → Canonical Execution Orchestrator
- *     → OCR Provider Adapter → Provider futuro
+ *     → OCRProviderPort → AzureDocumentIntelligenceAdapter → Azure
  *
- * NÃO executa OCR. NÃO extrai texto. NÃO interpreta documentos.
- * NÃO conecta Azure / Google Vision / Textract / Tesseract.
+ * NÃO contém HTTP Azure. NÃO interpreta documentos. NÃO conhece TISS.
  */
 import type {
   CoordinateOCRInput,
@@ -23,6 +22,8 @@ import type {
   OCRRuntimeCapabilities,
   OCRRuntimeHealth,
   OCRRuntimeProviderId,
+  ProcessOCRInput,
+  ProcessOCRResult,
 } from "./types";
 
 export interface OCRRuntimePort {
@@ -32,14 +33,20 @@ export interface OCRRuntimePort {
   /** Verificação leve de prontidão (consulta Ports Enterprise quando disponíveis). */
   health(): Promise<OCRRuntimeHealth>;
 
-  /** Capacidades estáticas do adapter ativo (OCR tecnológico = FALSE). */
+  /** Capacidades estáticas do adapter ativo. */
   capabilities(): OCRRuntimeCapabilities;
 
   /**
    * Coordena estruturalmente uma sessão OCR via Orchestrator + OCR Provider Adapter.
-   * NÃO executa OCR. NÃO invoca extração real no Provider Adapter.
+   * Sem bytes: coordenação (health/capabilities). Não dispara Azure sem process().
    */
   coordinateOcr(input: CoordinateOCRInput): Promise<CoordinateOCRResult>;
+
+  /**
+   * Executa OCR real exclusivamente via OCRProviderPort.process().
+   * Retorna Canonical OCR Result com ProcessingOutput EPC-13 quando ok.
+   */
+  process(input: ProcessOCRInput): Promise<ProcessOCRResult>;
 
   /** Obtém sessão OCR por id. */
   getSession(input: GetOCRRuntimeSessionInput): Promise<GetOCRRuntimeSessionResult>;
@@ -47,6 +54,6 @@ export interface OCRRuntimePort {
   /** Lista sessões OCR (filtros estruturais opcionais). */
   listSessions(input?: ListOCRRuntimeSessionsInput): Promise<ListOCRRuntimeSessionsResult>;
 
-  /** Lista referências estruturais a providers futuros (sem conexão). */
+  /** Lista referências a providers (HTTP somente no Adapter do Port). */
   listProviderReferences(): Promise<ListOCRProviderReferencesResult>;
 }

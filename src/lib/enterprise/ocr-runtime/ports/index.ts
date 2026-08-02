@@ -24,6 +24,8 @@ export type {
   OCRRuntimeProviderId,
   OCRRuntimeProviderOptions,
   OCRRuntimeSessionStatus,
+  ProcessOCRInput,
+  ProcessOCRResult,
 } from "./types";
 
 export { STRUCTURAL_OCR_PROVIDER_REFERENCES, resolveStructuralProviderReference } from "./types";

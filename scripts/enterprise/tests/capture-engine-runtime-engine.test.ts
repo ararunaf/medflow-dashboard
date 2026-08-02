@@ -147,6 +147,7 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_CAPTURE_ENGINE_RUNTIME_ADAPTER_ID);
     assert.equal(caps.supportsRegisterCapture, true);
+    assert.equal(caps.supportsProcessOcr, true);
     assert.equal(caps.implementsOcr, false);
     assert.equal(caps.implementsAi, false);
     assert.equal(caps.implementsTiss, false);
@@ -183,6 +184,7 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     assert.equal(port.capabilities().usesCanonicalExecutionOrchestrator, true);
     assert.equal(port.capabilities().usesDocumentIntakePort, true);
     assert.equal(port.capabilities().usesOCRRuntime, true);
+    assert.equal(port.capabilities().supportsProcessOcr, true);
     assert.equal(port.capabilities().usesDocumentClassificationRuntime, true);
     assert.equal(port.capabilities().usesStorageManagerRuntime, true);
     assert.equal(port.capabilities().usesDocumentSearchRuntime, true);

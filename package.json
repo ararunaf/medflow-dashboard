@@ -78,6 +78,7 @@
     "enterprise:document-processor:test": "npx tsx --test scripts/enterprise/tests/document-processor-engine.test.ts",
     "enterprise:processing-provider:test": "npx tsx --test scripts/enterprise/tests/processing-provider-engine.test.ts",
     "enterprise:ocr-provider:test": "npx tsx --test scripts/enterprise/tests/ocr-provider-engine.test.ts",
+    "enterprise:ocr-provider-azure:test": "npx tsx --test scripts/enterprise/tests/ocr-provider-azure-engine.test.ts",
     "enterprise:ai-orchestrator:test": "npx tsx --test scripts/enterprise/tests/ai-orchestrator-engine.test.ts",
     "enterprise:contract-rule-binding:test": "npx tsx --test scripts/enterprise/tests/contract-rule-binding-engine.test.ts",
     "enterprise:ai-auditor:test": "npx tsx --test scripts/enterprise/tests/ai-auditor-engine.test.ts",

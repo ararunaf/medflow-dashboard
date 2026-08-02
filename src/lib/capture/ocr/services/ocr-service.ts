@@ -1,7 +1,10 @@
 /**
  * OcrService — orquestra captura → OCR → persistência.
- * Nunca referencia Azure diretamente — sempre via OcrOrchestrator.
- * MEDICFLOW-OCR-IMPLEMENTATION-01
+ * Nunca referencia Azure diretamente — sempre via OcrOrchestrator,
+ * que por sua vez utiliza exclusivamente a Enterprise Foundation (OCR-01):
+ *   Produto → Enterprise Runtime → Capture Runtime → OCR Runtime
+ *     → OCRProviderPort → AzureDocumentIntelligenceAdapter
+ * MEDICFLOW-OCR-IMPLEMENTATION-01 / OCR-01
  */
 import { NotFoundError, ValidationError } from "@/lib/domain/operations/errors";
 import type { Json, JsonObject } from "@/lib/database.types";

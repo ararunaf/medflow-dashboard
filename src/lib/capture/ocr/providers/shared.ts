@@ -96,21 +96,9 @@ export const CAPTURE_OCR_SUPPORTED_MIMES = [
   "image/tiff",
 ] as const;
 
-export function resolveAzureConfig(): { endpoint: string; apiKey: string } | null {
-  const endpoint =
-    (typeof process !== "undefined" && process.env?.MEDFLOW_AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT) ||
-    (typeof process !== "undefined" && process.env?.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT);
-  const apiKey =
-    (typeof process !== "undefined" && process.env?.MEDFLOW_AZURE_DOCUMENT_INTELLIGENCE_KEY) ||
-    (typeof process !== "undefined" && process.env?.AZURE_DOCUMENT_INTELLIGENCE_KEY);
-
-  if (
-    typeof endpoint === "string" &&
-    endpoint.length > 0 &&
-    typeof apiKey === "string" &&
-    apiKey.length > 0
-  ) {
-    return { endpoint: endpoint.replace(/\/$/, ""), apiKey };
-  }
-  return null;
-}
+/**
+ * @deprecated OCR-01 — credenciais resolvidas exclusivamente no
+ * AzureDocumentIntelligenceAdapter (Enterprise). Mantido como reexport
+ * para compatibilidade de imports de produto/testes.
+ */
+export { resolveAzureDocumentIntelligenceConfig as resolveAzureConfig } from "@/lib/enterprise/ocr-provider";

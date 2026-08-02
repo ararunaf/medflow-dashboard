@@ -5,7 +5,7 @@
  * Ponto único de acesso do produto aos Ports Enterprise.
  * Bridge Captura → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime
  *   → DocumentIntakePort → Adapter → Implementação existente
- *   → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
+ *   → OCRRuntimePort → Orchestrator → OCRProviderPort → Azure Adapter (OCR-01)
  *   → DocumentClassificationRuntimePort → Orchestrator
  *   → Classification Provider Adapter (referência estrutural)
  *   → StorageManagerRuntimePort → Orchestrator
@@ -13,7 +13,7 @@
  *   → DocumentSearchRuntimePort → Orchestrator
  *   → Search Provider Adapter (referência estrutural)
  *   → AIProviderRuntimePort → Orchestrator → AIProviderPort → Adapter → OpenAI.
- * Não executa OCR real, classificação real, storage real, busca real, parser, TISS, filas ou workers reais.
+ * OCR: exclusivamente via OCR Runtime → OCRProviderPort (OCR-01) — sem bypass HTTP Azure.
  * IA: exclusivamente via AI Provider Runtime (ARCH-02) — sem bypass HTTP.
  */
 import { createAIProviderPort } from "../ai-provider/providers/create-ai-provider-port";
@@ -80,8 +80,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOrchestratorPort: () => this.orchestratorPort,
         },
       });
-    this.ocrProviderPort =
-      options.ocrProviderPort ?? createOCRProviderPort({ provider: "default" });
+    // OCR-01: Azure Document Intelligence oficial atrás do OCRProviderPort — sem bypass no produto.
+    this.ocrProviderPort = options.ocrProviderPort ?? createOCRProviderPort({ provider: "azure" });
     this.ocrRuntimePort =
       options.ocrRuntimePort ??
       createOCRRuntimePort({
@@ -162,6 +162,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
 
   getOCRRuntimePort(): OCRRuntimePort {
     return this.ocrRuntimePort;
+  }
+
+  getOCRProviderPort(): OCRProviderPort {
+    return this.ocrProviderPort;
   }
 
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort {
