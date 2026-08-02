@@ -12,10 +12,12 @@
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
  *   → SearchProviderPort → DefaultSearchProviderAdapter (SEARCH-01)
+ *   → TISSRuntimePort → Orchestrator → TISSProviderPort → DefaultTISSProviderAdapter (TISS-01)
  *   → AIProviderRuntimePort → Orchestrator → AIProviderPort → Adapter → OpenAI.
  * OCR: exclusivamente via OCR Runtime → OCRProviderPort (OCR-01) — sem bypass HTTP Azure.
  * Storage: exclusivamente via Storage Manager Runtime → StorageProviderPort (STORAGE-01).
  * Search: exclusivamente via Document Search Runtime → SearchProviderPort (SEARCH-01).
+ * TISS: exclusivamente via TISS Runtime → TISSProviderPort (TISS-01) — sem XML/operadoras.
  * IA: exclusivamente via AI Provider Runtime (ARCH-02) — sem bypass HTTP.
  */
 import { createAIProviderPort } from "../ai-provider/providers/create-ai-provider-port";
@@ -47,6 +49,10 @@ import { createStorageManagerRuntimePort } from "../storage-manager-runtime/prov
 import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports/storage-manager-runtime-port";
 import { createStorageProviderPort } from "../storage-provider/providers/create-storage-provider-port";
 import type { StorageProviderPort } from "../storage-provider/ports/storage-provider-port";
+import { createTISSProviderPort } from "../tiss-provider/providers/create-tiss-provider-port";
+import type { TISSProviderPort } from "../tiss-provider/ports/tiss-provider-port";
+import { createTISSRuntimePort } from "../tiss-runtime/providers/create-tiss-runtime-port";
+import type { TISSRuntimePort } from "../tiss-runtime/ports/tiss-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -72,6 +78,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly searchProviderPort: SearchProviderPort;
   private readonly documentSearchRuntimePort: DocumentSearchRuntimePort;
+  private readonly tissProviderPort: TISSProviderPort;
+  private readonly tissRuntimePort: TISSRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
   private readonly aiProviderRuntimePort: AIProviderRuntimePort;
@@ -159,6 +167,18 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getDocumentSearchRuntimePort: () => this.documentSearchRuntimePort,
         },
       });
+    // TISS-01: Enterprise TISS Provider oficial atrás do TISSProviderPort — sem XML/operadoras.
+    this.tissProviderPort =
+      options.tissProviderPort ?? createTISSProviderPort({ provider: "enterprise" });
+    this.tissRuntimePort =
+      options.tissRuntimePort ??
+      createTISSRuntimePort({
+        provider: "default",
+        enterpriseDeps: {
+          getOrchestratorPort: () => this.orchestratorPort,
+          getTISSProviderPort: () => this.tissProviderPort,
+        },
+      });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
     this.aiProviderPort = options.aiProviderPort ?? createAIProviderPort({ provider: "openai" });
     this.aiProviderRuntimePort =
@@ -220,6 +240,14 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.documentSearchRuntimePort;
   }
 
+  getTISSProviderPort(): TISSProviderPort {
+    return this.tissProviderPort;
+  }
+
+  getTISSRuntimePort(): TISSRuntimePort {
+    return this.tissRuntimePort;
+  }
+
   getAIProviderPort(): AIProviderPort {
     return this.aiProviderPort;
   }
@@ -243,6 +271,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       storageManagerRuntimeHealth,
       searchProviderHealth,
       documentSearchRuntimeHealth,
+      tissProviderHealth,
+      tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
     ] = await Promise.all([
@@ -258,6 +288,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.storageManagerRuntimePort.health(),
       this.searchProviderPort.health(),
       this.documentSearchRuntimePort.health(),
+      this.tissProviderPort.health(),
+      this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
     ]);
@@ -275,6 +307,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       storageManagerRuntimeHealth.ok &&
       searchProviderHealth.ok &&
       documentSearchRuntimeHealth.ok &&
+      tissProviderHealth.ok &&
+      tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
     return {
@@ -293,10 +327,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       searchProviderOk: searchProviderHealth.ok,
       documentSearchRuntimeOk: documentSearchRuntimeHealth.ok,
+      tissProviderOk: tissProviderHealth.ok,
+      tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (TISSRuntime/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

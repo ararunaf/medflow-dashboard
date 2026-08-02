@@ -54,9 +54,9 @@ A partir de ARCH-DEBT-01:
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
 | Enterprise Infrastructure | INF-01…INF-05, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
-| OCR / Classification / Storage | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01 |
+| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
-| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01 |
+| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01 |
 
 ### Nota sobre Gates
 
@@ -72,6 +72,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | OCR-GATE-01 | `ba3e0f85-ac8e-4c51-9ecf-2440c40638f2` | GO |
 | CLASS-GATE-01 | `399a1900-51f9-4823-9309-831151d66675` | GO |
 | STORAGE-GATE-01 | `6a8c25e2-4b17-47c6-b406-42934ae44830` | GO COM RESSALVAS |
+| SEARCH-GATE-01 | `4ea20d57-a783-4ec7-9d65-4ccc429067d0` | GO |
 
 ---
 
@@ -79,17 +80,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **54** |
+| **Total de ressalvas registradas** | **61** |
 | Prioridade **Alta** | **12** |
 | Prioridade **Média** | **18** |
-| Prioridade **Baixa** | **24** |
+| Prioridade **Baixa** | **31** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02) | **4** |
-| Criticidade **Não bloqueante** | **50** |
+| Criticidade **Não bloqueante** | **57** |
 | Status **Resolvida** | **6** |
 | Status **Planejada** | **3** |
-| Status **Aceita** | **44** |
+| Status **Aceita** | **51** |
 | Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **48** |
+| Pendentes (Aberta + Aceita + Planejada) | **55** |
 
 ### Bloqueantes — estado atual
 
@@ -100,8 +101,9 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | AER-GA02-B3 | Application 0/43 | **Resolvida** (ARCH-01 / decisão ECS-01) | Não |
 | AER-GA02-B4 | Staging Foundation pendente | **Aceita** | Não bloqueia SEARCH-01 (Gates posteriores não reemitiram NO-GO) |
 
-**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional para SEARCH-01.**  
-STORAGE-GATE-01 autorizou SEARCH-01 **com risco aceito** da ressalva Alta de convergência Runtime de Storage.
+**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional para TISS-GATE-01.**  
+TISS-01 implementou o Enterprise TISS Provider/Runtime (estrutural). **AER-GA03-A4** permanece Aceita (dual-path produto vs enterprise — convergência pós TISS-GATE-01).  
+SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).
 
 ---
 
@@ -135,7 +137,7 @@ STORAGE-GATE-01 autorizou SEARCH-01 **com risco aceito** da ressalva Alta de con
 | AER-GA03-A1 | Dual-path Captura (estrutural vs funcional) | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | Consolidação dual-path |
 | AER-GA03-A2 | OCR real fora do OCR Runtime | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | **Resolvida** | OCR-01 / OCR-GATE-01 |
 | AER-GA03-A3 | Storage Captura fora do Storage Manager | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | STORAGE-CONV-01 (ver AER-STG-A1) |
-| AER-GA03-A4 | TISS produto vs `enterprise/tiss-*` | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | Fase TISS / composição Runtime |
+| AER-GA03-A4 | TISS produto vs `enterprise/tiss-*` | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | TISS-CONV-01 (pós TISS-GATE-01) |
 | AER-GA03-M5 | Módulos EPC não compostos no Runtime | GATE-ARCH-03 | Architecture | Média | Não bloqueante | Aceita | Composição por fase |
 | AER-GA03-M6 | INF in-memory insuficiente para escala | GATE-ARCH-03 | Scalability | Média | Não bloqueante | Aceita | Adapters reais INF |
 | AER-GA03-M7 | Modelos canônicos não unificados | GATE-ARCH-03 | Maintainability | Média | Não bloqueante | Aceita | Consolidação na ativação |
@@ -164,6 +166,13 @@ STORAGE-GATE-01 autorizou SEARCH-01 **com risco aceito** da ressalva Alta de con
 | AER-STG-M1 | Coexistência EPC-02 `StoragePort` | STORAGE-GATE-01 | Maintainability | Média | Não bloqueante | **Planejada** | **STORAGE-DEBT-01** |
 | AER-STG-B1 | Observability Storage estrutural | STORAGE-GATE-01 | Observability | Baixa | Não bloqueante | **Planejada** | **OBS-STORAGE-01** |
 | AER-STG-B2 | Runtime default Storage in-memory | STORAGE-GATE-01 | Infrastructure | Baixa | Não bloqueante | Aceita | Bind explícito / ops |
+| AER-SRCHG-B1 | Logging/telemetria Search estrutural | SEARCH-GATE-01 | Observability | Baixa | Não bloqueante | Aceita | Acoplar OBS (opcional) |
+| AER-SRCHG-B2 | Catálogo Search in-memory | SEARCH-GATE-01 | Scalability | Baixa | Não bloqueante | Aceita | Adapter indexado futuro |
+| AER-SRCHG-B3 | Escape hatch `getSearchProviderPort()` | SEARCH-GATE-01 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-SRCHG-B4 | MQ/Workers/Scheduler não acoplados ao Search | SEARCH-GATE-01 | Scalability | Baixa | Não bloqueante | Aceita | Bridge Search→INF (opcional) |
+| AER-TISS-B1 | Logging/telemetria TISS estrutural | TISS-01 | Observability | Baixa | Não bloqueante | Aceita | Acoplar OBS (opcional) |
+| AER-TISS-B2 | Escape hatch `getTISSProviderPort()` | TISS-01 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-TISS-B3 | TISS-01 sem XML/dispatch reais | TISS-01 | Architecture | Baixa | Não bloqueante | Aceita | Sprints funcionais pós TISS-GATE-01 |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -363,13 +372,58 @@ Ver tabela resumida (AER-GA03-M5…M9, B10…B13). Todas **Não bloqueantes**, s
 
 ---
 
-### 6.6 OCR-GATE-01 / CLASS-GATE-01 / STORAGE-GATE-01
+### 6.6 OCR-GATE-01 / CLASS-GATE-01 / STORAGE-GATE-01 / SEARCH-GATE-01
 
 #### OCR-GATE-01 (GO) — AER-OCRG-B1…B4
 Riscos **Baixa**, **Não bloqueantes**, status **Aceita**. Sem risco Alta/bloqueante.
 
 #### CLASS-GATE-01 (GO) — AER-CLSG-B1…B4
 Riscos **Baixa**, **Não bloqueantes**, status **Aceita**. “Nenhum risco Alta ou bloqueante.”
+
+#### SEARCH-GATE-01 (GO) — AER-SRCHG-B1…B4
+Riscos **Baixa**, **Não bloqueantes**, status **Aceita**. Sem risco Alta/bloqueante.  
+Busca documental Enterprise exclusivamente via `SearchProviderPort` → Adapter → `StorageProviderPort`.  
+`coordinateSearch` no Capture permanece coordenação estrutural (`realSearchExecuted=false`); execução real via `DocumentSearchRuntimePort.search()` / `SearchProviderPort.search()`.
+
+##### AER-SRCHG-B1
+- **Título:** Logging/telemetria Search estrutural  
+- **Descrição:** Logs/telemetria retornam no resultado canônico do Adapter; sem acoplamento à Observability Foundation.  
+- **Origem:** SEARCH-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** OBS-SEARCH-01 (opcional)
+
+##### AER-SRCHG-B2
+- **Título:** Catálogo Search in-memory  
+- **Descrição:** `DefaultSearchProviderAdapter` indexa/consulta via `InMemorySearchCatalog`; escala a milhões de documentos exige adapter indexado futuro sem quebrar o Port.  
+- **Origem:** SEARCH-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Adapter indexado futuro  
+- **Impacto alto volume (20 mil boletins/mês):** Não bloqueia certificação do Port; para busca produtiva em alto volume, planejar índice persistente/distribuído atrás do mesmo `SearchProviderPort`.
+
+##### AER-SRCHG-B3
+- **Título:** Escape hatch `getSearchProviderPort()` no Enterprise Runtime  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getAIProviderPort` / AER-GA03A-R1). Cadeia oficial permanece Runtime → Capture → Document Search Runtime → Port.  
+- **Origem:** SEARCH-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+##### AER-SRCHG-B4
+- **Título:** MQ/Workers/Scheduler não acoplados ao Search  
+- **Descrição:** Fundação INF existe; Search não consome filas/workers/cron.  
+- **Origem:** SEARCH-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Bridge Search→INF (opcional)
+
+#### TISS-01 — AER-TISS-B1…B3
+Riscos **Baixa**, **Não bloqueantes**, status **Aceita**. Infraestrutura Enterprise TISS sem XML/dispatch reais.  
+Cadeia oficial: Enterprise Runtime → TISS Runtime → `TISSProviderPort` → Adapter. Sem lógica de operadora/contrato/tenant.
+
+##### AER-TISS-B1
+- **Título:** Logging/telemetria TISS estrutural  
+- **Descrição:** Logs/telemetria retornam no resultado canônico do Adapter; sem acoplamento à Observability Foundation.  
+- **Origem:** TISS-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** OBS-TISS-01 (opcional)
+
+##### AER-TISS-B2
+- **Título:** Escape hatch `getTISSProviderPort()` no Enterprise Runtime  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getAIProviderPort` / AER-GA03A-R1). Cadeia oficial permanece Runtime → TISS Runtime → Port.  
+- **Origem:** TISS-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+##### AER-TISS-B3
+- **Título:** TISS-01 sem XML/dispatch reais  
+- **Descrição:** `realTissExecuted=false` por design nesta sprint; sem XML, envio a operadoras, validações clínicas ou regras ANS.  
+- **Origem:** TISS-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Sprints funcionais pós TISS-GATE-01
 
 #### STORAGE-GATE-01 (GO COM RESSALVAS)
 
@@ -445,6 +499,22 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 4. Fica autorizado o início da próxima Sprint: **SEARCH-01 — Enterprise Search Provider**, sob o risco aceito de **AER-STG-A1** (STORAGE-GATE-01).  
 5. A certificação plena de produção do Storage permanece condicionada a **STORAGE-CONV-01**.
 
+### Atualização SEARCH-GATE-01 (02/08/2026)
+
+1. **SEARCH-01 encerrada oficialmente** — Enterprise Search certificado (**GO**).  
+2. Novas ressalvas Baixa: **AER-SRCHG-B1…B4** (Aceitas, não bloqueantes).  
+3. **AER-GA03A-R4** permanece **Resolvida** (CLASS-01 + SEARCH-01).  
+4. Roadmap liberado para **TISS-01 — Enterprise TISS Provider**.  
+5. Nenhuma ressalva Alta/bloqueante nova no Search; AER-STG-A1 permanece Planejada (Storage).
+
+### Atualização TISS-01 (02/08/2026)
+
+1. **TISS-01 implementado** — Enterprise TISS Provider + TISS Runtime (estrutural; `realTissExecuted=false`).  
+2. Cadeia oficial: Enterprise Runtime → TISS Runtime → `TISSProviderPort` → `DefaultTISSProviderAdapter`.  
+3. Novas ressalvas Baixa: **AER-TISS-B1…B3** (Aceitas, não bloqueantes).  
+4. **AER-GA03-A4** permanece **Aceita** (dual-path produto vs `enterprise/tiss-*` — convergência em TISS-CONV-01 pós Gate).  
+5. Roadmap liberado para **TISS-GATE-01** (certificação de desacoplamento). **Não iniciar funcionalidades TISS reais antes do Gate.**
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -452,3 +522,5 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | Data | Sprint | Alteração |
 |------|--------|-----------|
 | 02/08/2026 | ARCH-DEBT-01 | Criação do registro oficial e consolidação inicial |
+| 02/08/2026 | SEARCH-GATE-01 | Certificação Search (GO); AER-SRCHG-B1…B4; liberação TISS-01 |
+| 02/08/2026 | TISS-01 | Enterprise TISS Provider/Runtime; AER-TISS-B1…B3; liberação TISS-GATE-01 |

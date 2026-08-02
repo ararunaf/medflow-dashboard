@@ -2,9 +2,11 @@
  * Tipos do Enterprise Runtime — ARCH-01 / DIP-01…DIP-06 / ARCH-02 (DIP-07).
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
- * Sem regras de negócio. Sem XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
+ * Sem regras de negócio. Sem XML/TISS reais / classificação/storage/busca reais. Sem filas/workers reais.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
+ * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
+ * TISS: acesso exclusivo via TISS Runtime → TISSProviderPort (TISS-01) — estrutural.
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -23,6 +25,8 @@ import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports
 import type { StorageProviderPort } from "../storage-provider/ports/storage-provider-port";
 import type { AIProviderPort } from "../ai-provider/ports/ai-provider-port";
 import type { AIProviderRuntimePort } from "../ai-provider-runtime/ports/ai-provider-runtime-port";
+import type { TISSProviderPort } from "../tiss-provider/ports/tiss-provider-port";
+import type { TISSRuntimePort } from "../tiss-runtime/ports/tiss-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -45,6 +49,8 @@ export type EnterpriseRuntimeHealth = {
   storageProviderOk?: boolean;
   searchProviderOk?: boolean;
   documentSearchRuntimeOk?: boolean;
+  tissProviderOk?: boolean;
+  tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
 };
@@ -105,6 +111,8 @@ export type EnterpriseRuntimeOptions = {
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   searchProviderPort?: SearchProviderPort;
   documentSearchRuntimePort?: DocumentSearchRuntimePort;
+  tissProviderPort?: TISSProviderPort;
+  tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
 };
@@ -169,6 +177,12 @@ export interface EnterpriseRuntime {
 
   /** Resolve DocumentSearchRuntimePort (DIP-06 / SEARCH-01). */
   getDocumentSearchRuntimePort(): DocumentSearchRuntimePort;
+
+  /** Resolve TISSProviderPort (TISS-01) — Adapter oficial. */
+  getTISSProviderPort(): TISSProviderPort;
+
+  /** Resolve TISSRuntimePort (TISS-01). */
+  getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */
   getAIProviderPort(): AIProviderPort;
