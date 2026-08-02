@@ -23,6 +23,7 @@
  * INF-02: infraestrutura estrutural de Workers exclusiva via ExecutionWorkerPort.
  * INF-03: infraestrutura estrutural de Schedulers exclusiva via ExecutionSchedulerPort.
  * INF-04: infraestrutura estrutural de Observabilidade exclusiva via ExecutionObservabilityPort.
+ * INF-05: infraestrutura estrutural de Health Center exclusiva via ExecutionHealthCenterPort.
  */
 import { createExecutionCapabilityRegistryPort } from "../../execution-capability-registry/providers/create-execution-capability-registry-port";
 import type { ExecutionCapabilityRegistryPort } from "../../execution-capability-registry/ports/execution-capability-registry-port";
@@ -43,6 +44,8 @@ import { createExecutionSchedulerPort } from "../../scheduler-foundation/provide
 import type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/execution-scheduler-port";
 import { createExecutionObservabilityPort } from "../../observability-foundation/providers/execution-observability-provider";
 import type { ExecutionObservabilityPort } from "../../observability-foundation/ports/execution-observability-port";
+import { createExecutionHealthCenterPort } from "../../health-center-foundation/providers/execution-health-center-provider";
+import type { ExecutionHealthCenterPort } from "../../health-center-foundation/ports/execution-health-center-port";
 import { createExecutionEventBusPort } from "../../execution-event-bus/providers/create-execution-event-bus-port";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
 import { createExecutionPolicyRegistryPort } from "../../execution-policy-registry/providers/create-execution-policy-registry-port";
@@ -104,6 +107,7 @@ import {
   attachStateMachineToExecutionContext,
   attachTraceToExecutionContext,
   attachObservabilityToExecutionContext,
+  attachHealthCenterToExecutionContext,
   attachSchedulerToExecutionContext,
   attachWorkerToExecutionContext,
   buildRequest,
@@ -126,6 +130,7 @@ import {
   registerRequirementRegistryForContext,
   registerResourceRegistryForContext,
   registerObservabilityForContext,
+  registerHealthCenterForContext,
   registerSchedulerForContext,
   registerWorkerForContext,
   resolvePipelineComposition,
@@ -159,6 +164,7 @@ export type MockCanonicalExecutionOrchestratorAdapterOptions = {
   executionWorker?: ExecutionWorkerPort;
   executionScheduler?: ExecutionSchedulerPort;
   executionObservability?: ExecutionObservabilityPort;
+  executionHealthCenter?: ExecutionHealthCenterPort;
   foundationPorts?: FoundationPortRegistry;
   createExecutionId?: () => string;
   createStepId?: () => string;
@@ -191,6 +197,7 @@ export class MockCanonicalExecutionOrchestratorAdapter implements CanonicalExecu
   private readonly executionWorkerPort: ExecutionWorkerPort;
   private readonly executionSchedulerPort: ExecutionSchedulerPort;
   private readonly executionObservabilityPort: ExecutionObservabilityPort;
+  private readonly executionHealthCenterPort: ExecutionHealthCenterPort;
   private readonly foundationPorts?: FoundationPortRegistry;
   private readonly createExecutionId: () => string;
   private readonly createStepId: () => string;
@@ -244,6 +251,8 @@ export class MockCanonicalExecutionOrchestratorAdapter implements CanonicalExecu
       options.executionScheduler ?? createExecutionSchedulerPort({ provider: "mock" });
     this.executionObservabilityPort =
       options.executionObservability ?? createExecutionObservabilityPort({ provider: "mock" });
+    this.executionHealthCenterPort =
+      options.executionHealthCenter ?? createExecutionHealthCenterPort({ provider: "mock" });
     this.foundationPorts = options.foundationPorts;
     this.createExecutionId = options.createExecutionId ?? createExecutionId;
     this.createStepId = options.createStepId ?? createStepId;
@@ -323,6 +332,10 @@ export class MockCanonicalExecutionOrchestratorAdapter implements CanonicalExecu
 
   getExecutionObservabilityPort(): ExecutionObservabilityPort {
     return this.executionObservabilityPort;
+  }
+
+  getExecutionHealthCenterPort(): ExecutionHealthCenterPort {
+    return this.executionHealthCenterPort;
   }
 
   getFoundationPorts(): FoundationPortRegistry | undefined {
@@ -694,6 +707,37 @@ export class MockCanonicalExecutionOrchestratorAdapter implements CanonicalExecu
       stamp,
     );
 
+    const executionHealthCenter = await registerHealthCenterForContext(
+      this.executionHealthCenterPort,
+      {
+        executionId,
+        correlationId,
+        contextId: executionId,
+        stateMachineId: lifecycle.stateMachineId,
+        eventBusId: eventBus.eventBusId,
+        executionRegistryId: registryEntry.executionRegistryId,
+        executionTraceId: executionTrace.executionTraceId,
+        executionCapabilityRegistryId: capabilityRegistry.executionCapabilityRegistryId,
+        executionDependencyRegistryId: dependencyRegistry.executionDependencyRegistryId,
+        executionPolicyRegistryId: policyRegistry.executionPolicyRegistryId,
+        executionConstraintRegistryId: constraintRegistry.executionConstraintRegistryId,
+        executionRequirementRegistryId: requirementRegistry.executionRequirementRegistryId,
+        executionResourceRegistryId: resourceRegistry.executionResourceRegistryId,
+        executionEnvironmentRegistryId: environmentRegistry.executionEnvironmentRegistryId,
+        executionMessageQueueId: messageQueue.executionMessageQueueId,
+        executionWorkerId: executionWorker.executionWorkerId,
+        executionSchedulerId: executionScheduler.executionSchedulerId,
+        executionObservabilityId: executionObservability.executionObservabilityId,
+        pipelineId: pipelineResolution.pipelineId,
+      },
+    );
+    await attachHealthCenterToExecutionContext(
+      this.executionContextPort,
+      executionId,
+      executionHealthCenter.executionHealthCenterId,
+      stamp,
+    );
+
     lifecycle = await transitionExecutionState(
       this.executionStateMachinePort,
       lifecycle.stateMachineId,
@@ -810,7 +854,7 @@ export class MockCanonicalExecutionOrchestratorAdapter implements CanonicalExecu
       result,
       trace,
       code: "started",
-      message: `canonical execution completed structurally — Context via ExecutionContextPort, pipeline via PipelineResolverPort, lifecycle via ExecutionStateMachinePort (${lifecycle.stateMachineId} → ${lifecycle.currentState.status}), event bus via ExecutionEventBusPort (${eventBus.eventBusId}, events not delivered), registry via ExecutionRegistryPort (${registryEntry.executionRegistryId}, no persistence), trace via ExecutionTracePort (${executionTrace.executionTraceId}, no logs/telemetry), capability registry via ExecutionCapabilityRegistryPort (${capabilityRegistry.executionCapabilityRegistryId}, no execution/discovery), dependency registry via ExecutionDependencyRegistryPort (${dependencyRegistry.executionDependencyRegistryId}, no resolution/ordering), policy registry via ExecutionPolicyRegistryPort (${policyRegistry.executionPolicyRegistryId}, no interpretation/evaluation), constraint registry via ExecutionConstraintRegistryPort (${constraintRegistry.executionConstraintRegistryId}, no validation/blocking), requirement registry via ExecutionRequirementRegistryPort (${requirementRegistry.executionRequirementRegistryId}, no validation/preconditions), resource registry via ExecutionResourceRegistryPort (${resourceRegistry.executionResourceRegistryId}, no allocation/reservation/load-balancing), environment registry via ExecutionEnvironmentRegistryPort (${environmentRegistry.executionEnvironmentRegistryId}, no selection/provisioning/activation), message queue via ExecutionQueuePort (${messageQueue.executionMessageQueueId}, no publishing/consumers/workers), worker foundation via ExecutionWorkerPort (${executionWorker.executionWorkerId}, no execution/threads/background jobs), scheduler foundation via ExecutionSchedulerPort (${executionScheduler.executionSchedulerId}, no execution/cron/timers/jobs), observability foundation via ExecutionObservabilityPort (${executionObservability.executionObservabilityId}, no logs/metrics/tracing/transmission), engines not invoked`,
+      message: `canonical execution completed structurally — Context via ExecutionContextPort, pipeline via PipelineResolverPort, lifecycle via ExecutionStateMachinePort (${lifecycle.stateMachineId} → ${lifecycle.currentState.status}), event bus via ExecutionEventBusPort (${eventBus.eventBusId}, events not delivered), registry via ExecutionRegistryPort (${registryEntry.executionRegistryId}, no persistence), trace via ExecutionTracePort (${executionTrace.executionTraceId}, no logs/telemetry), capability registry via ExecutionCapabilityRegistryPort (${capabilityRegistry.executionCapabilityRegistryId}, no execution/discovery), dependency registry via ExecutionDependencyRegistryPort (${dependencyRegistry.executionDependencyRegistryId}, no resolution/ordering), policy registry via ExecutionPolicyRegistryPort (${policyRegistry.executionPolicyRegistryId}, no interpretation/evaluation), constraint registry via ExecutionConstraintRegistryPort (${constraintRegistry.executionConstraintRegistryId}, no validation/blocking), requirement registry via ExecutionRequirementRegistryPort (${requirementRegistry.executionRequirementRegistryId}, no validation/preconditions), resource registry via ExecutionResourceRegistryPort (${resourceRegistry.executionResourceRegistryId}, no allocation/reservation/load-balancing), environment registry via ExecutionEnvironmentRegistryPort (${environmentRegistry.executionEnvironmentRegistryId}, no selection/provisioning/activation), message queue via ExecutionQueuePort (${messageQueue.executionMessageQueueId}, no publishing/consumers/workers), worker foundation via ExecutionWorkerPort (${executionWorker.executionWorkerId}, no execution/threads/background jobs), scheduler foundation via ExecutionSchedulerPort (${executionScheduler.executionSchedulerId}, no execution/cron/timers/jobs), observability foundation via ExecutionObservabilityPort (${executionObservability.executionObservabilityId}, no logs/metrics/tracing/transmission), health center foundation via ExecutionHealthCenterPort (${executionHealthCenter.executionHealthCenterId}, no monitoring/health-checks/queries), engines not invoked`,
     };
   }
 

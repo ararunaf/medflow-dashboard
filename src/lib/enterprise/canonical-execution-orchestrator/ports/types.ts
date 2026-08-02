@@ -227,6 +227,10 @@ export type CanonicalExecutionOrchestratorCapabilities = {
   dependsOnExecutionObservability: true;
   /** Observability Foundation utilizado exclusivamente de forma estrutural (sem logs / métricas / tracing / transmissão). */
   usesExecutionObservabilityStructurally: true;
+  /** Infraestrutura estrutural de Health Center via ExecutionHealthCenterPort (INF-05). */
+  dependsOnExecutionHealthCenter: true;
+  /** Health Center Foundation utilizado exclusivamente de forma estrutural (sem monitoramento / health checks / consultas). */
+  usesExecutionHealthCenterStructurally: true;
   /** Explicitamente sem OCR real nesta fundação. */
   implementsOcr: false;
   /** Explicitamente sem AI nesta fundação. */

@@ -18,6 +18,7 @@
  * INF-02: infraestrutura estrutural de Workers exclusiva via ExecutionWorkerPort.
  * INF-03: infraestrutura estrutural de Schedulers exclusiva via ExecutionSchedulerPort.
  * INF-04: infraestrutura estrutural de Observabilidade exclusiva via ExecutionObservabilityPort.
+ * INF-05: infraestrutura estrutural de Health Center exclusiva via ExecutionHealthCenterPort.
  * Somente orquestração de estado in-memory.
  * Sem OCR. Sem IA. Sem Mapping. Sem regras. Sem validações.
  * Sem entrega de eventos. Sem filas reais. Sem Pub/Sub. Sem workers reais.
@@ -56,6 +57,10 @@ import type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/ex
 import type { CanonicalSchedule } from "../../scheduler-foundation/ports/models";
 import type { ExecutionObservabilityPort } from "../../observability-foundation/ports/execution-observability-port";
 import type { CanonicalObservation } from "../../observability-foundation/ports/models";
+import type { ExecutionHealthCenterPort } from "../../health-center-foundation/ports/execution-health-center-port";
+import type { CanonicalHealthComponent } from "../../health-center-foundation/ports/models";
+import { STRUCTURAL_MONITORABLE_COMPONENT_CATALOG } from "../../health-center-foundation/ports/models";
+import { createExecutionHealthCenterId } from "../../health-center-foundation/ports/identity";
 import type { ExecutionResourceRegistryPort } from "../../execution-resource-registry/ports/execution-resource-registry-port";
 import type { ExecutionResourceRegistry } from "../../execution-resource-registry/ports/models";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
@@ -1979,6 +1984,158 @@ export async function attachObservabilityToExecutionContext(
 }
 
 /**
+ * Resolve Health Center Foundation estruturalmente via ExecutionHealthCenterPort.
+ * Registra o catálogo estrutural de componentes monitoráveis (sem monitoramento real).
+ * Nenhuma observation é consultada. Nenhum health check real. Nenhum diagnóstico.
+ */
+export async function registerHealthCenterForContext(
+  healthCenterPort: ExecutionHealthCenterPort,
+  input: {
+    executionId: string;
+    correlationId?: string;
+    contextId?: string;
+    stateMachineId?: string;
+    eventBusId?: string;
+    executionRegistryId?: string;
+    executionTraceId?: string;
+    executionCapabilityRegistryId?: string;
+    executionDependencyRegistryId?: string;
+    executionPolicyRegistryId?: string;
+    executionConstraintRegistryId?: string;
+    executionRequirementRegistryId?: string;
+    executionResourceRegistryId?: string;
+    executionEnvironmentRegistryId?: string;
+    executionMessageQueueId?: string;
+    executionWorkerId?: string;
+    executionSchedulerId?: string;
+    executionObservabilityId?: string;
+    pipelineId?: string;
+    executionHealthCenterId?: string;
+  },
+): Promise<{
+  executionHealthCenterId: string;
+  components: readonly CanonicalHealthComponent[];
+}> {
+  const executionHealthCenterId = input.executionHealthCenterId ?? createExecutionHealthCenterId();
+  const components: CanonicalHealthComponent[] = [];
+
+  for (const catalogEntry of STRUCTURAL_MONITORABLE_COMPONENT_CATALOG) {
+    const resolved = await healthCenterPort.registerComponent({
+      executionHealthCenterId,
+      executionId: input.executionId,
+      correlationId: input.correlationId,
+      contextId: input.contextId,
+      stateMachineId: input.stateMachineId,
+      eventBusId: input.eventBusId,
+      executionRegistryId: input.executionRegistryId,
+      executionTraceId: input.executionTraceId,
+      executionCapabilityRegistryId: input.executionCapabilityRegistryId,
+      executionDependencyRegistryId: input.executionDependencyRegistryId,
+      executionPolicyRegistryId: input.executionPolicyRegistryId,
+      executionConstraintRegistryId: input.executionConstraintRegistryId,
+      executionRequirementRegistryId: input.executionRequirementRegistryId,
+      executionResourceRegistryId: input.executionResourceRegistryId,
+      executionEnvironmentRegistryId: input.executionEnvironmentRegistryId,
+      executionMessageQueueId: input.executionMessageQueueId,
+      executionWorkerId: input.executionWorkerId,
+      executionSchedulerId: input.executionSchedulerId,
+      executionObservabilityId: input.executionObservabilityId,
+      pipelineId: input.pipelineId,
+      key: catalogEntry.key,
+      name: catalogEntry.name,
+      createIfMissing: true,
+      structuralNotes: catalogEntry.notes,
+      tags: ["health-center-foundation", "foundation", "structural", catalogEntry.key],
+    });
+
+    if (!resolved.ok || !resolved.component) {
+      throw new Error(
+        resolved.message ??
+          `ExecutionHealthCenterPort failed to resolve structural component: ${catalogEntry.key}`,
+      );
+    }
+
+    components.push(resolved.component);
+  }
+
+  return { executionHealthCenterId, components };
+}
+
+/**
+ * Anexa referência estrutural do Health Center Foundation ao Execution Context (transporte).
+ * Anexa apenas executionHealthCenterId.
+ * Nenhum monitoramento. Nenhum health check real. Nenhuma consulta externa.
+ */
+export async function attachHealthCenterToExecutionContext(
+  executionContextPort: ExecutionContextPort,
+  contextId: string,
+  executionHealthCenterId: string,
+  stamp: string,
+): Promise<ExecutionContext> {
+  const updated = await executionContextPort.updateContext({
+    contextId,
+    appendReferences: [
+      {
+        name: "executionHealthCenterId",
+        value: executionHealthCenterId,
+        notes:
+          "Execution Health Center reference — components registered exclusively via ExecutionHealthCenterPort",
+      },
+    ],
+    appendHistory: [
+      {
+        event: "execution-health-center-attached",
+        phase: "created",
+        status: "pending",
+        occurredAt: stamp,
+        notes:
+          "Health Center Foundation attached structurally — no monitoring, no health checks, no queries, no engines",
+        attributes: {
+          executionHealthCenterId,
+          monitoringPerformed: false,
+          healthCheckPerformed: false,
+          probingPerformed: false,
+          diagnosticsExecuted: false,
+          pollingPerformed: false,
+          dashboardRendered: false,
+          externalQueryPerformed: false,
+          componentConsulted: false,
+          externalIntegrationUsed: false,
+          processingPerformed: false,
+          realHealthBackend: false,
+          enginesInvoked: false,
+        },
+      },
+    ],
+    metadata: {
+      kind: "execution-context-metadata",
+      customAttributes: {
+        executionHealthCenterId,
+        monitoringPerformed: false,
+        healthCheckPerformed: false,
+        probingPerformed: false,
+        diagnosticsExecuted: false,
+        pollingPerformed: false,
+        dashboardRendered: false,
+        externalQueryPerformed: false,
+        componentConsulted: false,
+        externalIntegrationUsed: false,
+        processingPerformed: false,
+        realHealthBackend: false,
+      },
+    },
+  });
+
+  if (!updated.ok || !updated.context) {
+    throw new Error(
+      updated.message ?? "ExecutionContextPort failed to attach execution health center",
+    );
+  }
+
+  return updated.context;
+}
+
+/**
  * Anexa a composição do Pipeline Resolver ao Execution Context (estrutural).
  * O Resolver permanece independente do conteúdo do Context.
  */
@@ -2197,6 +2354,8 @@ export function foundationCapabilitiesBase(adapterId: string) {
     usesExecutionSchedulerStructurally: true as const,
     dependsOnExecutionObservability: true as const,
     usesExecutionObservabilityStructurally: true as const,
+    dependsOnExecutionHealthCenter: true as const,
+    usesExecutionHealthCenterStructurally: true as const,
     implementsOcr: false as const,
     implementsAi: false as const,
     implementsXmlParser: false as const,

@@ -22,6 +22,7 @@
  * INF-02: injeta ExecutionWorkerPort para infraestrutura estrutural de Workers.
  * INF-03: injeta ExecutionSchedulerPort para infraestrutura estrutural de Schedulers.
  * INF-04: injeta ExecutionObservabilityPort para infraestrutura estrutural de Observabilidade.
+ * INF-05: injeta ExecutionHealthCenterPort para infraestrutura estrutural de Health Center.
  */
 import type { ExecutionCapabilityRegistryPort } from "../../execution-capability-registry/ports/execution-capability-registry-port";
 import type { ExecutionConstraintRegistryPort } from "../../execution-constraint-registry/ports/execution-constraint-registry-port";
@@ -32,6 +33,7 @@ import type { ExecutionQueuePort } from "../../message-queue/ports/execution-que
 import type { ExecutionWorkerPort } from "../../worker-foundation/ports/execution-worker-port";
 import type { ExecutionSchedulerPort } from "../../scheduler-foundation/ports/execution-scheduler-port";
 import type { ExecutionObservabilityPort } from "../../observability-foundation/ports/execution-observability-port";
+import type { ExecutionHealthCenterPort } from "../../health-center-foundation/ports/execution-health-center-port";
 import type { ExecutionEventBusPort } from "../../execution-event-bus/ports/execution-event-bus-port";
 import type { ExecutionPolicyRegistryPort } from "../../execution-policy-registry/ports/execution-policy-registry-port";
 import type { ExecutionRegistryPort } from "../../execution-registry/ports/execution-registry-port";
@@ -91,6 +93,8 @@ export type CanonicalExecutionOrchestratorFactoryOptions = {
   executionScheduler?: ExecutionSchedulerPort;
   /** Observability Foundation — infraestrutura estrutural de Observabilidade (INF-04). */
   executionObservability?: ExecutionObservabilityPort;
+  /** Health Center Foundation — infraestrutura estrutural de Health Center (INF-05). */
+  executionHealthCenter?: ExecutionHealthCenterPort;
   /** Registry opcional de Ports Foundation (DI estrutural legado — sem invocação). */
   foundationPorts?: FoundationPortRegistry;
 };
@@ -118,6 +122,7 @@ export class CanonicalExecutionOrchestratorFactory {
   private readonly executionWorker?: ExecutionWorkerPort;
   private readonly executionScheduler?: ExecutionSchedulerPort;
   private readonly executionObservability?: ExecutionObservabilityPort;
+  private readonly executionHealthCenter?: ExecutionHealthCenterPort;
   private readonly foundationPorts?: FoundationPortRegistry;
 
   constructor(options: CanonicalExecutionOrchestratorFactoryOptions = {}) {
@@ -140,6 +145,7 @@ export class CanonicalExecutionOrchestratorFactory {
     this.executionWorker = options.executionWorker;
     this.executionScheduler = options.executionScheduler;
     this.executionObservability = options.executionObservability;
+    this.executionHealthCenter = options.executionHealthCenter;
     this.foundationPorts = options.foundationPorts;
   }
 
@@ -178,6 +184,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionWorker: this.executionWorker,
           executionScheduler: this.executionScheduler,
           executionObservability: this.executionObservability,
+          executionHealthCenter: this.executionHealthCenter,
           foundationPorts: this.foundationPorts,
         });
       case "mock":
@@ -201,6 +208,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionWorker: this.executionWorker,
           executionScheduler: this.executionScheduler,
           executionObservability: this.executionObservability,
+          executionHealthCenter: this.executionHealthCenter,
           foundationPorts: this.foundationPorts,
         });
       case "test":
@@ -224,6 +232,7 @@ export class CanonicalExecutionOrchestratorFactory {
           executionWorker: this.executionWorker,
           executionScheduler: this.executionScheduler,
           executionObservability: this.executionObservability,
+          executionHealthCenter: this.executionHealthCenter,
           foundationPorts: this.foundationPorts,
         });
       default: {
