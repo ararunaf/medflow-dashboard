@@ -9,7 +9,7 @@
  *     → DocumentIntakePort → Adapter → Implementação
  *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
  *     → DocumentClassificationRuntimePort → Orchestrator
- *     → Classification Provider Adapter (referência estrutural)
+ *     → DocumentClassificationProviderPort → DefaultDocumentClassificationAdapter (CLASS-01)
  *     → StorageManagerRuntimePort → Orchestrator
  *     → Storage Provider Adapter (referência estrutural)
  *     → DocumentSearchRuntimePort → Orchestrator
@@ -18,7 +18,9 @@
  *
  * Sem regras de negócio. Sem OCR/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
  * IA: exclusivamente via AI Provider Runtime (ARCH-02).
- */ export type {
+ * Classification: exclusivamente via DocumentClassificationProviderPort (CLASS-01).
+ */
+export type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
   EnterpriseRuntimeId,

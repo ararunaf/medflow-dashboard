@@ -1,19 +1,21 @@
 /**
- * DefaultDocumentClassificationRuntimeAdapter — adapter default (DIP-04).
+ * DefaultDocumentClassificationRuntimeAdapter — adapter default (DIP-04 / CLASS-01).
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
- *   Canonical Execution Orchestrator → OCR Runtime (hop anterior)
- *   → Classification Provider Adapter (referência estrutural apenas)
+ *   Canonical Execution Orchestrator → OCR Runtime
+ *   → DocumentClassificationProviderPort → DefaultDocumentClassificationAdapter
  *
- * NÃO executa classificação. NÃO usa IA/LLM/ML/embeddings.
- * NÃO usa OCR para classificação. NÃO aplica regras ou heurísticas.
- * NÃO identifica automaticamente tipos documentais.
- * NÃO conecta Classification Providers externos.
+ * NÃO usa IA/LLM/ML/embeddings.
+ * NÃO chama HTTP Azure/OpenAI.
+ * Classificação real exclusivamente via DocumentClassificationProviderPort.classify().
  */
+import type { DocumentClassificationProcessInput } from "../../document-classification-provider/ports/types";
 import { createDocumentClassificationRuntimeSessionId } from "../ports/identity";
 import type { DocumentClassificationRuntimePort } from "../ports/document-classification-runtime-port";
 import type { CanonicalDocumentClassificationSession } from "../ports/models";
 import type {
+  ClassifyDocumentInput,
+  ClassifyDocumentResult,
   CoordinateClassificationInput,
   CoordinateClassificationResult,
   DocumentClassificationRuntimeCapabilities,
@@ -36,7 +38,7 @@ import {
 
 export const DEFAULT_DOCUMENT_CLASSIFICATION_RUNTIME_ADAPTER_ID = "default-enterprise-bridge";
 
-/** Referência estrutural ao Classification Provider Adapter (sem Port de execução). */
+/** @deprecated CLASS-01 — prefer adapterId do DocumentClassificationProviderPort. */
 export const STRUCTURAL_CLASSIFICATION_PROVIDER_ADAPTER_ID =
   "structural-classification-provider-adapter";
 
@@ -58,6 +60,7 @@ function foundationCapabilities(): DocumentClassificationRuntimeCapabilities {
     provider: "default",
     adapterId: DEFAULT_DOCUMENT_CLASSIFICATION_RUNTIME_ADAPTER_ID,
     supportsCoordinateClassification: true,
+    supportsClassify: true,
     supportsGetSession: true,
     supportsListSessions: true,
     supportsHealth: true,
@@ -67,15 +70,16 @@ function foundationCapabilities(): DocumentClassificationRuntimeCapabilities {
     usesCanonicalExecutionOrchestrator: true,
     usesOCRRuntime: true,
     usesCaptureEngineRuntime: true,
-    supportsMedicalGuideClassification: false,
-    supportsInvoiceClassification: false,
+    usesDocumentClassificationProviderAdapter: true,
+    supportsMedicalGuideClassification: true,
+    supportsInvoiceClassification: true,
     supportsContractClassification: false,
     supportsBatchClassification: false,
-    supportsConfidenceScore: false,
+    supportsConfidenceScore: true,
     supportsMultiLabelClassification: false,
     supportsCustomModels: false,
-    supportsRuleBasedClassification: false,
-    implementsRealClassification: false,
+    supportsRuleBasedClassification: true,
+    implementsRealClassification: true,
     implementsAi: false,
     implementsMachineLearning: false,
     implementsRuleEngine: false,
@@ -83,6 +87,25 @@ function foundationCapabilities(): DocumentClassificationRuntimeCapabilities {
     implementsLlm: false,
     implementsOcrForClassification: false,
   };
+}
+
+function toProviderReferenceId(
+  providerId: string,
+): ReturnType<typeof resolveStructuralClassificationProviderReference>["providerReferenceId"] {
+  switch (providerId) {
+    case "rule-based":
+    case "default":
+      return "rule-based-classifier";
+    case "mock":
+    case "test":
+      return "mock";
+    case "ai-classifier":
+    case "ml-classifier":
+    case "hybrid-classifier":
+      return providerId;
+    default:
+      return "rule-based-classifier";
+  }
 }
 
 export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClassificationRuntimePort {
@@ -98,7 +121,14 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
     if (!options.enterpriseDeps) {
       throw new Error(
         "DefaultDocumentClassificationRuntimeAdapter exige enterpriseDeps " +
-          "(Orchestrator + OCRRuntimePort). Implementação paralela é proibida.",
+          "(Orchestrator + OCRRuntimePort + DocumentClassificationProviderPort). " +
+          "Implementação paralela é proibida.",
+      );
+    }
+    if (typeof options.enterpriseDeps.getDocumentClassificationProviderPort !== "function") {
+      throw new Error(
+        "DefaultDocumentClassificationRuntimeAdapter exige " +
+          "enterpriseDeps.getDocumentClassificationProviderPort().",
       );
     }
     this.enterpriseDeps = options.enterpriseDeps;
@@ -123,17 +153,18 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
         provider: "default",
         latencyMs: Math.max(0, Math.round(end - start)),
         message: probe.message ?? (probe.ok ? "probe ok" : "probe falhou"),
-        realClassificationAvailable: false,
+        realClassificationAvailable: probe.ok,
       };
     }
 
     const storeHealth = this.store.health();
-    const [orchestratorHealth, ocrRuntimeHealth] = await Promise.all([
+    const [orchestratorHealth, ocrRuntimeHealth, providerHealth] = await Promise.all([
       this.enterpriseDeps.getOrchestratorPort().health(),
       this.enterpriseDeps.getOCRRuntimePort().health(),
+      this.enterpriseDeps.getDocumentClassificationProviderPort().health(),
     ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
-    const ok = storeHealth.ok && orchestratorHealth.ok && ocrRuntimeHealth.ok;
+    const ok = storeHealth.ok && orchestratorHealth.ok && ocrRuntimeHealth.ok && providerHealth.ok;
 
     return {
       ok,
@@ -141,9 +172,10 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
       latencyMs: Math.max(0, Math.round(end - start)),
       enterpriseOrchestratorOk: orchestratorHealth.ok,
       ocrRuntimeOk: ocrRuntimeHealth.ok,
-      realClassificationAvailable: false,
+      classificationProviderAdapterOk: providerHealth.ok,
+      realClassificationAvailable: providerHealth.ok,
       message: ok
-        ? "Document Classification Runtime pronto (Orchestrator + OCR Runtime — sem classificação real)."
+        ? "Document Classification Runtime pronto (Orchestrator + OCR Runtime + Classification Provider — CLASS-01)."
         : "Document Classification Runtime degradado — ver Ports Enterprise.",
     };
   }
@@ -164,10 +196,12 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
       };
     }
 
+    const classificationProvider = this.enterpriseDeps.getDocumentClassificationProviderPort();
+    const providerCaps = classificationProvider.capabilities();
     const providerReference = resolveStructuralClassificationProviderReference(
       input.configuration?.preferredProviderReference ??
         input.reference?.providerReferenceId ??
-        "mock",
+        toProviderReferenceId(classificationProvider.providerId),
     );
 
     let session: CanonicalDocumentClassificationSession = {
@@ -200,7 +234,7 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
         channel,
         intakeRef: input.metadata.sessionId,
         documentRef: input.identity.documentId,
-        tags: ["dip-04", "document-classification-runtime", ...(input.metadata.tags ?? [])],
+        tags: ["class-01", "document-classification-runtime", ...(input.metadata.tags ?? [])],
         customAttributes: {
           source: "document-classification-runtime-coordination",
           sessionId: input.metadata.sessionId,
@@ -213,7 +247,7 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
         },
         structuralNotes:
           input.structuralNotes ??
-          "DIP-04: Classification coordinated structurally via Document Classification Runtime (no real classification).",
+          "CLASS-01: Classification coordinated via Document Classification Runtime (execution via classify()).",
       });
 
       if (!execution.ok) {
@@ -241,8 +275,6 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
         };
       }
 
-      // Hop estrutural OCR Runtime — health/capabilities apenas.
-      // PROIBIDO: classificação / IA / ML / embeddings / LLM / regras / heurísticas nesta sprint.
       const ocrRuntime = this.enterpriseDeps.getOCRRuntimePort();
       const ocrCaps = ocrRuntime.capabilities();
       const ocrHealth = await ocrRuntime.health();
@@ -252,7 +284,7 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
           ...session,
           status: "failed",
           executionId: execution.context?.executionId,
-          classificationProviderAdapterId: STRUCTURAL_CLASSIFICATION_PROVIDER_ADAPTER_ID,
+          classificationProviderAdapterId: providerCaps.adapterId,
           updatedAt: nowIso(this.now),
           message: ocrHealth.message ?? "OCR Runtime health falhou.",
           code: "OCR_RUNTIME_UNHEALTHY",
@@ -273,20 +305,43 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
         };
       }
 
-      // Classification Provider Adapter — referência estrutural apenas (health/capabilities simbólicos).
-      // PROIBIDO: classify / predict / embeddings / LLM / HTTP / credenciais nesta sprint.
-      // OCR Runtime capabilities consultadas estruturalmente (implementsRealOcr permanece false).
+      const providerHealth = await classificationProvider.health();
+      if (!providerHealth.ok) {
+        session = {
+          ...session,
+          status: "failed",
+          executionId: execution.context?.executionId,
+          classificationProviderAdapterId: providerCaps.adapterId,
+          updatedAt: nowIso(this.now),
+          message: providerHealth.message ?? "Classification Provider Adapter health falhou.",
+          code: "CLASSIFICATION_PROVIDER_ADAPTER_UNHEALTHY",
+          errors: [providerHealth.message ?? "CLASSIFICATION_PROVIDER_ADAPTER_UNHEALTHY"],
+          realClassificationExecuted: false,
+        };
+        this.store.setSession(session);
+        return {
+          kind: "canonical-document-classification-result",
+          ok: false,
+          runtimeSessionId,
+          session,
+          executionId: execution.context?.executionId,
+          providerReferenceId: providerReference.providerReferenceId,
+          message: session.message,
+          code: session.code,
+          realClassificationExecuted: false,
+        };
+      }
 
       session = {
         ...session,
         status: "coordinated",
         executionId: execution.context?.executionId,
-        classificationProviderAdapterId: STRUCTURAL_CLASSIFICATION_PROVIDER_ADAPTER_ID,
+        classificationProviderAdapterId: providerCaps.adapterId,
         updatedAt: nowIso(this.now),
         message:
-          "Classification coordinated structurally via Document Classification Runtime " +
+          "Classification coordinated via Document Classification Runtime " +
           `(Orchestrator + OCR Runtime adapter=${ocrCaps.adapterId} + ` +
-          "Classification Provider Adapter reference — no real classification).",
+          `Classification Provider adapter=${providerCaps.adapterId} — execution via classify()).`,
         code: "COORDINATED",
         realClassificationExecuted: false,
       };
@@ -302,6 +357,176 @@ export class DefaultDocumentClassificationRuntimeAdapter implements DocumentClas
         message: session.message,
         code: session.code,
         realClassificationExecuted: false,
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      session = {
+        ...session,
+        status: "failed",
+        updatedAt: nowIso(this.now),
+        message,
+        code: "RUNTIME_BRIDGE_ERROR",
+        errors: [message],
+        realClassificationExecuted: false,
+      };
+      this.store.setSession(session);
+      return {
+        kind: "canonical-document-classification-result",
+        ok: false,
+        runtimeSessionId,
+        session,
+        message,
+        code: "RUNTIME_BRIDGE_ERROR",
+        realClassificationExecuted: false,
+      };
+    }
+  }
+
+  async classify(input: ClassifyDocumentInput): Promise<ClassifyDocumentResult> {
+    const stamp = nowIso(this.now);
+    const runtimeSessionId = this.createSessionId();
+    const classificationProvider = this.enterpriseDeps.getDocumentClassificationProviderPort();
+    const providerCaps = classificationProvider.capabilities();
+    const providerReferenceId = toProviderReferenceId(classificationProvider.providerId);
+    const documentId = input.documentId ?? String(input.attributes?.documentId ?? "unknown");
+    const sessionId = input.sessionId ?? String(input.attributes?.sessionId ?? runtimeSessionId);
+
+    let session: CanonicalDocumentClassificationSession = {
+      kind: "canonical-document-classification-session",
+      runtimeSessionId,
+      status: "pending",
+      request: {
+        kind: "canonical-document-classification-request",
+        identity: {
+          kind: "canonical-document-classification-identity",
+          documentId,
+          documentKind: "capture-document",
+        },
+        metadata: {
+          kind: "canonical-document-classification-metadata",
+          sessionId,
+          tenantRef:
+            input.tenantRef ??
+            (input.attributes?.tenantId != null ? String(input.attributes.tenantId) : undefined),
+          correlationId: input.correlationId,
+          channel: "document-classification-runtime-classify",
+          tags: ["class-01", "document-classification-runtime", "classify"],
+        },
+        reference: {
+          kind: "canonical-document-classification-reference",
+          captureRuntimeSessionId: input.captureRuntimeSessionId,
+          ocrRuntimeSessionId: input.ocrRuntimeSessionId,
+          providerReferenceId: input.preferredProviderReference ?? providerReferenceId,
+        },
+        configuration: {
+          kind: "canonical-document-classification-configuration",
+          preferredProviderReference: input.preferredProviderReference ?? providerReferenceId,
+          contentTypeHint: input.contentType,
+          languageHint: input.language,
+          channel: "document-classification-runtime-classify",
+          notes: "CLASS-01: classify via DocumentClassificationProviderPort (no AI).",
+        },
+        structuralNotes:
+          "CLASS-01: Classification Runtime classify → DocumentClassificationProviderPort.classify().",
+      },
+      providerReferenceId,
+      classificationProviderAdapterId: providerCaps.adapterId,
+      createdAt: stamp,
+      updatedAt: stamp,
+      realClassificationExecuted: false,
+    };
+    this.store.setSession(session);
+
+    try {
+      session = { ...session, status: "processing", updatedAt: nowIso(this.now) };
+      this.store.setSession(session);
+
+      try {
+        const orchestrator = this.enterpriseDeps.getOrchestratorPort();
+        const execution = await orchestrator.startExecution({
+          correlationId: input.correlationId,
+          tenantRef: input.tenantRef,
+          channel: "document-classification-runtime-classify",
+          intakeRef: sessionId,
+          documentRef: documentId,
+          tags: ["class-01", "document-classification-runtime", "classify"],
+          customAttributes: {
+            source: "document-classification-runtime-classify",
+            requestId: input.requestId ?? null,
+            providerId: classificationProvider.providerId,
+            adapterId: providerCaps.adapterId,
+            captureRuntimeSessionId: input.captureRuntimeSessionId ?? null,
+            ocrRuntimeSessionId: input.ocrRuntimeSessionId ?? null,
+          },
+          structuralNotes:
+            "CLASS-01: Classification execution coordinated via Runtime → ProviderPort.",
+        });
+        if (execution.ok) {
+          session = {
+            ...session,
+            executionId: execution.context?.executionId,
+            updatedAt: nowIso(this.now),
+          };
+          this.store.setSession(session);
+        }
+      } catch {
+        // Orchestrator best-effort — Classification Provider Port permanece obrigatório.
+      }
+
+      const processInput: DocumentClassificationProcessInput = {
+        requestId: input.requestId,
+        ocrText: input.ocrText,
+        ocrStructuredData: input.ocrStructuredData,
+        documentId,
+        sessionId,
+        contentType: input.contentType,
+        language: input.language,
+        signal: input.signal,
+        timeoutMs: input.timeoutMs,
+        retryCount: input.retryCount,
+        rules: input.rules,
+        attributes: {
+          ...(input.attributes ?? {}),
+          sessionId,
+          documentId,
+          tenantId: input.tenantRef ?? null,
+          ocrRuntimeSessionId: input.ocrRuntimeSessionId ?? null,
+          captureRuntimeSessionId: input.captureRuntimeSessionId ?? null,
+        },
+      };
+
+      const providerResult = await classificationProvider.classify(processInput);
+
+      session = {
+        ...session,
+        status: providerResult.ok ? "completed" : "failed",
+        updatedAt: nowIso(this.now),
+        message: providerResult.message,
+        code: providerResult.code ?? (providerResult.ok ? "CLASSIFIED" : "CLASSIFICATION_FAILED"),
+        realClassificationExecuted: true,
+        documentType: providerResult.documentType,
+        confidence: providerResult.confidence,
+        matchedRules: providerResult.matchedRules,
+        errors: providerResult.ok
+          ? undefined
+          : [providerResult.message ?? providerResult.code ?? "CLASSIFICATION_FAILED"],
+      };
+      this.store.setSession(session);
+
+      return {
+        kind: "canonical-document-classification-result",
+        ok: providerResult.ok,
+        runtimeSessionId,
+        session,
+        executionId: session.executionId,
+        providerReferenceId,
+        message: providerResult.message,
+        code: session.code,
+        realClassificationExecuted: true,
+        documentType: providerResult.documentType,
+        confidence: providerResult.confidence,
+        matchedRules: providerResult.matchedRules,
+        telemetry: providerResult.telemetry,
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

@@ -27,6 +27,7 @@ import { createDocumentIntakeRuntimePort } from "../../../src/lib/enterprise/doc
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/index.ts";
 import { createOCRRuntimePort } from "../../../src/lib/enterprise/ocr-runtime/index.ts";
+import { createDocumentClassificationProviderPort } from "../../../src/lib/enterprise/document-classification-provider/index.ts";
 import { createDocumentClassificationRuntimePort } from "../../../src/lib/enterprise/document-classification-runtime/index.ts";
 import { createStorageManagerRuntimePort } from "../../../src/lib/enterprise/storage-manager-runtime/index.ts";
 import { createDocumentSearchRuntimePort } from "../../../src/lib/enterprise/document-search-runtime/index.ts";
@@ -93,11 +94,15 @@ function enterpriseDeps() {
       getOCRProviderPort: () => ocrProviderPort,
     },
   });
+  const documentClassificationProviderPort = createDocumentClassificationProviderPort({
+    provider: "rule-based",
+  });
   const documentClassificationRuntimePort = createDocumentClassificationRuntimePort({
     provider: "default",
     enterpriseDeps: {
       getOrchestratorPort: () => orchestratorPort,
       getOCRRuntimePort: () => ocrRuntimePort,
+      getDocumentClassificationProviderPort: () => documentClassificationProviderPort,
     },
   });
   const storageManagerRuntimePort = createStorageManagerRuntimePort({

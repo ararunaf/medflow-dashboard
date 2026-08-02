@@ -409,30 +409,30 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
           captureExecutionId: execution.context?.executionId,
           ocrRuntimeSessionId: ocrResult.runtimeSessionId,
           ocrExecutionId: ocrResult.executionId,
-          providerReferenceId: "mock",
+          providerReferenceId: "rule-based-classifier",
         },
         capabilities: {
           kind: "canonical-document-classification-capabilities",
-          supportsMedicalGuideClassification: false,
-          supportsInvoiceClassification: false,
+          supportsMedicalGuideClassification: true,
+          supportsInvoiceClassification: true,
           supportsContractClassification: false,
           supportsBatchClassification: false,
-          supportsConfidenceScore: false,
+          supportsConfidenceScore: true,
           supportsMultiLabelClassification: false,
           supportsCustomModels: false,
-          supportsRuleBasedClassification: false,
-          declared: ["capture-engine-runtime", "document-classification-runtime-structural"],
+          supportsRuleBasedClassification: true,
+          declared: ["capture-engine-runtime", "document-classification-runtime", "class-01"],
         },
         configuration: {
           kind: "canonical-document-classification-configuration",
-          preferredProviderReference: "mock",
+          preferredProviderReference: "rule-based-classifier",
           channel,
           priority: input.configuration?.priority ?? "NORMAL",
           notes:
-            "DIP-04: structural classification coordination from Capture Engine Runtime (no real classification).",
+            "CLASS-01: classification coordination from Capture Engine Runtime via DocumentClassificationProviderPort.",
         },
         structuralNotes:
-          "DIP-04: Classification coordinated from Capture Engine Runtime (no real classification / no AI / no ML).",
+          "CLASS-01: Classification coordinated from Capture Engine Runtime → Classification Runtime → ProviderPort (rule-based, no AI).",
       });
 
       // DIP-05 — coordenação estrutural via Storage Manager Runtime (sem armazenamento real / sem upload).
@@ -653,10 +653,41 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
 
   async processOcr(input: ProcessCaptureOcrInput): Promise<ProcessCaptureOcrResult> {
     const ocrRuntime = this.enterpriseDeps.getOCRRuntimePort();
-    return ocrRuntime.process({
+    const ocrResult = await ocrRuntime.process({
       ...input,
       preferredProviderReference: input.preferredProviderReference ?? "azure",
     });
+
+    // CLASS-01 — classificação rule-based a partir do resultado OCR (sem IA / sem bypass).
+    if (ocrResult.ok) {
+      const structured = ocrResult.output?.structuredData ?? {};
+      const ocrText =
+        (typeof structured.extractedText === "string" && structured.extractedText) ||
+        (typeof structured.fullText === "string" && structured.fullText) ||
+        (typeof structured.text === "string" && structured.text) ||
+        "";
+      const classificationRuntime = this.enterpriseDeps.getDocumentClassificationRuntimePort();
+      await classificationRuntime.classify({
+        requestId: input.requestId,
+        ocrText,
+        ocrStructuredData: structured,
+        documentId: input.documentId ?? input.documentIdentityReference?.documentId,
+        sessionId: input.sessionId,
+        tenantRef: input.tenantRef,
+        correlationId: input.correlationId,
+        captureRuntimeSessionId: input.captureRuntimeSessionId ?? ocrResult.runtimeSessionId,
+        ocrRuntimeSessionId: ocrResult.runtimeSessionId,
+        contentType: input.contentType,
+        language: input.language,
+        signal: input.signal,
+        timeoutMs: input.timeoutMs,
+        retryCount: input.retryCount,
+        preferredProviderReference: "rule-based-classifier",
+        attributes: input.attributes,
+      });
+    }
+
+    return ocrResult;
   }
 
   async getSession(input: GetCaptureRuntimeSessionInput): Promise<GetCaptureRuntimeSessionResult> {

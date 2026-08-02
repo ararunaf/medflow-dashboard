@@ -1,21 +1,22 @@
 /**
- * DocumentClassificationRuntimePort — contrato único do Classification Runtime (DIP-04).
+ * DocumentClassificationRuntimePort — contrato único do Classification Runtime (DIP-04 / CLASS-01).
  *
  * Application / Enterprise Runtime / Capture Engine Runtime / OCR Runtime dependem
- * exclusivamente desta interface para coordenação estrutural de classificação.
+ * exclusivamente desta interface para coordenação e classificação documental.
  *
- * Fluxo obrigatório (sem implementação paralela / sem classificação real):
+ * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → DocumentClassificationRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Classification Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → DocumentClassificationProviderPort
+ *     → DefaultDocumentClassificationAdapter → Classification Provider
  *
- * NÃO executa classificação. NÃO usa IA/LLM/ML/embeddings.
- * NÃO usa OCR para classificação. NÃO aplica regras ou heurísticas.
- * NÃO identifica automaticamente tipos documentais.
+ * NÃO usa IA/LLM/ML/embeddings.
+ * Classificação real exclusivamente via DocumentClassificationProviderPort.
  */
 import type {
+  ClassifyDocumentInput,
+  ClassifyDocumentResult,
   CoordinateClassificationInput,
   CoordinateClassificationResult,
   DocumentClassificationRuntimeCapabilities,
@@ -35,16 +36,22 @@ export interface DocumentClassificationRuntimePort {
   /** Verificação leve de prontidão (consulta Ports Enterprise quando disponíveis). */
   health(): Promise<DocumentClassificationRuntimeHealth>;
 
-  /** Capacidades estáticas do adapter ativo (classificação tecnológica = FALSE). */
+  /** Capacidades estáticas do adapter ativo. */
   capabilities(): DocumentClassificationRuntimeCapabilities;
 
   /**
-   * Coordena estruturalmente uma sessão de classificação via Orchestrator + OCR Runtime.
-   * NÃO executa classificação. NÃO invoca Classification Provider real.
+   * Coordena estruturalmente uma sessão de classificação via Orchestrator + Provider health.
+   * NÃO executa classify() — execução real via classify().
    */
   coordinateClassification(
     input: CoordinateClassificationInput,
   ): Promise<CoordinateClassificationResult>;
+
+  /**
+   * Executa classificação real via DocumentClassificationProviderPort.classify().
+   * Consome exclusivamente resultado OCR (texto/estrutura).
+   */
+  classify(input: ClassifyDocumentInput): Promise<ClassifyDocumentResult>;
 
   /** Obtém sessão de classificação por id. */
   getSession(
@@ -56,6 +63,6 @@ export interface DocumentClassificationRuntimePort {
     input?: ListDocumentClassificationRuntimeSessionsInput,
   ): Promise<ListDocumentClassificationRuntimeSessionsResult>;
 
-  /** Lista referências estruturais a Classification Providers futuros (sem conexão). */
+  /** Lista referências a Classification Providers (sem conexão externa). */
   listProviderReferences(): Promise<ListDocumentClassificationProviderReferencesResult>;
 }

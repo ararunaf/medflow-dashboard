@@ -61,7 +61,7 @@ export class DocumentClassificationRuntimeFactory {
         if (!enterpriseDeps) {
           throw new Error(
             'DocumentClassificationRuntime provider "default" exige enterpriseDeps ' +
-              "(getOrchestratorPort + getOCRRuntimePort). " +
+              "(getOrchestratorPort + getOCRRuntimePort + getDocumentClassificationProviderPort). " +
               "Use createEnterpriseRuntime() / DI do composition root.",
           );
         }

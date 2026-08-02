@@ -1,15 +1,17 @@
 /**
- * MockDocumentClassificationRuntimeAdapter — DIP-04.
+ * MockDocumentClassificationRuntimeAdapter — DIP-04 / CLASS-01.
  *
  * Voltado para testes e homologação.
  * Quando enterpriseDeps estão presentes, usa Orchestrator + OCR Runtime
- * (mesma cadeia do default). Sem deps, opera somente no store in-memory
- * para isolamento de contrato — sem classificação real e sem implementação paralela.
+ * + DocumentClassificationProviderPort (mesma cadeia do default).
+ * Sem deps, opera somente no store in-memory para isolamento de contrato.
  */
 import { createDocumentClassificationRuntimeSessionId } from "../ports/identity";
 import type { DocumentClassificationRuntimePort } from "../ports/document-classification-runtime-port";
 import type { CanonicalDocumentClassificationSession } from "../ports/models";
 import type {
+  ClassifyDocumentInput,
+  ClassifyDocumentResult,
   CoordinateClassificationInput,
   CoordinateClassificationResult,
   DocumentClassificationRuntimeCapabilities,
@@ -80,6 +82,7 @@ export class MockDocumentClassificationRuntimeAdapter implements DocumentClassif
       provider: this.providerId,
       adapterId: MOCK_DOCUMENT_CLASSIFICATION_RUNTIME_ADAPTER_ID,
       supportsCoordinateClassification: true,
+      supportsClassify: Boolean(this.delegate),
       supportsGetSession: true,
       supportsListSessions: true,
       supportsHealth: true,
@@ -89,15 +92,16 @@ export class MockDocumentClassificationRuntimeAdapter implements DocumentClassif
       usesCanonicalExecutionOrchestrator: Boolean(this.delegate),
       usesOCRRuntime: Boolean(this.delegate),
       usesCaptureEngineRuntime: Boolean(this.delegate),
-      supportsMedicalGuideClassification: false,
-      supportsInvoiceClassification: false,
+      usesDocumentClassificationProviderAdapter: Boolean(this.delegate),
+      supportsMedicalGuideClassification: Boolean(this.delegate),
+      supportsInvoiceClassification: Boolean(this.delegate),
       supportsContractClassification: false,
       supportsBatchClassification: false,
-      supportsConfidenceScore: false,
+      supportsConfidenceScore: Boolean(this.delegate),
       supportsMultiLabelClassification: false,
       supportsCustomModels: false,
-      supportsRuleBasedClassification: false,
-      implementsRealClassification: false,
+      supportsRuleBasedClassification: Boolean(this.delegate),
+      implementsRealClassification: Boolean(this.delegate),
       implementsAi: false,
       implementsMachineLearning: false,
       implementsRuleEngine: false,
@@ -110,7 +114,7 @@ export class MockDocumentClassificationRuntimeAdapter implements DocumentClassif
   async health(): Promise<DocumentClassificationRuntimeHealth> {
     if (this.delegate) {
       const health = await this.delegate.health();
-      return { ...health, provider: this.providerId, realClassificationAvailable: false };
+      return { ...health, provider: this.providerId };
     }
     return {
       ok: this.healthy,
@@ -164,6 +168,19 @@ export class MockDocumentClassificationRuntimeAdapter implements DocumentClassif
       providerReferenceId: "mock",
       message: session.message,
       code: session.code,
+      realClassificationExecuted: false,
+    };
+  }
+
+  async classify(input: ClassifyDocumentInput): Promise<ClassifyDocumentResult> {
+    if (this.delegate) {
+      return this.delegate.classify(input);
+    }
+    return {
+      kind: "canonical-document-classification-result",
+      ok: false,
+      message: "Mock store-only adapter não executa classify() sem enterpriseDeps.",
+      code: "CLASSIFY_UNSUPPORTED",
       realClassificationExecuted: false,
     };
   }

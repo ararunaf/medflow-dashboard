@@ -7,7 +7,7 @@
  *   → DocumentIntakePort → Adapter → Implementação existente
  *   → OCRRuntimePort → Orchestrator → OCRProviderPort → Azure Adapter (OCR-01)
  *   → DocumentClassificationRuntimePort → Orchestrator
- *   → Classification Provider Adapter (referência estrutural)
+ *   → DocumentClassificationProviderPort → DefaultDocumentClassificationAdapter (CLASS-01)
  *   → StorageManagerRuntimePort → Orchestrator
  *   → Storage Provider Adapter (referência estrutural)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -25,6 +25,8 @@ import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-
 import { createCaptureEngineRuntimePort } from "../capture-engine-runtime/providers/create-capture-engine-runtime-port";
 import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
 import type { CanonicalCaptureRequest } from "../capture-engine-runtime/ports/models";
+import { createDocumentClassificationProviderPort } from "../document-classification-provider/providers/create-document-classification-provider-port";
+import type { DocumentClassificationProviderPort } from "../document-classification-provider/ports/document-classification-provider-port";
 import { createDocumentClassificationRuntimePort } from "../document-classification-runtime/providers/create-document-classification-runtime-port";
 import type { DocumentClassificationRuntimePort } from "../document-classification-runtime/ports/document-classification-runtime-port";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
@@ -58,6 +60,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly documentIntakeRuntimePort: DocumentIntakeRuntimePort;
   private readonly ocrProviderPort: OCRProviderPort;
   private readonly ocrRuntimePort: OCRRuntimePort;
+  private readonly documentClassificationProviderPort: DocumentClassificationProviderPort;
   private readonly documentClassificationRuntimePort: DocumentClassificationRuntimePort;
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly documentSearchRuntimePort: DocumentSearchRuntimePort;
@@ -91,6 +94,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOCRProviderPort: () => this.ocrProviderPort,
         },
       });
+    // CLASS-01: Rule-based Document Classification oficial atrás do ProviderPort — sem IA / sem bypass.
+    this.documentClassificationProviderPort =
+      options.documentClassificationProviderPort ??
+      createDocumentClassificationProviderPort({ provider: "rule-based" });
     this.documentClassificationRuntimePort =
       options.documentClassificationRuntimePort ??
       createDocumentClassificationRuntimePort({
@@ -98,6 +105,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         enterpriseDeps: {
           getOrchestratorPort: () => this.orchestratorPort,
           getOCRRuntimePort: () => this.ocrRuntimePort,
+          getDocumentClassificationProviderPort: () => this.documentClassificationProviderPort,
         },
       });
     this.storageManagerRuntimePort =
@@ -172,6 +180,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.documentClassificationRuntimePort;
   }
 
+  getDocumentClassificationProviderPort(): DocumentClassificationProviderPort {
+    return this.documentClassificationProviderPort;
+  }
+
   getStorageManagerRuntimePort(): StorageManagerRuntimePort {
     return this.storageManagerRuntimePort;
   }
@@ -197,6 +209,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       captureRuntimeHealth,
       ocrRuntimeHealth,
       ocrProviderHealth,
+      classificationProviderHealth,
       classificationRuntimeHealth,
       storageManagerRuntimeHealth,
       documentSearchRuntimeHealth,
@@ -209,6 +222,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.captureEngineRuntimePort.health(),
       this.ocrRuntimePort.health(),
       this.ocrProviderPort.health(),
+      this.documentClassificationProviderPort.health(),
       this.documentClassificationRuntimePort.health(),
       this.storageManagerRuntimePort.health(),
       this.documentSearchRuntimePort.health(),
@@ -223,6 +237,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       captureRuntimeHealth.ok &&
       ocrRuntimeHealth.ok &&
       ocrProviderHealth.ok &&
+      classificationProviderHealth.ok &&
       classificationRuntimeHealth.ok &&
       storageManagerRuntimeHealth.ok &&
       documentSearchRuntimeHealth.ok &&
@@ -238,13 +253,14 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       captureEngineRuntimeOk: captureRuntimeHealth.ok,
       ocrRuntimeOk: ocrRuntimeHealth.ok,
       ocrProviderOk: ocrProviderHealth.ok,
+      documentClassificationProviderOk: classificationProviderHealth.ok,
       documentClassificationRuntimeOk: classificationRuntimeHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       documentSearchRuntimeOk: documentSearchRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (AIProviderRuntime + DocumentSearchRuntime + StorageManagerRuntime + DocumentClassificationRuntime + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (AIProviderRuntime + DocumentSearchRuntime + StorageManagerRuntime + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
@@ -258,7 +274,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
    *   → Orchestrator.startExecution → DocumentIntakeRuntime.registerIntake
    *   → DocumentIntakePort.createIntake
    *   → OCRRuntimePort.coordinateOcr (estrutural — sem OCR real)
-   *   → DocumentClassificationRuntimePort.coordinateClassification (estrutural — sem classificação real)
+   *   → DocumentClassificationRuntimePort.coordinateClassification (CLASS-01 Provider via classify())
    *   → StorageManagerRuntimePort.coordinateStorage (estrutural — sem armazenamento real)
    *   → DocumentSearchRuntimePort.coordinateSearch (estrutural — sem busca real)
    */

@@ -1,16 +1,15 @@
 /**
- * Enterprise Document Classification Runtime — Document Intelligence Platform (DIP-04).
+ * Enterprise Document Classification Runtime — Document Intelligence Platform (DIP-04 / CLASS-01).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → DocumentClassificationRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Classification Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → DocumentClassificationProviderPort
+ *     → DefaultDocumentClassificationAdapter → Classification Provider
  *
- * DIP-04: infraestrutura oficial de coordenação de classificação documental —
- * sem classificação real, sem IA, sem LLM, sem embeddings, sem ML,
- * sem OCR para classificação, sem regras/heurísticas, sem I/O externo.
+ * CLASS-01: classificação rule-based via Provider Port.
+ * Sem IA, sem LLM, sem embeddings, sem ML, sem RAG.
  */
 export type {
   CanonicalDocumentClassificationCapabilities,
@@ -23,6 +22,10 @@ export type {
   CanonicalDocumentClassificationRequest,
   CanonicalDocumentClassificationResult,
   CanonicalDocumentClassificationSession,
+  CanonicalDocumentClassificationTelemetry,
+  CanonicalDocumentClassificationType,
+  ClassifyDocumentInput,
+  ClassifyDocumentResult,
   CoordinateClassificationInput,
   CoordinateClassificationResult,
   DocumentClassificationRuntimeCapabilities,

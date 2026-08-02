@@ -1,18 +1,19 @@
 /**
- * Tipos vendor-agnósticos do Document Classification Runtime — DIP-04.
+ * Tipos vendor-agnósticos do Document Classification Runtime — DIP-04 / CLASS-01.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → Capture Engine Runtime
  *     → OCR Runtime → DocumentClassificationRuntimePort
  *     → Canonical Execution Orchestrator
- *     → Classification Provider Adapter (referência estrutural)
- *     → Provider futuro
+ *     → DocumentClassificationProviderPort
+ *     → DefaultDocumentClassificationAdapter → Classification Provider
  *
- * Este componente NÃO executa classificação. NÃO usa IA/LLM/ML/embeddings.
- * NÃO usa OCR para classificação. NÃO aplica regras ou heurísticas.
- * Coordena estruturalmente via Ports oficiais.
+ * Este componente NÃO usa IA/LLM/ML/embeddings.
+ * Classificação real exclusivamente via DocumentClassificationProviderPort.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
+import type { DocumentClassificationProviderPort } from "../../document-classification-provider/ports/document-classification-provider-port";
+import type { DocumentClassificationProcessInput } from "../../document-classification-provider/ports/types";
 import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
 import type {
   CanonicalDocumentClassificationProviderReference,
@@ -34,6 +35,8 @@ export type {
   CanonicalDocumentClassificationRequest,
   CanonicalDocumentClassificationResult,
   CanonicalDocumentClassificationSession,
+  CanonicalDocumentClassificationTelemetry,
+  CanonicalDocumentClassificationType,
   DocumentClassificationRuntimeSessionStatus,
 } from "./models";
 
@@ -48,17 +51,20 @@ export type DocumentClassificationRuntimeHealth = {
   message?: string;
   enterpriseOrchestratorOk?: boolean;
   ocrRuntimeOk?: boolean;
-  realClassificationAvailable: false;
+  classificationProviderAdapterOk?: boolean;
+  /** true quando DocumentClassificationProviderPort pode executar classificação. */
+  realClassificationAvailable: boolean;
 };
 
 /**
  * Capacidades declaradas pelo adapter (Port level).
- * Capacidades tecnológicas de classificação permanecem FALSE — nenhuma é executada.
+ * Runtime permanece desacoplado de vendors — regras só no Provider Adapter.
  */
 export type DocumentClassificationRuntimeCapabilities = {
   provider: DocumentClassificationRuntimeProviderId;
   adapterId: string;
   supportsCoordinateClassification: boolean;
+  supportsClassify: boolean;
   supportsGetSession: boolean;
   supportsListSessions: boolean;
   supportsHealth: boolean;
@@ -68,16 +74,17 @@ export type DocumentClassificationRuntimeCapabilities = {
   usesCanonicalExecutionOrchestrator: boolean;
   usesOCRRuntime: boolean;
   usesCaptureEngineRuntime: boolean;
-  /** Capacidades tecnológicas — informativas / FALSE (DIP-04). */
-  supportsMedicalGuideClassification: false;
-  supportsInvoiceClassification: false;
-  supportsContractClassification: false;
-  supportsBatchClassification: false;
-  supportsConfidenceScore: false;
-  supportsMultiLabelClassification: false;
-  supportsCustomModels: false;
-  supportsRuleBasedClassification: false;
-  implementsRealClassification: false;
+  usesDocumentClassificationProviderAdapter: boolean;
+  supportsMedicalGuideClassification: boolean;
+  supportsInvoiceClassification: boolean;
+  supportsContractClassification: boolean;
+  supportsBatchClassification: boolean;
+  supportsConfidenceScore: boolean;
+  supportsMultiLabelClassification: boolean;
+  supportsCustomModels: boolean;
+  supportsRuleBasedClassification: boolean;
+  /** Runtime pode acionar classificação real via ProviderPort.classify(). */
+  implementsRealClassification: boolean;
   implementsAi: false;
   implementsMachineLearning: false;
   implementsRuleEngine: false;
@@ -93,10 +100,12 @@ export type DocumentClassificationRuntimeCapabilities = {
 export type DocumentClassificationRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
   /**
-   * OCR Runtime (DIP-03) — hop anterior na cadeia estrutural.
-   * NUNCA invocar OCR real; apenas health / sessão estrutural.
+   * OCR Runtime (DIP-03) — hop anterior na cadeia.
+   * classify() consome texto/estrutura do OCR; nunca chama OCR HTTP.
    */
   getOCRRuntimePort(): OCRRuntimePort;
+  /** DocumentClassificationProviderPort oficial — classify()/health()/capabilities. */
+  getDocumentClassificationProviderPort(): DocumentClassificationProviderPort;
 };
 
 export type GetDocumentClassificationRuntimeSessionInput = {
@@ -131,9 +140,22 @@ export type ListDocumentClassificationProviderReferencesResult = {
   references: readonly CanonicalDocumentClassificationProviderReference[];
 };
 
-/** Alias tipado da operação principal (coordenação estrutural — sem classificação real). */
+/** Alias tipado da coordenação (sem classificação real). */
 export type CoordinateClassificationInput = CanonicalDocumentClassificationRequest;
 export type CoordinateClassificationResult = CanonicalDocumentClassificationResult;
+
+/** Input de execução de classificação real via Runtime (CLASS-01). */
+export type ClassifyDocumentInput = DocumentClassificationProcessInput & {
+  documentId?: string;
+  sessionId?: string;
+  tenantRef?: string;
+  correlationId?: string;
+  captureRuntimeSessionId?: string;
+  ocrRuntimeSessionId?: string;
+  preferredProviderReference?: CanonicalDocumentClassificationProviderReferenceId;
+};
+
+export type ClassifyDocumentResult = CanonicalDocumentClassificationResult;
 
 /** Opções de resolução do DocumentClassificationRuntimePort. */
 export type DocumentClassificationRuntimeProviderOptions = {
@@ -145,7 +167,7 @@ export type DocumentClassificationRuntimeProviderOptions = {
   enterpriseDeps?: DocumentClassificationRuntimeEnterpriseDeps;
 };
 
-/** Catálogo estrutural de Classification Providers futuros (sem conexão). */
+/** Catálogo de Classification Providers referenciados pelo Runtime. */
 export const STRUCTURAL_DOCUMENT_CLASSIFICATION_PROVIDER_REFERENCES: readonly CanonicalDocumentClassificationProviderReference[] =
   [
     {
@@ -164,9 +186,9 @@ export const STRUCTURAL_DOCUMENT_CLASSIFICATION_PROVIDER_REFERENCES: readonly Ca
       kind: "canonical-document-classification-provider-reference",
       providerReferenceId: "rule-based-classifier",
       displayName: "Rule Based Classifier",
-      vendor: "Future Rule Engine",
-      status: "structural-reference-only",
-      implementsRealClassification: false,
+      vendor: "MedicFlow Enterprise",
+      status: "available-via-document-classification-provider-port",
+      implementsRealClassification: true,
       implementsAi: false,
       implementsMachineLearning: false,
       implementsRuleEngine: false,

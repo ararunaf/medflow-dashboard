@@ -134,8 +134,9 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(classificationSession.session?.realClassificationExecuted, false);
     assert.equal(
       runtime.getDocumentClassificationRuntimePort().capabilities().implementsRealClassification,
-      false,
+      true,
     );
+    assert.equal(runtime.getDocumentClassificationProviderPort().providerId, "rule-based");
 
     const storageSession = await runtime.getStorageManagerRuntimePort().getSession({
       runtimeSessionId: result.storageManagerRuntimeSessionId!,

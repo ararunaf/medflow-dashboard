@@ -27,6 +27,7 @@ import {
   type CanonicalDocumentClassificationRequest,
   type DocumentClassificationRuntimePort,
 } from "../../../src/lib/enterprise/document-classification-runtime/index.ts";
+import { createDocumentClassificationProviderPort } from "../../../src/lib/enterprise/document-classification-provider/index.ts";
 import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/index.ts";
 import { createOCRRuntimePort } from "../../../src/lib/enterprise/ocr-runtime/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
@@ -99,28 +100,28 @@ function enterpriseDeps() {
       getOCRProviderPort: () => ocrProviderPort,
     },
   });
+  const documentClassificationProviderPort = createDocumentClassificationProviderPort({
+    provider: "rule-based",
+  });
   return {
     orchestratorPort,
     ocrRuntimePort,
+    documentClassificationProviderPort,
     deps: {
       getOrchestratorPort: () => orchestratorPort,
       getOCRRuntimePort: () => ocrRuntimePort,
+      getDocumentClassificationProviderPort: () => documentClassificationProviderPort,
     },
   };
 }
 
-function assertNoRealClassificationCapabilities(
+function assertClass01ClassificationCapabilities(
   caps: ReturnType<DocumentClassificationRuntimePort["capabilities"]>,
 ) {
-  assert.equal(caps.supportsMedicalGuideClassification, false);
-  assert.equal(caps.supportsInvoiceClassification, false);
-  assert.equal(caps.supportsContractClassification, false);
-  assert.equal(caps.supportsBatchClassification, false);
-  assert.equal(caps.supportsConfidenceScore, false);
-  assert.equal(caps.supportsMultiLabelClassification, false);
-  assert.equal(caps.supportsCustomModels, false);
-  assert.equal(caps.supportsRuleBasedClassification, false);
-  assert.equal(caps.implementsRealClassification, false);
+  assert.equal(caps.supportsRuleBasedClassification, true);
+  assert.equal(caps.implementsRealClassification, true);
+  assert.equal(caps.supportsClassify, true);
+  assert.equal(caps.usesDocumentClassificationProviderAdapter, true);
   assert.equal(caps.implementsAi, false);
   assert.equal(caps.implementsMachineLearning, false);
   assert.equal(caps.implementsRuleEngine, false);
@@ -144,7 +145,9 @@ describe("DIP-04 DocumentClassificationRuntimePort contract", () => {
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_DOCUMENT_CLASSIFICATION_RUNTIME_ADAPTER_ID);
     assert.equal(caps.supportsCoordinateClassification, true);
-    assertNoRealClassificationCapabilities(caps);
+    assert.equal(caps.implementsRealClassification, false);
+    assert.equal(caps.implementsAi, false);
+    assert.equal(caps.implementsLlm, false);
   });
 
   it("default adapter exige enterpriseDeps (sem implementação paralela)", () => {
@@ -165,7 +168,7 @@ describe("DIP-04 DocumentClassificationRuntimePort contract", () => {
     assert.equal(port.capabilities().adapterId, DEFAULT_DOCUMENT_CLASSIFICATION_RUNTIME_ADAPTER_ID);
     assert.equal(port.capabilities().usesCanonicalExecutionOrchestrator, true);
     assert.equal(port.capabilities().usesOCRRuntime, true);
-    assertNoRealClassificationCapabilities(port.capabilities());
+    assertClass01ClassificationCapabilities(port.capabilities());
 
     const result = await port.coordinateClassification(sampleRequest());
     assert.equal(result.ok, true);
@@ -253,7 +256,7 @@ describe("DIP-04 DocumentClassificationRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.health.realClassificationAvailable, false);
     assert.equal(summary.capabilities.supportsCoordinateClassification, true);
-    assertNoRealClassificationCapabilities(summary.capabilities);
+    assert.equal(summary.capabilities.implementsRealClassification, false);
   });
 
   it("coordinateClassification rejeita input inválido", async () => {
@@ -305,11 +308,16 @@ describe("DIP-04 DocumentClassificationRuntimePort contract", () => {
     ]);
     for (const ref of refs.references) {
       assert.equal(ref.connected, false);
-      assert.equal(ref.implementsRealClassification, false);
       assert.equal(ref.implementsAi, false);
       assert.equal(ref.implementsMachineLearning, false);
       assert.equal(ref.implementsRuleEngine, false);
-      assert.equal(ref.status, "structural-reference-only");
+      if (ref.providerReferenceId === "rule-based-classifier") {
+        assert.equal(ref.implementsRealClassification, true);
+        assert.equal(ref.status, "available-via-document-classification-provider-port");
+      } else {
+        assert.equal(ref.implementsRealClassification, false);
+        assert.equal(ref.status, "structural-reference-only");
+      }
     }
   });
 });
@@ -330,10 +338,12 @@ describe("DIP-04 integração Enterprise / Capture / OCR / Orchestrator", () => 
     assert.equal(health.orchestratorOk, true);
 
     const classificationHealth = await classificationRuntime.health();
-    assert.equal(classificationHealth.realClassificationAvailable, false);
+    assert.equal(classificationHealth.realClassificationAvailable, true);
+    assert.equal(health.documentClassificationProviderOk, true);
+    assert.equal(runtime.getDocumentClassificationProviderPort().providerId, "rule-based");
   });
 
-  it("fluxo captura passa pelo Classification Runtime sem classificação real", async () => {
+  it("fluxo captura passa pelo Classification Runtime (coordenação; classify via ProviderPort)", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -383,7 +393,7 @@ describe("DIP-04 integração Enterprise / Capture / OCR / Orchestrator", () => 
 
     assert.equal(
       runtime.getDocumentClassificationRuntimePort().capabilities().implementsRealClassification,
-      false,
+      true,
     );
     assert.equal(
       runtime.getCaptureEngineRuntimePort().capabilities().implementsClassification,
@@ -407,8 +417,8 @@ describe("DIP-04 integração Enterprise / Capture / OCR / Orchestrator", () => 
   });
 });
 
-describe("DIP-04 ausência de classificação real / IA / ML / integrações externas", () => {
-  it("fonte do módulo Classification Runtime não contém IA/ML/classificação real nem HTTP", () => {
+describe("DIP-04 / CLASS-01 ausência de IA / ML / bypass no Classification Runtime", () => {
+  it("fonte do módulo Classification Runtime não contém IA/ML/HTTP nem bypass de Provider", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/document-classification-runtime");
     const files = [
       "adapters/default-document-classification-runtime-adapter.ts",
@@ -429,7 +439,6 @@ describe("DIP-04 ausência de classificação real / IA / ML / integrações ext
       /@tensorflow\//i,
       /@huggingface\//i,
       /langchain/i,
-      /\.classify\s*\(/,
       /\.predict\s*\(/,
       /createEmbedding\s*\(/i,
       /fetch\s*\(/,
@@ -453,13 +462,12 @@ describe("DIP-04 ausência de classificação real / IA / ML / integrações ext
       join(moduleDir, "adapters/default-document-classification-runtime-adapter.ts"),
       "utf8",
     );
-    assert.match(defaultAdapter, /health\/capabilities/);
-    assert.match(defaultAdapter, /PROIBIDO:/);
-    assert.equal(/\.classify\s*\(/.test(defaultAdapter), false);
+    assert.match(defaultAdapter, /DocumentClassificationProviderPort/);
+    assert.match(defaultAdapter, /classificationProvider\.classify/);
     assert.equal(/\.predict\s*\(/.test(defaultAdapter), false);
   });
 
-  it("coordinateClassification não produz labels, confidence nem tipo documental", async () => {
+  it("coordinateClassification não executa classify (realClassificationExecuted=false)", async () => {
     const { deps } = enterpriseDeps();
     const port = createDocumentClassificationRuntimePort({
       provider: "default",
@@ -467,14 +475,29 @@ describe("DIP-04 ausência de classificação real / IA / ML / integrações ext
     });
     const result = await port.coordinateClassification(sampleRequest());
     assert.equal(result.ok, true);
-    const sessionJson = JSON.stringify(result.session);
-    // Campos de resultado de classificação real (não capabilities estruturais FALSE).
-    assert.equal(/"predictedLabel"\s*:/i.test(sessionJson), false);
-    assert.equal(/"confidence"\s*:/i.test(sessionJson), false);
-    assert.equal(/"documentType"\s*:/i.test(sessionJson), false);
-    assert.equal(/"classLabel"\s*:/i.test(sessionJson), false);
-    assert.equal(/"labels"\s*:/i.test(sessionJson), false);
     assert.equal(result.realClassificationExecuted, false);
     assert.equal(result.session?.realClassificationExecuted, false);
+    assert.equal(result.documentType, undefined);
+    assert.equal(result.confidence, undefined);
+  });
+
+  it("classify() produz CanonicalDocumentClassificationResult via ProviderPort", async () => {
+    const { deps } = enterpriseDeps();
+    const port = createDocumentClassificationRuntimePort({
+      provider: "default",
+      enterpriseDeps: deps,
+    });
+    const result = await port.classify({
+      ocrText: "Guia TISS — número da guia ANS 123456",
+      documentId: "doc-class-01",
+      sessionId: "sess-class-01",
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.kind, "canonical-document-classification-result");
+    assert.equal(result.realClassificationExecuted, true);
+    assert.equal(result.documentType, "guia-tiss");
+    assert.ok((result.confidence ?? 0) > 0);
+    assert.ok((result.matchedRules?.length ?? 0) > 0);
+    assert.ok(result.telemetry);
   });
 });

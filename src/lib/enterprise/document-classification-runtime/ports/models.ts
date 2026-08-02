@@ -1,11 +1,10 @@
 /**
- * Modelos canônicos do Document Classification Runtime — DIP-04.
+ * Modelos canônicos do Document Classification Runtime — DIP-04 / CLASS-01.
  *
- * Representação estrutural da sessão de classificação documental na
- * Document Intelligence Platform.
- * Sem classificação real. Sem IA. Sem LLM. Sem embeddings. Sem ML.
- * Sem OCR para classificação. Sem regras de negócio. Sem heurísticas.
- * Sem identificação automática de tipos documentais.
+ * Coordenação + execução via DocumentClassificationProviderPort.
+ * Sem IA. Sem LLM. Sem embeddings. Sem ML. Sem RAG.
+ * Consome exclusivamente resultado produzido pelo OCR Runtime.
+ * Resultado canônico único: CanonicalDocumentClassificationResult.
  */
 
 /** Status estrutural da sessão de classificação no Runtime. */
@@ -13,9 +12,29 @@ export type DocumentClassificationRuntimeSessionStatus =
   | "pending"
   | "coordinating"
   | "coordinated"
+  | "processing"
+  | "completed"
   | "deferred"
   | "failed";
 
+/** Tipo documental canônico (CLASS-01 — rule-based). */
+export type CanonicalDocumentClassificationType =
+  | "guia-tiss"
+  | "solicitacao"
+  | "prontuario"
+  | "laudo"
+  | "documento-administrativo"
+  | "documento-financeiro"
+  | "documento-desconhecido";
+
+/** Telemetria estrutural canônica (embutida no resultado). */
+export type CanonicalDocumentClassificationTelemetry = {
+  latencyMs: number;
+  attempts: number;
+  cancelled: boolean;
+  matchedRuleCount?: number;
+  documentType?: CanonicalDocumentClassificationType;
+};
 /** Identidade canônica do documento na classificação (referências opacas). */
 export type CanonicalDocumentClassificationIdentity = {
   kind: "canonical-document-classification-identity";
@@ -56,18 +75,18 @@ export type CanonicalDocumentClassificationReference = {
 
 /**
  * Capacidades canônicas tecnológicas do Classification Runtime (modelo de domínio).
- * Todas FALSE / informativas — nenhuma capacidade é executada (DIP-04).
+ * Declaração informativa — execução real ocorre via DocumentClassificationProviderPort.
  */
 export type CanonicalDocumentClassificationCapabilities = {
   kind: "canonical-document-classification-capabilities";
-  supportsMedicalGuideClassification: false;
-  supportsInvoiceClassification: false;
-  supportsContractClassification: false;
-  supportsBatchClassification: false;
-  supportsConfidenceScore: false;
-  supportsMultiLabelClassification: false;
-  supportsCustomModels: false;
-  supportsRuleBasedClassification: false;
+  supportsMedicalGuideClassification: boolean;
+  supportsInvoiceClassification: boolean;
+  supportsContractClassification: boolean;
+  supportsBatchClassification: boolean;
+  supportsConfidenceScore: boolean;
+  supportsMultiLabelClassification: boolean;
+  supportsCustomModels: boolean;
+  supportsRuleBasedClassification: boolean;
   declared?: readonly string[];
 };
 
@@ -84,8 +103,8 @@ export type CanonicalDocumentClassificationConfiguration = {
 };
 
 /**
- * Referências estruturais a Classification Providers futuros.
- * NÃO são implementações. NÃO conectam serviços externos.
+ * Referências a Classification Providers.
+ * Execução ocorre somente no Adapter do DocumentClassificationProviderPort.
  */
 export type CanonicalDocumentClassificationProviderReferenceId =
   | "ai-classifier"
@@ -94,18 +113,18 @@ export type CanonicalDocumentClassificationProviderReferenceId =
   | "hybrid-classifier"
   | "mock";
 
-/** Descritor estrutural de um Classification Provider futuro. */
+/** Descritor de um Classification Provider referenciado pelo Runtime. */
 export type CanonicalDocumentClassificationProviderReference = {
   kind: "canonical-document-classification-provider-reference";
   providerReferenceId: CanonicalDocumentClassificationProviderReferenceId;
   displayName: string;
   vendor: string;
-  status: "structural-reference-only";
-  implementsRealClassification: false;
-  implementsAi: false;
-  implementsMachineLearning: false;
-  implementsRuleEngine: false;
-  connected: false;
+  status: "structural-reference-only" | "available-via-document-classification-provider-port";
+  implementsRealClassification: boolean;
+  implementsAi: boolean;
+  implementsMachineLearning: boolean;
+  implementsRuleEngine: boolean;
+  connected: boolean;
 };
 
 /** Pedido canônico de coordenação de classificação via Runtime. */
@@ -133,11 +152,17 @@ export type CanonicalDocumentClassificationSession = {
   message?: string;
   code?: string;
   errors?: readonly string[];
-  /** Sempre false nesta sprint — coordenação sem execução. */
-  realClassificationExecuted?: false;
+  /** true quando DocumentClassificationProviderPort.classify() executou. */
+  realClassificationExecuted?: boolean;
+  documentType?: CanonicalDocumentClassificationType;
+  confidence?: number;
+  matchedRules?: readonly string[];
 };
 
-/** Resultado canônico da coordenação via Document Classification Runtime. */
+/**
+ * Resultado canônico único da classificação documental (CLASS-01).
+ * Sem modelos paralelos — coordenação e execução compartilham este tipo.
+ */
 export type CanonicalDocumentClassificationResult = {
   kind: "canonical-document-classification-result";
   ok: boolean;
@@ -147,6 +172,14 @@ export type CanonicalDocumentClassificationResult = {
   providerReferenceId?: CanonicalDocumentClassificationProviderReferenceId;
   message?: string;
   code?: string;
-  /** Sempre false nesta sprint. */
-  realClassificationExecuted?: false;
+  /** true quando DocumentClassificationProviderPort.classify() executou. */
+  realClassificationExecuted?: boolean;
+  /** Tipo documental classificado (CLASS-01). */
+  documentType?: CanonicalDocumentClassificationType;
+  /** Confiança da classificação rule-based. */
+  confidence?: number;
+  /** Regras que contribuíram para o resultado. */
+  matchedRules?: readonly string[];
+  /** Telemetria estrutural (timeout/retry/cancel). */
+  telemetry?: CanonicalDocumentClassificationTelemetry;
 };

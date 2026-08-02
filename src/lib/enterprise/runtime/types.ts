@@ -4,10 +4,12 @@
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
  * Sem regras de negócio. Sem XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
+ * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
+import type { DocumentClassificationProviderPort } from "../document-classification-provider/ports/document-classification-provider-port";
 import type { DocumentClassificationRuntimePort } from "../document-classification-runtime/ports/document-classification-runtime-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
@@ -36,6 +38,7 @@ export type EnterpriseRuntimeHealth = {
   ocrRuntimeOk?: boolean;
   ocrProviderOk?: boolean;
   documentClassificationRuntimeOk?: boolean;
+  documentClassificationProviderOk?: boolean;
   storageManagerRuntimeOk?: boolean;
   documentSearchRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
@@ -92,6 +95,7 @@ export type EnterpriseRuntimeOptions = {
   captureEngineRuntimePort?: CaptureEngineRuntimePort;
   ocrRuntimePort?: OCRRuntimePort;
   ocrProviderPort?: OCRProviderPort;
+  documentClassificationProviderPort?: DocumentClassificationProviderPort;
   documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   documentSearchRuntimePort?: DocumentSearchRuntimePort;
@@ -115,8 +119,9 @@ export type EnterpriseRuntimeOptions = {
  * - expor AI Provider Runtime (ARCH-02 / DIP-07)
  * - expor bridge estrutural para o produto
  *
- * NÃO contém regras de negócio. NÃO executa classificação/storage/busca reais.
+ * NÃO contém regras de negócio. NÃO executa storage/busca reais.
  * OCR: exclusivamente via OCRRuntimePort → OCRProviderPort.
+ * Classification: exclusivamente via DocumentClassificationRuntimePort → ProviderPort (CLASS-01).
  * IA: exclusivamente via AIProviderRuntimePort → AIProviderPort.
  */
 export interface EnterpriseRuntime {
@@ -140,8 +145,11 @@ export interface EnterpriseRuntime {
   /** Resolve OCRProviderPort (EPC-15 / OCR-01) — Adapter oficial. */
   getOCRProviderPort(): OCRProviderPort;
 
-  /** Resolve DocumentClassificationRuntimePort (DIP-04). */
+  /** Resolve DocumentClassificationRuntimePort (DIP-04 / CLASS-01). */
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
+
+  /** Resolve DocumentClassificationProviderPort (CLASS-01) — Adapter oficial. */
+  getDocumentClassificationProviderPort(): DocumentClassificationProviderPort;
 
   /** Resolve StorageManagerRuntimePort (DIP-05). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
@@ -163,7 +171,7 @@ export interface EnterpriseRuntime {
    *     → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort → Adapter
    *     → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
    *     → DocumentClassificationRuntimePort → Orchestrator
-   *     → Classification Provider Adapter (referência estrutural)
+   *     → DocumentClassificationRuntimePort → DocumentClassificationProviderPort (CLASS-01)
    *     → StorageManagerRuntimePort → Orchestrator
    *     → Storage Provider Adapter (referência estrutural)
    *     → DocumentSearchRuntimePort → Orchestrator
