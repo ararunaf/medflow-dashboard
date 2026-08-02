@@ -29,7 +29,7 @@
 | 18 | ESLint PASS? | **Sim** (0 errors; warnings pré-existentes) |
 | 19 | Enterprise PASS? | **Sim** (document-intake + orchestrator + runtime) |
 | 20 | Capture PASS? | **Sim** (`npm run capture:test`) |
-| 21 | Working Tree limpa? | Após commit |
+| 21 | Working Tree limpa? | **Sim** |
 | 22 | Commit criado? | Sim (branch `feat/arch-01-enterprise-runtime-integration`) |
 | 23 | Push realizado? | Não (aguardando autorização) |
 | 24 | GitHub sincronizado? | Não (aguardando push) |
