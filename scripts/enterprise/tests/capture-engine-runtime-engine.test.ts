@@ -29,6 +29,7 @@ import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/
 import { createOCRRuntimePort } from "../../../src/lib/enterprise/ocr-runtime/index.ts";
 import { createDocumentClassificationRuntimePort } from "../../../src/lib/enterprise/document-classification-runtime/index.ts";
 import { createStorageManagerRuntimePort } from "../../../src/lib/enterprise/storage-manager-runtime/index.ts";
+import { createDocumentSearchRuntimePort } from "../../../src/lib/enterprise/document-search-runtime/index.ts";
 import {
   createEnterpriseRuntime,
   resetEnterpriseRuntimeForTests,
@@ -106,6 +107,13 @@ function enterpriseDeps() {
       getDocumentClassificationRuntimePort: () => documentClassificationRuntimePort,
     },
   });
+  const documentSearchRuntimePort = createDocumentSearchRuntimePort({
+    provider: "default",
+    enterpriseDeps: {
+      getOrchestratorPort: () => orchestratorPort,
+      getStorageManagerRuntimePort: () => storageManagerRuntimePort,
+    },
+  });
   return {
     documentIntakePort,
     orchestratorPort,
@@ -113,12 +121,14 @@ function enterpriseDeps() {
     ocrRuntimePort,
     documentClassificationRuntimePort,
     storageManagerRuntimePort,
+    documentSearchRuntimePort,
     deps: {
       getDocumentIntakeRuntimePort: () => documentIntakeRuntimePort,
       getOrchestratorPort: () => orchestratorPort,
       getOCRRuntimePort: () => ocrRuntimePort,
       getDocumentClassificationRuntimePort: () => documentClassificationRuntimePort,
       getStorageManagerRuntimePort: () => storageManagerRuntimePort,
+      getDocumentSearchRuntimePort: () => documentSearchRuntimePort,
     },
   };
 }
@@ -163,6 +173,7 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
       ocrRuntimePort,
       documentClassificationRuntimePort,
       storageManagerRuntimePort,
+      documentSearchRuntimePort,
     } = enterpriseDeps();
     const port = new DefaultCaptureEngineRuntimeAdapter({ enterpriseDeps: deps });
 
@@ -174,9 +185,11 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     assert.equal(port.capabilities().usesOCRRuntime, true);
     assert.equal(port.capabilities().usesDocumentClassificationRuntime, true);
     assert.equal(port.capabilities().usesStorageManagerRuntime, true);
+    assert.equal(port.capabilities().usesDocumentSearchRuntime, true);
     assert.equal(port.capabilities().implementsOcr, false);
     assert.equal(port.capabilities().implementsClassification, false);
     assert.equal(port.capabilities().implementsStorageManager, false);
+    assert.equal(port.capabilities().implementsSearch, false);
 
     const result = await port.registerCapture(sampleRequest());
     assert.equal(result.ok, true);
@@ -187,6 +200,7 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     assert.ok(result.ocrRuntimeSessionId);
     assert.ok(result.classificationRuntimeSessionId);
     assert.ok(result.storageManagerRuntimeSessionId);
+    assert.ok(result.documentSearchRuntimeSessionId);
     assert.equal(result.session?.status, "registered");
 
     const ocrSession = await ocrRuntimePort.getSession({
@@ -210,6 +224,14 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     assert.equal(storageSession.session?.status, "coordinated");
     assert.equal(storageSession.session?.realStorageExecuted, false);
     assert.equal(storageSession.session?.realUploadExecuted, false);
+
+    const searchSession = await documentSearchRuntimePort.getSession({
+      runtimeSessionId: result.documentSearchRuntimeSessionId!,
+    });
+    assert.equal(searchSession.ok, true);
+    assert.equal(searchSession.session?.status, "coordinated");
+    assert.equal(searchSession.session?.realSearchExecuted, false);
+    assert.equal(searchSession.session?.realIndexingExecuted, false);
 
     const storedIntake = await documentIntakePort.getIntake({ intakeId: result.intakeId! });
     assert.equal(storedIntake.ok, true);
@@ -337,7 +359,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.equal(health.orchestratorOk, true);
   });
 
-  it("registerCaptureDocumentIntake usa Capture Engine + Orchestrator + DocumentIntakeRuntime + OCRRuntime + ClassificationRuntime + StorageManagerRuntime", async () => {
+  it("registerCaptureDocumentIntake usa Capture Engine + Orchestrator + DocumentIntakeRuntime + OCRRuntime + ClassificationRuntime + StorageManagerRuntime + DocumentSearchRuntime", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
 
@@ -357,6 +379,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.ok(result.ocrRuntimeSessionId);
     assert.ok(result.classificationRuntimeSessionId);
     assert.ok(result.storageManagerRuntimeSessionId);
+    assert.ok(result.documentSearchRuntimeSessionId);
     assert.equal(result.intake?.ok, true);
     assert.equal(result.execution?.ok, true);
     assert.equal(result.intake?.intake?.sourceType, "UPLOAD");
@@ -370,6 +393,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.ok(captureSessions.sessions[0]?.ocrRuntimeSessionId);
     assert.ok(captureSessions.sessions[0]?.classificationRuntimeSessionId);
     assert.ok(captureSessions.sessions[0]?.storageManagerRuntimeSessionId);
+    assert.ok(captureSessions.sessions[0]?.documentSearchRuntimeSessionId);
 
     const intakeSessions = await runtime.getDocumentIntakeRuntimePort().listSessions({
       sessionId: "sess-arch-dip-02",
@@ -405,6 +429,15 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.equal(storageSessions.sessions[0]?.realStorageExecuted, false);
     assert.equal(storageSessions.sessions[0]?.realUploadExecuted, false);
 
+    const searchSessions = await runtime.getDocumentSearchRuntimePort().listSessions({
+      sessionId: "sess-arch-dip-02",
+    });
+    assert.equal(searchSessions.ok, true);
+    assert.equal(searchSessions.sessions.length, 1);
+    assert.equal(searchSessions.sessions[0]?.status, "coordinated");
+    assert.equal(searchSessions.sessions[0]?.realSearchExecuted, false);
+    assert.equal(searchSessions.sessions[0]?.realIndexingExecuted, false);
+
     const stored = await runtime.getDocumentIntakePort().getIntake({
       intakeId: result.intakeId!,
     });
@@ -431,6 +464,7 @@ describe("DIP-02 integração Enterprise Runtime", () => {
     assert.equal(typeof runtime.getOCRRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentClassificationRuntimePort, "function");
     assert.equal(typeof runtime.getStorageManagerRuntimePort, "function");
+    assert.equal(typeof runtime.getDocumentSearchRuntimePort, "function");
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });

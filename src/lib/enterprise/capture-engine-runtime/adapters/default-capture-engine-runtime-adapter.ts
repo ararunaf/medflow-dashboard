@@ -1,5 +1,5 @@
 /**
- * DefaultCaptureEngineRuntimeAdapter — adapter default (DIP-02 / DIP-03 / DIP-04 / DIP-05).
+ * DefaultCaptureEngineRuntimeAdapter — adapter default (DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06).
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
  *   Canonical Execution Orchestrator → DocumentIntakeRuntime
@@ -9,10 +9,12 @@
  *     → Classification Provider Adapter (referência estrutural)
  *   → StorageManagerRuntimePort → Orchestrator
  *     → Storage Provider Adapter (referência estrutural)
+ *   → DocumentSearchRuntimePort → Orchestrator
+ *     → Search Provider Adapter (referência estrutural)
  *
  * NÃO reimplementa intake. NÃO cria adapters paralelos.
  * NÃO executa OCR real, IA, XML, TISS, parser, classificação real, storage real,
- * Workflow, Rule Engine, versionamento ou busca.
+ * Workflow, Rule Engine, versionamento ou busca real.
  */
 import { createCaptureRuntimeSessionId } from "../ports/identity";
 import type { CaptureEngineRuntimePort } from "../ports/capture-engine-runtime-port";
@@ -61,6 +63,7 @@ function foundationCapabilities(): CaptureEngineRuntimeCapabilities {
     usesOCRRuntime: true,
     usesDocumentClassificationRuntime: true,
     usesStorageManagerRuntime: true,
+    usesDocumentSearchRuntime: true,
     implementsOcr: false,
     implementsAi: false,
     implementsXml: false,
@@ -88,7 +91,7 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
     if (!options.enterpriseDeps) {
       throw new Error(
         "DefaultCaptureEngineRuntimeAdapter exige enterpriseDeps " +
-          "(Orchestrator + DocumentIntakeRuntime + OCRRuntime + DocumentClassificationRuntime + StorageManagerRuntime). " +
+          "(Orchestrator + DocumentIntakeRuntime + OCRRuntime + DocumentClassificationRuntime + StorageManagerRuntime + DocumentSearchRuntime). " +
           "Implementação paralela é proibida.",
       );
     }
@@ -504,6 +507,83 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
           "DIP-05: Storage coordinated from Capture Engine Runtime (no real storage / no upload / no external providers).",
       });
 
+      // DIP-06 — coordenação estrutural via Document Search Runtime (sem busca real / sem indexação).
+      const documentSearchRuntime = this.enterpriseDeps.getDocumentSearchRuntimePort();
+      const searchResult = await documentSearchRuntime.coordinateSearch({
+        kind: "canonical-search-request",
+        identity: {
+          kind: "canonical-search-identity",
+          documentId: input.identity.documentId,
+          documentKind: input.identity.documentKind ?? "capture-document",
+          version: input.identity.version,
+        },
+        metadata: {
+          kind: "canonical-search-metadata",
+          sessionId: input.metadata.sessionId,
+          tenantRef: input.metadata.tenantRef,
+          correlationId: input.metadata.correlationId,
+          channel,
+          tags: [
+            "dip-06",
+            "capture-engine-runtime",
+            "document-search-runtime",
+            ...(input.metadata.tags ?? []),
+          ],
+          customAttributes: {
+            sessionId: input.metadata.sessionId,
+            documentId: input.identity.documentId,
+            captureRuntimeSessionId: runtimeSessionId,
+            captureExecutionId: execution.context?.executionId ?? null,
+            intakeId: intakeResult.intakeId ?? null,
+            ocrRuntimeSessionId: ocrResult.runtimeSessionId ?? null,
+            classificationRuntimeSessionId: classificationResult.runtimeSessionId ?? null,
+            storageManagerRuntimeSessionId: storageResult.runtimeSessionId ?? null,
+            ...(input.metadata.customAttributes ?? {}),
+          },
+        },
+        reference: {
+          kind: "canonical-search-reference",
+          storageKey: input.reference?.storageKey,
+          storageContainer: input.reference?.storageContainer ?? "clinical-documents",
+          storageProvider: input.reference?.storageProvider ?? "product-capture",
+          metadataId: input.reference?.metadataId ?? input.metadata.sessionId,
+          metadataNamespace: input.reference?.metadataNamespace ?? "product.capture",
+          intakeId: intakeResult.intakeId,
+          executionId: execution.context?.executionId,
+          captureRuntimeSessionId: runtimeSessionId,
+          captureExecutionId: execution.context?.executionId,
+          ocrRuntimeSessionId: ocrResult.runtimeSessionId,
+          ocrExecutionId: ocrResult.executionId,
+          classificationRuntimeSessionId: classificationResult.runtimeSessionId,
+          classificationExecutionId: classificationResult.executionId,
+          storageManagerRuntimeSessionId: storageResult.runtimeSessionId,
+          storageExecutionId: storageResult.executionId,
+          providerReferenceId: "mock-search",
+        },
+        capabilities: {
+          kind: "canonical-search-capabilities",
+          supportsKeywordSearch: false,
+          supportsMetadataSearch: false,
+          supportsFullTextSearch: false,
+          supportsSemanticSearch: false,
+          supportsVectorSearch: false,
+          supportsBatchSearch: false,
+          supportsRanking: false,
+          supportsFacetedSearch: false,
+          declared: ["capture-engine-runtime", "document-search-runtime-structural"],
+        },
+        configuration: {
+          kind: "canonical-search-configuration",
+          preferredProviderReference: "mock-search",
+          channel,
+          priority: input.configuration?.priority ?? "NORMAL",
+          notes:
+            "DIP-06: structural search coordination from Capture Engine Runtime (no real search / no indexing).",
+        },
+        structuralNotes:
+          "DIP-06: Search coordinated from Capture Engine Runtime (no real search / no indexing / no external providers).",
+      });
+
       session = {
         ...session,
         status: "registered",
@@ -517,11 +597,13 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         classificationExecutionId: classificationResult.executionId,
         storageManagerRuntimeSessionId: storageResult.runtimeSessionId,
         storageExecutionId: storageResult.executionId,
+        documentSearchRuntimeSessionId: searchResult.runtimeSessionId,
+        searchExecutionId: searchResult.executionId,
         updatedAt: nowIso(this.now),
         message:
-          ocrResult.ok && classificationResult.ok && storageResult.ok
-            ? "Capture registered via Capture Engine Runtime Ports (+ OCR + Classification + Storage Manager Runtime structural)."
-            : "Capture registered; OCR/Classification/Storage Runtime coordination reported non-ok (no real processing/storage).",
+          ocrResult.ok && classificationResult.ok && storageResult.ok && searchResult.ok
+            ? "Capture registered via Capture Engine Runtime Ports (+ OCR + Classification + Storage Manager + Document Search Runtime structural)."
+            : "Capture registered; OCR/Classification/Storage/Search Runtime coordination reported non-ok (no real processing/storage/search).",
         code: "REGISTERED",
       };
       this.store.setSession(session);
@@ -540,6 +622,8 @@ export class DefaultCaptureEngineRuntimeAdapter implements CaptureEngineRuntimeP
         classificationExecutionId: classificationResult.executionId,
         storageManagerRuntimeSessionId: storageResult.runtimeSessionId,
         storageExecutionId: storageResult.executionId,
+        documentSearchRuntimeSessionId: searchResult.runtimeSessionId,
+        searchExecutionId: searchResult.executionId,
         message: session.message,
         code: session.code,
       };

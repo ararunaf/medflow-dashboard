@@ -1,5 +1,5 @@
 /**
- * Bridge Captura → Enterprise Runtime (ARCH-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05).
+ * Bridge Captura → Enterprise Runtime (ARCH-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06).
  *
  * Side-effect estrutural após upload bem-sucedido.
  * Fluxo: Produto → Enterprise Runtime → CaptureEngineRuntimePort
@@ -8,8 +8,10 @@
  *   → DocumentClassificationRuntimePort → Orchestrator
  *   → Classification Provider Adapter (referência estrutural)
  *   → StorageManagerRuntimePort → Orchestrator
- *   → Storage Provider Adapter (referência estrutural).
- * NÃO altera OCR/classificação/storage reais do produto, parser, auditoria, UI, APIs ou regras.
+ *   → Storage Provider Adapter (referência estrutural)
+ *   → DocumentSearchRuntimePort → Orchestrator
+ *   → Search Provider Adapter (referência estrutural).
+ * NÃO altera OCR/classificação/storage/busca reais do produto, parser, auditoria, UI, APIs ou regras.
  * Falhas são engolidas — o fluxo de Captura permanece válido.
  */
 import {

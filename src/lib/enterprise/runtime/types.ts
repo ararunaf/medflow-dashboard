@@ -1,8 +1,8 @@
 /**
- * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05.
+ * Tipos do Enterprise Runtime — ARCH-01 / DIP-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06.
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
- * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação/storage reais. Sem filas/workers reais.
+ * Sem regras de negócio. Sem OCR/IA/XML/TISS/classificação/storage/busca reais. Sem filas/workers reais.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
@@ -11,6 +11,7 @@ import type { DocumentIntakePort } from "../document-intake/ports/document-intak
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
 import type { DocumentIntakeRuntimePort } from "../document-intake-runtime/ports/document-intake-runtime-port";
+import type { DocumentSearchRuntimePort } from "../document-search-runtime/ports/document-search-runtime-port";
 import type { OCRRuntimePort } from "../ocr-runtime/ports/ocr-runtime-port";
 import type { OCRProviderPort } from "../ocr-provider/ports/ocr-provider-port";
 import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports/storage-manager-runtime-port";
@@ -32,6 +33,7 @@ export type EnterpriseRuntimeHealth = {
   ocrProviderOk?: boolean;
   documentClassificationRuntimeOk?: boolean;
   storageManagerRuntimeOk?: boolean;
+  documentSearchRuntimeOk?: boolean;
 };
 
 /**
@@ -62,6 +64,9 @@ export type RegisterCaptureDocumentIntakeResult = {
   /** DIP-05 — sessão Storage Manager Runtime (coordenação estrutural, sem armazenamento real). */
   storageManagerRuntimeSessionId?: string;
   storageExecutionId?: string;
+  /** DIP-06 — sessão Document Search Runtime (coordenação estrutural, sem busca real). */
+  documentSearchRuntimeSessionId?: string;
+  searchExecutionId?: string;
   intake?: CreateIntakeResult;
   execution?: StartExecutionResult;
   message?: string;
@@ -83,6 +88,7 @@ export type EnterpriseRuntimeOptions = {
   ocrProviderPort?: OCRProviderPort;
   documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
+  documentSearchRuntimePort?: DocumentSearchRuntimePort;
 };
 
 /**
@@ -97,9 +103,10 @@ export type EnterpriseRuntimeOptions = {
  * - expor OCR Runtime (DIP-03)
  * - expor Document Classification Runtime (DIP-04)
  * - expor Storage Manager Runtime (DIP-05)
+ * - expor Document Search Runtime (DIP-06)
  * - expor bridge estrutural para o produto
  *
- * NÃO contém regras de negócio. NÃO executa OCR/classificação/storage reais.
+ * NÃO contém regras de negócio. NÃO executa OCR/classificação/storage/busca reais.
  */
 export interface EnterpriseRuntime {
   readonly runtimeId: EnterpriseRuntimeId;
@@ -125,8 +132,11 @@ export interface EnterpriseRuntime {
   /** Resolve StorageManagerRuntimePort (DIP-05). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
 
+  /** Resolve DocumentSearchRuntimePort (DIP-06). */
+  getDocumentSearchRuntimePort(): DocumentSearchRuntimePort;
+
   /**
-   * Bridge oficial Captura → Foundation (DIP-02 / DIP-03 / DIP-04 / DIP-05).
+   * Bridge oficial Captura → Foundation (DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06).
    *
    * Fluxo:
    *   Produto → Runtime → CaptureEngineRuntimePort
@@ -136,6 +146,8 @@ export interface EnterpriseRuntime {
    *     → Classification Provider Adapter (referência estrutural)
    *     → StorageManagerRuntimePort → Orchestrator
    *     → Storage Provider Adapter (referência estrutural)
+   *     → DocumentSearchRuntimePort → Orchestrator
+   *     → Search Provider Adapter (referência estrutural)
    *
    * Best-effort: nunca lança para o produto; falhas retornam ok:false.
    */

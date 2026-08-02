@@ -1,5 +1,5 @@
 /**
- * Tipos vendor-agnósticos do Capture Engine Runtime — DIP-02 / DIP-03 / DIP-04 / DIP-05.
+ * Tipos vendor-agnósticos do Capture Engine Runtime — DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06.
  *
  * Arquitetura obrigatória:
  *   Produto → Enterprise Runtime → CaptureEngineRuntimePort
@@ -10,13 +10,16 @@
  *     → Classification Provider Adapter (referência estrutural)
  *     → StorageManagerRuntimePort → Orchestrator
  *     → Storage Provider Adapter (referência estrutural)
+ *     → DocumentSearchRuntimePort → Orchestrator
+ *     → Search Provider Adapter (referência estrutural)
  *
  * Este componente NÃO reimplementa intake nem processamento documental.
- * NÃO executa OCR nem classificação nem armazenamento. Coordena via Ports oficiais.
+ * NÃO executa OCR nem classificação nem armazenamento nem busca. Coordena via Ports oficiais.
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
 import type { DocumentClassificationRuntimePort } from "../../document-classification-runtime/ports/document-classification-runtime-port";
 import type { DocumentIntakeRuntimePort } from "../../document-intake-runtime/ports/document-intake-runtime-port";
+import type { DocumentSearchRuntimePort } from "../../document-search-runtime/ports/document-search-runtime-port";
 import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
 import type { StorageManagerRuntimePort } from "../../storage-manager-runtime/ports/storage-manager-runtime-port";
 import type {
@@ -69,6 +72,7 @@ export type CaptureEngineRuntimeCapabilities = {
   usesOCRRuntime: boolean;
   usesDocumentClassificationRuntime: boolean;
   usesStorageManagerRuntime: boolean;
+  usesDocumentSearchRuntime: boolean;
   implementsOcr: false;
   implementsAi: false;
   implementsXml: false;
@@ -95,6 +99,8 @@ export type CaptureEngineRuntimeEnterpriseDeps = {
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
   /** DIP-05 — coordenação estrutural de storage (sem armazenamento real). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
+  /** DIP-06 — coordenação estrutural de search (sem busca real). */
+  getDocumentSearchRuntimePort(): DocumentSearchRuntimePort;
 };
 
 export type GetCaptureRuntimeSessionInput = {

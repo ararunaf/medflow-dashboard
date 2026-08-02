@@ -81,6 +81,7 @@ export class MockCaptureEngineRuntimeAdapter implements CaptureEngineRuntimePort
       usesOCRRuntime: Boolean(this.delegate),
       usesDocumentClassificationRuntime: Boolean(this.delegate),
       usesStorageManagerRuntime: Boolean(this.delegate),
+      usesDocumentSearchRuntime: Boolean(this.delegate),
       implementsOcr: false,
       implementsAi: false,
       implementsXml: false,

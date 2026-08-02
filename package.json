@@ -72,6 +72,7 @@
     "enterprise:ocr-runtime:test": "npx tsx --test scripts/enterprise/tests/ocr-runtime-engine.test.ts",
     "enterprise:document-classification-runtime:test": "npx tsx --test scripts/enterprise/tests/document-classification-runtime-engine.test.ts",
     "enterprise:storage-manager-runtime:test": "npx tsx --test scripts/enterprise/tests/storage-manager-runtime-engine.test.ts",
+    "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
 
     "enterprise:document-processor:test": "npx tsx --test scripts/enterprise/tests/document-processor-engine.test.ts",
     "enterprise:processing-provider:test": "npx tsx --test scripts/enterprise/tests/processing-provider-engine.test.ts",
