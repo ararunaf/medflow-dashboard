@@ -38,6 +38,7 @@ import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-
 import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
 import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-serializer-runtime/index.ts";
 import { createXMLSchemaRuntimePort } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
+import { createXMLValidationRuntimePort } from "../../../src/lib/enterprise/xml-validation-runtime/index.ts";
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSProviderPort } from "../../../src/lib/enterprise/tiss-provider/index.ts";
@@ -328,6 +329,7 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
     const { catalog, rulePackEngine, xmlGenerationRuntime, enterpriseDeps } = withEnterpriseDeps();
     const xmlSerializerRuntime = createXMLSerializerRuntimePort({ provider: "enterprise" });
     const xmlSchemaRuntime = createXMLSchemaRuntimePort({ provider: "enterprise" });
+    const xmlValidationRuntime = createXMLValidationRuntimePort({ provider: "enterprise" });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps,
@@ -343,6 +345,7 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
         getXMLGenerationRuntimePort: () => xmlGenerationRuntime,
         getXMLSerializerRuntimePort: () => xmlSerializerRuntime,
         getXMLSchemaRuntimePort: () => xmlSchemaRuntime,
+        getXMLValidationRuntimePort: () => xmlValidationRuntime,
       },
     });
 

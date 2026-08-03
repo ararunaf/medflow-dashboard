@@ -11,6 +11,7 @@ import { createXMLGenerationRuntimePort } from "../../xml-generation-runtime/pro
 import { createXMLRuntimePort } from "../../xml-runtime/providers/create-xml-runtime-port";
 import { createXMLSchemaRuntimePort } from "../../xml-schema-runtime/providers/create-xml-schema-runtime-port";
 import { createXMLSerializerRuntimePort } from "../../xml-serializer-runtime/providers/create-xml-serializer-runtime-port";
+import { createXMLValidationRuntimePort } from "../../xml-validation-runtime/providers/create-xml-validation-runtime-port";
 import type { TISSRuntimePort } from "../ports/tiss-runtime-port";
 import type {
   GetTISSRuntimeSessionInput,
@@ -54,6 +55,7 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
     const xmlGenerationRuntimePort = createXMLGenerationRuntimePort({ provider: "mock" });
     const xmlSerializerRuntimePort = createXMLSerializerRuntimePort({ provider: "mock" });
     const xmlSchemaRuntimePort = createXMLSchemaRuntimePort({ provider: "mock" });
+    const xmlValidationRuntimePort = createXMLValidationRuntimePort({ provider: "mock" });
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
       getTISSProviderPort: () => createTISSProviderPort({ provider: "mock" }),
@@ -62,6 +64,7 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       getXMLGenerationRuntimePort: () => xmlGenerationRuntimePort,
       getXMLSerializerRuntimePort: () => xmlSerializerRuntimePort,
       getXMLSchemaRuntimePort: () => xmlSchemaRuntimePort,
+      getXMLValidationRuntimePort: () => xmlValidationRuntimePort,
       getXMLRuntimePort: () =>
         createXMLRuntimePort({
           provider: "mock",

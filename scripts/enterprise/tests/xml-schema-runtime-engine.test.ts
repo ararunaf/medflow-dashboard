@@ -33,6 +33,7 @@ import {
   getXMLSchemaRuntimeHealthSummary,
   type XMLSchemaRuntimePort,
 } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
+import { createXMLValidationRuntimePort } from "../../../src/lib/enterprise/xml-validation-runtime/index.ts";
 import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-serializer-runtime/index.ts";
 import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
@@ -275,6 +276,7 @@ describe("TISS-07 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     const xmlGenerationRuntime = createXMLGenerationRuntimePort({ provider: "enterprise" });
     const xmlSerializerRuntime = createXMLSerializerRuntimePort({ provider: "enterprise" });
     const xmlSchemaRuntime = createXMLSchemaRuntimePort({ provider: "enterprise" });
+    const xmlValidationRuntime = createXMLValidationRuntimePort({ provider: "enterprise" });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps: {
@@ -294,6 +296,7 @@ describe("TISS-07 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
         getXMLGenerationRuntimePort: () => xmlGenerationRuntime,
         getXMLSerializerRuntimePort: () => xmlSerializerRuntime,
         getXMLSchemaRuntimePort: () => xmlSchemaRuntime,
+        getXMLValidationRuntimePort: () => xmlValidationRuntime,
       },
     });
 

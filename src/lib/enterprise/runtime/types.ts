@@ -6,7 +6,7 @@
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + TISSProviderPort (TISS-01…07).
+ * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + TISSProviderPort (TISS-01…08).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -33,6 +33,7 @@ import type { XMLGenerationRuntimePort } from "../xml-generation-runtime/ports/x
 import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
 import type { XMLSchemaRuntimePort } from "../xml-schema-runtime/ports/xml-schema-runtime-port";
 import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
+import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -62,6 +63,7 @@ export type EnterpriseRuntimeHealth = {
   xmlGenerationRuntimeOk?: boolean;
   xmlSerializerRuntimeOk?: boolean;
   xmlSchemaRuntimeOk?: boolean;
+  xmlValidationRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -130,6 +132,7 @@ export type EnterpriseRuntimeOptions = {
   xmlGenerationRuntimePort?: XMLGenerationRuntimePort;
   xmlSerializerRuntimePort?: XMLSerializerRuntimePort;
   xmlSchemaRuntimePort?: XMLSchemaRuntimePort;
+  xmlValidationRuntimePort?: XMLValidationRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -217,7 +220,10 @@ export interface EnterpriseRuntime {
   /** Resolve XMLSchemaRuntimePort (TISS-07) — Enterprise XML Schema Runtime. */
   getXMLSchemaRuntimePort(): XMLSchemaRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-07). */
+  /** Resolve XMLValidationRuntimePort (TISS-08) — Enterprise XML Validation Runtime. */
+  getXMLValidationRuntimePort(): XMLValidationRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-08). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

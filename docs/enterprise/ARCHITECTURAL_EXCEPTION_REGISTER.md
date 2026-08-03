@@ -230,6 +230,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-XMLSER-B2 | Barrel exporta Store + `getStore()` no Adapter (Serializer) | TISS-06 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-XMLSCH-B1 | Escape hatch `getXMLSchemaRuntimePort()` | TISS-07 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-XMLSCH-B2 | Barrel exporta Store + `getStore()` no Adapter (Schema) | TISS-07 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
+| AER-XMLVAL-B1 | Escape hatch `getXMLValidationRuntimePort()` | TISS-08 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-XMLVAL-B2 | Barrel exporta Store + `getStore()` no Adapter (Validation) | TISS-08 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -939,6 +941,28 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 11. **Roadmap:** **TISS-08 — Enterprise XML Validation Runtime oficialmente liberada**.  
 12. Documento: `docs/enterprise/TISS-SCHEMA-GATE-01_CERTIFICATION.md`.
 
+### Atualização TISS-08 (03/08/2026)
+
+1. **TISS-08 implementado** — Enterprise XML Validation Runtime (`src/lib/enterprise/xml-validation-runtime/`).  
+2. Cadeia oficial: Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → `XMLGenerationRuntimePort` → `XMLSerializerRuntimePort` → `XMLSchemaRuntimePort` → `XMLValidationRuntimePort` → Adapter → Store → Canonical XML Validation Result.  
+3. Resposta estrutural apenas — **`validationExecuted = false`**, **`realValidationPerformed = false`**, **`officialXsdLoaded = false`**, **`officialAnsValidation = false`**, **`officialTissValidation = false`**, **`validationRulesLoaded = false`**, **`validationEngineReady = true`** hardcoded; sem XSD oficial / validação real / XML TISS/ANS / namespace / SOAP.  
+4. Integração à cadeia XML via composition root (Enterprise/TISS Runtime); módulos XML Runtime / Generation / Serializer / Schema não importam Validation Runtime.  
+5. **Novas ressalvas Baixa:** **AER-XMLVAL-B1…B2** (Aceitas, não bloqueantes).  
+6. **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** permanecem Aceitas (sem regressão).  
+7. Indicador permanente novo: **XML Validation Runtime Coverage = 100%**.  
+8. Sprint **TISS-08 encerrada oficialmente**. Próxima Sprint obrigatória: **TISS-VALIDATION-GATE-01**.  
+9. Documentos: `TISS-08_ENTERPRISE_XML_VALIDATION_RUNTIME.md`, `TISS-08_XML_VALIDATION_ARCHITECTURE.md`, `TISS-08_XML_VALIDATION_CERTIFICATION.md`.
+
+#### AER-XMLVAL-B1
+- **Título:** Escape hatch `getXMLValidationRuntimePort()`  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getXMLSchemaRuntimePort` / AER-XMLSCH-B1). Cadeia oficial permanece Runtime → TISS Runtime → XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort → XMLSchemaRuntimePort → XMLValidationRuntimePort.  
+- **Origem:** TISS-08 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+#### AER-XMLVAL-B2
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Validation)  
+- **Descrição:** `xml-validation-runtime/index.ts` reexporta `InMemoryXMLValidationRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-XMLSCH-B2**.  
+- **Origem:** TISS-08 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -965,3 +989,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-06A | Certificação XML Serializer Runtime (**GO COM RESSALVAS**); AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; TISS-07 liberado |
 | 03/08/2026 | TISS-07 | Enterprise XML Schema Runtime; AER-XMLSCH-B1…B2; liberação TISS-SCHEMA-GATE-01 |
 | 03/08/2026 | TISS-SCHEMA-GATE-01 | Certificação XML Schema Runtime (**GO COM RESSALVAS**); AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-08 liberado |
+| 03/08/2026 | TISS-08 | Enterprise XML Validation Runtime; AER-XMLVAL-B1…B2; liberação TISS-VALIDATION-GATE-01 |

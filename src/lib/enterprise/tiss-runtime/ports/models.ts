@@ -1,5 +1,5 @@
 /**
- * Modelos canônicos do TISS Runtime — TISS-01…TISS-07.
+ * Modelos canônicos do TISS Runtime — TISS-01…TISS-08.
  *
  * Reutiliza CanonicalTISS* do TISS Provider. Sessão de coordenação é estrutural.
  */
@@ -36,6 +36,7 @@ export type CanonicalTISSRuntimeSession = {
   xmlGenerationResultId?: string;
   xmlSerializeResultId?: string;
   xmlSchemaResultId?: string;
+  xmlValidationResultId?: string;
   processedViaTISSProviderPort: boolean;
   processedViaTISSCatalogPort?: boolean;
   processedViaRulePackEnginePort?: boolean;
@@ -43,6 +44,7 @@ export type CanonicalTISSRuntimeSession = {
   processedViaXMLGenerationRuntimePort?: boolean;
   processedViaXMLSerializerRuntimePort?: boolean;
   processedViaXMLSchemaRuntimePort?: boolean;
+  processedViaXMLValidationRuntimePort?: boolean;
   realTissExecuted: boolean;
   createdAt: string;
   updatedAt: string;
