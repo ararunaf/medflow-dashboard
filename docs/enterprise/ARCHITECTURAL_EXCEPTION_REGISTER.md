@@ -54,9 +54,9 @@ A partir de ARCH-DEBT-01:
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
 | Enterprise Infrastructure | INF-01…INF-05, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
-| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A, TISS-05, TISS-XMLGEN-GATE-01, TISS-06, TISS-06A, TISS-07, TISS-SCHEMA-GATE-01, TISS-08, TISS-VALIDATION-GATE-01 |
+| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A, TISS-05, TISS-XMLGEN-GATE-01, TISS-06, TISS-06A, TISS-07, TISS-SCHEMA-GATE-01, TISS-08, TISS-VALIDATION-GATE-01, TISS-09, TISS-XSD-GATE-01, TISS-10, TISS-NAMESPACE-GATE-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
-| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-XML-GATE-01, TISS-XML-GATE-01A, TISS-XMLGEN-GATE-01, TISS-06A, TISS-SCHEMA-GATE-01, TISS-VALIDATION-GATE-01 |
+| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-XML-GATE-01, TISS-XML-GATE-01A, TISS-XMLGEN-GATE-01, TISS-06A, TISS-SCHEMA-GATE-01, TISS-VALIDATION-GATE-01, TISS-XSD-GATE-01, TISS-NAMESPACE-GATE-01 |
 
 ### Nota sobre Gates
 
@@ -129,7 +129,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 **TISS-VALIDATION-GATE-01** reconfirma certificação do XML Validation Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
 **TISS-09** adiciona Enterprise XSD Runtime com ressalvas Baixa **AER-XSD-B1…B2**.  
 **TISS-XSD-GATE-01** reconfirma certificação do XSD Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XSD-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
-**TISS-10** adiciona Enterprise Namespace Runtime com ressalvas Baixa **AER-NS-B1…B2**.
+**TISS-10** adiciona Enterprise Namespace Runtime com ressalvas Baixa **AER-NS-B1…B2**.  
+**TISS-NAMESPACE-GATE-01** reconfirma certificação do Namespace Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-NS-B1…B2** / **AER-XSD-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).
 
 ### XML Enterprise Dashboard (indicadores permanentes)
 
@@ -142,8 +143,9 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | **XML Schema Runtime Coverage** | **100%** | Infraestrutura oficial TISS-07 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
 | **XML Validation Runtime Coverage** | **100%** | Infraestrutura oficial TISS-08 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
 | **XSD Runtime Coverage** | **100%** | Infraestrutura oficial TISS-09 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
+| **Namespace Runtime Coverage** | **100%** | Infraestrutura oficial TISS-10 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
 | **XML Legacy Components** | **1** | `src/lib/services/tiss/xml-export-service.ts` (+ superfície produto/API/UI) |
-| **XML Enterprise Compliance** | **95%** | ECS-01 completo nos módulos XML; desvios não bloqueantes **AER-XMLRT-B1…B3** / **AER-XMLGEN-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XSD-B1…B2** |
+| **XML Enterprise Compliance** | **95%** | ECS-01 completo nos módulos XML; desvios não bloqueantes **AER-XMLRT-B1…B3** / **AER-XMLGEN-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XSD-B1…B2** / **AER-NS-B1…B2** |
 
 ---
 
@@ -1051,6 +1053,22 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 - **Descrição:** `namespace-runtime/index.ts` reexporta `InMemoryNamespaceRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-XSD-B2**.  
 - **Origem:** TISS-10 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
 
+### Atualização TISS-NAMESPACE-GATE-01 (03/08/2026)
+
+1. **Natureza:** auditoria/certificação exclusivamente — **zero** alteração de Runtime, Provider, Adapter, Store, Factory, Registry, Enterprise Runtime, TISS Runtime, XML/XSD/Namespace Runtimes, Capture, banco, APIs, UI ou comportamento.  
+2. **Cadeia oficial reconfirmada:** Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → `XMLGenerationRuntimePort` → `XMLSerializerRuntimePort` → `XMLSchemaRuntimePort` → `XMLValidationRuntimePort` → `XSDRuntimePort` → `NamespaceRuntimePort` → Adapter → Store → Canonical Namespace Runtime Result.  
+3. **Sem** Runtime/Provider/Adapter/Factory/Registry paralelo de Namespace; **sem** bypass na cadeia Enterprise.  
+4. **Namespace Runtime permanece estrutural e desacoplado:** `officialNamespacesLoaded = false` / `realNamespacesLoaded = false` / `namespaceResolutionEnabled = false` / `namespaceValidationEnabled = false` / `officialAnsNamespacesLoaded = false` / `officialTissNamespacesLoaded = false` / `runtimeReady = true`; sem namespace oficial; sem namespace ANS/TISS; sem XML TISS/ANS; sem SOAP; sem Reader/Parser/Writer/Validator; sem operadora/contrato/tenant; sem regras ANS/TISS.  
+5. **Escape hatches reconfirmados:** **AER-NS-B1** (`getNamespaceRuntimePort`) · **AER-NS-B2** (barrel/`getStore()`).  
+6. **Não foi identificada nenhuma nova Architectural Exception.**  
+7. **Gates:** build / `tsc --noEmit` / lint (0 errors) / smoke / Enterprise **67/67** / Capture **198 pass / 1 skipped** — todos **PASS**; sem regressão; ECS-01 íntegro.  
+8. **Nenhuma implementação da TISS-11.**  
+9. **Indicadores XML (sem regressão):** Coverage **50%** · Runtime / Generation / Serializer / Schema / Validation / XSD / Namespace Coverage **100%** · Legacy Components **1** · Enterprise Compliance **95%**.  
+10. **Parecer:** **GO COM RESSALVAS**.  
+11. **Encerramento:** Sprint **TISS-10** declarada encerrada e certificada; Enterprise Namespace Runtime oficialmente certificado.  
+12. **Roadmap:** **TISS-11 — Enterprise XML Reader Runtime Foundation oficialmente liberada**.  
+13. Documento: `docs/enterprise/TISS-NAMESPACE-GATE-01_CERTIFICATION.md`.
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -1082,3 +1100,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-09 | Enterprise XSD Runtime; AER-XSD-B1…B2; liberação TISS-XSD-GATE-01 |
 | 03/08/2026 | TISS-XSD-GATE-01 | Certificação XSD Runtime (**GO COM RESSALVAS**); AER-XSD-B1…B2 / AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-09 encerrada; TISS-10 liberado |
 | 03/08/2026 | TISS-10 | Enterprise Namespace Runtime; AER-NS-B1…B2; liberação TISS-NAMESPACE-GATE-01 |
+| 03/08/2026 | TISS-NAMESPACE-GATE-01 | Certificação Namespace Runtime (**GO COM RESSALVAS**); AER-NS-B1…B2 / AER-XSD-B1…B2 / AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-10 encerrada; TISS-11 liberado |
