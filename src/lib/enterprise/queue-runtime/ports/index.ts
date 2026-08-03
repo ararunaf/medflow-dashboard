@@ -26,6 +26,7 @@ export type {
   PurgeInput,
   PurgeResult,
   QueueRuntimeCapabilities,
+  QueueRuntimeEnterpriseDeps,
   QueueRuntimeHealth,
   QueueRuntimeInfo,
   QueueRuntimeOperationEnvelope,

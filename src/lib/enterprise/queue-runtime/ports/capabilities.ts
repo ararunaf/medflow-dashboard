@@ -20,6 +20,8 @@ export type QueueRuntimeCapabilities = {
   supportsRetry?: boolean;
   supportsCancellation?: boolean;
   supportsTelemetry?: boolean;
+  /** INF-06 — dependência Worker Runtime preparada (sem consumo). */
+  usesWorkerRuntimePort?: boolean;
   runtimeReady?: true;
   realQueueBackend?: false;
   messagesPublished?: false;
@@ -69,6 +71,7 @@ export const DEFAULT_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   supportsRetry: true,
   supportsCancellation: true,
   supportsTelemetry: true,
+  usesWorkerRuntimePort: true,
   runtimeReady: true,
   realQueueBackend: false,
   messagesPublished: false,

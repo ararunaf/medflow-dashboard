@@ -3,6 +3,7 @@
  *
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
  * Sem regras de negócio. Sem XML/TISS reais / classificação/storage/busca reais. Sem filas/workers reais.
+ * INF-06: Worker Runtime estrutural — sem Workers reais / Scheduler / Thread Pool.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
@@ -37,6 +38,7 @@ import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/x
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
+import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -70,6 +72,7 @@ export type EnterpriseRuntimeHealth = {
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
+  workerRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -142,6 +145,7 @@ export type EnterpriseRuntimeOptions = {
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
+  workerRuntimePort?: WorkerRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -241,7 +245,10 @@ export interface EnterpriseRuntime {
   /** Resolve QueueRuntimePort (INF-05) — Enterprise Queue Runtime. */
   getQueueRuntimePort(): QueueRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue Runtime dep). */
+  /** Resolve WorkerRuntimePort (INF-06) — Enterprise Worker Runtime. */
+  getWorkerRuntimePort(): WorkerRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker deps). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

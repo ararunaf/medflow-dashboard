@@ -22,6 +22,7 @@ import type {
   PeekResult,
   PurgeInput,
   PurgeResult,
+  QueueRuntimeEnterpriseDeps,
   QueueRuntimeHealth,
   QueueRuntimeInfo,
   QueueRuntimePortCapabilities,
@@ -41,6 +42,7 @@ export type MockQueueRuntimeAdapterOptions = {
   healthy?: boolean;
   message?: string;
   store?: QueueRuntimeStore;
+  enterpriseDeps?: QueueRuntimeEnterpriseDeps;
 };
 
 function mockMetadata(
@@ -77,6 +79,7 @@ export class MockQueueRuntimeAdapter implements QueueRuntimePort {
       healthy: this.healthy,
       message: this.message,
       store: options.store,
+      enterpriseDeps: options.enterpriseDeps,
     });
   }
 
@@ -95,6 +98,7 @@ export class MockQueueRuntimeAdapter implements QueueRuntimePort {
       supportsRetry: true,
       supportsCancellation: true,
       supportsTelemetry: true,
+      usesWorkerRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

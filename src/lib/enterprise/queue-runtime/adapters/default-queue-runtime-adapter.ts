@@ -36,6 +36,7 @@ import type {
   PeekResult,
   PurgeInput,
   PurgeResult,
+  QueueRuntimeEnterpriseDeps,
   QueueRuntimeHealth,
   QueueRuntimeInfo,
   QueueRuntimeOperationEnvelope,
@@ -61,6 +62,8 @@ export type DefaultQueueRuntimeAdapterOptions = {
   healthy?: boolean;
   message?: string;
   store?: QueueRuntimeStore;
+  /** INF-06 — Worker Runtime preparado (sem alocação/execução). */
+  enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   defaultTimeoutMs?: number;
   defaultRetryCount?: number;
   defaultRetryBackoffMs?: number;
@@ -101,6 +104,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   private readonly message: string;
   private readonly metadata: QueueRuntimeProviderMetadata;
   private readonly store: QueueRuntimeStore;
+  private readonly enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
   private readonly defaultRetryBackoffMs: number;
@@ -122,12 +126,19 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         "Official INF-05 Enterprise Queue Runtime — canonical queue infrastructure only.",
     };
     this.store = options.store ?? new InMemoryQueueRuntimeStore();
+    this.enterpriseDeps = options.enterpriseDeps;
     this.defaultTimeoutMs = options.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.defaultRetryCount = options.defaultRetryCount ?? DEFAULT_RETRY_COUNT;
     this.defaultRetryBackoffMs = options.defaultRetryBackoffMs ?? DEFAULT_RETRY_BACKOFF_MS;
     this.now = options.now ?? (() => new Date().toISOString());
     this.sleep = options.sleep ?? defaultSleep;
     this.failAttemptsRemaining = options.failAttempts ?? 0;
+
+    if (this.enterpriseDeps && typeof this.enterpriseDeps.getWorkerRuntimePort !== "function") {
+      throw new Error(
+        "DefaultQueueRuntimeAdapter exige enterpriseDeps.getWorkerRuntimePort (INF-06) quando deps são fornecidas.",
+      );
+    }
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -146,6 +157,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       supportsRetry: true,
       supportsCancellation: true,
       supportsTelemetry: true,
+      usesWorkerRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,
@@ -184,7 +196,17 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async health(): Promise<QueueRuntimeHealth> {
     const storeHealth = this.store.health();
-    const ok = this.healthy && storeHealth.ok;
+    let workerRuntimeOk = true;
+    if (this.enterpriseDeps) {
+      // INF-06: dependência preparada — valida Port sem chamar health()
+      // (evita ciclo Queue.health ↔ Worker.health).
+      const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
+      workerRuntimeOk =
+        !!workerPort &&
+        typeof workerPort.health === "function" &&
+        typeof workerPort.capabilities === "function";
+    }
+    const ok = this.healthy && storeHealth.ok && workerRuntimeOk;
     return {
       kind: "canonical-queue-health",
       ok,
@@ -193,6 +215,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       status: ok ? "ready" : "unhealthy",
       storedQueueCount: this.store.queueCount(),
       storedMessageCount: this.store.messageCount(),
+      workerRuntimeOk,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

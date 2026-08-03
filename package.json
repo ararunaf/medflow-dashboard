@@ -86,6 +86,7 @@
     "enterprise:xsd-runtime:test": "npx tsx --test scripts/enterprise/tests/xsd-runtime-engine.test.ts",
     "enterprise:namespace-runtime:test": "npx tsx --test scripts/enterprise/tests/namespace-runtime-engine.test.ts",
     "enterprise:queue-runtime:test": "npx tsx --test scripts/enterprise/tests/queue-runtime-engine.test.ts",
+    "enterprise:worker-runtime:test": "npx tsx --test scripts/enterprise/tests/worker-runtime-engine.test.ts",
     "enterprise:tiss-conv-01:test": "npx tsx --test scripts/enterprise/tests/tiss-conv-01-capture-convergence.test.ts",
     "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
 

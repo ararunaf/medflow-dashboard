@@ -76,6 +76,8 @@ import { createNamespaceRuntimePort } from "../namespace-runtime/providers/creat
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import { createQueueRuntimePort } from "../queue-runtime/providers/create-queue-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
+import { createWorkerRuntimePort } from "../worker-runtime/providers/create-worker-runtime-port";
+import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -112,6 +114,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly xsdRuntimePort: XSDRuntimePort;
   private readonly namespaceRuntimePort: NamespaceRuntimePort;
   private readonly queueRuntimePort: QueueRuntimePort;
+  /** Atribuído após Queue; lazy getter do Queue pode referenciar antes da atribuição. */
+  private readonly workerRuntimePort!: WorkerRuntimePort;
   private readonly tissRuntimePort: TISSRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
@@ -238,9 +242,23 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =
       options.namespaceRuntimePort ?? createNamespaceRuntimePort({ provider: "enterprise" });
-    // INF-05: Queue Runtime oficial — infraestrutura estrutural de filas (sem backends reais).
+    // INF-05 / INF-06: Queue Runtime + Worker Runtime — deps cruzadas preparadas (lazy getters).
     this.queueRuntimePort =
-      options.queueRuntimePort ?? createQueueRuntimePort({ provider: "enterprise" });
+      options.queueRuntimePort ??
+      createQueueRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+        },
+      });
+    this.workerRuntimePort =
+      options.workerRuntimePort ??
+      createWorkerRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getQueueRuntimePort: () => this.queueRuntimePort,
+        },
+      });
     this.tissRuntimePort =
       options.tissRuntimePort ??
       createTISSRuntimePort({
@@ -258,6 +276,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getXSDRuntimePort: () => this.xsdRuntimePort,
           getNamespaceRuntimePort: () => this.namespaceRuntimePort,
           getQueueRuntimePort: () => this.queueRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
         },
       });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
@@ -365,6 +384,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.queueRuntimePort;
   }
 
+  getWorkerRuntimePort(): WorkerRuntimePort {
+    return this.workerRuntimePort;
+  }
+
   getTISSRuntimePort(): TISSRuntimePort {
     return this.tissRuntimePort;
   }
@@ -403,6 +426,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
       queueRuntimeHealth,
+      workerRuntimeHealth,
       tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -430,6 +454,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.xsdRuntimePort.health(),
       this.namespaceRuntimePort.health(),
       this.queueRuntimePort.health(),
+      this.workerRuntimePort.health(),
       this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -459,6 +484,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xsdRuntimeHealth.ok &&
       namespaceRuntimeHealth.ok &&
       queueRuntimeHealth.ok &&
+      workerRuntimeHealth.ok &&
       tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -489,11 +515,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
       queueRuntimeOk: queueRuntimeHealth.ok,
+      workerRuntimeOk: workerRuntimeHealth.ok,
       tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (TISSRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (TISSRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

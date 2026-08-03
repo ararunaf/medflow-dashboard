@@ -32,6 +32,7 @@ import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/port
 import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
+import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -64,6 +65,7 @@ export type TISSRuntimeHealth = {
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
+  workerRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -88,6 +90,7 @@ export type TISSRuntimeCapabilities = {
   usesXSDRuntimePort: boolean;
   usesNamespaceRuntimePort: boolean;
   usesQueueRuntimePort: boolean;
+  usesWorkerRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -123,6 +126,11 @@ export type TISSRuntimeEnterpriseDeps = {
    * Dependência obrigatória preparada; TISS Runtime NÃO consome/executa filas nesta sprint.
    */
   getQueueRuntimePort(): QueueRuntimePort;
+  /**
+   * WorkerRuntimePort oficial — infraestrutura canônica de Workers (INF-06).
+   * Dependência obrigatória preparada; TISS Runtime NÃO aloca/executa Workers nesta sprint.
+   */
+  getWorkerRuntimePort(): WorkerRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

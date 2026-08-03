@@ -7,7 +7,11 @@
  */
 import { DefaultQueueRuntimeAdapter, MockQueueRuntimeAdapter } from "../adapters";
 import type { QueueRuntimePort } from "../ports/queue-runtime-port";
-import type { QueueRuntimeOptions, QueueRuntimeProviderId } from "../ports/types";
+import type {
+  QueueRuntimeEnterpriseDeps,
+  QueueRuntimeOptions,
+  QueueRuntimeProviderId,
+} from "../ports/types";
 import {
   QueueRuntimeRegistry,
   createDefaultQueueRuntimeRegistry,
@@ -17,6 +21,7 @@ import type { QueueRuntimeStore } from "../store";
 export type QueueRuntimeFactoryOptions = {
   registry?: QueueRuntimeRegistry;
   store?: QueueRuntimeStore;
+  enterpriseDeps?: QueueRuntimeEnterpriseDeps;
 };
 
 /**
@@ -25,10 +30,12 @@ export type QueueRuntimeFactoryOptions = {
 export class QueueRuntimeFactory {
   private readonly registry: QueueRuntimeRegistry;
   private readonly store?: QueueRuntimeStore;
+  private readonly enterpriseDeps?: QueueRuntimeEnterpriseDeps;
 
   constructor(options: QueueRuntimeFactoryOptions = {}) {
     this.registry = options.registry ?? createDefaultQueueRuntimeRegistry();
     this.store = options.store;
+    this.enterpriseDeps = options.enterpriseDeps;
   }
 
   getRegistry(): QueueRuntimeRegistry {
@@ -48,30 +55,37 @@ export class QueueRuntimeFactory {
       );
     }
 
-    return this.instantiate(provider);
+    return this.instantiate(provider, options.enterpriseDeps ?? this.enterpriseDeps);
   }
 
-  private instantiate(provider: QueueRuntimeProviderId): QueueRuntimePort {
+  private instantiate(
+    provider: QueueRuntimeProviderId,
+    enterpriseDeps?: QueueRuntimeEnterpriseDeps,
+  ): QueueRuntimePort {
     switch (provider) {
       case "mock":
         return new MockQueueRuntimeAdapter({
           provider: "mock",
           store: this.store,
+          enterpriseDeps,
         });
       case "test":
         return new MockQueueRuntimeAdapter({
           provider: "test",
           store: this.store,
+          enterpriseDeps,
         });
       case "default":
         return new DefaultQueueRuntimeAdapter({
           provider: "default",
           store: this.store,
+          enterpriseDeps,
         });
       case "enterprise":
         return new DefaultQueueRuntimeAdapter({
           provider: "enterprise",
           store: this.store,
+          enterpriseDeps,
         });
       default: {
         const _exhaustive: never = provider;

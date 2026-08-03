@@ -1,12 +1,14 @@
 /**
- * Tipos vendor-agnósticos do Enterprise Queue Runtime — INF-05.
+ * Tipos vendor-agnósticos do Enterprise Queue Runtime — INF-05 / INF-06.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → QueueRuntimePort
  *     → Adapter → Queue Runtime Store → Canonical Queue Result
  *
  * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem workers. Sem filas reais.
+ * INF-06: dependência Worker Runtime preparada — sem alocação/execução de Workers.
  */
+import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
   CanonicalQueue,
   CanonicalQueueBatch,
@@ -64,6 +66,8 @@ export type QueueRuntimeStructuredLog = {
 export type QueueRuntimeHealth = CanonicalQueueHealth & {
   provider: QueueRuntimeProviderId;
   status?: QueueRuntimeStatus;
+  /** INF-06 — prontidão estrutural do Worker Runtime (dependência preparada). */
+  workerRuntimeOk?: boolean;
 };
 
 /** Capacidades do adapter no nível do Port. */
@@ -77,6 +81,8 @@ export type QueueRuntimePortCapabilities = {
   supportsRetry: boolean;
   supportsCancellation: boolean;
   supportsTelemetry: boolean;
+  /** INF-06 — dependência Worker Runtime preparada (sem consumo). */
+  usesWorkerRuntimePort: boolean;
   runtimeReady: true;
   realQueueBackend: false;
   messagesPublished: false;
@@ -222,12 +228,22 @@ export type StatsResult = QueueRuntimeOperationEnvelope & {
   result?: CanonicalQueueResult;
 };
 
+/**
+ * Dependências Enterprise injetadas no Queue Runtime (INF-06).
+ * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada nesta sprint.
+ */
+export type QueueRuntimeEnterpriseDeps = {
+  getWorkerRuntimePort(): WorkerRuntimePort;
+};
+
 /** Opções de resolução do QueueRuntimePort. */
 export type QueueRuntimeOptions = {
   /**
    * Provedor desejado. Default da fundação: `enterprise` (INF-05).
    */
   provider?: QueueRuntimeProviderId;
+  /** INF-06 — Worker Runtime preparado (sem consumo funcional). */
+  enterpriseDeps?: QueueRuntimeEnterpriseDeps;
 };
 
 /** Entrada de registro no QueueRuntimeRegistry. */
