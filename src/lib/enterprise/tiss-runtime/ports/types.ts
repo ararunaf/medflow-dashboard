@@ -1,5 +1,5 @@
 /**
- * Tipos do TISS Runtime — TISS-01…TISS-08.
+ * Tipos do TISS Runtime — TISS-01…TISS-09.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → TISSRuntimePort
@@ -7,7 +7,8 @@
  *     → RulePackEnginePort → Rule Pack Adapter → Store
  *     → XMLRuntimePort → XMLGenerationRuntimePort
  *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
- *     → XMLValidationRuntimePort → Store → Canonical XML Validation Result
+ *     → XMLValidationRuntimePort → XSDRuntimePort
+ *     → Store → Canonical XSD Runtime Result
  *     → Canonical Execution Orchestrator → TISSProviderPort → Adapter
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -27,6 +28,7 @@ import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
 import type { XMLSchemaRuntimePort } from "../../xml-schema-runtime/ports/xml-schema-runtime-port";
 import type { XMLSerializerRuntimePort } from "../../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
+import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -56,6 +58,7 @@ export type TISSRuntimeHealth = {
   xmlSerializerRuntimeOk?: boolean;
   xmlSchemaRuntimeOk?: boolean;
   xmlValidationRuntimeOk?: boolean;
+  xsdRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -77,6 +80,7 @@ export type TISSRuntimeCapabilities = {
   usesXMLSerializerRuntimePort: boolean;
   usesXMLSchemaRuntimePort: boolean;
   usesXMLValidationRuntimePort: boolean;
+  usesXSDRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -103,6 +107,8 @@ export type TISSRuntimeEnterpriseDeps = {
   getXMLSchemaRuntimePort(): XMLSchemaRuntimePort;
   /** XMLValidationRuntimePort oficial — infraestrutura canônica de validação XML (TISS-08). */
   getXMLValidationRuntimePort(): XMLValidationRuntimePort;
+  /** XSDRuntimePort oficial — infraestrutura canônica de gerenciamento de XSDs (TISS-09). */
+  getXSDRuntimePort(): XSDRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {
