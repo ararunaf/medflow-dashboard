@@ -227,11 +227,11 @@ Nenhuma alteração de código Foundation foi realizada nesta Sprint.
 | Campo | Valor |
 |-------|-------|
 | Branch | `feat/inf-08-enterprise-persistent-queue-runtime` |
-| Commit (docs INF-08A) | `1fced78` — docs(enterprise): fill INF-08A git governance section (tip; cert base `b5dfe82`) |
-| Hash completo | `1fced7887fb33eb397d9c416f1f4e839d7ede307` |
+| Commit (docs INF-08A) | `b5dfe82` — docs(enterprise): certify INF-08A Persistent Queue Runtime Gate |
+| Hash completo | `b5dfe82a87ee86a695778c03945fd111c36c6566` (certificação); tip da branch após governança: ver `git rev-parse HEAD` |
 | URL | `https://github.com/ararunaf/medflow-dashboard/tree/feat/inf-08-enterprise-persistent-queue-runtime` |
 | Push realizado | **Sim** |
-| Hash local = remoto | **Sim** (`1fced7887fb33eb397d9c416f1f4e839d7ede307`) |
+| Hash local = remoto | **Sim** (após push da tip) |
 | Ahead | **0** |
 | Behind | **0** |
 | Working Tree | limpa quanto aos artefatos INF-08A (`docs/audit/` permanece untracked externo) |
