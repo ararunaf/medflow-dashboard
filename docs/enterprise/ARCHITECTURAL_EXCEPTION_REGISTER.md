@@ -127,7 +127,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 **TISS-SCHEMA-GATE-01** reconfirma certificação do XML Schema Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
 **TISS-08** adiciona Enterprise XML Validation Runtime com ressalvas Baixa **AER-XMLVAL-B1…B2**.  
 **TISS-VALIDATION-GATE-01** reconfirma certificação do XML Validation Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
-**TISS-09** adiciona Enterprise XSD Runtime com ressalvas Baixa **AER-XSD-B1…B2**.
+**TISS-09** adiciona Enterprise XSD Runtime com ressalvas Baixa **AER-XSD-B1…B2**.  
+**TISS-XSD-GATE-01** reconfirma certificação do XSD Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XSD-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).
 
 ### XML Enterprise Dashboard (indicadores permanentes)
 
@@ -1008,6 +1009,22 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 - **Descrição:** `xsd-runtime/index.ts` reexporta `InMemoryXSDRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-XMLVAL-B2**.  
 - **Origem:** TISS-09 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
 
+### Atualização TISS-XSD-GATE-01 (03/08/2026)
+
+1. **Auditoria exclusivamente de leitura** — nenhuma alteração de código/Runtime/Provider/Adapter/Store/Models/Factory/Registry/testes/comportamento.  
+2. **Cadeia oficial reconfirmada íntegra:** Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → `XMLGenerationRuntimePort` → `XMLSerializerRuntimePort` → `XMLSchemaRuntimePort` → `XMLValidationRuntimePort` → `XSDRuntimePort` → Adapter → Store → Canonical XSD Runtime Result.  
+3. **Sem Provider paralelo / sem Adapter paralelo / sem Runtime paralelo / sem bypass Enterprise** ao `XSDRuntimePort`.  
+4. **XSD Runtime permanece estrutural e desacoplado:** `officialXsdLoaded = false` / `realXsdLoaded = false` / `realValidationAvailable = false` / `officialNamespacesLoaded = false` / `officialSchemasLoaded = false` / `schemaParsingEnabled = false` / `schemaValidationEnabled = false` / `runtimeReady = true`; sem XSD oficial; sem leitura/parser de XSD; sem namespace oficial; sem validação XSD; sem XML TISS/ANS; sem SOAP; sem Reader/Parser/Validator; sem operadora/contrato/tenant; sem regras ANS.  
+5. **Ressalvas resolvidas nesta Gate:** nenhuma.  
+6. **Ressalvas Baixa confirmadas Aceitas (não bloqueantes):** **AER-XSD-B1…B2**, **AER-XMLVAL-B1…B2**, **AER-XMLSCH-B1…B2**, **AER-XMLSER-B1…B2**, **AER-XMLGEN-B1…B2**, **AER-XMLRT-B1…B3**.  
+7. **Nenhuma nova Architectural Exception encontrada.** / **nenhuma regressão** / **ECS-01 íntegro**.  
+8. **Gates:** Build PASS · TypeScript PASS · ESLint PASS · Smoke PASS · Enterprise PASS (66/66) · Capture PASS (198/1 skipped) · `enterprise:xsd-runtime:test` PASS (18/18).  
+9. **Indicadores XML (sem regressão):** Coverage **50%** · Runtime Coverage **100%** · Generation Runtime Coverage **100%** · Serializer Runtime Coverage **100%** · Schema Runtime Coverage **100%** · Validation Runtime Coverage **100%** · XSD Runtime Coverage **100%** · Legacy Components **1** · Enterprise Compliance **95%**.  
+10. **Parecer:** **GO COM RESSALVAS**.  
+11. **Encerramento:** Sprint **TISS-09** declarada encerrada oficialmente; Enterprise XSD Runtime oficialmente certificado.  
+12. **Roadmap:** **TISS-10 — Enterprise Namespace Runtime oficialmente liberada**.  
+13. Documento: `docs/enterprise/TISS-XSD-GATE-01_CERTIFICATION.md`.
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -1037,3 +1054,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-08 | Enterprise XML Validation Runtime; AER-XMLVAL-B1…B2; liberação TISS-VALIDATION-GATE-01 |
 | 03/08/2026 | TISS-VALIDATION-GATE-01 | Certificação XML Validation Runtime (**GO COM RESSALVAS**); AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-09 liberado |
 | 03/08/2026 | TISS-09 | Enterprise XSD Runtime; AER-XSD-B1…B2; liberação TISS-XSD-GATE-01 |
+| 03/08/2026 | TISS-XSD-GATE-01 | Certificação XSD Runtime (**GO COM RESSALVAS**); AER-XSD-B1…B2 / AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-09 encerrada; TISS-10 liberado |
