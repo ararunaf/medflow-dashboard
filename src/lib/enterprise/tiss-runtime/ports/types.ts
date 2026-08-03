@@ -1,10 +1,11 @@
 /**
- * Tipos do TISS Runtime — TISS-01 / TISS-02 / TISS-03.
+ * Tipos do TISS Runtime — TISS-01 / TISS-02 / TISS-03 / TISS-04.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → TISSRuntimePort
  *     → TISSCatalogPort → Catalog Adapter → Store
  *     → RulePackEnginePort → Rule Pack Adapter → Store
+ *     → XMLRuntimePort → XML Adapter → Store
  *     → Canonical Execution Orchestrator → TISSProviderPort → Adapter
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -19,6 +20,7 @@ import type {
   TISSProcessInput,
   TISSProviderOperationResult,
 } from "../../tiss-provider/ports/types";
+import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -43,6 +45,7 @@ export type TISSRuntimeHealth = {
   tissProviderAdapterOk?: boolean;
   tissCatalogOk?: boolean;
   rulePackEngineOk?: boolean;
+  xmlRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -59,6 +62,7 @@ export type TISSRuntimeCapabilities = {
   usesTISSProviderPort: boolean;
   usesTISSCatalogPort: boolean;
   usesRulePackEnginePort: boolean;
+  usesXMLRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -75,6 +79,8 @@ export type TISSRuntimeEnterpriseDeps = {
   getTISSCatalogPort(): TISSCatalogPort;
   /** RulePackEnginePort oficial — interpretação/execução de Rule Packs (TISS-03). */
   getRulePackEnginePort(): RulePackEnginePort;
+  /** XMLRuntimePort oficial — fundação estrutural de geração XML (TISS-04). */
+  getXMLRuntimePort(): XMLRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

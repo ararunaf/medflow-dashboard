@@ -6,7 +6,7 @@
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + TISSProviderPort (TISS-01/02/03).
+ * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + TISSProviderPort (TISS-01/02/03/04).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -29,6 +29,7 @@ import type { AIProviderRuntimePort } from "../ai-provider-runtime/ports/ai-prov
 import type { TISSCatalogPort } from "../tiss-catalog/ports/tiss-catalog-port";
 import type { TISSProviderPort } from "../tiss-provider/ports/tiss-provider-port";
 import type { TISSRuntimePort } from "../tiss-runtime/ports/tiss-runtime-port";
+import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -54,6 +55,7 @@ export type EnterpriseRuntimeHealth = {
   tissProviderOk?: boolean;
   tissCatalogOk?: boolean;
   rulePackEngineOk?: boolean;
+  xmlRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -118,6 +120,7 @@ export type EnterpriseRuntimeOptions = {
   tissProviderPort?: TISSProviderPort;
   tissCatalogPort?: TISSCatalogPort;
   rulePackEnginePort?: RulePackEnginePort;
+  xmlRuntimePort?: XMLRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -193,7 +196,10 @@ export interface EnterpriseRuntime {
   /** Resolve RulePackEnginePort (TISS-03) — Enterprise Rule Pack Engine. */
   getRulePackEnginePort(): RulePackEnginePort;
 
-  /** Resolve TISSRuntimePort (TISS-01 / TISS-02 / TISS-03). */
+  /** Resolve XMLRuntimePort (TISS-04) — Enterprise XML Runtime Foundation. */
+  getXMLRuntimePort(): XMLRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01 / TISS-02 / TISS-03 / TISS-04). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

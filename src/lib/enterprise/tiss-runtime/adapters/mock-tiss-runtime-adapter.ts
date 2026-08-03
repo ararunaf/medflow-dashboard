@@ -1,5 +1,5 @@
 /**
- * MockTISSRuntimeAdapter — TISS-01 / TISS-02 / TISS-03.
+ * MockTISSRuntimeAdapter — TISS-01 / TISS-02 / TISS-03 / TISS-04.
  *
  * Determinístico in-process. Pode usar enterpriseDeps quando disponíveis.
  */
@@ -7,6 +7,7 @@ import { createCanonicalExecutionOrchestratorPort } from "../../canonical-execut
 import { createRulePackEnginePort } from "../../rule-pack-engine/providers/create-rule-pack-engine-port";
 import { createTISSCatalogPort } from "../../tiss-catalog/providers/create-tiss-catalog-port";
 import { createTISSProviderPort } from "../../tiss-provider/providers/create-tiss-provider-port";
+import { createXMLRuntimePort } from "../../xml-runtime/providers/create-xml-runtime-port";
 import type { TISSRuntimePort } from "../ports/tiss-runtime-port";
 import type {
   GetTISSRuntimeSessionInput,
@@ -43,14 +44,22 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
     this.healthy = options.healthy ?? true;
 
     const catalogPort = createTISSCatalogPort({ provider: "mock" });
+    const rulePackEnginePort = createRulePackEnginePort({
+      provider: "mock",
+      enterpriseDeps: { getTISSCatalogPort: () => catalogPort },
+    });
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
       getTISSProviderPort: () => createTISSProviderPort({ provider: "mock" }),
       getTISSCatalogPort: () => catalogPort,
-      getRulePackEnginePort: () =>
-        createRulePackEnginePort({
+      getRulePackEnginePort: () => rulePackEnginePort,
+      getXMLRuntimePort: () =>
+        createXMLRuntimePort({
           provider: "mock",
-          enterpriseDeps: { getTISSCatalogPort: () => catalogPort },
+          enterpriseDeps: {
+            getTISSCatalogPort: () => catalogPort,
+            getRulePackEnginePort: () => rulePackEnginePort,
+          },
         }),
     };
 

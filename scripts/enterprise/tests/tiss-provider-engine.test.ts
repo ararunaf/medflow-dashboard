@@ -33,6 +33,7 @@ import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
 import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
+import { createXMLRuntimePort } from "../../../src/lib/enterprise/xml-runtime/index.ts";
 import {
   createEnterpriseRuntime,
   resetEnterpriseRuntimeForTests,
@@ -254,6 +255,13 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
       provider: "enterprise",
       enterpriseDeps: { getTISSCatalogPort: () => tissCatalog },
     });
+    const xmlRuntime = createXMLRuntimePort({
+      provider: "enterprise",
+      enterpriseDeps: {
+        getTISSCatalogPort: () => tissCatalog,
+        getRulePackEnginePort: () => rulePackEngine,
+      },
+    });
     const tissRuntime = createTISSRuntimePort({
       provider: "default",
       enterpriseDeps: {
@@ -261,6 +269,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
         getTISSProviderPort: () => tissProvider,
         getTISSCatalogPort: () => tissCatalog,
         getRulePackEnginePort: () => rulePackEngine,
+        getXMLRuntimePort: () => xmlRuntime,
       },
     });
 

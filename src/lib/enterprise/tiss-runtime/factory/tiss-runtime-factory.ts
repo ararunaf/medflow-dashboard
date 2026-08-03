@@ -41,7 +41,7 @@ export class TISSRuntimeFactory {
         if (!enterpriseDeps) {
           throw new Error(
             'TISSRuntime provider "default" exige enterpriseDeps ' +
-              "(getOrchestratorPort + getTISSProviderPort + getTISSCatalogPort + getRulePackEnginePort). " +
+              "(getOrchestratorPort + getTISSProviderPort + getTISSCatalogPort + getRulePackEnginePort + getXMLRuntimePort). " +
               "Use createEnterpriseRuntime() / DI do composition root.",
           );
         }
