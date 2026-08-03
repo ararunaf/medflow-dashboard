@@ -159,6 +159,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       supportsTelemetry: true,
       usesWorkerRuntimePort: true,
       usesSchedulerRuntimePort: true,
+      usesPersistentQueueRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,
@@ -199,9 +200,10 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     const storeHealth = this.store.health();
     let workerRuntimeOk = true;
     let schedulerRuntimeOk = true;
+    let persistentQueueRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-06 / INF-07: deps preparadas — valida Port sem chamar health()
-      // (evita ciclo Queue.health ↔ Worker/Scheduler.health).
+      // INF-06 / INF-07 / INF-08: deps preparadas — valida Port sem chamar health()
+      // (evita ciclo Queue.health ↔ Worker/Scheduler/PersistentQueue.health).
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       workerRuntimeOk =
         !!workerPort &&
@@ -214,8 +216,20 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
           typeof schedulerPort.health === "function" &&
           typeof schedulerPort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort === "function") {
+        const persistentQueuePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
+        persistentQueueRuntimeOk =
+          !!persistentQueuePort &&
+          typeof persistentQueuePort.health === "function" &&
+          typeof persistentQueuePort.capabilities === "function";
+      }
     }
-    const ok = this.healthy && storeHealth.ok && workerRuntimeOk && schedulerRuntimeOk;
+    const ok =
+      this.healthy &&
+      storeHealth.ok &&
+      workerRuntimeOk &&
+      schedulerRuntimeOk &&
+      persistentQueueRuntimeOk;
     return {
       kind: "canonical-queue-health",
       ok,
@@ -226,6 +240,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       storedMessageCount: this.store.messageCount(),
       workerRuntimeOk,
       schedulerRuntimeOk,
+      persistentQueueRuntimeOk,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

@@ -21,6 +21,8 @@ export type SchedulerRuntimeCapabilities = {
   supportsTelemetry?: boolean;
   usesQueueRuntimePort?: boolean;
   usesWorkerRuntimePort?: boolean;
+  /** INF-08 — dependência Persistent Queue Runtime preparada (sem consumo). */
+  usesPersistentQueueRuntimePort?: boolean;
   runtimeReady?: true;
   realScheduler?: false;
   cronImplemented?: false;
@@ -87,6 +89,7 @@ export const DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilitie
   supportsTelemetry: true,
   usesQueueRuntimePort: true,
   usesWorkerRuntimePort: true,
+  usesPersistentQueueRuntimePort: true,
   runtimeReady: true,
   realScheduler: false,
   cronImplemented: false,

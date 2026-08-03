@@ -110,6 +110,7 @@ export class MockSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       supportsTelemetry: true,
       usesQueueRuntimePort: true,
       usesWorkerRuntimePort: true,
+      usesPersistentQueueRuntimePort: true,
       runtimeReady: true,
       realScheduler: false,
       cronImplemented: false,

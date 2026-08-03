@@ -7,6 +7,7 @@
  *
  * Sem Workers reais. Sem Thread Pool. Sem Scheduler. Sem backends de fila.
  */
+import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type {
@@ -82,6 +83,8 @@ export type WorkerRuntimePortCapabilities = {
   usesQueueRuntimePort: boolean;
   /** INF-07 — dependência Scheduler Runtime preparada (sem consumo). */
   usesSchedulerRuntimePort: boolean;
+  /** INF-08 — dependência Persistent Queue Runtime preparada (sem consumo). */
+  usesPersistentQueueRuntimePort: boolean;
   runtimeReady: true;
   realWorkers: false;
   tasksExecuted: false;
@@ -214,11 +217,14 @@ export type WorkerStatsResult = WorkerRuntimeOperationEnvelope & {
  * Dependências Enterprise injetadas no adapter default/enterprise.
  * Queue Runtime é dependência obrigatória preparada — NÃO consumida.
  * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
+ * Persistent Queue Runtime é dependência preparada (opcional no Port shape) — NÃO persistida/consumida.
  */
 export type WorkerRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;
   /** INF-07 — Scheduler Runtime preparado (sem consumo funcional). */
   getSchedulerRuntimePort?: () => SchedulerRuntimePort;
+  /** INF-08 — Persistent Queue Runtime preparado (sem consumo funcional). */
+  getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
 };
 
 /** Opções de resolução do WorkerRuntimePort. */

@@ -8,6 +8,7 @@
  * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem workers. Sem filas reais.
  * INF-06: dependência Worker Runtime preparada — sem alocação/execução de Workers.
  */
+import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
@@ -71,6 +72,8 @@ export type QueueRuntimeHealth = CanonicalQueueHealth & {
   workerRuntimeOk?: boolean;
   /** INF-07 — prontidão estrutural do Scheduler Runtime (dependência preparada). */
   schedulerRuntimeOk?: boolean;
+  /** INF-08 — prontidão estrutural do Persistent Queue Runtime (dependência preparada). */
+  persistentQueueRuntimeOk?: boolean;
 };
 
 /** Capacidades do adapter no nível do Port. */
@@ -88,6 +91,8 @@ export type QueueRuntimePortCapabilities = {
   usesWorkerRuntimePort: boolean;
   /** INF-07 — dependência Scheduler Runtime preparada (sem consumo). */
   usesSchedulerRuntimePort: boolean;
+  /** INF-08 — dependência Persistent Queue Runtime preparada (sem consumo). */
+  usesPersistentQueueRuntimePort: boolean;
   runtimeReady: true;
   realQueueBackend: false;
   messagesPublished: false;
@@ -234,14 +239,17 @@ export type StatsResult = QueueRuntimeOperationEnvelope & {
 };
 
 /**
- * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07).
+ * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07 / INF-08).
  * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada.
  * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
+ * Persistent Queue Runtime é dependência preparada (opcional no Port shape) — NÃO persistida/consumida.
  */
 export type QueueRuntimeEnterpriseDeps = {
   getWorkerRuntimePort(): WorkerRuntimePort;
   /** INF-07 — Scheduler Runtime preparado (sem consumo funcional). */
   getSchedulerRuntimePort?: () => SchedulerRuntimePort;
+  /** INF-08 — Persistent Queue Runtime preparado (sem consumo funcional). */
+  getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
 };
 
 /** Opções de resolução do QueueRuntimePort. */

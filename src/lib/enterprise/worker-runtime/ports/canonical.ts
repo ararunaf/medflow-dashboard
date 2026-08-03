@@ -199,6 +199,8 @@ export type CanonicalWorkerHealth = {
   queueRuntimeOk?: boolean;
   /** INF-07 — prontidão estrutural do Scheduler Runtime (dependência preparada). */
   schedulerRuntimeOk?: boolean;
+  /** INF-08 — prontidão estrutural do Persistent Queue Runtime (dependência preparada). */
+  persistentQueueRuntimeOk?: boolean;
   runtimeReady: true;
   realWorkers: false;
   tasksExecuted: false;

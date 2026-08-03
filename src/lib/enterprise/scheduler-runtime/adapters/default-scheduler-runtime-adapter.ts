@@ -180,6 +180,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       supportsTelemetry: true,
       usesQueueRuntimePort: true,
       usesWorkerRuntimePort: true,
+      usesPersistentQueueRuntimePort: true,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       implementsCron: false,
@@ -226,9 +227,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
     const storeHealth = this.store.health();
     let queueRuntimeOk = true;
     let workerRuntimeOk = true;
+    let persistentQueueRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-07: deps preparadas — valida Port shape sem chamar health()
-      // (evita ciclos Scheduler.health ↔ Queue/Worker.health).
+      // INF-07 / INF-08: deps preparadas — valida Port shape sem chamar health()
+      // (evita ciclos Scheduler.health ↔ Queue/Worker/PersistentQueue.health).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       queueRuntimeOk =
@@ -239,8 +241,20 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         !!workerPort &&
         typeof workerPort.health === "function" &&
         typeof workerPort.capabilities === "function";
+      if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort === "function") {
+        const persistentQueuePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
+        persistentQueueRuntimeOk =
+          !!persistentQueuePort &&
+          typeof persistentQueuePort.health === "function" &&
+          typeof persistentQueuePort.capabilities === "function";
+      }
     }
-    const ok = this.healthy && storeHealth.ok && queueRuntimeOk && workerRuntimeOk;
+    const ok =
+      this.healthy &&
+      storeHealth.ok &&
+      queueRuntimeOk &&
+      workerRuntimeOk &&
+      persistentQueueRuntimeOk;
     return {
       kind: "canonical-scheduler-health",
       ok,
@@ -252,6 +266,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       storedDispatchCount: this.store.dispatchCount(),
       queueRuntimeOk,
       workerRuntimeOk,
+      persistentQueueRuntimeOk,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       message: this.healthy

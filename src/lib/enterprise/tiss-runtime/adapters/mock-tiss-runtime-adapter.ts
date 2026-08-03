@@ -14,6 +14,7 @@ import { createXMLSerializerRuntimePort } from "../../xml-serializer-runtime/pro
 import { createXMLValidationRuntimePort } from "../../xml-validation-runtime/providers/create-xml-validation-runtime-port";
 import { createXSDRuntimePort } from "../../xsd-runtime/providers/create-xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../../namespace-runtime/providers/create-namespace-runtime-port";
+import { createPersistentQueueRuntimePort } from "../../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
 import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
 import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
@@ -77,6 +78,14 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
         getWorkerRuntimePort: () => workerRuntimePort,
       },
     });
+    const persistentQueueRuntimePort = createPersistentQueueRuntimePort({
+      provider: "mock",
+      enterpriseDeps: {
+        getQueueRuntimePort: () => queueRuntimePort,
+        getWorkerRuntimePort: () => workerRuntimePort,
+        getSchedulerRuntimePort: () => schedulerRuntimePort,
+      },
+    });
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
       getTISSProviderPort: () => createTISSProviderPort({ provider: "mock" }),
@@ -91,6 +100,7 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       getQueueRuntimePort: () => queueRuntimePort,
       getWorkerRuntimePort: () => workerRuntimePort,
       getSchedulerRuntimePort: () => schedulerRuntimePort,
+      getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
       getXMLRuntimePort: () =>
         createXMLRuntimePort({
           provider: "mock",

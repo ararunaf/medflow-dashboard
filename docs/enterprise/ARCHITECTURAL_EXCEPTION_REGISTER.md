@@ -52,7 +52,7 @@ A partir de ARCH-DEBT-01:
 | Área | Fontes |
 |------|--------|
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
-| Enterprise Infrastructure | INF-01…INF-07, FASE_B consolidado |
+| Enterprise Infrastructure | INF-01…INF-08, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
 | OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A, TISS-05, TISS-XMLGEN-GATE-01, TISS-06, TISS-06A, TISS-07, TISS-SCHEMA-GATE-01, TISS-08, TISS-VALIDATION-GATE-01, TISS-09, TISS-XSD-GATE-01, TISS-10, TISS-NAMESPACE-GATE-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
@@ -120,6 +120,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **AER-QR-B1…B2** (INF-05 Queue Runtime) permanecem Aceitas.
 **AER-WR-B1…B2** (INF-06 Worker Runtime) permanecem Aceitas.
 **AER-SR-B1…B2** (INF-07 Scheduler Runtime) permanecem Aceitas.
+**AER-PQR-B1…B2** (INF-08 Persistent Queue Runtime) permanecem Aceitas.
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).  
@@ -255,6 +256,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-WR-B2 | Barrel exporta Store + `getStore()` no Adapter (Worker Runtime) | INF-06 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-SR-B1 | Escape hatch `getSchedulerRuntimePort()` | INF-07 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-SR-B2 | Barrel exporta Store + `getStore()` no Adapter (Scheduler Runtime) | INF-07 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
+| AER-PQR-B1 | Escape hatch `getPersistentQueueRuntimePort()` | INF-08 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-PQR-B2 | Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime) | INF-08 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -1130,6 +1133,29 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 - **Descrição:** `scheduler-runtime/index.ts` reexporta `InMemorySchedulerRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-WR-B2**.  
 - **Origem:** INF-07 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
 
+### Atualização INF-08 — Enterprise Persistent Queue Runtime (03/08/2026)
+
+1. **Natureza:** foundation estrutural ECS-01 — sem RabbitMQ / Kafka / Azure Service Bus / Azure Queue / Redis Streams / BullMQ / persistência real.  
+2. **Persistent Queue Runtime oficial:** `PersistentQueueRuntimePort` via `createPersistentQueueRuntimePort()`; Factory + Registry únicos; Adapters Default/Enterprise/Mock.  
+3. **Enterprise Runtime:** `getPersistentQueueRuntimePort()` + health `persistentQueueRuntimeOk`.  
+4. **Queue / Worker / Scheduler Runtime:** dependência `getPersistentQueueRuntimePort()` preparada; **sem** persist/release/execução. Persistent Queue recebe `getQueueRuntimePort()` + `getWorkerRuntimePort()` + `getSchedulerRuntimePort()` preparados; **sem** consumo.  
+5. **TISS Runtime:** dependência obrigatória `getPersistentQueueRuntimePort()` preparada; **sem** utilização funcional.  
+6. **Novas ressalvas Baixa:** **AER-PQR-B1…B2** (Aceitas, não bloqueantes).  
+7. **Cobertura:** `enterprise:persistent-queue-runtime:test`.  
+8. **Sprint encerrada** com parecer **GO COM RESSALVAS**.  
+9. Documentos: `INF-08_ENTERPRISE_PERSISTENT_QUEUE_RUNTIME.md`, `INF-08_PERSISTENT_QUEUE_RUNTIME_ARCHITECTURE.md`, `INF-08_PERSISTENT_QUEUE_RUNTIME_CERTIFICATION.md`.  
+10. **Roadmap:** INF-08A **não iniciada**.
+
+#### AER-PQR-B1
+- **Título:** Escape hatch `getPersistentQueueRuntimePort()`  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getSchedulerRuntimePort` / AER-SR-B1). Cadeia oficial permanece Produto → Enterprise Runtime → PersistentQueueRuntimePort. Queue/Worker/Scheduler/TISS recebem apenas dependência preparada.  
+- **Origem:** INF-08 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+#### AER-PQR-B2
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime)  
+- **Descrição:** `persistent-queue-runtime/index.ts` reexporta `InMemoryPersistentQueueRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-SR-B2**.  
+- **Origem:** INF-08 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
 ### Atualização TISS-NAMESPACE-GATE-01 (03/08/2026)
 
 1. **Natureza:** auditoria/certificação exclusivamente — **zero** alteração de Runtime, Provider, Adapter, Store, Factory, Registry, Enterprise Runtime, TISS Runtime, XML/XSD/Namespace Runtimes, Capture, banco, APIs, UI ou comportamento.  
@@ -1181,3 +1207,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | INF-05 | Enterprise Queue Runtime Foundation; AER-QR-B1…B2; QueueRuntimePort integrado ao Enterprise Runtime; dependência TISS preparada sem consumo; INF-05A não iniciada |
 | 03/08/2026 | INF-06 | Enterprise Worker Runtime Foundation; AER-WR-B1…B2; WorkerRuntimePort integrado ao Enterprise Runtime; deps Queue/TISS preparadas sem consumo/execução; INF-06A não iniciada |
 | 03/08/2026 | INF-07 | Enterprise Scheduler Runtime Foundation; AER-SR-B1…B2; SchedulerRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/TISS preparadas sem consumo/execução; INF-07A não iniciada |
+| 03/08/2026 | INF-08 | Enterprise Persistent Queue Runtime Foundation; AER-PQR-B1…B2; PersistentQueueRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/TISS preparadas sem consumo; INF-08A não iniciada |

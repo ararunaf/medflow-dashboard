@@ -212,6 +212,8 @@ export type CanonicalSchedulerHealth = {
   storedDispatchCount?: number;
   queueRuntimeOk?: boolean;
   workerRuntimeOk?: boolean;
+  /** INF-08 — prontidão estrutural do Persistent Queue Runtime (dependência preparada). */
+  persistentQueueRuntimeOk?: boolean;
   runtimeReady: true;
   realScheduler: false;
   cronImplemented: false;
