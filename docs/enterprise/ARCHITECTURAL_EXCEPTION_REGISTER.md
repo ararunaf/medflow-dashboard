@@ -54,9 +54,9 @@ A partir de ARCH-DEBT-01:
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
 | Enterprise Infrastructure | INF-01…INF-05, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
-| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01 |
+| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A |
 | Integração Runtime | ARCH-01, ARCH-02 |
-| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-XML-GATE-01 |
+| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-XML-GATE-01, TISS-XML-GATE-01A |
 
 ### Nota sobre Gates
 
@@ -76,7 +76,8 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | TISS-CATALOG-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
 | TISS-RULE-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
 | TISS-RULEPACK-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
-| TISS-XML-GATE-01 | (transcript da sessão de auditoria) | **NO-GO** |
+| TISS-XML-GATE-01 | (transcript da sessão de auditoria) | **NO-GO** (histórico; supersedido por TISS-XML-GATE-01A) |
+| TISS-XML-GATE-01A | `docs/enterprise/TISS-XML-GATE-01A_XML_RUNTIME_RECERTIFICATION.md` | **GO COM RESSALVAS** |
 
 ---
 
@@ -104,14 +105,14 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | AER-GA02-B2 | EPC-24 + INF fora de `main` | **Aceita** | Não bloqueia SEARCH-01 no branch Enterprise; permanece dívida de governança de trunk |
 | AER-GA02-B3 | Application 0/43 | **Resolvida** (ARCH-01 / decisão ECS-01) | Não |
 | AER-GA02-B4 | Staging Foundation pendente | **Aceita** | Não bloqueia SEARCH-01 (Gates posteriores não reemitiram NO-GO) |
-| AER-XMLG-T1 | `tsc --noEmit` FAIL no XML Runtime Adapter (3× TS2352) | **Resolvida** (XML-HOTFIX-01) | Não — Gate TypeScript restaurado; reexecutar TISS-XML-GATE-01 antes de liberar TISS-05 |
+| AER-XMLG-T1 | `tsc --noEmit` FAIL no XML Runtime Adapter (3× TS2352) | **Resolvida** (XML-HOTFIX-01) | Não — reconfirmada em TISS-XML-GATE-01A; TISS-05 liberado |
 
 **Arquitetura XML Runtime permanece íntegra** (cadeia oficial sem Provider/Adapter paralelo; sem bypass Enterprise).  
-**AER-XMLG-T1 Resolvida** em XML-HOTFIX-01 (casts alinhados ao padrão `as unknown as` dos siblings Catalog/RulePack).  
-**TISS-XML-GATE-01** permanece com parecer histórico **NO-GO** até re-certificação oficial pós-hotfix.  
+**AER-XMLG-T1 Resolvida** em XML-HOTFIX-01; **reconfirmada RESOLVIDA** em TISS-XML-GATE-01A.  
+**TISS-XML-GATE-01A** reemite certificação oficial: **GO COM RESSALVAS** (ressalvas Baixa **AER-XMLRT-B1…B3**).  
 **AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
 **AER-RPE-B2** / **AER-TISSCG-B1** / **AER-XMLG-T1** permanecem Resolvidas.  
-**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3** permanecem Aceitas (não bloqueantes).  
+**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3** permanecem Aceitas (não bloqueantes / baixa prioridade).  
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).
@@ -797,6 +798,20 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 5. **Parecer XML-HOTFIX-01:** **GO**.  
 6. **Roadmap:** reexecutar **TISS-XML-GATE-01** imediatamente; **não liberar TISS-05** até GO na re-certificação.
 
+### Atualização TISS-XML-GATE-01A (03/08/2026)
+
+1. **Recertificação exclusivamente de leitura** — nenhuma alteração de código/Runtime/Provider/Adapter/Store/Models/testes/comportamento.  
+2. **Cadeia oficial reconfirmada íntegra:** Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → Adapter → Store.  
+3. **Sem Provider paralelo / sem Adapter paralelo / sem bypass Enterprise** ao `XMLRuntimePort`.  
+4. **AER-XMLG-T1 permanece oficialmente RESOLVIDA** (casts `as unknown as` confirmados; `tsc --noEmit` PASS).  
+5. **Ressalvas Baixa confirmadas Aceitas (não bloqueantes):** **AER-XMLRT-B1…B3**.  
+6. **Nenhuma nova ressalva** / **nenhuma regressão** / **ECS-01 íntegro**.  
+7. **Gates:** Build PASS · TypeScript PASS · ESLint PASS · Smoke PASS · Enterprise PASS · Capture PASS.  
+8. **Indicadores XML (sem regressão):** Coverage **50%** · Runtime Coverage **100%** · Legacy Components **1** · Enterprise Compliance **95%**.  
+9. **Parecer:** **GO COM RESSALVAS**.  
+10. **Roadmap:** **TISS-05 — Enterprise XML Generation Runtime oficialmente liberada**.  
+11. Documento: `docs/enterprise/TISS-XML-GATE-01A_XML_RUNTIME_RECERTIFICATION.md`.
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -816,3 +831,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-04 | Enterprise XML Runtime Foundation; AER-XMLRT-B1…B3; liberação TISS-XML-GATE-01 |
 | 03/08/2026 | TISS-XML-GATE-01 | Certificação XML Runtime (**NO-GO**); AER-XMLG-T1 Aberta/Bloqueante; indicadores XML permanentes; TISS-05 não liberado |
 | 03/08/2026 | XML-HOTFIX-01 | Gate TypeScript restaurado; AER-XMLG-T1 Resolvida; re-run TISS-XML-GATE-01 pendente antes de TISS-05 |
+| 03/08/2026 | TISS-XML-GATE-01A | Recertificação XML Runtime (**GO COM RESSALVAS**); AER-XMLG-T1 reconfirmada Resolvida; TISS-05 liberado |
