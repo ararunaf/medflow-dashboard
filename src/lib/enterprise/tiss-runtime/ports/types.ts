@@ -31,6 +31,7 @@ import type { XMLSerializerRuntimePort } from "../../xml-serializer-runtime/port
 import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
+import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -62,6 +63,7 @@ export type TISSRuntimeHealth = {
   xmlValidationRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
+  queueRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -85,6 +87,7 @@ export type TISSRuntimeCapabilities = {
   usesXMLValidationRuntimePort: boolean;
   usesXSDRuntimePort: boolean;
   usesNamespaceRuntimePort: boolean;
+  usesQueueRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -115,6 +118,11 @@ export type TISSRuntimeEnterpriseDeps = {
   getXSDRuntimePort(): XSDRuntimePort;
   /** NamespaceRuntimePort oficial — infraestrutura canônica de namespaces XML (TISS-10). */
   getNamespaceRuntimePort(): NamespaceRuntimePort;
+  /**
+   * QueueRuntimePort oficial — infraestrutura canônica de filas (INF-05).
+   * Dependência obrigatória preparada; TISS Runtime NÃO consome/executa filas nesta sprint.
+   */
+  getQueueRuntimePort(): QueueRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

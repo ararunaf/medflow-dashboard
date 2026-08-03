@@ -74,6 +74,8 @@ import { createXSDRuntimePort } from "../xsd-runtime/providers/create-xsd-runtim
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../namespace-runtime/providers/create-namespace-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
+import { createQueueRuntimePort } from "../queue-runtime/providers/create-queue-runtime-port";
+import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -109,6 +111,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly xmlValidationRuntimePort: XMLValidationRuntimePort;
   private readonly xsdRuntimePort: XSDRuntimePort;
   private readonly namespaceRuntimePort: NamespaceRuntimePort;
+  private readonly queueRuntimePort: QueueRuntimePort;
   private readonly tissRuntimePort: TISSRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
@@ -235,6 +238,9 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =
       options.namespaceRuntimePort ?? createNamespaceRuntimePort({ provider: "enterprise" });
+    // INF-05: Queue Runtime oficial — infraestrutura estrutural de filas (sem backends reais).
+    this.queueRuntimePort =
+      options.queueRuntimePort ?? createQueueRuntimePort({ provider: "enterprise" });
     this.tissRuntimePort =
       options.tissRuntimePort ??
       createTISSRuntimePort({
@@ -251,6 +257,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getXSDRuntimePort: () => this.xsdRuntimePort,
           getNamespaceRuntimePort: () => this.namespaceRuntimePort,
+          getQueueRuntimePort: () => this.queueRuntimePort,
         },
       });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
@@ -354,6 +361,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.namespaceRuntimePort;
   }
 
+  getQueueRuntimePort(): QueueRuntimePort {
+    return this.queueRuntimePort;
+  }
+
   getTISSRuntimePort(): TISSRuntimePort {
     return this.tissRuntimePort;
   }
@@ -391,6 +402,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlValidationRuntimeHealth,
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
+      queueRuntimeHealth,
       tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -417,6 +429,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.xmlValidationRuntimePort.health(),
       this.xsdRuntimePort.health(),
       this.namespaceRuntimePort.health(),
+      this.queueRuntimePort.health(),
       this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -445,6 +458,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlValidationRuntimeHealth.ok &&
       xsdRuntimeHealth.ok &&
       namespaceRuntimeHealth.ok &&
+      queueRuntimeHealth.ok &&
       tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -474,11 +488,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
+      queueRuntimeOk: queueRuntimeHealth.ok,
       tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (TISSRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (TISSRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

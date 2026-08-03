@@ -36,6 +36,7 @@ import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/x
 import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
+import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -68,6 +69,7 @@ export type EnterpriseRuntimeHealth = {
   xmlValidationRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
+  queueRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -139,6 +141,7 @@ export type EnterpriseRuntimeOptions = {
   xmlValidationRuntimePort?: XMLValidationRuntimePort;
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
+  queueRuntimePort?: QueueRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -235,7 +238,10 @@ export interface EnterpriseRuntime {
   /** Resolve NamespaceRuntimePort (TISS-10) — Enterprise Namespace Runtime. */
   getNamespaceRuntimePort(): NamespaceRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-10). */
+  /** Resolve QueueRuntimePort (INF-05) — Enterprise Queue Runtime. */
+  getQueueRuntimePort(): QueueRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue Runtime dep). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

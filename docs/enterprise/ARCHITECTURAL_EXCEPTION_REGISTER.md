@@ -89,17 +89,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **86** |
+| **Total de ressalvas registradas** | **88** |
 | Prioridade **Alta** | **14** |
 | Prioridade **Média** | **20** |
-| Prioridade **Baixa** | **52** |
+| Prioridade **Baixa** | **54** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02 + TISS-XML-GATE-01) | **5** |
-| Criticidade **Não bloqueante** | **81** |
+| Criticidade **Não bloqueante** | **83** |
 | Status **Resolvida** | **11** |
 | Status **Planejada** | **3** |
-| Status **Aceita** | **71** |
+| Status **Aceita** | **73** |
 | Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **75** |
+| Pendentes (Aberta + Aceita + Planejada) | **77** |
 
 ### Bloqueantes — estado atual
 
@@ -117,6 +117,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
 **AER-RPE-B2** / **AER-TISSCG-B1** / **AER-XMLG-T1** permanecem Resolvidas.  
 **AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3**, **AER-XMLGEN-B1…B2**, **AER-XMLSER-B1…B2**, **AER-XMLSCH-B1…B2**, **AER-XMLVAL-B1…B2**, **AER-XSD-B1…B2**, **AER-NS-B1…B2** permanecem Aceitas (não bloqueantes / baixa prioridade).  
+**AER-QR-B1…B2** (INF-05 Queue Runtime) permanecem Aceitas.  
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).  
@@ -246,6 +247,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-XSD-B2 | Barrel exporta Store + `getStore()` no Adapter (XSD) | TISS-09 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-NS-B1 | Escape hatch `getNamespaceRuntimePort()` | TISS-10 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-NS-B2 | Barrel exporta Store + `getStore()` no Adapter (Namespace) | TISS-10 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
+| AER-QR-B1 | Escape hatch `getQueueRuntimePort()` | INF-05 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-QR-B2 | Barrel exporta Store + `getStore()` no Adapter (Queue Runtime) | INF-05 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -1053,6 +1056,28 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 - **Descrição:** `namespace-runtime/index.ts` reexporta `InMemoryNamespaceRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-XSD-B2**.  
 - **Origem:** TISS-10 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
 
+### Atualização INF-05 — Enterprise Queue Runtime (03/08/2026)
+
+1. **Natureza:** foundation estrutural ECS-01 — sem filas reais / workers / backends.  
+2. **Queue Runtime oficial:** `QueueRuntimePort` via `createQueueRuntimePort()`; Factory + Registry únicos; Adapters Default/Enterprise/Mock.  
+3. **Enterprise Runtime:** `getQueueRuntimePort()` + health `queueRuntimeOk`.  
+4. **TISS Runtime:** dependência obrigatória `getQueueRuntimePort()` preparada; **sem** enqueue/dequeue/consumo.  
+5. **Novas ressalvas Baixa:** **AER-QR-B1…B2** (Aceitas, não bloqueantes).  
+6. **Cobertura:** `enterprise:queue-runtime:test`.  
+7. **Sprint encerrada** com parecer **GO COM RESSALVAS**.  
+8. Documentos: `INF-05_ENTERPRISE_QUEUE_RUNTIME.md`, `INF-05_QUEUE_RUNTIME_ARCHITECTURE.md`, `INF-05_QUEUE_RUNTIME_CERTIFICATION.md`.  
+9. **Roadmap:** INF-05A **não iniciada**.
+
+#### AER-QR-B1
+- **Título:** Escape hatch `getQueueRuntimePort()`  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getNamespaceRuntimePort` / AER-NS-B1). Cadeia oficial permanece Produto → Enterprise Runtime → QueueRuntimePort. TISS recebe apenas dependência preparada.  
+- **Origem:** INF-05 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+#### AER-QR-B2
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Queue Runtime)  
+- **Descrição:** `queue-runtime/index.ts` reexporta `InMemoryQueueRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-NS-B2**.  
+- **Origem:** INF-05 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
 ### Atualização TISS-NAMESPACE-GATE-01 (03/08/2026)
 
 1. **Natureza:** auditoria/certificação exclusivamente — **zero** alteração de Runtime, Provider, Adapter, Store, Factory, Registry, Enterprise Runtime, TISS Runtime, XML/XSD/Namespace Runtimes, Capture, banco, APIs, UI ou comportamento.  
@@ -1101,3 +1126,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-XSD-GATE-01 | Certificação XSD Runtime (**GO COM RESSALVAS**); AER-XSD-B1…B2 / AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-09 encerrada; TISS-10 liberado |
 | 03/08/2026 | TISS-10 | Enterprise Namespace Runtime; AER-NS-B1…B2; liberação TISS-NAMESPACE-GATE-01 |
 | 03/08/2026 | TISS-NAMESPACE-GATE-01 | Certificação Namespace Runtime (**GO COM RESSALVAS**); AER-NS-B1…B2 / AER-XSD-B1…B2 / AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-10 encerrada; TISS-11 liberado |
+| 03/08/2026 | INF-05 | Enterprise Queue Runtime Foundation; AER-QR-B1…B2; QueueRuntimePort integrado ao Enterprise Runtime; dependência TISS preparada sem consumo; INF-05A não iniciada |

@@ -64,6 +64,7 @@ function foundationCapabilities(): TISSRuntimeCapabilities {
     usesXMLValidationRuntimePort: true,
     usesXSDRuntimePort: true,
     usesNamespaceRuntimePort: true,
+    usesQueueRuntimePort: true,
     implementsRealXml: false,
     implementsOperatorDispatch: false,
   };
@@ -131,6 +132,11 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getNamespaceRuntimePort (TISS-10).",
       );
     }
+    if (typeof options.enterpriseDeps.getQueueRuntimePort !== "function") {
+      throw new Error(
+        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getQueueRuntimePort (INF-05).",
+      );
+    }
     this.enterpriseDeps = options.enterpriseDeps;
     this.store = options.store ?? new InMemoryTISSRuntimeStore();
     this.ping = options.ping;
@@ -166,6 +172,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     const xmlValidationRuntimePort = this.enterpriseDeps.getXMLValidationRuntimePort();
     const xsdRuntimePort = this.enterpriseDeps.getXSDRuntimePort();
     const namespaceRuntimePort = this.enterpriseDeps.getNamespaceRuntimePort();
+    const queueRuntimePort = this.enterpriseDeps.getQueueRuntimePort();
     const [
       orchestratorHealth,
       tissProviderHealth,
@@ -178,6 +185,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       xmlValidationRuntimeHealth,
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
+      queueRuntimeHealth,
     ] = await Promise.all([
       this.enterpriseDeps.getOrchestratorPort().health(),
       this.enterpriseDeps.getTISSProviderPort().health(),
@@ -190,6 +198,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       xmlValidationRuntimePort.health(),
       xsdRuntimePort.health(),
       namespaceRuntimePort.health(),
+      queueRuntimePort.health(),
     ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
     const ok =
@@ -204,7 +213,8 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       xmlSchemaRuntimeHealth.ok &&
       xmlValidationRuntimeHealth.ok &&
       xsdRuntimeHealth.ok &&
-      namespaceRuntimeHealth.ok;
+      namespaceRuntimeHealth.ok &&
+      queueRuntimeHealth.ok;
 
     return {
       ok,
@@ -221,8 +231,9 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
+      queueRuntimeOk: queueRuntimeHealth.ok,
       message: ok
-        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort — sem bypass)."
+        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + QueueRuntimePort + TISSProviderPort — sem bypass; Queue Runtime dependência preparada sem consumo)."
         : "TISS Runtime degradado — ver Ports Enterprise.",
     };
   }

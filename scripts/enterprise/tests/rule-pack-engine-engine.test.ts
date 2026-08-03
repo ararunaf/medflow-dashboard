@@ -48,6 +48,7 @@ import {
 } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
+import { createQueueRuntimePort } from '../../../src/lib/enterprise/queue-runtime/index.ts';
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSProviderPort } from "../../../src/lib/enterprise/tiss-provider/index.ts";
 import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
@@ -327,6 +328,7 @@ describe("TISS-03 cadeia Enterprise / TISS Runtime / Rule Pack Engine", () => {
     const xmlValidationRuntime = createXMLValidationRuntimePort({ provider: "enterprise" });
     const xsdRuntime = createXSDRuntimePort({ provider: "enterprise" });
     const namespaceRuntime = createNamespaceRuntimePort({ provider: "enterprise" });
+    const queueRuntime = createQueueRuntimePort({ provider: "enterprise" });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps: {
@@ -349,6 +351,7 @@ describe("TISS-03 cadeia Enterprise / TISS Runtime / Rule Pack Engine", () => {
         getXMLValidationRuntimePort: () => xmlValidationRuntime,
         getXSDRuntimePort: () => xsdRuntime,
         getNamespaceRuntimePort: () => namespaceRuntime,
+        getQueueRuntimePort: () => queueRuntime,
       },
     });
 
