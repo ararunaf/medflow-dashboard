@@ -90,11 +90,11 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | Prioridade **Baixa** | **46** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02 + TISS-XML-GATE-01) | **5** |
 | Criticidade **Não bloqueante** | **75** |
-| Status **Resolvida** | **10** |
+| Status **Resolvida** | **11** |
 | Status **Planejada** | **3** |
 | Status **Aceita** | **65** |
-| Status **Aberta** | **2** |
-| Pendentes (Aberta + Aceita + Planejada) | **70** |
+| Status **Aberta** | **1** |
+| Pendentes (Aberta + Aceita + Planejada) | **69** |
 
 ### Bloqueantes — estado atual
 
@@ -104,12 +104,13 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | AER-GA02-B2 | EPC-24 + INF fora de `main` | **Aceita** | Não bloqueia SEARCH-01 no branch Enterprise; permanece dívida de governança de trunk |
 | AER-GA02-B3 | Application 0/43 | **Resolvida** (ARCH-01 / decisão ECS-01) | Não |
 | AER-GA02-B4 | Staging Foundation pendente | **Aceita** | Não bloqueia SEARCH-01 (Gates posteriores não reemitiram NO-GO) |
-| AER-XMLG-T1 | `tsc --noEmit` FAIL no XML Runtime Adapter (3× TS2352) | **Aberta** | **Sim — bloqueia certificação TISS-XML-GATE-01 e liberação de TISS-05** |
+| AER-XMLG-T1 | `tsc --noEmit` FAIL no XML Runtime Adapter (3× TS2352) | **Resolvida** (XML-HOTFIX-01) | Não — Gate TypeScript restaurado; reexecutar TISS-XML-GATE-01 antes de liberar TISS-05 |
 
 **Arquitetura XML Runtime permanece íntegra** (cadeia oficial sem Provider/Adapter paralelo; sem bypass Enterprise).  
-**TISS-XML-GATE-01 = NO-GO** exclusivamente por **AER-XMLG-T1** (Gate TypeScript).  
+**AER-XMLG-T1 Resolvida** em XML-HOTFIX-01 (casts alinhados ao padrão `as unknown as` dos siblings Catalog/RulePack).  
+**TISS-XML-GATE-01** permanece com parecer histórico **NO-GO** até re-certificação oficial pós-hotfix.  
 **AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
-**AER-RPE-B2** / **AER-TISSCG-B1** permanecem Resolvidas.  
+**AER-RPE-B2** / **AER-TISSCG-B1** / **AER-XMLG-T1** permanecem Resolvidas.  
 **AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3** permanecem Aceitas (não bloqueantes).  
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
@@ -210,7 +211,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-XMLRT-B1 | Escape hatch `getXMLRuntimePort()` | TISS-04 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-XMLRT-B2 | Produto `xml-export-service` permanece fora do XML Runtime | TISS-04 | Architecture | Baixa | Não bloqueante | Aceita | Convergência futura / pós TISS-05 |
 | AER-XMLRT-B3 | Barrel exporta Store + `getStore()` no Adapter | TISS-04 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
-| AER-XMLG-T1 | `tsc --noEmit` FAIL — 3× TS2352 no DefaultXMLRuntimeAdapter | TISS-XML-GATE-01 | Infrastructure | Alta | **Bloqueante** | **Aberta** | Hotfix pré TISS-05 (`as unknown as`) |
+| AER-XMLG-T1 | `tsc --noEmit` FAIL — 3× TS2352 no DefaultXMLRuntimeAdapter | TISS-XML-GATE-01 | Infrastructure | Alta | **Bloqueante** | **Resolvida** | XML-HOTFIX-01 |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -218,7 +219,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 
 - Prioridades de GATE-ARCH-02 B1–B4 não vieram rotuladas Alta/Média/Baixa na origem; foram mapeadas por severidade do blocker (B1–B3 → Alta; B4 → Média), preservando criticidade **Bloqueante**.
 - AER-GA03A-R4 foi **Resolvida** em SEARCH-01 (Classification Provider em CLASS-01; Search Provider em SEARCH-01).
-- Resolvidas confirmadas: AER-CORE-GLOBAL-01, AER-GA02-B1, AER-GA02-B3, AER-GA03-A2, AER-GA03A-R2, AER-GA03A-R4, AER-TISSCG-B1, AER-RPE-B2, AER-GA03-A4, AER-TISSCG-A1.
+- Resolvidas confirmadas: AER-CORE-GLOBAL-01, AER-GA02-B1, AER-GA02-B3, AER-GA03-A2, AER-GA03A-R2, AER-GA03A-R4, AER-TISSCG-B1, AER-RPE-B2, AER-GA03-A4, AER-TISSCG-A1, AER-XMLG-T1.
 
 ---
 
@@ -777,15 +778,24 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 
 #### AER-XMLG-T1
 - **Título:** `tsc --noEmit` FAIL no DefaultXMLRuntimeAdapter (3× TS2352)  
-- **Descrição:** Casts `as T & XMLRuntimeOperationEnvelope` nas linhas de erro/cancelamento de `runOperation` falham sob `strict`. Adapters irmãos (`tiss-catalog`, `rule-pack-engine`) já usam `as unknown as T & …`. Build Vite passa; Gate TypeScript oficial (`npx tsc --noEmit -p tsconfig.json`) falha.  
+- **Descrição:** Casts `as T & XMLRuntimeOperationEnvelope` nas linhas de erro/cancelamento de `runOperation` falhavam sob `strict`. Corrigido em XML-HOTFIX-01 alinhando ao padrão dos adapters irmãos (`as unknown as T & …`). Sem alteração funcional, arquitetural, de Runtime, Providers ou contratos.  
 - **Origem:** TISS-XML-GATE-01  
 - **Categoria:** Infrastructure  
 - **Prioridade:** Alta  
-- **Impacto:** Bloqueia certificação da infraestrutura XML e liberação de TISS-05  
-- **Criticidade:** **Bloqueante**  
+- **Impacto:** Bloqueava certificação da infraestrutura XML e liberação de TISS-05  
+- **Criticidade:** **Bloqueante** (histórico)  
 - **Justificativa técnica:** Defeito de tipagem introduzido em TISS-04; correção trivial e local (alinhar cast ao padrão dos siblings). Sem impacto arquitetural de Ports/Adapters.  
-- **Sprint prevista:** Hotfix imediato pré TISS-05 / re-run TISS-XML-GATE-01  
-- **Status:** **Aberta**
+- **Sprint de resolução:** XML-HOTFIX-01  
+- **Status:** **Resolvida**
+
+### Atualização XML-HOTFIX-01 (03/08/2026)
+
+1. **Hotfix de governança** — exclusivamente tipagem; sem funcionalidade, Runtime, Providers, contratos ou XML TISS.  
+2. **Escopo:** `DefaultXMLRuntimeAdapter.runOperation` — 3 casts `as T &` → `as unknown as T &` (padrão Catalog/RulePack).  
+3. **AER-XMLG-T1 Resolvida.**  
+4. **Gates pós-hotfix:** Build PASS · TypeScript PASS · ESLint PASS · Smoke PASS · Enterprise PASS · Capture PASS.  
+5. **Parecer XML-HOTFIX-01:** **GO**.  
+6. **Roadmap:** reexecutar **TISS-XML-GATE-01** imediatamente; **não liberar TISS-05** até GO na re-certificação.
 
 ---
 
@@ -805,3 +815,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-CONV-01 | Convergência Capture→Enterprise; AER-GA03-A4 / AER-TISSCG-A1 Resolvidas; AER-TISSCV-B1…B2; liberação TISS-04 |
 | 03/08/2026 | TISS-04 | Enterprise XML Runtime Foundation; AER-XMLRT-B1…B3; liberação TISS-XML-GATE-01 |
 | 03/08/2026 | TISS-XML-GATE-01 | Certificação XML Runtime (**NO-GO**); AER-XMLG-T1 Aberta/Bloqueante; indicadores XML permanentes; TISS-05 não liberado |
+| 03/08/2026 | XML-HOTFIX-01 | Gate TypeScript restaurado; AER-XMLG-T1 Resolvida; re-run TISS-XML-GATE-01 pendente antes de TISS-05 |

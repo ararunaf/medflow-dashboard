@@ -558,7 +558,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
               operation,
             },
             logs,
-          } as T & XMLRuntimeOperationEnvelope;
+          } as unknown as T & XMLRuntimeOperationEnvelope;
         }
 
         try {
@@ -623,7 +623,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
           operation,
         },
         logs,
-      } as T & XMLRuntimeOperationEnvelope;
+      } as unknown as T & XMLRuntimeOperationEnvelope;
     } catch (err) {
       const end = typeof performance !== "undefined" ? performance.now() : Date.now();
       const isTimeout =
@@ -646,7 +646,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
           operation,
         },
         logs,
-      } as T & XMLRuntimeOperationEnvelope;
+      } as unknown as T & XMLRuntimeOperationEnvelope;
     }
   }
 
