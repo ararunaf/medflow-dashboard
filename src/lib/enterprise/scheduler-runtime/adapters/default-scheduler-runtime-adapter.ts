@@ -181,6 +181,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       usesQueueRuntimePort: true,
       usesWorkerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
+      usesObservabilityRuntimePort: true,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       implementsCron: false,
@@ -228,9 +229,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
     let queueRuntimeOk = true;
     let workerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
+    let observabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-07 / INF-08: deps preparadas — valida Port shape sem chamar health()
-      // (evita ciclos Scheduler.health ↔ Queue/Worker/PersistentQueue.health).
+      // INF-07 / INF-08 / INF-09: deps preparadas — valida Port shape sem chamar health()
+      // (evita ciclos Scheduler.health ↔ Queue/Worker/PersistentQueue/Observability.health).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       queueRuntimeOk =
@@ -248,13 +250,21 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
           typeof persistentQueuePort.health === "function" &&
           typeof persistentQueuePort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
+        const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
+        observabilityRuntimeOk =
+          !!observabilityPort &&
+          typeof observabilityPort.health === "function" &&
+          typeof observabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
       storeHealth.ok &&
       queueRuntimeOk &&
       workerRuntimeOk &&
-      persistentQueueRuntimeOk;
+      persistentQueueRuntimeOk &&
+      observabilityRuntimeOk;
     return {
       kind: "canonical-scheduler-health",
       ok,
@@ -267,6 +277,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       queueRuntimeOk,
       workerRuntimeOk,
       persistentQueueRuntimeOk,
+      observabilityRuntimeOk,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       message: this.healthy

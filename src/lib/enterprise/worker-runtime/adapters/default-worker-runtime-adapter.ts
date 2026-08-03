@@ -157,6 +157,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       usesQueueRuntimePort: true,
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
+      usesObservabilityRuntimePort: true,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,
@@ -201,11 +202,12 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
     let queueRuntimeOk = true;
     let schedulerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
+    let observabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
       const queueHealth = await this.enterpriseDeps.getQueueRuntimePort().health();
       queueRuntimeOk = queueHealth.ok;
-      // INF-07 / INF-08: Scheduler/PersistentQueue preparados — valida Port sem chamar health()
-      // (evita ciclo Worker.health ↔ Scheduler/PersistentQueue.health).
+      // INF-07 / INF-08 / INF-09: Scheduler/PersistentQueue/Observability preparados — valida Port sem chamar health()
+      // (evita ciclo Worker.health ↔ Scheduler/PersistentQueue/Observability.health).
       if (typeof this.enterpriseDeps.getSchedulerRuntimePort === "function") {
         const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
         schedulerRuntimeOk =
@@ -220,13 +222,21 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
           typeof persistentQueuePort.health === "function" &&
           typeof persistentQueuePort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
+        const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
+        observabilityRuntimeOk =
+          !!observabilityPort &&
+          typeof observabilityPort.health === "function" &&
+          typeof observabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
       storeHealth.ok &&
       queueRuntimeOk &&
       schedulerRuntimeOk &&
-      persistentQueueRuntimeOk;
+      persistentQueueRuntimeOk &&
+      observabilityRuntimeOk;
     return {
       kind: "canonical-worker-health",
       ok,
@@ -239,6 +249,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       queueRuntimeOk,
       schedulerRuntimeOk,
       persistentQueueRuntimeOk,
+      observabilityRuntimeOk,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,

@@ -9,6 +9,7 @@
  * INF-06: dependência Worker Runtime preparada — sem alocação/execução de Workers.
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
+import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
@@ -74,6 +75,8 @@ export type QueueRuntimeHealth = CanonicalQueueHealth & {
   schedulerRuntimeOk?: boolean;
   /** INF-08 — prontidão estrutural do Persistent Queue Runtime (dependência preparada). */
   persistentQueueRuntimeOk?: boolean;
+  /** INF-09 — prontidão estrutural do Observability Runtime (dependência preparada). */
+  observabilityRuntimeOk?: boolean;
 };
 
 /** Capacidades do adapter no nível do Port. */
@@ -93,6 +96,8 @@ export type QueueRuntimePortCapabilities = {
   usesSchedulerRuntimePort: boolean;
   /** INF-08 — dependência Persistent Queue Runtime preparada (sem consumo). */
   usesPersistentQueueRuntimePort: boolean;
+  /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
+  usesObservabilityRuntimePort: boolean;
   runtimeReady: true;
   realQueueBackend: false;
   messagesPublished: false;
@@ -239,10 +244,11 @@ export type StatsResult = QueueRuntimeOperationEnvelope & {
 };
 
 /**
- * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07 / INF-08).
+ * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07 / INF-08 / INF-09).
  * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada.
  * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
  * Persistent Queue Runtime é dependência preparada (opcional no Port shape) — NÃO persistida/consumida.
+ * Observability Runtime é dependência preparada (opcional no Port shape) — NÃO observada/emitida.
  */
 export type QueueRuntimeEnterpriseDeps = {
   getWorkerRuntimePort(): WorkerRuntimePort;
@@ -250,6 +256,8 @@ export type QueueRuntimeEnterpriseDeps = {
   getSchedulerRuntimePort?: () => SchedulerRuntimePort;
   /** INF-08 — Persistent Queue Runtime preparado (sem consumo funcional). */
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
+  /** INF-09 — Observability Runtime preparado (sem consumo funcional). */
+  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
 };
 
 /** Opções de resolução do QueueRuntimePort. */

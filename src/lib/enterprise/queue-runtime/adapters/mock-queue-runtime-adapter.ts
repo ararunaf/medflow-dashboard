@@ -101,6 +101,7 @@ export class MockQueueRuntimeAdapter implements QueueRuntimePort {
       usesWorkerRuntimePort: true,
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
+      usesObservabilityRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

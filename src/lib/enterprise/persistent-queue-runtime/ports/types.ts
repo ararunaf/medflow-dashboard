@@ -7,6 +7,7 @@
  *
  * Sem backends persistentes reais. Sem RabbitMQ/Kafka/Azure/Redis/BullMQ. Sem Workers reais.
  */
+import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
@@ -83,6 +84,8 @@ export type PersistentQueueRuntimePortCapabilities = {
   usesQueueRuntimePort: boolean;
   usesWorkerRuntimePort: boolean;
   usesSchedulerRuntimePort: boolean;
+  /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
+  usesObservabilityRuntimePort: boolean;
   runtimeReady: true;
   realPersistentBackend: false;
   rabbitMqImplemented: false;
@@ -229,11 +232,14 @@ export type PersistentQueueStatsResult = PersistentQueueRuntimeOperationEnvelope
 /**
  * Dependências Enterprise injetadas no adapter default/enterprise.
  * Queue + Worker + Scheduler Runtime são dependências obrigatórias preparadas — NÃO consumidas nesta sprint.
+ * Observability Runtime é dependência preparada (opcional no Port shape) — NÃO observada/emitida.
  */
 export type PersistentQueueRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;
   getWorkerRuntimePort(): WorkerRuntimePort;
   getSchedulerRuntimePort(): SchedulerRuntimePort;
+  /** INF-09 — Observability Runtime preparado (sem consumo funcional). */
+  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
 };
 
 /** Opções de resolução do PersistentQueueRuntimePort. */

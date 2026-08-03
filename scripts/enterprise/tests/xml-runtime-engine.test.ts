@@ -46,6 +46,8 @@ import { createQueueRuntimePort } from '../../../src/lib/enterprise/queue-runtim
 import { createSchedulerRuntimePort } from "../../../src/lib/enterprise/scheduler-runtime/index.ts";
 import { createWorkerRuntimePort } from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import { createPersistentQueueRuntimePort } from "../../../src/lib/enterprise/persistent-queue-runtime/index.ts";
+import { createObservabilityRuntimePort } from "../../../src/lib/enterprise/observability-runtime/index.ts";
+import type { TISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/ports/tiss-runtime-port.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSProviderPort } from "../../../src/lib/enterprise/tiss-provider/index.ts";
 import {
@@ -382,6 +384,53 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
         getWorkerRuntimePort: () => workerRuntime,
         getSchedulerRuntimePort: () => schedulerRuntime,
         getPersistentQueueRuntimePort: () => persistentQueueRuntime,
+        getObservabilityRuntimePort: () =>
+          createObservabilityRuntimePort({
+            provider: "mock",
+            enterpriseDeps: {
+              getQueueRuntimePort: () => queueRuntime,
+              getWorkerRuntimePort: () => workerRuntime,
+              getSchedulerRuntimePort: () => schedulerRuntime,
+              getPersistentQueueRuntimePort: () => persistentQueueRuntime,
+              getTISSRuntimePort: () =>
+                ({
+                  providerId: "mock",
+                  health: async () => ({ ok: true, provider: "mock" }),
+                  capabilities: () =>
+                    ({
+                      provider: "mock",
+                      adapterId: "stub",
+                      supportsProcess: true,
+                      supportsGetSession: true,
+                      supportsListSessions: true,
+                      supportsHealth: true,
+                      supportsCapabilities: true,
+                      usesEnterpriseRuntimePorts: true,
+                      usesCanonicalExecutionOrchestrator: true,
+                      usesTISSProviderPort: true,
+                      usesTISSCatalogPort: true,
+                      usesRulePackEnginePort: true,
+                      usesXMLRuntimePort: true,
+                      usesXMLGenerationRuntimePort: true,
+                      usesXMLSerializerRuntimePort: true,
+                      usesXMLSchemaRuntimePort: true,
+                      usesXMLValidationRuntimePort: true,
+                      usesXSDRuntimePort: true,
+                      usesNamespaceRuntimePort: true,
+                      usesQueueRuntimePort: true,
+                      usesWorkerRuntimePort: true,
+                      usesSchedulerRuntimePort: true,
+                      usesPersistentQueueRuntimePort: true,
+                      usesObservabilityRuntimePort: true,
+                      implementsRealXml: false,
+                      implementsOperatorDispatch: false,
+                    }),
+                  process: async () => ({ ok: true }),
+                  getSession: async () => ({ ok: false }),
+                  listSessions: async () => ({ ok: true, sessions: [] }),
+                }) as TISSRuntimePort,
+            },
+          }),
       },
     });
 

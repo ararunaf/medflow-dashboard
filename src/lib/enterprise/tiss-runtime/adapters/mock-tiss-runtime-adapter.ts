@@ -15,6 +15,8 @@ import { createXMLValidationRuntimePort } from "../../xml-validation-runtime/pro
 import { createXSDRuntimePort } from "../../xsd-runtime/providers/create-xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../../namespace-runtime/providers/create-namespace-runtime-port";
 import { createPersistentQueueRuntimePort } from "../../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
+import { createObservabilityRuntimePort } from "../../observability-runtime/providers/create-observability-runtime-port";
+import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
 import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
 import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
@@ -86,6 +88,11 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
         getSchedulerRuntimePort: () => schedulerRuntimePort,
       },
     });
+
+    // Observability com lazy TISS back-ref — evita ciclo MockTISS ↔ MockObs.
+    let observabilityRuntimePort: ObservabilityRuntimePort | undefined;
+    const tissRef: { current?: DefaultTISSRuntimeAdapter } = {};
+
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
       getTISSProviderPort: () => createTISSProviderPort({ provider: "mock" }),
@@ -101,6 +108,26 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       getWorkerRuntimePort: () => workerRuntimePort,
       getSchedulerRuntimePort: () => schedulerRuntimePort,
       getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
+      getObservabilityRuntimePort: () => {
+        if (!observabilityRuntimePort) {
+          observabilityRuntimePort = createObservabilityRuntimePort({
+            provider: "mock",
+            enterpriseDeps: {
+              getQueueRuntimePort: () => queueRuntimePort,
+              getWorkerRuntimePort: () => workerRuntimePort,
+              getSchedulerRuntimePort: () => schedulerRuntimePort,
+              getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
+              getTISSRuntimePort: () => {
+                if (!tissRef.current) {
+                  throw new Error("Mock TISS delegate not ready");
+                }
+                return tissRef.current;
+              },
+            },
+          });
+        }
+        return observabilityRuntimePort;
+      },
       getXMLRuntimePort: () =>
         createXMLRuntimePort({
           provider: "mock",
@@ -116,6 +143,7 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       enterpriseDeps,
       store: options.store,
     });
+    tissRef.current = this.delegate;
   }
 
   capabilities(): TISSRuntimeCapabilities {

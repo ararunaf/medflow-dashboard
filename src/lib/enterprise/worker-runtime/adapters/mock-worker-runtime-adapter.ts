@@ -105,6 +105,7 @@ export class MockWorkerRuntimeAdapter implements WorkerRuntimePort {
       usesQueueRuntimePort: true,
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
+      usesObservabilityRuntimePort: true,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,

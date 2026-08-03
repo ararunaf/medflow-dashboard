@@ -78,6 +78,8 @@ import { createQueueRuntimePort } from "../queue-runtime/providers/create-queue-
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
 import { createPersistentQueueRuntimePort } from "../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
 import type { PersistentQueueRuntimePort } from "../persistent-queue-runtime/ports/persistent-queue-runtime-port";
+import { createObservabilityRuntimePort } from "../observability-runtime/providers/create-observability-runtime-port";
+import type { ObservabilityRuntimePort } from "../observability-runtime/ports/observability-runtime-port";
 import { createSchedulerRuntimePort } from "../scheduler-runtime/providers/create-scheduler-runtime-port";
 import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
 import { createWorkerRuntimePort } from "../worker-runtime/providers/create-worker-runtime-port";
@@ -124,7 +126,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly schedulerRuntimePort!: SchedulerRuntimePort;
   /** Atribuído após Queue/Worker/Scheduler; lazy getters podem referenciar antes da atribuição. */
   private readonly persistentQueueRuntimePort!: PersistentQueueRuntimePort;
-  private readonly tissRuntimePort: TISSRuntimePort;
+  /** Atribuído após PQR; lazy getters de Q/W/S/PQR/TISS podem referenciar antes da atribuição. */
+  private readonly observabilityRuntimePort!: ObservabilityRuntimePort;
+  /** Atribuído após Observability; lazy getter do Observability pode referenciar antes da atribuição. */
+  private readonly tissRuntimePort!: TISSRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
   private readonly aiProviderRuntimePort: AIProviderRuntimePort;
@@ -250,7 +255,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =
       options.namespaceRuntimePort ?? createNamespaceRuntimePort({ provider: "enterprise" });
-    // INF-05 / INF-06 / INF-07 / INF-08: Queue + Worker + Scheduler + PersistentQueue — deps cruzadas preparadas (lazy getters).
+    // INF-05 / INF-06 / INF-07 / INF-08 / INF-09: Queue + Worker + Scheduler + PersistentQueue + Observability — deps cruzadas preparadas (lazy getters).
     this.queueRuntimePort =
       options.queueRuntimePort ??
       createQueueRuntimePort({
@@ -259,6 +264,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWorkerRuntimePort: () => this.workerRuntimePort,
           getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     this.workerRuntimePort =
@@ -269,6 +275,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getQueueRuntimePort: () => this.queueRuntimePort,
           getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     this.schedulerRuntimePort =
@@ -279,6 +286,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getQueueRuntimePort: () => this.queueRuntimePort,
           getWorkerRuntimePort: () => this.workerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     this.persistentQueueRuntimePort =
@@ -289,6 +297,19 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getQueueRuntimePort: () => this.queueRuntimePort,
           getWorkerRuntimePort: () => this.workerRuntimePort,
           getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
+        },
+      });
+    this.observabilityRuntimePort =
+      options.observabilityRuntimePort ??
+      createObservabilityRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getQueueRuntimePort: () => this.queueRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getTISSRuntimePort: () => this.tissRuntimePort,
         },
       });
     this.tissRuntimePort =
@@ -311,6 +332,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWorkerRuntimePort: () => this.workerRuntimePort,
           getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
@@ -430,6 +452,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.persistentQueueRuntimePort;
   }
 
+  getObservabilityRuntimePort(): ObservabilityRuntimePort {
+    return this.observabilityRuntimePort;
+  }
+
   getTISSRuntimePort(): TISSRuntimePort {
     return this.tissRuntimePort;
   }
@@ -471,6 +497,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       workerRuntimeHealth,
       schedulerRuntimeHealth,
       persistentQueueRuntimeHealth,
+      observabilityRuntimeHealth,
       tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -501,6 +528,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.workerRuntimePort.health(),
       this.schedulerRuntimePort.health(),
       this.persistentQueueRuntimePort.health(),
+      this.observabilityRuntimePort.health(),
       this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -533,6 +561,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       workerRuntimeHealth.ok &&
       schedulerRuntimeHealth.ok &&
       persistentQueueRuntimeHealth.ok &&
+      observabilityRuntimeHealth.ok &&
       tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -566,11 +595,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       workerRuntimeOk: workerRuntimeHealth.ok,
       schedulerRuntimeOk: schedulerRuntimeHealth.ok,
       persistentQueueRuntimeOk: persistentQueueRuntimeHealth.ok,
+      observabilityRuntimeOk: observabilityRuntimeHealth.ok,
       tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (TISSRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (TISSRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

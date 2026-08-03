@@ -89,6 +89,7 @@
     "enterprise:worker-runtime:test": "npx tsx --test scripts/enterprise/tests/worker-runtime-engine.test.ts",
     "enterprise:scheduler-runtime:test": "npx tsx --test scripts/enterprise/tests/scheduler-runtime-engine.test.ts",
     "enterprise:persistent-queue-runtime:test": "npx tsx --test scripts/enterprise/tests/persistent-queue-runtime-engine.test.ts",
+    "enterprise:observability-runtime:test": "npx tsx --test scripts/enterprise/tests/observability-runtime-engine.test.ts",
     "enterprise:tiss-conv-01:test": "npx tsx --test scripts/enterprise/tests/tiss-conv-01-capture-convergence.test.ts",
     "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
 

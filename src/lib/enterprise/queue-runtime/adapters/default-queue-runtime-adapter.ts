@@ -160,6 +160,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       usesWorkerRuntimePort: true,
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
+      usesObservabilityRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,
@@ -201,9 +202,10 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     let workerRuntimeOk = true;
     let schedulerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
+    let observabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-06 / INF-07 / INF-08: deps preparadas — valida Port sem chamar health()
-      // (evita ciclo Queue.health ↔ Worker/Scheduler/PersistentQueue.health).
+      // INF-06 / INF-07 / INF-08 / INF-09: deps preparadas — valida Port sem chamar health()
+      // (evita ciclo Queue.health ↔ Worker/Scheduler/PersistentQueue/Observability.health).
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       workerRuntimeOk =
         !!workerPort &&
@@ -223,13 +225,21 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
           typeof persistentQueuePort.health === "function" &&
           typeof persistentQueuePort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
+        const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
+        observabilityRuntimeOk =
+          !!observabilityPort &&
+          typeof observabilityPort.health === "function" &&
+          typeof observabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
       storeHealth.ok &&
       workerRuntimeOk &&
       schedulerRuntimeOk &&
-      persistentQueueRuntimeOk;
+      persistentQueueRuntimeOk &&
+      observabilityRuntimeOk;
     return {
       kind: "canonical-queue-health",
       ok,
@@ -241,6 +251,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       workerRuntimeOk,
       schedulerRuntimeOk,
       persistentQueueRuntimeOk,
+      observabilityRuntimeOk,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

@@ -188,6 +188,7 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
       usesQueueRuntimePort: true,
       usesWorkerRuntimePort: true,
       usesSchedulerRuntimePort: true,
+      usesObservabilityRuntimePort: true,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       implementsRabbitMq: false,
@@ -231,9 +232,10 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
     let queueRuntimeOk = true;
     let workerRuntimeOk = true;
     let schedulerRuntimeOk = true;
+    let observabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-08: deps preparadas — valida Port shape sem chamar health()
-      // (evita ciclos PersistentQueue.health ↔ Queue/Worker/Scheduler.health).
+      // INF-08 / INF-09: deps preparadas — valida Port shape sem chamar health()
+      // (evita ciclos PersistentQueue.health ↔ Queue/Worker/Scheduler/Observability.health).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
@@ -249,9 +251,21 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
         !!schedulerPort &&
         typeof schedulerPort.health === "function" &&
         typeof schedulerPort.capabilities === "function";
+      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
+        const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
+        observabilityRuntimeOk =
+          !!observabilityPort &&
+          typeof observabilityPort.health === "function" &&
+          typeof observabilityPort.capabilities === "function";
+      }
     }
     const ok =
-      this.healthy && storeHealth.ok && queueRuntimeOk && workerRuntimeOk && schedulerRuntimeOk;
+      this.healthy &&
+      storeHealth.ok &&
+      queueRuntimeOk &&
+      workerRuntimeOk &&
+      schedulerRuntimeOk &&
+      observabilityRuntimeOk;
     return {
       kind: "canonical-persistent-queue-health",
       ok,
@@ -264,6 +278,7 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
       queueRuntimeOk,
       workerRuntimeOk,
       schedulerRuntimeOk,
+      observabilityRuntimeOk,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       message: this.healthy

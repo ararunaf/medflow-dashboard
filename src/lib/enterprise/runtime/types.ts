@@ -6,6 +6,7 @@
  * INF-06: Worker Runtime estrutural — sem Workers reais / Scheduler / Thread Pool.
  * INF-07: Scheduler Runtime estrutural — sem Scheduler real / Cron / Timer.
  * INF-08: Persistent Queue Runtime estrutural — sem fila persistente real / RabbitMQ / Kafka.
+ * INF-09: Observability Runtime estrutural — sem OpenTelemetry / Application Insights / Prometheus.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
@@ -41,6 +42,7 @@ import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
 import type { PersistentQueueRuntimePort } from "../persistent-queue-runtime/ports/persistent-queue-runtime-port";
+import type { ObservabilityRuntimePort } from "../observability-runtime/ports/observability-runtime-port";
 import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 
@@ -79,6 +81,7 @@ export type EnterpriseRuntimeHealth = {
   workerRuntimeOk?: boolean;
   schedulerRuntimeOk?: boolean;
   persistentQueueRuntimeOk?: boolean;
+  observabilityRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -154,6 +157,7 @@ export type EnterpriseRuntimeOptions = {
   workerRuntimePort?: WorkerRuntimePort;
   schedulerRuntimePort?: SchedulerRuntimePort;
   persistentQueueRuntimePort?: PersistentQueueRuntimePort;
+  observabilityRuntimePort?: ObservabilityRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -262,7 +266,10 @@ export interface EnterpriseRuntime {
   /** Resolve PersistentQueueRuntimePort (INF-08) — Enterprise Persistent Queue Runtime. */
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker + INF-07 Scheduler + INF-08 PersistentQueue deps). */
+  /** Resolve ObservabilityRuntimePort (INF-09) — Enterprise Observability Runtime. */
+  getObservabilityRuntimePort(): ObservabilityRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker + INF-07 Scheduler + INF-08 PersistentQueue + INF-09 Observability deps). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

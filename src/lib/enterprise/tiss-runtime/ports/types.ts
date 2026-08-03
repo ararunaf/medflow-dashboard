@@ -32,6 +32,7 @@ import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/port
 import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
+import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
@@ -70,6 +71,7 @@ export type TISSRuntimeHealth = {
   workerRuntimeOk?: boolean;
   schedulerRuntimeOk?: boolean;
   persistentQueueRuntimeOk?: boolean;
+  observabilityRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -97,6 +99,7 @@ export type TISSRuntimeCapabilities = {
   usesWorkerRuntimePort: boolean;
   usesSchedulerRuntimePort: boolean;
   usesPersistentQueueRuntimePort: boolean;
+  usesObservabilityRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -147,6 +150,11 @@ export type TISSRuntimeEnterpriseDeps = {
    * Dependência obrigatória preparada; TISS Runtime NÃO persiste/consome filas nesta sprint.
    */
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort;
+  /**
+   * ObservabilityRuntimePort oficial — infraestrutura canônica de observabilidade (INF-09).
+   * Dependência obrigatória preparada; TISS Runtime NÃO emite/observa sinais reais nesta sprint.
+   */
+  getObservabilityRuntimePort(): ObservabilityRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

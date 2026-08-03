@@ -52,7 +52,7 @@ A partir de ARCH-DEBT-01:
 | Área | Fontes |
 |------|--------|
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
-| Enterprise Infrastructure | INF-01…INF-08, INF-08A, FASE_B consolidado |
+| Enterprise Infrastructure | INF-01…INF-09, INF-08A, INF-08B, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
 | OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A, TISS-05, TISS-XMLGEN-GATE-01, TISS-06, TISS-06A, TISS-07, TISS-SCHEMA-GATE-01, TISS-08, TISS-VALIDATION-GATE-01, TISS-09, TISS-XSD-GATE-01, TISS-10, TISS-NAMESPACE-GATE-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
@@ -120,9 +120,10 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **AER-QR-B1…B2** (INF-05 Queue Runtime) permanecem Aceitas.
 **AER-WR-B1…B2** (INF-06 Worker Runtime) permanecem Aceitas.
 **AER-SR-B1…B2** (INF-07 Scheduler Runtime) permanecem Aceitas.
-**AER-PQR-B1…B2** (INF-08 Persistent Queue Runtime) permanecem Aceitas.  
+**AER-PQR-B1…B2** (INF-08 Persistent Queue Runtime) permanecem Aceitas.
 **AER-PQR-T1** (INF-08A — harness Enterprise sem `getPersistentQueueRuntimePort`) **Resolvida** em INF-08B (Enterprise 71/71 PASS).
-**AER-TISSCV-B1…B2** permanecem Aceitas.  
+**AER-OBS-B1…B2** (INF-09 Observability Runtime) permanecem Aceitas.
+**AER-TISSCV-B1…B2** permanecem Aceitas.
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).  
 **TISS-XMLGEN-GATE-01** reconfirma certificação do XML Generation Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
@@ -260,6 +261,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-PQR-B1 | Escape hatch `getPersistentQueueRuntimePort()` | INF-08 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-PQR-B2 | Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime) | INF-08 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-PQR-T1 | Harness Enterprise: `createTISSRuntimePort` sem `getPersistentQueueRuntimePort` | INF-08A | Test Debt | Média | Não bloqueante | Resolvida | INF-08B — harnesses pré-INF-08 atualizados |
+| AER-OBS-B1 | Escape hatch `getObservabilityRuntimePort()` | INF-09 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-OBS-B2 | Barrel exporta Store + `getStore()` no Adapter (Observability Runtime) | INF-09 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -1186,6 +1189,30 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 7. **Parecer:** **GO**. INF-08 encerrada sem pendências de harness. **INF-09 autorizada** para início oficial.
 8. Documento: `INF-08B_ENTERPRISE_PERSISTENT_QUEUE_TEST_HARNESS_REPAIR.md`.
 
+### Atualização INF-09 — Enterprise Observability Runtime (03/08/2026)
+
+1. **Natureza:** foundation estrutural ECS-01 — sem OpenTelemetry / Application Insights / Azure Monitor / Prometheus / Grafana / Elastic / Datadog / New Relic / Loki / Jaeger / logs / métricas / tracing / alertas / dashboards reais.  
+2. **Observability Runtime oficial:** `ObservabilityRuntimePort` via `createObservabilityRuntimePort()`; Factory + Registry únicos; Adapters Default/Enterprise/Mock.  
+3. **Enterprise Runtime:** `getObservabilityRuntimePort()` + health `observabilityRuntimeOk`.  
+4. **Queue / Worker / Scheduler / Persistent Queue Runtime:** dependência `getObservabilityRuntimePort()` preparada; **sem** observe/release/execução. Observability recebe `getQueueRuntimePort()` + `getWorkerRuntimePort()` + `getSchedulerRuntimePort()` + `getPersistentQueueRuntimePort()` + `getTISSRuntimePort()` preparados; **sem** consumo.  
+5. **TISS Runtime:** dependência obrigatória `getObservabilityRuntimePort()` preparada; **sem** utilização funcional.  
+6. **Novas ressalvas Baixa:** **AER-OBS-B1…B2** (Aceitas, não bloqueantes).  
+7. **Harnesses:** atualizados proativamente com `getObservabilityRuntimePort` — **sem AER-OBS-T1**.  
+8. **Cobertura:** `enterprise:observability-runtime:test`.  
+9. **Sprint encerrada** com parecer **GO COM RESSALVAS** (gates a preencher).  
+10. Documentos: `INF-09_ENTERPRISE_OBSERVABILITY_RUNTIME.md`, `INF-09_OBSERVABILITY_RUNTIME_ARCHITECTURE.md`, `INF-09_OBSERVABILITY_RUNTIME_CERTIFICATION.md`.  
+11. **Roadmap:** INF-09A **não iniciada**.
+
+#### AER-OBS-B1
+- **Título:** Escape hatch `getObservabilityRuntimePort()`  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getPersistentQueueRuntimePort` / AER-PQR-B1). Cadeia oficial permanece Produto → Enterprise Runtime → ObservabilityRuntimePort. Queue/Worker/Scheduler/Persistent Queue/TISS recebem apenas dependência preparada.  
+- **Origem:** INF-09 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+#### AER-OBS-B2
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Observability Runtime)
+- **Descrição:** `observability-runtime/index.ts` reexporta `InMemoryObservabilityRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-PQR-B2**.
+- **Origem:** INF-09 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
 ### Atualização TISS-NAMESPACE-GATE-01 (03/08/2026)
 
 1. **Natureza:** auditoria/certificação exclusivamente — **zero** alteração de Runtime, Provider, Adapter, Store, Factory, Registry, Enterprise Runtime, TISS Runtime, XML/XSD/Namespace Runtimes, Capture, banco, APIs, UI ou comportamento.  
@@ -1240,3 +1267,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | INF-08 | Enterprise Persistent Queue Runtime Foundation; AER-PQR-B1…B2; PersistentQueueRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/TISS preparadas sem consumo; INF-08A não iniciada |
 | 03/08/2026 | INF-08A | Certificação Persistent Queue Runtime Gate (**GO COM RESSALVAS**); AER-PQR-B1…B2 reconfirmadas; **AER-PQR-T1** adicionada (harness Enterprise 61/71); INF-08 encerrada; INF-09 não iniciada |
 | 03/08/2026 | INF-08B | Reparo harness Enterprise Persistent Queue (**GO**); **AER-PQR-T1 Resolvida**; Enterprise 71/71 PASS; INF-08 encerrada sem pendências; INF-09 autorizada |
+| 03/08/2026 | INF-09 | Enterprise Observability Runtime Foundation; AER-OBS-B1…B2; ObservabilityRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/Persistent Queue/TISS preparadas sem consumo; harnesses atualizados proativamente (sem AER-OBS-T1); INF-09A não iniciada |
