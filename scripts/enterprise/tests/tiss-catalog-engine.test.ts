@@ -36,6 +36,7 @@ import {
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSProviderPort } from "../../../src/lib/enterprise/tiss-provider/index.ts";
+import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
 import {
   createEnterpriseRuntime,
   resetEnterpriseRuntimeForTests,
@@ -245,12 +246,17 @@ describe("TISS-02 cadeia Enterprise / TISS Runtime / Catalog", () => {
     const orchestrator = createCanonicalExecutionOrchestratorPort({ provider: "mock" });
     const tissProvider = createTISSProviderPort({ provider: "enterprise" });
     const tissCatalog = createTISSCatalogPort({ provider: "enterprise" });
+    const rulePackEngine = createRulePackEnginePort({
+      provider: "enterprise",
+      enterpriseDeps: { getTISSCatalogPort: () => tissCatalog },
+    });
     const tissRuntime = createTISSRuntimePort({
       provider: "default",
       enterpriseDeps: {
         getOrchestratorPort: () => orchestrator,
         getTISSProviderPort: () => tissProvider,
         getTISSCatalogPort: () => tissCatalog,
+        getRulePackEnginePort: () => rulePackEngine,
       },
     });
 
@@ -304,9 +310,7 @@ describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", 
 
     for (const file of files) {
       const source = readFileSync(file, "utf8");
-      const codeWithoutComments = source
-        .replace(/\/\*[\s\S]*?\*\//g, "")
-        .replace(/\/\/.*$/gm, "");
+      const codeWithoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       for (const pattern of forbidden) {
         assert.equal(
           pattern.test(codeWithoutComments),
@@ -321,9 +325,7 @@ describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", 
     const moduleDir = join(repoRoot, "src/lib/enterprise/tiss-catalog");
     for (const file of collectTsFiles(moduleDir)) {
       const source = readFileSync(file, "utf8");
-      const codeWithoutComments = source
-        .replace(/\/\*[\s\S]*?\*\//g, "")
-        .replace(/\/\/.*$/gm, "");
+      const codeWithoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       assert.equal(
         /if\s*\(\s*operadora/i.test(codeWithoutComments),
         false,
@@ -349,10 +351,7 @@ describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", 
 
   it("Enterprise Runtime / TISS Runtime usam exclusivamente TISSCatalogPort", () => {
     const runtimeAdapter = readFileSync(
-      join(
-        repoRoot,
-        "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts",
-      ),
+      join(repoRoot, "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts"),
       "utf8",
     );
     assert.match(runtimeAdapter, /getTISSCatalogPort/);

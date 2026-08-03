@@ -70,5 +70,6 @@ npm run enterprise:tiss-catalog:test
 
 ## Próximo passo obrigatório
 
-Executar **TISS-CATALOG-GATE-01** antes de avançar para **TISS-03 — Enterprise TISS Rule Packs**.
-Não implementar XML TISS nem regras de negócio nesta fase.
+**TISS-CATALOG-GATE-01** concluído (GO COM RESSALVAS).  
+**TISS-03 — Enterprise Rule Pack Engine** implementado.  
+Próximo: **TISS-RULE-GATE-01** antes de **TISS-03A — Enterprise Base Rule Packs**.
