@@ -5,7 +5,8 @@
  *   Produto → Enterprise Runtime → TISSRuntimePort
  *     → TISSCatalogPort → Catalog Adapter → Store
  *     → RulePackEnginePort → Rule Pack Adapter → Store
- *     → XMLRuntimePort → XMLGenerationRuntimePort → Store → Canonical XML Result
+ *     → XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort
+ *     → Store → Canonical XML String
  *     → Canonical Execution Orchestrator → TISSProviderPort → Adapter
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -22,6 +23,7 @@ import type {
 } from "../../tiss-provider/ports/types";
 import type { XMLGenerationRuntimePort } from "../../xml-generation-runtime/ports/xml-generation-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
+import type { XMLSerializerRuntimePort } from "../../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -48,6 +50,7 @@ export type TISSRuntimeHealth = {
   rulePackEngineOk?: boolean;
   xmlRuntimeOk?: boolean;
   xmlGenerationRuntimeOk?: boolean;
+  xmlSerializerRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -66,6 +69,7 @@ export type TISSRuntimeCapabilities = {
   usesRulePackEnginePort: boolean;
   usesXMLRuntimePort: boolean;
   usesXMLGenerationRuntimePort: boolean;
+  usesXMLSerializerRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -86,6 +90,8 @@ export type TISSRuntimeEnterpriseDeps = {
   getXMLRuntimePort(): XMLRuntimePort;
   /** XMLGenerationRuntimePort oficial — materialização canônica (TISS-05). */
   getXMLGenerationRuntimePort(): XMLGenerationRuntimePort;
+  /** XMLSerializerRuntimePort oficial — serialização canônica em texto (TISS-06). */
+  getXMLSerializerRuntimePort(): XMLSerializerRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

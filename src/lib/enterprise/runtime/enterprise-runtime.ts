@@ -14,13 +14,13 @@
  *   → SearchProviderPort → DefaultSearchProviderAdapter (SEARCH-01)
  *   → TISSRuntimePort → TISSCatalogPort → Catalog Adapter → Store (TISS-02)
  *   → TISSRuntimePort → RulePackEnginePort → Rule Pack Adapter → Store (TISS-03)
- *   → TISSRuntimePort → XMLRuntimePort → XMLGenerationRuntimePort → Store (TISS-04/TISS-05)
+ *   → TISSRuntimePort → XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort → Store (TISS-04/TISS-05/TISS-06)
  *   → TISSRuntimePort → Orchestrator → TISSProviderPort → DefaultTISSProviderAdapter (TISS-01)
  *   → AIProviderRuntimePort → Orchestrator → AIProviderPort → Adapter → OpenAI.
  * OCR: exclusivamente via OCR Runtime → OCRProviderPort (OCR-01) — sem bypass HTTP Azure.
  * Storage: exclusivamente via Storage Manager Runtime → StorageProviderPort (STORAGE-01).
  * Search: exclusivamente via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: exclusivamente via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + TISSProviderPort — sem XML real/operadoras.
+ * TISS: exclusivamente via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + TISSProviderPort — sem XML TISS/ANS real/operadoras.
  * IA: exclusivamente via AI Provider Runtime (ARCH-02) — sem bypass HTTP.
  */
 import { createAIProviderPort } from "../ai-provider/providers/create-ai-provider-port";
@@ -64,6 +64,8 @@ import { createXMLGenerationRuntimePort } from "../xml-generation-runtime/provid
 import type { XMLGenerationRuntimePort } from "../xml-generation-runtime/ports/xml-generation-runtime-port";
 import { createXMLRuntimePort } from "../xml-runtime/providers/create-xml-runtime-port";
 import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
+import { createXMLSerializerRuntimePort } from "../xml-serializer-runtime/providers/create-xml-serializer-runtime-port";
+import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -94,6 +96,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly rulePackEnginePort: RulePackEnginePort;
   private readonly xmlGenerationRuntimePort: XMLGenerationRuntimePort;
   private readonly xmlRuntimePort: XMLRuntimePort;
+  private readonly xmlSerializerRuntimePort: XMLSerializerRuntimePort;
   private readonly tissRuntimePort: TISSRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
@@ -182,7 +185,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getDocumentSearchRuntimePort: () => this.documentSearchRuntimePort,
         },
       });
-    // TISS-01…05: Provider + Catalog + Rule Pack Engine + XML Runtime + XML Generation Runtime — sem XML real/operadoras.
+    // TISS-01…06: Provider + Catalog + Rule Pack Engine + XML Runtime + Generation + Serializer — sem XML TISS/ANS real/operadoras.
     this.tissProviderPort =
       options.tissProviderPort ?? createTISSProviderPort({ provider: "enterprise" });
     this.tissCatalogPort =
@@ -208,6 +211,9 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getXMLGenerationRuntimePort: () => this.xmlGenerationRuntimePort,
         },
       });
+    this.xmlSerializerRuntimePort =
+      options.xmlSerializerRuntimePort ??
+      createXMLSerializerRuntimePort({ provider: "enterprise" });
     this.tissRuntimePort =
       options.tissRuntimePort ??
       createTISSRuntimePort({
@@ -219,6 +225,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getRulePackEnginePort: () => this.rulePackEnginePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
           getXMLGenerationRuntimePort: () => this.xmlGenerationRuntimePort,
+          getXMLSerializerRuntimePort: () => this.xmlSerializerRuntimePort,
         },
       });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
@@ -302,6 +309,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.xmlGenerationRuntimePort;
   }
 
+  getXMLSerializerRuntimePort(): XMLSerializerRuntimePort {
+    return this.xmlSerializerRuntimePort;
+  }
+
   getTISSRuntimePort(): TISSRuntimePort {
     return this.tissRuntimePort;
   }
@@ -334,6 +345,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       rulePackEngineHealth,
       xmlGenerationRuntimeHealth,
       xmlRuntimeHealth,
+      xmlSerializerRuntimeHealth,
       tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -355,6 +367,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.rulePackEnginePort.health(),
       this.xmlGenerationRuntimePort.health(),
       this.xmlRuntimePort.health(),
+      this.xmlSerializerRuntimePort.health(),
       this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -378,6 +391,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       rulePackEngineHealth.ok &&
       xmlGenerationRuntimeHealth.ok &&
       xmlRuntimeHealth.ok &&
+      xmlSerializerRuntimeHealth.ok &&
       tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -402,11 +416,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       rulePackEngineOk: rulePackEngineHealth.ok,
       xmlGenerationRuntimeOk: xmlGenerationRuntimeHealth.ok,
       xmlRuntimeOk: xmlRuntimeHealth.ok,
+      xmlSerializerRuntimeOk: xmlSerializerRuntimeHealth.ok,
       tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (TISSRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (TISSRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

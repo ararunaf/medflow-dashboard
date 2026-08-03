@@ -1,13 +1,14 @@
 /**
- * DefaultTISSRuntimeAdapter — TISS-01…TISS-05.
+ * DefaultTISSRuntimeAdapter — TISS-01…TISS-06.
  *
  * Utiliza exclusivamente Ports Enterprise injetados:
  *   TISSCatalogPort → Catalog Adapter → Store
  *   RulePackEnginePort → Rule Pack Adapter → Store
- *   XMLRuntimePort → XMLGenerationRuntimePort → Store → Canonical XML Result
+ *   XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort
+ *     → Store → Canonical XML String
  *   Canonical Execution Orchestrator → TISSProviderPort → Adapter
  *
- * NÃO chama XML real/operadoras/banco/Storage/OCR diretamente.
+ * NÃO chama XML TISS/ANS real/operadoras/banco/Storage/OCR diretamente.
  * NÃO acessa Catalog Store / Rule Pack Store / XML Store diretamente — apenas via Ports.
  */
 import { createTISSRuntimeSessionId } from "../ports/identity";
@@ -56,6 +57,7 @@ function foundationCapabilities(): TISSRuntimeCapabilities {
     usesRulePackEnginePort: true,
     usesXMLRuntimePort: true,
     usesXMLGenerationRuntimePort: true,
+    usesXMLSerializerRuntimePort: true,
     implementsRealXml: false,
     implementsOperatorDispatch: false,
   };
@@ -74,7 +76,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     if (!options.enterpriseDeps) {
       throw new Error(
         "DefaultTISSRuntimeAdapter exige enterpriseDeps " +
-          "(Orchestrator + TISSProviderPort + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort). " +
+          "(Orchestrator + TISSProviderPort + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort). " +
           "Bypass / implementação paralela é proibida.",
       );
     }
@@ -96,6 +98,11 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     if (typeof options.enterpriseDeps.getXMLGenerationRuntimePort !== "function") {
       throw new Error(
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXMLGenerationRuntimePort (TISS-05).",
+      );
+    }
+    if (typeof options.enterpriseDeps.getXMLSerializerRuntimePort !== "function") {
+      throw new Error(
+        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXMLSerializerRuntimePort (TISS-06).",
       );
     }
     this.enterpriseDeps = options.enterpriseDeps;
@@ -128,6 +135,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     const rulePackEnginePort = this.enterpriseDeps.getRulePackEnginePort();
     const xmlRuntimePort = this.enterpriseDeps.getXMLRuntimePort();
     const xmlGenerationRuntimePort = this.enterpriseDeps.getXMLGenerationRuntimePort();
+    const xmlSerializerRuntimePort = this.enterpriseDeps.getXMLSerializerRuntimePort();
     const [
       orchestratorHealth,
       tissProviderHealth,
@@ -135,6 +143,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEngineHealth,
       xmlRuntimeHealth,
       xmlGenerationRuntimeHealth,
+      xmlSerializerRuntimeHealth,
     ] = await Promise.all([
       this.enterpriseDeps.getOrchestratorPort().health(),
       this.enterpriseDeps.getTISSProviderPort().health(),
@@ -142,6 +151,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEnginePort.health(),
       xmlRuntimePort.health(),
       xmlGenerationRuntimePort.health(),
+      xmlSerializerRuntimePort.health(),
     ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
     const ok =
@@ -151,7 +161,8 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       tissCatalogHealth.ok &&
       rulePackEngineHealth.ok &&
       xmlRuntimeHealth.ok &&
-      xmlGenerationRuntimeHealth.ok;
+      xmlGenerationRuntimeHealth.ok &&
+      xmlSerializerRuntimeHealth.ok;
 
     return {
       ok,
@@ -163,8 +174,9 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEngineOk: rulePackEngineHealth.ok,
       xmlRuntimeOk: xmlRuntimeHealth.ok,
       xmlGenerationRuntimeOk: xmlGenerationRuntimeHealth.ok,
+      xmlSerializerRuntimeOk: xmlSerializerRuntimeHealth.ok,
       message: ok
-        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + TISSProviderPort — sem bypass)."
+        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + TISSProviderPort — sem bypass)."
         : "TISS Runtime degradado — ver Ports Enterprise.",
     };
   }
@@ -177,6 +189,8 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     const catalogPort = this.enterpriseDeps.getTISSCatalogPort();
     const rulePackEnginePort = this.enterpriseDeps.getRulePackEnginePort();
     const xmlRuntimePort = this.enterpriseDeps.getXMLRuntimePort();
+    const xmlGenerationRuntimePort = this.enterpriseDeps.getXMLGenerationRuntimePort();
+    const xmlSerializerRuntimePort = this.enterpriseDeps.getXMLSerializerRuntimePort();
 
     let catalogId: string | undefined;
     let processedViaTISSCatalogPort = false;
@@ -217,8 +231,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
 
     let xmlGenerationId: string | undefined;
     let xmlGenerationResultId: string | undefined;
+    let xmlSerializeResultId: string | undefined;
     let processedViaXMLRuntimePort = false;
     let processedViaXMLGenerationRuntimePort = false;
+    let processedViaXMLSerializerRuntimePort = false;
     try {
       const xmlGeneration = await xmlRuntimePort.generate({
         requestId: input.requestId,
@@ -237,10 +253,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
             sessionId: input.metadata.sessionId,
             correlationId: input.metadata.correlationId,
             channel: input.metadata.channel ?? "tiss-runtime",
-            tags: ["tiss-04", "tiss-05", "tiss-runtime", ...(input.metadata.tags ?? [])],
+            tags: ["tiss-04", "tiss-05", "tiss-06", "tiss-runtime", ...(input.metadata.tags ?? [])],
           },
           structuralNotes:
-            "TISS Runtime → XMLRuntimePort → XMLGenerationRuntimePort (TISS-05 — no real XML).",
+            "TISS Runtime → XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort (TISS-06 — no real TISS/ANS XML).",
         },
       });
       if (xmlGeneration.ok && xmlGeneration.generation) {
@@ -257,6 +273,64 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
         }
         if (!rulePackCode && xmlGeneration.generation.rulePackCode) {
           rulePackCode = xmlGeneration.generation.rulePackCode;
+        }
+
+        // Integração obrigatória ao XML Generation Runtime: serializa a estrutura canônica via Port.
+        let structure = xmlGeneration.generation.canonicalStructure;
+        if (!structure && xmlGenerationResultId) {
+          try {
+            const genResult = await xmlGenerationRuntimePort.getResult({
+              resultId: xmlGenerationResultId,
+              requestId: input.requestId,
+              signal: input.signal,
+              timeoutMs: input.timeoutMs,
+              retryCount: input.retryCount,
+              attributes: input.attributes,
+            });
+            if (genResult.ok && genResult.result?.structure) {
+              structure = genResult.result.structure;
+              processedViaXMLGenerationRuntimePort = true;
+            }
+          } catch {
+            // Best-effort Generation lookup — não bloqueia process via Port.
+          }
+        }
+
+        try {
+          const serialized = await xmlSerializerRuntimePort.serialize({
+            requestId: input.requestId,
+            signal: input.signal,
+            timeoutMs: input.timeoutMs,
+            retryCount: input.retryCount,
+            attributes: input.attributes,
+            generationId: xmlGenerationId,
+            generationResultId: xmlGenerationResultId,
+            documentId: input.documentId,
+            structure,
+            request: {
+              kind: "canonical-xml-serialize-request",
+              generationId: xmlGenerationId,
+              generationResultId: xmlGenerationResultId,
+              documentId: input.documentId,
+              structure,
+              metadata: {
+                kind: "canonical-xml-serializer-metadata",
+                sessionId: input.metadata.sessionId,
+                correlationId: input.metadata.correlationId,
+                channel: input.metadata.channel ?? "tiss-runtime",
+                source: "tiss-runtime",
+                tags: ["tiss-06", "tiss-runtime", ...(input.metadata.tags ?? [])],
+              },
+              structuralNotes:
+                "TISS Runtime → XMLGenerationRuntimePort → XMLSerializerRuntimePort (canonical XML string only).",
+            },
+          });
+          if (serialized.ok && serialized.result) {
+            xmlSerializeResultId = serialized.result.resultId;
+            processedViaXMLSerializerRuntimePort = true;
+          }
+        } catch {
+          // Best-effort XML Serializer Runtime — não bloqueia process via Port.
         }
       }
     } catch {
@@ -283,11 +357,13 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackCode,
       xmlGenerationId,
       xmlGenerationResultId,
+      xmlSerializeResultId,
       processedViaTISSProviderPort: true,
       processedViaTISSCatalogPort,
       processedViaRulePackEnginePort,
       processedViaXMLRuntimePort,
       processedViaXMLGenerationRuntimePort,
+      processedViaXMLSerializerRuntimePort,
       realTissExecuted: false,
       createdAt: stamp,
       updatedAt: stamp,
@@ -310,6 +386,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
             "tiss-03",
             "tiss-04",
             "tiss-05",
+            "tiss-06",
             "tiss-runtime",
             ...(input.metadata.tags ?? []),
           ],
@@ -325,9 +402,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
             rulePackCode: rulePackCode ?? null,
             xmlGenerationId: xmlGenerationId ?? null,
             xmlGenerationResultId: xmlGenerationResultId ?? null,
+            xmlSerializeResultId: xmlSerializeResultId ?? null,
           },
           structuralNotes:
-            "TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + TISSProviderPort (no real XML / no operator logic).",
+            "TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + TISSProviderPort (no real TISS/ANS XML / no operator logic).",
         });
         if (execution.ok) {
           session = {

@@ -6,7 +6,7 @@
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + TISSProviderPort (TISS-01…05).
+ * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + TISSProviderPort (TISS-01…06).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -31,6 +31,7 @@ import type { TISSProviderPort } from "../tiss-provider/ports/tiss-provider-port
 import type { TISSRuntimePort } from "../tiss-runtime/ports/tiss-runtime-port";
 import type { XMLGenerationRuntimePort } from "../xml-generation-runtime/ports/xml-generation-runtime-port";
 import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
+import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -58,6 +59,7 @@ export type EnterpriseRuntimeHealth = {
   rulePackEngineOk?: boolean;
   xmlRuntimeOk?: boolean;
   xmlGenerationRuntimeOk?: boolean;
+  xmlSerializerRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -124,6 +126,7 @@ export type EnterpriseRuntimeOptions = {
   rulePackEnginePort?: RulePackEnginePort;
   xmlRuntimePort?: XMLRuntimePort;
   xmlGenerationRuntimePort?: XMLGenerationRuntimePort;
+  xmlSerializerRuntimePort?: XMLSerializerRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -205,7 +208,10 @@ export interface EnterpriseRuntime {
   /** Resolve XMLGenerationRuntimePort (TISS-05) — Enterprise XML Generation Runtime. */
   getXMLGenerationRuntimePort(): XMLGenerationRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-05). */
+  /** Resolve XMLSerializerRuntimePort (TISS-06) — Enterprise XML Serializer Runtime. */
+  getXMLSerializerRuntimePort(): XMLSerializerRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-06). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */
