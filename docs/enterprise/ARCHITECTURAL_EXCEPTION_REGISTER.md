@@ -54,9 +54,9 @@ A partir de ARCH-DEBT-01:
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
 | Enterprise Infrastructure | INF-01…INF-05, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
-| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04 |
+| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
-| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01 |
+| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-XML-GATE-01 |
 
 ### Nota sobre Gates
 
@@ -76,6 +76,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | TISS-CATALOG-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
 | TISS-RULE-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
 | TISS-RULEPACK-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
+| TISS-XML-GATE-01 | (transcript da sessão de auditoria) | **NO-GO** |
 
 ---
 
@@ -83,17 +84,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **79** |
-| Prioridade **Alta** | **13** |
+| **Total de ressalvas registradas** | **80** |
+| Prioridade **Alta** | **14** |
 | Prioridade **Média** | **20** |
 | Prioridade **Baixa** | **46** |
-| Criticidade **Bloqueante** (histórico GATE-ARCH-02) | **4** |
+| Criticidade **Bloqueante** (histórico GATE-ARCH-02 + TISS-XML-GATE-01) | **5** |
 | Criticidade **Não bloqueante** | **75** |
 | Status **Resolvida** | **10** |
 | Status **Planejada** | **3** |
 | Status **Aceita** | **65** |
-| Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **69** |
+| Status **Aberta** | **2** |
+| Pendentes (Aberta + Aceita + Planejada) | **70** |
 
 ### Bloqueantes — estado atual
 
@@ -103,15 +104,25 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | AER-GA02-B2 | EPC-24 + INF fora de `main` | **Aceita** | Não bloqueia SEARCH-01 no branch Enterprise; permanece dívida de governança de trunk |
 | AER-GA02-B3 | Application 0/43 | **Resolvida** (ARCH-01 / decisão ECS-01) | Não |
 | AER-GA02-B4 | Staging Foundation pendente | **Aceita** | Não bloqueia SEARCH-01 (Gates posteriores não reemitiram NO-GO) |
+| AER-XMLG-T1 | `tsc --noEmit` FAIL no XML Runtime Adapter (3× TS2352) | **Aberta** | **Sim — bloqueia certificação TISS-XML-GATE-01 e liberação de TISS-05** |
 
-**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional pós TISS-04.**  
-TISS-04 criou a fundação estrutural do Enterprise XML Runtime (**GO COM RESSALVAS** — sem geração XML real).  
+**Arquitetura XML Runtime permanece íntegra** (cadeia oficial sem Provider/Adapter paralelo; sem bypass Enterprise).  
+**TISS-XML-GATE-01 = NO-GO** exclusivamente por **AER-XMLG-T1** (Gate TypeScript).  
 **AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
 **AER-RPE-B2** / **AER-TISSCG-B1** permanecem Resolvidas.  
 **AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3** permanecem Aceitas (não bloqueantes).  
-Novas Baixa (Aceitas): **AER-TISSCV-B1…B2** (patterns OCR do parser; CRUD operacional `tuss_procedures`).  
-**AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence — fora do escopo TISS-CONV-01).  
+**AER-TISSCV-B1…B2** permanecem Aceitas.  
+**AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).
+
+### XML Enterprise Dashboard (indicadores permanentes)
+
+| Indicador | Valor | Critério |
+|-----------|------:|----------|
+| **XML Coverage** | **50%** | 1/2 fluxos XML na Enterprise Foundation (path estrutural Runtime ✓; MVP produto `xml-export-service` ✗) |
+| **XML Runtime Coverage** | **100%** | Infraestrutura oficial TISS-04 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
+| **XML Legacy Components** | **1** | `src/lib/services/tiss/xml-export-service.ts` (+ superfície produto/API/UI) |
+| **XML Enterprise Compliance** | **95%** | ECS-01 completo no módulo; desvios não bloqueantes **AER-XMLRT-B1…B3** |
 
 ---
 
@@ -197,8 +208,9 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-RPKG-B1 | Runtime `process()` executa só o pack default (foundation) | TISS-RULEPACK-GATE-01 | Architecture | Baixa | Não bloqueante | Aceita | Multi-pack execution / seleção explícita |
 | AER-RPKG-B2 | Lacuna de cobertura: References + Catalog Metadata | TISS-RULEPACK-GATE-01 | Maintainability | Baixa | Não bloqueante | Aceita | Packs de existência para reference/metadata |
 | AER-XMLRT-B1 | Escape hatch `getXMLRuntimePort()` | TISS-04 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
-| AER-XMLRT-B2 | Produto `xml-export-service` permanece fora do XML Runtime | TISS-04 | Architecture | Baixa | Não bloqueante | Aceita | TISS-XML-GATE-01 / convergência futura |
+| AER-XMLRT-B2 | Produto `xml-export-service` permanece fora do XML Runtime | TISS-04 | Architecture | Baixa | Não bloqueante | Aceita | Convergência futura / pós TISS-05 |
 | AER-XMLRT-B3 | Barrel exporta Store + `getStore()` no Adapter | TISS-04 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
+| AER-XMLG-T1 | `tsc --noEmit` FAIL — 3× TS2352 no DefaultXMLRuntimeAdapter | TISS-XML-GATE-01 | Infrastructure | Alta | **Bloqueante** | **Aberta** | Hotfix pré TISS-05 (`as unknown as`) |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -740,13 +752,40 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 
 #### AER-XMLRT-B2
 - **Título:** Produto `xml-export-service` permanece fora do XML Runtime  
-- **Descrição:** Export MVP do produto (`src/lib/services/tiss/xml-export-service.ts`) não foi alterado nesta Sprint (escopo: fundação apenas, sem mudança de comportamento). Não é Provider/Adapter Enterprise paralelo; permanece dívida de convergência.  
-- **Origem:** TISS-04 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** TISS-XML-GATE-01 / convergência futura
+- **Descrição:** Export MVP do produto (`src/lib/services/tiss/xml-export-service.ts`) gera XML esquelético (`medflowTissExport`) fora da cadeia Enterprise. Confirmado em TISS-XML-GATE-01: não é Provider/Adapter Enterprise paralelo; isolado no produto (API/UI TISS). Dívida de convergência aceita.  
+- **Origem:** TISS-04 / TISS-XML-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Convergência futura / pós TISS-05
 
 #### AER-XMLRT-B3
 - **Título:** Barrel exporta Store + `getStore()` no Adapter  
 - **Descrição:** `xml-runtime/index.ts` reexporta `InMemoryXMLRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-TISSCG-B2** / **AER-RPEG-B1**.  
 - **Origem:** TISS-04 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
+### Atualização TISS-XML-GATE-01 (03/08/2026)
+
+1. **Auditoria exclusivamente de leitura** — nenhuma alteração de código/Runtime/Provider/Adapter/testes/comportamento.  
+2. **Cadeia oficial confirmada íntegra:** Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → Adapter → Store.  
+3. **Sem Provider paralelo / sem Adapter paralelo / sem Runtime ignorado / sem bypass Enterprise** ao `XMLRuntimePort`.  
+4. **XML Runtime desacoplado:** apenas modelos canônicos; não conhece operadoras/contratos/tenants/versões específicas/XML TISS/regras ANS.  
+5. **Ressalvas resolvidas nesta Gate:** nenhuma.  
+6. **Ressalvas confirmadas Aceitas:** **AER-XMLRT-B1…B3** (escape hatch; MVP `xml-export-service` isolado; barrel/`getStore()`).  
+7. **Nova ressalva bloqueante:** **AER-XMLG-T1** — `npx tsc --noEmit` FAIL (3× TS2352) em `DefaultXMLRuntimeAdapter.runOperation` (`as T &` sem `unknown`; siblings Catalog/RulePack usam `as unknown as`). Build Vite PASS (não typecheck estrito).  
+8. **Gates:** Build PASS · TypeScript **FAIL** · ESLint PASS (0 errors / 7 warnings pré-existentes) · Smoke PASS · Enterprise PASS · Capture PASS.  
+9. **Indicadores XML (permanentes):** Coverage **50%** · Runtime Coverage **100%** · Legacy Components **1** · Enterprise Compliance **95%**.  
+10. **Parecer:** **NO-GO**.  
+11. **Roadmap:** **não liberar TISS-05** até hotfix de **AER-XMLG-T1** + re-certificação do Gate TypeScript.  
+12. Sprint **TISS-04 permanece encerrada** (fundação entregue); certificação da infraestrutura **não** está completa enquanto **AER-XMLG-T1** estiver Aberta.
+
+#### AER-XMLG-T1
+- **Título:** `tsc --noEmit` FAIL no DefaultXMLRuntimeAdapter (3× TS2352)  
+- **Descrição:** Casts `as T & XMLRuntimeOperationEnvelope` nas linhas de erro/cancelamento de `runOperation` falham sob `strict`. Adapters irmãos (`tiss-catalog`, `rule-pack-engine`) já usam `as unknown as T & …`. Build Vite passa; Gate TypeScript oficial (`npx tsc --noEmit -p tsconfig.json`) falha.  
+- **Origem:** TISS-XML-GATE-01  
+- **Categoria:** Infrastructure  
+- **Prioridade:** Alta  
+- **Impacto:** Bloqueia certificação da infraestrutura XML e liberação de TISS-05  
+- **Criticidade:** **Bloqueante**  
+- **Justificativa técnica:** Defeito de tipagem introduzido em TISS-04; correção trivial e local (alinhar cast ao padrão dos siblings). Sem impacto arquitetural de Ports/Adapters.  
+- **Sprint prevista:** Hotfix imediato pré TISS-05 / re-run TISS-XML-GATE-01  
+- **Status:** **Aberta**
 
 ---
 
@@ -765,3 +804,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-RULEPACK-GATE-01 | Certificação Base Rule Packs (GO COM RESSALVAS); AER-RPKG-B1…B2; encerramento TISS-03A; recomendação TISS-CONV-01 |
 | 03/08/2026 | TISS-CONV-01 | Convergência Capture→Enterprise; AER-GA03-A4 / AER-TISSCG-A1 Resolvidas; AER-TISSCV-B1…B2; liberação TISS-04 |
 | 03/08/2026 | TISS-04 | Enterprise XML Runtime Foundation; AER-XMLRT-B1…B3; liberação TISS-XML-GATE-01 |
+| 03/08/2026 | TISS-XML-GATE-01 | Certificação XML Runtime (**NO-GO**); AER-XMLG-T1 Aberta/Bloqueante; indicadores XML permanentes; TISS-05 não liberado |
