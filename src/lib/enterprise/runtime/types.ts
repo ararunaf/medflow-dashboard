@@ -6,7 +6,7 @@
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: acesso exclusivo via TISS Runtime → TISSProviderPort (TISS-01) — estrutural.
+ * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + TISSProviderPort (TISS-01/02).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -25,6 +25,7 @@ import type { StorageManagerRuntimePort } from "../storage-manager-runtime/ports
 import type { StorageProviderPort } from "../storage-provider/ports/storage-provider-port";
 import type { AIProviderPort } from "../ai-provider/ports/ai-provider-port";
 import type { AIProviderRuntimePort } from "../ai-provider-runtime/ports/ai-provider-runtime-port";
+import type { TISSCatalogPort } from "../tiss-catalog/ports/tiss-catalog-port";
 import type { TISSProviderPort } from "../tiss-provider/ports/tiss-provider-port";
 import type { TISSRuntimePort } from "../tiss-runtime/ports/tiss-runtime-port";
 
@@ -50,6 +51,7 @@ export type EnterpriseRuntimeHealth = {
   searchProviderOk?: boolean;
   documentSearchRuntimeOk?: boolean;
   tissProviderOk?: boolean;
+  tissCatalogOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -112,6 +114,7 @@ export type EnterpriseRuntimeOptions = {
   searchProviderPort?: SearchProviderPort;
   documentSearchRuntimePort?: DocumentSearchRuntimePort;
   tissProviderPort?: TISSProviderPort;
+  tissCatalogPort?: TISSCatalogPort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -181,7 +184,10 @@ export interface EnterpriseRuntime {
   /** Resolve TISSProviderPort (TISS-01) — Adapter oficial. */
   getTISSProviderPort(): TISSProviderPort;
 
-  /** Resolve TISSRuntimePort (TISS-01). */
+  /** Resolve TISSCatalogPort (TISS-02) — Catálogo Canônico oficial. */
+  getTISSCatalogPort(): TISSCatalogPort;
+
+  /** Resolve TISSRuntimePort (TISS-01 / TISS-02). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

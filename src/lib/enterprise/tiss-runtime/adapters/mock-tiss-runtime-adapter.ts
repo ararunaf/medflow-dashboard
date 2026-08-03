@@ -3,6 +3,7 @@
  *
  * Determinístico in-process. Pode usar enterpriseDeps quando disponíveis.
  */
+import { createTISSCatalogPort } from "../../tiss-catalog/providers/create-tiss-catalog-port";
 import { createTISSProviderPort } from "../../tiss-provider/providers/create-tiss-provider-port";
 import { createCanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/providers/create-canonical-execution-orchestrator-port";
 import type { TISSRuntimePort } from "../ports/tiss-runtime-port";
@@ -43,6 +44,7 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
       getTISSProviderPort: () => createTISSProviderPort({ provider: "mock" }),
+      getTISSCatalogPort: () => createTISSCatalogPort({ provider: "mock" }),
     };
 
     this.delegate = new DefaultTISSRuntimeAdapter({

@@ -80,17 +80,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **61** |
+| **Total de ressalvas registradas** | **63** |
 | Prioridade **Alta** | **12** |
 | Prioridade **Média** | **18** |
-| Prioridade **Baixa** | **31** |
+| Prioridade **Baixa** | **33** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02) | **4** |
-| Criticidade **Não bloqueante** | **57** |
+| Criticidade **Não bloqueante** | **59** |
 | Status **Resolvida** | **6** |
 | Status **Planejada** | **3** |
-| Status **Aceita** | **51** |
+| Status **Aceita** | **53** |
 | Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **55** |
+| Pendentes (Aberta + Aceita + Planejada) | **57** |
 
 ### Bloqueantes — estado atual
 
@@ -101,8 +101,8 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | AER-GA02-B3 | Application 0/43 | **Resolvida** (ARCH-01 / decisão ECS-01) | Não |
 | AER-GA02-B4 | Staging Foundation pendente | **Aceita** | Não bloqueia SEARCH-01 (Gates posteriores não reemitiram NO-GO) |
 
-**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional para TISS-GATE-01.**  
-TISS-01 implementou o Enterprise TISS Provider/Runtime (estrutural). **AER-GA03-A4** permanece Aceita (dual-path produto vs enterprise — convergência pós TISS-GATE-01).  
+**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional para TISS-CATALOG-GATE-01.**  
+TISS-01/TISS-02 implementaram Provider/Runtime + Canonical Catalog (estrutural). **AER-GA03-A4** permanece Aceita (dual-path produto vs enterprise — convergência pós Gate).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).
 
 ---
@@ -173,6 +173,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-TISS-B1 | Logging/telemetria TISS estrutural | TISS-01 | Observability | Baixa | Não bloqueante | Aceita | Acoplar OBS (opcional) |
 | AER-TISS-B2 | Escape hatch `getTISSProviderPort()` | TISS-01 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-TISS-B3 | TISS-01 sem XML/dispatch reais | TISS-01 | Architecture | Baixa | Não bloqueante | Aceita | Sprints funcionais pós TISS-GATE-01 |
+| AER-TISS-B4 | Escape hatch `getTISSCatalogPort()` | TISS-02 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-TISS-B5 | Seed mínimo in-memory do Catalog | TISS-02 | Scalability | Baixa | Não bloqueante | Aceita | Carga por configuração futura |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -425,6 +427,20 @@ Cadeia oficial: Enterprise Runtime → TISS Runtime → `TISSProviderPort` → A
 - **Descrição:** `realTissExecuted=false` por design nesta sprint; sem XML, envio a operadoras, validações clínicas ou regras ANS.  
 - **Origem:** TISS-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Sprints funcionais pós TISS-GATE-01
 
+#### TISS-02 — AER-TISS-B4…B5
+Riscos **Baixa**, **Não bloqueantes**, status **Aceita**. Canonical Catalog como única fonte oficial de conhecimento TISS.  
+Cadeia oficial: Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → Adapter → `InMemoryTISSCatalog`. Sem lógica de operadora/versão.
+
+##### AER-TISS-B4
+- **Título:** Escape hatch `getTISSCatalogPort()` no Enterprise Runtime  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getTISSProviderPort` / AER-TISS-B2). Cadeia oficial permanece Runtime → TISS Runtime → TISSCatalogPort.  
+- **Origem:** TISS-02 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+##### AER-TISS-B5
+- **Título:** Seed mínimo in-memory do Canonical Catalog  
+- **Descrição:** TISS-02 carrega apenas exemplos mínimos (versões/guias/perfis/domínios/categorias/procedimentos/metadados). Catálogo completo será carregado por configuração futura — sem XML/operadoras.  
+- **Origem:** TISS-02 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Carga por configuração / TISS-03+
+
 #### STORAGE-GATE-01 (GO COM RESSALVAS)
 
 ##### AER-STG-A1
@@ -515,6 +531,14 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 4. **AER-GA03-A4** permanece **Aceita** (dual-path produto vs `enterprise/tiss-*` — convergência em TISS-CONV-01 pós Gate).  
 5. Roadmap liberado para **TISS-GATE-01** (certificação de desacoplamento). **Não iniciar funcionalidades TISS reais antes do Gate.**
 
+### Atualização TISS-02 (02/08/2026)
+
+1. **TISS-02 implementado** — Enterprise TISS Canonical Catalog (`TISSCatalogPort` + `InMemoryTISSCatalog`).  
+2. Cadeia oficial: Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `DefaultTISSCatalogAdapter` → `InMemoryTISSCatalog`.  
+3. Novas ressalvas Baixa: **AER-TISS-B4…B5** (Aceitas, não bloqueantes).  
+4. Sem lógica específica de operadora/versão; sem catálogo paralelo; sem bypass do Port.  
+5. Roadmap liberado para **TISS-CATALOG-GATE-01**. **Não iniciar XML TISS / Rule Packs (TISS-03) antes do Gate.**
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -524,3 +548,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 02/08/2026 | ARCH-DEBT-01 | Criação do registro oficial e consolidação inicial |
 | 02/08/2026 | SEARCH-GATE-01 | Certificação Search (GO); AER-SRCHG-B1…B4; liberação TISS-01 |
 | 02/08/2026 | TISS-01 | Enterprise TISS Provider/Runtime; AER-TISS-B1…B3; liberação TISS-GATE-01 |
+| 02/08/2026 | TISS-02 | Enterprise TISS Canonical Catalog; AER-TISS-B4…B5; liberação TISS-CATALOG-GATE-01 |

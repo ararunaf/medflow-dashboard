@@ -29,7 +29,9 @@ export type CanonicalTISSRuntimeSession = {
   providerReference?: CanonicalTISSProviderReference;
   executionId?: string;
   tissProviderAdapterId?: string;
+  tissCatalogId?: string;
   processedViaTISSProviderPort: boolean;
+  processedViaTISSCatalogPort?: boolean;
   realTissExecuted: boolean;
   createdAt: string;
   updatedAt: string;

@@ -76,6 +76,7 @@
     "enterprise:storage-provider:test": "npx tsx --test scripts/enterprise/tests/storage-provider-engine.test.ts",
     "enterprise:search-provider:test": "npx tsx --test scripts/enterprise/tests/search-provider-engine.test.ts",
     "enterprise:tiss-provider:test": "npx tsx --test scripts/enterprise/tests/tiss-provider-engine.test.ts",
+    "enterprise:tiss-catalog:test": "npx tsx --test scripts/enterprise/tests/tiss-catalog-engine.test.ts",
     "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
 
     "enterprise:ai-provider-runtime:test": "npx tsx --test scripts/enterprise/tests/ai-provider-runtime-engine.test.ts",

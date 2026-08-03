@@ -1,11 +1,13 @@
 /**
- * Tipos do TISS Runtime — TISS-01.
+ * Tipos do TISS Runtime — TISS-01 / TISS-02.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → TISSRuntimePort
+ *     → TISS Catalog Runtime → TISSCatalogPort → Catalog Adapter → Store
  *     → Canonical Execution Orchestrator → TISSProviderPort → Adapter
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
+import type { TISSCatalogPort } from "../../tiss-catalog/ports/tiss-catalog-port";
 import type { TISSProviderPort } from "../../tiss-provider/ports/tiss-provider-port";
 import type {
   CanonicalTISSRequest,
@@ -37,6 +39,7 @@ export type TISSRuntimeHealth = {
   message?: string;
   enterpriseOrchestratorOk?: boolean;
   tissProviderAdapterOk?: boolean;
+  tissCatalogOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -51,6 +54,7 @@ export type TISSRuntimeCapabilities = {
   usesEnterpriseRuntimePorts: boolean;
   usesCanonicalExecutionOrchestrator: boolean;
   usesTISSProviderPort: boolean;
+  usesTISSCatalogPort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -63,6 +67,8 @@ export type TISSRuntimeEnterpriseDeps = {
   getOrchestratorPort(): CanonicalExecutionOrchestratorPort;
   /** TISSProviderPort oficial — único caminho para Adapters TISS. */
   getTISSProviderPort(): TISSProviderPort;
+  /** TISSCatalogPort oficial — única fonte de conhecimento TISS (TISS-02). */
+  getTISSCatalogPort?: () => TISSCatalogPort;
 };
 
 export type GetTISSRuntimeSessionInput = {
