@@ -229,13 +229,13 @@ Nenhuma alteração de código Foundation foi realizada nesta Sprint.
 | Campo | Valor |
 |-------|-------|
 | Branch | `feat/inf-10-enterprise-scalability-runtime` |
-| Commit (docs INF-10A) | *(preenchido após commit)* |
-| Hash completo | *(preenchido após commit)* |
+| Commit (docs INF-10A) | `63748de` — docs(enterprise): certify INF-10A Scalability Runtime Gate |
+| Hash completo | `63748de49f3c0ca889e65993651fb072ce3e1f3d` (certificação); tip da branch após governança: ver `git rev-parse HEAD` |
 | URL | `https://github.com/ararunaf/medflow-dashboard/tree/feat/inf-10-enterprise-scalability-runtime` |
-| Push realizado | *(preenchido após push)* |
-| Hash local = remoto | *(preenchido após push)* |
-| Ahead | *(preenchido após push)* |
-| Behind | *(preenchido após push)* |
+| Push realizado | **Sim** |
+| Hash local = remoto | **Sim** (após push da tip) |
+| Ahead | **0** |
+| Behind | **0** |
 | Working Tree | limpa quanto aos artefatos INF-10A (`docs/audit/` permanece untracked externo) |
 
 ---
