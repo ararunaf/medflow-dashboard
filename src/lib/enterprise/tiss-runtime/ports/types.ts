@@ -1,5 +1,5 @@
 /**
- * Tipos do TISS Runtime — TISS-01…TISS-09.
+ * Tipos do TISS Runtime — TISS-01…TISS-10.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → TISSRuntimePort
@@ -8,7 +8,8 @@
  *     → XMLRuntimePort → XMLGenerationRuntimePort
  *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
  *     → XMLValidationRuntimePort → XSDRuntimePort
- *     → Store → Canonical XSD Runtime Result
+ *     → NamespaceRuntimePort
+ *     → Store → Canonical Namespace Runtime Result
  *     → Canonical Execution Orchestrator → TISSProviderPort → Adapter
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -29,6 +30,7 @@ import type { XMLSchemaRuntimePort } from "../../xml-schema-runtime/ports/xml-sc
 import type { XMLSerializerRuntimePort } from "../../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
+import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -59,6 +61,7 @@ export type TISSRuntimeHealth = {
   xmlSchemaRuntimeOk?: boolean;
   xmlValidationRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
+  namespaceRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -81,6 +84,7 @@ export type TISSRuntimeCapabilities = {
   usesXMLSchemaRuntimePort: boolean;
   usesXMLValidationRuntimePort: boolean;
   usesXSDRuntimePort: boolean;
+  usesNamespaceRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -109,6 +113,8 @@ export type TISSRuntimeEnterpriseDeps = {
   getXMLValidationRuntimePort(): XMLValidationRuntimePort;
   /** XSDRuntimePort oficial — infraestrutura canônica de gerenciamento de XSDs (TISS-09). */
   getXSDRuntimePort(): XSDRuntimePort;
+  /** NamespaceRuntimePort oficial — infraestrutura canônica de namespaces XML (TISS-10). */
+  getNamespaceRuntimePort(): NamespaceRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

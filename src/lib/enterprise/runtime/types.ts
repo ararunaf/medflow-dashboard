@@ -6,7 +6,7 @@
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + TISSProviderPort (TISS-01…09).
+ * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…10).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -35,6 +35,7 @@ import type { XMLSchemaRuntimePort } from "../xml-schema-runtime/ports/xml-schem
 import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
+import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -66,6 +67,7 @@ export type EnterpriseRuntimeHealth = {
   xmlSchemaRuntimeOk?: boolean;
   xmlValidationRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
+  namespaceRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -136,6 +138,7 @@ export type EnterpriseRuntimeOptions = {
   xmlSchemaRuntimePort?: XMLSchemaRuntimePort;
   xmlValidationRuntimePort?: XMLValidationRuntimePort;
   xsdRuntimePort?: XSDRuntimePort;
+  namespaceRuntimePort?: NamespaceRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -229,7 +232,10 @@ export interface EnterpriseRuntime {
   /** Resolve XSDRuntimePort (TISS-09) — Enterprise XSD Runtime. */
   getXSDRuntimePort(): XSDRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-09). */
+  /** Resolve NamespaceRuntimePort (TISS-10) — Enterprise Namespace Runtime. */
+  getNamespaceRuntimePort(): NamespaceRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-10). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

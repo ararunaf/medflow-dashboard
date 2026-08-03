@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * TISS-09 — Enterprise XSD Runtime
- * Prova: Application → XSDRuntimePort → Adapter → Factory → Registry → Store
- *         + XML Validation Runtime + XML Schema Runtime + XML Serializer Runtime
- *         + XML Generation Runtime + XML Runtime
+ * TISS-10 — Enterprise Namespace Runtime
+ * Prova: Application → NamespaceRuntimePort → Adapter → Factory → Registry → Store
+ *         + XSD Runtime + XML Validation Runtime + XML Schema Runtime
+ *         + XML Serializer Runtime + XML Generation Runtime + XML Runtime
  *         + TISS Runtime + Enterprise Runtime
- *         + Canonical XSD Runtime Request / Result
+ *         + Canonical Namespace Runtime Request / Result
  *         + prepare / health / capabilities
- *         + ausência de XSD oficial / validação real / XML TISS/ANS / bypass
+ *         + ausência de namespace oficial / ANS/TISS / XML TISS/ANS / bypass
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -15,26 +15,26 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  BUILTIN_XSD_RUNTIME_PROVIDER_COUNT,
-  DEFAULT_XSD_RUNTIME_ADAPTER_ID,
-  DEFAULT_XSD_RUNTIME_CAPABILITIES,
-  DefaultXSDRuntimeAdapter,
-  EnterpriseXSDRuntimeAdapter,
-  IN_MEMORY_XSD_RUNTIME_STORE_ID,
-  InMemoryXSDRuntimeStore,
-  MOCK_XSD_RUNTIME_ADAPTER_ID,
-  MockXSDRuntimeAdapter,
-  XSDRuntimeFactory,
-  XSDRuntimeProvider,
-  XSDRuntimeRegistry,
-  createDefaultXSDRuntimeRegistry,
-  createXSDRuntimeFactory,
-  createXSDRuntimePort,
-  getXSDRuntimeFactory,
-  getXSDRuntimeHealthSummary,
-  type XSDRuntimePort,
-} from "../../../src/lib/enterprise/xsd-runtime/index.ts";
-import { createNamespaceRuntimePort } from "../../../src/lib/enterprise/namespace-runtime/index.ts";
+  BUILTIN_NAMESPACE_RUNTIME_PROVIDER_COUNT,
+  DEFAULT_NAMESPACE_RUNTIME_ADAPTER_ID,
+  DEFAULT_NAMESPACE_RUNTIME_CAPABILITIES,
+  DefaultNamespaceRuntimeAdapter,
+  EnterpriseNamespaceRuntimeAdapter,
+  IN_MEMORY_NAMESPACE_RUNTIME_STORE_ID,
+  InMemoryNamespaceRuntimeStore,
+  MOCK_NAMESPACE_RUNTIME_ADAPTER_ID,
+  MockNamespaceRuntimeAdapter,
+  NamespaceRuntimeFactory,
+  NamespaceRuntimeProvider,
+  NamespaceRuntimeRegistry,
+  createDefaultNamespaceRuntimeRegistry,
+  createNamespaceRuntimeFactory,
+  createNamespaceRuntimePort,
+  getNamespaceRuntimeFactory,
+  getNamespaceRuntimeHealthSummary,
+  type NamespaceRuntimePort,
+} from "../../../src/lib/enterprise/namespace-runtime/index.ts";
+import { createXSDRuntimePort } from "../../../src/lib/enterprise/xsd-runtime/index.ts";
 import { createXMLValidationRuntimePort } from "../../../src/lib/enterprise/xml-validation-runtime/index.ts";
 import { createXMLSchemaRuntimePort } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
 import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-serializer-runtime/index.ts";
@@ -64,9 +64,9 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
-describe("TISS-09 XSDRuntimePort contract", () => {
+describe("TISS-10 NamespaceRuntimePort contract", () => {
   it("mock adapter satisfaz o Port e responde healthy", async () => {
-    const port: XSDRuntimePort = new MockXSDRuntimeAdapter({
+    const port: NamespaceRuntimePort = new MockNamespaceRuntimeAdapter({
       provider: "mock",
     });
     assert.equal(port.providerId, "mock");
@@ -75,100 +75,106 @@ describe("TISS-09 XSDRuntimePort contract", () => {
     assert.equal(health.ok, true);
     assert.equal(health.provider, "mock");
     assert.equal(health.status, "ready");
-    assert.equal(health.kind, "canonical-xsd-health");
+    assert.equal(health.kind, "canonical-namespace-health");
     assert.equal(health.runtimeReady, true);
 
     const caps = port.capabilities();
-    assert.equal(caps.adapterId, MOCK_XSD_RUNTIME_ADAPTER_ID);
-    assert.equal(caps.supportsCanonicalXsd, true);
+    assert.equal(caps.adapterId, MOCK_NAMESPACE_RUNTIME_ADAPTER_ID);
+    assert.equal(caps.supportsCanonicalNamespace, true);
     assert.equal(caps.runtimeReady, true);
-    assert.equal(caps.officialXsdLoaded, false);
-    assert.equal(caps.realXsdLoaded, false);
-    assert.equal(caps.realValidationAvailable, false);
     assert.equal(caps.officialNamespacesLoaded, false);
-    assert.equal(caps.officialSchemasLoaded, false);
-    assert.equal(caps.schemaParsingEnabled, false);
-    assert.equal(caps.schemaValidationEnabled, false);
-    assert.equal(caps.implementsOfficialXsd, false);
-    assert.equal(caps.implementsXsdValidation, false);
-    assert.equal(caps.implementsRealXmlValidation, false);
+    assert.equal(caps.realNamespacesLoaded, false);
+    assert.equal(caps.namespaceResolutionEnabled, false);
+    assert.equal(caps.namespaceValidationEnabled, false);
+    assert.equal(caps.officialAnsNamespacesLoaded, false);
+    assert.equal(caps.officialTissNamespacesLoaded, false);
+    assert.equal(caps.implementsOfficialNamespaces, false);
+    assert.equal(caps.implementsNamespaceValidation, false);
+    assert.equal(caps.implementsRealNamespaceResolution, false);
     assert.equal(caps.implementsOperatorDispatch, false);
     assert.equal(caps.knowsOperatorOrCooperative, false);
     assert.equal(caps.knowsContract, false);
     assert.equal(caps.knowsTenant, false);
     assert.equal(caps.knowsTissPattern, false);
-    assert.equal(caps.canonical.kind, "canonical-xsd-capabilities");
+    assert.equal(caps.canonical.kind, "canonical-namespace-capabilities");
     assert.equal(caps.canonical.runtimeReady, true);
-    assert.equal(caps.canonical.officialXsdLoaded, false);
+    assert.equal(caps.canonical.officialNamespacesLoaded, false);
   });
 
-  it("DefaultXSDRuntimeAdapter é o adapter enterprise oficial", () => {
-    assert.equal(EnterpriseXSDRuntimeAdapter, DefaultXSDRuntimeAdapter);
-    const port = new DefaultXSDRuntimeAdapter({
+  it("DefaultNamespaceRuntimeAdapter é o adapter enterprise oficial", () => {
+    assert.equal(EnterpriseNamespaceRuntimeAdapter, DefaultNamespaceRuntimeAdapter);
+    const port = new DefaultNamespaceRuntimeAdapter({
       provider: "enterprise",
     });
     assert.equal(port.providerId, "enterprise");
-    assert.equal(port.capabilities().adapterId, DEFAULT_XSD_RUNTIME_ADAPTER_ID);
+    assert.equal(port.capabilities().adapterId, DEFAULT_NAMESPACE_RUNTIME_ADAPTER_ID);
   });
 
   it("provider default resolve enterprise", () => {
-    const port = createXSDRuntimePort();
+    const port = createNamespaceRuntimePort();
     assert.equal(port.providerId, "enterprise");
-    assert.equal(XSDRuntimeProvider.create().providerId, "enterprise");
+    assert.equal(NamespaceRuntimeProvider.create().providerId, "enterprise");
   });
 
   it("factory resolve mock / test / default / enterprise", () => {
-    const factory = createXSDRuntimeFactory();
+    const factory = createNamespaceRuntimeFactory();
     assert.equal(factory.create({ provider: "mock" }).providerId, "mock");
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
     assert.equal(
-      getXSDRuntimeFactory().getRegistry().list().length,
-      BUILTIN_XSD_RUNTIME_PROVIDER_COUNT,
+      getNamespaceRuntimeFactory().getRegistry().list().length,
+      BUILTIN_NAMESPACE_RUNTIME_PROVIDER_COUNT,
     );
   });
 
   it("prepare → get → list com flags estruturais obrigatórias", async () => {
+    const xsd = createXSDRuntimePort({ provider: "enterprise" });
     const validation = createXMLValidationRuntimePort({ provider: "enterprise" });
     const schema = createXMLSchemaRuntimePort({ provider: "enterprise" });
     const serializer = createXMLSerializerRuntimePort({ provider: "enterprise" });
-    const serialized = await serializer.serialize({ documentId: "doc-xsd-01" });
+    const serialized = await serializer.serialize({ documentId: "doc-ns-01" });
     const registered = await schema.register({
-      documentId: "doc-xsd-01",
+      documentId: "doc-ns-01",
       serializeResultId: serialized.result?.resultId,
     });
     const validated = await validation.validate({
-      documentId: "doc-xsd-01",
+      documentId: "doc-ns-01",
+      schemaResultId: registered.result?.resultId,
+      serializeResultId: serialized.result?.resultId,
+    });
+    const preparedXsd = await xsd.prepare({
+      documentId: "doc-ns-01",
+      validationResultId: validated.result?.resultId,
       schemaResultId: registered.result?.resultId,
       serializeResultId: serialized.result?.resultId,
     });
 
-    const port = createXSDRuntimePort({ provider: "enterprise" });
+    const port = createNamespaceRuntimePort({ provider: "enterprise" });
     const prepared = await port.prepare({
-      documentId: "doc-xsd-01",
+      documentId: "doc-ns-01",
+      xsdResultId: preparedXsd.result?.resultId,
       validationResultId: validated.result?.resultId,
       schemaResultId: registered.result?.resultId,
       serializeResultId: serialized.result?.resultId,
       request: {
-        kind: "canonical-xsd-runtime-request",
-        name: "Foundation XSD",
-        structuralNotes: "TISS-09 structural only",
+        kind: "canonical-namespace-runtime-request",
+        name: "Foundation Namespace",
+        structuralNotes: "TISS-10 structural only",
       },
     });
 
     assert.equal(prepared.ok, true);
     assert.ok(prepared.result?.resultId);
-    assert.equal(prepared.result?.officialXsdLoaded, false);
-    assert.equal(prepared.result?.realXsdLoaded, false);
-    assert.equal(prepared.result?.realValidationAvailable, false);
     assert.equal(prepared.result?.officialNamespacesLoaded, false);
-    assert.equal(prepared.result?.officialSchemasLoaded, false);
-    assert.equal(prepared.result?.schemaParsingEnabled, false);
-    assert.equal(prepared.result?.schemaValidationEnabled, false);
+    assert.equal(prepared.result?.realNamespacesLoaded, false);
+    assert.equal(prepared.result?.namespaceResolutionEnabled, false);
+    assert.equal(prepared.result?.namespaceValidationEnabled, false);
+    assert.equal(prepared.result?.officialAnsNamespacesLoaded, false);
+    assert.equal(prepared.result?.officialTissNamespacesLoaded, false);
     assert.equal(prepared.result?.runtimeReady, true);
     assert.equal(prepared.result?.status, "prepared");
-    assert.equal(prepared.result?.schema?.kind, "canonical-xsd-schema");
+    assert.equal(prepared.result?.definition?.kind, "canonical-namespace-definition");
 
     const loaded = await port.getResult({ resultId: prepared.result!.resultId });
     assert.equal(loaded.ok, true);
@@ -177,26 +183,28 @@ describe("TISS-09 XSDRuntimePort contract", () => {
     const listed = await port.listResults();
     assert.equal(listed.ok, true);
     assert.ok(listed.results.length >= 1);
-    assert.equal(listed.statistics?.officialXsdLoadedCount, 0);
-    assert.equal(listed.statistics?.realXsdLoadedCount, 0);
-    assert.equal(listed.statistics?.realValidationAvailableCount, 0);
+    assert.equal(listed.statistics?.officialNamespacesLoadedCount, 0);
+    assert.equal(listed.statistics?.realNamespacesLoadedCount, 0);
+    assert.equal(listed.statistics?.namespaceResolutionEnabledCount, 0);
+    assert.equal(listed.statistics?.officialAnsNamespacesLoadedCount, 0);
+    assert.equal(listed.statistics?.officialTissNamespacesLoadedCount, 0);
   });
 
-  it("InMemory store oficial e estatísticas zeradas para XSD real", () => {
-    const store = new InMemoryXSDRuntimeStore();
-    assert.equal(store.storeId, IN_MEMORY_XSD_RUNTIME_STORE_ID);
+  it("InMemory store oficial e estatísticas zeradas para namespace real", () => {
+    const store = new InMemoryNamespaceRuntimeStore();
+    assert.equal(store.storeId, IN_MEMORY_NAMESPACE_RUNTIME_STORE_ID);
     const stats = store.statistics();
-    assert.equal(stats.kind, "canonical-xsd-statistics");
-    assert.equal(stats.officialXsdLoadedCount, 0);
-    assert.equal(stats.realXsdLoadedCount, 0);
+    assert.equal(stats.kind, "canonical-namespace-statistics");
     assert.equal(stats.officialNamespacesLoadedCount, 0);
-    assert.equal(stats.schemaParsingEnabledCount, 0);
-    assert.equal(DEFAULT_XSD_RUNTIME_CAPABILITIES.runtimeReady, true);
-    assert.equal(DEFAULT_XSD_RUNTIME_CAPABILITIES.officialXsdLoaded, false);
+    assert.equal(stats.realNamespacesLoadedCount, 0);
+    assert.equal(stats.officialAnsNamespacesLoadedCount, 0);
+    assert.equal(stats.namespaceValidationEnabledCount, 0);
+    assert.equal(DEFAULT_NAMESPACE_RUNTIME_CAPABILITIES.runtimeReady, true);
+    assert.equal(DEFAULT_NAMESPACE_RUNTIME_CAPABILITIES.officialNamespacesLoaded, false);
   });
 
   it("retry recupera falha transitória", async () => {
-    const port = new DefaultXSDRuntimeAdapter({
+    const port = new DefaultNamespaceRuntimeAdapter({
       provider: "enterprise",
       failAttempts: 1,
       defaultRetryCount: 1,
@@ -208,7 +216,7 @@ describe("TISS-09 XSDRuntimePort contract", () => {
   });
 
   it("AbortSignal cancela operação", async () => {
-    const port = createXSDRuntimePort({ provider: "enterprise" });
+    const port = createNamespaceRuntimePort({ provider: "enterprise" });
     const controller = new AbortController();
     controller.abort();
     const result = await port.prepare({
@@ -216,35 +224,36 @@ describe("TISS-09 XSDRuntimePort contract", () => {
       signal: controller.signal,
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "XSD_RUNTIME_CANCELLED");
+    assert.equal(result.code, "NAMESPACE_RUNTIME_CANCELLED");
   });
 
   it("registry/factory sem fallback silencioso", () => {
-    const registry = createDefaultXSDRuntimeRegistry();
+    const registry = createDefaultNamespaceRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, BUILTIN_XSD_RUNTIME_PROVIDER_COUNT);
-    assert.ok(registry instanceof XSDRuntimeRegistry);
+    assert.equal(registry.snapshot().count, BUILTIN_NAMESPACE_RUNTIME_PROVIDER_COUNT);
+    assert.ok(registry instanceof NamespaceRuntimeRegistry);
 
-    const factory = new XSDRuntimeFactory({ registry });
+    const factory = new NamespaceRuntimeFactory({ registry });
     assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("demo health summary depende apenas do Port", async () => {
-    const port = createXSDRuntimePort({ provider: "enterprise" });
-    const summary = await getXSDRuntimeHealthSummary(port);
+    const port = createNamespaceRuntimePort({ provider: "enterprise" });
+    const summary = await getNamespaceRuntimeHealthSummary(port);
     assert.equal(summary.architectureLayer, "application");
     assert.equal(summary.health.ok, true);
-    assert.equal(summary.info.providerType, "XSD_RUNTIME");
+    assert.equal(summary.info.providerType, "NAMESPACE_RUNTIME");
     assert.equal(summary.capabilities.runtimeReady, true);
-    assert.equal(summary.capabilities.officialXsdLoaded, false);
-    assert.equal(summary.capabilities.realValidationAvailable, false);
+    assert.equal(summary.capabilities.officialNamespacesLoaded, false);
+    assert.equal(summary.capabilities.namespaceResolutionEnabled, false);
   });
 });
 
-describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Schema / Validation / XSD", () => {
-  it("Enterprise Runtime expõe XSD Runtime + cadeia XML", async () => {
+describe("TISS-10 cadeia Enterprise / TISS / XML / … / XSD / Namespace", () => {
+  it("Enterprise Runtime expõe Namespace Runtime + cadeia XML/XSD", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
+    assert.equal(runtime.getNamespaceRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getXSDRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getXMLValidationRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getXMLSchemaRuntimePort().providerId, "enterprise");
@@ -252,6 +261,7 @@ describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     assert.equal(runtime.getXMLGenerationRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getXMLRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getTISSRuntimePort().providerId, "default");
+    assert.equal(runtime.getTISSRuntimePort().capabilities().usesNamespaceRuntimePort, true);
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesXSDRuntimePort, true);
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLValidationRuntimePort, true);
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLSchemaRuntimePort, true);
@@ -262,6 +272,7 @@ describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
+    assert.equal(health.namespaceRuntimeOk, true);
     assert.equal(health.xsdRuntimeOk, true);
     assert.equal(health.xmlValidationRuntimeOk, true);
     assert.equal(health.xmlSchemaRuntimeOk, true);
@@ -271,7 +282,7 @@ describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     assert.equal(health.tissRuntimeOk, true);
   });
 
-  it("fluxo oficial: TISS → XML → Generation → Serializer → Schema → Validation → XSD", async () => {
+  it("fluxo oficial: TISS → XML → … → Validation → XSD → Namespace", async () => {
     const orchestrator = createCanonicalExecutionOrchestratorPort({ provider: "mock" });
     const tissProvider = createTISSProviderPort({ provider: "enterprise" });
     const catalog = createTISSCatalogPort({ provider: "enterprise" });
@@ -315,8 +326,8 @@ describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
       mode: "structural-process",
       metadata: {
         kind: "canonical-tiss-metadata",
-        sessionId: "sess-tiss-09",
-        correlationId: "corr-tiss-09",
+        sessionId: "sess-tiss-10",
+        correlationId: "corr-tiss-10",
       },
     });
 
@@ -334,28 +345,29 @@ describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     assert.equal(session.session?.processedViaXMLSchemaRuntimePort, true);
     assert.equal(session.session?.processedViaXMLValidationRuntimePort, true);
     assert.equal(session.session?.processedViaXSDRuntimePort, true);
+    assert.equal(session.session?.processedViaNamespaceRuntimePort, true);
     assert.ok(session.session?.xmlGenerationId);
     assert.ok(session.session?.xmlGenerationResultId);
     assert.ok(session.session?.xmlSerializeResultId);
     assert.ok(session.session?.xmlSchemaResultId);
     assert.ok(session.session?.xmlValidationResultId);
     assert.ok(session.session?.xsdResultId);
+    assert.ok(session.session?.namespaceResultId);
 
-    const xsdResult = await xsdRuntime.getResult({
-      resultId: session.session!.xsdResultId!,
+    const nsResult = await namespaceRuntime.getResult({
+      resultId: session.session!.namespaceResultId!,
     });
-    assert.equal(xsdResult.ok, true);
-    assert.equal(xsdResult.result?.officialXsdLoaded, false);
-    assert.equal(xsdResult.result?.realXsdLoaded, false);
-    assert.equal(xsdResult.result?.realValidationAvailable, false);
-    assert.equal(xsdResult.result?.officialNamespacesLoaded, false);
-    assert.equal(xsdResult.result?.officialSchemasLoaded, false);
-    assert.equal(xsdResult.result?.schemaParsingEnabled, false);
-    assert.equal(xsdResult.result?.schemaValidationEnabled, false);
-    assert.equal(xsdResult.result?.runtimeReady, true);
+    assert.equal(nsResult.ok, true);
+    assert.equal(nsResult.result?.officialNamespacesLoaded, false);
+    assert.equal(nsResult.result?.realNamespacesLoaded, false);
+    assert.equal(nsResult.result?.namespaceResolutionEnabled, false);
+    assert.equal(nsResult.result?.namespaceValidationEnabled, false);
+    assert.equal(nsResult.result?.officialAnsNamespacesLoaded, false);
+    assert.equal(nsResult.result?.officialTissNamespacesLoaded, false);
+    assert.equal(nsResult.result?.runtimeReady, true);
   });
 
-  it("TISS Runtime consome exclusivamente XSDRuntimePort (sem adapter paralelo)", async () => {
+  it("TISS Runtime consome exclusivamente NamespaceRuntimePort (sem adapter paralelo)", async () => {
     const adapterSource = readFileSync(
       join(
         repoRoot,
@@ -363,18 +375,18 @@ describe("TISS-09 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
       ),
       "utf8",
     );
-    assert.match(adapterSource, /getXSDRuntimePort/);
-    assert.match(adapterSource, /canonical-xsd-runtime-request/);
-    assert.equal(/new DefaultXSDRuntimeAdapter/.test(adapterSource), false);
-    assert.equal(/InMemoryXSDRuntimeStore/.test(adapterSource), false);
+    assert.match(adapterSource, /getNamespaceRuntimePort/);
+    assert.match(adapterSource, /canonical-namespace-runtime-request/);
+    assert.equal(/new DefaultNamespaceRuntimeAdapter/.test(adapterSource), false);
+    assert.equal(/InMemoryNamespaceRuntimeStore/.test(adapterSource), false);
     assert.equal(/ansTISS/i.test(adapterSource), false);
-    assert.equal(/\.xsd["']/.test(adapterSource), false);
+    assert.equal(/xmlns:ans/i.test(adapterSource), false);
   });
 });
 
-describe("TISS-09 auditoria — sem bypass / sem XSD oficial / sem validação real / sem XML TISS/ANS", () => {
-  it("módulo xsd-runtime não contém backends / operadoras / XSD oficial / validação real", () => {
-    const moduleDir = join(repoRoot, "src/lib/enterprise/xsd-runtime");
+describe("TISS-10 auditoria — sem bypass / sem namespace oficial / sem XML TISS/ANS", () => {
+  it("módulo namespace-runtime não contém backends / operadoras / namespaces oficiais", () => {
+    const moduleDir = join(repoRoot, "src/lib/enterprise/namespace-runtime");
     const files = collectTsFiles(moduleDir);
     assert.ok(files.length > 0);
 
@@ -424,17 +436,17 @@ describe("TISS-09 auditoria — sem bypass / sem XSD oficial / sem validação r
     }
   });
 
-  it("Enterprise Runtime wiring inclui createXSDRuntimePort", () => {
+  it("Enterprise Runtime wiring inclui createNamespaceRuntimePort", () => {
     const enterpriseRuntime = readFileSync(
       join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
       "utf8",
     );
-    assert.match(enterpriseRuntime, /createXSDRuntimePort/);
-    assert.match(enterpriseRuntime, /getXSDRuntimePort/);
-    assert.match(enterpriseRuntime, /xsdRuntimeOk/);
+    assert.match(enterpriseRuntime, /createNamespaceRuntimePort/);
+    assert.match(enterpriseRuntime, /getNamespaceRuntimePort/);
+    assert.match(enterpriseRuntime, /namespaceRuntimeOk/);
   });
 
-  it("TISS Runtime wiring inclui getXSDRuntimePort", () => {
+  it("TISS Runtime wiring inclui getNamespaceRuntimePort", () => {
     const tissAdapter = readFileSync(
       join(
         repoRoot,
@@ -442,27 +454,28 @@ describe("TISS-09 auditoria — sem bypass / sem XSD oficial / sem validação r
       ),
       "utf8",
     );
-    assert.match(tissAdapter, /getXSDRuntimePort/);
-    assert.match(tissAdapter, /usesXSDRuntimePort/);
-    assert.match(tissAdapter, /processedViaXSDRuntimePort/);
-    assert.equal(/new DefaultXSDRuntimeAdapter/.test(tissAdapter), false);
+    assert.match(tissAdapter, /getNamespaceRuntimePort/);
+    assert.match(tissAdapter, /usesNamespaceRuntimePort/);
+    assert.match(tissAdapter, /processedViaNamespaceRuntimePort/);
+    assert.equal(/new DefaultNamespaceRuntimeAdapter/.test(tissAdapter), false);
   });
 
-  it("XML Runtime / Generation / Serializer / Schema / Validation modules não importam XSD Runtime", () => {
+  it("XML Runtime / Generation / Serializer / Schema / Validation / XSD modules não importam Namespace Runtime", () => {
     for (const moduleName of [
       "xml-runtime",
       "xml-generation-runtime",
       "xml-serializer-runtime",
       "xml-schema-runtime",
       "xml-validation-runtime",
+      "xsd-runtime",
     ]) {
       const moduleDir = join(repoRoot, "src/lib/enterprise", moduleName);
       for (const file of collectTsFiles(moduleDir)) {
         const source = readFileSync(file, "utf8");
         assert.equal(
-          /xsd-runtime/.test(source),
+          /namespace-runtime/.test(source),
           false,
-          `${file} must not import xsd-runtime`,
+          `${file} must not import namespace-runtime`,
         );
       }
     }
@@ -471,29 +484,37 @@ describe("TISS-09 auditoria — sem bypass / sem XSD oficial / sem validação r
   it("flags de fundação permanecem estruturais na cadeia", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
+    const ns = runtime.getNamespaceRuntimePort();
     const xsd = runtime.getXSDRuntimePort();
     const validation = runtime.getXMLValidationRuntimePort();
     const schema = runtime.getXMLSchemaRuntimePort();
     const serializer = runtime.getXMLSerializerRuntimePort();
-    const serialized = await serializer.serialize({ documentId: "doc-flag-xsd" });
+    const serialized = await serializer.serialize({ documentId: "doc-flag-ns" });
     const registered = await schema.register({
-      documentId: "doc-flag-xsd",
+      documentId: "doc-flag-ns",
       serializeResultId: serialized.result?.resultId,
     });
     const validated = await validation.validate({
-      documentId: "doc-flag-xsd",
+      documentId: "doc-flag-ns",
       schemaResultId: registered.result?.resultId,
       serializeResultId: serialized.result?.resultId,
     });
-    const prepared = await xsd.prepare({
-      documentId: "doc-flag-xsd",
+    const preparedXsd = await xsd.prepare({
+      documentId: "doc-flag-ns",
       validationResultId: validated.result?.resultId,
       schemaResultId: registered.result?.resultId,
       serializeResultId: serialized.result?.resultId,
     });
-    assert.equal(prepared.result?.officialXsdLoaded, false);
-    assert.equal(prepared.result?.realXsdLoaded, false);
-    assert.equal(prepared.result?.realValidationAvailable, false);
+    const prepared = await ns.prepare({
+      documentId: "doc-flag-ns",
+      xsdResultId: preparedXsd.result?.resultId,
+      validationResultId: validated.result?.resultId,
+      schemaResultId: registered.result?.resultId,
+      serializeResultId: serialized.result?.resultId,
+    });
+    assert.equal(prepared.result?.officialNamespacesLoaded, false);
+    assert.equal(prepared.result?.realNamespacesLoaded, false);
+    assert.equal(prepared.result?.namespaceResolutionEnabled, false);
     assert.equal(prepared.result?.runtimeReady, true);
 
     const tiss = runtime.getTISSRuntimePort();
@@ -502,24 +523,24 @@ describe("TISS-09 auditoria — sem bypass / sem XSD oficial / sem validação r
       mode: "structural-process",
       metadata: {
         kind: "canonical-tiss-metadata",
-        sessionId: "sess-flag-09",
+        sessionId: "sess-flag-10",
       },
     });
     assert.equal(processed.ok, true);
     const session = await tiss.getSession({
       runtimeSessionId: processed.runtimeSessionId!,
     });
+    assert.equal(session.session?.processedViaNamespaceRuntimePort, true);
     assert.equal(session.session?.processedViaXSDRuntimePort, true);
-    const xsdLoaded = await xsd.getResult({
-      resultId: session.session!.xsdResultId!,
+    const nsLoaded = await ns.getResult({
+      resultId: session.session!.namespaceResultId!,
     });
-    assert.equal(xsdLoaded.result?.officialXsdLoaded, false);
-    assert.equal(xsdLoaded.result?.realXsdLoaded, false);
-    assert.equal(xsdLoaded.result?.realValidationAvailable, false);
-    assert.equal(xsdLoaded.result?.officialNamespacesLoaded, false);
-    assert.equal(xsdLoaded.result?.officialSchemasLoaded, false);
-    assert.equal(xsdLoaded.result?.schemaParsingEnabled, false);
-    assert.equal(xsdLoaded.result?.schemaValidationEnabled, false);
-    assert.equal(xsdLoaded.result?.runtimeReady, true);
+    assert.equal(nsLoaded.result?.officialNamespacesLoaded, false);
+    assert.equal(nsLoaded.result?.realNamespacesLoaded, false);
+    assert.equal(nsLoaded.result?.namespaceResolutionEnabled, false);
+    assert.equal(nsLoaded.result?.namespaceValidationEnabled, false);
+    assert.equal(nsLoaded.result?.officialAnsNamespacesLoaded, false);
+    assert.equal(nsLoaded.result?.officialTissNamespacesLoaded, false);
+    assert.equal(nsLoaded.result?.runtimeReady, true);
   });
 });

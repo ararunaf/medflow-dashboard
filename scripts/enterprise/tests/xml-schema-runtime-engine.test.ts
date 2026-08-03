@@ -35,6 +35,7 @@ import {
 } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
 import { createXMLValidationRuntimePort } from "../../../src/lib/enterprise/xml-validation-runtime/index.ts";
 import { createXSDRuntimePort } from "../../../src/lib/enterprise/xsd-runtime/index.ts";
+import { createNamespaceRuntimePort } from "../../../src/lib/enterprise/namespace-runtime/index.ts";
 import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-serializer-runtime/index.ts";
 import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
@@ -279,6 +280,7 @@ describe("TISS-07 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     const xmlSchemaRuntime = createXMLSchemaRuntimePort({ provider: "enterprise" });
     const xmlValidationRuntime = createXMLValidationRuntimePort({ provider: "enterprise" });
     const xsdRuntime = createXSDRuntimePort({ provider: "enterprise" });
+    const namespaceRuntime = createNamespaceRuntimePort({ provider: "enterprise" });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps: {
@@ -300,6 +302,7 @@ describe("TISS-07 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
         getXMLSchemaRuntimePort: () => xmlSchemaRuntime,
         getXMLValidationRuntimePort: () => xmlValidationRuntime,
         getXSDRuntimePort: () => xsdRuntime,
+        getNamespaceRuntimePort: () => namespaceRuntime,
       },
     });
 

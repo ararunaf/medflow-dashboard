@@ -116,7 +116,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **TISS-XML-GATE-01A** reemite certificação oficial: **GO COM RESSALVAS** (ressalvas Baixa **AER-XMLRT-B1…B3**).  
 **AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
 **AER-RPE-B2** / **AER-TISSCG-B1** / **AER-XMLG-T1** permanecem Resolvidas.  
-**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3**, **AER-XMLGEN-B1…B2**, **AER-XMLSER-B1…B2**, **AER-XMLSCH-B1…B2**, **AER-XMLVAL-B1…B2**, **AER-XSD-B1…B2** permanecem Aceitas (não bloqueantes / baixa prioridade).  
+**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3**, **AER-XMLGEN-B1…B2**, **AER-XMLSER-B1…B2**, **AER-XMLSCH-B1…B2**, **AER-XMLVAL-B1…B2**, **AER-XSD-B1…B2**, **AER-NS-B1…B2** permanecem Aceitas (não bloqueantes / baixa prioridade).  
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).  
@@ -128,7 +128,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 **TISS-08** adiciona Enterprise XML Validation Runtime com ressalvas Baixa **AER-XMLVAL-B1…B2**.  
 **TISS-VALIDATION-GATE-01** reconfirma certificação do XML Validation Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
 **TISS-09** adiciona Enterprise XSD Runtime com ressalvas Baixa **AER-XSD-B1…B2**.  
-**TISS-XSD-GATE-01** reconfirma certificação do XSD Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XSD-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).
+**TISS-XSD-GATE-01** reconfirma certificação do XSD Runtime: **GO COM RESSALVAS** (sem novas ressalvas; **AER-XSD-B1…B2** / **AER-XMLVAL-B1…B2** / **AER-XMLSCH-B1…B2** / **AER-XMLSER-B1…B2** / **AER-XMLGEN-B1…B2** / **AER-XMLRT-B1…B3** reconfirmadas Aceitas).  
+**TISS-10** adiciona Enterprise Namespace Runtime com ressalvas Baixa **AER-NS-B1…B2**.
 
 ### XML Enterprise Dashboard (indicadores permanentes)
 
@@ -241,6 +242,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-XMLVAL-B2 | Barrel exporta Store + `getStore()` no Adapter (Validation) | TISS-08 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-XSD-B1 | Escape hatch `getXSDRuntimePort()` | TISS-09 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-XSD-B2 | Barrel exporta Store + `getStore()` no Adapter (XSD) | TISS-09 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
+| AER-NS-B1 | Escape hatch `getNamespaceRuntimePort()` | TISS-10 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-NS-B2 | Barrel exporta Store + `getStore()` no Adapter (Namespace) | TISS-10 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -1025,6 +1028,29 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 12. **Roadmap:** **TISS-10 — Enterprise Namespace Runtime oficialmente liberada**.  
 13. Documento: `docs/enterprise/TISS-XSD-GATE-01_CERTIFICATION.md`.
 
+### Atualização TISS-10 (03/08/2026)
+
+1. **Módulo implementado:** `src/lib/enterprise/namespace-runtime/` (Port / Types / Canonical Models / Identity / Capabilities / Provider / Factory / Registry / Default+Mock Adapters / InMemory Store / Demo / Health / Barrel).  
+2. **Cadeia oficial estendida:** Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → `XMLGenerationRuntimePort` → `XMLSerializerRuntimePort` → `XMLSchemaRuntimePort` → `XMLValidationRuntimePort` → `XSDRuntimePort` → `NamespaceRuntimePort` → Adapter → Store → Canonical Namespace Runtime Result.  
+3. **Flags estruturais hardcoded:** `officialNamespacesLoaded = false` / `realNamespacesLoaded = false` / `namespaceResolutionEnabled = false` / `namespaceValidationEnabled = false` / `officialAnsNamespacesLoaded = false` / `officialTissNamespacesLoaded = false` / `runtimeReady = true`.  
+4. **Sem** namespace oficial / namespace ANS / namespace TISS / XML TISS/ANS / XSD oficial / validação / SOAP / Reader / Parser / Validator / operadora / contrato / tenant.  
+5. **Sem** Provider paralelo / Adapter paralelo / Runtime paralelo / bypass.  
+6. **Novas ressalvas Baixa:** **AER-NS-B1…B2** (Aceitas, não bloqueantes).  
+7. **Cobertura:** `enterprise:namespace-runtime:test`.  
+8. **Sprint encerrada** com parecer **GO COM RESSALVAS**.  
+9. Documentos: `TISS-10_ENTERPRISE_NAMESPACE_RUNTIME.md`, `TISS-10_NAMESPACE_RUNTIME_ARCHITECTURE.md`, `TISS-10_NAMESPACE_RUNTIME_CERTIFICATION.md`.  
+10. **Roadmap:** **TISS-NAMESPACE-GATE-01** oficialmente liberada (não iniciada nesta Sprint).
+
+#### AER-NS-B1
+- **Título:** Escape hatch `getNamespaceRuntimePort()`  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getXSDRuntimePort` / AER-XSD-B1). Cadeia oficial permanece Runtime → TISS Runtime → XMLRuntimePort → … → XSDRuntimePort → NamespaceRuntimePort.  
+- **Origem:** TISS-10 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+#### AER-NS-B2
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Namespace)  
+- **Descrição:** `namespace-runtime/index.ts` reexporta `InMemoryNamespaceRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-XSD-B2**.  
+- **Origem:** TISS-10 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -1055,3 +1081,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-VALIDATION-GATE-01 | Certificação XML Validation Runtime (**GO COM RESSALVAS**); AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-09 liberado |
 | 03/08/2026 | TISS-09 | Enterprise XSD Runtime; AER-XSD-B1…B2; liberação TISS-XSD-GATE-01 |
 | 03/08/2026 | TISS-XSD-GATE-01 | Certificação XSD Runtime (**GO COM RESSALVAS**); AER-XSD-B1…B2 / AER-XMLVAL-B1…B2 / AER-XMLSCH-B1…B2 / AER-XMLSER-B1…B2 / AER-XMLGEN-B1…B2 / AER-XMLRT-B1…B3 reconfirmadas; nenhuma nova AER; TISS-09 encerrada; TISS-10 liberado |
+| 03/08/2026 | TISS-10 | Enterprise Namespace Runtime; AER-NS-B1…B2; liberação TISS-NAMESPACE-GATE-01 |

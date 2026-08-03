@@ -84,6 +84,7 @@
     "enterprise:xml-schema-runtime:test": "npx tsx --test scripts/enterprise/tests/xml-schema-runtime-engine.test.ts",
     "enterprise:xml-validation-runtime:test": "npx tsx --test scripts/enterprise/tests/xml-validation-runtime-engine.test.ts",
     "enterprise:xsd-runtime:test": "npx tsx --test scripts/enterprise/tests/xsd-runtime-engine.test.ts",
+    "enterprise:namespace-runtime:test": "npx tsx --test scripts/enterprise/tests/namespace-runtime-engine.test.ts",
     "enterprise:tiss-conv-01:test": "npx tsx --test scripts/enterprise/tests/tiss-conv-01-capture-convergence.test.ts",
     "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
 

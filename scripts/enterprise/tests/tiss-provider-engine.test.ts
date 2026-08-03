@@ -38,6 +38,7 @@ import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-
 import { createXMLSchemaRuntimePort } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
 import { createXMLValidationRuntimePort } from "../../../src/lib/enterprise/xml-validation-runtime/index.ts";
 import { createXSDRuntimePort } from "../../../src/lib/enterprise/xsd-runtime/index.ts";
+import { createNamespaceRuntimePort } from "../../../src/lib/enterprise/namespace-runtime/index.ts";
 import { createXMLRuntimePort } from "../../../src/lib/enterprise/xml-runtime/index.ts";
 import {
   createEnterpriseRuntime,
@@ -265,6 +266,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
     const xmlSchemaRuntime = createXMLSchemaRuntimePort({ provider: "enterprise" });
     const xmlValidationRuntime = createXMLValidationRuntimePort({ provider: "enterprise" });
     const xsdRuntime = createXSDRuntimePort({ provider: "enterprise" });
+    const namespaceRuntime = createNamespaceRuntimePort({ provider: "enterprise" });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps: {
@@ -286,6 +288,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
         getXMLSchemaRuntimePort: () => xmlSchemaRuntime,
         getXMLValidationRuntimePort: () => xmlValidationRuntime,
         getXSDRuntimePort: () => xsdRuntime,
+        getNamespaceRuntimePort: () => namespaceRuntime,
       },
     });
 
