@@ -1,8 +1,26 @@
+/**
+ * TUSS procedures — operacional (CRUD tenant) + ponte Enterprise (TISS-CONV-01).
+ *
+ * Conhecimento TISS canônico (validação / membership) NÃO usa esta tabela.
+ * Fonte oficial: Enterprise Runtime → TISSCatalogPort.
+ *
+ * `tuss_procedures` permanece apenas como extensão operacional tenant-scoped
+ * (specialty, default_value, etc.) — não é catálogo TISS paralelo de conhecimento.
+ */
 import { assertCan } from "@/lib/auth/rbac";
 import { mapPostgresError } from "@/lib/domain/operations/errors";
+import {
+  ensureCaptureTissKnowledge,
+  getCaptureTissKnowledgeSnapshot,
+  isTussInCatalogFromEnterprise,
+} from "@/lib/capture/enterprise/tiss-knowledge-gateway";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import type { TussProcedureRow } from "./types";
 
+/**
+ * Lista procedimentos operacionais do tenant (CRUD).
+ * Não substitui o Canonical Catalog — ver `listCanonicalTussProcedureCodes`.
+ */
 export async function listTussProcedures(ctx: ServiceCtx): Promise<TussProcedureRow[]> {
   assertCan(ctx.role, "tiss:read");
   const { data, error } = await ctx.client
@@ -12,6 +30,25 @@ export async function listTussProcedures(ctx: ServiceCtx): Promise<TussProcedure
     .order("code", { ascending: true });
   if (error) throw mapPostgresError(error);
   return data ?? [];
+}
+
+/**
+ * Códigos TUSS canônicos via Enterprise TISSCatalogPort (TISS-CONV-01).
+ * Única fonte de conhecimento para membership/validação.
+ */
+export async function listCanonicalTussProcedureCodes(ctx: ServiceCtx): Promise<readonly string[]> {
+  assertCan(ctx.role, "tiss:read");
+  await ensureCaptureTissKnowledge();
+  return Array.from(getCaptureTissKnowledgeSnapshot().procedureCodes).sort();
+}
+
+/**
+ * Membership canônico — exclusivamente via Enterprise Foundation.
+ */
+export async function isCanonicalTussProcedure(ctx: ServiceCtx, code: string): Promise<boolean> {
+  assertCan(ctx.role, "tiss:read");
+  await ensureCaptureTissKnowledge();
+  return isTussInCatalogFromEnterprise(code);
 }
 
 export async function createTussProcedure(

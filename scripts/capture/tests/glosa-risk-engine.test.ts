@@ -138,8 +138,8 @@ function patchField(
   }
 }
 
-function runFullRiskPipeline(guide: StructuredGuide) {
-  const { report: auditReport, findings } = auditStructuredGuide(guide);
+async function runFullRiskPipeline(guide: StructuredGuide) {
+  const { report: auditReport, findings } = await auditStructuredGuide(guide);
   const { report: contractReport } = enrichAuditFindings(guide, findings);
   const { report } = assessGlosaRisk(guide, auditReport, contractReport, {
     sessionId: "test-session",
@@ -148,18 +148,18 @@ function runFullRiskPipeline(guide: StructuredGuide) {
 }
 
 describe("Glosa Risk Engine — infraestrutura", () => {
-  it("GlosaRiskEngine é instanciável", () => {
+  it("GlosaRiskEngine é instanciável", async () => {
     const engine = new GlosaRiskEngine();
     assert.ok(typeof engine.assess === "function");
   });
 
-  it("define caminho de storage correto", () => {
+  it("define caminho de storage correto", async () => {
     const path = buildRiskAssessmentStoragePath("tenant-1", "session-1");
     assert.equal(path, "tenant-1/session-1/audit/risk_assessment.json");
     assert.equal(RISK_ASSESSMENT_FILENAME, "risk_assessment.json");
   });
 
-  it("classifica níveis de risco corretamente", () => {
+  it("classifica níveis de risco corretamente", async () => {
     assert.equal(classifyRiskLevel(0), "Baixo");
     assert.equal(classifyRiskLevel(19), "Baixo");
     assert.equal(classifyRiskLevel(20), "Médio");
@@ -172,9 +172,9 @@ describe("Glosa Risk Engine — infraestrutura", () => {
 });
 
 describe("Glosa Risk Engine — guia perfeita", () => {
-  it("score baixo, sem bloqueios, probabilidade reduzida", () => {
+  it("score baixo, sem bloqueios, probabilidade reduzida", async () => {
     const guide = parseGuide(PERFECT_CONSULTA_OCR);
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
     const { assessment } = riskReport;
 
     assert.equal(riskReport.version, "risk_assessment_v1");
@@ -190,10 +190,10 @@ describe("Glosa Risk Engine — guia perfeita", () => {
 });
 
 describe("Glosa Risk Engine — CID ausente", () => {
-  it("eleva risco com finding DIA-001", () => {
+  it("eleva risco com finding DIA-001", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
 
     assert.ok(riskReport.findingRisks.some((f) => f.ruleId === "DIA-001"));
     assert.ok(riskReport.assessment.overallRiskScore > 0);
@@ -205,7 +205,7 @@ describe("Glosa Risk Engine — CID ausente", () => {
 });
 
 describe("Glosa Risk Engine — CRM inválido", () => {
-  it("eleva risco com finding EXE-002", () => {
+  it("eleva risco com finding EXE-002", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "executing_crm", {
       value: "INVALIDO",
@@ -213,7 +213,7 @@ describe("Glosa Risk Engine — CRM inválido", () => {
       status: "found",
       normalized: false,
     });
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
 
     const crmRisk = riskReport.findingRisks.find((f) => f.ruleId === "EXE-002");
     assert.ok(crmRisk);
@@ -224,7 +224,7 @@ describe("Glosa Risk Engine — CRM inválido", () => {
 });
 
 describe("Glosa Risk Engine — guia crítica", () => {
-  it("score crítico com bloqueios e alta probabilidade de glosa", () => {
+  it("score crítico com bloqueios e alta probabilidade de glosa", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "beneficiary_name", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "operator_ans_code", { value: null, rawValue: null, status: "missing" });
@@ -234,7 +234,7 @@ describe("Glosa Risk Engine — guia crítica", () => {
       status: "found",
     });
 
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
     const { assessment } = riskReport;
 
     assert.ok(assessment.overallRiskScore >= 45);
@@ -246,7 +246,7 @@ describe("Glosa Risk Engine — guia crítica", () => {
 });
 
 describe("Glosa Risk Engine — múltiplos erros", () => {
-  it("acumula risco por categoria e gera ranking", () => {
+  it("acumula risco por categoria e gera ranking", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", { value: "XX", rawValue: "XX", status: "found" });
@@ -256,7 +256,7 @@ describe("Glosa Risk Engine — múltiplos erros", () => {
       status: "found",
     });
 
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
 
     assert.ok(riskReport.findingRisks.length >= 3);
     assert.ok(riskReport.categoryRisks.length >= 2);
@@ -270,12 +270,12 @@ describe("Glosa Risk Engine — múltiplos erros", () => {
 });
 
 describe("Glosa Risk Engine — operadoras diferentes", () => {
-  it("Unimed e Bradesco produzem perfis de risco distintos", () => {
+  it("Unimed e Bradesco produzem perfis de risco distintos", async () => {
     const unimedGuide = parseGuide(UNIMED_CONSULTA_OCR);
     const bradescoGuide = parseGuide(BRADESCO_SADT_OCR);
 
-    const unimed = runFullRiskPipeline(unimedGuide);
-    const bradesco = runFullRiskPipeline(bradescoGuide);
+    const unimed = await runFullRiskPipeline(unimedGuide);
+    const bradesco = await runFullRiskPipeline(bradescoGuide);
 
     assert.notEqual(unimed.riskReport.guideType, bradesco.riskReport.guideType);
     assert.equal(unimed.riskReport.operatorAnsCode, "123456");
@@ -289,9 +289,9 @@ describe("Glosa Risk Engine — operadoras diferentes", () => {
 });
 
 describe("Glosa Risk Engine — contratos diferentes", () => {
-  it("enriquecimento contratual influencia score de findings", () => {
+  it("enriquecimento contratual influencia score de findings", async () => {
     const guide = cloneGuide(parseGuide(UNIMED_CONSULTA_OCR));
-    const audit = auditStructuredGuide(guide);
+    const audit = await auditStructuredGuide(guide);
     audit.findings.push({
       ruleId: "AUT-001",
       category: "autorizacoes",
@@ -319,10 +319,10 @@ describe("Glosa Risk Engine — contratos diferentes", () => {
 });
 
 describe("Glosa Risk Engine — RiskAssessment campos mínimos", () => {
-  it("possui todos os campos exigidos", () => {
+  it("possui todos os campos exigidos", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
     const a = riskReport.assessment;
 
     assert.ok(a.assessmentId);
@@ -338,10 +338,10 @@ describe("Glosa Risk Engine — RiskAssessment campos mínimos", () => {
 });
 
 describe("Glosa Risk Engine — scoring determinístico", () => {
-  it("pesos configuráveis alteram contribuição", () => {
+  it("pesos configuráveis alteram contribuição", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const audit = auditStructuredGuide(guide);
+    const audit = await auditStructuredGuide(guide);
     const { report: contractReport } = enrichAuditFindings(guide, audit.findings);
 
     const lowWeight = scoreGlosaRisk({
@@ -367,10 +367,10 @@ describe("Glosa Risk Engine — scoring determinístico", () => {
     assert.ok(highWeight.assessment.overallRiskScore > lowWeight.assessment.overallRiskScore);
   });
 
-  it("scoring breakdown é explicável e auditável", () => {
+  it("scoring breakdown é explicável e auditável", async () => {
     const guide = cloneGuide(parseGuide(PERFECT_CONSULTA_OCR));
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { riskReport } = runFullRiskPipeline(guide);
+    const { riskReport } = await runFullRiskPipeline(guide);
 
     assert.ok(riskReport.scoringBreakdown.length > 0);
     for (const factor of riskReport.scoringBreakdown) {

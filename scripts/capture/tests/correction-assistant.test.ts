@@ -134,11 +134,11 @@ const engine = new CorrectionProposalEngine();
 const perfectGuide = parseOcrToStructuredGuide(CONSULTA_OCR);
 
 describe("Correction Assistant — Infraestrutura", () => {
-  it("CorrectionProposalEngine é instanciável", () => {
+  it("CorrectionProposalEngine é instanciável", async () => {
     assert.ok(typeof engine.generateFromFindings === "function");
   });
 
-  it("correction_proposals.json path segue convenção audit/", () => {
+  it("correction_proposals.json path segue convenção audit/", async () => {
     const path = buildCorrectionProposalsStoragePath("tenant-1", "session-abc");
     assert.equal(path, "tenant-1/session-abc/audit/correction_proposals.json");
     assert.equal(CORRECTION_PROPOSALS_FILENAME, "correction_proposals.json");
@@ -146,7 +146,7 @@ describe("Correction Assistant — Infraestrutura", () => {
 });
 
 describe("Correction Assistant — Geração de propostas", () => {
-  it("gera uma proposta por finding", () => {
+  it("gera uma proposta por finding", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", {
@@ -154,16 +154,16 @@ describe("Correction Assistant — Geração de propostas", () => {
       rawValue: "XX",
       status: "found",
     });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const proposals = generateCorrectionProposals(findings, "sess-1");
     assert.equal(proposals.length, findings.length);
     assert.ok(proposals.length >= 2);
   });
 
-  it("proposta possui campos mínimos exigidos", () => {
+  it("proposta possui campos mínimos exigidos", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const [proposal] = generateCorrectionProposals(findings, "sess-1");
     assert.ok(proposal);
     assert.ok(proposal.proposalId);
@@ -180,14 +180,14 @@ describe("Correction Assistant — Geração de propostas", () => {
     assert.ok(proposal.severity);
   });
 
-  it("mapeia fonte TUSS para procedimentos", () => {
+  it("mapeia fonte TUSS para procedimentos", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "procedure_code", {
       value: "99999999",
       rawValue: "99999999",
       status: "found",
     });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const proposal = generateCorrectionProposals(findings, "sess-1").find(
       (p) => p.ruleId === "PRC-003",
     );
@@ -235,7 +235,7 @@ describe("Correction Assistant — Confiança", () => {
     assert.ok(proposal!.confidence < 0.5);
   });
 
-  it("eleva confiança quando expectedValue está presente", () => {
+  it("eleva confiança quando expectedValue está presente", async () => {
     const finding: AuditFinding = {
       ruleId: "EXE-002",
       category: "executante",
@@ -256,10 +256,10 @@ describe("Correction Assistant — Confiança", () => {
 });
 
 describe("Correction Assistant — Campo bloqueante", () => {
-  it("propaga flag blocking do finding", () => {
+  it("propaga flag blocking do finding", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "beneficiary_name", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const blockingFinding = findings.find((f) => f.ruleId === "PAT-001");
     assert.ok(blockingFinding?.blocking);
     const proposal = generateCorrectionProposals(findings, "sess-block").find(
@@ -270,10 +270,10 @@ describe("Correction Assistant — Campo bloqueante", () => {
 });
 
 describe("Correction Assistant — Decisões do usuário", () => {
-  it("proposta aceita", () => {
+  it("proposta aceita", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const store = buildStore(generateCorrectionProposals(findings, "sess-accept"));
     const target = store.proposals[0]!;
     const updated = decideProposalInStore(store, {
@@ -285,10 +285,10 @@ describe("Correction Assistant — Decisões do usuário", () => {
     assert.equal(proposalDecisionEventType("accept"), "proposal_accepted");
   });
 
-  it("proposta rejeitada", () => {
+  it("proposta rejeitada", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const store = buildStore(generateCorrectionProposals(findings, "sess-reject"));
     const target = store.proposals[0]!;
     const updated = decideProposalInStore(store, {
@@ -299,10 +299,10 @@ describe("Correction Assistant — Decisões do usuário", () => {
     assert.equal(proposalDecisionEventType("reject"), "proposal_rejected");
   });
 
-  it("proposta editada", () => {
+  it("proposta editada", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const store = buildStore(generateCorrectionProposals(findings, "sess-edit"));
     const target = store.proposals[0]!;
     const updated = decideProposalInStore(store, {
@@ -315,7 +315,7 @@ describe("Correction Assistant — Decisões do usuário", () => {
     assert.equal(proposalDecisionEventType("edit"), "proposal_edited");
   });
 
-  it("múltiplas propostas com estados independentes", () => {
+  it("múltiplas propostas com estados independentes", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", {
@@ -323,7 +323,7 @@ describe("Correction Assistant — Decisões do usuário", () => {
       rawValue: "XX",
       status: "found",
     });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const proposals = generateCorrectionProposals(findings, "sess-multi");
     assert.ok(proposals.length >= 2);
 
@@ -354,10 +354,10 @@ describe("Correction Assistant — Decisões do usuário", () => {
 });
 
 describe("Correction Assistant — Persistência", () => {
-  it("store serializa para JSON com version correction_proposals_v1", () => {
+  it("store serializa para JSON com version correction_proposals_v1", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const store = buildStore(generateCorrectionProposals(findings, "sess-persist"));
     const json = JSON.parse(JSON.stringify(store)) as CorrectionProposalStore;
     assert.equal(json.version, "correction_proposals_v1");
@@ -365,7 +365,7 @@ describe("Correction Assistant — Persistência", () => {
     assert.ok(json.proposals.length > 0);
   });
 
-  it("summary reflete contagens por status", () => {
+  it("summary reflete contagens por status", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", {
@@ -374,7 +374,7 @@ describe("Correction Assistant — Persistência", () => {
       status: "found",
     });
     const proposals = generateCorrectionProposals(
-      auditStructuredGuide(guide).findings,
+      (await auditStructuredGuide(guide)).findings,
       "sess-summary",
     );
     const accepted = decideProposalInStore(buildStore(proposals), {

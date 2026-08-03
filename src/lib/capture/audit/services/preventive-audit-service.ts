@@ -52,7 +52,8 @@ export class PreventiveAuditService {
     await persistSessionMetadata(ctx, sessionId, metadata);
 
     try {
-      const { report } = this.engine.audit(guide, { sessionId });
+      // TISS-CONV-01: conhecimento TUSS exclusivamente via Enterprise Foundation.
+      const { report } = await this.engine.auditAsync(guide, { sessionId });
       const auditDurationMs = Date.now() - start;
       const { storagePath } = await persistAuditReport(ctx, sessionId, report);
       const summary = buildAuditReportSummaryFromResult(report, storagePath, auditDurationMs);

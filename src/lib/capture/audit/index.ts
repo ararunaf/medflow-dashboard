@@ -55,4 +55,11 @@ export {
   type RunCaptureAuditResult,
 } from "./services/preventive-audit-service";
 
-export { TUSS_CATALOG, isTussInCatalog, tussRequiresAuthorization } from "./data/tuss-catalog";
+export {
+  TUSS_CATALOG,
+  getTussCatalogCodes,
+  isTussInCatalog,
+  tussRequiresAuthorization,
+  ensureCaptureTissKnowledge,
+  getEnterpriseTissVersionLabel,
+} from "./data/tuss-catalog";

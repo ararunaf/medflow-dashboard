@@ -20,6 +20,11 @@ export type TemplateFieldDef = {
 export type TissTemplate = {
   id: string;
   guideType: TissGuideType;
+  /**
+   * Código canônico no TISSCatalogPort (TISS-CONV-01).
+   * Conhecimento TISS de tipo de guia vive no Catalog; aqui só a ponte OCR→canônico.
+   */
+  catalogGuideTypeCode: string;
   version: string;
   headerPatterns: RegExp[];
   fields: TemplateFieldDef[];
@@ -153,6 +158,7 @@ const COMMON_AUTORIZACOES: TemplateFieldDef[] = [
 export const TEMPLATE_CONSULTA_V1: TissTemplate = {
   id: "template_consulta_v1",
   guideType: "guia_consulta",
+  catalogGuideTypeCode: "guia-consulta",
   version: "1.0",
   headerPatterns: [/guia\s*de\s*consulta/i, /consulta\s*m[eé]dica/i, /guia\s*consulta/i],
   fields: [
@@ -218,6 +224,7 @@ export const TEMPLATE_CONSULTA_V1: TissTemplate = {
 export const TEMPLATE_SADT_V1: TissTemplate = {
   id: "template_sadt_v1",
   guideType: "guia_sadt",
+  catalogGuideTypeCode: "guia-sadt",
   version: "1.0",
   headerPatterns: [
     /sp\s*[/\\]\s*sadt/i,
@@ -312,6 +319,7 @@ export const TEMPLATE_SADT_V1: TissTemplate = {
 export const TEMPLATE_HONORARIO_V1: TissTemplate = {
   id: "template_honorario_v1",
   guideType: "guia_honorario",
+  catalogGuideTypeCode: "guia-honorario",
   version: "1.0",
   headerPatterns: [/honor[aá]rio\s*individual/i, /guia\s*de\s*honor/i, /honor[aá]rios/i],
   fields: [

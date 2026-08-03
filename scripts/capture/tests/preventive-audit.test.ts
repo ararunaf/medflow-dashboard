@@ -134,7 +134,7 @@ const perfectGuide = parseOcrToStructuredGuide(CONSULTA_OCR);
 const engine = new PreventiveAuditEngine();
 
 describe("Preventive Audit — Infraestrutura", () => {
-  it("PreventiveAuditEngine é instanciável", () => {
+  it("PreventiveAuditEngine é instanciável", async () => {
     assert.ok(typeof engine.audit === "function");
   });
 
@@ -145,7 +145,7 @@ describe("Preventive Audit — Infraestrutura", () => {
     assert.equal(ids.size, ALL_AUDIT_RULES.length, "IDs de regras devem ser únicos");
   });
 
-  it("audit_report.json path segue convenção audit/", () => {
+  it("audit_report.json path segue convenção audit/", async () => {
     const path = buildAuditReportStoragePath("tenant-1", "session-abc");
     assert.equal(path, "tenant-1/session-abc/audit/audit_report.json");
     assert.equal(AUDIT_REPORT_FILENAME, "audit_report.json");
@@ -153,8 +153,8 @@ describe("Preventive Audit — Infraestrutura", () => {
 });
 
 describe("Preventive Audit — Guia perfeita", () => {
-  it("guia consulta completa — score 100, aprovada, zero findings", () => {
-    const { report, findings } = auditStructuredGuide(perfectGuide);
+  it("guia consulta completa — score 100, aprovada, zero findings", async () => {
+    const { report, findings } = await auditStructuredGuide(perfectGuide);
     assert.equal(findings.length, 0);
     assert.equal(report.score.overall, 100);
     assert.equal(report.score.approved, true);
@@ -165,10 +165,10 @@ describe("Preventive Audit — Guia perfeita", () => {
 });
 
 describe("Preventive Audit — CID ausente", () => {
-  it("gera finding DIA-001 quando CID missing", () => {
+  it("gera finding DIA-001 quando CID missing", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const cidFinding = findings.find((f) => f.ruleId === "DIA-001");
     assert.ok(cidFinding, "DIA-001 deve ser emitido");
     assert.equal(cidFinding.category, "diagnostico");
@@ -177,7 +177,7 @@ describe("Preventive Audit — CID ausente", () => {
 });
 
 describe("Preventive Audit — CRM inválido", () => {
-  it("gera finding EXE-002 para CRM malformado", () => {
+  it("gera finding EXE-002 para CRM malformado", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "executing_crm", {
       value: "INVALIDO",
@@ -185,7 +185,7 @@ describe("Preventive Audit — CRM inválido", () => {
       status: "found",
       normalized: false,
     });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const crmFinding = findings.find((f) => f.ruleId === "EXE-002");
     assert.ok(crmFinding, "EXE-002 deve ser emitido");
     assert.equal(crmFinding.field, "executing_crm");
@@ -194,14 +194,14 @@ describe("Preventive Audit — CRM inválido", () => {
 });
 
 describe("Preventive Audit — TUSS incompatível", () => {
-  it("gera finding PRC-003 para código fora do catálogo", () => {
+  it("gera finding PRC-003 para código fora do catálogo", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "procedure_code", {
       value: "99999999",
       rawValue: "99999999",
       status: "found",
     });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const tussFinding = findings.find((f) => f.ruleId === "PRC-003");
     assert.ok(tussFinding, "PRC-003 deve ser emitido");
     assert.equal(tussFinding.detectedValue, "99999999");
@@ -209,11 +209,11 @@ describe("Preventive Audit — TUSS incompatível", () => {
 });
 
 describe("Preventive Audit — Campos obrigatórios vazios", () => {
-  it("gera findings críticos para beneficiário e operadora ausentes", () => {
+  it("gera findings críticos para beneficiário e operadora ausentes", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "beneficiary_name", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "operator_ans_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     assert.ok(findings.some((f) => f.ruleId === "PAT-001"));
     assert.ok(findings.some((f) => f.ruleId === "OPR-001"));
     assert.ok(findings.some((f) => f.blocking));
@@ -221,9 +221,9 @@ describe("Preventive Audit — Campos obrigatórios vazios", () => {
 });
 
 describe("Preventive Audit — Datas inconsistentes", () => {
-  it("gera finding DAT-004 quando execução é anterior ao atendimento", () => {
+  it("gera finding DAT-004 quando execução é anterior ao atendimento", async () => {
     const guide = parseOcrToStructuredGuide(SADT_OCR);
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const dateFinding = findings.find((f) => f.ruleId === "DAT-004");
     assert.ok(dateFinding, "DAT-004 deve ser emitido");
     assert.equal(dateFinding.field, "execution_date");
@@ -231,7 +231,7 @@ describe("Preventive Audit — Datas inconsistentes", () => {
 });
 
 describe("Preventive Audit — Autorização ausente", () => {
-  it("gera finding AUT-001 em SADT sem senha", () => {
+  it("gera finding AUT-001 em SADT sem senha", async () => {
     const sadtNoAuth = buildOcrFromLines([
       { text: "GUIA SP/SADT", y: 15 },
       { text: "Registro ANS: 654321", y: 55 },
@@ -245,7 +245,7 @@ describe("Preventive Audit — Autorização ausente", () => {
       { text: "Valor Total: R$ 1.500,00", y: 720 },
     ]);
     const guide = parseOcrToStructuredGuide(sadtNoAuth);
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const authFinding = findings.find((f) => f.ruleId === "AUT-001");
     assert.ok(authFinding, "AUT-001 deve ser emitido");
     assert.equal(authFinding.blocking, true);
@@ -254,7 +254,7 @@ describe("Preventive Audit — Autorização ausente", () => {
 });
 
 describe("Preventive Audit — Múltiplos erros", () => {
-  it("acumula findings de categorias distintas", () => {
+  it("acumula findings de categorias distintas", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", {
@@ -267,7 +267,7 @@ describe("Preventive Audit — Múltiplos erros", () => {
       rawValue: "99999999",
       status: "found",
     });
-    const { findings, report } = auditStructuredGuide(guide);
+    const { findings, report } = await auditStructuredGuide(guide);
     assert.ok(findings.length >= 3);
     const categories = new Set(findings.map((f) => f.category));
     assert.ok(categories.size >= 2);
@@ -277,14 +277,14 @@ describe("Preventive Audit — Múltiplos erros", () => {
 });
 
 describe("Preventive Audit — Guia bloqueante", () => {
-  it("marca blocking quando data futura (DAT-003)", () => {
+  it("marca blocking quando data futura (DAT-003)", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "attendance_date", {
       value: "2099-12-31",
       rawValue: "31/12/2099",
       status: "found",
     });
-    const { report, findings } = auditStructuredGuide(guide);
+    const { report, findings } = await auditStructuredGuide(guide);
     const blockingFinding = findings.find((f) => f.ruleId === "DAT-003");
     assert.ok(blockingFinding);
     assert.equal(report.score.blocking, true);
@@ -294,10 +294,10 @@ describe("Preventive Audit — Guia bloqueante", () => {
 });
 
 describe("Preventive Audit — Guia aprovada", () => {
-  it("score ≥ 70 e sem bloqueios => approved", () => {
+  it("score ≥ 70 e sem bloqueios => approved", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { report } = auditStructuredGuide(guide);
+    const { report } = await auditStructuredGuide(guide);
     assert.equal(report.score.blocking, false);
     assert.equal(report.score.approved, true);
     assert.ok(report.score.overall >= 70);
@@ -305,7 +305,7 @@ describe("Preventive Audit — Guia aprovada", () => {
 });
 
 describe("Preventive Audit — Score e distribuição", () => {
-  it("calcula distribuição por severidade", () => {
+  it("calcula distribuição por severidade", async () => {
     const findings = [
       {
         ruleId: "T1",
@@ -340,20 +340,20 @@ describe("Preventive Audit — Score e distribuição", () => {
     assert.equal(score.overall, 67);
   });
 
-  it("gera correctionProposals para cada finding", () => {
+  it("gera correctionProposals para cada finding", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { report } = auditStructuredGuide(guide);
+    const { report } = await auditStructuredGuide(guide);
     assert.equal(report.correctionProposals.length, report.findings.length);
     assert.equal(report.correctionProposals[0]!.autoFixable, false);
   });
 });
 
 describe("Preventive Audit — AuditFinding modelo", () => {
-  it("findings possuem campos mínimos exigidos", () => {
+  it("findings possuem campos mínimos exigidos", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const { findings } = auditStructuredGuide(guide);
+    const { findings } = await auditStructuredGuide(guide);
     const f = findings[0]!;
     assert.ok(f.ruleId);
     assert.ok(f.category);

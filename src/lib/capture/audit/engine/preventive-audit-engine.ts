@@ -6,6 +6,7 @@
  * Não altera OCR, Parser nem Storage existentes.
  */
 import type { StructuredGuide } from "../../parser/types/structured-guide";
+import { ensureCaptureTissKnowledge } from "../../enterprise/tiss-knowledge-gateway";
 import type { AuditFinding, CorrectionProposal } from "../types/audit-finding";
 import type { AuditReport } from "../types/audit-report";
 import type { AuditRule } from "../types/audit-rule";
@@ -47,6 +48,10 @@ export class PreventiveAuditEngine {
     this.rules = rules;
   }
 
+  /**
+   * Auditoria síncrona — exige conhecimento TISS já hidratado via Enterprise Foundation.
+   * Preferir auditAsync / auditStructuredGuide (TISS-CONV-01).
+   */
   audit(guide: StructuredGuide, options: PreventiveAuditOptions = {}): PreventiveAuditResult {
     const start = Date.now();
     const ctx = buildAuditContext(guide, { sessionId: options.sessionId });
@@ -79,6 +84,15 @@ export class PreventiveAuditEngine {
     void start; // duration tracked by service layer
     return { report, findings, proposals };
   }
+
+  /** TISS-CONV-01 — hidrata TISSCatalogPort + RulePackEnginePort antes de auditar. */
+  async auditAsync(
+    guide: StructuredGuide,
+    options: PreventiveAuditOptions = {},
+  ): Promise<PreventiveAuditResult> {
+    await ensureCaptureTissKnowledge();
+    return this.audit(guide, options);
+  }
 }
 
 let defaultEngine: PreventiveAuditEngine | null = null;
@@ -88,9 +102,12 @@ export function getDefaultPreventiveAuditEngine(): PreventiveAuditEngine {
   return defaultEngine;
 }
 
-export function auditStructuredGuide(
+/**
+ * Auditoria preventiva — hidrata conhecimento TISS via Enterprise Foundation (TISS-CONV-01).
+ */
+export async function auditStructuredGuide(
   guide: StructuredGuide,
   options?: PreventiveAuditOptions,
-): PreventiveAuditResult {
-  return getDefaultPreventiveAuditEngine().audit(guide, options);
+): Promise<PreventiveAuditResult> {
+  return getDefaultPreventiveAuditEngine().auditAsync(guide, options);
 }

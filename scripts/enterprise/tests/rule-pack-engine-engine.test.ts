@@ -495,8 +495,8 @@ describe("TISS-03A Enterprise Base Rule Packs", () => {
   ] as const;
 
   it("seed inclui foundation + Base Rule Packs canônicos", () => {
-    assert.equal(ENTERPRISE_BASE_RULE_PACK_COUNT, 7);
-    assert.equal(ENTERPRISE_BASE_RULE_PACKS.length, 7);
+    assert.equal(ENTERPRISE_BASE_RULE_PACK_COUNT, 8);
+    assert.equal(ENTERPRISE_BASE_RULE_PACKS.length, 8);
     assert.ok(ALL_SEEDED_RULE_PACKS.length >= 8);
     assert.equal(ALL_SEEDED_RULE_PACKS[0]?.code, DEFAULT_STRUCTURAL_RULE_PACK_CODE);
 

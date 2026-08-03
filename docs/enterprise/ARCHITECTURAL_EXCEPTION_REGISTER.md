@@ -54,9 +54,9 @@ A partir de ARCH-DEBT-01:
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
 | Enterprise Infrastructure | INF-01…INF-05, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
-| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A |
+| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
-| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01 |
+| Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01 |
 
 ### Nota sobre Gates
 
@@ -75,6 +75,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | SEARCH-GATE-01 | `4ea20d57-a783-4ec7-9d65-4ccc429067d0` | GO |
 | TISS-CATALOG-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
 | TISS-RULE-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
+| TISS-RULEPACK-GATE-01 | (transcript da sessão de auditoria) | GO COM RESSALVAS |
 
 ---
 
@@ -82,17 +83,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **72** |
+| **Total de ressalvas registradas** | **76** |
 | Prioridade **Alta** | **13** |
 | Prioridade **Média** | **20** |
-| Prioridade **Baixa** | **39** |
+| Prioridade **Baixa** | **43** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02) | **4** |
-| Criticidade **Não bloqueante** | **68** |
-| Status **Resolvida** | **8** |
+| Criticidade **Não bloqueante** | **72** |
+| Status **Resolvida** | **10** |
 | Status **Planejada** | **3** |
-| Status **Aceita** | **60** |
+| Status **Aceita** | **62** |
 | Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **64** |
+| Pendentes (Aberta + Aceita + Planejada) | **66** |
 
 ### Bloqueantes — estado atual
 
@@ -103,12 +104,13 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 | AER-GA02-B3 | Application 0/43 | **Resolvida** (ARCH-01 / decisão ECS-01) | Não |
 | AER-GA02-B4 | Staging Foundation pendente | **Aceita** | Não bloqueia SEARCH-01 (Gates posteriores não reemitiram NO-GO) |
 
-**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional para TISS-RULEPACK-GATE-01.**  
-TISS-03A implementou os Enterprise Base Rule Packs canônicos.  
-**AER-RPE-B2** resolvida em TISS-03A (Base Rule Packs no seed oficial).  
-**AER-GA03-A4** / **AER-TISSCG-A1** permanecem Aceitas (conhecimento TISS/TUSS no produto Capture paralelo ao Catalog — convergência em TISS-CONV-01).  
-**AER-TISSCG-B1** resolvida em TISS-03 (`getTISSCatalogPort` obrigatório).  
-**AER-RPEG-M1**, **AER-RPEG-B1…B2** permanecem Aceitas (não bloqueantes).  
+**Nenhuma ressalva bloqueante impede a continuidade do roadmap funcional pós TISS-CONV-01.**  
+TISS-CONV-01 convergiu o conhecimento TISS do Capture para a Enterprise Foundation (**GO COM RESSALVAS**).  
+**AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
+**AER-RPE-B2** / **AER-TISSCG-B1** permanecem Resolvidas.  
+**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2** permanecem Aceitas (não bloqueantes).  
+Novas Baixa (Aceitas): **AER-TISSCV-B1…B2** (patterns OCR do parser; CRUD operacional `tuss_procedures`).  
+**AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence — fora do escopo TISS-CONV-01).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).
 
 ---
@@ -143,7 +145,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-GA03-A1 | Dual-path Captura (estrutural vs funcional) | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | Consolidação dual-path |
 | AER-GA03-A2 | OCR real fora do OCR Runtime | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | **Resolvida** | OCR-01 / OCR-GATE-01 |
 | AER-GA03-A3 | Storage Captura fora do Storage Manager | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | STORAGE-CONV-01 (ver AER-STG-A1) |
-| AER-GA03-A4 | TISS produto vs `enterprise/tiss-*` | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | TISS-CONV-01 (reforçada em TISS-CATALOG-GATE-01 / AER-TISSCG-A1) |
+| AER-GA03-A4 | TISS produto vs `enterprise/tiss-*` | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | **Resolvida** | TISS-CONV-01 |
 | AER-GA03-M5 | Módulos EPC não compostos no Runtime | GATE-ARCH-03 | Architecture | Média | Não bloqueante | Aceita | Composição por fase |
 | AER-GA03-M6 | INF in-memory insuficiente para escala | GATE-ARCH-03 | Scalability | Média | Não bloqueante | Aceita | Adapters reais INF |
 | AER-GA03-M7 | Modelos canônicos não unificados | GATE-ARCH-03 | Maintainability | Média | Não bloqueante | Aceita | Consolidação na ativação |
@@ -181,7 +183,9 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-TISS-B3 | TISS-01 sem XML/dispatch reais | TISS-01 | Architecture | Baixa | Não bloqueante | Aceita | Sprints funcionais pós TISS-GATE-01 |
 | AER-TISS-B4 | Escape hatch `getTISSCatalogPort()` | TISS-02 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-TISS-B5 | Seed mínimo in-memory do Catalog | TISS-02 | Scalability | Baixa | Não bloqueante | Aceita | Carga por configuração futura |
-| AER-TISSCG-A1 | Conhecimento TISS/TUSS no produto Capture paralelo ao Catalog | TISS-CATALOG-GATE-01 | Architecture | Alta | Não bloqueante | Aceita | TISS-CONV-01 |
+| AER-TISSCG-A1 | Conhecimento TISS/TUSS no produto Capture paralelo ao Catalog | TISS-CATALOG-GATE-01 | Architecture | Alta | Não bloqueante | **Resolvida** | TISS-CONV-01 |
+| AER-TISSCV-B1 | Patterns OCR de templates permanecem no Capture (adapter OCR) | TISS-CONV-01 | Maintainability | Baixa | Não bloqueante | Aceita | Aceitável — não é conhecimento TISS |
+| AER-TISSCV-B2 | Tabela `tuss_procedures` permanece como CRUD operacional tenant | TISS-CONV-01 | Maintainability | Baixa | Não bloqueante | Aceita | Membership canônico só via Catalog |
 | AER-TISSCG-M1 | Ports EPC-20/21/22 paralelos (stores vazios, não wired) | TISS-CATALOG-GATE-01 | Architecture | Média | Não bloqueante | Aceita | Consolidação / deprecação pós Rule Packs |
 | AER-TISSCG-B1 | `getTISSCatalogPort?` opcional no TISS Runtime deps | TISS-CATALOG-GATE-01 | Architecture | Baixa | Não bloqueante | **Resolvida** | TISS-03 |
 | AER-TISSCG-B2 | Barrel exporta Store/seed + `getStore()` no Adapter | TISS-CATALOG-GATE-01 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
@@ -190,6 +194,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-RPEG-M1 | Fundação EPC-09/23/06A paralela (não wired) | TISS-RULE-GATE-01 | Architecture | Média | Não bloqueante | Aceita | Consolidação / wiring pós Base Packs |
 | AER-RPEG-B1 | Barrel exporta Store/seed + `getStore()` no Adapter | TISS-RULE-GATE-01 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-RPEG-B2 | Best-effort `executePack` no TISS Runtime | TISS-RULE-GATE-01 | Architecture | Baixa | Não bloqueante | Aceita | Endurecer falha quando packs forem críticos |
+| AER-RPKG-B1 | Runtime `process()` executa só o pack default (foundation) | TISS-RULEPACK-GATE-01 | Architecture | Baixa | Não bloqueante | Aceita | Multi-pack execution / seleção explícita |
+| AER-RPKG-B2 | Lacuna de cobertura: References + Catalog Metadata | TISS-RULEPACK-GATE-01 | Maintainability | Baixa | Não bloqueante | Aceita | Packs de existência para reference/metadata |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -197,7 +203,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 
 - Prioridades de GATE-ARCH-02 B1–B4 não vieram rotuladas Alta/Média/Baixa na origem; foram mapeadas por severidade do blocker (B1–B3 → Alta; B4 → Média), preservando criticidade **Bloqueante**.
 - AER-GA03A-R4 foi **Resolvida** em SEARCH-01 (Classification Provider em CLASS-01; Search Provider em SEARCH-01).
-- Resolvidas confirmadas: AER-CORE-GLOBAL-01, AER-GA02-B1, AER-GA02-B3, AER-GA03-A2, AER-GA03A-R2, AER-GA03A-R4, AER-TISSCG-B1, AER-RPE-B2.
+- Resolvidas confirmadas: AER-CORE-GLOBAL-01, AER-GA02-B1, AER-GA02-B3, AER-GA03-A2, AER-GA03A-R2, AER-GA03A-R4, AER-TISSCG-B1, AER-RPE-B2, AER-GA03-A4, AER-TISSCG-A1.
 
 ---
 
@@ -363,7 +369,7 @@ Inventário oficial DEV-ORG-01…07 (`EPC-CERT-02_ORGANIZATION_CERTIFICATION.md`
 - **AER-GA03-A1** Dual-path Captura — **Aceita** — consolidação dual-path  
 - **AER-GA03-A2** OCR fora do OCR Runtime — **Resolvida** (OCR-01 / OCR-GATE-01)  
 - **AER-GA03-A3** Storage fora do Storage Manager — **Aceita** — estado atual em **AER-STG-A1** / STORAGE-CONV-01  
-- **AER-GA03-A4** TISS dual-path — **Aceita** — fase TISS  
+- **AER-GA03-A4** TISS dual-path — **Resolvida** (TISS-CONV-01)  
 
 #### Média / Baixa GATE-ARCH-03
 Ver tabela resumida (AER-GA03-M5…M9, B10…B13). Todas **Não bloqueantes**, status **Aceita**.
@@ -461,7 +467,7 @@ Riscos **Alta/Média/Baixa**, **Não bloqueantes**, status **Aceita**.
 Cadeia Enterprise certificada: Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → Adapter → `InMemoryTISSCatalog` (conhecimento puro; sem regras/XML/validações).  
 Catálogo **é** a única fonte oficial na cadeia Enterprise; conhecimento TISS/TUSS permanece no produto Capture (dual-path já previsto em **AER-GA03-A4**).
 
-##### AER-TISSCG-A1
+##### AER-TISSCG-A1 — Resolvida
 - **Título:** Conhecimento TISS/TUSS no produto Capture paralelo ao Canonical Catalog  
 - **Descrição:** Evidências concretas do dual-path: `src/lib/capture/audit/data/tuss-catalog.ts` (`TUSS_CATALOG` / `TUSS_REQUIRES_AUTH`), guide types/templates do parser, strings `TISS 4.01.00` em contract enricher/rules, e `src/lib/services/tiss/tuss-service.ts` → `tuss_procedures`. Nenhum desses caminhos consome `TISSCatalogPort`.  
 - **Origem:** TISS-CATALOG-GATE-01  
@@ -469,8 +475,9 @@ Catálogo **é** a única fonte oficial na cadeia Enterprise; conhecimento TISS/
 - **Prioridade:** Alta  
 - **Criticidade:** Não bloqueante  
 - **Justificativa técnica:** Já coberta em espírito por **AER-GA03-A4**; Gate materializa inventário. Não impede Rule Packs Enterprise (TISS-03) sobre o Catalog.  
-- **Sprint prevista:** **TISS-CONV-01**  
-- **Status:** Aceita
+- **Sprint prevista / correção:** **TISS-CONV-01**  
+- **Status:** **Resolvida** (TISS-CONV-01)  
+- **Evidência:** Gateway `tiss-knowledge-gateway.ts`; seed TUSS no Catalog; pack `base-procedure-authorization-pack`; facade Capture sem Sets hardcoded; membership via Ports.
 
 ##### AER-TISSCG-M1
 - **Título:** Ports EPC-20/21/22 paralelos (vocabulary/mapping/profile)  
@@ -528,6 +535,26 @@ Engine genérico: interpreta packs estruturais; conhecimento TISS exclusivamente
 - **Título:** Best-effort `executePack` no TISS Runtime  
 - **Descrição:** `DefaultTISSRuntimeAdapter.process()` envolve `rulePackEnginePort.executePack` em try/catch best-effort — falha do Engine não bloqueia o process estrutural (`processedViaRulePackEnginePort` pode ficar false). Não é bypass do Port; é degradação suave deliberada na fundação.  
 - **Origem:** TISS-RULE-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Endurecer falha quando packs forem críticos (pós TISS-03A)
+
+#### TISS-RULEPACK-GATE-01 (GO COM RESSALVAS) — AER-RPKG-B1 / B2
+Riscos **Baixa**, **Não bloqueantes**, status **Aceita**.  
+Certificação: Enterprise Base Rule Packs utilizam exclusivamente `RulePackEnginePort` + `TISSCatalogPort`; packs 100% genéricos; sem operadora/contrato/tenant; Gates PASS.
+
+##### AER-RPKG-B1
+- **Título:** Runtime `process()` executa apenas o pack default (foundation)  
+- **Descrição:** `executePack` sem `packId`/`code` resolve o primeiro pack ativo do store (`structural-foundation-pack`). Os 7 Base Rule Packs estão seeded e executáveis via Port com código explícito, mas não são todos disparados automaticamente em `TISSRuntimePort.process()`.  
+- **Origem:** TISS-RULEPACK-GATE-01  
+- **Categoria:** Architecture  
+- **Prioridade:** Baixa  
+- **Criticidade:** Não bloqueante  
+- **Justificativa técnica:** Fundação deliberada — default estável preservado; Base Packs certificados via Port/`listPacks`/`executePack(code)`. Não é bypass nem pack paralelo.  
+- **Sprint prevista:** Multi-pack execution / seleção explícita (pós convergência ou com XML Runtime)  
+- **Status:** Aceita
+
+##### AER-RPKG-B2
+- **Título:** Lacuna de cobertura do seed: References + Catalog Metadata  
+- **Descrição:** Seed mínimo do `TISSCatalog` possui 1 `CanonicalTISSReference` e 1 `CanonicalTISSMetadata` sem Rule Pack de existência dedicado. Demais áreas do seed (versions, guide-types, domains, procedure-*, profiles, vocabulary) possuem cobertura via Base Packs.  
+- **Origem:** TISS-RULEPACK-GATE-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Packs de existência para reference/metadata (ou expansão do Catalog)
 
 #### STORAGE-GATE-01 (GO COM RESSALVAS)
 
@@ -663,6 +690,37 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 6. Hardcodes/catálogos/bypasses de produto **não** removidos (permanecem em **TISS-CONV-01**).  
 7. Roadmap liberado para **TISS-RULEPACK-GATE-01**. **Não iniciar XML TISS nem regras específicas de operadoras.**
 
+### Atualização TISS-RULEPACK-GATE-01 (03/08/2026)
+
+1. **TISS-03A certificada com ressalvas** — Base Rule Packs são o mecanismo oficial de regras estruturais **na cadeia Enterprise**, via `RulePackEnginePort` + `TISSCatalogPort`.  
+2. Parecer: **GO COM RESSALVAS** (não GO puro: dual-path produto Capture **AER-TISSCG-A1** / **AER-GA03-A4**; fundação paralela **AER-RPEG-M1**; execução default de um pack **AER-RPKG-B1**; lacuna References/Metadata **AER-RPKG-B2**).  
+3. **Ressalvas resolvidas nesta Gate:** nenhuma (AER-RPE-B2 já Resolvida em TISS-03A).  
+4. **Novas ressalvas:** **AER-RPKG-B1…B2** (Baixa, Aceitas, não bloqueantes).  
+5. Packs genéricos; sem operadora/contrato/tenant; sem RulePackEngine paralelo; sem bypass de interpretação na cadeia wired; Gates Build/TS/ESLint/Smoke/Enterprise/Capture **PASS**.  
+6. Sprint **TISS-03A encerrada oficialmente**.  
+7. **Recomendação de roadmap:** próxima Sprint **TISS-CONV-01 — Convergência do Produto** (reduz risco Alta do dual-path antes de XML). **Não iniciar TISS-04 (XML Runtime) nem regras de operadoras antes da convergência.**
+
+### Atualização TISS-CONV-01 (03/08/2026)
+
+1. **TISS-CONV-01 implementado** — Capture consome conhecimento TISS exclusivamente via Enterprise Foundation.  
+2. Cadeia oficial do produto: Capture → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → Base Rule Packs.  
+3. **Ressalvas resolvidas:** **AER-GA03-A4**, **AER-TISSCG-A1** (dual-path de conhecimento TISS/TUSS eliminado).  
+4. **Novas ressalvas Baixa:** **AER-TISSCV-B1** (patterns OCR no parser — adapter, não conhecimento TISS), **AER-TISSCV-B2** (`tuss_procedures` CRUD operacional; membership canônico só via Catalog).  
+5. Hardcodes `TUSS_CATALOG` / `TUSS_REQUIRES_AUTH` removidos; seed canônico no Catalog; pack `base-procedure-authorization-pack`; guide types canônicos (`guia-honorario` incluso).  
+6. **Não** removeu seeds Unimed/Bradesco de Contract Intelligence (**AER-GA03-M8** permanece Aceita — fora do escopo de conhecimento TISS).  
+7. Percentual de convergência TISS conhecimento Capture→Enterprise: **~95%** (residual: OCR patterns + CRUD operacional).  
+8. Sprint **TISS-CONV-01 encerrada oficialmente**. Roadmap liberado para **TISS-04 — Enterprise XML Runtime**.  
+
+#### AER-TISSCV-B1
+- **Título:** Patterns OCR de templates permanecem no Capture  
+- **Descrição:** Regex/labelPatterns/expectedRegion dos templates são adapters OCR→campos, não conhecimento TISS. Tipos de guia canônicos vivem no Catalog (`catalogGuideTypeCode`).  
+- **Origem:** TISS-CONV-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Aceitável por desenho
+
+#### AER-TISSCV-B2
+- **Título:** Tabela `tuss_procedures` permanece como CRUD operacional  
+- **Descrição:** Persistência tenant para specialty/default_value; membership/validação canônica exclusivamente via `TISSCatalogPort` (`listCanonicalTussProcedureCodes` / gateway).  
+- **Origem:** TISS-CONV-01 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Opcional sync Catalog↔DB futura
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -677,3 +735,5 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-03 | Enterprise Rule Pack Engine; AER-TISSCG-B1 Resolvida; AER-RPE-B1…B2; liberação TISS-RULE-GATE-01 |
 | 03/08/2026 | TISS-RULE-GATE-01 | Certificação Rule Pack Engine (GO COM RESSALVAS); AER-RPEG-M1/B1/B2; liberação TISS-03A |
 | 03/08/2026 | TISS-03A | Enterprise Base Rule Packs; AER-RPE-B2 Resolvida; liberação TISS-RULEPACK-GATE-01 |
+| 03/08/2026 | TISS-RULEPACK-GATE-01 | Certificação Base Rule Packs (GO COM RESSALVAS); AER-RPKG-B1…B2; encerramento TISS-03A; recomendação TISS-CONV-01 |
+| 03/08/2026 | TISS-CONV-01 | Convergência Capture→Enterprise; AER-GA03-A4 / AER-TISSCG-A1 Resolvidas; AER-TISSCV-B1…B2; liberação TISS-04 |

@@ -166,12 +166,12 @@ const perfectGuide = parseOcrToStructuredGuide(CONSULTA_OCR);
 const engine = new LearningLoopEngine();
 
 describe("Learning Loop — Infraestrutura", () => {
-  it("LearningLoopEngine é instanciável", () => {
+  it("LearningLoopEngine é instanciável", async () => {
     assert.ok(typeof engine.proposalToRecord === "function");
     assert.ok(typeof engine.calculateMetrics === "function");
   });
 
-  it("paths seguem convenção tenant/learning/", () => {
+  it("paths seguem convenção tenant/learning/", async () => {
     assert.equal(
       buildLearningRecordsStoragePath("tenant-abc"),
       "tenant-abc/learning/learning_records.json",
@@ -184,7 +184,7 @@ describe("Learning Loop — Infraestrutura", () => {
     assert.equal(LEARNING_METRICS_FILENAME, "learning_metrics.json");
   });
 
-  it("módulos existem no filesystem", () => {
+  it("módulos existem no filesystem", async () => {
     const base = resolve(root, "src/lib/capture/learning");
     assert.ok(existsSync(resolve(base, "engine/learning-loop-engine.ts")));
     assert.ok(existsSync(resolve(base, "engine/recommendation-engine.ts")));
@@ -195,10 +195,10 @@ describe("Learning Loop — Infraestrutura", () => {
 });
 
 describe("Learning Loop — Registro de aceitação", () => {
-  it("converte proposta aceita em LearningRecord", () => {
+  it("converte proposta aceita em LearningRecord", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const proposals = generateCorrectionProposals(auditStructuredGuide(guide).findings, "sess-1");
+    const proposals = generateCorrectionProposals((await auditStructuredGuide(guide)).findings, "sess-1");
     const store = buildCorrectionStore(proposals);
     const accepted = decideProposal(store, proposals[0]!.proposalId, "accept");
 
@@ -217,10 +217,10 @@ describe("Learning Loop — Registro de aceitação", () => {
 });
 
 describe("Learning Loop — Registro de edição", () => {
-  it("converte proposta editada em LearningRecord", () => {
+  it("converte proposta editada em LearningRecord", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const proposals = generateCorrectionProposals(auditStructuredGuide(guide).findings, "sess-edit");
+    const proposals = generateCorrectionProposals((await auditStructuredGuide(guide)).findings, "sess-edit");
     const store = buildCorrectionStore(proposals);
     const edited = decideProposal(store, proposals[0]!.proposalId, "edit", "J06.9");
 
@@ -233,10 +233,10 @@ describe("Learning Loop — Registro de edição", () => {
 });
 
 describe("Learning Loop — Registro de rejeição", () => {
-  it("converte proposta rejeitada em LearningRecord", () => {
+  it("converte proposta rejeitada em LearningRecord", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const proposals = generateCorrectionProposals(auditStructuredGuide(guide).findings, "sess-reject");
+    const proposals = generateCorrectionProposals((await auditStructuredGuide(guide)).findings, "sess-reject");
     const store = buildCorrectionStore(proposals);
     const rejected = decideProposal(store, proposals[0]!.proposalId, "reject");
 
@@ -249,12 +249,12 @@ describe("Learning Loop — Registro de rejeição", () => {
 });
 
 describe("Learning Loop — Múltiplas decisões", () => {
-  it("registra múltiplas decisões sem duplicar", () => {
+  it("registra múltiplas decisões sem duplicar", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", { value: "XX", rawValue: "XX", status: "found" });
     const proposals = generateCorrectionProposals(
-      auditStructuredGuide(guide).findings,
+      (await auditStructuredGuide(guide)).findings,
       "sess-multi",
     );
     const store = buildCorrectionStore(proposals);
@@ -285,7 +285,7 @@ describe("Learning Loop — Múltiplas decisões", () => {
 });
 
 describe("Learning Loop — Cálculo de métricas", () => {
-  it("calcula taxas globais e por regra", () => {
+  it("calcula taxas globais e por regra", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
     patchField(guide, "executing_crm", { value: "XX", rawValue: "XX", status: "found" });
@@ -295,7 +295,7 @@ describe("Learning Loop — Cálculo de métricas", () => {
       status: "found",
     });
     const proposals = generateCorrectionProposals(
-      auditStructuredGuide(guide).findings,
+      (await auditStructuredGuide(guide)).findings,
       "sess-metrics",
     );
     const store = buildCorrectionStore(proposals);
@@ -347,10 +347,10 @@ describe("Learning Loop — Cálculo de métricas", () => {
 });
 
 describe("Learning Loop — Persistência (modelo JSON)", () => {
-  it("store serializa com version learning_records_v1", () => {
+  it("store serializa com version learning_records_v1", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const proposals = generateCorrectionProposals(auditStructuredGuide(guide).findings, "sess-json");
+    const proposals = generateCorrectionProposals((await auditStructuredGuide(guide)).findings, "sess-json");
     const store = buildCorrectionStore(proposals);
     const accepted = decideProposal(store, proposals[0]!.proposalId, "accept");
     const record = proposalToLearningRecord(accepted, "sess-json", store.generatedAt)!;
@@ -464,7 +464,7 @@ describe("Learning Loop — Recomendações", () => {
     );
   });
 
-  it("dashboard agrega rankings e recomendações", () => {
+  it("dashboard agrega rankings e recomendações", async () => {
     const records: LearningRecord[] = [
       {
         learningId: "lr-a",
@@ -502,10 +502,10 @@ describe("Learning Loop — Dashboard (componente)", () => {
 });
 
 describe("Learning Loop — Campos mínimos LearningRecord", () => {
-  it("possui todos os campos exigidos", () => {
+  it("possui todos os campos exigidos", async () => {
     const guide = cloneGuide(perfectGuide);
     patchField(guide, "cid_code", { value: null, rawValue: null, status: "missing" });
-    const proposals = generateCorrectionProposals(auditStructuredGuide(guide).findings, "sess-fields");
+    const proposals = generateCorrectionProposals((await auditStructuredGuide(guide)).findings, "sess-fields");
     const store = buildCorrectionStore(proposals);
     const accepted = decideProposal(store, proposals[0]!.proposalId, "accept");
     const record = proposalToLearningRecord(accepted, "sess-fields", store.generatedAt)!;

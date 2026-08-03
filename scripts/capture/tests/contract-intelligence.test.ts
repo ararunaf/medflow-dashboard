@@ -191,7 +191,7 @@ describe("Contract Intelligence — ContractKnowledgeEngine", () => {
     assert.equal(unimedIds.has("CTR-BRA-001"), false);
   });
 
-  it("resolve regras conflitantes por prioridade", () => {
+  it("resolve regras conflitantes por prioridade", async () => {
     const guide = parseGuide(UNIMED_CONSULTA_OCR);
     const engine = new ContractKnowledgeEngine();
     const context = engine.buildContext(guide);
@@ -207,7 +207,7 @@ describe("Contract Intelligence — ContractKnowledgeEngine", () => {
     }
   });
 
-  it("usa regras genéricas na ausência de contrato", () => {
+  it("usa regras genéricas na ausência de contrato", async () => {
     const guide = parseGuide(NO_OPERATOR_OCR);
     const engine = new ContractKnowledgeEngine();
     const operator = engine.resolveOperator(guide);
@@ -221,9 +221,9 @@ describe("Contract Intelligence — ContractKnowledgeEngine", () => {
 });
 
 describe("Contract Intelligence — enriquecimento de findings", () => {
-  it("enriquece findings sem modificar regra original", () => {
+  it("enriquece findings sem modificar regra original", async () => {
     const guide = parseGuide(UNIMED_CONSULTA_OCR);
-    const audit = auditStructuredGuide(guide);
+    const audit = await auditStructuredGuide(guide);
     const originalFinding = audit.findings.find((f) => f.ruleId === "AUT-001");
 
     if (!originalFinding) {

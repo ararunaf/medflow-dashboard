@@ -10,6 +10,7 @@ import {
   getCaptureSession,
   transitionCaptureSession,
 } from "../../infrastructure/capture-session-store";
+import { ensureCaptureTissKnowledge } from "../../enterprise/tiss-knowledge-gateway";
 import { loadOcrResult } from "../../ocr/infrastructure/ocr-storage";
 import { getDefaultTissParser } from "../engine/tiss-parser";
 import {
@@ -65,6 +66,9 @@ export class TissParserService {
     }
 
     try {
+      // TISS-CONV-01: aquecimento da cadeia Enterprise (tipos de guia canônicos no Catalog).
+      // Patterns OCR permanecem no parser; conhecimento TISS não é bypassado.
+      await ensureCaptureTissKnowledge();
       const guide = this.parser.parse(ocr, { sessionId });
       const { storagePath } = await persistStructuredGuide(ctx, sessionId, guide);
       const summary = buildStructuredGuideSummaryFromResult(guide, storagePath);

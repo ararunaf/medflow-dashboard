@@ -5,6 +5,10 @@
  * Adiciona justificativa ampliada, fundamentos e risco sem modificar a regra original.
  */
 import type { AuditFinding } from "../../audit/types/audit-finding";
+import {
+  getEnterpriseTissVersionLabel,
+  isCaptureTissKnowledgeReady,
+} from "../../enterprise/tiss-knowledge-gateway";
 import type { ContractResolutionContext } from "../types/contract-context";
 import type { ContractRule } from "../types/contract-rule";
 import type { EnrichedAuditFinding, FindingEnrichment } from "../types/enriched-finding";
@@ -22,20 +26,30 @@ function findMatchingRules(finding: AuditFinding, rules: ContractRule[]): Contra
     .sort((a, b) => b.priority - a.priority);
 }
 
+/** Rótulo de versão TISS via Enterprise Catalog (TISS-CONV-01) — sem hardcode de comportamento. */
+function resolveTissVersionPrefix(): string {
+  if (isCaptureTissKnowledgeReady()) {
+    return getEnterpriseTissVersionLabel();
+  }
+  // Prefixo estrutural estável até hidratação (mesmo rótulo canônico do Catalog seed).
+  return "TISS 4.01.00";
+}
+
 function buildTissBasis(finding: AuditFinding): string {
+  const versionPrefix = resolveTissVersionPrefix();
   const tissFields: Record<string, string> = {
-    operator_ans_code: "TISS 4.01.00 — Grupo 2: Dados da Operadora (registro ANS)",
-    beneficiary_name: "TISS 4.01.00 — Grupo 3: Dados do Beneficiário",
-    beneficiary_card_number: "TISS 4.01.00 — Grupo 3: Número da carteirinha",
-    procedure_code: "TISS 4.01.00 — Grupo 6: Procedimentos (código TUSS)",
-    cid_code: "TISS 4.01.00 — Grupo 5: Dados do Atendimento (CID-10)",
-    authorization_password: "TISS 4.01.00 — Grupo 7: Dados da Autorização",
-    authorization_number: "TISS 4.01.00 — Grupo 7: Número da guia/senha",
-    attendance_date: "TISS 4.01.00 — Grupo 5: Data do atendimento",
-    executor_crm: "TISS 4.01.00 — Grupo 4: Dados do Executante",
-    executor_name: "TISS 4.01.00 — Grupo 4: Nome do profissional executante",
+    operator_ans_code: `${versionPrefix} — Grupo 2: Dados da Operadora (registro ANS)`,
+    beneficiary_name: `${versionPrefix} — Grupo 3: Dados do Beneficiário`,
+    beneficiary_card_number: `${versionPrefix} — Grupo 3: Número da carteirinha`,
+    procedure_code: `${versionPrefix} — Grupo 6: Procedimentos (código TUSS)`,
+    cid_code: `${versionPrefix} — Grupo 5: Dados do Atendimento (CID-10)`,
+    authorization_password: `${versionPrefix} — Grupo 7: Dados da Autorização`,
+    authorization_number: `${versionPrefix} — Grupo 7: Número da guia/senha`,
+    attendance_date: `${versionPrefix} — Grupo 5: Data do atendimento`,
+    executor_crm: `${versionPrefix} — Grupo 4: Dados do Executante`,
+    executor_name: `${versionPrefix} — Grupo 4: Nome do profissional executante`,
   };
-  return tissFields[finding.field] ?? `TISS 4.01.00 — Campo ${finding.field}`;
+  return tissFields[finding.field] ?? `${versionPrefix} — Campo ${finding.field}`;
 }
 
 function buildTussBasis(finding: AuditFinding): string {

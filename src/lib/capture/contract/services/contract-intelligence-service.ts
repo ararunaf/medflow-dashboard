@@ -14,6 +14,7 @@ import { loadStructuredGuide } from "../../parser/infrastructure/parser-storage"
 import type { StructuredGuide } from "../../parser/types/structured-guide";
 import { loadAuditReport } from "../../audit/infrastructure/audit-storage";
 import type { AuditReport } from "../../audit/types/audit-report";
+import { ensureCaptureTissKnowledge } from "../../enterprise/tiss-knowledge-gateway";
 import { getDefaultContractIntelligenceEngine } from "../engine/contract-intelligence-engine";
 import {
   buildContractIntelligenceSummaryFromResult,
@@ -61,6 +62,8 @@ export class ContractIntelligenceService {
     await persistSessionMetadata(ctx, sessionId, metadata);
 
     try {
+      // TISS-CONV-01: rótulos/versão TISS via Enterprise Catalog antes do enrich.
+      await ensureCaptureTissKnowledge();
       const { report } = this.engine.enrich(guide, auditReport.findings, {
         sessionId,
         tenantId: ctx.tenantId,
