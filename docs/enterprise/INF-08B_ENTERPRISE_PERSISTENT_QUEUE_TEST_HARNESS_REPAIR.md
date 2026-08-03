@@ -91,13 +91,13 @@ Nenhum arquivo sob `src/` foi modificado.
 | Campo | Valor |
 |-------|-------|
 | Branch | `feat/inf-08-enterprise-persistent-queue-runtime` |
-| Commit | *(preenchido após commit)* |
-| Hash completo | *(preenchido após commit)* |
+| Commit | `eeb1b9d` — fix(enterprise): repair INF-08B harness for Persistent Queue Runtime deps |
+| Hash completo | `eeb1b9de3fd9522d1d2f3dacbf511ad882b508b2` (reparo harness); tip da branch após governança: ver `git rev-parse HEAD` |
 | URL | `https://github.com/ararunaf/medflow-dashboard/tree/feat/inf-08-enterprise-persistent-queue-runtime` |
-| Push realizado | *(preenchido após push)* |
-| Hash local = remoto | *(preenchido após push)* |
-| Ahead | *(preenchido após push)* |
-| Behind | *(preenchido após push)* |
+| Push realizado | **Sim** |
+| Hash local = remoto | **Sim** (após push da tip) |
+| Ahead | **0** |
+| Behind | **0** |
 | Working Tree | limpa quanto aos artefatos INF-08B (`docs/audit/` permanece untracked externo) |
 
 ---
