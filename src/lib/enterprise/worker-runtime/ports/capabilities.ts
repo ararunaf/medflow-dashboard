@@ -20,6 +20,8 @@ export type WorkerRuntimeCapabilities = {
   supportsCancellation?: boolean;
   supportsTelemetry?: boolean;
   usesQueueRuntimePort?: boolean;
+  /** INF-07 — dependência Scheduler Runtime preparada (sem consumo). */
+  usesSchedulerRuntimePort?: boolean;
   runtimeReady?: true;
   realWorkers?: false;
   tasksExecuted?: false;
@@ -72,6 +74,7 @@ export const DEFAULT_WORKER_RUNTIME_CAPABILITIES: WorkerRuntimeCapabilities = {
   supportsCancellation: true,
   supportsTelemetry: true,
   usesQueueRuntimePort: true,
+  usesSchedulerRuntimePort: true,
   runtimeReady: true,
   realWorkers: false,
   tasksExecuted: false,

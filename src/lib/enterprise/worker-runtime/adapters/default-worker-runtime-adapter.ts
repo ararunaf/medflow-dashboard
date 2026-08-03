@@ -155,6 +155,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       supportsCancellation: true,
       supportsTelemetry: true,
       usesQueueRuntimePort: true,
+      usesSchedulerRuntimePort: true,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,
@@ -197,11 +198,21 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
   async health(): Promise<WorkerRuntimeHealth> {
     const storeHealth = this.store.health();
     let queueRuntimeOk = true;
+    let schedulerRuntimeOk = true;
     if (this.enterpriseDeps) {
       const queueHealth = await this.enterpriseDeps.getQueueRuntimePort().health();
       queueRuntimeOk = queueHealth.ok;
+      // INF-07: Scheduler preparado — valida Port sem chamar health()
+      // (evita ciclo Worker.health ↔ Scheduler.health).
+      if (typeof this.enterpriseDeps.getSchedulerRuntimePort === "function") {
+        const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
+        schedulerRuntimeOk =
+          !!schedulerPort &&
+          typeof schedulerPort.health === "function" &&
+          typeof schedulerPort.capabilities === "function";
+      }
     }
-    const ok = this.healthy && storeHealth.ok && queueRuntimeOk;
+    const ok = this.healthy && storeHealth.ok && queueRuntimeOk && schedulerRuntimeOk;
     return {
       kind: "canonical-worker-health",
       ok,
@@ -212,6 +223,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       storedTaskCount: this.store.taskCount(),
       storedExecutionCount: this.store.executionCount(),
       queueRuntimeOk,
+      schedulerRuntimeOk,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,

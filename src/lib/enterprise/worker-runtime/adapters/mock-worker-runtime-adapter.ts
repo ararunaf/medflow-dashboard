@@ -103,6 +103,7 @@ export class MockWorkerRuntimeAdapter implements WorkerRuntimePort {
       supportsCancellation: true,
       supportsTelemetry: true,
       usesQueueRuntimePort: true,
+      usesSchedulerRuntimePort: true,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,

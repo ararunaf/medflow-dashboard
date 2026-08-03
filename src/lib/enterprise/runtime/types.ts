@@ -4,6 +4,7 @@
  * Runtime é o ponto único de acesso do produto à Enterprise Foundation.
  * Sem regras de negócio. Sem XML/TISS reais / classificação/storage/busca reais. Sem filas/workers reais.
  * INF-06: Worker Runtime estrutural — sem Workers reais / Scheduler / Thread Pool.
+ * INF-07: Scheduler Runtime estrutural — sem Scheduler real / Cron / Timer.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
@@ -38,6 +39,7 @@ import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/x
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
+import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 
 /** Identificador estável do runtime. */
@@ -73,6 +75,7 @@ export type EnterpriseRuntimeHealth = {
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
   workerRuntimeOk?: boolean;
+  schedulerRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -146,6 +149,7 @@ export type EnterpriseRuntimeOptions = {
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
   workerRuntimePort?: WorkerRuntimePort;
+  schedulerRuntimePort?: SchedulerRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -248,7 +252,10 @@ export interface EnterpriseRuntime {
   /** Resolve WorkerRuntimePort (INF-06) — Enterprise Worker Runtime. */
   getWorkerRuntimePort(): WorkerRuntimePort;
 
-  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker deps). */
+  /** Resolve SchedulerRuntimePort (INF-07) — Enterprise Scheduler Runtime. */
+  getSchedulerRuntimePort(): SchedulerRuntimePort;
+
+  /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker + INF-07 Scheduler deps). */
   getTISSRuntimePort(): TISSRuntimePort;
 
   /** Resolve AIProviderPort (EPC-07) — Adapter oficial. */

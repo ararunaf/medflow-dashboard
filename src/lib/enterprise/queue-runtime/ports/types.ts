@@ -8,6 +8,7 @@
  * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem workers. Sem filas reais.
  * INF-06: dependência Worker Runtime preparada — sem alocação/execução de Workers.
  */
+import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
   CanonicalQueue,
@@ -68,6 +69,8 @@ export type QueueRuntimeHealth = CanonicalQueueHealth & {
   status?: QueueRuntimeStatus;
   /** INF-06 — prontidão estrutural do Worker Runtime (dependência preparada). */
   workerRuntimeOk?: boolean;
+  /** INF-07 — prontidão estrutural do Scheduler Runtime (dependência preparada). */
+  schedulerRuntimeOk?: boolean;
 };
 
 /** Capacidades do adapter no nível do Port. */
@@ -83,6 +86,8 @@ export type QueueRuntimePortCapabilities = {
   supportsTelemetry: boolean;
   /** INF-06 — dependência Worker Runtime preparada (sem consumo). */
   usesWorkerRuntimePort: boolean;
+  /** INF-07 — dependência Scheduler Runtime preparada (sem consumo). */
+  usesSchedulerRuntimePort: boolean;
   runtimeReady: true;
   realQueueBackend: false;
   messagesPublished: false;
@@ -229,11 +234,14 @@ export type StatsResult = QueueRuntimeOperationEnvelope & {
 };
 
 /**
- * Dependências Enterprise injetadas no Queue Runtime (INF-06).
- * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada nesta sprint.
+ * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07).
+ * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada.
+ * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
  */
 export type QueueRuntimeEnterpriseDeps = {
   getWorkerRuntimePort(): WorkerRuntimePort;
+  /** INF-07 — Scheduler Runtime preparado (sem consumo funcional). */
+  getSchedulerRuntimePort?: () => SchedulerRuntimePort;
 };
 
 /** Opções de resolução do QueueRuntimePort. */

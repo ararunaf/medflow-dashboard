@@ -158,6 +158,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       supportsCancellation: true,
       supportsTelemetry: true,
       usesWorkerRuntimePort: true,
+      usesSchedulerRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,
@@ -197,16 +198,24 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   async health(): Promise<QueueRuntimeHealth> {
     const storeHealth = this.store.health();
     let workerRuntimeOk = true;
+    let schedulerRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-06: dependência preparada — valida Port sem chamar health()
-      // (evita ciclo Queue.health ↔ Worker.health).
+      // INF-06 / INF-07: deps preparadas — valida Port sem chamar health()
+      // (evita ciclo Queue.health ↔ Worker/Scheduler.health).
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       workerRuntimeOk =
         !!workerPort &&
         typeof workerPort.health === "function" &&
         typeof workerPort.capabilities === "function";
+      if (typeof this.enterpriseDeps.getSchedulerRuntimePort === "function") {
+        const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
+        schedulerRuntimeOk =
+          !!schedulerPort &&
+          typeof schedulerPort.health === "function" &&
+          typeof schedulerPort.capabilities === "function";
+      }
     }
-    const ok = this.healthy && storeHealth.ok && workerRuntimeOk;
+    const ok = this.healthy && storeHealth.ok && workerRuntimeOk && schedulerRuntimeOk;
     return {
       kind: "canonical-queue-health",
       ok,
@@ -216,6 +225,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       storedQueueCount: this.store.queueCount(),
       storedMessageCount: this.store.messageCount(),
       workerRuntimeOk,
+      schedulerRuntimeOk,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

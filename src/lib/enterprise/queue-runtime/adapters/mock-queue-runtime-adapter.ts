@@ -99,6 +99,7 @@ export class MockQueueRuntimeAdapter implements QueueRuntimePort {
       supportsCancellation: true,
       supportsTelemetry: true,
       usesWorkerRuntimePort: true,
+      usesSchedulerRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

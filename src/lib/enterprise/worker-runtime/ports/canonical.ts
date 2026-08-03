@@ -197,6 +197,8 @@ export type CanonicalWorkerHealth = {
   storedTaskCount?: number;
   storedExecutionCount?: number;
   queueRuntimeOk?: boolean;
+  /** INF-07 — prontidão estrutural do Scheduler Runtime (dependência preparada). */
+  schedulerRuntimeOk?: boolean;
   runtimeReady: true;
   realWorkers: false;
   tasksExecuted: false;

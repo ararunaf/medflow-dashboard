@@ -8,6 +8,7 @@
  * Sem Workers reais. Sem Thread Pool. Sem Scheduler. Sem backends de fila.
  */
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
+import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type {
   CanonicalWorker,
   CanonicalWorkerCapabilities,
@@ -79,6 +80,8 @@ export type WorkerRuntimePortCapabilities = {
   supportsCancellation: boolean;
   supportsTelemetry: boolean;
   usesQueueRuntimePort: boolean;
+  /** INF-07 — dependência Scheduler Runtime preparada (sem consumo). */
+  usesSchedulerRuntimePort: boolean;
   runtimeReady: true;
   realWorkers: false;
   tasksExecuted: false;
@@ -209,10 +212,13 @@ export type WorkerStatsResult = WorkerRuntimeOperationEnvelope & {
 
 /**
  * Dependências Enterprise injetadas no adapter default/enterprise.
- * Queue Runtime é dependência obrigatória preparada — NÃO consumida nesta sprint.
+ * Queue Runtime é dependência obrigatória preparada — NÃO consumida.
+ * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
  */
 export type WorkerRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;
+  /** INF-07 — Scheduler Runtime preparado (sem consumo funcional). */
+  getSchedulerRuntimePort?: () => SchedulerRuntimePort;
 };
 
 /** Opções de resolução do WorkerRuntimePort. */

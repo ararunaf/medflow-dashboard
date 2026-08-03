@@ -15,6 +15,7 @@ import { createXMLValidationRuntimePort } from "../../xml-validation-runtime/pro
 import { createXSDRuntimePort } from "../../xsd-runtime/providers/create-xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../../namespace-runtime/providers/create-namespace-runtime-port";
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
+import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
 import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
 import type { TISSRuntimePort } from "../ports/tiss-runtime-port";
 import type {
@@ -69,6 +70,13 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
         getQueueRuntimePort: () => queueRuntimePort,
       },
     });
+    const schedulerRuntimePort = createSchedulerRuntimePort({
+      provider: "mock",
+      enterpriseDeps: {
+        getQueueRuntimePort: () => queueRuntimePort,
+        getWorkerRuntimePort: () => workerRuntimePort,
+      },
+    });
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
       getTISSProviderPort: () => createTISSProviderPort({ provider: "mock" }),
@@ -82,6 +90,7 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       getNamespaceRuntimePort: () => namespaceRuntimePort,
       getQueueRuntimePort: () => queueRuntimePort,
       getWorkerRuntimePort: () => workerRuntimePort,
+      getSchedulerRuntimePort: () => schedulerRuntimePort,
       getXMLRuntimePort: () =>
         createXMLRuntimePort({
           provider: "mock",

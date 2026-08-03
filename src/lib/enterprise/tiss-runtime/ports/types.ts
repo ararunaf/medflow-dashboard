@@ -32,6 +32,7 @@ import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/port
 import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
+import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
@@ -66,6 +67,7 @@ export type TISSRuntimeHealth = {
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
   workerRuntimeOk?: boolean;
+  schedulerRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -91,6 +93,7 @@ export type TISSRuntimeCapabilities = {
   usesNamespaceRuntimePort: boolean;
   usesQueueRuntimePort: boolean;
   usesWorkerRuntimePort: boolean;
+  usesSchedulerRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -131,6 +134,11 @@ export type TISSRuntimeEnterpriseDeps = {
    * Dependência obrigatória preparada; TISS Runtime NÃO aloca/executa Workers nesta sprint.
    */
   getWorkerRuntimePort(): WorkerRuntimePort;
+  /**
+   * SchedulerRuntimePort oficial — infraestrutura canônica de Schedulers (INF-07).
+   * Dependência obrigatória preparada; TISS Runtime NÃO agenda/executa Cron/Timers nesta sprint.
+   */
+  getSchedulerRuntimePort(): SchedulerRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {
