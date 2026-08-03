@@ -1,10 +1,12 @@
 /**
- * Modelos canônicos do Enterprise XML Runtime — TISS-04.
+ * Modelos canônicos do Enterprise XML Runtime — TISS-04 / TISS-05.
  *
  * Fundação estrutural apenas. Sem geração XML real. Sem ANS.
  * Sem lógica de operadora, contrato, tenant, cooperativa ou versão.
  * Conhecimento TISS exclusivamente via TISSCatalogPort + RulePackEnginePort.
+ * Materialização canônica exclusivamente via XMLGenerationRuntimePort (TISS-05).
  */
+import type { CanonicalXMLStructure } from "../../xml-generation-runtime/ports/canonical";
 
 /** Status estrutural de uma geração canônica. */
 export type CanonicalXMLGenerationStatus =
@@ -67,7 +69,7 @@ export type CanonicalXMLRequest = {
 };
 
 /**
- * Resultado canônico — sem conteúdo XML real na fundação TISS-04.
+ * Resultado canônico — sem conteúdo XML real na fundação TISS-04/TISS-05.
  */
 export type CanonicalXMLResult = {
   kind: "canonical-xml-result";
@@ -80,7 +82,12 @@ export type CanonicalXMLResult = {
   rulePackExecutionId?: string;
   rulePackCode?: string;
   rulePackConsumed: boolean;
-  /** Sempre false na fundação TISS-04. */
+  /** Id do resultado produzido pelo XMLGenerationRuntimePort (TISS-05). */
+  xmlGenerationResultId?: string;
+  /** Estrutura canônica materializada via XMLGenerationRuntimePort. */
+  canonicalStructure?: CanonicalXMLStructure;
+  xmlGenerationRuntimeConsumed: boolean;
+  /** Sempre false na fundação TISS-04/TISS-05. */
   realXmlGenerated: false;
   status: CanonicalXMLGenerationStatus;
   message?: string;
@@ -101,6 +108,9 @@ export type CanonicalXMLGeneration = {
   rulePackExecutionId?: string;
   rulePackCode?: string;
   rulePackConsumed: boolean;
+  xmlGenerationResultId?: string;
+  canonicalStructure?: CanonicalXMLStructure;
+  xmlGenerationRuntimeConsumed: boolean;
   realXmlGenerated: false;
   createdAt: string;
   updatedAt: string;
@@ -136,6 +146,7 @@ export type CanonicalXMLProviderHealth = {
   storedGenerationCount?: number;
   tissCatalogOk?: boolean;
   rulePackEngineOk?: boolean;
+  xmlGenerationRuntimeOk?: boolean;
 };
 
 /**
@@ -150,6 +161,7 @@ export type CanonicalXMLProviderCapabilities = {
   supportsCanonicalResult: boolean;
   consumesTISSCatalogPort: boolean;
   consumesRulePackEnginePort: boolean;
+  consumesXMLGenerationRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
   implementsAnsValidation: false;

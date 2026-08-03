@@ -18,6 +18,7 @@ export type XMLRuntimeCapabilities = {
   supportsTelemetry?: boolean;
   consumesTISSCatalogPort?: boolean;
   consumesRulePackEnginePort?: boolean;
+  consumesXMLGenerationRuntimePort?: boolean;
   implementsRealXml?: false;
   implementsOperatorDispatch?: false;
   implementsAnsValidation?: false;
@@ -49,6 +50,7 @@ export const DEFAULT_XML_RUNTIME_CAPABILITIES: XMLRuntimeCapabilities = {
   supportsTelemetry: true,
   consumesTISSCatalogPort: true,
   consumesRulePackEnginePort: true,
+  consumesXMLGenerationRuntimePort: true,
   implementsRealXml: false,
   implementsOperatorDispatch: false,
   implementsAnsValidation: false,
@@ -75,6 +77,7 @@ export function toCanonicalXMLProviderCapabilities(
     supportsCanonicalResult: capabilities.supportsCanonicalResult === true,
     consumesTISSCatalogPort: capabilities.consumesTISSCatalogPort === true,
     consumesRulePackEnginePort: capabilities.consumesRulePackEnginePort === true,
+    consumesXMLGenerationRuntimePort: capabilities.consumesXMLGenerationRuntimePort === true,
     implementsRealXml: false,
     implementsOperatorDispatch: false,
     implementsAnsValidation: false,

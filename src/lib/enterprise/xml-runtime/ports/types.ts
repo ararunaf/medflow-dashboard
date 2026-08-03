@@ -1,16 +1,19 @@
 /**
- * Tipos vendor-agnósticos do Enterprise XML Runtime — TISS-04.
+ * Tipos vendor-agnósticos do Enterprise XML Runtime — TISS-04 / TISS-05.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → TISS Runtime
  *     → TISSCatalogPort → RulePackEnginePort
- *     → XMLRuntimePort → Adapter → XML Store
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → Adapter → XML Generation Store → Canonical XML Result
  *
  * Sem geração XML real. Sem operadoras. Sem contratos. Sem tenants.
  * Conhecimento TISS exclusivamente via TISSCatalogPort + RulePackEnginePort.
+ * Materialização canônica exclusivamente via XMLGenerationRuntimePort (TISS-05).
  */
 import type { RulePackEnginePort } from "../../rule-pack-engine/ports/rule-pack-engine-port";
 import type { TISSCatalogPort } from "../../tiss-catalog/ports/tiss-catalog-port";
+import type { XMLGenerationRuntimePort } from "../../xml-generation-runtime/ports/xml-generation-runtime-port";
 import type {
   CanonicalXMLGeneration,
   CanonicalXMLProviderCapabilities,
@@ -79,6 +82,7 @@ export type XMLRuntimePortCapabilities = {
   supportsTelemetry: boolean;
   consumesTISSCatalogPort: boolean;
   consumesRulePackEnginePort: boolean;
+  consumesXMLGenerationRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
   implementsAnsValidation: false;
@@ -181,6 +185,8 @@ export type XMLRuntimeEnterpriseDeps = {
   getTISSCatalogPort(): TISSCatalogPort;
   /** Fonte autorizada de Rule Packs estruturais. */
   getRulePackEnginePort(): RulePackEnginePort;
+  /** Fonte autorizada de materialização XML canônica (TISS-05). */
+  getXMLGenerationRuntimePort(): XMLGenerationRuntimePort;
 };
 
 /** Opções de resolução do XMLRuntimePort. */

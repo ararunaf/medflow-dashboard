@@ -6,6 +6,7 @@
  */
 import { createRulePackEnginePort } from "../../rule-pack-engine/providers/create-rule-pack-engine-port";
 import { createTISSCatalogPort } from "../../tiss-catalog/providers/create-tiss-catalog-port";
+import { createXMLGenerationRuntimePort } from "../../xml-generation-runtime/providers/create-xml-generation-runtime-port";
 import {
   DEFAULT_MOCK_XML_RUNTIME_CAPABILITIES,
   toCanonicalXMLProviderCapabilities,
@@ -73,6 +74,7 @@ export class MockXMLRuntimeAdapter implements XMLRuntimePort {
     this.providerMetadata = mockMetadata(this.providerId);
 
     const catalogPort = createTISSCatalogPort({ provider: "mock" });
+    const generationRuntime = createXMLGenerationRuntimePort({ provider: "mock" });
     const enterpriseDeps =
       options.enterpriseDeps ??
       ({
@@ -82,6 +84,7 @@ export class MockXMLRuntimeAdapter implements XMLRuntimePort {
             provider: "mock",
             enterpriseDeps: { getTISSCatalogPort: () => catalogPort },
           }),
+        getXMLGenerationRuntimePort: () => generationRuntime,
       } satisfies XMLRuntimeEnterpriseDeps);
 
     this.delegate = new DefaultXMLRuntimeAdapter({
@@ -110,6 +113,7 @@ export class MockXMLRuntimeAdapter implements XMLRuntimePort {
       supportsTelemetry: true,
       consumesTISSCatalogPort: true,
       consumesRulePackEnginePort: true,
+      consumesXMLGenerationRuntimePort: true,
       implementsRealXml: false,
       implementsOperatorDispatch: false,
       implementsAnsValidation: false,

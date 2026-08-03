@@ -8,6 +8,7 @@
  */
 import { createRulePackEnginePort } from "../../rule-pack-engine/providers/create-rule-pack-engine-port";
 import { createTISSCatalogPort } from "../../tiss-catalog/providers/create-tiss-catalog-port";
+import { createXMLGenerationRuntimePort } from "../../xml-generation-runtime/providers/create-xml-generation-runtime-port";
 import { DefaultXMLRuntimeAdapter, MockXMLRuntimeAdapter } from "../adapters";
 import type { XMLRuntimePort } from "../ports/xml-runtime-port";
 import type {
@@ -42,6 +43,7 @@ export class XMLRuntimeFactory {
       this.enterpriseDeps = options.enterpriseDeps;
     } else {
       const catalog = createTISSCatalogPort({ provider: "enterprise" });
+      const generationRuntime = createXMLGenerationRuntimePort({ provider: "enterprise" });
       this.enterpriseDeps = {
         getTISSCatalogPort: () => catalog,
         getRulePackEnginePort: () =>
@@ -49,6 +51,7 @@ export class XMLRuntimeFactory {
             provider: "enterprise",
             enterpriseDeps: { getTISSCatalogPort: () => catalog },
           }),
+        getXMLGenerationRuntimePort: () => generationRuntime,
       };
     }
   }

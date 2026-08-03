@@ -68,7 +68,7 @@ const BUILTIN_REGISTRATIONS: readonly XMLRuntimeRegistration[] = [
     vendor: "medicflow-enterprise",
     capabilities: DEFAULT_XML_RUNTIME_CAPABILITIES,
     description:
-      "Official TISS-04 Enterprise XML Runtime — structural generation via Catalog + RulePackEngine.",
+      "Official TISS-04/TISS-05 Enterprise XML Runtime — Catalog + RulePackEngine + XMLGenerationRuntimePort.",
   },
 ];
 

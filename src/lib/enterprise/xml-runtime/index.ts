@@ -4,13 +4,16 @@
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → TISS Runtime
  *     → TISSCatalogPort → RulePackEnginePort
- *     → XMLRuntimePort → DefaultXMLRuntimeAdapter → InMemoryXMLRuntimeStore
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → DefaultXMLGenerationAdapter → InMemoryXMLGenerationRuntimeStore
+ *     → Canonical XML Result
  *
- * TISS-04: fundação estrutural do Enterprise XML Runtime.
+ * TISS-04/TISS-05: fundação estrutural + geração canônica do Enterprise XML Runtime.
  * Sem geração XML real. Sem envio a operadoras. Sem validações clínicas/ANS.
  * Sem regras de negócio específicas. Sem acesso direto ao XML Store.
  * Sem lógica específica de operadora / contrato / tenant / cooperativa / versão.
  * Conhecimento TISS exclusivamente via TISSCatalogPort + RulePackEnginePort.
+ * Materialização canônica exclusivamente via XMLGenerationRuntimePort (TISS-05).
  */
 export type {
   CancelXMLInput,

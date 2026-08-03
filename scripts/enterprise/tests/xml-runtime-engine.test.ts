@@ -35,6 +35,7 @@ import {
 } from "../../../src/lib/enterprise/xml-runtime/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
 import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
+import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSProviderPort } from "../../../src/lib/enterprise/tiss-provider/index.ts";
@@ -63,12 +64,15 @@ function withEnterpriseDeps(portProvider: "enterprise" | "mock" = "enterprise") 
     provider: portProvider,
     enterpriseDeps: { getTISSCatalogPort: () => catalog },
   });
+  const xmlGenerationRuntime = createXMLGenerationRuntimePort({ provider: portProvider });
   return {
     catalog,
     rulePackEngine,
+    xmlGenerationRuntime,
     enterpriseDeps: {
       getTISSCatalogPort: () => catalog,
       getRulePackEnginePort: () => rulePackEngine,
+      getXMLGenerationRuntimePort: () => xmlGenerationRuntime,
     },
   };
 }
@@ -95,6 +99,7 @@ describe("TISS-04 XMLRuntimePort contract", () => {
     assert.equal(caps.supportsCanonicalResult, true);
     assert.equal(caps.consumesTISSCatalogPort, true);
     assert.equal(caps.consumesRulePackEnginePort, true);
+    assert.equal(caps.consumesXMLGenerationRuntimePort, true);
     assert.equal(caps.implementsRealXml, false);
     assert.equal(caps.implementsOperatorDispatch, false);
     assert.equal(caps.knowsOperatorOrCooperative, false);
@@ -158,6 +163,9 @@ describe("TISS-04 XMLRuntimePort contract", () => {
     assert.equal(generated.generation?.realXmlGenerated, false);
     assert.equal(generated.result?.catalogConsumed, true);
     assert.equal(generated.result?.rulePackConsumed, true);
+    assert.equal(generated.result?.xmlGenerationRuntimeConsumed, true);
+    assert.equal(generated.result?.canonicalStructure?.kind, "canonical-xml-structure");
+    assert.equal(generated.result?.canonicalStructure?.realXmlGenerated, false);
     assert.equal(generated.telemetry.cancelled, false);
 
     // Sem payload XML real no resultado canônico.
@@ -273,7 +281,7 @@ describe("TISS-04 XMLRuntimePort contract", () => {
     assert.equal(summary.capabilities.implementsRealXml, false);
   });
 
-  it("exige TISSCatalogPort + RulePackEnginePort — sem bypass", () => {
+  it("exige TISSCatalogPort + RulePackEnginePort + XMLGenerationRuntimePort — sem bypass", () => {
     assert.throws(
       () =>
         new DefaultXMLRuntimeAdapter({
@@ -281,7 +289,7 @@ describe("TISS-04 XMLRuntimePort contract", () => {
           // @ts-expect-error — deps obrigatórias
           enterpriseDeps: {},
         }),
-      /getTISSCatalogPort|getRulePackEnginePort/,
+      /getTISSCatalogPort|getRulePackEnginePort|getXMLGenerationRuntimePort/,
     );
   });
 });
@@ -295,7 +303,9 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
     assert.equal(runtime.getTISSCatalogPort().providerId, "enterprise");
     assert.equal(runtime.getTISSProviderPort().providerId, "enterprise");
     assert.equal(runtime.getTISSRuntimePort().providerId, "default");
+    assert.equal(runtime.getXMLGenerationRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLRuntimePort, true);
+    assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLGenerationRuntimePort, true);
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesRulePackEnginePort, true);
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesTISSCatalogPort, true);
     assert.equal(runtime.getTISSRuntimePort().capabilities().implementsRealXml, false);
@@ -303,16 +313,17 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
     const health = await runtime.health();
     assert.equal(health.ok, true);
     assert.equal(health.xmlRuntimeOk, true);
+    assert.equal(health.xmlGenerationRuntimeOk, true);
     assert.equal(health.rulePackEngineOk, true);
     assert.equal(health.tissCatalogOk, true);
     assert.equal(health.tissProviderOk, true);
     assert.equal(health.tissRuntimeOk, true);
   });
 
-  it("fluxo: Runtime → TISS Runtime → XMLRuntimePort → Canonical Result (sem XML real)", async () => {
+  it("fluxo: Runtime → TISS Runtime → XMLRuntimePort → XMLGenerationRuntimePort → Canonical Result (sem XML real)", async () => {
     const orchestrator = createCanonicalExecutionOrchestratorPort({ provider: "mock" });
     const tissProvider = createTISSProviderPort({ provider: "enterprise" });
-    const { catalog, rulePackEngine, enterpriseDeps } = withEnterpriseDeps();
+    const { catalog, rulePackEngine, xmlGenerationRuntime, enterpriseDeps } = withEnterpriseDeps();
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps,
@@ -325,6 +336,7 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
         getTISSCatalogPort: () => catalog,
         getRulePackEnginePort: () => rulePackEngine,
         getXMLRuntimePort: () => xmlRuntime,
+        getXMLGenerationRuntimePort: () => xmlGenerationRuntime,
       },
     });
 
@@ -349,7 +361,9 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
     assert.equal(session.session?.processedViaTISSCatalogPort, true);
     assert.equal(session.session?.processedViaRulePackEnginePort, true);
     assert.equal(session.session?.processedViaXMLRuntimePort, true);
+    assert.equal(session.session?.processedViaXMLGenerationRuntimePort, true);
     assert.ok(session.session?.xmlGenerationId);
+    assert.ok(session.session?.xmlGenerationResultId);
     assert.equal(session.session?.realTissExecuted, false);
 
     const generation = await xmlRuntime.getGeneration({
@@ -357,9 +371,11 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
     });
     assert.equal(generation.ok, true);
     assert.equal(generation.generation?.realXmlGenerated, false);
+    assert.equal(generation.generation?.xmlGenerationRuntimeConsumed, true);
+    assert.equal(generation.generation?.canonicalStructure?.root, "CanonicalXML");
   });
 
-  it("consumo exclusivo via Catalog + RulePackEngine Ports (não acessa stores)", async () => {
+  it("consumo exclusivo via Catalog + RulePackEngine + XMLGenerationRuntime Ports (não acessa stores)", async () => {
     const adapterSource = readFileSync(
       join(
         repoRoot,
@@ -369,12 +385,15 @@ describe("TISS-04 cadeia Enterprise / TISS Runtime / XML Runtime", () => {
     );
     assert.match(adapterSource, /getTISSCatalogPort/);
     assert.match(adapterSource, /getRulePackEnginePort/);
+    assert.match(adapterSource, /getXMLGenerationRuntimePort/);
     assert.match(adapterSource, /\.getCatalog\(/);
     assert.match(adapterSource, /\.executePack\(/);
     assert.equal(/InMemoryTISSCatalog/.test(adapterSource), false);
     assert.equal(/InMemoryRulePackEngineStore/.test(adapterSource), false);
+    assert.equal(/InMemoryXMLGenerationRuntimeStore/.test(adapterSource), false);
     assert.equal(/new DefaultTISSCatalogAdapter/.test(adapterSource), false);
     assert.equal(/new DefaultRulePackEngineAdapter/.test(adapterSource), false);
+    assert.equal(/new DefaultXMLGenerationAdapter/.test(adapterSource), false);
     assert.equal(/TUSS_CATALOG/.test(adapterSource), false);
     assert.equal(/tuss_procedures/.test(adapterSource), false);
     assert.equal(/DOMParser|XMLSerializer|XMLWriter|createElementNS/.test(adapterSource), false);

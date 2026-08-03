@@ -1,10 +1,10 @@
 /**
- * DefaultXMLRuntimeAdapter — TISS-04.
+ * DefaultXMLRuntimeAdapter — TISS-04 / TISS-05.
  *
  * Adapter oficial do Enterprise XML Runtime.
  * Sem geração XML real. Sem operadoras. Sem contratos. Sem tenants. Sem ANS.
  *
- * Consome exclusivamente TISSCatalogPort + RulePackEnginePort.
+ * Consome exclusivamente TISSCatalogPort + RulePackEnginePort + XMLGenerationRuntimePort.
  */
 import {
   DEFAULT_XML_RUNTIME_CAPABILITIES,
@@ -52,7 +52,8 @@ const FOUNDATION_CONFIGURATION: CanonicalXMLRuntimeConfiguration = {
   kind: "canonical-xml-runtime-configuration",
   mode: "foundation",
   priority: "NORMAL",
-  notes: "TISS-04 Enterprise XML Runtime Foundation — structural only; no real XML generation.",
+  notes:
+    "TISS-04/TISS-05 Enterprise XML Runtime — structural + canonical generation via XMLGenerationRuntimePort; no real XML.",
 };
 
 export type DefaultXMLRuntimeAdapterOptions = {
@@ -143,17 +144,23 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
           "Bypass / implementação paralela é proibida.",
       );
     }
+    if (!options.enterpriseDeps?.getXMLGenerationRuntimePort) {
+      throw new Error(
+        "DefaultXMLRuntimeAdapter exige enterpriseDeps.getXMLGenerationRuntimePort (TISS-05). " +
+          "Bypass / implementação paralela é proibida.",
+      );
+    }
     this.providerId = options.provider ?? "enterprise";
     this.healthy = options.healthy ?? true;
     this.message =
       options.message ??
-      `${this.providerId} XML Runtime ready (structural foundation — no real XML).`;
+      `${this.providerId} XML Runtime ready (structural + canonical generation — no real XML).`;
     this.metadata = {
       name: this.providerId === "default" ? "Default XML Runtime" : "Enterprise XML Runtime",
       version: DEFAULT_XML_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official TISS-04 Enterprise XML Runtime — structural generation via Catalog + RulePackEngine.",
+        "Official TISS-04/TISS-05 Enterprise XML Runtime — Catalog + RulePackEngine + XMLGenerationRuntimePort.",
     };
     this.store = options.store ?? new InMemoryXMLRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
@@ -183,6 +190,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
       supportsTelemetry: true,
       consumesTISSCatalogPort: true,
       consumesRulePackEnginePort: true,
+      consumesXMLGenerationRuntimePort: true,
       implementsRealXml: false,
       implementsOperatorDispatch: false,
       implementsAnsValidation: false,
@@ -208,6 +216,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
     const storeHealth = this.store.health();
     let tissCatalogOk = false;
     let rulePackEngineOk = false;
+    let xmlGenerationRuntimeOk = false;
     try {
       const catalogHealth = await this.enterpriseDeps.getTISSCatalogPort().health();
       tissCatalogOk = catalogHealth.ok === true;
@@ -220,7 +229,14 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
     } catch {
       rulePackEngineOk = false;
     }
-    const ok = this.healthy && storeHealth.ok && tissCatalogOk && rulePackEngineOk;
+    try {
+      const generationHealth = await this.enterpriseDeps.getXMLGenerationRuntimePort().health();
+      xmlGenerationRuntimeOk = generationHealth.ok === true;
+    } catch {
+      xmlGenerationRuntimeOk = false;
+    }
+    const ok =
+      this.healthy && storeHealth.ok && tissCatalogOk && rulePackEngineOk && xmlGenerationRuntimeOk;
     return {
       kind: "canonical-xml-provider-health",
       ok,
@@ -230,6 +246,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
       storedGenerationCount: this.store.generationCount(),
       tissCatalogOk,
       rulePackEngineOk,
+      xmlGenerationRuntimeOk,
       message: this.healthy ? (storeHealth.message ?? this.message) : "XML Runtime unhealthy.",
     };
   }
@@ -247,6 +264,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
         request,
         catalogConsumed: false,
         rulePackConsumed: false,
+        xmlGenerationRuntimeConsumed: false,
         realXmlGenerated: false,
         createdAt: stamp,
         updatedAt: stamp,
@@ -255,6 +273,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
 
       const catalogPort = this.enterpriseDeps.getTISSCatalogPort();
       const rulePackEnginePort = this.enterpriseDeps.getRulePackEnginePort();
+      const xmlGenerationRuntimePort = this.enterpriseDeps.getXMLGenerationRuntimePort();
 
       let catalogId: string | undefined;
       let catalogConsumed = false;
@@ -310,6 +329,61 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
         // Best-effort Rule Pack Engine — não bloqueia generate estrutural.
       }
 
+      let xmlGenerationResultId: string | undefined;
+      let xmlGenerationRuntimeConsumed = false;
+      let canonicalStructure: CanonicalXMLResult["canonicalStructure"];
+      try {
+        const generationResult = await xmlGenerationRuntimePort.generate({
+          requestId: input.requestId,
+          signal: readSignal(input),
+          timeoutMs: input.timeoutMs,
+          retryCount: input.retryCount,
+          attributes: input.attributes,
+          generationId,
+          documentId: request.documentId,
+          catalogId,
+          catalogConsumed,
+          rulePackExecutionId,
+          rulePackCode,
+          rulePackConsumed,
+          request: {
+            kind: "canonical-xml-generation-request",
+            requestId: input.requestId ?? request.requestId,
+            generationId,
+            documentId: request.documentId,
+            catalogId,
+            catalogConsumed,
+            rulePackExecutionId,
+            rulePackCode,
+            rulePackConsumed,
+            metadata: request.metadata
+              ? {
+                  kind: "canonical-xml-metadata",
+                  sessionId: request.metadata.sessionId,
+                  correlationId: request.metadata.correlationId,
+                  channel: request.metadata.channel,
+                  source: request.metadata.source ?? "xml-runtime",
+                  tags: ["tiss-05", "xml-runtime", ...(request.metadata.tags ?? [])],
+                  customAttributes: request.metadata.customAttributes,
+                }
+              : {
+                  kind: "canonical-xml-metadata",
+                  source: "xml-runtime",
+                  tags: ["tiss-05", "xml-runtime"],
+                },
+            structuralNotes:
+              "XMLRuntimePort → XMLGenerationRuntimePort canonical structure (TISS-05 — no real XML).",
+          },
+        });
+        if (generationResult.ok && generationResult.result) {
+          xmlGenerationResultId = generationResult.result.resultId;
+          xmlGenerationRuntimeConsumed = true;
+          canonicalStructure = generationResult.result.structure;
+        }
+      } catch {
+        // Best-effort XML Generation Runtime — não bloqueia generate estrutural.
+      }
+
       const result: CanonicalXMLResult = {
         kind: "canonical-xml-result",
         ok: true,
@@ -321,9 +395,13 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
         rulePackExecutionId,
         rulePackCode,
         rulePackConsumed,
+        xmlGenerationResultId,
+        canonicalStructure,
+        xmlGenerationRuntimeConsumed,
         realXmlGenerated: false,
         status: "completed",
-        message: "Structural XML generation completed (TISS-04 foundation — no real XML produced).",
+        message:
+          "Structural XML generation completed via XMLGenerationRuntimePort (TISS-05 — no real XML produced).",
         code: "XML_RUNTIME_STRUCTURAL_OK",
       };
 
@@ -336,6 +414,9 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
         rulePackExecutionId,
         rulePackCode,
         rulePackConsumed,
+        xmlGenerationResultId,
+        canonicalStructure,
+        xmlGenerationRuntimeConsumed,
         realXmlGenerated: false,
         message: result.message,
         code: result.code,
@@ -386,6 +467,9 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
           rulePackExecutionId: existing.rulePackExecutionId,
           rulePackCode: existing.rulePackCode,
           rulePackConsumed: existing.rulePackConsumed,
+          xmlGenerationResultId: existing.xmlGenerationResultId,
+          canonicalStructure: existing.canonicalStructure,
+          xmlGenerationRuntimeConsumed: existing.xmlGenerationRuntimeConsumed,
           realXmlGenerated: false,
           status: valid ? "validated" : "failed",
           message: valid
@@ -427,10 +511,11 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
         metadata: request.metadata,
         catalogConsumed: false,
         rulePackConsumed: false,
+        xmlGenerationRuntimeConsumed: false,
         realXmlGenerated: false,
         status: valid ? "validated" : "failed",
         message: valid
-          ? "Structural request validation passed (TISS-04 foundation)."
+          ? "Structural request validation passed (TISS-04/TISS-05 foundation)."
           : "Structural request validation failed.",
         code: valid ? "XML_RUNTIME_VALID" : "XML_RUNTIME_INVALID",
       };

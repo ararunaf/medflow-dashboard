@@ -7,9 +7,10 @@
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → TISS Runtime
  *     → TISSCatalogPort → RulePackEnginePort
- *     → XMLRuntimePort → Adapter → XML Store
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → Adapter → XML Generation Store → Canonical XML Result
  *
- * TISS-04: fundação estrutural apenas — sem geração XML real / operadoras / ANS.
+ * TISS-04/TISS-05: fundação estrutural + geração canônica — sem XML TISS/ANS real.
  */
 import type {
   CancelXMLInput,

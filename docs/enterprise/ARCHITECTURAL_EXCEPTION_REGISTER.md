@@ -54,7 +54,7 @@ A partir de ARCH-DEBT-01:
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
 | Enterprise Infrastructure | INF-01…INF-05, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
-| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A |
+| OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A, TISS-05 |
 | Integração Runtime | ARCH-01, ARCH-02 |
 | Gates / Auditorias | GATE-ARCH-02, GATE-ARCH-03, GATE-ARCH-03A, OCR-GATE-01, CLASS-GATE-01, STORAGE-GATE-01, SEARCH-GATE-01, TISS-CATALOG-GATE-01, TISS-RULE-GATE-01, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-XML-GATE-01, TISS-XML-GATE-01A |
 
@@ -85,17 +85,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **80** |
+| **Total de ressalvas registradas** | **82** |
 | Prioridade **Alta** | **14** |
 | Prioridade **Média** | **20** |
-| Prioridade **Baixa** | **46** |
+| Prioridade **Baixa** | **48** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02 + TISS-XML-GATE-01) | **5** |
-| Criticidade **Não bloqueante** | **75** |
+| Criticidade **Não bloqueante** | **77** |
 | Status **Resolvida** | **11** |
 | Status **Planejada** | **3** |
-| Status **Aceita** | **65** |
+| Status **Aceita** | **67** |
 | Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **69** |
+| Pendentes (Aberta + Aceita + Planejada) | **71** |
 
 ### Bloqueantes — estado atual
 
@@ -112,7 +112,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **TISS-XML-GATE-01A** reemite certificação oficial: **GO COM RESSALVAS** (ressalvas Baixa **AER-XMLRT-B1…B3**).  
 **AER-GA03-A4** / **AER-TISSCG-A1** **Resolvidas** (dual-path de conhecimento TISS/TUSS eliminado).  
 **AER-RPE-B2** / **AER-TISSCG-B1** / **AER-XMLG-T1** permanecem Resolvidas.  
-**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3** permanecem Aceitas (não bloqueantes / baixa prioridade).  
+**AER-RPEG-M1**, **AER-RPEG-B1…B2**, **AER-RPKG-B1…B2**, **AER-XMLRT-B1…B3**, **AER-XMLGEN-B1…B2** permanecem Aceitas (não bloqueantes / baixa prioridade).  
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).
@@ -121,10 +121,11 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 
 | Indicador | Valor | Critério |
 |-----------|------:|----------|
-| **XML Coverage** | **50%** | 1/2 fluxos XML na Enterprise Foundation (path estrutural Runtime ✓; MVP produto `xml-export-service` ✗) |
+| **XML Coverage** | **50%** | 1/2 fluxos XML na Enterprise Foundation (path estrutural+canônico Runtime ✓; MVP produto `xml-export-service` ✗) |
 | **XML Runtime Coverage** | **100%** | Infraestrutura oficial TISS-04 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
+| **XML Generation Runtime Coverage** | **100%** | Infraestrutura oficial TISS-05 completa (Port/Factory/Registry/Provider/Store/Models/Adapters/wiring) |
 | **XML Legacy Components** | **1** | `src/lib/services/tiss/xml-export-service.ts` (+ superfície produto/API/UI) |
-| **XML Enterprise Compliance** | **95%** | ECS-01 completo no módulo; desvios não bloqueantes **AER-XMLRT-B1…B3** |
+| **XML Enterprise Compliance** | **95%** | ECS-01 completo nos módulos XML; desvios não bloqueantes **AER-XMLRT-B1…B3** / **AER-XMLGEN-B1…B2** |
 
 ---
 
@@ -213,6 +214,8 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-XMLRT-B2 | Produto `xml-export-service` permanece fora do XML Runtime | TISS-04 | Architecture | Baixa | Não bloqueante | Aceita | Convergência futura / pós TISS-05 |
 | AER-XMLRT-B3 | Barrel exporta Store + `getStore()` no Adapter | TISS-04 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-XMLG-T1 | `tsc --noEmit` FAIL — 3× TS2352 no DefaultXMLRuntimeAdapter | TISS-XML-GATE-01 | Infrastructure | Alta | **Bloqueante** | **Resolvida** | XML-HOTFIX-01 |
+| AER-XMLGEN-B1 | Escape hatch `getXMLGenerationRuntimePort()` | TISS-05 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
+| AER-XMLGEN-B2 | Barrel exporta Store + `getStore()` no Adapter (Generation) | TISS-05 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -812,6 +815,27 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 10. **Roadmap:** **TISS-05 — Enterprise XML Generation Runtime oficialmente liberada**.  
 11. Documento: `docs/enterprise/TISS-XML-GATE-01A_XML_RUNTIME_RECERTIFICATION.md`.
 
+### Atualização TISS-05 (03/08/2026)
+
+1. **TISS-05 implementado** — Enterprise XML Generation Runtime (`src/lib/enterprise/xml-generation-runtime/`).  
+2. Cadeia oficial: Produto → Enterprise Runtime → TISS Runtime → `TISSCatalogPort` → `RulePackEnginePort` → `XMLRuntimePort` → `XMLGenerationRuntimePort` → Adapter → Store → Canonical XML Result.  
+3. Materialização canônica apenas — **`realXmlGenerated = false`** hardcoded; sem XML TISS/ANS/operadora.  
+4. **Novas ressalvas Baixa:** **AER-XMLGEN-B1…B2** (Aceitas, não bloqueantes).  
+5. **AER-XMLRT-B1…B3** permanecem Aceitas (sem regressão).  
+6. Indicador permanente novo: **XML Generation Runtime Coverage = 100%**.  
+7. Sprint **TISS-05 encerrada oficialmente**. Próxima Sprint recomendada: **TISS-XMLGEN-GATE-01**.  
+8. Documentos: `TISS-05_ENTERPRISE_XML_GENERATION_RUNTIME.md`, `TISS-05_XML_GENERATION_ARCHITECTURE.md`, `TISS-05_XML_GENERATION_CERTIFICATION.md`.
+
+#### AER-XMLGEN-B1
+- **Título:** Escape hatch `getXMLGenerationRuntimePort()`  
+- **Descrição:** Runtime expõe o Port diretamente (paralelo a `getXMLRuntimePort` / AER-XMLRT-B1). Cadeia oficial permanece Runtime → TISS Runtime → XMLRuntimePort → XMLGenerationRuntimePort.  
+- **Origem:** TISS-05 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
+
+#### AER-XMLGEN-B2
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Generation)  
+- **Descrição:** `xml-generation-runtime/index.ts` reexporta `InMemoryXMLGenerationRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-XMLRT-B3**.  
+- **Origem:** TISS-05 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
 ---
 
 ## 10. Controle de mudanças do registro
@@ -832,3 +856,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | TISS-XML-GATE-01 | Certificação XML Runtime (**NO-GO**); AER-XMLG-T1 Aberta/Bloqueante; indicadores XML permanentes; TISS-05 não liberado |
 | 03/08/2026 | XML-HOTFIX-01 | Gate TypeScript restaurado; AER-XMLG-T1 Resolvida; re-run TISS-XML-GATE-01 pendente antes de TISS-05 |
 | 03/08/2026 | TISS-XML-GATE-01A | Recertificação XML Runtime (**GO COM RESSALVAS**); AER-XMLG-T1 reconfirmada Resolvida; TISS-05 liberado |
+| 03/08/2026 | TISS-05 | Enterprise XML Generation Runtime; AER-XMLGEN-B1…B2; liberação TISS-XMLGEN-GATE-01 |
