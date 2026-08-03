@@ -25,6 +25,8 @@ export type {
   CanonicalRuleExecutionStatus,
   CanonicalRuleFinding,
   CanonicalRulePack,
+  CanonicalRulePackExpectedResult,
+  CanonicalRulePackMetadata,
   CanonicalRulePackStatus,
   CanonicalRuleSeverity,
   CanonicalRuleStatus,
@@ -137,6 +139,8 @@ export type ListPacksInput = RulePackEngineOperationalControls & {
   status?: string;
   tag?: string;
   codePrefix?: string;
+  /** Filtra por categoria estrutural do pack (TISS-03A). */
+  category?: string;
 };
 export type ListPacksResult = RulePackEngineOperationEnvelope & {
   packs: readonly CanonicalRulePack[];

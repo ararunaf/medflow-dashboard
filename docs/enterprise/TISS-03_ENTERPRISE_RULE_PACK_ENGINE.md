@@ -65,5 +65,6 @@ npm run enterprise:rule-pack-engine:test
 
 ## Próximo passo obrigatório
 
-Executar **TISS-RULE-GATE-01** antes de avançar para **TISS-03A — Enterprise Base Rule Packs**.
-Não implementar XML TISS nem integrações com operadoras nesta fase.
+**TISS-RULE-GATE-01** concluído (GO COM RESSALVAS).  
+**TISS-03A — Enterprise Base Rule Packs** implementado.  
+Próximo: **TISS-RULEPACK-GATE-01**. Não iniciar XML TISS nem regras de operadoras.

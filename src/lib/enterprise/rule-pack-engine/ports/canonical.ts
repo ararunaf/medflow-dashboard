@@ -1,5 +1,5 @@
 /**
- * Modelos canônicos do Enterprise Rule Pack Engine — TISS-03.
+ * Modelos canônicos do Enterprise Rule Pack Engine — TISS-03 / TISS-03A.
  *
  * Mecanismo genérico de interpretação/execução de Rule Packs.
  * Sem lógica de operadora, contrato, tenant, cooperativa, XML ou ANS.
@@ -37,6 +37,33 @@ export type CanonicalRuleExecutionStatus =
 
 /** Severidade estrutural opaca. */
 export type CanonicalRuleSeverity = "info" | "low" | "medium" | "high" | "critical" | (string & {});
+
+/**
+ * Metadata canônica do Rule Pack (TISS-03A).
+ * Estrutural — sem semântica de operadora/contrato/tenant.
+ */
+export type CanonicalRulePackMetadata = {
+  kind: "canonical-rule-pack-metadata";
+  namespace?: string;
+  channel?: string;
+  author?: string;
+  source?: string;
+  tags?: readonly string[];
+  customAttributes?: Readonly<Record<string, string | number | boolean | null>>;
+};
+
+/**
+ * Resultado esperado estrutural de um Rule Pack (TISS-03A).
+ * Usado para validação canônica pós-execução — sem regras de negócio.
+ */
+export type CanonicalRulePackExpectedResult = {
+  kind: "canonical-rule-pack-expected-result";
+  minRulesMatched?: number;
+  minFindings?: number;
+  status?: CanonicalRuleExecutionStatus;
+  expectedAttributeKeys?: readonly string[];
+  customAttributes?: Readonly<Record<string, string | number | boolean | null>>;
+};
 
 /**
  * Condição canônica — interpretada estruturalmente pelo Engine.
@@ -106,6 +133,9 @@ export type CanonicalRule = {
 /**
  * Rule Pack canônico — contêiner versionado de regras estruturais.
  * Não representa operadora, contrato, cooperativa ou tenant.
+ *
+ * TISS-03A: metadata, priority, categories, expectedResult,
+ * compatibleTissVersionCodes (códigos opacos do TISSCatalogPort).
  */
 export type CanonicalRulePack = {
   kind: "canonical-rule-pack";
@@ -115,6 +145,19 @@ export type CanonicalRulePack = {
   description?: string;
   status?: CanonicalRulePackStatus;
   version?: string;
+  /** Prioridade estrutural do pack (maior = mais prioritário). */
+  priority?: number;
+  /** Categorias estruturais genéricas (ex.: "existence", "compatibility"). */
+  categories?: readonly string[];
+  /** Metadata canônica do pack. */
+  metadata?: CanonicalRulePackMetadata;
+  /** Resultado esperado estrutural (validação canônica). */
+  expectedResult?: CanonicalRulePackExpectedResult;
+  /**
+   * Códigos opacos de versões TISS compatíveis — resolvidos exclusivamente
+   * via TISSCatalogPort (sem if/switch por versão).
+   */
+  compatibleTissVersionCodes?: readonly string[];
   rules: readonly CanonicalRule[];
   /** Perfis do catálogo referenciados (opacos — via TISSCatalogPort). */
   catalogProfileCodes?: readonly string[];
@@ -155,6 +198,8 @@ export type CanonicalRuleExecutionResult = {
   catalogId?: string;
   catalogConsumed: boolean;
   status: CanonicalRuleExecutionStatus;
+  /** Indica se o expectedResult estrutural do pack foi atendido (TISS-03A). */
+  expectedResultMet?: boolean;
   message?: string;
   code?: string;
 };

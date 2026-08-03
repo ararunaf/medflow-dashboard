@@ -1,11 +1,11 @@
 /**
- * DefaultRulePackEngineAdapter — TISS-03.
+ * DefaultRulePackEngineAdapter — TISS-03 / TISS-03A.
  *
  * Adapter oficial do Enterprise Rule Pack Engine.
  * Sem XML. Sem operadoras. Sem contratos. Sem tenants. Sem ANS.
  *
  * Implementa: load / interpret / execute, timeout, retry, cancelamento,
- * logging estrutural, telemetria estrutural.
+ * logging estrutural, telemetria estrutural, prioridade, expectedResult.
  * Conhecimento TISS exclusivamente via TISSCatalogPort.
  */
 import type { TISSCatalogPort } from "../../tiss-catalog/ports/tiss-catalog-port";
@@ -24,6 +24,7 @@ import type {
   CanonicalRuleExecutionResult,
   CanonicalRuleFinding,
   CanonicalRulePack,
+  CanonicalRulePackExpectedResult,
 } from "../ports/canonical";
 import type {
   ExecutePackInput,
@@ -97,6 +98,50 @@ function matchesList(pack: CanonicalRulePack, input: ListPacksInput): boolean {
   if (input.status != null && pack.status !== input.status) return false;
   if (input.tag != null && !(pack.tags ?? []).includes(input.tag)) return false;
   if (input.codePrefix != null && !pack.code.startsWith(input.codePrefix)) return false;
+  if (input.category != null && !(pack.categories ?? []).includes(input.category)) return false;
+  return true;
+}
+
+/** Ordena regras por prioridade decrescente (maior primeiro); empate estável por código. */
+function sortRulesByPriority(rules: readonly CanonicalRule[]): CanonicalRule[] {
+  return [...rules].sort((a, b) => {
+    const pa = a.priority ?? 0;
+    const pb = b.priority ?? 0;
+    if (pb !== pa) return pb - pa;
+    return a.code.localeCompare(b.code);
+  });
+}
+
+/**
+ * Avalia expectedResult estrutural do pack contra o resultado canônico.
+ * Sem semântica de negócio — apenas limiares estruturais.
+ */
+function evaluateExpectedResult(
+  expected: CanonicalRulePackExpectedResult | undefined,
+  result: Omit<CanonicalRuleExecutionResult, "expectedResultMet">,
+): boolean | undefined {
+  if (!expected) return undefined;
+
+  if (expected.minRulesMatched != null && result.rulesMatched < expected.minRulesMatched) {
+    return false;
+  }
+  if (expected.minFindings != null && result.findings.length < expected.minFindings) {
+    return false;
+  }
+  if (expected.status != null && result.status !== expected.status) {
+    return false;
+  }
+  if (expected.expectedAttributeKeys && expected.expectedAttributeKeys.length > 0) {
+    const presentKeys = new Set<string>();
+    for (const finding of result.findings) {
+      for (const key of Object.keys(finding.attributes ?? {})) {
+        presentKeys.add(key);
+      }
+    }
+    for (const key of expected.expectedAttributeKeys) {
+      if (!presentKeys.has(key)) return false;
+    }
+  }
   return true;
 }
 
@@ -330,7 +375,10 @@ export class DefaultRulePackEngineAdapter implements RulePackEnginePort {
 
   async listPacks(input: ListPacksInput = {}): Promise<ListPacksResult> {
     return this.runOperation("listPacks", input, async () => {
-      const packs = this.store.listPacks().filter((pack) => matchesList(pack, input));
+      const packs = this.store
+        .listPacks()
+        .filter((pack) => matchesList(pack, input))
+        .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
       return {
         ok: true,
         packs,
@@ -339,7 +387,6 @@ export class DefaultRulePackEngineAdapter implements RulePackEnginePort {
       };
     });
   }
-
   async interpretPack(input: InterpretPackInput): Promise<InterpretPackResult> {
     return this.runOperation("interpretPack", input, async () => {
       const pack = this.resolvePack(input.packId, input.code);
@@ -369,6 +416,11 @@ export class DefaultRulePackEngineAdapter implements RulePackEnginePort {
         for (const code of pack.catalogDomainCodes ?? []) {
           const domain = await catalog.getDomain({ code, requestId: input.requestId });
           if (domain.ok && domain.entry) resolvedCatalogCodes.push(code);
+        }
+        // Compatibilidade multi-versão: códigos opacos via TISSCatalogPort (sem if/switch versão).
+        for (const code of pack.compatibleTissVersionCodes ?? []) {
+          const version = await catalog.getVersion({ code, requestId: input.requestId });
+          if (version.ok && version.entry) resolvedCatalogCodes.push(code);
         }
         for (const rule of pack.rules) {
           for (const condition of rule.conditions) {
@@ -419,8 +471,8 @@ export class DefaultRulePackEngineAdapter implements RulePackEnginePort {
       let rulesMatched = 0;
       const findings: CanonicalRuleFinding[] = [];
 
-      const enabledRules = pack.rules.filter(
-        (rule) => rule.status == null || rule.status === "enabled",
+      const enabledRules = sortRulesByPriority(
+        pack.rules.filter((rule) => rule.status == null || rule.status === "enabled"),
       );
 
       for (const rule of enabledRules) {
@@ -445,8 +497,8 @@ export class DefaultRulePackEngineAdapter implements RulePackEnginePort {
         }
       }
 
-      const result: CanonicalRuleExecutionResult = {
-        kind: "canonical-rule-execution-result",
+      const resultBase = {
+        kind: "canonical-rule-execution-result" as const,
         ok: true,
         packId: pack.packId,
         packCode: pack.code,
@@ -455,9 +507,14 @@ export class DefaultRulePackEngineAdapter implements RulePackEnginePort {
         findings,
         catalogId,
         catalogConsumed,
-        status: "completed",
+        status: "completed" as const,
         message: "Rule pack executed structurally via TISSCatalogPort.",
         code: "RULE_PACK_ENGINE_OK",
+      };
+      const expectedResultMet = evaluateExpectedResult(pack.expectedResult, resultBase);
+      const result: CanonicalRuleExecutionResult = {
+        ...resultBase,
+        expectedResultMet,
       };
 
       const execution: CanonicalRuleExecution = {

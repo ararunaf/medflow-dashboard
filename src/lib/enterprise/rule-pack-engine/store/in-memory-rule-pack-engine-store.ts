@@ -9,7 +9,7 @@ import type {
   StoredRulePack,
   RulePackEngineStore,
 } from "./rule-pack-engine-store";
-import { MINIMAL_STRUCTURAL_RULE_PACKS } from "./seed";
+import { ALL_SEEDED_RULE_PACKS } from "./seed";
 
 export const IN_MEMORY_RULE_PACK_ENGINE_STORE_ID = "in-memory-rule-pack-engine";
 
@@ -19,7 +19,8 @@ export type InMemoryRulePackEngineStoreOptions = {
 };
 
 /**
- * Store de Rule Packs in-memory — exclusivo do Adapter (TISS-03).
+ * Store de Rule Packs in-memory — exclusivo do Adapter (TISS-03 / TISS-03A).
+ * Seed oficial: foundation + Enterprise Base Rule Packs.
  */
 export class InMemoryRulePackEngineStore implements RulePackEngineStore {
   readonly storeId = IN_MEMORY_RULE_PACK_ENGINE_STORE_ID;
@@ -31,7 +32,7 @@ export class InMemoryRulePackEngineStore implements RulePackEngineStore {
   constructor(options: InMemoryRulePackEngineStoreOptions = {}) {
     const seed = options.seedMinimalExamples !== false;
     if (seed) {
-      for (const pack of MINIMAL_STRUCTURAL_RULE_PACKS) this.setPack(pack);
+      for (const pack of ALL_SEEDED_RULE_PACKS) this.setPack(pack);
     }
     for (const pack of options.packs ?? []) this.setPack(pack);
   }

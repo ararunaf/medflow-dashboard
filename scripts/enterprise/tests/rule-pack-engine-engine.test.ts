@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
- * TISS-03 — Enterprise Rule Pack Engine
+ * TISS-03 / TISS-03A — Enterprise Rule Pack Engine + Base Rule Packs
  * Prova: Application → RulePackEnginePort → Adapter → Factory → Registry → Store
  *         + TISSCatalogPort (consumo exclusivo)
  *         + TISS Runtime + Enterprise Runtime
  *         + Modelos Canônicos / Resultado Canônico
+ *         + Enterprise Base Rule Packs (metadata / version / priority / tags /
+ *           conditions / actions / expectedResult / multi-version)
  *         + timeout / retry / cancelamento / erros
  *         + ausência de bypass / lógica específica de operadora/contrato/tenant
  */
@@ -14,11 +16,21 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  ALL_SEEDED_RULE_PACKS,
+  BASE_CANONICAL_COMPATIBILITY_PACK_CODE,
+  BASE_CATEGORY_EXISTENCE_PACK_CODE,
+  BASE_DOMAIN_EXISTENCE_PACK_CODE,
+  BASE_GUIDE_TYPE_EXISTENCE_PACK_CODE,
+  BASE_METADATA_PRESENCE_PACK_CODE,
+  BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE,
+  BASE_STRUCTURAL_CONSISTENCY_PACK_CODE,
   BUILTIN_RULE_PACK_ENGINE_PROVIDER_COUNT,
   DEFAULT_RULE_PACK_ENGINE_ADAPTER_ID,
   DEFAULT_RULE_PACK_ENGINE_CAPABILITIES,
   DEFAULT_STRUCTURAL_RULE_PACK_CODE,
   DefaultRulePackEngineAdapter,
+  ENTERPRISE_BASE_RULE_PACK_COUNT,
+  ENTERPRISE_BASE_RULE_PACKS,
   EnterpriseRulePackEngineAdapter,
   IN_MEMORY_RULE_PACK_ENGINE_STORE_ID,
   InMemoryRulePackEngineStore,
@@ -468,5 +480,192 @@ describe("TISS-03 auditoria — sem bypass / sem lógica de operadora/contrato/t
       if (/interface\s+RulePackEnginePort\b/.test(source)) offenders.push(file);
     }
     assert.deepEqual(offenders, []);
+  });
+});
+
+describe("TISS-03A Enterprise Base Rule Packs", () => {
+  const BASE_PACK_CODES = [
+    BASE_DOMAIN_EXISTENCE_PACK_CODE,
+    BASE_GUIDE_TYPE_EXISTENCE_PACK_CODE,
+    BASE_CATEGORY_EXISTENCE_PACK_CODE,
+    BASE_CANONICAL_COMPATIBILITY_PACK_CODE,
+    BASE_METADATA_PRESENCE_PACK_CODE,
+    BASE_STRUCTURAL_CONSISTENCY_PACK_CODE,
+    BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE,
+  ] as const;
+
+  it("seed inclui foundation + Base Rule Packs canônicos", () => {
+    assert.equal(ENTERPRISE_BASE_RULE_PACK_COUNT, 7);
+    assert.equal(ENTERPRISE_BASE_RULE_PACKS.length, 7);
+    assert.ok(ALL_SEEDED_RULE_PACKS.length >= 8);
+    assert.equal(ALL_SEEDED_RULE_PACKS[0]?.code, DEFAULT_STRUCTURAL_RULE_PACK_CODE);
+
+    const store = new InMemoryRulePackEngineStore();
+    assert.ok(store.packCount() >= 8);
+  });
+
+  it("cada Base Rule Pack possui metadata, version, priority, tags, categories, expectedResult", () => {
+    for (const pack of ENTERPRISE_BASE_RULE_PACKS) {
+      assert.equal(pack.kind, "canonical-rule-pack");
+      assert.equal(pack.status, "active");
+      assert.ok(typeof pack.version === "string" && pack.version.length > 0);
+      assert.ok(typeof pack.priority === "number");
+      assert.ok((pack.tags?.length ?? 0) >= 1);
+      assert.ok((pack.categories?.length ?? 0) >= 1);
+      assert.equal(pack.metadata?.kind, "canonical-rule-pack-metadata");
+      assert.equal(pack.expectedResult?.kind, "canonical-rule-pack-expected-result");
+      assert.ok((pack.compatibleTissVersionCodes?.length ?? 0) >= 1);
+      assert.ok(pack.rules.length >= 1);
+      assert.equal(pack.customAttributes?.generic, true);
+      assert.equal(pack.customAttributes?.operatorSpecific, false);
+      assert.equal(pack.customAttributes?.contractSpecific, false);
+      assert.equal(pack.customAttributes?.tenantSpecific, false);
+
+      for (const rule of pack.rules) {
+        assert.ok(rule.conditions.length >= 1);
+        assert.ok(rule.actions.length >= 1);
+        assert.ok(typeof rule.priority === "number");
+      }
+    }
+  });
+
+  it("interpretação e execução canônica de todos os Base Rule Packs via Port", async () => {
+    const { enterpriseDeps } = withCatalogDeps();
+    const port = createRulePackEnginePort({ provider: "enterprise", enterpriseDeps });
+
+    for (const code of BASE_PACK_CODES) {
+      const loaded = await port.loadPack({ code });
+      assert.equal(loaded.ok, true, `load ${code}`);
+      assert.equal(loaded.pack?.code, code);
+
+      const interpreted = await port.interpretPack({ code });
+      assert.equal(interpreted.ok, true, `interpret ${code}`);
+      assert.equal(interpreted.catalogConsumed, true, `catalogConsumed ${code}`);
+      assert.ok(
+        (interpreted.resolvedCatalogCodes?.length ?? 0) >= 1,
+        `resolved codes ${code}`,
+      );
+
+      const attrs =
+        code === BASE_METADATA_PRESENCE_PACK_CODE
+          ? { correlationId: "corr-tiss-03a" }
+          : undefined;
+      const executed = await port.executePack({ code, attributes: attrs });
+      assert.equal(executed.ok, true, `execute ${code}`);
+      assert.equal(executed.result?.kind, "canonical-rule-execution-result");
+      assert.equal(executed.execution?.kind, "canonical-rule-execution");
+      assert.equal(executed.result?.catalogConsumed, true);
+      assert.ok((executed.result?.rulesEvaluated ?? 0) >= 1);
+      assert.ok((executed.result?.rulesMatched ?? 0) >= 1);
+      assert.ok((executed.result?.findings.length ?? 0) >= 1);
+      assert.equal(executed.result?.expectedResultMet, true, `expectedResultMet ${code}`);
+    }
+  });
+
+  it("prioridade ordena packs e regras; tags e categories filtram", async () => {
+    const { enterpriseDeps } = withCatalogDeps();
+    const port = createRulePackEnginePort({ provider: "enterprise", enterpriseDeps });
+
+    const listed = await port.listPacks({ tag: "base" });
+    assert.equal(listed.ok, true);
+    assert.ok(listed.packs.length >= 7);
+    for (let i = 1; i < listed.packs.length; i++) {
+      assert.ok(
+        (listed.packs[i - 1]?.priority ?? 0) >= (listed.packs[i]?.priority ?? 0),
+        "packs sorted by priority desc",
+      );
+    }
+
+    const byCategory = await port.listPacks({ category: "existence" });
+    assert.equal(byCategory.ok, true);
+    assert.ok(byCategory.packs.length >= 3);
+    for (const pack of byCategory.packs) {
+      assert.ok((pack.categories ?? []).includes("existence"));
+    }
+
+    const executed = await port.executePack({ code: BASE_DOMAIN_EXISTENCE_PACK_CODE });
+    assert.equal(executed.ok, true);
+    const findingCodes = executed.result?.findings.map((f) => f.ruleCode) ?? [];
+    assert.equal(findingCodes[0], "BASE-DOMAIN-AMBULATORIAL-EXISTS");
+  });
+
+  it("compatibilidade multi-versão resolve códigos via TISSCatalogPort", async () => {
+    const { enterpriseDeps } = withCatalogDeps();
+    const port = createRulePackEnginePort({ provider: "enterprise", enterpriseDeps });
+
+    const interpreted = await port.interpretPack({
+      code: BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE,
+    });
+    assert.equal(interpreted.ok, true);
+    assert.ok(interpreted.resolvedCatalogCodes?.includes("tiss-4.01.00"));
+    assert.ok(interpreted.resolvedCatalogCodes?.includes("tiss-3.05.00"));
+
+    const executed = await port.executePack({
+      code: BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE,
+    });
+    assert.equal(executed.ok, true);
+    assert.equal(executed.result?.expectedResultMet, true);
+    assert.ok(
+      executed.result?.findings.some(
+        (f) => f.attributes?.multiVersionCompatibilityOk === true,
+      ),
+    );
+  });
+
+  it("Base Rule Packs consomem exclusivamente TISSCatalogPort e Runtime integra", async () => {
+    const { enterpriseDeps } = withCatalogDeps();
+    const port = createRulePackEnginePort({ provider: "enterprise", enterpriseDeps });
+
+    const seedSource = readFileSync(
+      join(repoRoot, "src/lib/enterprise/rule-pack-engine/store/base-rule-packs.ts"),
+      "utf8",
+    );
+    const codeWithoutComments = seedSource
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    assert.equal(/TUSS_CATALOG/.test(codeWithoutComments), false);
+    assert.equal(/tuss_procedures/.test(codeWithoutComments), false);
+    assert.equal(/unimed/i.test(codeWithoutComments), false);
+    assert.equal(/hapvida/i.test(codeWithoutComments), false);
+    assert.equal(/bradesco/i.test(codeWithoutComments), false);
+    assert.equal(/operadora\s*===/i.test(codeWithoutComments), false);
+    assert.equal(/contrato\s*===/i.test(codeWithoutComments), false);
+    assert.equal(/tenant\s*===/i.test(codeWithoutComments), false);
+
+    for (const code of BASE_PACK_CODES) {
+      const executed = await port.executePack({
+        code,
+        attributes:
+          code === BASE_METADATA_PRESENCE_PACK_CODE
+            ? { correlationId: "corr-runtime" }
+            : undefined,
+      });
+      assert.equal(executed.result?.catalogConsumed, true, code);
+    }
+
+    resetEnterpriseRuntimeForTests();
+    const runtime = createEnterpriseRuntime({ runtimeId: "test-tiss-03a" });
+    const engine = runtime.getRulePackEnginePort();
+    const packs = await engine.listPacks({ tag: "tiss-03a" });
+    assert.equal(packs.ok, true);
+    assert.ok(packs.packs.length >= 7);
+    assert.equal(runtime.getTISSRuntimePort().capabilities().usesRulePackEnginePort, true);
+    assert.equal(runtime.getTISSRuntimePort().capabilities().usesTISSCatalogPort, true);
+  });
+
+  it("não existe Base Rule Pack específico de operadora/contrato/tenant", () => {
+    for (const pack of ALL_SEEDED_RULE_PACKS) {
+      const blob = JSON.stringify(pack).toLowerCase();
+      assert.equal(blob.includes("unimed"), false, pack.code);
+      assert.equal(blob.includes("hapvida"), false, pack.code);
+      assert.equal(blob.includes("bradesco"), false, pack.code);
+      assert.equal(/\boperadora\b/.test(blob), false, pack.code);
+      assert.equal(/\bcontrato\b/.test(blob), false, pack.code);
+      assert.equal(/\bcooperativa\b/.test(blob), false, pack.code);
+      assert.equal(/"tenantid"|tenant\s*===|if\s*\(\s*tenant/.test(blob), false, pack.code);
+      assert.equal(pack.customAttributes?.operatorSpecific, false, pack.code);
+      assert.equal(pack.customAttributes?.contractSpecific, false, pack.code);
+      assert.equal(pack.customAttributes?.tenantSpecific, false, pack.code);
+    }
   });
 });

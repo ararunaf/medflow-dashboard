@@ -1,0 +1,697 @@
+/**
+ * Enterprise Base Rule Packs — TISS-03A.
+ *
+ * Rule Packs canônicos genéricos de referência.
+ * Todo conhecimento TISS vem exclusivamente de códigos opacos resolvidos
+ * via TISSCatalogPort (seed mínimo do catálogo).
+ *
+ * Proibido: operadora, contrato, tenant, XML, ANS, Capture, HTTP, banco.
+ */
+import type { CanonicalRulePack } from "../ports/canonical";
+
+/** Códigos canônicos dos Base Rule Packs (TISS-03A). */
+export const BASE_DOMAIN_EXISTENCE_PACK_CODE = "base-domain-existence-pack";
+export const BASE_GUIDE_TYPE_EXISTENCE_PACK_CODE = "base-guide-type-existence-pack";
+export const BASE_CATEGORY_EXISTENCE_PACK_CODE = "base-category-existence-pack";
+export const BASE_CANONICAL_COMPATIBILITY_PACK_CODE = "base-canonical-compatibility-pack";
+export const BASE_METADATA_PRESENCE_PACK_CODE = "base-metadata-presence-pack";
+export const BASE_STRUCTURAL_CONSISTENCY_PACK_CODE = "base-structural-consistency-pack";
+export const BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE = "base-multi-version-compatibility-pack";
+
+/**
+ * Conjunto oficial de Enterprise Base Rule Packs (TISS-03A).
+ * Ordem: packs base primeiro; foundation estrutural permanece em seed.ts.
+ */
+export const ENTERPRISE_BASE_RULE_PACKS: readonly CanonicalRulePack[] = [
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-domain-existence",
+    code: BASE_DOMAIN_EXISTENCE_PACK_CODE,
+    name: "Base Domain Existence Pack",
+    description: "Verifica existência estrutural de domínios canônicos via TISSCatalogPort.",
+    status: "active",
+    version: "1.0.0",
+    priority: 900,
+    categories: ["existence", "domain", "base"],
+    tags: ["base", "tiss-03a", "domain", "existence"],
+    catalogDomainCodes: ["domain-ambulatorial", "domain-hospitalar"],
+    compatibleTissVersionCodes: ["tiss-4.01.00", "tiss-3.05.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "domain"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 2,
+      minFindings: 2,
+      status: "completed",
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-domain-ambulatorial-exists",
+        code: "BASE-DOMAIN-AMBULATORIAL-EXISTS",
+        name: "Ambulatorial domain exists in catalog",
+        description: "Domínio ambulatorial resolvido via TISSCatalogPort.",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["domain", "existence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-domain-ambulatorial",
+            name: "Domain ambulatorial exists",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "domain",
+            catalogCode: "domain-ambulatorial",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-domain-ambulatorial-ok",
+            name: "Emit domain existence finding",
+            actionType: "emit-finding",
+            message: "Canonical domain domain-ambulatorial resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+      {
+        kind: "canonical-rule",
+        id: "rule-domain-hospitalar-exists",
+        code: "BASE-DOMAIN-HOSPITALAR-EXISTS",
+        name: "Hospitalar domain exists in catalog",
+        description: "Domínio hospitalar resolvido via TISSCatalogPort.",
+        status: "enabled",
+        priority: 90,
+        severity: "info",
+        tags: ["domain", "existence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-domain-hospitalar",
+            name: "Domain hospitalar exists",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "domain",
+            catalogCode: "domain-hospitalar",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-domain-hospitalar-ok",
+            name: "Emit domain existence finding",
+            actionType: "emit-finding",
+            message: "Canonical domain domain-hospitalar resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-guide-type-existence",
+    code: BASE_GUIDE_TYPE_EXISTENCE_PACK_CODE,
+    name: "Base Guide Type Existence Pack",
+    description: "Verifica existência estrutural de tipos de guia canônicos via TISSCatalogPort.",
+    status: "active",
+    version: "1.0.0",
+    priority: 880,
+    categories: ["existence", "guide-type", "base"],
+    tags: ["base", "tiss-03a", "guide-type", "existence"],
+    compatibleTissVersionCodes: ["tiss-4.01.00", "tiss-3.05.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "guide-type"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 2,
+      minFindings: 2,
+      status: "completed",
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-guide-consulta-exists",
+        code: "BASE-GUIDE-CONSULTA-EXISTS",
+        name: "Guide type consulta exists",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["guide-type", "existence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-guide-consulta",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "guide-type",
+            catalogCode: "guia-consulta",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-guide-consulta-ok",
+            actionType: "emit-finding",
+            message: "Canonical guide-type guia-consulta resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+      {
+        kind: "canonical-rule",
+        id: "rule-guide-sadt-exists",
+        code: "BASE-GUIDE-SADT-EXISTS",
+        name: "Guide type SADT exists",
+        status: "enabled",
+        priority: 90,
+        severity: "info",
+        tags: ["guide-type", "existence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-guide-sadt",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "guide-type",
+            catalogCode: "guia-sadt",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-guide-sadt-ok",
+            actionType: "emit-finding",
+            message: "Canonical guide-type guia-sadt resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-category-existence",
+    code: BASE_CATEGORY_EXISTENCE_PACK_CODE,
+    name: "Base Category Existence Pack",
+    description:
+      "Verifica existência estrutural de categorias/vocabulário canônicos via TISSCatalogPort.",
+    status: "active",
+    version: "1.0.0",
+    priority: 860,
+    categories: ["existence", "category", "vocabulary", "base"],
+    tags: ["base", "tiss-03a", "category", "vocabulary", "existence"],
+    compatibleTissVersionCodes: ["tiss-4.01.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "category"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 2,
+      minFindings: 2,
+      status: "completed",
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-vocab-patient-name-exists",
+        code: "BASE-CATEGORY-PATIENT-NAME-EXISTS",
+        name: "Vocabulary category entry patient.name exists",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["category", "vocabulary", "existence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-vocab-patient-name",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "vocabulary-entry",
+            catalogCode: "vocab.patient.name",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-vocab-patient-ok",
+            actionType: "emit-finding",
+            message: "Canonical vocabulary entry vocab.patient.name resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+      {
+        kind: "canonical-rule",
+        id: "rule-vocab-procedure-code-exists",
+        code: "BASE-CATEGORY-PROCEDURE-CODE-EXISTS",
+        name: "Vocabulary category entry procedure.code exists",
+        status: "enabled",
+        priority: 90,
+        severity: "info",
+        tags: ["category", "vocabulary", "existence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-vocab-procedure-code",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "vocabulary-entry",
+            catalogCode: "vocab.procedure.code",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-vocab-procedure-ok",
+            actionType: "emit-finding",
+            message:
+              "Canonical vocabulary entry vocab.procedure.code resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-canonical-compatibility",
+    code: BASE_CANONICAL_COMPATIBILITY_PACK_CODE,
+    name: "Base Canonical Compatibility Pack",
+    description:
+      "Verifica compatibilidade estrutural entre elementos canônicos (guia, domínio, perfil, procedimento).",
+    status: "active",
+    version: "1.0.0",
+    priority: 840,
+    categories: ["compatibility", "canonical", "base"],
+    tags: ["base", "tiss-03a", "compatibility", "canonical"],
+    catalogProfileCodes: ["profile-structural-default"],
+    catalogDomainCodes: ["domain-ambulatorial"],
+    compatibleTissVersionCodes: ["tiss-4.01.00", "tiss-3.05.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "compatibility"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 1,
+      minFindings: 1,
+      status: "completed",
+      expectedAttributeKeys: ["canonicalCompatibilityOk"],
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-canonical-elements-compatible",
+        code: "BASE-CANONICAL-ELEMENTS-COMPATIBLE",
+        name: "Canonical guide, domain, profile and procedure coexist",
+        description:
+          "Condições conjuntas: guide-type + domain + profile + procedure-type existem no catálogo.",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["compatibility", "canonical"],
+        catalogProfileCodes: ["profile-structural-default"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-compat-guide",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "guide-type",
+            catalogCode: "guia-consulta",
+          },
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-compat-domain",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "domain",
+            catalogCode: "domain-ambulatorial",
+          },
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-compat-profile",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "profile",
+            catalogCode: "profile-structural-default",
+          },
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-compat-procedure",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "procedure-type",
+            catalogCode: "procedure-generic",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-compat-ok",
+            actionType: "record-attribute",
+            attributeKey: "canonicalCompatibilityOk",
+            attributeValue: true,
+            message: "Canonical elements are structurally compatible via TISSCatalogPort.",
+            severity: "info",
+          },
+          {
+            kind: "canonical-rule-action",
+            id: "act-compat-finding",
+            actionType: "emit-finding",
+            message: "Guide/domain/profile/procedure coexistence verified via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-metadata-presence",
+    code: BASE_METADATA_PRESENCE_PACK_CODE,
+    name: "Base Metadata Presence Pack",
+    description: "Verifica presença estrutural de metadados de contexto (atributos genéricos).",
+    status: "active",
+    version: "1.0.0",
+    priority: 820,
+    categories: ["metadata", "presence", "base"],
+    tags: ["base", "tiss-03a", "metadata", "presence"],
+    compatibleTissVersionCodes: ["tiss-4.01.00", "tiss-3.05.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "metadata"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 1,
+      minFindings: 1,
+      status: "completed",
+      expectedAttributeKeys: ["metadataPresenceChecked"],
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-metadata-correlation-present",
+        code: "BASE-METADATA-CORRELATION-PRESENT",
+        name: "Context metadata correlationId present",
+        description:
+          "Condição metadata-attribute-present — atributo genérico de contexto (sem domínio).",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["metadata", "presence"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-metadata-correlation",
+            conditionType: "metadata-attribute-present",
+            metadataKey: "correlationId",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-metadata-ok",
+            actionType: "record-attribute",
+            attributeKey: "metadataPresenceChecked",
+            attributeValue: true,
+            message: "Context metadata correlationId present.",
+            severity: "info",
+          },
+        ],
+      },
+      {
+        kind: "canonical-rule",
+        id: "rule-metadata-always-baseline",
+        code: "BASE-METADATA-BASELINE",
+        name: "Always record metadata baseline",
+        description: "Baseline estrutural — executa mesmo sem metadata de contexto.",
+        status: "enabled",
+        priority: 10,
+        severity: "info",
+        tags: ["metadata", "baseline"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-metadata-always",
+            conditionType: "always",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-metadata-baseline",
+            actionType: "emit-finding",
+            message: "Metadata presence pack baseline executed.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-structural-consistency",
+    code: BASE_STRUCTURAL_CONSISTENCY_PACK_CODE,
+    name: "Base Structural Consistency Pack",
+    description:
+      "Verifica consistência estrutural: perfil, domínio, grupo e tipo de procedimento coexistentes.",
+    status: "active",
+    version: "1.0.0",
+    priority: 800,
+    categories: ["consistency", "structural", "base"],
+    tags: ["base", "tiss-03a", "consistency", "structural"],
+    catalogProfileCodes: ["profile-structural-default"],
+    catalogDomainCodes: ["domain-ambulatorial"],
+    compatibleTissVersionCodes: ["tiss-4.01.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "consistency"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 1,
+      minFindings: 1,
+      status: "completed",
+      expectedAttributeKeys: ["structuralConsistencyOk"],
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-structural-consistency",
+        code: "BASE-STRUCTURAL-CONSISTENCY",
+        name: "Profile, domain, procedure group and type are consistent",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["consistency", "structural"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-struct-profile",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "profile",
+            catalogCode: "profile-structural-default",
+          },
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-struct-domain",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "domain",
+            catalogCode: "domain-ambulatorial",
+          },
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-struct-group",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "procedure-group",
+            catalogCode: "group-consulta",
+          },
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-struct-procedure",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "procedure-type",
+            catalogCode: "procedure-generic",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-struct-ok",
+            actionType: "record-attribute",
+            attributeKey: "structuralConsistencyOk",
+            attributeValue: true,
+            message: "Structural consistency verified via TISSCatalogPort.",
+            severity: "info",
+          },
+          {
+            kind: "canonical-rule-action",
+            id: "act-struct-status",
+            actionType: "set-status",
+            attributeValue: "structurally-consistent",
+            message: "Structural consistency status recorded.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    kind: "canonical-rule-pack",
+    packId: "pack-base-multi-version-compatibility",
+    code: BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE,
+    name: "Base Multi-Version Compatibility Pack",
+    description:
+      "Verifica compatibilidade estrutural com múltiplas versões TISS via códigos opacos do catálogo.",
+    status: "active",
+    version: "1.0.0",
+    priority: 780,
+    categories: ["compatibility", "version", "base"],
+    tags: ["base", "tiss-03a", "version", "compatibility", "multi-version"],
+    compatibleTissVersionCodes: ["tiss-4.01.00", "tiss-3.05.00"],
+    metadata: {
+      kind: "canonical-rule-pack-metadata",
+      namespace: "enterprise.tiss.rule-packs.base",
+      channel: "foundation",
+      source: "tiss-03a",
+      tags: ["base", "multi-version"],
+      customAttributes: { packSet: "enterprise-base", knowledgeSource: "TISSCatalogPort" },
+    },
+    expectedResult: {
+      kind: "canonical-rule-pack-expected-result",
+      minRulesMatched: 2,
+      minFindings: 2,
+      status: "completed",
+      expectedAttributeKeys: ["multiVersionCompatibilityOk"],
+    },
+    customAttributes: {
+      generic: true,
+      operatorSpecific: false,
+      contractSpecific: false,
+      tenantSpecific: false,
+    },
+    rules: [
+      {
+        kind: "canonical-rule",
+        id: "rule-version-401-exists",
+        code: "BASE-VERSION-401-EXISTS",
+        name: "TISS version 4.01.00 exists in catalog",
+        status: "enabled",
+        priority: 100,
+        severity: "info",
+        tags: ["version", "compatibility"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-version-401",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "version",
+            catalogCode: "tiss-4.01.00",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-version-401-ok",
+            actionType: "emit-finding",
+            message: "Canonical TISS version tiss-4.01.00 resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+      {
+        kind: "canonical-rule",
+        id: "rule-version-305-exists",
+        code: "BASE-VERSION-305-EXISTS",
+        name: "TISS version 3.05.00 exists in catalog",
+        status: "enabled",
+        priority: 90,
+        severity: "info",
+        tags: ["version", "compatibility"],
+        conditions: [
+          {
+            kind: "canonical-rule-condition",
+            id: "cond-version-305",
+            conditionType: "catalog-entry-exists",
+            catalogEntryKind: "version",
+            catalogCode: "tiss-3.05.00",
+          },
+        ],
+        actions: [
+          {
+            kind: "canonical-rule-action",
+            id: "act-version-305-ok",
+            actionType: "record-attribute",
+            attributeKey: "multiVersionCompatibilityOk",
+            attributeValue: true,
+            message: "Canonical TISS version tiss-3.05.00 resolved via TISSCatalogPort.",
+            severity: "info",
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export const ENTERPRISE_BASE_RULE_PACK_COUNT = ENTERPRISE_BASE_RULE_PACKS.length;

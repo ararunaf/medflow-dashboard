@@ -9,6 +9,8 @@ export type {
   CanonicalRuleExecutionStatus,
   CanonicalRuleFinding,
   CanonicalRulePack,
+  CanonicalRulePackExpectedResult,
+  CanonicalRulePackMetadata,
   CanonicalRulePackStatus,
   CanonicalRuleSeverity,
   CanonicalRuleStatus,

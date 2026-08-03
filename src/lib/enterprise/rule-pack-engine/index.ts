@@ -21,6 +21,8 @@ export type {
   CanonicalRuleExecutionStatus,
   CanonicalRuleFinding,
   CanonicalRulePack,
+  CanonicalRulePackExpectedResult,
+  CanonicalRulePackMetadata,
   CanonicalRulePackStatus,
   CanonicalRuleSeverity,
   CanonicalRuleStatus,
@@ -91,10 +93,21 @@ export {
 } from "./registry";
 
 export {
+  ALL_SEEDED_RULE_PACKS,
+  BASE_CANONICAL_COMPATIBILITY_PACK_CODE,
+  BASE_CATEGORY_EXISTENCE_PACK_CODE,
+  BASE_DOMAIN_EXISTENCE_PACK_CODE,
+  BASE_GUIDE_TYPE_EXISTENCE_PACK_CODE,
+  BASE_METADATA_PRESENCE_PACK_CODE,
+  BASE_MULTI_VERSION_COMPATIBILITY_PACK_CODE,
+  BASE_STRUCTURAL_CONSISTENCY_PACK_CODE,
   DEFAULT_STRUCTURAL_RULE_PACK_CODE,
+  ENTERPRISE_BASE_RULE_PACK_COUNT,
+  ENTERPRISE_BASE_RULE_PACKS,
   IN_MEMORY_RULE_PACK_ENGINE_STORE_ID,
   InMemoryRulePackEngineStore,
   MINIMAL_STRUCTURAL_RULE_PACKS,
+  STRUCTURAL_FOUNDATION_RULE_PACK,
   type InMemoryRulePackEngineStoreOptions,
   type RulePackEngineStore,
 } from "./store";
