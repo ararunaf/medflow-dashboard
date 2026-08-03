@@ -124,6 +124,7 @@ export class MockPersistentQueueRuntimeAdapter implements PersistentQueueRuntime
       usesWorkerRuntimePort: true,
       usesSchedulerRuntimePort: true,
       usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       ...{
         realPersistentBackend: false as const,

@@ -26,6 +26,7 @@ export type WorkerRuntimeCapabilities = {
   usesPersistentQueueRuntimePort?: boolean;
   /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
   usesObservabilityRuntimePort?: boolean;
+  usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
   realWorkers?: false;
   tasksExecuted?: false;
@@ -81,6 +82,7 @@ export const DEFAULT_WORKER_RUNTIME_CAPABILITIES: WorkerRuntimeCapabilities = {
   usesSchedulerRuntimePort: true,
   usesPersistentQueueRuntimePort: true,
   usesObservabilityRuntimePort: true,
+  usesScalabilityRuntimePort: true,
   runtimeReady: true,
   realWorkers: false,
   tasksExecuted: false,

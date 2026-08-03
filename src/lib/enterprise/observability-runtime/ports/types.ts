@@ -13,6 +13,7 @@ import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtim
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { TISSRuntimePort } from "../../tiss-runtime/ports/tiss-runtime-port";
+import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type {
   CanonicalObservabilityScope,
   CanonicalObservabilityCapabilities,
@@ -88,6 +89,7 @@ export type ObservabilityRuntimePortCapabilities = {
   usesSchedulerRuntimePort: boolean;
   usesPersistentQueueRuntimePort: boolean;
   usesTISSRuntimePort: boolean;
+  usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
   realObservabilityBackend: false;
   openTelemetryImplemented: false;
@@ -254,6 +256,8 @@ export type ObservabilityRuntimeEnterpriseDeps = {
   getSchedulerRuntimePort(): SchedulerRuntimePort;
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort;
   getTISSRuntimePort(): TISSRuntimePort;
+  /** INF-10 — Scalability Runtime preparado (sem consumo funcional). */
+  getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };
 
 /** Opções de resolução do ObservabilityRuntimePort. */

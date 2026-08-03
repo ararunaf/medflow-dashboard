@@ -161,6 +161,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
       usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,
@@ -203,9 +204,10 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     let schedulerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
     let observabilityRuntimeOk = true;
+    let scalabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-06 / INF-07 / INF-08 / INF-09: deps preparadas — valida Port sem chamar health()
-      // (evita ciclo Queue.health ↔ Worker/Scheduler/PersistentQueue/Observability.health).
+      // INF-06 / INF-07 / INF-08 / INF-09 / INF-10: deps preparadas — valida Port sem chamar health()
+      // (evita ciclo Queue.health ↔ Worker/Scheduler/PersistentQueue/Observability/Scalability.health).
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       workerRuntimeOk =
         !!workerPort &&
@@ -232,6 +234,13 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
           typeof observabilityPort.health === "function" &&
           typeof observabilityPort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
+        const scalabilityPort = this.enterpriseDeps.getScalabilityRuntimePort();
+        scalabilityRuntimeOk =
+          !!scalabilityPort &&
+          typeof scalabilityPort.health === "function" &&
+          typeof scalabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
@@ -239,7 +248,8 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       workerRuntimeOk &&
       schedulerRuntimeOk &&
       persistentQueueRuntimeOk &&
-      observabilityRuntimeOk;
+      observabilityRuntimeOk &&
+      scalabilityRuntimeOk;
     return {
       kind: "canonical-queue-health",
       ok,
@@ -252,6 +262,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       schedulerRuntimeOk,
       persistentQueueRuntimeOk,
       observabilityRuntimeOk,
+      scalabilityRuntimeOk,
       runtimeReady: true,
       realQueueBackend: false,
       messagesPublished: false,

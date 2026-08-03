@@ -28,6 +28,7 @@ export type QueueRuntimeCapabilities = {
   usesPersistentQueueRuntimePort?: boolean;
   /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
   usesObservabilityRuntimePort?: boolean;
+  usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
   realQueueBackend?: false;
   messagesPublished?: false;
@@ -81,6 +82,7 @@ export const DEFAULT_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   usesSchedulerRuntimePort: true,
   usesPersistentQueueRuntimePort: true,
   usesObservabilityRuntimePort: true,
+  usesScalabilityRuntimePort: true,
   runtimeReady: true,
   realQueueBackend: false,
   messagesPublished: false,

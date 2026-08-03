@@ -215,6 +215,7 @@ export type CanonicalPersistentQueueHealth = {
   schedulerRuntimeOk?: boolean;
   /** INF-09 — prontidão estrutural do Observability Runtime (dependência preparada). */
   observabilityRuntimeOk?: boolean;
+  scalabilityRuntimeOk?: boolean;
   runtimeReady: true;
   realPersistentBackend: false;
   rabbitMqImplemented: false;

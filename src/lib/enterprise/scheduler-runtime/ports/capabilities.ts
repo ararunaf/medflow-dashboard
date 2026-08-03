@@ -25,6 +25,7 @@ export type SchedulerRuntimeCapabilities = {
   usesPersistentQueueRuntimePort?: boolean;
   /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
   usesObservabilityRuntimePort?: boolean;
+  usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
   realScheduler?: false;
   cronImplemented?: false;
@@ -93,6 +94,7 @@ export const DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilitie
   usesWorkerRuntimePort: true,
   usesPersistentQueueRuntimePort: true,
   usesObservabilityRuntimePort: true,
+  usesScalabilityRuntimePort: true,
   runtimeReady: true,
   realScheduler: false,
   cronImplemented: false,

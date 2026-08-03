@@ -69,6 +69,7 @@ function foundationCapabilities(): TISSRuntimeCapabilities {
     usesSchedulerRuntimePort: true,
     usesPersistentQueueRuntimePort: true,
     usesObservabilityRuntimePort: true,
+    usesScalabilityRuntimePort: true,
     implementsRealXml: false,
     implementsOperatorDispatch: false,
   };
@@ -161,6 +162,11 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getObservabilityRuntimePort (INF-09).",
       );
     }
+    if (typeof options.enterpriseDeps.getScalabilityRuntimePort !== "function") {
+      throw new Error(
+        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getScalabilityRuntimePort (INF-10).",
+      );
+    }
     this.enterpriseDeps = options.enterpriseDeps;
     this.store = options.store ?? new InMemoryTISSRuntimeStore();
     this.ping = options.ping;
@@ -201,6 +207,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     const schedulerRuntimePort = this.enterpriseDeps.getSchedulerRuntimePort();
     const persistentQueueRuntimePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
     const observabilityRuntimePort = this.enterpriseDeps.getObservabilityRuntimePort();
+    const scalabilityRuntimePort = this.enterpriseDeps.getScalabilityRuntimePort();
     const [
       orchestratorHealth,
       tissProviderHealth,
@@ -218,6 +225,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       schedulerRuntimeHealth,
       persistentQueueRuntimeHealth,
       observabilityRuntimeHealth,
+      scalabilityRuntimeHealth,
     ] = await Promise.all([
       this.enterpriseDeps.getOrchestratorPort().health(),
       this.enterpriseDeps.getTISSProviderPort().health(),
@@ -235,6 +243,7 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       schedulerRuntimePort.health(),
       persistentQueueRuntimePort.health(),
       observabilityRuntimePort.health(),
+      scalabilityRuntimePort.health(),
     ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
     const ok =
@@ -254,7 +263,8 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       workerRuntimeHealth.ok &&
       schedulerRuntimeHealth.ok &&
       persistentQueueRuntimeHealth.ok &&
-      observabilityRuntimeHealth.ok;
+      observabilityRuntimeHealth.ok &&
+      scalabilityRuntimeHealth.ok;
 
     return {
       ok,
@@ -276,8 +286,9 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       schedulerRuntimeOk: schedulerRuntimeHealth.ok,
       persistentQueueRuntimeOk: persistentQueueRuntimeHealth.ok,
       observabilityRuntimeOk: observabilityRuntimeHealth.ok,
+      scalabilityRuntimeOk: scalabilityRuntimeHealth.ok,
       message: ok
-        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + QueueRuntimePort + WorkerRuntimePort + SchedulerRuntimePort + PersistentQueueRuntimePort + ObservabilityRuntimePort + TISSProviderPort — sem bypass; Queue/Worker/Scheduler/PersistentQueue/Observability Runtime dependências preparadas sem consumo)."
+        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + QueueRuntimePort + WorkerRuntimePort + SchedulerRuntimePort + PersistentQueueRuntimePort + ObservabilityRuntimePort + ScalabilityRuntimePort + TISSProviderPort — sem bypass; Queue/Worker/Scheduler/PersistentQueue/Observability/Scalability Runtime dependências preparadas sem consumo)."
         : "TISS Runtime degradado — ver Ports Enterprise.",
     };
   }

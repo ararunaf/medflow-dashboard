@@ -207,6 +207,7 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
       usesTISSRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       implementsOpenTelemetry: false,
@@ -255,6 +256,7 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
     let schedulerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
     let tissRuntimeOk = true;
+    let scalabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
       // INF-09: deps preparadas — valida Port shape sem chamar health()
       // (evita ciclos Observability.health ↔ Queue/Worker/Scheduler/PQR/TISS.health).
@@ -283,6 +285,13 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
         !!tissPort &&
         typeof tissPort.health === "function" &&
         typeof tissPort.capabilities === "function";
+      if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
+        const scalabilityPort = this.enterpriseDeps.getScalabilityRuntimePort();
+        scalabilityRuntimeOk =
+          !!scalabilityPort &&
+          typeof scalabilityPort.health === "function" &&
+          typeof scalabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
@@ -291,7 +300,8 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       workerRuntimeOk &&
       schedulerRuntimeOk &&
       persistentQueueRuntimeOk &&
-      tissRuntimeOk;
+      tissRuntimeOk &&
+      scalabilityRuntimeOk;
     return {
       kind: "canonical-observability-health",
       ok,
@@ -306,6 +316,7 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       schedulerRuntimeOk,
       persistentQueueRuntimeOk,
       tissRuntimeOk,
+      scalabilityRuntimeOk,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       message: this.healthy

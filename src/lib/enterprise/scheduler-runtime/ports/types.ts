@@ -9,6 +9,7 @@
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
+import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
@@ -87,6 +88,8 @@ export type SchedulerRuntimePortCapabilities = {
   usesPersistentQueueRuntimePort: boolean;
   /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
   usesObservabilityRuntimePort: boolean;
+  /** INF-10 — dependência Scalability Runtime preparada (sem consumo). */
+  usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
   realScheduler: false;
   cronImplemented: false;
@@ -245,6 +248,8 @@ export type SchedulerRuntimeEnterpriseDeps = {
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
   /** INF-09 — Observability Runtime preparado (sem consumo funcional). */
   getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
+  /** INF-10 — Scalability Runtime preparado (sem consumo funcional). */
+  getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };
 
 /** Opções de resolução do SchedulerRuntimePort. */

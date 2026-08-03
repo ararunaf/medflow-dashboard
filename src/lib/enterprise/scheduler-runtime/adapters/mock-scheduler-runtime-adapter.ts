@@ -112,6 +112,7 @@ export class MockSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       usesWorkerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
       usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       realScheduler: false,
       cronImplemented: false,

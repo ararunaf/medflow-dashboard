@@ -17,6 +17,8 @@ import { createNamespaceRuntimePort } from "../../namespace-runtime/providers/cr
 import { createPersistentQueueRuntimePort } from "../../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
 import { createObservabilityRuntimePort } from "../../observability-runtime/providers/create-observability-runtime-port";
 import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
+import { createScalabilityRuntimePort } from "../../scalability-runtime/providers/create-scalability-runtime-port";
+import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
 import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
 import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
@@ -89,9 +91,51 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       },
     });
 
-    // Observability com lazy TISS back-ref — evita ciclo MockTISS ↔ MockObs.
+    // Observability/Scalability com lazy TISS back-ref — evita ciclos MockTISS ↔ MockObs/MockScal.
     let observabilityRuntimePort: ObservabilityRuntimePort | undefined;
+    let scalabilityRuntimePort: ScalabilityRuntimePort | undefined;
     const tissRef: { current?: DefaultTISSRuntimeAdapter } = {};
+
+    const getLazyTISS = () => {
+      if (!tissRef.current) {
+        throw new Error("Mock TISS delegate not ready");
+      }
+      return tissRef.current;
+    };
+
+    const getLazyObservability = () => {
+      if (!observabilityRuntimePort) {
+        observabilityRuntimePort = createObservabilityRuntimePort({
+          provider: "mock",
+          enterpriseDeps: {
+            getQueueRuntimePort: () => queueRuntimePort,
+            getWorkerRuntimePort: () => workerRuntimePort,
+            getSchedulerRuntimePort: () => schedulerRuntimePort,
+            getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
+            getTISSRuntimePort: getLazyTISS,
+            getScalabilityRuntimePort: getLazyScalability,
+          },
+        });
+      }
+      return observabilityRuntimePort;
+    };
+
+    const getLazyScalability = () => {
+      if (!scalabilityRuntimePort) {
+        scalabilityRuntimePort = createScalabilityRuntimePort({
+          provider: "mock",
+          enterpriseDeps: {
+            getQueueRuntimePort: () => queueRuntimePort,
+            getWorkerRuntimePort: () => workerRuntimePort,
+            getSchedulerRuntimePort: () => schedulerRuntimePort,
+            getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
+            getObservabilityRuntimePort: getLazyObservability,
+            getTISSRuntimePort: getLazyTISS,
+          },
+        });
+      }
+      return scalabilityRuntimePort;
+    };
 
     const enterpriseDeps: TISSRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getOrchestratorPort: () => createCanonicalExecutionOrchestratorPort({ provider: "mock" }),
@@ -108,26 +152,8 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       getWorkerRuntimePort: () => workerRuntimePort,
       getSchedulerRuntimePort: () => schedulerRuntimePort,
       getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
-      getObservabilityRuntimePort: () => {
-        if (!observabilityRuntimePort) {
-          observabilityRuntimePort = createObservabilityRuntimePort({
-            provider: "mock",
-            enterpriseDeps: {
-              getQueueRuntimePort: () => queueRuntimePort,
-              getWorkerRuntimePort: () => workerRuntimePort,
-              getSchedulerRuntimePort: () => schedulerRuntimePort,
-              getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
-              getTISSRuntimePort: () => {
-                if (!tissRef.current) {
-                  throw new Error("Mock TISS delegate not ready");
-                }
-                return tissRef.current;
-              },
-            },
-          });
-        }
-        return observabilityRuntimePort;
-      },
+      getObservabilityRuntimePort: getLazyObservability,
+      getScalabilityRuntimePort: getLazyScalability,
       getXMLRuntimePort: () =>
         createXMLRuntimePort({
           provider: "mock",

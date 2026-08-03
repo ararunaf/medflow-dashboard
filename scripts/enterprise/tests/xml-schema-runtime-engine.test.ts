@@ -47,6 +47,7 @@ import { createSchedulerRuntimePort } from "../../../src/lib/enterprise/schedule
 import { createWorkerRuntimePort } from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import { createPersistentQueueRuntimePort } from "../../../src/lib/enterprise/persistent-queue-runtime/index.ts";
 import { createObservabilityRuntimePort } from "../../../src/lib/enterprise/observability-runtime/index.ts";
+import { createScalabilityRuntimePort } from "../../../src/lib/enterprise/scalability-runtime/index.ts";
 import type { TISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/ports/tiss-runtime-port.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSProviderPort } from "../../../src/lib/enterprise/tiss-provider/index.ts";
@@ -382,6 +383,8 @@ describe("TISS-07 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
                 }) as TISSRuntimePort,
             },
           }),
+        getScalabilityRuntimePort: () =>
+          createScalabilityRuntimePort({ provider: "mock" }),
       },
     });
 

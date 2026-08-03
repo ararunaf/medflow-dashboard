@@ -27,6 +27,7 @@ export type ObservabilityRuntimeCapabilities = {
   usesSchedulerRuntimePort?: boolean;
   usesPersistentQueueRuntimePort?: boolean;
   usesTISSRuntimePort?: boolean;
+  usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
   realObservabilityBackend?: false;
   openTelemetryImplemented?: false;
@@ -104,6 +105,7 @@ export const DEFAULT_OBSERVABILITY_RUNTIME_CAPABILITIES: ObservabilityRuntimeCap
   usesSchedulerRuntimePort: true,
   usesPersistentQueueRuntimePort: true,
   usesTISSRuntimePort: true,
+  usesScalabilityRuntimePort: true,
   runtimeReady: true,
   realObservabilityBackend: false,
   openTelemetryImplemented: false,

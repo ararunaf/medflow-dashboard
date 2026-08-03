@@ -33,6 +33,7 @@ import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
+import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
@@ -72,6 +73,7 @@ export type TISSRuntimeHealth = {
   schedulerRuntimeOk?: boolean;
   persistentQueueRuntimeOk?: boolean;
   observabilityRuntimeOk?: boolean;
+  scalabilityRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -100,6 +102,7 @@ export type TISSRuntimeCapabilities = {
   usesSchedulerRuntimePort: boolean;
   usesPersistentQueueRuntimePort: boolean;
   usesObservabilityRuntimePort: boolean;
+  usesScalabilityRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -155,6 +158,11 @@ export type TISSRuntimeEnterpriseDeps = {
    * Dependência obrigatória preparada; TISS Runtime NÃO emite/observa sinais reais nesta sprint.
    */
   getObservabilityRuntimePort(): ObservabilityRuntimePort;
+  /**
+   * ScalabilityRuntimePort oficial — infraestrutura canônica de escalabilidade (INF-10).
+   * Dependência obrigatória preparada; TISS Runtime NÃO escala/balanceia nesta sprint.
+   */
+  getScalabilityRuntimePort(): ScalabilityRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

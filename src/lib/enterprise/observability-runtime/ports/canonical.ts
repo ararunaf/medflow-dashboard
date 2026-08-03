@@ -244,6 +244,7 @@ export type CanonicalObservabilityHealth = {
   schedulerRuntimeOk?: boolean;
   persistentQueueRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
+  scalabilityRuntimeOk?: boolean;
   runtimeReady: true;
   realObservabilityBackend: false;
   openTelemetryImplemented: false;

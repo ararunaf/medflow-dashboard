@@ -216,6 +216,7 @@ export type CanonicalSchedulerHealth = {
   persistentQueueRuntimeOk?: boolean;
   /** INF-09 — prontidão estrutural do Observability Runtime (dependência preparada). */
   observabilityRuntimeOk?: boolean;
+  scalabilityRuntimeOk?: boolean;
   runtimeReady: true;
   realScheduler: false;
   cronImplemented: false;

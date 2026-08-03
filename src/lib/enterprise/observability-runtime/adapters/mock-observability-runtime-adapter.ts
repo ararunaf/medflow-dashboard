@@ -94,6 +94,7 @@ function createMinimalTISSRuntimeStub(): TISSRuntimePort {
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
       usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       implementsRealXml: false,
       implementsOperatorDispatch: false,
     }),
@@ -182,6 +183,7 @@ export class MockObservabilityRuntimeAdapter implements ObservabilityRuntimePort
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
       usesTISSRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       ...{
         realObservabilityBackend: false as const,

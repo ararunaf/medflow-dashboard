@@ -189,6 +189,7 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
       usesWorkerRuntimePort: true,
       usesSchedulerRuntimePort: true,
       usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       implementsRabbitMq: false,
@@ -233,6 +234,7 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
     let workerRuntimeOk = true;
     let schedulerRuntimeOk = true;
     let observabilityRuntimeOk = true;
+    let scalabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
       // INF-08 / INF-09: deps preparadas — valida Port shape sem chamar health()
       // (evita ciclos PersistentQueue.health ↔ Queue/Worker/Scheduler/Observability.health).
@@ -258,6 +260,13 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
           typeof observabilityPort.health === "function" &&
           typeof observabilityPort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
+        const scalabilityPort = this.enterpriseDeps.getScalabilityRuntimePort();
+        scalabilityRuntimeOk =
+          !!scalabilityPort &&
+          typeof scalabilityPort.health === "function" &&
+          typeof scalabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
@@ -265,7 +274,8 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
       queueRuntimeOk &&
       workerRuntimeOk &&
       schedulerRuntimeOk &&
-      observabilityRuntimeOk;
+      observabilityRuntimeOk &&
+      scalabilityRuntimeOk;
     return {
       kind: "canonical-persistent-queue-health",
       ok,
@@ -279,6 +289,7 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
       workerRuntimeOk,
       schedulerRuntimeOk,
       observabilityRuntimeOk,
+      scalabilityRuntimeOk,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       message: this.healthy

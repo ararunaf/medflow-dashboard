@@ -158,6 +158,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       usesSchedulerRuntimePort: true,
       usesPersistentQueueRuntimePort: true,
       usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,
@@ -203,6 +204,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
     let schedulerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
     let observabilityRuntimeOk = true;
+    let scalabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
       const queueHealth = await this.enterpriseDeps.getQueueRuntimePort().health();
       queueRuntimeOk = queueHealth.ok;
@@ -229,6 +231,13 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
           typeof observabilityPort.health === "function" &&
           typeof observabilityPort.capabilities === "function";
       }
+      if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
+        const scalabilityPort = this.enterpriseDeps.getScalabilityRuntimePort();
+        scalabilityRuntimeOk =
+          !!scalabilityPort &&
+          typeof scalabilityPort.health === "function" &&
+          typeof scalabilityPort.capabilities === "function";
+      }
     }
     const ok =
       this.healthy &&
@@ -236,7 +245,8 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       queueRuntimeOk &&
       schedulerRuntimeOk &&
       persistentQueueRuntimeOk &&
-      observabilityRuntimeOk;
+      observabilityRuntimeOk &&
+      scalabilityRuntimeOk;
     return {
       kind: "canonical-worker-health",
       ok,
@@ -250,6 +260,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       schedulerRuntimeOk,
       persistentQueueRuntimeOk,
       observabilityRuntimeOk,
+      scalabilityRuntimeOk,
       runtimeReady: true,
       realWorkers: false,
       tasksExecuted: false,

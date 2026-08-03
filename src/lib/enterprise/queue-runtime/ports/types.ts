@@ -10,6 +10,7 @@
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
+import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
@@ -77,6 +78,8 @@ export type QueueRuntimeHealth = CanonicalQueueHealth & {
   persistentQueueRuntimeOk?: boolean;
   /** INF-09 — prontidão estrutural do Observability Runtime (dependência preparada). */
   observabilityRuntimeOk?: boolean;
+  /** INF-10 — prontidão estrutural do Scalability Runtime (dependência preparada). */
+  scalabilityRuntimeOk?: boolean;
 };
 
 /** Capacidades do adapter no nível do Port. */
@@ -98,6 +101,8 @@ export type QueueRuntimePortCapabilities = {
   usesPersistentQueueRuntimePort: boolean;
   /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
   usesObservabilityRuntimePort: boolean;
+  /** INF-10 — dependência Scalability Runtime preparada (sem consumo). */
+  usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
   realQueueBackend: false;
   messagesPublished: false;
@@ -258,6 +263,8 @@ export type QueueRuntimeEnterpriseDeps = {
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
   /** INF-09 — Observability Runtime preparado (sem consumo funcional). */
   getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
+  /** INF-10 — Scalability Runtime preparado (sem consumo funcional). */
+  getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };
 
 /** Opções de resolução do QueueRuntimePort. */

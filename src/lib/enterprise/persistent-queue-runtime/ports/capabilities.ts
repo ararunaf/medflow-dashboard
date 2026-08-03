@@ -26,6 +26,7 @@ export type PersistentQueueRuntimeCapabilities = {
   usesSchedulerRuntimePort?: boolean;
   /** INF-09 — dependência Observability Runtime preparada (sem consumo). */
   usesObservabilityRuntimePort?: boolean;
+  usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
   realPersistentBackend?: false;
   rabbitMqImplemented?: false;
@@ -90,6 +91,7 @@ export const DEFAULT_PERSISTENT_QUEUE_RUNTIME_CAPABILITIES: PersistentQueueRunti
   usesWorkerRuntimePort: true,
   usesSchedulerRuntimePort: true,
   usesObservabilityRuntimePort: true,
+  usesScalabilityRuntimePort: true,
   runtimeReady: true,
   realPersistentBackend: false,
   rabbitMqImplemented: false,
