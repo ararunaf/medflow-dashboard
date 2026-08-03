@@ -229,13 +229,13 @@ Nenhuma alteração de código Foundation foi realizada nesta Sprint.
 | Campo | Valor |
 |-------|-------|
 | Branch | `feat/inf-09-enterprise-observability-runtime` |
-| Commit (docs INF-09A) | *(preenchido após commit)* |
-| Hash completo | *(preenchido após commit)* |
+| Commit (docs INF-09A) | `c2b633a` — docs(enterprise): certify INF-09A Observability Runtime Gate |
+| Hash completo | `c2b633a4b03897c8263e9d81ef4e9664c4149407` (certificação); tip da branch após governança: ver `git rev-parse HEAD` |
 | URL | `https://github.com/ararunaf/medflow-dashboard/tree/feat/inf-09-enterprise-observability-runtime` |
-| Push realizado | *(preenchido após push)* |
-| Hash local = remoto | *(preenchido após push)* |
-| Ahead | *(preenchido após push)* |
-| Behind | *(preenchido após push)* |
+| Push realizado | **Sim** |
+| Hash local = remoto | **Sim** (após push da tip) |
+| Ahead | **0** |
+| Behind | **0** |
 | Working Tree | limpa quanto aos artefatos INF-09A (`docs/audit/` permanece untracked externo) |
 
 ---
