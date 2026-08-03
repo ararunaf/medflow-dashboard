@@ -33,6 +33,7 @@ import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/
 import { createQueueRuntimePort } from '../../../src/lib/enterprise/queue-runtime/index.ts';
 import { createSchedulerRuntimePort } from "../../../src/lib/enterprise/scheduler-runtime/index.ts";
 import { createWorkerRuntimePort } from "../../../src/lib/enterprise/worker-runtime/index.ts";
+import { createPersistentQueueRuntimePort } from "../../../src/lib/enterprise/persistent-queue-runtime/index.ts";
 import { createCanonicalExecutionOrchestratorPort } from "../../../src/lib/enterprise/canonical-execution-orchestrator/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
 import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
@@ -284,6 +285,14 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
         getWorkerRuntimePort: () => workerRuntime,
       },
     });
+    const persistentQueueRuntime = createPersistentQueueRuntimePort({
+      provider: "enterprise",
+      enterpriseDeps: {
+        getQueueRuntimePort: () => queueRuntime,
+        getWorkerRuntimePort: () => workerRuntime,
+        getSchedulerRuntimePort: () => schedulerRuntime,
+      },
+    });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps: {
@@ -309,6 +318,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
         getQueueRuntimePort: () => queueRuntime,
         getWorkerRuntimePort: () => workerRuntime,
         getSchedulerRuntimePort: () => schedulerRuntime,
+        getPersistentQueueRuntimePort: () => persistentQueueRuntime,
       },
     });
 

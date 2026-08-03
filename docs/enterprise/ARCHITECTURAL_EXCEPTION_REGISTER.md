@@ -121,7 +121,7 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **AER-WR-B1…B2** (INF-06 Worker Runtime) permanecem Aceitas.
 **AER-SR-B1…B2** (INF-07 Scheduler Runtime) permanecem Aceitas.
 **AER-PQR-B1…B2** (INF-08 Persistent Queue Runtime) permanecem Aceitas.  
-**AER-PQR-T1** (INF-08A — harness Enterprise sem `getPersistentQueueRuntimePort`) adicionada e Aceita (Média, não bloqueante arquitetural).
+**AER-PQR-T1** (INF-08A — harness Enterprise sem `getPersistentQueueRuntimePort`) **Resolvida** em INF-08B (Enterprise 71/71 PASS).
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).  
@@ -259,7 +259,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-SR-B2 | Barrel exporta Store + `getStore()` no Adapter (Scheduler Runtime) | INF-07 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-PQR-B1 | Escape hatch `getPersistentQueueRuntimePort()` | INF-08 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-PQR-B2 | Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime) | INF-08 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
-| AER-PQR-T1 | Harness Enterprise: `createTISSRuntimePort` sem `getPersistentQueueRuntimePort` | INF-08A | Test Debt | Média | Não bloqueante | Aceita | Atualizar harnesses pré-INF-08 |
+| AER-PQR-T1 | Harness Enterprise: `createTISSRuntimePort` sem `getPersistentQueueRuntimePort` | INF-08A | Test Debt | Média | Não bloqueante | Resolvida | INF-08B — harnesses pré-INF-08 atualizados |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -1173,7 +1173,18 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 #### AER-PQR-T1
 - **Título:** Harness Enterprise: `createTISSRuntimePort` sem `getPersistentQueueRuntimePort`
 - **Descrição:** Após INF-08, `DefaultTISSRuntimeAdapter` exige `enterpriseDeps.getPersistentQueueRuntimePort`. Suítes Enterprise anteriores (`tiss-provider`, `tiss-catalog`, `rule-pack-engine`, `xml-runtime`, `xml-generation-runtime`, `xml-serializer-runtime`, `xml-schema-runtime`, `xml-validation-runtime`, `xsd-runtime`, `namespace-runtime`) instanciam TISS Runtime fora do Enterprise Runtime sem essa dep e falham no teste de fluxo. Não é Runtime paralelo nem bypass de produto; é dívida de testes. Correção proibida em INF-08A (auditoria exclusiva).
-- **Origem:** INF-08A · **Prioridade:** Média · **Status:** Aceita · **Sprint:** Atualizar harnesses pré-INF-08 com `getPersistentQueueRuntimePort` mock/enterprise
+- **Origem:** INF-08A · **Prioridade:** Média · **Status:** Resolvida (INF-08B) · **Sprint:** Harnesses pré-INF-08 atualizados com `createPersistentQueueRuntimePort` + `getPersistentQueueRuntimePort` (somente testes)
+
+### Atualização INF-08B — Enterprise Persistent Queue Test Harness Repair (03/08/2026)
+
+1. **Natureza:** reparo exclusivo do harness de testes — **zero** alteração de Foundation, Runtime, Provider, Adapter, Store, Factory, Registry, Enterprise Runtime, Queue/Worker/Scheduler/Persistent Queue/TISS Runtime, Capture ou comportamento de produto.
+2. **Escopo:** 10 suítes Enterprise que construíam `TISSRuntimeEnterpriseDeps` sem `getPersistentQueueRuntimePort()` após INF-08.
+3. **Correção:** cada suíte passa a criar `createPersistentQueueRuntimePort({ provider: "enterprise", enterpriseDeps: { getQueueRuntimePort, getWorkerRuntimePort, getSchedulerRuntimePort } })` e a injetar `getPersistentQueueRuntimePort` em `createTISSRuntimePort`.
+4. **Builders atualizados:** 10 builders locais de fluxo (1 por suíte) — sem factory/helper compartilhado alterado; sem código de produção.
+5. **Resultado:** Enterprise **71/71 PASS**; Capture **198 pass / 1 skipped**; Persistent Queue Runtime **21/21 PASS**; gates build / `tsc --noEmit` / lint (0 errors) / smoke **PASS**.
+6. **AER-PQR-T1:** marcada **RESOLVIDA**.
+7. **Parecer:** **GO**. INF-08 encerrada sem pendências de harness. **INF-09 autorizada** para início oficial.
+8. Documento: `INF-08B_ENTERPRISE_PERSISTENT_QUEUE_TEST_HARNESS_REPAIR.md`.
 
 ### Atualização TISS-NAMESPACE-GATE-01 (03/08/2026)
 
@@ -1228,3 +1239,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | INF-07 | Enterprise Scheduler Runtime Foundation; AER-SR-B1…B2; SchedulerRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/TISS preparadas sem consumo/execução; INF-07A não iniciada |
 | 03/08/2026 | INF-08 | Enterprise Persistent Queue Runtime Foundation; AER-PQR-B1…B2; PersistentQueueRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/TISS preparadas sem consumo; INF-08A não iniciada |
 | 03/08/2026 | INF-08A | Certificação Persistent Queue Runtime Gate (**GO COM RESSALVAS**); AER-PQR-B1…B2 reconfirmadas; **AER-PQR-T1** adicionada (harness Enterprise 61/71); INF-08 encerrada; INF-09 não iniciada |
+| 03/08/2026 | INF-08B | Reparo harness Enterprise Persistent Queue (**GO**); **AER-PQR-T1 Resolvida**; Enterprise 71/71 PASS; INF-08 encerrada sem pendências; INF-09 autorizada |
