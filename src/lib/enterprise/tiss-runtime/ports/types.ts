@@ -1,12 +1,13 @@
 /**
- * Tipos do TISS Runtime — TISS-01…TISS-05.
+ * Tipos do TISS Runtime — TISS-01…TISS-07.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → TISSRuntimePort
  *     → TISSCatalogPort → Catalog Adapter → Store
  *     → RulePackEnginePort → Rule Pack Adapter → Store
- *     → XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort
- *     → Store → Canonical XML String
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
+ *     → Store → Canonical XML Schema
  *     → Canonical Execution Orchestrator → TISSProviderPort → Adapter
  */
 import type { CanonicalExecutionOrchestratorPort } from "../../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -23,6 +24,7 @@ import type {
 } from "../../tiss-provider/ports/types";
 import type { XMLGenerationRuntimePort } from "../../xml-generation-runtime/ports/xml-generation-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
+import type { XMLSchemaRuntimePort } from "../../xml-schema-runtime/ports/xml-schema-runtime-port";
 import type { XMLSerializerRuntimePort } from "../../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
@@ -51,6 +53,7 @@ export type TISSRuntimeHealth = {
   xmlRuntimeOk?: boolean;
   xmlGenerationRuntimeOk?: boolean;
   xmlSerializerRuntimeOk?: boolean;
+  xmlSchemaRuntimeOk?: boolean;
 };
 
 /** Capacidades declaradas pelo adapter (Port level). */
@@ -70,6 +73,7 @@ export type TISSRuntimeCapabilities = {
   usesXMLRuntimePort: boolean;
   usesXMLGenerationRuntimePort: boolean;
   usesXMLSerializerRuntimePort: boolean;
+  usesXMLSchemaRuntimePort: boolean;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
 };
@@ -92,6 +96,8 @@ export type TISSRuntimeEnterpriseDeps = {
   getXMLGenerationRuntimePort(): XMLGenerationRuntimePort;
   /** XMLSerializerRuntimePort oficial — serialização canônica em texto (TISS-06). */
   getXMLSerializerRuntimePort(): XMLSerializerRuntimePort;
+  /** XMLSchemaRuntimePort oficial — infraestrutura canônica de XML Schemas (TISS-07). */
+  getXMLSchemaRuntimePort(): XMLSchemaRuntimePort;
 };
 
 export type GetTISSRuntimeSessionInput = {

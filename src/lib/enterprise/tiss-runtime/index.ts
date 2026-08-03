@@ -1,10 +1,11 @@
 /**
- * Enterprise TISS Runtime — TISS-01…TISS-06.
+ * Enterprise TISS Runtime — TISS-01…TISS-07.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → TISSRuntimePort
  *     → TISSCatalogPort → RulePackEnginePort
- *     → XMLRuntimePort → XMLGenerationRuntimePort → XMLSerializerRuntimePort
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
  *     → Canonical Execution Orchestrator → TISSProviderPort
  *     → DefaultTISSProviderAdapter → Implementação oficial
  */

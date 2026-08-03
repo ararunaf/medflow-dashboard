@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * TISS-01 — Enterprise TISS Provider
  * Prova: Application → TISSProviderPort → Adapter → Factory → Registry
@@ -35,6 +35,7 @@ import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/
 import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
 import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
 import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-serializer-runtime/index.ts";
+import { createXMLSchemaRuntimePort } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
 import { createXMLRuntimePort } from "../../../src/lib/enterprise/xml-runtime/index.ts";
 import {
   createEnterpriseRuntime,
@@ -259,6 +260,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
     });
     const xmlGenerationRuntime = createXMLGenerationRuntimePort({ provider: "enterprise" });
     const xmlSerializerRuntime = createXMLSerializerRuntimePort({ provider: "enterprise" });
+    const xmlSchemaRuntime = createXMLSchemaRuntimePort({ provider: "enterprise" });
     const xmlRuntime = createXMLRuntimePort({
       provider: "enterprise",
       enterpriseDeps: {
@@ -277,6 +279,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
         getXMLRuntimePort: () => xmlRuntime,
         getXMLGenerationRuntimePort: () => xmlGenerationRuntime,
         getXMLSerializerRuntimePort: () => xmlSerializerRuntime,
+        getXMLSchemaRuntimePort: () => xmlSchemaRuntime,
       },
     });
 
