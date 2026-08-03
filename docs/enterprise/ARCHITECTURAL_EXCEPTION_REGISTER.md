@@ -52,7 +52,7 @@ A partir de ARCH-DEBT-01:
 | Área | Fontes |
 |------|--------|
 | Enterprise Foundation | EPC-00…EPC-24, ECS-01, EPC-CERT-01, EPC-CERT-02, EPC-19A |
-| Enterprise Infrastructure | INF-01…INF-08, FASE_B consolidado |
+| Enterprise Infrastructure | INF-01…INF-08, INF-08A, FASE_B consolidado |
 | Document Intelligence Platform | DIP-01…DIP-06 |
 | OCR / Classification / Storage / Search / TISS | OCR-01 (código + OCR-GATE-01), CLASS-01, STORAGE-01, SEARCH-01, TISS-01, TISS-02, TISS-03, TISS-RULE-GATE-01, TISS-03A, TISS-RULEPACK-GATE-01, TISS-CONV-01, TISS-04, TISS-XML-GATE-01, XML-HOTFIX-01, TISS-XML-GATE-01A, TISS-05, TISS-XMLGEN-GATE-01, TISS-06, TISS-06A, TISS-07, TISS-SCHEMA-GATE-01, TISS-08, TISS-VALIDATION-GATE-01, TISS-09, TISS-XSD-GATE-01, TISS-10, TISS-NAMESPACE-GATE-01 |
 | Integração Runtime | ARCH-01, ARCH-02 |
@@ -89,17 +89,17 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 
 | Métrica | Quantidade |
 |---------|------------|
-| **Total de ressalvas registradas** | **88** |
+| **Total de ressalvas registradas** | **89** |
 | Prioridade **Alta** | **14** |
-| Prioridade **Média** | **20** |
+| Prioridade **Média** | **21** |
 | Prioridade **Baixa** | **54** |
 | Criticidade **Bloqueante** (histórico GATE-ARCH-02 + TISS-XML-GATE-01) | **5** |
-| Criticidade **Não bloqueante** | **83** |
+| Criticidade **Não bloqueante** | **84** |
 | Status **Resolvida** | **11** |
 | Status **Planejada** | **3** |
-| Status **Aceita** | **73** |
+| Status **Aceita** | **74** |
 | Status **Aberta** | **1** |
-| Pendentes (Aberta + Aceita + Planejada) | **77** |
+| Pendentes (Aberta + Aceita + Planejada) | **78** |
 
 ### Bloqueantes — estado atual
 
@@ -120,7 +120,8 @@ As ressalvas desses Gates foram consolidadas aqui a partir dos transcripts ofici
 **AER-QR-B1…B2** (INF-05 Queue Runtime) permanecem Aceitas.
 **AER-WR-B1…B2** (INF-06 Worker Runtime) permanecem Aceitas.
 **AER-SR-B1…B2** (INF-07 Scheduler Runtime) permanecem Aceitas.
-**AER-PQR-B1…B2** (INF-08 Persistent Queue Runtime) permanecem Aceitas.
+**AER-PQR-B1…B2** (INF-08 Persistent Queue Runtime) permanecem Aceitas.  
+**AER-PQR-T1** (INF-08A — harness Enterprise sem `getPersistentQueueRuntimePort`) adicionada e Aceita (Média, não bloqueante arquitetural).
 **AER-TISSCV-B1…B2** permanecem Aceitas.  
 **AER-GA03-M8** permanece Aceita (seeds Unimed/Bradesco de Contract Intelligence).  
 SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl. **AER-STG-A1**).  
@@ -258,6 +259,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-SR-B2 | Barrel exporta Store + `getStore()` no Adapter (Scheduler Runtime) | INF-07 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
 | AER-PQR-B1 | Escape hatch `getPersistentQueueRuntimePort()` | INF-08 | Architecture | Baixa | Não bloqueante | Aceita | API interna / proibir produto |
 | AER-PQR-B2 | Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime) | INF-08 | Maintainability | Baixa | Não bloqueante | Aceita | Restringir superfície pública |
+| AER-PQR-T1 | Harness Enterprise: `createTISSRuntimePort` sem `getPersistentQueueRuntimePort` | INF-08A | Test Debt | Média | Não bloqueante | Aceita | Atualizar harnesses pré-INF-08 |
 
 \*Em EPC-CERT-01/02 o Build/TS global foi Estado Global pré-existente **fora do escopo** (não bloqueava certificação Core/Org). Eliminado em EPC-19A.
 
@@ -1152,9 +1154,26 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 - **Origem:** INF-08 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** API interna / proibir produto
 
 #### AER-PQR-B2
-- **Título:** Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime)  
-- **Descrição:** `persistent-queue-runtime/index.ts` reexporta `InMemoryPersistentQueueRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-SR-B2**.  
+- **Título:** Barrel exporta Store + `getStore()` no Adapter (Persistent Queue Runtime)
+- **Descrição:** `persistent-queue-runtime/index.ts` reexporta `InMemoryPersistentQueueRuntimeStore`; adapters expõem `getStore()` fora do Port — superfície de uso indevido (sem consumidor produto atual). Espelho de **AER-SR-B2**.
 - **Origem:** INF-08 · **Prioridade:** Baixa · **Status:** Aceita · **Sprint:** Restringir superfície pública
+
+### Atualização INF-08A — Enterprise Persistent Queue Gate (03/08/2026)
+
+1. **Natureza:** auditoria/certificação exclusivamente — **zero** alteração de Foundation, Runtime, Provider, Adapter, Store, Factory, Registry, Enterprise Runtime, Queue/Worker/Scheduler/TISS Runtime, Capture ou comportamento.
+2. **Cadeia oficial reconfirmada:** Produto → Enterprise Runtime → `PersistentQueueRuntimePort` → Adapter → `InMemoryPersistentQueueRuntimeStore` → Canonical Persistent Queue Result.
+3. **Sem** Runtime/Provider/Adapter/Factory/Registry paralelo de Persistent Queue; **sem** bypass na cadeia Enterprise.
+4. **Sem** RabbitMQ / Kafka / Azure Service Bus / Azure Queue / Redis Streams / BullMQ / DLQ / Retry / Delay / Priority Queue / persistência real / Workers reais / Scheduler real.
+5. **Escape hatches reconfirmados:** **AER-PQR-B1** (`getPersistentQueueRuntimePort`) · **AER-PQR-B2** (barrel/`getStore()`) — continuam **Aceitas**.
+6. **Nova ressalva Média:** **AER-PQR-T1** — 10 suítes Enterprise pré-INF-08 que chamam `createTISSRuntimePort` sem `getPersistentQueueRuntimePort` falham (1 teste de fluxo cada); cadeia via Enterprise Runtime permanece PASS; suíte oficial PQR **21/21 PASS**.
+7. **Gates:** build / `tsc --noEmit` / lint (0 errors) / smoke **PASS**; Capture **198 pass / 1 skipped** **PASS**; Enterprise **61/71** (falhas = **AER-PQR-T1**).
+8. **Parecer:** **GO COM RESSALVAS**. INF-08 encerrada e certificada. INF-09 **não iniciada**.
+9. Documento: `INF-08A_ENTERPRISE_PERSISTENT_QUEUE_GATE_CERTIFICATION.md`.
+
+#### AER-PQR-T1
+- **Título:** Harness Enterprise: `createTISSRuntimePort` sem `getPersistentQueueRuntimePort`
+- **Descrição:** Após INF-08, `DefaultTISSRuntimeAdapter` exige `enterpriseDeps.getPersistentQueueRuntimePort`. Suítes Enterprise anteriores (`tiss-provider`, `tiss-catalog`, `rule-pack-engine`, `xml-runtime`, `xml-generation-runtime`, `xml-serializer-runtime`, `xml-schema-runtime`, `xml-validation-runtime`, `xsd-runtime`, `namespace-runtime`) instanciam TISS Runtime fora do Enterprise Runtime sem essa dep e falham no teste de fluxo. Não é Runtime paralelo nem bypass de produto; é dívida de testes. Correção proibida em INF-08A (auditoria exclusiva).
+- **Origem:** INF-08A · **Prioridade:** Média · **Status:** Aceita · **Sprint:** Atualizar harnesses pré-INF-08 com `getPersistentQueueRuntimePort` mock/enterprise
 
 ### Atualização TISS-NAMESPACE-GATE-01 (03/08/2026)
 
@@ -1208,3 +1227,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | INF-06 | Enterprise Worker Runtime Foundation; AER-WR-B1…B2; WorkerRuntimePort integrado ao Enterprise Runtime; deps Queue/TISS preparadas sem consumo/execução; INF-06A não iniciada |
 | 03/08/2026 | INF-07 | Enterprise Scheduler Runtime Foundation; AER-SR-B1…B2; SchedulerRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/TISS preparadas sem consumo/execução; INF-07A não iniciada |
 | 03/08/2026 | INF-08 | Enterprise Persistent Queue Runtime Foundation; AER-PQR-B1…B2; PersistentQueueRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/TISS preparadas sem consumo; INF-08A não iniciada |
+| 03/08/2026 | INF-08A | Certificação Persistent Queue Runtime Gate (**GO COM RESSALVAS**); AER-PQR-B1…B2 reconfirmadas; **AER-PQR-T1** adicionada (harness Enterprise 61/71); INF-08 encerrada; INF-09 não iniciada |
