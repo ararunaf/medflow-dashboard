@@ -94,6 +94,7 @@
     "enterprise:scanner-runtime:test": "npx tsx --test scripts/enterprise/tests/scanner-runtime-engine.test.ts",
     "enterprise:watch-folder-runtime:test": "npx tsx --test scripts/enterprise/tests/watch-folder-runtime-engine.test.ts",
     "enterprise:upload-runtime:test": "npx tsx --test scripts/enterprise/tests/upload-runtime-engine.test.ts",
+    "enterprise:intelligent-capture-runtime:test": "npx tsx --test scripts/enterprise/tests/intelligent-capture-runtime-engine.test.ts",
     "enterprise:tiss-conv-01:test": "npx tsx --test scripts/enterprise/tests/tiss-conv-01-capture-convergence.test.ts",
     "enterprise:document-search-runtime:test": "npx tsx --test scripts/enterprise/tests/document-search-runtime-engine.test.ts",
 

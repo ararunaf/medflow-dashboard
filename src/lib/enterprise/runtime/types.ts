@@ -11,6 +11,7 @@
  * F3-CAP-01: Scanner Runtime estrutural — sem Scanner real / TWAIN / WIA / ISIS / Drivers.
  * F3-CAP-02: Watch Folder Runtime estrutural — sem Watch Folder real / FileSystemWatcher / Polling / SMB / UNC / Azure Files.
  * F3-CAP-03: Upload Runtime estrutural — sem Upload real / Web / Desktop / Mobile / API / Multipart / Chunked / Resumable / Azure Blob / Supabase / S3 / Drive / OneDrive / Dropbox.
+ * F3-CAP-04: Intelligent Capture Runtime estrutural — orquestração Scanner/WatchFolder/Upload sem OCR / IA / Pipeline / captura automática / leitura de arquivos.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
@@ -53,6 +54,7 @@ import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-p
 import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 import type { WatchFolderRuntimePort } from "../watch-folder-runtime/ports/watch-folder-runtime-port";
 import type { UploadRuntimePort } from "../upload-runtime/ports/upload-runtime-port";
+import type { IntelligentCaptureRuntimePort } from "../intelligent-capture-runtime/ports/intelligent-capture-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -94,6 +96,7 @@ export type EnterpriseRuntimeHealth = {
   scannerRuntimeOk?: boolean;
   watchFolderRuntimeOk?: boolean;
   uploadRuntimeOk?: boolean;
+  intelligentCaptureRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -174,6 +177,7 @@ export type EnterpriseRuntimeOptions = {
   scannerRuntimePort?: ScannerRuntimePort;
   watchFolderRuntimePort?: WatchFolderRuntimePort;
   uploadRuntimePort?: UploadRuntimePort;
+  intelligentCaptureRuntimePort?: IntelligentCaptureRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -296,6 +300,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve UploadRuntimePort (F3-CAP-03) — Enterprise Upload Runtime Foundation. */
   getUploadRuntimePort(): UploadRuntimePort;
+
+  /** Resolve IntelligentCaptureRuntimePort (F3-CAP-04) — Enterprise Intelligent Capture Integration Foundation. */
+  getIntelligentCaptureRuntimePort(): IntelligentCaptureRuntimePort;
 
   /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker + INF-07 Scheduler + INF-08 PersistentQueue + INF-09 Observability + INF-10 Scalability deps). */
   getTISSRuntimePort(): TISSRuntimePort;
