@@ -5,6 +5,7 @@
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_02.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_02.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md)  
+**Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md)  
 **Documento de arquitetura:** [`C03_SOAP_RUNTIME_ARCHITECTURE.md`](./C03_SOAP_RUNTIME_ARCHITECTURE.md)
 
 ---
@@ -79,4 +80,4 @@ Implementação funcional de transporte **não** faz parte desta Sprint e **não
 
 ## Vigência
 
-Esta regra é **permanente** para todo o BLOCO C. Sprints futuras (C-03A em diante) devem respeitá-la sem exceção silenciosa.
+Esta regra é **permanente** para todo o BLOCO C. Sprints futuras (C-04 em diante) devem respeitá-la sem exceção silenciosa.

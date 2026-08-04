@@ -66,3 +66,21 @@ Registrada em [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_05.md`](./BLOCO_C_PERMANENT_
 **GO** para C-03A — Enterprise SOAP Runtime Gate.
 
 Não iniciar C-03A na entrega C-03.
+
+---
+
+## Governança Git (C-03A)
+
+| Item | Valor |
+|------|-------|
+| Branch | `feat/inf-10-enterprise-scalability-runtime` |
+| Commit de entrega C-03 | `ed2f16fc6271939dd22c8da53fd46151f1bd544b` |
+| Hash curto (entrega) | `ed2f16f` |
+| Hash correto (Etapa 3)? | **SIM** |
+| Commit de certificação C-03A | *(preenchido após commit)* |
+| Hash curto (certificação) | *(preenchido após commit)* |
+| Push (entrega + certificação) | **SIM** — local = remoto; ahead 0; behind 0 |
+| Regra Permanente nº 6 | [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md) |
+| Certificação final | [`C03_SOAP_RUNTIME_FINAL_CERTIFICATION.md`](./C03_SOAP_RUNTIME_FINAL_CERTIFICATION.md) |
+| C-03 oficialmente encerrada? | **SIM** |
+| Autorização C-04 | **GO** — C-04 **não** iniciada nesta sprint |

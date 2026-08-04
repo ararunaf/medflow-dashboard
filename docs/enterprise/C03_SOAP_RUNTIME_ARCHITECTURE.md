@@ -85,6 +85,21 @@ Demais Runtimes do BLOCO C **não conhecem SOAP**.
 Futuros Runtimes de transporte (REST / gRPC / MQ / Event / File Exchange)
 não devem alterar Runtimes existentes — especialização por Adapters.
 
+## Regra Permanente nº 6 — Protocol Isolation
+
+Documento oficial:
+[`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md).
+
+O SOAP Runtime permanece **genérico**:
+
+- nenhuma operadora é conhecida (Unimed, Hapvida, Bradesco, SulAmérica, Amil, CASSI, GEAP, IPM ou quaisquer outras);
+- nenhum endpoint é conhecido;
+- nenhum namespace específico é conhecido;
+- nenhum protocolo proprietário é conhecido;
+- toda especialização ocorrerá exclusivamente por Adapters.
+
+A plataforma continua trabalhando apenas com contratos canônicos.
+
 ## Regra Permanente nº 4 — Observability by Design
 
 Documento oficial:
@@ -100,3 +115,6 @@ Documento oficial:
 
 - [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md)
 - [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_02.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_02.md)
+- [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md)
+- [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_05.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_05.md)
+- [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md)
