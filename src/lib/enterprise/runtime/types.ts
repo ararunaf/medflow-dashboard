@@ -20,6 +20,7 @@
  * F3-CAP-09: AI Orchestration Runtime estrutural — sem IA real / sem OpenAI / sem Azure OpenAI / sem Gemini / sem Claude / sem Ollama / sem Llama / sem ML / sem Prompt Engineering / sem HTTP / sem agentes funcionais / sem workflow / sem decisão automática.
  * F3-CAP-10: Audit Runtime estrutural — sem auditoria real / sem IA / sem OpenAI / sem Azure OpenAI / sem Gemini / sem Claude / sem ML / sem regras TISS / sem regras de operadoras / sem justificativas automáticas / sem correções automáticas / sem aprovação/rejeição automática.
  * F3-CAP-11: TISS Mapping Runtime estrutural — sem mapeamento funcional / sem operadoras / sem XML / sem preenchimento automático / sem IA / sem banco / sem persistência / sem APIs.
+ * F3-CAP-12: Auto-Fill Runtime estrutural — sem preenchimento automático / sem geração de XML / sem escrita em guias / sem integração com operadoras / sem IA / sem banco / sem persistência / sem APIs.
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
  * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…10).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
@@ -33,6 +34,7 @@ import type { ValidationRuntimePort } from "../validation-runtime/ports/validati
 import type { AIOrchestrationRuntimePort } from "../ai-orchestration-runtime/ports/ai-orchestration-runtime-port";
 import type { AuditRuntimePort } from "../audit-runtime/ports/audit-runtime-port";
 import type { TISSMappingRuntimePort } from "../tiss-mapping-runtime/ports/tiss-mapping-runtime-port";
+import type { AutoFillRuntimePort } from "../auto-fill-runtime/ports/auto-fill-runtime-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
@@ -89,6 +91,7 @@ export type EnterpriseRuntimeHealth = {
   aiOrchestrationRuntimeOk?: boolean;
   auditRuntimeOk?: boolean;
   tissMappingRuntimeOk?: boolean;
+  autoFillRuntimeOk?: boolean;
   storageManagerRuntimeOk?: boolean;
   storageProviderOk?: boolean;
   searchProviderOk?: boolean;
@@ -175,6 +178,7 @@ export type EnterpriseRuntimeOptions = {
   aiOrchestrationRuntimePort?: AIOrchestrationRuntimePort;
   auditRuntimePort?: AuditRuntimePort;
   tissMappingRuntimePort?: TISSMappingRuntimePort;
+  autoFillRuntimePort?: AutoFillRuntimePort;
   storageProviderPort?: StorageProviderPort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   searchProviderPort?: SearchProviderPort;
@@ -267,6 +271,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve TISSMappingRuntimePort (F3-CAP-11). */
   getTISSMappingRuntimePort(): TISSMappingRuntimePort;
+
+  /** Resolve AutoFillRuntimePort (F3-CAP-12). */
+  getAutoFillRuntimePort(): AutoFillRuntimePort;
 
   /** Resolve StorageManagerRuntimePort (DIP-05 / STORAGE-01). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
