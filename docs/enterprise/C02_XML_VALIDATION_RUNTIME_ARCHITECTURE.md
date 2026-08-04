@@ -87,3 +87,15 @@ Documento oficial:
 
 Regra irmã (C-01A):
 [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md).
+
+## Regra Permanente nº 4 — Observability by Design
+
+Documento oficial:
+[`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md).
+
+Por contrato estrutural, cada Runtime do BLOCO C deverá prever:
+`operationId` · `correlationId` · `startedAt` · `finishedAt` · `executionStatus` ·
+`executionDuration` · `processedItems` · `warnings` · `errors` · `traceMetadata`.
+
+**Limite explícito (C-02A):** não existe observabilidade funcional, telemetry,
+tracing nem logging específico — apenas arquitetura preparada.

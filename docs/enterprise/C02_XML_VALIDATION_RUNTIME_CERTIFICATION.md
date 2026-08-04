@@ -59,8 +59,24 @@ Registrada em [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_02.md`](./BLOCO_C_PERMANENT_
 **Enterprise Foundation:** íntegra.  
 **Centro Operacional:** íntegro.
 
-## Parecer
+## Parecer (entrega C-02)
 
 **GO** para C-02A — Enterprise XML Validation Runtime Gate.
 
-Não iniciar C-02A nesta entrega.
+Não iniciar C-02A na entrega C-02.
+
+---
+
+## Governança Git (C-02A)
+
+| Item | Valor |
+|------|-------|
+| Branch | `feat/inf-10-enterprise-scalability-runtime` |
+| Commit de entrega C-02 | `2b8d0d1d149068e9c1ca7ac7e16b7207ff2ecb9d` |
+| Hash curto (entrega) | `2b8d0d1` |
+| Hash correto (Etapa 3)? | **SIM** |
+| Push (entrega) | **SIM** — local = remoto; ahead 0; behind 0 |
+| Regra Permanente nº 4 | [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md) |
+| Certificação final | [`C02_XML_VALIDATION_RUNTIME_FINAL_CERTIFICATION.md`](./C02_XML_VALIDATION_RUNTIME_FINAL_CERTIFICATION.md) |
+| C-02 oficialmente encerrada? | **SIM** |
+| Autorização C-03 | **GO** — C-03 **não** iniciada nesta sprint |
