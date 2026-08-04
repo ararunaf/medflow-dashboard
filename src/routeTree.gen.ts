@@ -32,6 +32,7 @@ import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-se
 import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
 import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
 import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
+import { Route as Fase3SlugRouteImport } from './routes/fase3.$slug'
 import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
 
 const TissRoute = TissRouteImport.update({
@@ -152,6 +153,11 @@ const FinanceiroConciliacaoOperacionalRoute =
     path: '/conciliacao-operacional',
     getParentRoute: () => FinanceiroRoute,
   } as any)
+const Fase3SlugRoute = Fase3SlugRouteImport.update({
+  id: '/fase3/$slug',
+  path: '/fase3/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
   id: '/revisao/$sessionId',
   path: '/revisao/$sessionId',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
+  '/fase3/$slug': typeof Fase3SlugRoute
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
   '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
+  '/fase3/$slug': typeof Fase3SlugRoute
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
   '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
+  '/fase3/$slug': typeof Fase3SlugRoute
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
   '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/processamento'
     | '/site'
     | '/tiss'
+    | '/fase3/$slug'
     | '/financeiro/conciliacao-operacional'
     | '/financeiro/dashboard-executivo'
     | '/financeiro/fechamento-operacional'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/processamento'
     | '/site'
     | '/tiss'
+    | '/fase3/$slug'
     | '/financeiro/conciliacao-operacional'
     | '/financeiro/dashboard-executivo'
     | '/financeiro/fechamento-operacional'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/processamento'
     | '/site'
     | '/tiss'
+    | '/fase3/$slug'
     | '/financeiro/conciliacao-operacional'
     | '/financeiro/dashboard-executivo'
     | '/financeiro/fechamento-operacional'
@@ -337,6 +349,7 @@ export interface RootRouteChildren {
   ProcessamentoRoute: typeof ProcessamentoRoute
   SiteRoute: typeof SiteRoute
   TissRoute: typeof TissRoute
+  Fase3SlugRoute: typeof Fase3SlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -502,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceiroConciliacaoOperacionalRouteImport
       parentRoute: typeof FinanceiroRoute
     }
+    '/fase3/$slug': {
+      id: '/fase3/$slug'
+      path: '/fase3/$slug'
+      fullPath: '/fase3/$slug'
+      preLoaderRoute: typeof Fase3SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/captura/revisao/$sessionId': {
       id: '/captura/revisao/$sessionId'
       path: '/revisao/$sessionId'
@@ -570,6 +590,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProcessamentoRoute: ProcessamentoRoute,
   SiteRoute: SiteRoute,
   TissRoute: TissRoute,
+  Fase3SlugRoute: Fase3SlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

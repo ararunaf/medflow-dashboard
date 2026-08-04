@@ -4,6 +4,9 @@ import { AppShell } from "@/components/app-shell";
 import { OperationalIaHomeCard } from "@/components/operational/operational-ia-home-card";
 import { IaLegend } from "@/components/operational/ia-legend";
 import { PilotHomeBanner } from "@/components/pilot-launch/pilot-home-banner";
+import { DocumentalQuickActions } from "@/components/navigation/documental-quick-actions";
+import { OperationalCenterHub } from "@/components/navigation/operational-center-hub";
+import { quickActionsForRole } from "@/lib/navigation";
 import {
   operationalReadinessQueryOptions,
   useOperationalReadinessQuery,
@@ -19,7 +22,7 @@ import {
   StatCard,
   StatusBadge,
 } from "@/components/ui-kit";
-import { Activity, CalendarCheck, Stethoscope, Users, AlertTriangle, Sparkles } from "lucide-react";
+import { Activity, CalendarCheck, Stethoscope, Users, AlertTriangle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useClientMounted } from "@/hooks/use-client-mounted";
 import { operationalCommandCenterQueryOptions } from "@/hooks/use-operational-metrics";
@@ -31,8 +34,11 @@ import { can, isOperationalManager } from "@/lib/auth/rbac";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: brandPageTitle("Dashboard") },
-      { name: "description", content: "Visão operacional em tempo real." },
+      { title: brandPageTitle("Centro Operacional") },
+      {
+        name: "description",
+        content: "Centro Operacional — fluxos de captura, processamento, auditoria e faturamento.",
+      },
     ],
   }),
   loader: async ({ context }) => {
@@ -68,13 +74,15 @@ function HomePage() {
   const mounted = useClientMounted();
   const dashboard = useDashboardQuery();
   const readiness = useOperationalReadinessQuery();
-  const canExec = can(auth.profile?.role ?? null, "financial_closing:read");
-  const canPilot = can(auth.profile?.role ?? null, "tenant_settings:read");
-  const canSeeIa = isOperationalManager(auth.profile?.role ?? null);
+  const role = auth.profile?.role ?? null;
+  const canExec = can(role, "financial_closing:read");
+  const canPilot = can(role, "tenant_settings:read");
+  const canSeeIa = isOperationalManager(role);
   const tenantId = auth.tenantId ?? undefined;
   const manualFlags = usePilotManualFlags(tenantId);
+  const quickActions = useMemo(() => quickActionsForRole(role), [role]);
 
-  const [title, setTitle] = useState("Bom dia");
+  const [title, setTitle] = useState("Centro Operacional");
   const [subtitle, setSubtitle] = useState("");
 
   useEffect(() => {
@@ -106,48 +114,75 @@ function HomePage() {
 
   return (
     <AppShell>
-      {pilotProgress ? (
-        <PilotHomeBanner
-          overallPercent={pilotProgress.overallPercent}
-          pilotReady={pilotProgress.pilotReady}
-        />
-      ) : null}
       <PageHeader
         title={title}
-        subtitle={subtitle}
+        subtitle={
+          subtitle
+            ? `${subtitle} · Centro Operacional`
+            : "Centro Operacional — visão do fluxo de trabalho"
+        }
         actions={
           <div className="flex flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
-            <Link
-              to="/piloto"
-              className="text-xs font-medium text-primary hover:underline whitespace-nowrap"
-            >
-              Implantação piloto →
-            </Link>
+            {canExec ? (
+              <Link
+                to="/processamento"
+                search={{ queue: undefined }}
+                className="text-xs font-medium text-primary hover:underline whitespace-nowrap"
+              >
+                Processamento →
+              </Link>
+            ) : null}
+            {canSeeIa ? (
+              <Link
+                to="/central"
+                className="text-xs font-medium text-primary hover:underline whitespace-nowrap"
+              >
+                Central IA →
+              </Link>
+            ) : null}
             <Link
               to="/ajuda"
               className="text-xs font-medium text-muted-foreground hover:text-foreground whitespace-nowrap"
             >
-              Central de ajuda →
-            </Link>
-            {canExec ? (
-              <Link
-                to="/executivo"
-                className="text-xs font-medium text-primary hover:underline whitespace-nowrap"
-              >
-                Início executivo →
-              </Link>
-            ) : null}
-            <Link
-              to="/central"
-              className="text-xs font-medium text-primary hover:underline whitespace-nowrap"
-            >
-              Central de IA →
+              Ajuda →
             </Link>
           </div>
         }
       />
 
-      {/* Métricas */}
+      {pilotProgress ? (
+        <div className="mb-4">
+          <PilotHomeBanner
+            overallPercent={pilotProgress.overallPercent}
+            pilotReady={pilotProgress.pilotReady}
+          />
+        </div>
+      ) : null}
+
+      <DocumentalQuickActions actions={quickActions} className="mb-5" />
+
+      <OperationalCenterHub role={role} className="mb-6" />
+
+      {canSeeIa ? (
+        <div className="mb-6">
+          <OperationalIaHomeCard />
+          <IaLegend className="mt-2 px-1" />
+        </div>
+      ) : null}
+
+      {/* Plantões — eixo clínico secundário no Centro Operacional */}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Plantões e cobertura</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Visão clínica complementar ao fluxo documental
+          </p>
+        </div>
+        <Link to="/plantoes" className="text-xs font-medium text-primary hover:underline shrink-0">
+          Ver plantões →
+        </Link>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         <StatCard
           label="Plantões disponíveis"
@@ -185,13 +220,6 @@ function HomePage() {
           tone={dashboard.data?.metrics.availableForShifts ? "success" : "warning"}
         />
       </div>
-
-      {canSeeIa ? (
-        <div className="mt-4">
-          <OperationalIaHomeCard />
-          <IaLegend className="mt-2 px-1" />
-        </div>
-      ) : null}
 
       <div className="mt-6 grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-xl bg-card border border-border ring-soft">
@@ -258,25 +286,6 @@ function HomePage() {
         <div className="space-y-4">
           <div className="rounded-xl border border-border bg-card ring-soft">
             <div className="px-5 py-4 border-b border-border flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[color:var(--secondary)]" />
-              <h2 className="text-sm font-semibold">Visão operacional</h2>
-            </div>
-            <div className="p-5 space-y-3">
-              <div className="text-sm text-foreground">
-                Plantões em aberto no tenant:{" "}
-                <span className="font-semibold text-primary">
-                  {dashboard.data?.metrics.openShifts ?? 0}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Os contadores e a Central de IA Operacional atualizam automaticamente via Supabase
-                Realtime (invalidação TanStack Query).
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card ring-soft">
-            <div className="px-5 py-4 border-b border-border flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold">Trocas em andamento</h2>
             </div>
@@ -287,8 +296,44 @@ function HomePage() {
                   ? "solicitação aguarda resposta"
                   : "solicitações aguardam resposta"}
               </div>
+              <Link
+                to="/plantoes"
+                search={{ tab: "swaps" }}
+                className="mt-3 inline-block text-xs font-medium text-primary hover:underline"
+              >
+                Abrir trocas →
+              </Link>
             </div>
           </div>
+
+          {canExec ? (
+            <div className="rounded-xl border border-border bg-card ring-soft">
+              <div className="px-5 py-4 border-b border-border">
+                <h2 className="text-sm font-semibold">Entrada rápida documental</h2>
+              </div>
+              <div className="p-5 space-y-2 text-xs">
+                <Link to="/captura" className="block font-medium text-primary hover:underline">
+                  Nova captura →
+                </Link>
+                <Link
+                  to="/processamento"
+                  search={{ queue: undefined }}
+                  className="block font-medium text-primary hover:underline"
+                >
+                  Abrir filas →
+                </Link>
+                <Link to="/tiss" className="block font-medium text-primary hover:underline">
+                  Guias TISS →
+                </Link>
+                <Link
+                  to="/financeiro"
+                  className="block font-medium text-muted-foreground hover:text-foreground"
+                >
+                  Hub financeiro →
+                </Link>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </AppShell>
