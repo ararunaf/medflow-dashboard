@@ -202,7 +202,7 @@ certifica o encerramento oficial da C-04.
 |------|------|
 | Commit de entrega C-04 | `c9f491e3445b01e32aaee69804ad8ff37b593329` |
 | Mensagem (entrega) | `feat(operator-runtime): add C-04 Enterprise Operator Runtime Foundation` |
-| Commit de certificação C-04A | _(preenchido após commit de certificação)_ |
+| Commit de certificação C-04A | `91f03d819274c0bbe9a3b3fc43d610eed30760d5` |
 | Mensagem (certificação) | `docs(enterprise): certify C-04A Enterprise Operator Runtime Gate` |
 
 ---
@@ -216,8 +216,8 @@ certifica o encerramento oficial da C-04.
 | Commit de entrega confirmado | `c9f491e3445b01e32aaee69804ad8ff37b593329` |
 | Hash curto (entrega) | `c9f491e` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | _(preenchido após commit de certificação)_ |
-| Hash curto (certificação) | _(preenchido após commit de certificação)_ |
+| Commit de certificação confirmado | `91f03d819274c0bbe9a3b3fc43d610eed30760d5` |
+| Hash curto (certificação) | `91f03d8` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |

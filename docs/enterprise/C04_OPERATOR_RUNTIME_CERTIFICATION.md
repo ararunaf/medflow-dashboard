@@ -49,6 +49,7 @@ Foundation ECS-01 do Enterprise Operator Runtime:
 |------|-------|
 | Branch | `feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega C-04 | `c9f491e3445b01e32aaee69804ad8ff37b593329` |
+| Commit de certificação C-04A | `91f03d819274c0bbe9a3b3fc43d610eed30760d5` |
 | Hash correto? | **SIM** |
 | Working Tree (produto) | Limpa após certificação |
 | Push | Realizado |
