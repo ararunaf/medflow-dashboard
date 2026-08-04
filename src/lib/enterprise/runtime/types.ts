@@ -10,6 +10,7 @@
  * INF-10: Scalability Runtime estrutural — sem Kubernetes / Auto Scaling / Cluster / Load Balancer.
  * F3-CAP-01: Scanner Runtime estrutural — sem Scanner real / TWAIN / WIA / ISIS / Drivers.
  * F3-CAP-02: Watch Folder Runtime estrutural — sem Watch Folder real / FileSystemWatcher / Polling / SMB / UNC / Azure Files.
+ * F3-CAP-03: Upload Runtime estrutural — sem Upload real / Web / Desktop / Mobile / API / Multipart / Chunked / Resumable / Azure Blob / Supabase / S3 / Drive / OneDrive / Dropbox.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
@@ -51,6 +52,7 @@ import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-
 import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 import type { WatchFolderRuntimePort } from "../watch-folder-runtime/ports/watch-folder-runtime-port";
+import type { UploadRuntimePort } from "../upload-runtime/ports/upload-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -91,6 +93,7 @@ export type EnterpriseRuntimeHealth = {
   scalabilityRuntimeOk?: boolean;
   scannerRuntimeOk?: boolean;
   watchFolderRuntimeOk?: boolean;
+  uploadRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -170,6 +173,7 @@ export type EnterpriseRuntimeOptions = {
   scalabilityRuntimePort?: ScalabilityRuntimePort;
   scannerRuntimePort?: ScannerRuntimePort;
   watchFolderRuntimePort?: WatchFolderRuntimePort;
+  uploadRuntimePort?: UploadRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -289,6 +293,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve WatchFolderRuntimePort (F3-CAP-02) — Enterprise Watch Folder Runtime Foundation. */
   getWatchFolderRuntimePort(): WatchFolderRuntimePort;
+
+  /** Resolve UploadRuntimePort (F3-CAP-03) — Enterprise Upload Runtime Foundation. */
+  getUploadRuntimePort(): UploadRuntimePort;
 
   /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker + INF-07 Scheduler + INF-08 PersistentQueue + INF-09 Observability + INF-10 Scalability deps). */
   getTISSRuntimePort(): TISSRuntimePort;

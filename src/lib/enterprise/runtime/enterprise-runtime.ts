@@ -90,6 +90,8 @@ import { createScannerRuntimePort } from "../scanner-runtime/providers/create-sc
 import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 import { createWatchFolderRuntimePort } from "../watch-folder-runtime/providers/create-watch-folder-runtime-port";
 import type { WatchFolderRuntimePort } from "../watch-folder-runtime/ports/watch-folder-runtime-port";
+import { createUploadRuntimePort } from "../upload-runtime/providers/create-upload-runtime-port";
+import type { UploadRuntimePort } from "../upload-runtime/ports/upload-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -142,6 +144,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly scannerRuntimePort!: ScannerRuntimePort;
   /** Atribuído após Scanner + Capture/OCR/PQR/Scheduler/Worker/Obs — deps estruturais. */
   private readonly watchFolderRuntimePort!: WatchFolderRuntimePort;
+  /** Atribuído após WatchFolder + Scanner/Capture/OCR/PQR/Scheduler/Worker/Obs — deps estruturais. */
+  private readonly uploadRuntimePort!: UploadRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
   private readonly aiProviderRuntimePort: AIProviderRuntimePort;
@@ -398,6 +402,22 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
+    // F3-CAP-03: Upload Runtime Foundation — deps estruturais apenas (sem Upload real / storage providers).
+    this.uploadRuntimePort =
+      options.uploadRuntimePort ??
+      createUploadRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getCaptureEngineRuntimePort: () => this.captureEngineRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
+        },
+      });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
     this.aiProviderPort = options.aiProviderPort ?? createAIProviderPort({ provider: "openai" });
     this.aiProviderRuntimePort =
@@ -531,6 +551,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.watchFolderRuntimePort;
   }
 
+  getUploadRuntimePort(): UploadRuntimePort {
+    return this.uploadRuntimePort;
+  }
+
   getTISSRuntimePort(): TISSRuntimePort {
     return this.tissRuntimePort;
   }
@@ -576,6 +600,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       scalabilityRuntimeHealth,
       scannerRuntimeHealth,
       watchFolderRuntimeHealth,
+      uploadRuntimeHealth,
       tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -610,6 +635,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.scalabilityRuntimePort.health(),
       this.scannerRuntimePort.health(),
       this.watchFolderRuntimePort.health(),
+      this.uploadRuntimePort.health(),
       this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -646,6 +672,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       scalabilityRuntimeHealth.ok &&
       scannerRuntimeHealth.ok &&
       watchFolderRuntimeHealth.ok &&
+      uploadRuntimeHealth.ok &&
       tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -683,11 +710,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       scalabilityRuntimeOk: scalabilityRuntimeHealth.ok,
       scannerRuntimeOk: scannerRuntimeHealth.ok,
       watchFolderRuntimeOk: watchFolderRuntimeHealth.ok,
+      uploadRuntimeOk: uploadRuntimeHealth.ok,
       tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
