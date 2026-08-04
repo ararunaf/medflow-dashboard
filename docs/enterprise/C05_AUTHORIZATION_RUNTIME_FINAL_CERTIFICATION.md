@@ -207,7 +207,7 @@ certifica o encerramento oficial da C-05.
 |------|------|
 | Commit de entrega C-05 | `3b91a0151b20dc5e4302f139b92c45b6ccd24c08` |
 | Mensagem (entrega) | `feat(authorization-runtime): add C-05 Enterprise Authorization Runtime Foundation` |
-| Commit de certificação C-05A | _(preenchido após commit de certificação)_ |
+| Commit de certificação C-05A | `1d7a696e5571745beef85a953c9d279edb9ba287` |
 | Mensagem (certificação) | `docs(enterprise): certify C-05A Enterprise Authorization Runtime Gate` |
 
 ---
@@ -221,8 +221,8 @@ certifica o encerramento oficial da C-05.
 | Commit de entrega confirmado | `3b91a0151b20dc5e4302f139b92c45b6ccd24c08` |
 | Hash curto (entrega) | `3b91a01` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | _(preenchido após commit de certificação)_ |
-| Hash curto (certificação) | _(preenchido após commit de certificação)_ |
+| Commit de certificação confirmado | `1d7a696e5571745beef85a953c9d279edb9ba287` |
+| Hash curto (certificação) | `1d7a696` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
