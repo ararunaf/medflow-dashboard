@@ -183,7 +183,7 @@ certifica o encerramento oficial da F3-CAP-11.
 |------|------|
 | Commit de entrega F3-CAP-11 | `fbe9eed343ef42694ca834270b08514d8c521feb` |
 | Mensagem (entrega) | `feat(tiss-mapping-runtime): add F3-CAP-11 Enterprise TISS Mapping Runtime Foundation` |
-| Commit de certificação F3-CAP-11A | _(preenchido após commit desta certificação)_ |
+| Commit de certificação F3-CAP-11A | `12570fba23730bb883f2d960a15447fb0a5333a7` |
 | Mensagem (certificação) | `docs(enterprise): certify F3-CAP-11A Enterprise TISS Mapping Runtime Gate` |
 
 ---
@@ -196,8 +196,8 @@ certifica o encerramento oficial da F3-CAP-11.
 | Remote | `origin/feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega confirmado | `fbe9eed343ef42694ca834270b08514d8c521feb` |
 | Hash curto (entrega) | `fbe9eed` |
-| Commit de certificação confirmado | _(preenchido após commit desta certificação)_ |
-| Hash curto (certificação) | _(preenchido após commit desta certificação)_ |
+| Commit de certificação confirmado | `12570fba23730bb883f2d960a15447fb0a5333a7` |
+| Hash curto (certificação) | `12570fb` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** |
 | Ahead | **0** |
