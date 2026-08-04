@@ -5,7 +5,7 @@
  * Ponto único de acesso do produto aos Ports Enterprise.
  * Bridge Captura → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime
  *   → DocumentIntakePort → Adapter → Implementação existente
- *   → OCRRuntimePort → Orchestrator → OCRProviderPort → Azure Adapter (OCR-01)
+ *   → OCRRuntimePort (F3-CAP-05) → Orchestrator → OCRProviderPort → Azure Adapter (OCR-01)
  *   → DocumentClassificationRuntimePort → Orchestrator
  *   → DocumentClassificationProviderPort → DefaultDocumentClassificationAdapter (CLASS-01)
  *   → StorageManagerRuntimePort → Orchestrator
@@ -171,13 +171,29 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       });
     // OCR-01: Azure Document Intelligence oficial atrás do OCRProviderPort — sem bypass no produto.
     this.ocrProviderPort = options.ocrProviderPort ?? createOCRProviderPort({ provider: "azure" });
+    // F3-CAP-05: Enterprise OCR Runtime Foundation — orquestração estrutural de
+    // jobs/requests/documentos OCR, com coordenação/execução real DIP-03/OCR-01
+    // preservada via Orchestrator + OCRProviderPort. Peers estruturais
+    // (IntelligentCapture/Scanner/WatchFolder/Upload/PQR/Worker/Scheduler/
+    // Observability/Scalability) via lazy getters — OCR é construído antes
+    // desses Ports no composition root, sem consumo funcional (shape-check
+    // apenas em health()).
     this.ocrRuntimePort =
       options.ocrRuntimePort ??
       createOCRRuntimePort({
-        provider: "default",
+        provider: "enterprise",
         enterpriseDeps: {
           getOrchestratorPort: () => this.orchestratorPort,
           getOCRProviderPort: () => this.ocrProviderPort,
+          getIntelligentCaptureRuntimePort: () => this.intelligentCaptureRuntimePort,
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getUploadRuntimePort: () => this.uploadRuntimePort,
+          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
+          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
     // CLASS-01: Rule-based Document Classification oficial atrás do ProviderPort — sem IA / sem bypass.

@@ -300,7 +300,7 @@ describe("F3-CAP-04 cadeia Enterprise / Intelligent Capture Runtime", () => {
     assert.equal(runtime.getUploadRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getWatchFolderRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getScannerRuntimePort().providerId, "enterprise");
-    assert.equal(runtime.getOCRRuntimePort().providerId, "default");
+    assert.equal(runtime.getOCRRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getWorkerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getSchedulerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getPersistentQueueRuntimePort().providerId, "enterprise");

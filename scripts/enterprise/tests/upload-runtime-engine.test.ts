@@ -283,7 +283,7 @@ describe("F3-CAP-03 cadeia Enterprise / Upload Runtime", () => {
     assert.equal(runtime.getWatchFolderRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getScannerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getCaptureEngineRuntimePort().providerId, "default");
-    assert.equal(runtime.getOCRRuntimePort().providerId, "default");
+    assert.equal(runtime.getOCRRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getWorkerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getSchedulerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getPersistentQueueRuntimePort().providerId, "enterprise");

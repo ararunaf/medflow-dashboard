@@ -1,23 +1,49 @@
 /**
- * OCRRuntimeProvider — factory do Port (DIP-03).
+ * OCRRuntimeProvider — factory pública do OCRRuntimePort (F3-CAP-05 + DIP-03 preservado).
  *
  * Application / Enterprise Runtime resolvem o Port via este factory;
- * nunca instanciam adapters concretos no Domain.
- *
- * Default: DefaultOCRRuntimeAdapter (exige enterpriseDeps).
+ * nunca instanciam adapters de vendor diretamente no Domain.
  */
-import { createOCRRuntimeFactory } from "../factory/ocr-runtime-factory";
+import { OCRRuntimeFactory, createOCRRuntimeFactory } from "../factory/ocr-runtime-factory";
 import type { OCRRuntimePort } from "../ports/ocr-runtime-port";
-import type { OCRRuntimeProviderOptions } from "../ports/types";
+import type { OCRRuntimeOptions } from "../ports/types";
+
+let sharedFactory: OCRRuntimeFactory | undefined;
+
+function getSharedFactory(): OCRRuntimeFactory {
+  if (!sharedFactory) {
+    sharedFactory = createOCRRuntimeFactory();
+  }
+  return sharedFactory;
+}
 
 /**
  * Cria o OCRRuntimePort para o provedor solicitado.
  *
- * Default de produção: DefaultOCRRuntimeAdapter
- * (Orchestrator + OCR Provider Adapter estrutural via enterpriseDeps).
+ * Default da factory: `enterprise` (F3-CAP-05 oficial).
+ * DIP-03 preservado: enterpriseDeps.getOrchestratorPort + getOCRProviderPort
+ * habilitam coordinateOcr()/process() reais quando presentes.
  */
-export function createOCRRuntimePort(options: OCRRuntimeProviderOptions = {}): OCRRuntimePort {
-  return createOCRRuntimeFactory({
-    enterpriseDeps: options.enterpriseDeps,
-  }).create(options);
+export function createOCRRuntimePort(options: OCRRuntimeOptions = {}): OCRRuntimePort {
+  return getSharedFactory().create(options);
 }
+
+/** Expõe a factory compartilhada (registry incluso) para inspeção/demo. */
+export function getOCRRuntimeFactory(): OCRRuntimeFactory {
+  return getSharedFactory();
+}
+
+/**
+ * Composition-root helper — resolve o Port oficial da fundação.
+ * Preferido no produto via Enterprise Runtime.getOCRRuntimePort().
+ */
+export function getOCRRuntimePort(options: OCRRuntimeOptions = {}): OCRRuntimePort {
+  return createOCRRuntimePort(options);
+}
+
+/** Alias explícito do Provider (F3-CAP-05). */
+export const OCRRuntimeProvider = {
+  create: createOCRRuntimePort,
+  get: getOCRRuntimePort,
+  getFactory: getOCRRuntimeFactory,
+};

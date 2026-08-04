@@ -1,1 +1,6 @@
-export { createOCRRuntimePort } from "./create-ocr-runtime-port";
+export {
+  OCRRuntimeProvider,
+  createOCRRuntimePort,
+  getOCRRuntimeFactory,
+  getOCRRuntimePort,
+} from "./create-ocr-runtime-port";

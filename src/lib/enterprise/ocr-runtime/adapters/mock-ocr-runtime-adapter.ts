@@ -1,17 +1,26 @@
 /**
- * MockOCRRuntimeAdapter — DIP-03.
+ * MockOCRRuntimeAdapter — F3-CAP-05 (+ DIP-03 preservado).
  *
- * Voltado para testes e homologação.
- * Quando enterpriseDeps estão presentes, usa Orchestrator + OCR Provider Adapter
- * (mesma cadeia do default). Sem deps, opera somente no store in-memory
- * para isolamento de contrato — sem OCR real e sem implementação paralela de produto.
+ * Implementação totalmente determinística in-process.
+ * Sem HTTP. Sem OCR real. Sem Tesseract/Azure/Google/AWS/ABBYY/PaddleOCR.
+ *
+ * Delega sempre ao Default (mesmo sem enterpriseDeps — DefaultOCRRuntimeAdapter
+ * aceita deps opcionais). Quando enterpriseDeps.getOrchestratorPort +
+ * getOCRProviderPort estão presentes, process()/coordinateOcr() coordenam via
+ * Orchestrator + OCR Provider Adapter (mesma cadeia do default).
  */
-import { createOCRRuntimeSessionId } from "../ports/identity";
+import {
+  DEFAULT_MOCK_OCR_RUNTIME_ENGINE_CAPABILITIES,
+  toCanonicalOCRCapabilities,
+} from "../ports/capabilities";
 import type { OCRRuntimePort } from "../ports/ocr-runtime-port";
-import type { CanonicalOCRSession } from "../ports/models";
 import type {
+  CloseOCRJobInput,
+  CloseOCRJobResult,
   CoordinateOCRInput,
   CoordinateOCRResult,
+  GetOCRResultInput,
+  GetOCRResultResult,
   GetOCRRuntimeSessionInput,
   GetOCRRuntimeSessionResult,
   ListOCRProviderReferencesResult,
@@ -20,15 +29,26 @@ import type {
   OCRRuntimeCapabilities,
   OCRRuntimeEnterpriseDeps,
   OCRRuntimeHealth,
+  OCRRuntimeInfo,
   OCRRuntimeProviderId,
+  OCRRuntimeProviderMetadata,
+  OCRStatsInput,
+  OCRStatsResult,
+  OpenOCRJobInput,
+  OpenOCRJobResult,
   ProcessOCRInput,
   ProcessOCRResult,
+  RegisterOCRDocumentInput,
+  RegisterOCRDocumentResult,
+  SubmitOCRRequestInput,
+  SubmitOCRRequestResult,
 } from "../ports/types";
-import { STRUCTURAL_OCR_PROVIDER_REFERENCES } from "../ports/types";
-import { InMemoryOCRRuntimeStore, type OCRRuntimeStore } from "../store";
+import type { OCRRuntimeStore } from "../store";
+import { InMemoryOCRRuntimeStore } from "../store";
 import { DefaultOCRRuntimeAdapter } from "./default-ocr-runtime-adapter";
 
-export const MOCK_OCR_RUNTIME_ADAPTER_ID = "mock-in-memory";
+export const MOCK_OCR_RUNTIME_ADAPTER_ID = "mock-deterministic-ocr-runtime";
+export const DEFAULT_MOCK_OCR_RUNTIME_VERSION = "1.0.0";
 
 export type MockOCRRuntimeAdapterOptions = {
   provider?: Extract<OCRRuntimeProviderId, "mock" | "test">;
@@ -40,33 +60,52 @@ export type MockOCRRuntimeAdapterOptions = {
   now?: () => string;
 };
 
+function mockMetadata(
+  providerId: Extract<OCRRuntimeProviderId, "mock" | "test">,
+): OCRRuntimeProviderMetadata {
+  return {
+    name: providerId === "test" ? "Test OCR Runtime" : "Mock OCR Runtime",
+    version: DEFAULT_MOCK_OCR_RUNTIME_VERSION,
+    vendor: "medicflow-enterprise",
+    layer: "Foundation",
+    vendorAgnostic: true,
+    description:
+      "Deterministic in-process OCR Runtime mock — no network, no real OCR engine (Tesseract/Azure/Google/AWS/ABBYY/PaddleOCR).",
+  };
+}
+
+/**
+ * Mock adapter — delega ao Default em modo canônico (simulated:true).
+ */
 export class MockOCRRuntimeAdapter implements OCRRuntimePort {
   readonly providerId: Extract<OCRRuntimeProviderId, "mock" | "test">;
 
   private readonly healthy: boolean;
   private readonly message: string;
-  private readonly store: OCRRuntimeStore;
-  private readonly createSessionId: () => string;
-  private readonly now?: () => string;
-  private readonly delegate: DefaultOCRRuntimeAdapter | undefined;
+  private readonly providerMetadata: OCRRuntimeProviderMetadata;
+  private readonly delegate: DefaultOCRRuntimeAdapter;
+  private readonly hasOcrProviderDeps: boolean;
 
   constructor(options: MockOCRRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "mock";
     this.healthy = options.healthy ?? true;
-    this.message = options.message ?? `${this.providerId} ocr-runtime ready (no real OCR).`;
-    this.store = options.store ?? new InMemoryOCRRuntimeStore();
-    this.createSessionId = options.createSessionId ?? createOCRRuntimeSessionId;
-    this.now = options.now;
+    this.message = options.message ?? `${this.providerId} OCR Runtime ready (deterministic).`;
+    this.providerMetadata = mockMetadata(this.providerId);
+    this.hasOcrProviderDeps = typeof options.enterpriseDeps?.getOCRProviderPort === "function";
 
-    if (options.enterpriseDeps) {
-      this.delegate = new DefaultOCRRuntimeAdapter({
-        enterpriseDeps: options.enterpriseDeps,
-        store: this.store,
-        createSessionId: this.createSessionId,
-        now: this.now,
-        ping: async () => ({ ok: this.healthy, message: this.message }),
-      });
-    }
+    this.delegate = new DefaultOCRRuntimeAdapter({
+      provider: "default",
+      healthy: this.healthy,
+      message: this.message,
+      store: options.store ?? new InMemoryOCRRuntimeStore(),
+      enterpriseDeps: options.enterpriseDeps,
+      createSessionId: options.createSessionId,
+      now: options.now,
+    });
+  }
+
+  getStore(): OCRRuntimeStore {
+    return this.delegate.getStore();
   }
 
   capabilities(): OCRRuntimeCapabilities {
@@ -80,10 +119,10 @@ export class MockOCRRuntimeAdapter implements OCRRuntimePort {
       supportsHealth: true,
       supportsCapabilities: true,
       supportsProviderReferences: true,
-      usesEnterpriseRuntimePorts: Boolean(this.delegate),
-      usesCanonicalExecutionOrchestrator: Boolean(this.delegate),
-      usesOCRProviderAdapter: Boolean(this.delegate),
-      usesCaptureEngineRuntime: Boolean(this.delegate),
+      usesEnterpriseRuntimePorts: this.hasOcrProviderDeps,
+      usesCanonicalExecutionOrchestrator: this.hasOcrProviderDeps,
+      usesOCRProviderAdapter: this.hasOcrProviderDeps,
+      usesCaptureEngineRuntime: this.hasOcrProviderDeps,
       supportsPdf: false,
       supportsImage: false,
       supportsBatch: false,
@@ -92,7 +131,7 @@ export class MockOCRRuntimeAdapter implements OCRRuntimePort {
       supportsTables: false,
       supportsForms: false,
       supportsConfidenceScore: false,
-      implementsRealOcr: Boolean(this.delegate),
+      implementsRealOcr: this.hasOcrProviderDeps,
       implementsAzure: false,
       implementsGoogleVision: false,
       implementsAwsTextract: false,
@@ -101,145 +140,124 @@ export class MockOCRRuntimeAdapter implements OCRRuntimePort {
       implementsClassification: false,
       implementsXml: false,
       implementsTiss: false,
+      // F3-CAP-05 — operações estruturais (sempre disponíveis, sem deps).
+      supportsOpenJob: true,
+      supportsCloseJob: true,
+      supportsSubmitRequest: true,
+      supportsRegisterDocument: true,
+      supportsGetResult: true,
+      supportsStats: true,
+      supportsCanonicalOcr: true,
+      supportsTimeout: true,
+      supportsRetry: true,
+      supportsCancellation: true,
+      supportsTelemetry: true,
+      usesIntelligentCaptureRuntimePort: true,
+      usesScannerRuntimePort: true,
+      usesWatchFolderRuntimePort: true,
+      usesUploadRuntimePort: true,
+      usesPersistentQueueRuntimePort: true,
+      usesWorkerRuntimePort: true,
+      usesSchedulerRuntimePort: true,
+      usesObservabilityRuntimePort: true,
+      usesScalabilityRuntimePort: true,
+      runtimeReady: true,
+      ocrEngineImplemented: false,
+      pdfOcrImplemented: false,
+      imageOcrImplemented: false,
+      documentRecognitionImplemented: false,
+      textExtractionImplemented: false,
+      barcodeRecognitionImplemented: false,
+      qrRecognitionImplemented: false,
+      layoutAnalysisImplemented: false,
+      tableRecognitionImplemented: false,
+      handwritingRecognitionImplemented: false,
+      multiEngineImplemented: false,
+      confidenceScoreImplemented: false,
+      languageDetectionImplemented: false,
+      engine: { ...DEFAULT_MOCK_OCR_RUNTIME_ENGINE_CAPABILITIES },
+      canonical: toCanonicalOCRCapabilities(DEFAULT_MOCK_OCR_RUNTIME_ENGINE_CAPABILITIES),
+    };
+  }
+
+  providerInfo(): OCRRuntimeInfo {
+    return {
+      providerId: this.providerId,
+      metadata: this.providerMetadata,
+      status: this.healthy ? "ready" : "unhealthy",
+      providerType: "OCR_RUNTIME",
+      capabilities: { ...DEFAULT_MOCK_OCR_RUNTIME_ENGINE_CAPABILITIES },
     };
   }
 
   async health(): Promise<OCRRuntimeHealth> {
-    if (this.delegate) {
-      const health = await this.delegate.health();
-      return { ...health, provider: this.providerId, realOcrAvailable: false };
-    }
+    const health = await this.delegate.health();
     return {
-      ok: this.healthy,
+      ...health,
       provider: this.providerId,
       message: this.message,
       realOcrAvailable: false,
+      runtimeReady: true,
     };
   }
 
-  async process(input: ProcessOCRInput): Promise<ProcessOCRResult> {
-    if (this.delegate) {
-      return this.delegate.process(input);
-    }
+  // ---------------------------------------------------------------------
+  // F3-CAP-05 — operações estruturais (delega ao Default; simulated:true).
+  // ---------------------------------------------------------------------
 
-    const stamp = this.now?.() ?? new Date().toISOString();
-    const runtimeSessionId = this.createSessionId();
-    const session: CanonicalOCRSession = {
-      kind: "canonical-ocr-session",
-      runtimeSessionId,
-      status: "completed",
-      request: {
-        kind: "canonical-ocr-request",
-        identity: {
-          kind: "canonical-ocr-identity",
-          documentId: input.documentId ?? "mock-doc",
-        },
-        metadata: {
-          kind: "canonical-ocr-metadata",
-          sessionId: input.sessionId ?? runtimeSessionId,
-        },
-      },
-      providerReferenceId: "mock",
-      ocrProviderAdapterId: MOCK_OCR_RUNTIME_ADAPTER_ID,
-      createdAt: stamp,
-      updatedAt: stamp,
-      message: "Mock OCR Runtime process (store-only; no real OCR).",
-      code: "MOCK_PROCESSED",
-      realOcrExecuted: false,
-    };
-    this.store.setSession(session);
-    return {
-      kind: "canonical-ocr-result",
-      ok: this.healthy,
-      runtimeSessionId,
-      session,
-      providerReferenceId: "mock",
-      message: session.message,
-      code: session.code,
-      realOcrExecuted: false,
-    };
+  async openJob(input: OpenOCRJobInput): Promise<OpenOCRJobResult> {
+    const result = await this.delegate.openJob(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async closeJob(input: CloseOCRJobInput): Promise<CloseOCRJobResult> {
+    const result = await this.delegate.closeJob(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async submitRequest(input: SubmitOCRRequestInput): Promise<SubmitOCRRequestResult> {
+    const result = await this.delegate.submitRequest(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async registerDocument(input: RegisterOCRDocumentInput): Promise<RegisterOCRDocumentResult> {
+    const result = await this.delegate.registerDocument(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async getResult(input: GetOCRResultInput): Promise<GetOCRResultResult> {
+    const result = await this.delegate.getResult(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async stats(input?: OCRStatsInput): Promise<OCRStatsResult> {
+    const result = await this.delegate.stats(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  // ---------------------------------------------------------------------
+  // DIP-03 / OCR-01 — coordenação e execução real preservadas (delegate).
+  // ---------------------------------------------------------------------
+
+  async process(input: ProcessOCRInput): Promise<ProcessOCRResult> {
+    return this.delegate.process(input);
   }
 
   async coordinateOcr(input: CoordinateOCRInput): Promise<CoordinateOCRResult> {
-    if (this.delegate) {
-      return this.delegate.coordinateOcr(input);
-    }
-
-    if (!input.identity?.documentId || !input.metadata?.sessionId) {
-      return {
-        kind: "canonical-ocr-result",
-        ok: false,
-        message: "identity.documentId e metadata.sessionId são obrigatórios.",
-        code: "INVALID_INPUT",
-        realOcrExecuted: false,
-      };
-    }
-
-    const stamp = this.now?.() ?? new Date().toISOString();
-    const runtimeSessionId = this.createSessionId();
-    const session: CanonicalOCRSession = {
-      kind: "canonical-ocr-session",
-      runtimeSessionId,
-      status: "coordinated",
-      request: input,
-      executionId: `mock-exec-${runtimeSessionId}`,
-      providerReferenceId: "mock",
-      ocrProviderAdapterId: MOCK_OCR_RUNTIME_ADAPTER_ID,
-      createdAt: stamp,
-      updatedAt: stamp,
-      message: "Mock OCR coordinated (store-only; no Enterprise Ports; no real OCR).",
-      code: "MOCK_COORDINATED",
-      realOcrExecuted: false,
-    };
-    this.store.setSession(session);
-    return {
-      kind: "canonical-ocr-result",
-      ok: true,
-      runtimeSessionId,
-      session,
-      executionId: session.executionId,
-      providerReferenceId: "mock",
-      message: session.message,
-      code: session.code,
-      realOcrExecuted: false,
-    };
+    return this.delegate.coordinateOcr(input);
   }
 
   async getSession(input: GetOCRRuntimeSessionInput): Promise<GetOCRRuntimeSessionResult> {
-    if (this.delegate) return this.delegate.getSession(input);
-    const session = this.store.getSession(input.runtimeSessionId);
-    if (!session) return { ok: false, message: "not found", code: "not_found" };
-    return { ok: true, session };
+    return this.delegate.getSession(input);
   }
 
   async listSessions(
     input: ListOCRRuntimeSessionsInput = {},
   ): Promise<ListOCRRuntimeSessionsResult> {
-    if (this.delegate) return this.delegate.listSessions(input);
-    const sessions = this.store.listSessions().filter((session) => {
-      if (input.status != null && session.status !== input.status) return false;
-      if (input.documentId != null && session.request.identity.documentId !== input.documentId) {
-        return false;
-      }
-      if (input.sessionId != null && session.request.metadata.sessionId !== input.sessionId) {
-        return false;
-      }
-      if (input.idPrefix != null && !session.runtimeSessionId.startsWith(input.idPrefix)) {
-        return false;
-      }
-      if (
-        input.captureRuntimeSessionId != null &&
-        session.request.reference?.captureRuntimeSessionId !== input.captureRuntimeSessionId
-      ) {
-        return false;
-      }
-      return true;
-    });
-    return { ok: true, sessions };
+    return this.delegate.listSessions(input);
   }
 
   async listProviderReferences(): Promise<ListOCRProviderReferencesResult> {
-    if (this.delegate) return this.delegate.listProviderReferences();
-    return { ok: true, references: STRUCTURAL_OCR_PROVIDER_REFERENCES };
+    return this.delegate.listProviderReferences();
   }
 }

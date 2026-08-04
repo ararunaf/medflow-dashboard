@@ -275,7 +275,7 @@ describe("F3-CAP-01 cadeia Enterprise / Scanner Runtime", () => {
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.getScannerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getCaptureEngineRuntimePort().providerId, "default");
-    assert.equal(runtime.getOCRRuntimePort().providerId, "default");
+    assert.equal(runtime.getOCRRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getQueueRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getWorkerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getSchedulerRuntimePort().providerId, "enterprise");
