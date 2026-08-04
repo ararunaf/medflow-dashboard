@@ -192,7 +192,7 @@ certifica o encerramento oficial da C-02.
 |------|------|
 | Commit de entrega C-02 | `2b8d0d1d149068e9c1ca7ac7e16b7207ff2ecb9d` |
 | Mensagem (entrega) | `feat(xml-validation-runtime): add C-02 Enterprise XML Validation Runtime Foundation` |
-| Commit de certificação C-02A | *(preenchido após commit administrativo)* |
+| Commit de certificação C-02A | `9a67cf6e12d1da97695ea7796f8047f4cca51cbe` |
 | Mensagem (certificação) | `docs(enterprise): certify C-02A Enterprise XML Validation Runtime Gate` |
 
 ---
@@ -206,10 +206,10 @@ certifica o encerramento oficial da C-02.
 | Commit de entrega confirmado | `2b8d0d1d149068e9c1ca7ac7e16b7207ff2ecb9d` |
 | Hash curto (entrega) | `2b8d0d1` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | *(preenchido após commit administrativo)* |
-| Hash curto (certificação) | *(preenchido após commit administrativo)* |
+| Commit de certificação confirmado | `9a67cf6e12d1da97695ea7796f8047f4cca51cbe` |
+| Hash curto (certificação) | `9a67cf6` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
-| Hash local = remoto | **SIM** (entrega); atualizado após push da certificação |
+| Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
 | Behind | **0** |
 | Working Tree (produto) | **Limpa** (após commit + push desta certificação) |

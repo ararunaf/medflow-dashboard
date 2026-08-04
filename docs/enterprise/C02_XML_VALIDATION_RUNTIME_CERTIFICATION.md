@@ -75,7 +75,9 @@ Não iniciar C-02A na entrega C-02.
 | Commit de entrega C-02 | `2b8d0d1d149068e9c1ca7ac7e16b7207ff2ecb9d` |
 | Hash curto (entrega) | `2b8d0d1` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Push (entrega) | **SIM** — local = remoto; ahead 0; behind 0 |
+| Commit de certificação C-02A | `9a67cf6e12d1da97695ea7796f8047f4cca51cbe` |
+| Hash curto (certificação) | `9a67cf6` |
+| Push (entrega + certificação) | **SIM** — local = remoto; ahead 0; behind 0 |
 | Regra Permanente nº 4 | [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md) |
 | Certificação final | [`C02_XML_VALIDATION_RUNTIME_FINAL_CERTIFICATION.md`](./C02_XML_VALIDATION_RUNTIME_FINAL_CERTIFICATION.md) |
 | C-02 oficialmente encerrada? | **SIM** |
