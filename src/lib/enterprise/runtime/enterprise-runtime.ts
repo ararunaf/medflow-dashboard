@@ -541,9 +541,30 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       createXMLSerializerRuntimePort({ provider: "enterprise" });
     this.xmlSchemaRuntimePort =
       options.xmlSchemaRuntimePort ?? createXMLSchemaRuntimePort({ provider: "enterprise" });
+    // C-02: Enterprise XML Validation Runtime Foundation — orquestração
+    // estrutural de validação futura de documentos XML.
+    // Sem validação XML real / XSD / parser / correção automática / SOAP /
+    // operadoras / banco / persistência / APIs / IA.
+    // Peers estruturais (XMLTISS/Quality/AutoFill/TISSMapping/Audit/Validation/
+    // DocumentExtraction/DocumentClassification/OCR/AIOrchestration) via lazy
+    // getters — shape-check apenas em health().
     this.xmlValidationRuntimePort =
       options.xmlValidationRuntimePort ??
-      createXMLValidationRuntimePort({ provider: "enterprise" });
+      createXMLValidationRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getXMLTISSRuntimePort: () => this.xmlTissRuntimePort,
+          getQualityRuntimePort: () => this.qualityRuntimePort,
+          getAutoFillRuntimePort: () => this.autoFillRuntimePort,
+          getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
+          getAuditRuntimePort: () => this.auditRuntimePort,
+          getValidationRuntimePort: () => this.validationRuntimePort,
+          getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
+          getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getAIOrchestrationRuntimePort: () => this.aiOrchestrationRuntimePort,
+        },
+      });
     this.xsdRuntimePort =
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =

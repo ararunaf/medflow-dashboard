@@ -1,35 +1,39 @@
 /**
- * XMLValidationRuntimePort — contrato único do Enterprise XML Validation Runtime (TISS-08).
+ * XMLValidationRuntimePort — contrato único do Enterprise XML Validation Runtime (C-02).
  *
- * Application / TISS Runtime dependem exclusivamente desta interface
- * para preparar a infraestrutura de validação XML canônica.
+ * Application / Enterprise Runtime / TISS Runtime dependem exclusivamente desta
+ * interface para orquestração estrutural de validação futura de XML.
  *
- * Fluxo obrigatório:
- *   Produto → Enterprise Runtime → TISS Runtime
- *     → TISSCatalogPort → RulePackEnginePort
- *     → XMLRuntimePort → XMLGenerationRuntimePort
- *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
- *     → XMLValidationRuntimePort
- *     → Adapter → XML Validation Store → Canonical XML Validation Result
+ * Fluxo estrutural (C-02):
+ *   Produto → Enterprise Runtime → XMLValidationRuntimePort
+ *     → Adapter → XML Validation Runtime Store → XMLValidationResult
  *
- * TISS-08: infraestrutura canônica apenas — sem XSD oficial / validação real / XML TISS/ANS.
+ * C-02: infraestrutura canônica estrutural apenas. Sem validação XML.
+ * Sem XSD. Sem parser. Sem correção automática. Sem SOAP. Sem operadoras.
+ * Sem banco. Sem persistência. Sem APIs. Sem IA.
  */
 import type {
-  GetCanonicalXMLValidationResultInput,
-  GetCanonicalXMLValidationResultResult,
-  ListCanonicalXMLValidationResultsInput,
-  ListCanonicalXMLValidationResultsResult,
-  ValidateCanonicalXMLInput,
-  ValidateCanonicalXMLResult,
+  GetXMLValidationResultInput,
+  GetXMLValidationResultResult,
+  ListXMLValidationResultsInput,
+  ListXMLValidationResultsResult,
+  ValidateXMLInput,
+  ValidateXMLResult,
+  XMLValidationRuntimeCapabilities,
   XMLValidationRuntimeHealth,
   XMLValidationRuntimeInfo,
-  XMLValidationRuntimePortCapabilities,
   XMLValidationRuntimeProviderId,
+  XMLValidationStatsInput,
+  XMLValidationStatsResult,
 } from "./types";
 
 export interface XMLValidationRuntimePort {
   /** Identificador estável do provedor por trás do adapter. */
   readonly providerId: XMLValidationRuntimeProviderId;
+
+  // -------------------------------------------------------------------------
+  // C-02 — operações estruturais canônicas (nunca validam XML).
+  // -------------------------------------------------------------------------
 
   /**
    * Executa operação estrutural de validação canônica.
@@ -37,16 +41,23 @@ export interface XMLValidationRuntimePort {
    * Sempre validationExecuted = false e realValidationPerformed = false.
    * Sempre validationEngineReady = true.
    */
-  validate(input: ValidateCanonicalXMLInput): Promise<ValidateCanonicalXMLResult>;
+  validate(input: ValidateXMLInput): Promise<ValidateXMLResult>;
 
-  getResult(
-    input: GetCanonicalXMLValidationResultInput,
-  ): Promise<GetCanonicalXMLValidationResultResult>;
-  listResults(
-    input?: ListCanonicalXMLValidationResultsInput,
-  ): Promise<ListCanonicalXMLValidationResultsResult>;
+  /** Obtém resultado estrutural por resultId. NÃO executa validação. */
+  getResult(input: GetXMLValidationResultInput): Promise<GetXMLValidationResultResult>;
 
+  /** Lista resultados estruturais do store in-memory. */
+  listResults(input?: ListXMLValidationResultsInput): Promise<ListXMLValidationResultsResult>;
+
+  /** Estatísticas estruturais do store in-memory (C-02). */
+  stats(input?: XMLValidationStatsInput): Promise<XMLValidationStatsResult>;
+
+  /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;
-  capabilities(): XMLValidationRuntimePortCapabilities;
+
+  /** Capacidades estáticas do adapter ativo. */
+  capabilities(): XMLValidationRuntimeCapabilities;
+
+  /** Metadados agregados do provedor (C-02). */
   providerInfo(): XMLValidationRuntimeInfo;
 }

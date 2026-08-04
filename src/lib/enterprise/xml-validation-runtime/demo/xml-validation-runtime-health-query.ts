@@ -1,26 +1,26 @@
 /**
- * PoC Application — depende apenas de XMLValidationRuntimePort (TISS-08).
+ * PoC Application — depende apenas de XMLValidationRuntimePort (C-02).
  *
- * Não é usado por rotas, Server Functions, UI, Upload, Scanner,
- * Contratos, Rule Engine, Workflow ou IA.
+ * Não é usado por rotas, Server Functions, UI, validação XML,
+ * XSD, parser, correção automática ou SOAP.
  */
 import type { XMLValidationRuntimePort } from "../ports/xml-validation-runtime-port";
 import type {
+  XMLValidationRuntimeCapabilities,
   XMLValidationRuntimeHealth,
   XMLValidationRuntimeInfo,
-  XMLValidationRuntimePortCapabilities,
 } from "../ports/types";
 
 export type XMLValidationRuntimeHealthSummary = {
   health: XMLValidationRuntimeHealth;
-  capabilities: XMLValidationRuntimePortCapabilities;
+  capabilities: XMLValidationRuntimeCapabilities;
   info: XMLValidationRuntimeInfo;
   architectureLayer: "application";
 };
 
 /**
  * Query de aplicação: resume saúde/capacidades/info via Port.
- * Zero conhecimento de XSD oficial / validação real / XML TISS/ANS / operadoras.
+ * Zero conhecimento de validação XML / XSD / parser / correção.
  */
 export async function getXMLValidationRuntimeHealthSummary(
   port: XMLValidationRuntimePort,

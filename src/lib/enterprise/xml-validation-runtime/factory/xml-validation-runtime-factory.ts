@@ -1,16 +1,17 @@
 /**
- * XMLValidationRuntimeFactory — instancia o adapter correto (TISS-08).
+ * XMLValidationRuntimeFactory — instancia o adapter correto (C-02).
  *
- * Sem lógica de negócio. Sem XSD oficial. Sem validação real. Sem XML TISS/ANS.
+ * Sem lógica de negócio. Sem validação XML. Sem banco. Sem HTTP.
  * Posição na arquitetura:
- *   Application → TISS Runtime → XMLRuntimePort
- *     → XMLGenerationRuntimePort → XMLSerializerRuntimePort
- *     → XMLSchemaRuntimePort → XMLValidationRuntimePort
- *     → Adapter ← Factory ← Registry
+ *   Application → Enterprise Runtime → XMLValidationRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultXMLValidationAdapter, MockXMLValidationAdapter } from "../adapters";
+import { DefaultXMLValidationRuntimeAdapter, MockXMLValidationRuntimeAdapter } from "../adapters";
 import type { XMLValidationRuntimePort } from "../ports/xml-validation-runtime-port";
-import type { XMLValidationRuntimeOptions, XMLValidationRuntimeProviderId } from "../ports/types";
+import type {
+  XMLValidationRuntimeEnterpriseDeps,
+  XMLValidationRuntimeOptions,
+  XMLValidationRuntimeProviderId,
+} from "../ports/types";
 import {
   XMLValidationRuntimeRegistry,
   createDefaultXMLValidationRuntimeRegistry,
@@ -19,7 +20,10 @@ import type { XMLValidationRuntimeStore } from "../store";
 
 export type XMLValidationRuntimeFactoryOptions = {
   registry?: XMLValidationRuntimeRegistry;
+  /** Store compartilhado opcional. */
   store?: XMLValidationRuntimeStore;
+  /** Ports Enterprise default para os providers default/enterprise. */
+  enterpriseDeps?: XMLValidationRuntimeEnterpriseDeps;
 };
 
 /**
@@ -28,10 +32,12 @@ export type XMLValidationRuntimeFactoryOptions = {
 export class XMLValidationRuntimeFactory {
   private readonly registry: XMLValidationRuntimeRegistry;
   private readonly store?: XMLValidationRuntimeStore;
+  private readonly enterpriseDeps?: XMLValidationRuntimeEnterpriseDeps;
 
   constructor(options: XMLValidationRuntimeFactoryOptions = {}) {
     this.registry = options.registry ?? createDefaultXMLValidationRuntimeRegistry();
     this.store = options.store;
+    this.enterpriseDeps = options.enterpriseDeps;
   }
 
   getRegistry(): XMLValidationRuntimeRegistry {
@@ -51,30 +57,37 @@ export class XMLValidationRuntimeFactory {
       );
     }
 
-    return this.instantiate(provider);
+    return this.instantiate(provider, options.enterpriseDeps ?? this.enterpriseDeps);
   }
 
-  private instantiate(provider: XMLValidationRuntimeProviderId): XMLValidationRuntimePort {
+  private instantiate(
+    provider: XMLValidationRuntimeProviderId,
+    enterpriseDeps?: XMLValidationRuntimeEnterpriseDeps,
+  ): XMLValidationRuntimePort {
     switch (provider) {
       case "mock":
-        return new MockXMLValidationAdapter({
+        return new MockXMLValidationRuntimeAdapter({
           provider: "mock",
           store: this.store,
+          enterpriseDeps,
         });
       case "test":
-        return new MockXMLValidationAdapter({
+        return new MockXMLValidationRuntimeAdapter({
           provider: "test",
           store: this.store,
+          enterpriseDeps,
         });
       case "default":
-        return new DefaultXMLValidationAdapter({
+        return new DefaultXMLValidationRuntimeAdapter({
           provider: "default",
           store: this.store,
+          enterpriseDeps,
         });
       case "enterprise":
-        return new DefaultXMLValidationAdapter({
+        return new DefaultXMLValidationRuntimeAdapter({
           provider: "enterprise",
           store: this.store,
+          enterpriseDeps,
         });
       default: {
         const _exhaustive: never = provider;

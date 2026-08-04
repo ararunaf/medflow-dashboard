@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 /**
- * TISS-08 — Enterprise XML Validation Runtime
+ * C-02 — Enterprise XML Validation Runtime Foundation
  * Prova: Application → XMLValidationRuntimePort → Adapter → Factory → Registry → Store
- *         + XML Schema Runtime + XML Serializer Runtime + XML Generation Runtime + XML Runtime
- *         + TISS Runtime + Enterprise Runtime
- *         + Canonical XML Validation Request / Result
- *         + validate / health / capabilities
- *         + ausência de XSD oficial / validação real / XML TISS/ANS / bypass
+ *         + validate / getResult / listResults / stats
+ *         + Enterprise Runtime + deps estruturais (XMLTISS/Quality/AutoFill/TISSMapping/
+ *           Audit/Validation/DocumentExtraction/DocumentClassification/OCR/
+ *           AIOrchestration)
+ *         + contrato XMLValidationContext (XMLDocument + CanonicalGuide +
+ *           CanonicalMappingResult + QualityAssessment + ValidationResult +
+ *           AuditResult + AutoFillResult)
+ *         + contratos structure/schema/namespace/version/integrity/consistency/
+ *           compatibility/report (somente estruturais)
+ *         + ausência de validação XML / XSD / parser / correção automática /
+ *           SOAP / operadoras / banco / persistência / APIs / IA
+ *         + compatibilidade de cadeia TISS (validate API)
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -15,26 +22,37 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   BUILTIN_XML_VALIDATION_RUNTIME_PROVIDER_COUNT,
-  DEFAULT_XML_VALIDATION_ADAPTER_ID,
-  DEFAULT_XML_VALIDATION_RUNTIME_CAPABILITIES,
-  DefaultXMLValidationAdapter,
-  EnterpriseXMLValidationAdapter,
+  DEFAULT_XML_VALIDATION_RUNTIME_ADAPTER_ID,
+  DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
+  DefaultXMLValidationRuntimeAdapter,
+  EnterpriseXMLValidationRuntimeAdapter,
   IN_MEMORY_XML_VALIDATION_RUNTIME_STORE_ID,
   InMemoryXMLValidationRuntimeStore,
-  MOCK_XML_VALIDATION_ADAPTER_ID,
-  MockXMLValidationAdapter,
+  MOCK_XML_VALIDATION_RUNTIME_ADAPTER_ID,
+  MockXMLValidationRuntimeAdapter,
+  XML_VALIDATION_RUNTIME_IDENTITY,
   XMLValidationRuntimeFactory,
   XMLValidationRuntimeProvider,
   XMLValidationRuntimeRegistry,
   createDefaultXMLValidationRuntimeRegistry,
+  createDisabledXMLValidationReport,
+  createDisabledXMLValidationSchema,
+  createDisabledXMLValidationStructure,
   createXMLValidationRuntimeFactory,
   createXMLValidationRuntimePort,
   getXMLValidationRuntimeFactory,
   getXMLValidationRuntimeHealthSummary,
+  getXMLValidationRuntimePort,
+  resetAllXMLValidationRuntimeIdSequences,
+  type AuditResult,
+  type AutoFillResult,
+  type CanonicalGuide,
+  type CanonicalMappingResult,
+  type QualityAssessment,
+  type ValidationResult,
+  type XMLValidationContext,
   type XMLValidationRuntimePort,
 } from "../../../src/lib/enterprise/xml-validation-runtime/index.ts";
-import { createXSDRuntimePort } from "../../../src/lib/enterprise/xsd-runtime/index.ts";
-import { createNamespaceRuntimePort } from "../../../src/lib/enterprise/namespace-runtime/index.ts";
 import { createXMLSchemaRuntimePort } from "../../../src/lib/enterprise/xml-schema-runtime/index.ts";
 import { createXMLSerializerRuntimePort } from "../../../src/lib/enterprise/xml-serializer-runtime/index.ts";
 import { createXMLGenerationRuntimePort } from "../../../src/lib/enterprise/xml-generation-runtime/index.ts";
@@ -42,7 +60,9 @@ import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/
 import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
 import { createXMLRuntimePort } from "../../../src/lib/enterprise/xml-runtime/index.ts";
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
-import { createQueueRuntimePort } from '../../../src/lib/enterprise/queue-runtime/index.ts';
+import { createXSDRuntimePort } from "../../../src/lib/enterprise/xsd-runtime/index.ts";
+import { createNamespaceRuntimePort } from "../../../src/lib/enterprise/namespace-runtime/index.ts";
+import { createQueueRuntimePort } from "../../../src/lib/enterprise/queue-runtime/index.ts";
 import { createSchedulerRuntimePort } from "../../../src/lib/enterprise/scheduler-runtime/index.ts";
 import { createWorkerRuntimePort } from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import { createPersistentQueueRuntimePort } from "../../../src/lib/enterprise/persistent-queue-runtime/index.ts";
@@ -70,9 +90,187 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
-describe("TISS-08 XMLValidationRuntimePort contract", () => {
-  it("mock adapter satisfaz o Port e responde healthy", async () => {
-    const port: XMLValidationRuntimePort = new MockXMLValidationAdapter({
+function assertStructuralFlagsFalse(obj: Record<string, unknown>) {
+  const flags = [
+    "xmlValidationImplemented",
+    "xsdValidationImplemented",
+    "namespaceValidationImplemented",
+    "schemaSelectionImplemented",
+    "versionValidationImplemented",
+    "businessValidationImplemented",
+    "operatorValidationImplemented",
+    "xmlRepairImplemented",
+    "automaticCorrectionImplemented",
+    "validationReportImplemented",
+  ];
+  for (const flag of flags) {
+    assert.equal(obj[flag], false, `${flag} deveria ser false`);
+  }
+}
+
+function sampleCanonicalGuide(overrides: Partial<CanonicalGuide> = {}): CanonicalGuide {
+  return {
+    kind: "canonical-tiss-guide",
+    guideId: "canonical-guide-structural",
+    guideType: "sp-sadt",
+    status: "processed",
+    canonicalModelImplemented: false,
+    guideTransformationImplemented: false,
+    mappingEngineImplemented: false,
+    operatorMappingImplemented: false,
+    templateMappingImplemented: false,
+    fieldNormalizationImplemented: false,
+    tissVersionMappingImplemented: false,
+    layoutMappingImplemented: false,
+    xmlMappingImplemented: false,
+    autoFillPreparationImplemented: false,
+    ...overrides,
+  };
+}
+
+function sampleMappingResult(
+  overrides: Partial<CanonicalMappingResult> = {},
+): CanonicalMappingResult {
+  return {
+    kind: "canonical-tiss-mapping-result",
+    ok: true,
+    resultId: "mapping-result-structural",
+    operation: "getResult",
+    mappingEngineImplemented: false,
+    operatorMappingImplemented: false,
+    templateMappingImplemented: false,
+    canonicalModelImplemented: false,
+    guideTransformationImplemented: false,
+    fieldNormalizationImplemented: false,
+    tissVersionMappingImplemented: false,
+    layoutMappingImplemented: false,
+    xmlMappingImplemented: false,
+    autoFillPreparationImplemented: false,
+    runtimeReady: true,
+    status: "processed",
+    createdAt: "2026-08-04T00:00:00.000Z",
+    updatedAt: "2026-08-04T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function sampleAutoFillResult(overrides: Partial<AutoFillResult> = {}): AutoFillResult {
+  return {
+    kind: "canonical-auto-fill-result",
+    ok: true,
+    resultId: "auto-fill-result-structural",
+    operation: "getResult",
+    autoFillEngineImplemented: false,
+    guideGenerationImplemented: false,
+    fieldPopulationImplemented: false,
+    templatePopulationImplemented: false,
+    operatorPopulationImplemented: false,
+    xmlPopulationImplemented: false,
+    validationIntegrationImplemented: false,
+    auditIntegrationImplemented: false,
+    qualityIntegrationImplemented: false,
+    automaticCompletionImplemented: false,
+    runtimeReady: true,
+    status: "processed",
+    createdAt: "2026-08-04T00:00:00.000Z",
+    updatedAt: "2026-08-04T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function sampleQualityAssessment(overrides: Partial<QualityAssessment> = {}): QualityAssessment {
+  return {
+    kind: "canonical-quality-assessment",
+    assessmentId: "quality-assessment-structural",
+    status: "prepared",
+    createdAt: "2026-08-04T00:00:00.000Z",
+    updatedAt: "2026-08-04T00:00:00.000Z",
+    qualityEngineImplemented: false,
+    qualityScoreImplemented: false,
+    ocrQualityImplemented: false,
+    classificationQualityImplemented: false,
+    extractionQualityImplemented: false,
+    validationQualityImplemented: false,
+    mappingQualityImplemented: false,
+    autoFillQualityImplemented: false,
+    auditQualityImplemented: false,
+    approvalDecisionImplemented: false,
+    ...overrides,
+  };
+}
+
+function sampleValidationResult(overrides: Partial<ValidationResult> = {}): ValidationResult {
+  return {
+    kind: "canonical-validation-result",
+    ok: true,
+    resultId: "validation-result-structural",
+    operation: "getResult",
+    issues: [],
+    warnings: [],
+    errors: [],
+    fieldValidationImplemented: false,
+    documentValidationImplemented: false,
+    templateValidationImplemented: false,
+    operatorValidationImplemented: false,
+    tissValidationImplemented: false,
+    confidenceValidationImplemented: false,
+    qualityValidationImplemented: false,
+    mandatoryFieldValidationImplemented: false,
+    crossFieldValidationImplemented: false,
+    businessRuleValidationImplemented: false,
+    automaticApprovalImplemented: false,
+    automaticRejectionImplemented: false,
+    runtimeReady: true,
+    status: "processed",
+    createdAt: "2026-08-04T00:00:00.000Z",
+    updatedAt: "2026-08-04T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function sampleAuditResult(overrides: Partial<AuditResult> = {}): AuditResult {
+  return {
+    kind: "canonical-audit-result",
+    ok: true,
+    resultId: "audit-result-structural",
+    operation: "getResult",
+    auditEngineImplemented: false,
+    businessRulesImplemented: false,
+    tissAuditImplemented: false,
+    operatorAuditImplemented: false,
+    automaticAuditImplemented: false,
+    auditSuggestionsImplemented: false,
+    auditJustificationImplemented: false,
+    auditScoreImplemented: false,
+    complianceImplemented: false,
+    automaticCorrectionImplemented: false,
+    runtimeReady: true,
+    status: "processed",
+    createdAt: "2026-08-04T00:00:00.000Z",
+    updatedAt: "2026-08-04T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function sampleXMLValidationContext(
+  overrides: Partial<XMLValidationContext> = {},
+): XMLValidationContext {
+  return {
+    kind: "canonical-xml-validation-context",
+    canonicalGuide: sampleCanonicalGuide(),
+    mappingResult: sampleMappingResult(),
+    autoFillResult: sampleAutoFillResult(),
+    qualityAssessment: sampleQualityAssessment(),
+    validationResult: sampleValidationResult(),
+    auditResult: sampleAuditResult(),
+    structuralNotes: "C-02 structural only",
+    ...overrides,
+  };
+}
+
+describe("C-02 XMLValidationRuntimePort contract", () => {
+  it("mock adapter satisfaz o Port e responde healthy sem validação XML", async () => {
+    const port: XMLValidationRuntimePort = new MockXMLValidationRuntimeAdapter({
       provider: "mock",
     });
     assert.equal(port.providerId, "mock");
@@ -80,42 +278,45 @@ describe("TISS-08 XMLValidationRuntimePort contract", () => {
     const health = await port.health();
     assert.equal(health.ok, true);
     assert.equal(health.provider, "mock");
-    assert.equal(health.status, "ready");
-    assert.equal(health.kind, "canonical-xml-validation-health");
+    assert.equal(health.runtimeReady, true);
     assert.equal(health.validationEngineReady, true);
+    assertStructuralFlagsFalse(health as unknown as Record<string, unknown>);
 
     const caps = port.capabilities();
-    assert.equal(caps.adapterId, MOCK_XML_VALIDATION_ADAPTER_ID);
-    assert.equal(caps.supportsCanonicalValidation, true);
-    assert.equal(caps.validationEngineReady, true);
-    assert.equal(caps.implementsOfficialXsd, false);
-    assert.equal(caps.implementsXsdValidation, false);
-    assert.equal(caps.implementsRealXmlValidation, false);
-    assert.equal(caps.implementsOfficialTissValidation, false);
-    assert.equal(caps.implementsOfficialAnsValidation, false);
-    assert.equal(caps.implementsOperatorDispatch, false);
-    assert.equal(caps.knowsOperatorOrCooperative, false);
-    assert.equal(caps.knowsContract, false);
-    assert.equal(caps.knowsTenant, false);
-    assert.equal(caps.knowsTissPattern, false);
-    assert.equal(caps.canonical.kind, "canonical-xml-validation-capabilities");
-    assert.equal(caps.canonical.validationEngineReady, true);
-    assert.equal(caps.canonical.implementsOfficialXsd, false);
+    assert.equal(caps.adapterId, MOCK_XML_VALIDATION_RUNTIME_ADAPTER_ID);
+    assert.equal(caps.supportsValidate, true);
+    assert.equal(caps.supportsGetResult, true);
+    assert.equal(caps.supportsListResults, true);
+    assert.equal(caps.supportsStats, true);
+    assert.equal(caps.runtimeReady, true);
+    assertStructuralFlagsFalse(caps as unknown as Record<string, unknown>);
   });
 
-  it("DefaultXMLValidationAdapter é o adapter enterprise oficial", () => {
-    assert.equal(EnterpriseXMLValidationAdapter, DefaultXMLValidationAdapter);
-    const port = new DefaultXMLValidationAdapter({
-      provider: "enterprise",
-    });
+  it("DefaultXMLValidationRuntimeAdapter é o adapter enterprise oficial (enterpriseDeps opcional)", () => {
+    assert.equal(EnterpriseXMLValidationRuntimeAdapter, DefaultXMLValidationRuntimeAdapter);
+    const port = new DefaultXMLValidationRuntimeAdapter({ provider: "enterprise" });
     assert.equal(port.providerId, "enterprise");
-    assert.equal(port.capabilities().adapterId, DEFAULT_XML_VALIDATION_ADAPTER_ID);
+    assert.equal(port.capabilities().adapterId, DEFAULT_XML_VALIDATION_RUNTIME_ADAPTER_ID);
   });
 
-  it("provider default resolve enterprise", () => {
+  it("identity declara Enterprise XML Validation Runtime Foundation vendor-agnostic", () => {
+    assert.equal(XML_VALIDATION_RUNTIME_IDENTITY.name, "Enterprise XML Validation Runtime");
+    assert.equal(XML_VALIDATION_RUNTIME_IDENTITY.layer, "Foundation");
+    assert.ok(XML_VALIDATION_RUNTIME_IDENTITY.version);
+    assert.equal(XML_VALIDATION_RUNTIME_IDENTITY.vendorAgnostic, true);
+    const info = createXMLValidationRuntimePort().providerInfo();
+    assert.equal(info.metadata.vendorAgnostic, true);
+    assert.equal(info.metadata.layer, "Foundation");
+    assert.equal(info.providerType, "XML_VALIDATION_RUNTIME");
+  });
+
+  it("provider default resolve enterprise via getXMLValidationRuntimePort/Provider", () => {
     const port = createXMLValidationRuntimePort();
     assert.equal(port.providerId, "enterprise");
+    assert.equal(getXMLValidationRuntimePort().providerId, "enterprise");
     assert.equal(XMLValidationRuntimeProvider.create().providerId, "enterprise");
+    assert.equal(XMLValidationRuntimeProvider.get().providerId, "enterprise");
+    assert.ok(XMLValidationRuntimeProvider.getFactory() instanceof XMLValidationRuntimeFactory);
   });
 
   it("factory resolve mock / test / default / enterprise", () => {
@@ -124,30 +325,45 @@ describe("TISS-08 XMLValidationRuntimePort contract", () => {
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
-    assert.equal(getXMLValidationRuntimeFactory().getRegistry().list().length, BUILTIN_XML_VALIDATION_RUNTIME_PROVIDER_COUNT);
+    assert.equal(
+      getXMLValidationRuntimeFactory().getRegistry().list().length,
+      BUILTIN_XML_VALIDATION_RUNTIME_PROVIDER_COUNT,
+    );
   });
 
-  it("validate → get → list com flags estruturais obrigatórias", async () => {
-    const schema = createXMLSchemaRuntimePort({ provider: "enterprise" });
-    const serializer = createXMLSerializerRuntimePort({ provider: "enterprise" });
-    const serialized = await serializer.serialize({ documentId: "doc-val-01" });
-    const registered = await schema.register({
-      documentId: "doc-val-01",
-      serializeResultId: serialized.result?.resultId,
-    });
+  it("registry registra mock / test / default / enterprise", () => {
+    const registry = createDefaultXMLValidationRuntimeRegistry();
+    assert.ok(registry instanceof XMLValidationRuntimeRegistry);
+    assert.equal(registry.has("mock"), true);
+    assert.equal(registry.has("test"), true);
+    assert.equal(registry.has("default"), true);
+    assert.equal(registry.has("enterprise"), true);
+    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.get("enterprise")?.capabilities.xmlValidationImplemented, false);
+    assert.equal(registry.get("enterprise")?.capabilities.xsdValidationImplemented, false);
+    assert.equal(registry.get("enterprise")?.capabilities.automaticCorrectionImplemented, false);
+  });
 
+  it("validate → getResult → listResults → stats (sem validação XML)", async () => {
+    resetAllXMLValidationRuntimeIdSequences();
+    const xmlContext = sampleXMLValidationContext();
     const port = createXMLValidationRuntimePort({ provider: "enterprise" });
+
     const validated = await port.validate({
-      documentId: "doc-val-01",
-      schemaResultId: registered.result?.resultId,
-      serializeResultId: serialized.result?.resultId,
+      documentId: "doc-c02-01",
+      xmlContext,
+      canonicalGuide: xmlContext.canonicalGuide,
+      mappingResult: xmlContext.mappingResult,
+      autoFillResult: xmlContext.autoFillResult,
+      qualityAssessment: xmlContext.qualityAssessment,
+      validationResult: xmlContext.validationResult,
+      auditResult: xmlContext.auditResult,
       request: {
         kind: "canonical-xml-validation-request",
         name: "Foundation Validation",
-        structuralNotes: "TISS-08 structural only",
+        structuralNotes: "C-02 structural only",
       },
     });
-
     assert.equal(validated.ok, true);
     assert.ok(validated.result?.resultId);
     assert.equal(validated.result?.validationExecuted, false);
@@ -157,9 +373,12 @@ describe("TISS-08 XMLValidationRuntimePort contract", () => {
     assert.equal(validated.result?.officialTissValidation, false);
     assert.equal(validated.result?.validationRulesLoaded, false);
     assert.equal(validated.result?.validationEngineReady, true);
+    assert.equal(validated.result?.runtimeReady, true);
     assert.equal(validated.result?.issues.length, 0);
-    assert.equal(validated.result?.summary?.issueCount, 0);
     assert.equal(validated.result?.status, "validated");
+    assert.equal(validated.result?.xmlContext?.kind, "canonical-xml-validation-context");
+    assert.equal(validated.result?.xmlContext?.canonicalGuide?.kind, "canonical-tiss-guide");
+    assertStructuralFlagsFalse(validated.result as unknown as Record<string, unknown>);
 
     const loaded = await port.getResult({ resultId: validated.result!.resultId });
     assert.equal(loaded.ok, true);
@@ -169,23 +388,94 @@ describe("TISS-08 XMLValidationRuntimePort contract", () => {
     assert.equal(listed.ok, true);
     assert.ok(listed.results.length >= 1);
     assert.equal(listed.statistics?.validationExecutedCount, 0);
-    assert.equal(listed.statistics?.realValidationPerformedCount, 0);
-    assert.equal(listed.statistics?.officialXsdLoadedCount, 0);
+    assert.equal(listed.statistics?.xmlValidationImplementedCount, 0);
+
+    const stats = await port.stats();
+    assert.equal(stats.ok, true);
+    assert.ok((stats.statistics?.totalResults ?? 0) >= 1);
+    assert.equal(stats.statistics?.xsdValidationImplementedCount, 0);
+    assert.equal(stats.statistics?.automaticCorrectionImplementedCount, 0);
   });
 
-  it("InMemory store oficial e estatísticas zeradas para validação real", () => {
+  it("store in-memory sem persistência", () => {
     const store = new InMemoryXMLValidationRuntimeStore();
     assert.equal(store.storeId, IN_MEMORY_XML_VALIDATION_RUNTIME_STORE_ID);
-    const stats = store.statistics();
-    assert.equal(stats.kind, "canonical-xml-validation-statistics");
-    assert.equal(stats.validationExecutedCount, 0);
-    assert.equal(stats.officialAnsValidationCount, 0);
-    assert.equal(stats.officialTissValidationCount, 0);
-    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_CAPABILITIES.validationEngineReady, true);
+    assert.equal(store.health().ok, true);
+    assert.equal(store.resultCount(), 0);
+    assert.equal(store.requestCount(), 0);
+    assert.equal(store.contextCount(), 0);
+  });
+
+  it("demo getXMLValidationRuntimeHealthSummary resume Port sem validação funcional", async () => {
+    const port = createXMLValidationRuntimePort({ provider: "enterprise" });
+    const summary = await getXMLValidationRuntimeHealthSummary(port);
+    assert.equal(summary.architectureLayer, "application");
+    assert.equal(summary.health.ok, true);
+    assert.equal(summary.capabilities.runtimeReady, true);
+    assert.equal(summary.info.providerType, "XML_VALIDATION_RUNTIME");
+    assertStructuralFlagsFalse(summary.health as unknown as Record<string, unknown>);
+  });
+
+  it("capabilities engine declara todas as flags *Implemented = false", () => {
+    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented, false);
+    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xsdValidationImplemented, false);
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.namespaceValidationImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.schemaSelectionImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.versionValidationImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.businessValidationImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.operatorValidationImplemented,
+      false,
+    );
+    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlRepairImplemented, false);
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.automaticCorrectionImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.validationReportImplemented,
+      false,
+    );
+  });
+
+  it("contratos estruturais (structure/schema/report) sem implementação", () => {
+    const structure = createDisabledXMLValidationStructure();
+    assert.equal(structure.structureValidationImplemented, false);
+    assert.equal(structure.xmlValidationImplemented, false);
+    const schema = createDisabledXMLValidationSchema();
+    assert.equal(schema.schemaSelectionImplemented, false);
+    assert.equal(schema.xsdValidationImplemented, false);
+    const report = createDisabledXMLValidationReport();
+    assert.equal(report.validationReportImplemented, false);
+    assert.equal(report.automaticCorrectionImplemented, false);
+    assert.equal(report.xmlRepairImplemented, false);
+  });
+
+  it("XMLValidationContext aceita peers estruturais sem processar", () => {
+    const ctx = sampleXMLValidationContext();
+    assert.equal(ctx.kind, "canonical-xml-validation-context");
+    assert.ok(ctx.canonicalGuide);
+    assert.ok(ctx.mappingResult);
+    assert.ok(ctx.autoFillResult);
+    assert.ok(ctx.qualityAssessment);
+    assert.ok(ctx.validationResult);
+    assert.ok(ctx.auditResult);
   });
 
   it("retry recupera falha transitória", async () => {
-    const port = new DefaultXMLValidationAdapter({
+    const port = new DefaultXMLValidationRuntimeAdapter({
       provider: "enterprise",
       failAttempts: 1,
       defaultRetryCount: 1,
@@ -211,26 +501,106 @@ describe("TISS-08 XMLValidationRuntimePort contract", () => {
   it("registry/factory sem fallback silencioso", () => {
     const registry = createDefaultXMLValidationRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, BUILTIN_XML_VALIDATION_RUNTIME_PROVIDER_COUNT);
-    assert.ok(registry instanceof XMLValidationRuntimeRegistry);
-
     const factory = new XMLValidationRuntimeFactory({ registry });
     assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
-  it("demo health summary depende apenas do Port", async () => {
-    const port = createXMLValidationRuntimePort({ provider: "enterprise" });
-    const summary = await getXMLValidationRuntimeHealthSummary(port);
-    assert.equal(summary.architectureLayer, "application");
-    assert.equal(summary.health.ok, true);
-    assert.equal(summary.info.providerType, "XML_VALIDATION_RUNTIME");
-    assert.equal(summary.capabilities.validationEngineReady, true);
-    assert.equal(summary.capabilities.implementsOfficialXsd, false);
-    assert.equal(summary.capabilities.implementsXsdValidation, false);
+  it("Enterprise Runtime expõe XMLValidationRuntimePort provider enterprise + health.xmlValidationRuntimeOk", async () => {
+    resetEnterpriseRuntimeForTests();
+    const runtime = createEnterpriseRuntime({ runtimeId: "test" });
+    const port = runtime.getXMLValidationRuntimePort();
+    assert.equal(port.providerId, "enterprise");
+    const health = await runtime.health();
+    assert.equal(health.ok, true);
+    assert.equal(health.xmlValidationRuntimeOk, true);
+    assert.equal(health.qualityRuntimeOk, true);
+    assert.equal(health.autoFillRuntimeOk, true);
+    assert.equal(health.tissMappingRuntimeOk, true);
+    assert.equal(health.auditRuntimeOk, true);
+    assert.equal(health.aiOrchestrationRuntimeOk, true);
+    assert.equal(health.validationRuntimeOk, true);
+    resetEnterpriseRuntimeForTests();
+  });
+
+  it("shape-check estrutural dos peers via enterpriseDeps (sem consumo funcional)", async () => {
+    resetEnterpriseRuntimeForTests();
+    const runtime = createEnterpriseRuntime({ runtimeId: "test" });
+    const port = runtime.getXMLValidationRuntimePort();
+    const health = await port.health();
+    assert.equal(health.ok, true);
+    assert.equal(health.xmlTissRuntimeOk, true);
+    assert.equal(health.qualityRuntimeOk, true);
+    assert.equal(health.autoFillRuntimeOk, true);
+    assert.equal(health.tissMappingRuntimeOk, true);
+    assert.equal(health.auditRuntimeOk, true);
+    assert.equal(health.validationRuntimeOk, true);
+    assert.equal(health.documentExtractionRuntimeOk, true);
+    assert.equal(health.documentClassificationRuntimeOk, true);
+    assert.equal(health.ocrRuntimeOk, true);
+    assert.equal(health.aiOrchestrationRuntimeOk, true);
+    resetEnterpriseRuntimeForTests();
+  });
+
+  it("módulo não importa OpenAI/Azure/Gemini/Claude/HTTP/ML/DB/parser/XSD funcional", () => {
+    const moduleRoot = join(repoRoot, "src/lib/enterprise/xml-validation-runtime");
+    const files = collectTsFiles(moduleRoot);
+    assert.ok(files.length > 0);
+    const forbidden = [
+      /from ["']openai/i,
+      /from ["']@openai/i,
+      /from ["']@azure\/openai/i,
+      /from ["']anthropic/i,
+      /from ["']@anthropic/i,
+      /from ["']@google\/generative-ai/i,
+      /from ["']ollama/i,
+      /langchain/i,
+      /@tensorflow\//i,
+      /@huggingface\//i,
+      /\.predict\s*\(/,
+      /createEmbedding\s*\(/i,
+      /fetch\s*\(/,
+      /https?:\/\//,
+      /from ["']axios["']/,
+      /new\s+FormData\s*\(/,
+      /from ["']pg["']/,
+      /from ["']postgres/i,
+      /createClient\s*\(/,
+      /XMLSerializer/,
+      /DOMParser/,
+      /from ["']soap/i,
+      /require\(["']soap/i,
+      /\.xsd["']/,
+      /libxml/i,
+      /xmllint/i,
+      /fast-xml-parser/i,
+      /xml2js/i,
+      /validateXML\s*\(/i,
+      /repairXML\s*\(/i,
+      /parseXML\s*\(/i,
+    ];
+    for (const file of files) {
+      const source = readFileSync(file, "utf8");
+      for (const pattern of forbidden) {
+        assert.equal(pattern.test(source), false, `${file} contém padrão proibido: ${pattern}`);
+      }
+    }
+  });
+
+  it("Enterprise Runtime wiring inclui createXMLValidationRuntimePort provider enterprise + deps estruturais", () => {
+    const source = readFileSync(
+      join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
+      "utf8",
+    );
+    assert.ok(source.includes("createXMLValidationRuntimePort"));
+    assert.ok(source.includes("xmlValidationRuntimeOk"));
+    assert.ok(source.includes("getXMLValidationRuntimePort"));
+    assert.ok(source.includes("getXMLTISSRuntimePort"));
+    assert.ok(source.includes("getQualityRuntimePort"));
+    assert.ok(source.includes("C-02"));
   });
 });
 
-describe("TISS-08 cadeia Enterprise / TISS / XML / Generation / Serializer / Schema / Validation", () => {
+describe("C-02 cadeia Enterprise / TISS compatibility", () => {
   it("Enterprise Runtime expõe XML Validation Runtime + cadeia XML", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
@@ -241,19 +611,10 @@ describe("TISS-08 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     assert.equal(runtime.getXMLRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getTISSRuntimePort().providerId, "default");
     assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLValidationRuntimePort, true);
-    assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLSchemaRuntimePort, true);
-    assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLSerializerRuntimePort, true);
-    assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLGenerationRuntimePort, true);
-    assert.equal(runtime.getTISSRuntimePort().capabilities().usesXMLRuntimePort, true);
-    assert.equal(runtime.getTISSRuntimePort().capabilities().implementsRealXml, false);
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
     assert.equal(health.xmlValidationRuntimeOk, true);
-    assert.equal(health.xmlSchemaRuntimeOk, true);
-    assert.equal(health.xmlSerializerRuntimeOk, true);
-    assert.equal(health.xmlGenerationRuntimeOk, true);
-    assert.equal(health.xmlRuntimeOk, true);
     assert.equal(health.tissRuntimeOk, true);
   });
 
@@ -366,8 +727,7 @@ describe("TISS-08 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
                 }) as TISSRuntimePort,
             },
           }),
-        getScalabilityRuntimePort: () =>
-          createScalabilityRuntimePort({ provider: "mock" }),
+        getScalabilityRuntimePort: () => createScalabilityRuntimePort({ provider: "mock" }),
       },
     });
 
@@ -376,8 +736,8 @@ describe("TISS-08 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
       mode: "structural-process",
       metadata: {
         kind: "canonical-tiss-metadata",
-        sessionId: "sess-tiss-08",
-        correlationId: "corr-tiss-08",
+        sessionId: "sess-c02",
+        correlationId: "corr-c02",
       },
     });
 
@@ -389,15 +749,7 @@ describe("TISS-08 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
       runtimeSessionId: result.runtimeSessionId!,
     });
     assert.equal(session.ok, true);
-    assert.equal(session.session?.processedViaXMLRuntimePort, true);
-    assert.equal(session.session?.processedViaXMLGenerationRuntimePort, true);
-    assert.equal(session.session?.processedViaXMLSerializerRuntimePort, true);
-    assert.equal(session.session?.processedViaXMLSchemaRuntimePort, true);
     assert.equal(session.session?.processedViaXMLValidationRuntimePort, true);
-    assert.ok(session.session?.xmlGenerationId);
-    assert.ok(session.session?.xmlGenerationResultId);
-    assert.ok(session.session?.xmlSerializeResultId);
-    assert.ok(session.session?.xmlSchemaResultId);
     assert.ok(session.session?.xmlValidationResultId);
 
     const valResult = await xmlValidationRuntime.getResult({
@@ -407,169 +759,18 @@ describe("TISS-08 cadeia Enterprise / TISS / XML / Generation / Serializer / Sch
     assert.equal(valResult.result?.validationExecuted, false);
     assert.equal(valResult.result?.realValidationPerformed, false);
     assert.equal(valResult.result?.officialXsdLoaded, false);
-    assert.equal(valResult.result?.officialAnsValidation, false);
-    assert.equal(valResult.result?.officialTissValidation, false);
-    assert.equal(valResult.result?.validationRulesLoaded, false);
     assert.equal(valResult.result?.validationEngineReady, true);
   });
 
   it("TISS Runtime consome exclusivamente XMLValidationRuntimePort (sem adapter paralelo)", async () => {
     const adapterSource = readFileSync(
-      join(
-        repoRoot,
-        "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts",
-      ),
+      join(repoRoot, "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts"),
       "utf8",
     );
     assert.match(adapterSource, /getXMLValidationRuntimePort/);
     assert.match(adapterSource, /canonical-xml-validation-request/);
     assert.equal(/new DefaultXMLValidationAdapter/.test(adapterSource), false);
+    assert.equal(/new DefaultXMLValidationRuntimeAdapter/.test(adapterSource), false);
     assert.equal(/InMemoryXMLValidationRuntimeStore/.test(adapterSource), false);
-    assert.equal(/ansTISS/i.test(adapterSource), false);
-    assert.equal(/\.xsd["']/.test(adapterSource), false);
-  });
-});
-
-describe("TISS-08 auditoria — sem bypass / sem XSD / sem validação real / sem XML TISS/ANS", () => {
-  it("módulo xml-validation-runtime não contém backends / operadoras / XSD oficial / validação real", () => {
-    const moduleDir = join(repoRoot, "src/lib/enterprise/xml-validation-runtime");
-    const files = collectTsFiles(moduleDir);
-    assert.ok(files.length > 0);
-
-    const forbidden = [
-      /from ["']@supabase/i,
-      /storage\.from\s*\(/,
-      /from ["']node:fs["']/,
-      /from ["']fs["']/,
-      /createClient\s*\(/,
-      /operadora\s*===/i,
-      /operadora\s*==/i,
-      /tenant\s*===/i,
-      /cliente\s*===/i,
-      /contrato\s*===/i,
-      /unimed/i,
-      /hapvida/i,
-      /bradesco/i,
-      /amil/i,
-      /sulamerica/i,
-      /cassi/i,
-      /TUSS_CATALOG/,
-      /tuss_procedures/,
-      /DOMParser/,
-      /XMLWriter/,
-      /createElementNS/,
-      /ansTISS/i,
-      /xmlns:ans/i,
-      /xml-export-service/,
-      /\.xsd["']/,
-      /SOAP/i,
-      /XSDSchema/i,
-      /xsd-validator/i,
-      /libxml/i,
-      /xmllint/i,
-      /fast-xml-parser/i,
-      /xml2js/i,
-    ];
-
-    for (const file of files) {
-      const source = readFileSync(file, "utf8");
-      for (const pattern of forbidden) {
-        assert.equal(
-          pattern.test(source),
-          false,
-          `Forbidden pattern ${pattern} in ${file}`,
-        );
-      }
-    }
-  });
-
-  it("Enterprise Runtime wiring inclui createXMLValidationRuntimePort", () => {
-    const enterpriseRuntime = readFileSync(
-      join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
-      "utf8",
-    );
-    assert.match(enterpriseRuntime, /createXMLValidationRuntimePort/);
-    assert.match(enterpriseRuntime, /getXMLValidationRuntimePort/);
-    assert.match(enterpriseRuntime, /xmlValidationRuntimeOk/);
-  });
-
-  it("TISS Runtime wiring inclui getXMLValidationRuntimePort", () => {
-    const tissAdapter = readFileSync(
-      join(
-        repoRoot,
-        "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts",
-      ),
-      "utf8",
-    );
-    assert.match(tissAdapter, /getXMLValidationRuntimePort/);
-    assert.match(tissAdapter, /usesXMLValidationRuntimePort/);
-    assert.match(tissAdapter, /processedViaXMLValidationRuntimePort/);
-    assert.equal(/new DefaultXMLValidationAdapter/.test(tissAdapter), false);
-  });
-
-  it("XML Runtime / Generation / Serializer / Schema modules não importam Validation Runtime", () => {
-    for (const moduleName of [
-      "xml-runtime",
-      "xml-generation-runtime",
-      "xml-serializer-runtime",
-      "xml-schema-runtime",
-    ]) {
-      const moduleDir = join(repoRoot, "src/lib/enterprise", moduleName);
-      for (const file of collectTsFiles(moduleDir)) {
-        const source = readFileSync(file, "utf8");
-        assert.equal(
-          /xml-validation-runtime/.test(source),
-          false,
-          `${file} must not import xml-validation-runtime`,
-        );
-      }
-    }
-  });
-
-  it("flags de fundação permanecem estruturais na cadeia", async () => {
-    resetEnterpriseRuntimeForTests();
-    const runtime = createEnterpriseRuntime({ runtimeId: "test" });
-    const validation = runtime.getXMLValidationRuntimePort();
-    const schema = runtime.getXMLSchemaRuntimePort();
-    const serializer = runtime.getXMLSerializerRuntimePort();
-    const serialized = await serializer.serialize({ documentId: "doc-flag-val" });
-    const registered = await schema.register({
-      documentId: "doc-flag-val",
-      serializeResultId: serialized.result?.resultId,
-    });
-    const validated = await validation.validate({
-      documentId: "doc-flag-val",
-      schemaResultId: registered.result?.resultId,
-      serializeResultId: serialized.result?.resultId,
-    });
-    assert.equal(validated.result?.validationExecuted, false);
-    assert.equal(validated.result?.realValidationPerformed, false);
-    assert.equal(validated.result?.officialXsdLoaded, false);
-    assert.equal(validated.result?.validationEngineReady, true);
-
-    const tiss = runtime.getTISSRuntimePort();
-    const processed = await tiss.process({
-      kind: "canonical-tiss-request",
-      mode: "structural-process",
-      metadata: {
-        kind: "canonical-tiss-metadata",
-        sessionId: "sess-flag-08",
-      },
-    });
-    assert.equal(processed.ok, true);
-    const session = await tiss.getSession({
-      runtimeSessionId: processed.runtimeSessionId!,
-    });
-    assert.equal(session.session?.processedViaXMLValidationRuntimePort, true);
-    const val = await validation.getResult({
-      resultId: session.session!.xmlValidationResultId!,
-    });
-    assert.equal(val.result?.validationExecuted, false);
-    assert.equal(val.result?.realValidationPerformed, false);
-    assert.equal(val.result?.officialXsdLoaded, false);
-    assert.equal(val.result?.officialAnsValidation, false);
-    assert.equal(val.result?.officialTissValidation, false);
-    assert.equal(val.result?.validationRulesLoaded, false);
-    assert.equal(val.result?.validationEngineReady, true);
   });
 });

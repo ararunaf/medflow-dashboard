@@ -1,23 +1,37 @@
 /**
- * Enterprise XML Validation Runtime — Ports & Adapters (TISS-08).
+ * Enterprise XML Validation Runtime — C-02 / ECS-01.
  *
- * Fluxo oficial:
- *   Produto → Enterprise Runtime → TISS Runtime
- *     → TISSCatalogPort → RulePackEnginePort
- *     → XMLRuntimePort → XMLGenerationRuntimePort
- *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
- *     → XMLValidationRuntimePort
- *     → DefaultXMLValidationAdapter → InMemoryXMLValidationRuntimeStore
- *     → Canonical XML Validation Result
+ * Fluxo estrutural oficial (C-02):
+ *   Produto → Enterprise Runtime → XMLValidationRuntimePort
+ *     → DefaultXMLValidationRuntimeAdapter / EnterpriseXMLValidationRuntimeAdapter /
+ *       MockXMLValidationRuntimeAdapter
+ *     → InMemoryXMLValidationRuntimeStore → XMLValidationResult
  *
- * TISS-08: infraestrutura canônica de validação XML estrutural.
- * Sem XSD oficial. Sem validação XSD real. Sem XML TISS/ANS. Sem namespaces oficiais.
- * Sem envelope de webservice. Sem envio a operadoras. Sem regras de negócio específicas.
- * Sem acesso direto ao XML Validation Store.
- * Sem lógica específica de operadora / contrato / tenant / cooperativa / versão.
- * Sem conhecimento de padrões TISS — apenas resposta canônica estrutural.
+ * C-02: infraestrutura canônica de orquestração estrutural de
+ * validação futura de documentos XML (estrutura / schema / namespace /
+ * versão / integridade / consistência / compatibilidade / relatório).
+ * Sem validação XML real. Sem XSD. Sem parser. Sem SOAP. Sem operadoras.
+ * Sem correção automática. Sem banco. Sem persistência. Sem APIs. Sem IA.
+ *
+ * Contrato oficial XMLValidationContext:
+ *   XMLDocument + CanonicalGuide + CanonicalMappingResult +
+ *   QualityAssessment + ValidationResult + AuditResult + AutoFillResult
+ *   (metadados estruturais apenas — sem processamento).
+ *
+ * Dependências XMLTISSRuntime/QualityRuntime/AutoFillRuntime/TISSMappingRuntime/
+ * AuditRuntime/ValidationRuntime/DocumentExtractionRuntime/
+ * DocumentClassificationRuntime/OCRRuntime/AIOrchestrationRuntime preparadas —
+ * sem consumo funcional (shape-check apenas em health()).
+ *
+ * Compatibilidade TISS-08: aliases CanonicalXMLValidation* e
+ * DefaultXMLValidationAdapter / EnterpriseXMLValidationAdapter /
+ * MockXMLValidationAdapter mantidos para a cadeia TISS.
  */
 export type {
+  AuditResult,
+  AutoFillResult,
+  CanonicalGuide,
+  CanonicalMappingResult,
   CanonicalXMLValidationCapabilities,
   CanonicalXMLValidationHealth,
   CanonicalXMLValidationIssue,
@@ -33,49 +47,114 @@ export type {
   CanonicalXMLValidationVersion,
   GetCanonicalXMLValidationResultInput,
   GetCanonicalXMLValidationResultResult,
+  GetXMLValidationResultInput,
+  GetXMLValidationResultResult,
   ListCanonicalXMLValidationResultsInput,
   ListCanonicalXMLValidationResultsResult,
+  ListXMLValidationResultsInput,
+  ListXMLValidationResultsResult,
+  QualityAssessment,
   ValidateCanonicalXMLInput,
   ValidateCanonicalXMLResult,
+  ValidateXMLInput,
+  ValidateXMLResult,
+  ValidationResult,
+  XMLDocument,
+  XMLValidationCapabilities,
+  XMLValidationCompatibilityContract,
+  XMLValidationConsistencyContract,
+  XMLValidationContext,
+  XMLValidationHealth,
+  XMLValidationIntegrityContract,
+  XMLValidationIssue,
+  XMLValidationMetadata,
+  XMLValidationNamespaceContract,
+  XMLValidationOperation,
+  XMLValidationProfile,
+  XMLValidationReference,
+  XMLValidationReportContract,
+  XMLValidationRequest,
+  XMLValidationResult,
   XMLValidationRuntimeCapabilities,
+  XMLValidationRuntimeEngineCapabilities,
+  XMLValidationRuntimeEnterpriseDeps,
   XMLValidationRuntimeHealth,
   XMLValidationRuntimeInfo,
-  XMLValidationRuntimeOperationEnvelope,
   XMLValidationRuntimeOperationalControls,
+  XMLValidationRuntimeOperationEnvelope,
   XMLValidationRuntimeOptions,
   XMLValidationRuntimePort,
   XMLValidationRuntimePortCapabilities,
   XMLValidationRuntimeProviderId,
   XMLValidationRuntimeProviderMetadata,
+  XMLValidationRuntimeProviderOptions,
   XMLValidationRuntimeRegistration,
   XMLValidationRuntimeStatus,
   XMLValidationRuntimeStructuredLog,
   XMLValidationRuntimeTelemetry,
+  XMLValidationSchemaContract,
+  XMLValidationStatistics,
+  XMLValidationStatsInput,
+  XMLValidationStatsResult,
+  XMLValidationStatus,
+  XMLValidationStructureContract,
+  XMLValidationSummary,
+  XMLValidationVersion,
+  XMLValidationVersionContract,
 } from "./ports";
 
 export {
+  XML_VALIDATION_RUNTIME_IDENTITY,
   DEFAULT_MOCK_XML_VALIDATION_RUNTIME_CAPABILITIES,
+  DEFAULT_MOCK_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_XML_VALIDATION_RUNTIME_CAPABILITIES,
+  DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
+  createDisabledXMLValidationReport,
+  createDisabledXMLValidationSchema,
+  createDisabledXMLValidationStructure,
+  createXMLValidationContextId,
   createXMLValidationId,
   createXMLValidationResultId,
   createXMLValidationRuntimeRequestId,
   defineXMLValidationRuntimeCapabilities,
+  defineXMLValidationRuntimeEngineCapabilities,
   emptyXMLValidationRuntimeCapabilities,
+  emptyXMLValidationRuntimeEngineCapabilities,
+  resetAllXMLValidationRuntimeIdSequences,
   resetXMLValidationRuntimeIdSequences,
   toCanonicalXMLValidationCapabilities,
+  toXMLValidationCapabilities,
 } from "./ports";
 
 export {
-  DEFAULT_XML_VALIDATION_ADAPTER_ID,
-  DEFAULT_XML_VALIDATION_RUNTIME_VERSION,
   DEFAULT_MOCK_XML_VALIDATION_RUNTIME_VERSION,
+  DEFAULT_XML_VALIDATION_ADAPTER_ID,
+  DEFAULT_XML_VALIDATION_RUNTIME_ADAPTER_ID,
+  DEFAULT_XML_VALIDATION_RUNTIME_VERSION,
   DefaultXMLValidationAdapter,
+  DefaultXMLValidationRuntimeAdapter,
   EnterpriseXMLValidationAdapter,
+  EnterpriseXMLValidationRuntimeAdapter,
   MOCK_XML_VALIDATION_ADAPTER_ID,
+  MOCK_XML_VALIDATION_RUNTIME_ADAPTER_ID,
   MockXMLValidationAdapter,
+  MockXMLValidationRuntimeAdapter,
   type DefaultXMLValidationAdapterOptions,
+  type DefaultXMLValidationRuntimeAdapterOptions,
   type MockXMLValidationAdapterOptions,
+  type MockXMLValidationRuntimeAdapterOptions,
 } from "./adapters";
+
+export {
+  IN_MEMORY_XML_VALIDATION_RUNTIME_STORE_ID,
+  InMemoryXMLValidationRuntimeStore,
+  type InMemoryXMLValidationRuntimeStoreOptions,
+  type StoredCanonicalXMLValidationResult,
+  type StoredXMLValidationContext,
+  type StoredXMLValidationRequest,
+  type StoredXMLValidationResult,
+  type XMLValidationRuntimeStore,
+} from "./store";
 
 export {
   XMLValidationRuntimeFactory,
@@ -91,17 +170,10 @@ export {
 } from "./registry";
 
 export {
-  IN_MEMORY_XML_VALIDATION_RUNTIME_STORE_ID,
-  InMemoryXMLValidationRuntimeStore,
-  type InMemoryXMLValidationRuntimeStoreOptions,
-  type StoredCanonicalXMLValidationResult,
-  type XMLValidationRuntimeStore,
-} from "./store";
-
-export {
   XMLValidationRuntimeProvider,
   createXMLValidationRuntimePort,
   getXMLValidationRuntimeFactory,
+  getXMLValidationRuntimePort,
 } from "./providers";
 
 export {

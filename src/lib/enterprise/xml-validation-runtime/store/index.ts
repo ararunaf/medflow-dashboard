@@ -1,5 +1,8 @@
 export type {
   StoredCanonicalXMLValidationResult,
+  StoredXMLValidationContext,
+  StoredXMLValidationRequest,
+  StoredXMLValidationResult,
   XMLValidationRuntimeStore,
 } from "./xml-validation-runtime-store";
 

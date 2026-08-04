@@ -1,7 +1,7 @@
 /**
- * XMLValidationRuntimeProvider — factory pública do XMLValidationRuntimePort (TISS-08).
+ * XMLValidationRuntimeProvider — factory pública do XMLValidationRuntimePort (C-02).
  *
- * Application / TISS Runtime resolvem o Port via este factory;
+ * Application / Enterprise Runtime resolvem o Port via este factory;
  * nunca instanciam adapters de vendor diretamente no Domain.
  */
 import {
@@ -23,7 +23,7 @@ function getSharedFactory(): XMLValidationRuntimeFactory {
 /**
  * Cria o XMLValidationRuntimePort para o provedor solicitado.
  *
- * Default da factory: `enterprise` (TISS-08 oficial).
+ * Default da factory: `enterprise` (C-02 oficial).
  */
 export function createXMLValidationRuntimePort(
   options: XMLValidationRuntimeOptions = {},
@@ -36,8 +36,19 @@ export function getXMLValidationRuntimeFactory(): XMLValidationRuntimeFactory {
   return getSharedFactory();
 }
 
-/** Alias explícito do Provider (TISS-08). */
+/**
+ * Composition-root helper — resolve o Port oficial da fundação.
+ * Preferido no produto via Enterprise Runtime.getXMLValidationRuntimePort().
+ */
+export function getXMLValidationRuntimePort(
+  options: XMLValidationRuntimeOptions = {},
+): XMLValidationRuntimePort {
+  return createXMLValidationRuntimePort(options);
+}
+
+/** Alias explícito do Provider (C-02). */
 export const XMLValidationRuntimeProvider = {
   create: createXMLValidationRuntimePort,
+  get: getXMLValidationRuntimePort,
   getFactory: getXMLValidationRuntimeFactory,
 };

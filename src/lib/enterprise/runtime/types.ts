@@ -322,7 +322,7 @@ export interface EnterpriseRuntime {
   /** Resolve XMLSchemaRuntimePort (TISS-07) — Enterprise XML Schema Runtime. */
   getXMLSchemaRuntimePort(): XMLSchemaRuntimePort;
 
-  /** Resolve XMLValidationRuntimePort (TISS-08) — Enterprise XML Validation Runtime. */
+  /** Resolve XMLValidationRuntimePort (C-02) — Enterprise XML Validation Runtime. */
   getXMLValidationRuntimePort(): XMLValidationRuntimePort;
 
   /** Resolve XSDRuntimePort (TISS-09) — Enterprise XSD Runtime. */
