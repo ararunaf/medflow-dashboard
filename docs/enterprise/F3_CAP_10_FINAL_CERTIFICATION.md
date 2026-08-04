@@ -182,7 +182,7 @@ certifica o encerramento oficial da F3-CAP-10.
 |------|------|
 | Commit de entrega F3-CAP-10 | `a29b0d1f9030769d4569046b804ec57eed6ca6a5` |
 | Mensagem (entrega) | `feat(audit-runtime): add F3-CAP-10 Enterprise Audit Runtime Foundation` |
-| Commit de certificação F3-CAP-10A | *(preenchido após commit deste documento)* |
+| Commit de certificação F3-CAP-10A | `f47a97fd3a7dc31929c748b5ca5c6b0f26bfe6a4` |
 | Mensagem (certificação) | `docs(enterprise): certify F3-CAP-10A Enterprise Audit Runtime Gate` |
 
 ---
@@ -195,11 +195,13 @@ certifica o encerramento oficial da F3-CAP-10.
 | Remote | `origin/feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega confirmado | `a29b0d1f9030769d4569046b804ec57eed6ca6a5` |
 | Hash curto (entrega) | `a29b0d1` |
-| Push (entrega) | **Realizado** nesta sprint administrativa |
-| Hash local = remoto (pós-push entrega) | **SIM** |
-| Ahead (pós-push entrega) | **0** |
-| Behind (pós-push entrega) | **0** |
-| Working Tree (produto) | **Limpa** (após commit de certificação) |
+| Commit de certificação confirmado | `f47a97fd3a7dc31929c748b5ca5c6b0f26bfe6a4` |
+| Hash curto (certificação) | `f47a97f` |
+| Push | **Realizado** nesta sprint administrativa |
+| Hash local = remoto | **SIM** |
+| Ahead | **0** |
+| Behind | **0** |
+| Working Tree (produto) | **Limpa** |
 
 ---
 
