@@ -38,6 +38,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     const tissMappingRuntime = runtime.getTISSMappingRuntimePort();
     const autoFillRuntime = runtime.getAutoFillRuntimePort();
     const qualityRuntime = runtime.getQualityRuntimePort();
+    const xmlTissRuntime = runtime.getXMLTISSRuntimePort();
     const storageManagerRuntime = runtime.getStorageManagerRuntimePort();
     const documentSearchRuntime = runtime.getDocumentSearchRuntimePort();
     const aiProvider = runtime.getAIProviderPort();
@@ -55,6 +56,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.ok(tissMappingRuntime);
     assert.ok(autoFillRuntime);
     assert.ok(qualityRuntime);
+    assert.ok(xmlTissRuntime);
     assert.ok(storageManagerRuntime);
     assert.ok(documentSearchRuntime);
     assert.ok(aiProvider);
@@ -68,6 +70,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(tissMappingRuntime.providerId, "enterprise");
     assert.equal(autoFillRuntime.providerId, "enterprise");
     assert.equal(qualityRuntime.providerId, "enterprise");
+    assert.equal(xmlTissRuntime.providerId, "enterprise");
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
@@ -85,6 +88,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(health.tissMappingRuntimeOk, true);
     assert.equal(health.autoFillRuntimeOk, true);
     assert.equal(health.qualityRuntimeOk, true);
+    assert.equal(health.xmlTissRuntimeOk, true);
     assert.equal(health.storageManagerRuntimeOk, true);
     assert.equal(health.documentSearchRuntimeOk, true);
     assert.equal(health.aiProviderRuntimeOk, true);

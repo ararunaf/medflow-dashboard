@@ -22,6 +22,7 @@
  * F3-CAP-11: TISS Mapping Runtime estrutural — sem mapeamento funcional / sem operadoras / sem XML / sem preenchimento automático / sem IA / sem banco / sem persistência / sem APIs.
  * F3-CAP-12: Auto-Fill Runtime estrutural — sem preenchimento automático / sem geração de XML / sem escrita em guias / sem integração com operadoras / sem IA / sem banco / sem persistência / sem APIs.
  * F3-CAP-13: Quality Runtime estrutural — sem avaliação automática / sem score funcional / sem decisão automática / sem IA / sem OCR / sem auditoria automática / sem banco / sem persistência / sem APIs.
+ * C-01: XML TISS Runtime estrutural — sem geração de XML / sem serialização / sem parser / sem XSD / sem SOAP / sem operadoras / sem banco / sem persistência / sem APIs.
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
  * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…10).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
@@ -37,6 +38,7 @@ import type { AuditRuntimePort } from "../audit-runtime/ports/audit-runtime-port
 import type { TISSMappingRuntimePort } from "../tiss-mapping-runtime/ports/tiss-mapping-runtime-port";
 import type { AutoFillRuntimePort } from "../auto-fill-runtime/ports/auto-fill-runtime-port";
 import type { QualityRuntimePort } from "../quality-runtime/ports/quality-runtime-port";
+import type { XMLTISSRuntimePort } from "../xml-tiss-runtime/ports/xml-tiss-runtime-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
@@ -95,6 +97,7 @@ export type EnterpriseRuntimeHealth = {
   tissMappingRuntimeOk?: boolean;
   autoFillRuntimeOk?: boolean;
   qualityRuntimeOk?: boolean;
+  xmlTissRuntimeOk?: boolean;
   storageManagerRuntimeOk?: boolean;
   storageProviderOk?: boolean;
   searchProviderOk?: boolean;
@@ -183,6 +186,7 @@ export type EnterpriseRuntimeOptions = {
   tissMappingRuntimePort?: TISSMappingRuntimePort;
   autoFillRuntimePort?: AutoFillRuntimePort;
   qualityRuntimePort?: QualityRuntimePort;
+  xmlTissRuntimePort?: XMLTISSRuntimePort;
   storageProviderPort?: StorageProviderPort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   searchProviderPort?: SearchProviderPort;
@@ -281,6 +285,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve QualityRuntimePort (F3-CAP-13). */
   getQualityRuntimePort(): QualityRuntimePort;
+
+  /** Resolve XMLTISSRuntimePort (C-01). */
+  getXMLTISSRuntimePort(): XMLTISSRuntimePort;
 
   /** Resolve StorageManagerRuntimePort (DIP-05 / STORAGE-01). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;

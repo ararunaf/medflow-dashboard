@@ -15,6 +15,7 @@
  *   → TISSMappingRuntimePort (F3-CAP-11) — structural foundation only
  *   → AutoFillRuntimePort (F3-CAP-12) — structural foundation only
  *   → QualityRuntimePort (F3-CAP-13) — structural foundation only
+ *   → XMLTISSRuntimePort (C-01) — structural foundation only
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -57,6 +58,8 @@ import { createAutoFillRuntimePort } from "../auto-fill-runtime/providers/create
 import type { AutoFillRuntimePort } from "../auto-fill-runtime/ports/auto-fill-runtime-port";
 import { createQualityRuntimePort } from "../quality-runtime/providers/create-quality-runtime-port";
 import type { QualityRuntimePort } from "../quality-runtime/ports/quality-runtime-port";
+import { createXMLTISSRuntimePort } from "../xml-tiss-runtime/providers/create-xml-tiss-runtime-port";
+import type { XMLTISSRuntimePort } from "../xml-tiss-runtime/ports/xml-tiss-runtime-port";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
@@ -143,6 +146,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly tissMappingRuntimePort: TISSMappingRuntimePort;
   private readonly autoFillRuntimePort: AutoFillRuntimePort;
   private readonly qualityRuntimePort: QualityRuntimePort;
+  private readonly xmlTissRuntimePort: XMLTISSRuntimePort;
   private readonly storageProviderPort: StorageProviderPort;
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly searchProviderPort: SearchProviderPort;
@@ -421,6 +425,34 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       createQualityRuntimePort({
         provider: "enterprise",
         enterpriseDeps: {
+          getAutoFillRuntimePort: () => this.autoFillRuntimePort,
+          getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
+          getAuditRuntimePort: () => this.auditRuntimePort,
+          getValidationRuntimePort: () => this.validationRuntimePort,
+          getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
+          getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getAIOrchestrationRuntimePort: () => this.aiOrchestrationRuntimePort,
+          getIntelligentCaptureRuntimePort: () => this.intelligentCaptureRuntimePort,
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getUploadRuntimePort: () => this.uploadRuntimePort,
+        },
+      });
+    // C-01: Enterprise XML TISS Runtime Foundation — orquestração
+    // estrutural de transformação futura Canonical TISS → XML TISS/ANS.
+    // Sem geração de XML / serialização / parser / XSD / SOAP /
+    // operadoras / banco / persistência / APIs.
+    // Peers estruturais (Quality/AutoFill/TISSMapping/Audit/Validation/
+    // DocumentExtraction/DocumentClassification/OCR/AIOrchestration/
+    // IntelligentCapture/Scanner/WatchFolder/Upload) via lazy getters —
+    // shape-check apenas em health().
+    this.xmlTissRuntimePort =
+      options.xmlTissRuntimePort ??
+      createXMLTISSRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getQualityRuntimePort: () => this.qualityRuntimePort,
           getAutoFillRuntimePort: () => this.autoFillRuntimePort,
           getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
           getAuditRuntimePort: () => this.auditRuntimePort,
@@ -752,6 +784,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.qualityRuntimePort;
   }
 
+  getXMLTISSRuntimePort(): XMLTISSRuntimePort {
+    return this.xmlTissRuntimePort;
+  }
+
   getStorageManagerRuntimePort(): StorageManagerRuntimePort {
     return this.storageManagerRuntimePort;
   }
@@ -878,6 +914,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       tissMappingRuntimeHealth,
       autoFillRuntimeHealth,
       qualityRuntimeHealth,
+      xmlTissRuntimeHealth,
       storageProviderHealth,
       storageManagerRuntimeHealth,
       searchProviderHealth,
@@ -921,6 +958,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.tissMappingRuntimePort.health(),
       this.autoFillRuntimePort.health(),
       this.qualityRuntimePort.health(),
+      this.xmlTissRuntimePort.health(),
       this.storageProviderPort.health(),
       this.storageManagerRuntimePort.health(),
       this.searchProviderPort.health(),
@@ -966,6 +1004,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       tissMappingRuntimeHealth.ok &&
       autoFillRuntimeHealth.ok &&
       qualityRuntimeHealth.ok &&
+      xmlTissRuntimeHealth.ok &&
       storageProviderHealth.ok &&
       storageManagerRuntimeHealth.ok &&
       searchProviderHealth.ok &&
@@ -1012,6 +1051,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       tissMappingRuntimeOk: tissMappingRuntimeHealth.ok,
       autoFillRuntimeOk: autoFillRuntimeHealth.ok,
       qualityRuntimeOk: qualityRuntimeHealth.ok,
+      xmlTissRuntimeOk: xmlTissRuntimeHealth.ok,
       storageProviderOk: storageProviderHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       searchProviderOk: searchProviderHealth.ok,
@@ -1040,7 +1080,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (AuditRuntime/AIOrchestrationRuntime/ValidationRuntime/DocumentExtractionRuntime/IntelligentCaptureRuntime/UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (XMLTISSRuntime/QualityRuntime/AuditRuntime/AIOrchestrationRuntime/ValidationRuntime/DocumentExtractionRuntime/IntelligentCaptureRuntime/UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
