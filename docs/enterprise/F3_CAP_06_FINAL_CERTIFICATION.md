@@ -175,7 +175,8 @@ o encerramento oficial da F3-CAP-06.
 |------|------|
 | Commit de entrega F3-CAP-06 | `25f8d29695297febf42f44ee7f4d39fea39271b8` |
 | Mensagem (entrega) | `feat(document-classification-runtime): add F3-CAP-06 Enterprise Document Classification Runtime Foundation` |
-| Commit de certificação F3-CAP-06A | *(preenchido na governança Git após commit deste documento)* |
+| Commit de certificação F3-CAP-06A | `066422d259fe47eebc40a84072ca0ecd5d23b5ae` |
+| Mensagem (certificação) | `docs(enterprise): certify F3-CAP-06A Document Classification Runtime Gate` |
 
 ---
 
@@ -186,11 +187,12 @@ o encerramento oficial da F3-CAP-06.
 | Branch | `feat/inf-10-enterprise-scalability-runtime` |
 | Remote | `origin/feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega confirmado | `25f8d29695297febf42f44ee7f4d39fea39271b8` |
-| Push do commit de entrega | **Realizado** nesta sprint administrativa |
-| Hash local = remoto (pós-push entrega) | **SIM** |
-| Ahead (pós-push entrega) | **0** |
-| Behind (pós-push entrega) | **0** |
-| Working Tree (produto) após certificação versionada | **Limpa** |
+| Commit de certificação confirmado | `066422d259fe47eebc40a84072ca0ecd5d23b5ae` |
+| Push | **Realizado** nesta sprint administrativa |
+| Hash local = remoto | **SIM** |
+| Ahead | **0** |
+| Behind | **0** |
+| Working Tree (produto) | **Limpa** |
 
 ---
 
