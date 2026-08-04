@@ -77,8 +77,8 @@ Não iniciar C-03A na entrega C-03.
 | Commit de entrega C-03 | `ed2f16fc6271939dd22c8da53fd46151f1bd544b` |
 | Hash curto (entrega) | `ed2f16f` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação C-03A | *(preenchido após commit)* |
-| Hash curto (certificação) | *(preenchido após commit)* |
+| Commit de certificação C-03A | `83d9b254176e8f3f0cde8e1960a4313ed332690c` |
+| Hash curto (certificação) | `83d9b25` |
 | Push (entrega + certificação) | **SIM** — local = remoto; ahead 0; behind 0 |
 | Regra Permanente nº 6 | [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md) |
 | Certificação final | [`C03_SOAP_RUNTIME_FINAL_CERTIFICATION.md`](./C03_SOAP_RUNTIME_FINAL_CERTIFICATION.md) |

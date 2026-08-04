@@ -196,7 +196,7 @@ certifica o encerramento oficial da C-03.
 |------|------|
 | Commit de entrega C-03 | `ed2f16fc6271939dd22c8da53fd46151f1bd544b` |
 | Mensagem (entrega) | `feat(soap-runtime): add C-03 Enterprise SOAP Runtime Foundation` |
-| Commit de certificação C-03A | *(preenchido após commit desta certificação)* |
+| Commit de certificação C-03A | `83d9b254176e8f3f0cde8e1960a4313ed332690c` |
 | Mensagem (certificação) | `docs(enterprise): certify C-03A Enterprise SOAP Runtime Gate` |
 
 ---
@@ -210,8 +210,8 @@ certifica o encerramento oficial da C-03.
 | Commit de entrega confirmado | `ed2f16fc6271939dd22c8da53fd46151f1bd544b` |
 | Hash curto (entrega) | `ed2f16f` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | *(após commit + push)* |
-| Hash curto (certificação) | *(após commit)* |
+| Commit de certificação confirmado | `83d9b254176e8f3f0cde8e1960a4313ed332690c` |
+| Hash curto (certificação) | `83d9b25` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
