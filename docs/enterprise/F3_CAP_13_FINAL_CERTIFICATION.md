@@ -198,7 +198,7 @@ certifica o encerramento oficial da F3-CAP-13 e do **BLOCO B — Inteligência D
 |------|------|
 | Commit de entrega F3-CAP-13 | `d3e710e6445ced5cd0bc0c2bfed5227d13201781` |
 | Mensagem (entrega) | `feat(quality-runtime): add F3-CAP-13 Enterprise Quality Runtime Foundation` |
-| Commit de certificação F3-CAP-13A | _(preenchido na seção de governança após commit)_ |
+| Commit de certificação F3-CAP-13A | `f4a425661c53ae43380c1a211bbe6e314326b6b3` |
 | Mensagem (certificação) | `docs(enterprise): certify F3-CAP-13A Enterprise Quality Runtime Gate` |
 
 ---
@@ -212,8 +212,8 @@ certifica o encerramento oficial da F3-CAP-13 e do **BLOCO B — Inteligência D
 | Commit de entrega confirmado | `d3e710e6445ced5cd0bc0c2bfed5227d13201781` |
 | Hash curto (entrega) | `d3e710e` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | _(preenchido após commit)_ |
-| Hash curto (certificação) | _(preenchido após commit)_ |
+| Commit de certificação confirmado | `f4a425661c53ae43380c1a211bbe6e314326b6b3` |
+| Hash curto (certificação) | `f4a4256` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** |
 | Ahead | **0** |
