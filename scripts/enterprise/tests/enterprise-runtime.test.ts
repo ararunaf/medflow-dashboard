@@ -37,6 +37,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     const auditRuntime = runtime.getAuditRuntimePort();
     const tissMappingRuntime = runtime.getTISSMappingRuntimePort();
     const autoFillRuntime = runtime.getAutoFillRuntimePort();
+    const qualityRuntime = runtime.getQualityRuntimePort();
     const storageManagerRuntime = runtime.getStorageManagerRuntimePort();
     const documentSearchRuntime = runtime.getDocumentSearchRuntimePort();
     const aiProvider = runtime.getAIProviderPort();
@@ -53,6 +54,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.ok(auditRuntime);
     assert.ok(tissMappingRuntime);
     assert.ok(autoFillRuntime);
+    assert.ok(qualityRuntime);
     assert.ok(storageManagerRuntime);
     assert.ok(documentSearchRuntime);
     assert.ok(aiProvider);
@@ -65,6 +67,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(auditRuntime.providerId, "enterprise");
     assert.equal(tissMappingRuntime.providerId, "enterprise");
     assert.equal(autoFillRuntime.providerId, "enterprise");
+    assert.equal(qualityRuntime.providerId, "enterprise");
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
@@ -81,6 +84,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(health.auditRuntimeOk, true);
     assert.equal(health.tissMappingRuntimeOk, true);
     assert.equal(health.autoFillRuntimeOk, true);
+    assert.equal(health.qualityRuntimeOk, true);
     assert.equal(health.storageManagerRuntimeOk, true);
     assert.equal(health.documentSearchRuntimeOk, true);
     assert.equal(health.aiProviderRuntimeOk, true);
@@ -253,6 +257,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(typeof runtime.getAuditRuntimePort, "function");
     assert.equal(typeof runtime.getTISSMappingRuntimePort, "function");
     assert.equal(typeof runtime.getAutoFillRuntimePort, "function");
+    assert.equal(typeof runtime.getQualityRuntimePort, "function");
     assert.equal(typeof runtime.getStorageManagerRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentSearchRuntimePort, "function");
     assert.equal(typeof runtime.getAIProviderPort, "function");

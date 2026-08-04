@@ -14,6 +14,7 @@
  *   → AuditRuntimePort (F3-CAP-10) — structural foundation only
  *   → TISSMappingRuntimePort (F3-CAP-11) — structural foundation only
  *   → AutoFillRuntimePort (F3-CAP-12) — structural foundation only
+ *   → QualityRuntimePort (F3-CAP-13) — structural foundation only
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -54,6 +55,8 @@ import { createTISSMappingRuntimePort } from "../tiss-mapping-runtime/providers/
 import type { TISSMappingRuntimePort } from "../tiss-mapping-runtime/ports/tiss-mapping-runtime-port";
 import { createAutoFillRuntimePort } from "../auto-fill-runtime/providers/create-auto-fill-runtime-port";
 import type { AutoFillRuntimePort } from "../auto-fill-runtime/ports/auto-fill-runtime-port";
+import { createQualityRuntimePort } from "../quality-runtime/providers/create-quality-runtime-port";
+import type { QualityRuntimePort } from "../quality-runtime/ports/quality-runtime-port";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
@@ -139,6 +142,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly auditRuntimePort: AuditRuntimePort;
   private readonly tissMappingRuntimePort: TISSMappingRuntimePort;
   private readonly autoFillRuntimePort: AutoFillRuntimePort;
+  private readonly qualityRuntimePort: QualityRuntimePort;
   private readonly storageProviderPort: StorageProviderPort;
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly searchProviderPort: SearchProviderPort;
@@ -391,6 +395,33 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       createAutoFillRuntimePort({
         provider: "enterprise",
         enterpriseDeps: {
+          getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
+          getAuditRuntimePort: () => this.auditRuntimePort,
+          getValidationRuntimePort: () => this.validationRuntimePort,
+          getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
+          getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getAIOrchestrationRuntimePort: () => this.aiOrchestrationRuntimePort,
+          getIntelligentCaptureRuntimePort: () => this.intelligentCaptureRuntimePort,
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getUploadRuntimePort: () => this.uploadRuntimePort,
+        },
+      });
+    // F3-CAP-13: Enterprise Quality Runtime Foundation — orquestração
+    // estrutural de avaliação futura de qualidade do pipeline documental.
+    // Sem avaliação automática / score funcional / decisão automática /
+    // IA / OCR / auditoria automática / banco / persistência / APIs.
+    // Peers estruturais (AutoFill/TISSMapping/Audit/Validation/
+    // DocumentExtraction/DocumentClassification/OCR/AIOrchestration/
+    // IntelligentCapture/Scanner/WatchFolder/Upload) via lazy getters —
+    // shape-check apenas em health().
+    this.qualityRuntimePort =
+      options.qualityRuntimePort ??
+      createQualityRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getAutoFillRuntimePort: () => this.autoFillRuntimePort,
           getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
           getAuditRuntimePort: () => this.auditRuntimePort,
           getValidationRuntimePort: () => this.validationRuntimePort,
@@ -717,6 +748,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.autoFillRuntimePort;
   }
 
+  getQualityRuntimePort(): QualityRuntimePort {
+    return this.qualityRuntimePort;
+  }
+
   getStorageManagerRuntimePort(): StorageManagerRuntimePort {
     return this.storageManagerRuntimePort;
   }
@@ -842,6 +877,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       auditRuntimeHealth,
       tissMappingRuntimeHealth,
       autoFillRuntimeHealth,
+      qualityRuntimeHealth,
       storageProviderHealth,
       storageManagerRuntimeHealth,
       searchProviderHealth,
@@ -884,6 +920,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.auditRuntimePort.health(),
       this.tissMappingRuntimePort.health(),
       this.autoFillRuntimePort.health(),
+      this.qualityRuntimePort.health(),
       this.storageProviderPort.health(),
       this.storageManagerRuntimePort.health(),
       this.searchProviderPort.health(),
@@ -928,6 +965,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       auditRuntimeHealth.ok &&
       tissMappingRuntimeHealth.ok &&
       autoFillRuntimeHealth.ok &&
+      qualityRuntimeHealth.ok &&
       storageProviderHealth.ok &&
       storageManagerRuntimeHealth.ok &&
       searchProviderHealth.ok &&
@@ -973,6 +1011,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       auditRuntimeOk: auditRuntimeHealth.ok,
       tissMappingRuntimeOk: tissMappingRuntimeHealth.ok,
       autoFillRuntimeOk: autoFillRuntimeHealth.ok,
+      qualityRuntimeOk: qualityRuntimeHealth.ok,
       storageProviderOk: storageProviderHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       searchProviderOk: searchProviderHealth.ok,

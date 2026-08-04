@@ -77,6 +77,7 @@
     "enterprise:audit-runtime:test": "npx tsx --test scripts/enterprise/tests/audit-runtime-engine.test.ts",
     "enterprise:tiss-mapping-runtime:test": "npx tsx --test scripts/enterprise/tests/tiss-mapping-runtime-engine.test.ts",
     "enterprise:auto-fill-runtime:test": "npx tsx --test scripts/enterprise/tests/auto-fill-runtime-engine.test.ts",
+    "enterprise:quality-runtime:test": "npx tsx --test scripts/enterprise/tests/quality-runtime-engine.test.ts",
     "enterprise:document-classification-provider:test": "npx tsx --test scripts/enterprise/tests/document-classification-provider-engine.test.ts",
     "enterprise:storage-manager-runtime:test": "npx tsx --test scripts/enterprise/tests/storage-manager-runtime-engine.test.ts",
     "enterprise:storage-provider:test": "npx tsx --test scripts/enterprise/tests/storage-provider-engine.test.ts",
