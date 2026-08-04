@@ -200,14 +200,15 @@ Confirmado via `git show HEAD` (commit de entrega) + Working Tree: alterações 
 |------|-------|
 | Branch | `feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega F3-CAP-03 | `1a7be06d611af3b5cc097cb9a528af1ba209517c` |
-| Mensagem | `feat(upload): add F3-CAP-03 Enterprise Upload Runtime Foundation` |
-| Commit de certificação F3-CAP-03A | *(preenchido após commit/push)* |
+| Mensagem (entrega) | `feat(upload): add F3-CAP-03 Enterprise Upload Runtime Foundation` |
+| Commit de certificação F3-CAP-03A | `dcf9f23c9bb57d95f2d1ec2d327120024d254718` |
+| Mensagem (certificação) | `docs(enterprise): certify F3-CAP-03A Upload Runtime Gate` |
 | Remote | `origin/feat/inf-10-enterprise-scalability-runtime` |
 | Push | Realizado nesta sprint administrativa |
-| Hash local = remoto | **SIM** (após push) |
-| Ahead | **0** (após push) |
-| Behind | **0** (após push) |
-| Working Tree (produto) | **Limpa** (após versionar este documento) |
+| Hash local = remoto | **SIM** |
+| Ahead | **0** |
+| Behind | **0** |
+| Working Tree (produto) | **Limpa** |
 
 ---
 
