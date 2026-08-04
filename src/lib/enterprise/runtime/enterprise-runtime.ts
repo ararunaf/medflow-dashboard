@@ -11,6 +11,7 @@
  *   → DocumentExtractionRuntimePort (F3-CAP-07) — structural foundation only
  *   → ValidationRuntimePort (F3-CAP-08) — structural foundation only
  *   → AIOrchestrationRuntimePort (F3-CAP-09) — structural foundation only
+ *   → AuditRuntimePort (F3-CAP-10) — structural foundation only
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -45,6 +46,8 @@ import { createValidationRuntimePort } from "../validation-runtime/providers/cre
 import type { ValidationRuntimePort } from "../validation-runtime/ports/validation-runtime-port";
 import { createAIOrchestrationRuntimePort } from "../ai-orchestration-runtime/providers/create-ai-orchestration-runtime-port";
 import type { AIOrchestrationRuntimePort } from "../ai-orchestration-runtime/ports/ai-orchestration-runtime-port";
+import { createAuditRuntimePort } from "../audit-runtime/providers/create-audit-runtime-port";
+import type { AuditRuntimePort } from "../audit-runtime/ports/audit-runtime-port";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
@@ -127,6 +130,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly documentExtractionRuntimePort: DocumentExtractionRuntimePort;
   private readonly validationRuntimePort: ValidationRuntimePort;
   private readonly aiOrchestrationRuntimePort: AIOrchestrationRuntimePort;
+  private readonly auditRuntimePort: AuditRuntimePort;
   private readonly storageProviderPort: StorageProviderPort;
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly searchProviderPort: SearchProviderPort;
@@ -300,6 +304,35 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       createAIOrchestrationRuntimePort({
         provider: "enterprise",
         enterpriseDeps: {
+          getValidationRuntimePort: () => this.validationRuntimePort,
+          getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
+          getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getIntelligentCaptureRuntimePort: () => this.intelligentCaptureRuntimePort,
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getUploadRuntimePort: () => this.uploadRuntimePort,
+          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
+          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
+        },
+      });
+    // F3-CAP-10: Enterprise Audit Runtime Foundation — orquestração
+    // estrutural de jobs/requests/findings de auditoria futura. Sem auditoria
+    // real / IA / OpenAI / Azure OpenAI / Gemini / Claude / ML / regras TISS /
+    // regras de operadoras / justificativas automáticas / correções
+    // automáticas / aprovação ou rejeição automática. Peers estruturais
+    // (AIOrchestration/Validation/DocumentExtraction/DocumentClassification/
+    // OCR/IntelligentCapture/Scanner/WatchFolder/Upload/PQR/Worker/Scheduler/
+    // Observability/Scalability) via lazy getters — shape-check apenas em health().
+    this.auditRuntimePort =
+      options.auditRuntimePort ??
+      createAuditRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getAIOrchestrationRuntimePort: () => this.aiOrchestrationRuntimePort,
           getValidationRuntimePort: () => this.validationRuntimePort,
           getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
           getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
@@ -616,6 +649,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.aiOrchestrationRuntimePort;
   }
 
+  getAuditRuntimePort(): AuditRuntimePort {
+    return this.auditRuntimePort;
+  }
+
   getStorageManagerRuntimePort(): StorageManagerRuntimePort {
     return this.storageManagerRuntimePort;
   }
@@ -738,6 +775,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       documentExtractionRuntimeHealth,
       validationRuntimeHealth,
       aiOrchestrationRuntimeHealth,
+      auditRuntimeHealth,
       storageProviderHealth,
       storageManagerRuntimeHealth,
       searchProviderHealth,
@@ -777,6 +815,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.documentExtractionRuntimePort.health(),
       this.validationRuntimePort.health(),
       this.aiOrchestrationRuntimePort.health(),
+      this.auditRuntimePort.health(),
       this.storageProviderPort.health(),
       this.storageManagerRuntimePort.health(),
       this.searchProviderPort.health(),
@@ -818,6 +857,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       documentExtractionRuntimeHealth.ok &&
       validationRuntimeHealth.ok &&
       aiOrchestrationRuntimeHealth.ok &&
+      auditRuntimeHealth.ok &&
       storageProviderHealth.ok &&
       storageManagerRuntimeHealth.ok &&
       searchProviderHealth.ok &&
@@ -860,6 +900,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       documentExtractionRuntimeOk: documentExtractionRuntimeHealth.ok,
       validationRuntimeOk: validationRuntimeHealth.ok,
       aiOrchestrationRuntimeOk: aiOrchestrationRuntimeHealth.ok,
+      auditRuntimeOk: auditRuntimeHealth.ok,
       storageProviderOk: storageProviderHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       searchProviderOk: searchProviderHealth.ok,
@@ -888,7 +929,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (AIOrchestrationRuntime/ValidationRuntime/DocumentExtractionRuntime/IntelligentCaptureRuntime/UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (AuditRuntime/AIOrchestrationRuntime/ValidationRuntime/DocumentExtractionRuntime/IntelligentCaptureRuntime/UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
