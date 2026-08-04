@@ -1,15 +1,15 @@
 /**
- * Tipos vendor-agn�sticos do Enterprise XML Validation Runtime � TISS-08.
+ * Tipos vendor-agnósticos do Enterprise XML Validation Runtime — TISS-08.
  *
  * Fluxo oficial:
- *   Produto ? Enterprise Runtime ? TISS Runtime
- *     ? TISSCatalogPort ? RulePackEnginePort
- *     ? XMLRuntimePort ? XMLGenerationRuntimePort
- *     ? XMLSerializerRuntimePort ? XMLSchemaRuntimePort
- *     ? XMLValidationRuntimePort
- *     ? Adapter ? XML Validation Store ? Canonical XML Validation Result
+ *   Produto → Enterprise Runtime → TISS Runtime
+ *     → TISSCatalogPort → RulePackEnginePort
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
+ *     → XMLValidationRuntimePort
+ *     → Adapter → XML Validation Store → Canonical XML Validation Result
  *
- * Sem XSD oficial. Sem valida��o XSD real. Sem XML TISS/ANS. Sem operadoras.
+ * Sem XSD oficial. Sem validação XSD real. Sem XML TISS/ANS. Sem operadoras.
  */
 import type {
   CanonicalXMLValidationCapabilities,
@@ -68,7 +68,7 @@ export type XMLValidationRuntimeHealth = CanonicalXMLValidationHealth & {
   status?: XMLValidationRuntimeStatus;
 };
 
-/** Capacidades do adapter no n�vel do Port. */
+/** Capacidades do adapter no nível do Port. */
 export type XMLValidationRuntimePortCapabilities = {
   provider: XMLValidationRuntimeProviderId;
   adapterId: string;
@@ -93,7 +93,7 @@ export type XMLValidationRuntimePortCapabilities = {
   knowsTissPattern: false;
 };
 
-/** Metadados est�veis do provedor. */
+/** Metadados estáveis do provedor. */
 export type XMLValidationRuntimeProviderMetadata = {
   name: string;
   version: string;
@@ -162,10 +162,10 @@ export type ListCanonicalXMLValidationResultsResult = XMLValidationRuntimeOperat
   statistics?: CanonicalXMLValidationStatistics;
 };
 
-/** Op��es de resolu��o do XMLValidationRuntimePort. */
+/** Opções de resolução do XMLValidationRuntimePort. */
 export type XMLValidationRuntimeOptions = {
   /**
-   * Provedor desejado. Default da funda��o: `enterprise` (TISS-08).
+   * Provedor desejado. Default da fundação: `enterprise` (TISS-08).
    */
   provider?: XMLValidationRuntimeProviderId;
 };

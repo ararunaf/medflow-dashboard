@@ -1,21 +1,21 @@
 /**
- * Enterprise XML Validation Runtime ? Ports & Adapters (TISS-08).
+ * Enterprise XML Validation Runtime — Ports & Adapters (TISS-08).
  *
  * Fluxo oficial:
- *   Produto ? Enterprise Runtime ? TISS Runtime
- *     ? TISSCatalogPort ? RulePackEnginePort
- *     ? XMLRuntimePort ? XMLGenerationRuntimePort
- *     ? XMLSerializerRuntimePort ? XMLSchemaRuntimePort
- *     ? XMLValidationRuntimePort
- *     ? DefaultXMLValidationAdapter ? InMemoryXMLValidationRuntimeStore
- *     ? Canonical XML Validation Result
+ *   Produto → Enterprise Runtime → TISS Runtime
+ *     → TISSCatalogPort → RulePackEnginePort
+ *     → XMLRuntimePort → XMLGenerationRuntimePort
+ *     → XMLSerializerRuntimePort → XMLSchemaRuntimePort
+ *     → XMLValidationRuntimePort
+ *     → DefaultXMLValidationAdapter → InMemoryXMLValidationRuntimeStore
+ *     → Canonical XML Validation Result
  *
- * TISS-08: infraestrutura can�nica de valida��o XML estrutural.
- * Sem XSD oficial. Sem valida��o XSD real. Sem XML TISS/ANS. Sem namespaces oficiais.
- * Sem envelope de webservice. Sem envio a operadoras. Sem regras de neg�cio espec�ficas.
+ * TISS-08: infraestrutura canônica de validação XML estrutural.
+ * Sem XSD oficial. Sem validação XSD real. Sem XML TISS/ANS. Sem namespaces oficiais.
+ * Sem envelope de webservice. Sem envio a operadoras. Sem regras de negócio específicas.
  * Sem acesso direto ao XML Validation Store.
- * Sem l�gica espec�fica de operadora / contrato / tenant / cooperativa / vers�o.
- * Sem conhecimento de padr�es TISS ? apenas resposta can�nica estrutural.
+ * Sem lógica específica de operadora / contrato / tenant / cooperativa / versão.
+ * Sem conhecimento de padrões TISS — apenas resposta canônica estrutural.
  */
 export type {
   CanonicalXMLValidationCapabilities,

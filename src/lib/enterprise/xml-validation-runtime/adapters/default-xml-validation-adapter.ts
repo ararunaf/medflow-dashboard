@@ -1,10 +1,10 @@
 /**
- * DefaultXMLValidationAdapter ? TISS-08.
+ * DefaultXMLValidationAdapter â€” TISS-08.
  *
  * Adapter oficial do Enterprise XML Validation Runtime.
- * Responde exclusivamente de forma estrutural (sem validação real).
- * Sem XSD oficial. Sem validação XSD. Sem XML TISS/ANS. Sem namespaces oficiais.
- * Sem conhecimento de padrões TISS ? infraestrutura estrutural apenas.
+ * Responde exclusivamente de forma estrutural (sem validaÃ§Ã£o real).
+ * Sem XSD oficial. Sem validaÃ§Ã£o XSD. Sem XML TISS/ANS. Sem namespaces oficiais.
+ * Sem conhecimento de padrÃµes TISS â€” infraestrutura estrutural apenas.
  */
 import {
   DEFAULT_XML_VALIDATION_RUNTIME_CAPABILITIES,
@@ -56,7 +56,7 @@ export type DefaultXMLValidationAdapterOptions = {
   defaultRetryBackoffMs?: number;
   now?: () => string;
   sleep?: (ms: number) => Promise<void>;
-  /** Força falha transitória nas N primeiras tentativas (testes de retry). */
+  /** ForÃ§a falha transitÃ³ria nas N primeiras tentativas (testes de retry). */
   failAttempts?: number;
 };
 
@@ -111,7 +111,7 @@ function resolveSummary(): CanonicalXMLValidationSummary {
 }
 
 /**
- * Adapter oficial TISS-08 ? XML Validation Runtime default / enterprise.
+ * Adapter oficial TISS-08 â€” XML Validation Runtime default / enterprise.
  */
 export class DefaultXMLValidationAdapter implements XMLValidationRuntimePort {
   readonly providerId: Extract<XMLValidationRuntimeProviderId, "enterprise" | "default">;
@@ -152,7 +152,7 @@ export class DefaultXMLValidationAdapter implements XMLValidationRuntimePort {
     this.failAttemptsRemaining = options.failAttempts ?? 0;
   }
 
-  /** Acesso estrutural ao store (testes / demo ? não produto). */
+  /** Acesso estrutural ao store (testes / demo â€” nÃ£o produto). */
   getStore(): XMLValidationRuntimeStore {
     return this.store;
   }
