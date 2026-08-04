@@ -205,14 +205,14 @@ Confirmado via `git show d402d7c` (commit de entrega) + Working Tree: alteraçõ
 | Branch | `feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega F3-CAP-04 | `d402d7cdf4187aa8108a16bf481e8fa838140042` |
 | Mensagem (entrega) | `feat(intelligent-capture): add F3-CAP-04 Enterprise Intelligent Capture Runtime Foundation` |
-| Commit de certificação F3-CAP-04A | *(preenchido após commit deste documento)* |
+| Commit de certificação F3-CAP-04A | `bd15b1a0d815a26201590d8bdebc087f4123a06a` |
 | Mensagem (certificação) | `docs(enterprise): certify F3-CAP-04A Intelligent Capture Runtime Gate` |
 | Remote | `origin/feat/inf-10-enterprise-scalability-runtime` |
-| Push (entrega) | Realizado nesta sprint administrativa |
-| Hash local = remoto (pós-push entrega) | **SIM** (`d402d7c…`) |
-| Ahead (pós-push entrega) | **0** |
-| Behind (pós-push entrega) | **0** |
-| Working Tree (produto) | **Limpa** (pré-documento); documento de certificação versionado nesta sprint |
+| Push | Realizado nesta sprint administrativa |
+| Hash local = remoto | **SIM** |
+| Ahead | **0** |
+| Behind | **0** |
+| Working Tree (produto) | **Limpa** |
 
 ---
 
