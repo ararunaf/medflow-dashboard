@@ -60,6 +60,7 @@ import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
 import type { XMLSchemaRuntimePort } from "../xml-schema-runtime/ports/xml-schema-runtime-port";
 import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
 import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
+import type { SOAPRuntimePort } from "../soap-runtime/ports/soap-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
@@ -110,6 +111,7 @@ export type EnterpriseRuntimeHealth = {
   xmlSerializerRuntimeOk?: boolean;
   xmlSchemaRuntimeOk?: boolean;
   xmlValidationRuntimeOk?: boolean;
+  soapRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
@@ -199,6 +201,7 @@ export type EnterpriseRuntimeOptions = {
   xmlSerializerRuntimePort?: XMLSerializerRuntimePort;
   xmlSchemaRuntimePort?: XMLSchemaRuntimePort;
   xmlValidationRuntimePort?: XMLValidationRuntimePort;
+  soapRuntimePort?: SOAPRuntimePort;
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
@@ -324,6 +327,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve XMLValidationRuntimePort (C-02) — Enterprise XML Validation Runtime. */
   getXMLValidationRuntimePort(): XMLValidationRuntimePort;
+
+  /** Resolve SOAPRuntimePort (C-03) — Enterprise SOAP Runtime Foundation. */
+  getSOAPRuntimePort(): SOAPRuntimePort;
 
   /** Resolve XSDRuntimePort (TISS-09) — Enterprise XSD Runtime. */
   getXSDRuntimePort(): XSDRuntimePort;
