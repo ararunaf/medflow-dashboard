@@ -13,7 +13,8 @@
  * F3-CAP-03: Upload Runtime estrutural — sem Upload real / Web / Desktop / Mobile / API / Multipart / Chunked / Resumable / Azure Blob / Supabase / S3 / Drive / OneDrive / Dropbox.
  * F3-CAP-04: Intelligent Capture Runtime estrutural — orquestração Scanner/WatchFolder/Upload sem OCR / IA / Pipeline / captura automática / leitura de arquivos.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
- * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
+ * F3-CAP-06: Document Classification Runtime estrutural — sem IA / sem ML / sem LLM / sem OCR real / sem template matching / sem roteamento automático / sem visão computacional.
+ * Classification: acesso exclusivo via Classification Runtime (F3-CAP-06) → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
  * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…10).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
@@ -201,7 +202,7 @@ export type EnterpriseRuntimeOptions = {
  *
  * NÃO contém regras de negócio. NÃO executa busca real.
  * OCR: exclusivamente via OCRRuntimePort → OCRProviderPort.
- * Classification: exclusivamente via DocumentClassificationRuntimePort → ProviderPort (CLASS-01).
+ * Classification: exclusivamente via DocumentClassificationRuntimePort (F3-CAP-06) → ProviderPort (CLASS-01).
  * Storage: exclusivamente via StorageManagerRuntimePort → StorageProviderPort (STORAGE-01).
  * IA: exclusivamente via AIProviderRuntimePort → AIProviderPort.
  */
@@ -226,7 +227,7 @@ export interface EnterpriseRuntime {
   /** Resolve OCRProviderPort (EPC-15 / OCR-01) — Adapter oficial. */
   getOCRProviderPort(): OCRProviderPort;
 
-  /** Resolve DocumentClassificationRuntimePort (DIP-04 / CLASS-01). */
+  /** Resolve DocumentClassificationRuntimePort (F3-CAP-06 + DIP-04 / CLASS-01 preservado). */
   getDocumentClassificationRuntimePort(): DocumentClassificationRuntimePort;
 
   /** Resolve DocumentClassificationProviderPort (CLASS-01) — Adapter oficial. */

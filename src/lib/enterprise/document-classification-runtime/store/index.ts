@@ -1,5 +1,9 @@
 export type {
   DocumentClassificationRuntimeStore,
+  StoredDocumentClassificationRuntimeDocument,
+  StoredDocumentClassificationRuntimeJob,
+  StoredDocumentClassificationRuntimeRequest,
+  StoredDocumentClassificationRuntimeResult,
   StoredDocumentClassificationRuntimeSession,
 } from "./document-classification-runtime-store";
 

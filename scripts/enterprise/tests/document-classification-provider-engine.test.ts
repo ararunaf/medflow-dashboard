@@ -238,7 +238,7 @@ describe("CLASS-01 cadeia Enterprise / Capture / OCR / Classification / Orchestr
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.getDocumentClassificationProviderPort().providerId, "rule-based");
-    assert.equal(runtime.getDocumentClassificationRuntimePort().providerId, "default");
+    assert.equal(runtime.getDocumentClassificationRuntimePort().providerId, "enterprise");
     assert.equal(
       runtime.getDocumentClassificationRuntimePort().capabilities().implementsRealClassification,
       true,

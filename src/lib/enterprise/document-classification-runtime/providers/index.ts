@@ -1,1 +1,6 @@
-export { createDocumentClassificationRuntimePort } from "./create-document-classification-runtime-port";
+export {
+  DocumentClassificationRuntimeProvider,
+  createDocumentClassificationRuntimePort,
+  getDocumentClassificationRuntimeFactory,
+  getDocumentClassificationRuntimePort,
+} from "./create-document-classification-runtime-port";

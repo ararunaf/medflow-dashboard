@@ -6,7 +6,7 @@
  * Bridge Captura → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime
  *   → DocumentIntakePort → Adapter → Implementação existente
  *   → OCRRuntimePort (F3-CAP-05) → Orchestrator → OCRProviderPort → Azure Adapter (OCR-01)
- *   → DocumentClassificationRuntimePort → Orchestrator
+ *   → DocumentClassificationRuntimePort (F3-CAP-06) → Orchestrator
  *   → DocumentClassificationProviderPort → DefaultDocumentClassificationAdapter (CLASS-01)
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
@@ -200,14 +200,30 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     this.documentClassificationProviderPort =
       options.documentClassificationProviderPort ??
       createDocumentClassificationProviderPort({ provider: "rule-based" });
+    // F3-CAP-06: Enterprise Document Classification Runtime Foundation — orquestração
+    // estrutural de jobs/requests/documentos de classificação, com coordenação/execução
+    // real DIP-04/CLASS-01 preservada via Orchestrator + OCR Runtime +
+    // DocumentClassificationProviderPort. Peers estruturais (IntelligentCapture/Scanner/
+    // WatchFolder/Upload/PQR/Worker/Scheduler/Observability/Scalability) via lazy
+    // getters — Classification Runtime é construído antes desses Ports no composition
+    // root, sem consumo funcional (shape-check apenas em health()).
     this.documentClassificationRuntimePort =
       options.documentClassificationRuntimePort ??
       createDocumentClassificationRuntimePort({
-        provider: "default",
+        provider: "enterprise",
         enterpriseDeps: {
           getOrchestratorPort: () => this.orchestratorPort,
           getOCRRuntimePort: () => this.ocrRuntimePort,
           getDocumentClassificationProviderPort: () => this.documentClassificationProviderPort,
+          getIntelligentCaptureRuntimePort: () => this.intelligentCaptureRuntimePort,
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getUploadRuntimePort: () => this.uploadRuntimePort,
+          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
+          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
     // STORAGE-01: Storage Provider oficial atrás do StorageProviderPort — sem bypass no produto.
