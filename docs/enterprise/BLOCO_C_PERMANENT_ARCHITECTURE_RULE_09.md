@@ -9,8 +9,10 @@
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_07.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_07.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_08.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_08.md)  
+**Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_10.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_10.md)  
 **Documento de arquitetura:** [`C05_AUTHORIZATION_RUNTIME_ARCHITECTURE.md`](./C05_AUTHORIZATION_RUNTIME_ARCHITECTURE.md)  
-**Documento de produto:** [`C05_ENTERPRISE_AUTHORIZATION_RUNTIME.md`](./C05_ENTERPRISE_AUTHORIZATION_RUNTIME.md)
+**Documento de produto:** [`C05_ENTERPRISE_AUTHORIZATION_RUNTIME.md`](./C05_ENTERPRISE_AUTHORIZATION_RUNTIME.md)  
+**Certificação final:** [`C05_AUTHORIZATION_RUNTIME_FINAL_CERTIFICATION.md`](./C05_AUTHORIZATION_RUNTIME_FINAL_CERTIFICATION.md)
 
 ---
 
@@ -87,17 +89,19 @@ if (guia) ...
 - **RULE_08** — decisão operacional consulta o Capability Profile
 - **RULE_09** — autorização ocorre por strategies; Runtime apenas seleciona;
   decisão policy-driven via Profile + `AuthorizationPolicy`
+- **RULE_10** — Workflow interno soberano; integrações participam e não controlam o fluxo
 
 Fluxo canônico futuro:
 
 ```
-Operadora futura
-  → OperatorCapabilityProfile (RULE_07)
-    → Capability Negotiation (RULE_08)
-      → AuthorizationPolicy (RULE_09)
-        → AuthorizationStrategy selecionada (RULE_09)
-          → Adapter especializado (futuro)
-            → Ports canônicos
+Workflow interno soberano (RULE_10)
+  → Operadora futura
+    → OperatorCapabilityProfile (RULE_07)
+      → Capability Negotiation (RULE_08)
+        → AuthorizationPolicy (RULE_09)
+          → AuthorizationStrategy selecionada (RULE_09)
+            → Adapter especializado (futuro)
+              → Ports canônicos
 ```
 
 ---
@@ -123,5 +127,5 @@ e **não** deve ser introduzida silenciosamente em Sprints de Foundation.
 
 ## Vigência
 
-Esta regra é **permanente** para todo o BLOCO C. Sprints futuras (C-05A em diante)
+Esta regra é **permanente** para todo o BLOCO C. Sprints futuras (C-06 em diante)
 devem respeitá-la sem exceção silenciosa.

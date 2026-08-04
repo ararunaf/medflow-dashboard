@@ -100,6 +100,26 @@ Peers injetados via `AuthorizationRuntimeEnterpriseDeps` (shape-check em `health
 - Audit Runtime
 - Validation Runtime
 
+## WORKFLOW BEFORE INTEGRATION (RULE_10)
+
+Registrada oficialmente na Sprint C-05A:
+
+- o Workflow interno do MedicFlow-AI é **soberano**;
+- integrações externas **executam etapas** — nunca controlam o fluxo;
+- operadoras **não** alteram a sequência canônica do pipeline;
+- o núcleo (Enterprise Runtime / Workflow) permanece o **orquestrador**.
+
+Documento oficial:
+[`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_10.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_10.md)
+
+Sequência canônica (síntese):
+
+```
+Documento → OCR → Classification → Extraction → Validation → Mapping
+  → Auto Fill → Quality → XML → XML Validation → SOAP → Operator
+  → Authorization → Workflow → Integração Externa
+```
+
 ## Limites explícitos
 
 - **não existe** autorização funcional
