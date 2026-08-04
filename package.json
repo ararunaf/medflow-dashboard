@@ -94,6 +94,7 @@
     "enterprise:soap-runtime:test": "npx tsx --test scripts/enterprise/tests/soap-runtime-engine.test.ts",
     "enterprise:operator-runtime:test": "npx tsx --test scripts/enterprise/tests/operator-runtime-engine.test.ts",
     "enterprise:authorization-runtime:test": "npx tsx --test scripts/enterprise/tests/authorization-runtime-engine.test.ts",
+    "enterprise:batch-runtime:test": "npx tsx --test scripts/enterprise/tests/batch-runtime-engine.test.ts",
     "enterprise:xsd-runtime:test": "npx tsx --test scripts/enterprise/tests/xsd-runtime-engine.test.ts",
     "enterprise:namespace-runtime:test": "npx tsx --test scripts/enterprise/tests/namespace-runtime-engine.test.ts",
     "enterprise:queue-runtime:test": "npx tsx --test scripts/enterprise/tests/queue-runtime-engine.test.ts",

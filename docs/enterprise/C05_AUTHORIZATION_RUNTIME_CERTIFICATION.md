@@ -2,7 +2,7 @@
 
 **Sprint:** C-05 — Enterprise Authorization Runtime Foundation  
 **Gate:** C-05A — Enterprise Authorization Runtime Gate  
-**Status:** Foundation entregue — Gate C-05A **encerrado**  
+**Status:** Foundation estrutural entregue — Gate C-05A **encerrado**  
 **Data:** 2026-08-04
 
 ---

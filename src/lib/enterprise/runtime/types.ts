@@ -63,6 +63,7 @@ import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/x
 import type { SOAPRuntimePort } from "../soap-runtime/ports/soap-runtime-port";
 import type { OperatorRuntimePort } from "../operator-runtime/ports/operator-runtime-port";
 import type { AuthorizationRuntimePort } from "../authorization-runtime/ports/authorization-runtime-port";
+import type { BatchRuntimePort } from "../batch-runtime/ports/batch-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
@@ -116,6 +117,7 @@ export type EnterpriseRuntimeHealth = {
   soapRuntimeOk?: boolean;
   operatorRuntimeOk?: boolean;
   authorizationRuntimeOk?: boolean;
+  batchRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
@@ -208,6 +210,7 @@ export type EnterpriseRuntimeOptions = {
   soapRuntimePort?: SOAPRuntimePort;
   operatorRuntimePort?: OperatorRuntimePort;
   authorizationRuntimePort?: AuthorizationRuntimePort;
+  batchRuntimePort?: BatchRuntimePort;
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
@@ -342,6 +345,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve AuthorizationRuntimePort (C-05) — Enterprise Authorization Runtime Foundation. */
   getAuthorizationRuntimePort(): AuthorizationRuntimePort;
+
+  /** Resolve BatchRuntimePort (C-06) — Enterprise Batch Runtime Foundation. */
+  getBatchRuntimePort(): BatchRuntimePort;
 
   /** Resolve XSDRuntimePort (TISS-09) — Enterprise XSD Runtime. */
   getXSDRuntimePort(): XSDRuntimePort;
