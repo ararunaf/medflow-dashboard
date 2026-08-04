@@ -185,7 +185,7 @@ certifica o encerramento oficial da F3-CAP-12.
 |------|------|
 | Commit de entrega F3-CAP-12 | `a0788ad8926f8a24a26824fd2d16672ad6571b80` |
 | Mensagem (entrega) | `feat(auto-fill-runtime): add F3-CAP-12 Enterprise Auto-Fill Runtime Foundation` |
-| Commit de certificação F3-CAP-12A | *(preenchido após commit de certificação)* |
+| Commit de certificação F3-CAP-12A | `e2aa20596edaead2984c715a609c3ee087fd8459` |
 | Mensagem (certificação) | `docs(enterprise): certify F3-CAP-12A Enterprise Auto-Fill Runtime Gate` |
 
 ---
@@ -198,8 +198,8 @@ certifica o encerramento oficial da F3-CAP-12.
 | Remote | `origin/feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega confirmado | `a0788ad8926f8a24a26824fd2d16672ad6571b80` |
 | Hash curto (entrega) | `a0788ad` |
-| Commit de certificação confirmado | *(preenchido após commit de certificação)* |
-| Hash curto (certificação) | *(preenchido após commit de certificação)* |
+| Commit de certificação confirmado | `e2aa20596edaead2984c715a609c3ee087fd8459` |
+| Hash curto (certificação) | `e2aa205` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** |
 | Ahead | **0** |
