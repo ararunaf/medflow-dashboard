@@ -12,6 +12,7 @@
  *   → ValidationRuntimePort (F3-CAP-08) — structural foundation only
  *   → AIOrchestrationRuntimePort (F3-CAP-09) — structural foundation only
  *   → AuditRuntimePort (F3-CAP-10) — structural foundation only
+ *   → TISSMappingRuntimePort (F3-CAP-11) — structural foundation only
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -48,6 +49,8 @@ import { createAIOrchestrationRuntimePort } from "../ai-orchestration-runtime/pr
 import type { AIOrchestrationRuntimePort } from "../ai-orchestration-runtime/ports/ai-orchestration-runtime-port";
 import { createAuditRuntimePort } from "../audit-runtime/providers/create-audit-runtime-port";
 import type { AuditRuntimePort } from "../audit-runtime/ports/audit-runtime-port";
+import { createTISSMappingRuntimePort } from "../tiss-mapping-runtime/providers/create-tiss-mapping-runtime-port";
+import type { TISSMappingRuntimePort } from "../tiss-mapping-runtime/ports/tiss-mapping-runtime-port";
 import { createDocumentIntakePort } from "../document-intake/providers/create-document-intake-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import { createDocumentIntakeRuntimePort } from "../document-intake-runtime/providers/create-document-intake-runtime-port";
@@ -131,6 +134,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly validationRuntimePort: ValidationRuntimePort;
   private readonly aiOrchestrationRuntimePort: AIOrchestrationRuntimePort;
   private readonly auditRuntimePort: AuditRuntimePort;
+  private readonly tissMappingRuntimePort: TISSMappingRuntimePort;
   private readonly storageProviderPort: StorageProviderPort;
   private readonly storageManagerRuntimePort: StorageManagerRuntimePort;
   private readonly searchProviderPort: SearchProviderPort;
@@ -346,6 +350,29 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
+        },
+      });
+    // F3-CAP-11: Enterprise TISS Mapping Runtime Foundation — orquestração
+    // estrutural de mapeamento canônico TISS futuro. Sem mapeamento funcional /
+    // operadoras / XML / preenchimento automático / IA / banco / persistência /
+    // APIs. Peers estruturais (AIOrchestration/Audit/Validation/
+    // DocumentExtraction/DocumentClassification/OCR/IntelligentCapture/Scanner/
+    // WatchFolder/Upload) via lazy getters — shape-check apenas em health().
+    this.tissMappingRuntimePort =
+      options.tissMappingRuntimePort ??
+      createTISSMappingRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getAIOrchestrationRuntimePort: () => this.aiOrchestrationRuntimePort,
+          getAuditRuntimePort: () => this.auditRuntimePort,
+          getValidationRuntimePort: () => this.validationRuntimePort,
+          getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
+          getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getIntelligentCaptureRuntimePort: () => this.intelligentCaptureRuntimePort,
+          getScannerRuntimePort: () => this.scannerRuntimePort,
+          getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
+          getUploadRuntimePort: () => this.uploadRuntimePort,
         },
       });
     // STORAGE-01: Storage Provider oficial atrás do StorageProviderPort — sem bypass no produto.
@@ -653,6 +680,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.auditRuntimePort;
   }
 
+  getTISSMappingRuntimePort(): TISSMappingRuntimePort {
+    return this.tissMappingRuntimePort;
+  }
+
   getStorageManagerRuntimePort(): StorageManagerRuntimePort {
     return this.storageManagerRuntimePort;
   }
@@ -776,6 +807,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       validationRuntimeHealth,
       aiOrchestrationRuntimeHealth,
       auditRuntimeHealth,
+      tissMappingRuntimeHealth,
       storageProviderHealth,
       storageManagerRuntimeHealth,
       searchProviderHealth,
@@ -816,6 +848,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.validationRuntimePort.health(),
       this.aiOrchestrationRuntimePort.health(),
       this.auditRuntimePort.health(),
+      this.tissMappingRuntimePort.health(),
       this.storageProviderPort.health(),
       this.storageManagerRuntimePort.health(),
       this.searchProviderPort.health(),
@@ -858,6 +891,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       validationRuntimeHealth.ok &&
       aiOrchestrationRuntimeHealth.ok &&
       auditRuntimeHealth.ok &&
+      tissMappingRuntimeHealth.ok &&
       storageProviderHealth.ok &&
       storageManagerRuntimeHealth.ok &&
       searchProviderHealth.ok &&
@@ -901,6 +935,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       validationRuntimeOk: validationRuntimeHealth.ok,
       aiOrchestrationRuntimeOk: aiOrchestrationRuntimeHealth.ok,
       auditRuntimeOk: auditRuntimeHealth.ok,
+      tissMappingRuntimeOk: tissMappingRuntimeHealth.ok,
       storageProviderOk: storageProviderHealth.ok,
       storageManagerRuntimeOk: storageManagerRuntimeHealth.ok,
       searchProviderOk: searchProviderHealth.ok,
