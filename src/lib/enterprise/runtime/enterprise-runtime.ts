@@ -86,6 +86,8 @@ import { createSchedulerRuntimePort } from "../scheduler-runtime/providers/creat
 import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
 import { createWorkerRuntimePort } from "../worker-runtime/providers/create-worker-runtime-port";
 import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
+import { createScannerRuntimePort } from "../scanner-runtime/providers/create-scanner-runtime-port";
+import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 import type {
   EnterpriseRuntime,
   EnterpriseRuntimeHealth,
@@ -134,6 +136,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly scalabilityRuntimePort!: ScalabilityRuntimePort;
   /** Atribuído após Scalability; lazy getters de Obs/Scal podem referenciar antes da atribuição. */
   private readonly tissRuntimePort!: TISSRuntimePort;
+  /** Atribuído após TISS + Capture/OCR/Queue/Worker/Scheduler/PQR/Obs/Scal — deps estruturais. */
+  private readonly scannerRuntimePort!: ScannerRuntimePort;
   private readonly captureEngineRuntimePort: CaptureEngineRuntimePort;
   private readonly aiProviderPort: AIProviderPort;
   private readonly aiProviderRuntimePort: AIProviderRuntimePort;
@@ -358,6 +362,23 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
+    // F3-CAP-01: Scanner Runtime Foundation — deps estruturais apenas (sem Scanner real / drivers).
+    this.scannerRuntimePort =
+      options.scannerRuntimePort ??
+      createScannerRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getCaptureEngineRuntimePort: () => this.captureEngineRuntimePort,
+          getOCRRuntimePort: () => this.ocrRuntimePort,
+          getQueueRuntimePort: () => this.queueRuntimePort,
+          getWorkerRuntimePort: () => this.workerRuntimePort,
+          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
+          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
+          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
+          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
+          getTISSRuntimePort: () => this.tissRuntimePort,
+        },
+      });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
     this.aiProviderPort = options.aiProviderPort ?? createAIProviderPort({ provider: "openai" });
     this.aiProviderRuntimePort =
@@ -483,6 +504,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.scalabilityRuntimePort;
   }
 
+  getScannerRuntimePort(): ScannerRuntimePort {
+    return this.scannerRuntimePort;
+  }
+
   getTISSRuntimePort(): TISSRuntimePort {
     return this.tissRuntimePort;
   }
@@ -526,6 +551,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       persistentQueueRuntimeHealth,
       observabilityRuntimeHealth,
       scalabilityRuntimeHealth,
+      scannerRuntimeHealth,
       tissRuntimeHealth,
       aiProviderRuntimeHealth,
       aiProviderHealth,
@@ -558,6 +584,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.persistentQueueRuntimePort.health(),
       this.observabilityRuntimePort.health(),
       this.scalabilityRuntimePort.health(),
+      this.scannerRuntimePort.health(),
       this.tissRuntimePort.health(),
       this.aiProviderRuntimePort.health(),
       this.aiProviderPort.health(),
@@ -592,6 +619,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       persistentQueueRuntimeHealth.ok &&
       observabilityRuntimeHealth.ok &&
       scalabilityRuntimeHealth.ok &&
+      scannerRuntimeHealth.ok &&
       tissRuntimeHealth.ok &&
       aiProviderRuntimeHealth.ok &&
       aiProviderHealth.ok;
@@ -627,11 +655,12 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       persistentQueueRuntimeOk: persistentQueueRuntimeHealth.ok,
       observabilityRuntimeOk: observabilityRuntimeHealth.ok,
       scalabilityRuntimeOk: scalabilityRuntimeHealth.ok,
+      scannerRuntimeOk: scannerRuntimeHealth.ok,
       tissRuntimeOk: tissRuntimeHealth.ok,
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }

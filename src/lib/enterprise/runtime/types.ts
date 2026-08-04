@@ -8,6 +8,7 @@
  * INF-08: Persistent Queue Runtime estrutural — sem fila persistente real / RabbitMQ / Kafka.
  * INF-09: Observability Runtime estrutural — sem OpenTelemetry / Application Insights / Prometheus.
  * INF-10: Scalability Runtime estrutural — sem Kubernetes / Auto Scaling / Cluster / Load Balancer.
+ * F3-CAP-01: Scanner Runtime estrutural — sem Scanner real / TWAIN / WIA / ISIS / Drivers.
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * Classification: acesso exclusivo via Classification Runtime → ProviderPort (CLASS-01).
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
@@ -47,6 +48,7 @@ import type { ObservabilityRuntimePort } from "../observability-runtime/ports/ob
 import type { ScalabilityRuntimePort } from "../scalability-runtime/ports/scalability-runtime-port";
 import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
 import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
+import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 
 /** Identificador estável do runtime. */
 export type EnterpriseRuntimeId = "default" | "test";
@@ -85,6 +87,7 @@ export type EnterpriseRuntimeHealth = {
   persistentQueueRuntimeOk?: boolean;
   observabilityRuntimeOk?: boolean;
   scalabilityRuntimeOk?: boolean;
+  scannerRuntimeOk?: boolean;
   tissRuntimeOk?: boolean;
   aiProviderRuntimeOk?: boolean;
   aiProviderOk?: boolean;
@@ -162,6 +165,7 @@ export type EnterpriseRuntimeOptions = {
   persistentQueueRuntimePort?: PersistentQueueRuntimePort;
   observabilityRuntimePort?: ObservabilityRuntimePort;
   scalabilityRuntimePort?: ScalabilityRuntimePort;
+  scannerRuntimePort?: ScannerRuntimePort;
   tissRuntimePort?: TISSRuntimePort;
   aiProviderPort?: AIProviderPort;
   aiProviderRuntimePort?: AIProviderRuntimePort;
@@ -275,6 +279,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve ScalabilityRuntimePort (INF-10) — Enterprise Scalability Runtime. */
   getScalabilityRuntimePort(): ScalabilityRuntimePort;
+
+  /** Resolve ScannerRuntimePort (F3-CAP-01) — Enterprise Scanner Runtime Foundation. */
+  getScannerRuntimePort(): ScannerRuntimePort;
 
   /** Resolve TISSRuntimePort (TISS-01…TISS-10 + INF-05 Queue + INF-06 Worker + INF-07 Scheduler + INF-08 PersistentQueue + INF-09 Observability + INF-10 Scalability deps). */
   getTISSRuntimePort(): TISSRuntimePort;
