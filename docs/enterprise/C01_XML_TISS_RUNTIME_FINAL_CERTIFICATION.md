@@ -206,7 +206,7 @@ da C-01.
 |------|------|
 | Commit de entrega C-01 | `6a1e03b5fd9e25fd10416b43bb981cc45cf0705f` |
 | Mensagem (entrega) | `feat(xml-tiss-runtime): add C-01 Enterprise XML TISS Runtime Foundation` |
-| Commit de certificação C-01A | _(preenchido após commit desta certificação)_ |
+| Commit de certificação C-01A | `26895d6a4954a4cfcd07ffa2e350902337ca239b` |
 | Mensagem (certificação) | `docs(enterprise): certify C-01A Enterprise XML TISS Runtime Gate` |
 
 ---
@@ -220,11 +220,13 @@ da C-01.
 | Commit de entrega confirmado | `6a1e03b5fd9e25fd10416b43bb981cc45cf0705f` |
 | Hash curto (entrega) | `6a1e03b` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Push (entrega) | **Realizado** (já publicado antes da C-01A) |
-| Hash local = remoto (pré-certificação) | **SIM** |
-| Ahead (pré-certificação) | **0** |
-| Behind (pré-certificação) | **0** |
-| Working Tree (produto) | Limpa após commit + push desta certificação |
+| Commit de certificação confirmado | `26895d6a4954a4cfcd07ffa2e350902337ca239b` |
+| Hash curto (certificação) | `26895d6` |
+| Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
+| Hash local = remoto | **SIM** |
+| Ahead | **0** |
+| Behind | **0** |
+| Working Tree (produto) | **Limpa** (após commit + push desta certificação) |
 
 ---
 

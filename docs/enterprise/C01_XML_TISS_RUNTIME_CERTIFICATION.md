@@ -49,8 +49,10 @@ Registrada em [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`](./BLOCO_C_PERMANENT_ARC
 |------|-------|
 | Branch | `feat/inf-10-enterprise-scalability-runtime` |
 | Commit de entrega C-01 | `6a1e03b5fd9e25fd10416b43bb981cc45cf0705f` |
-| Hash curto | `6a1e03b` |
+| Hash curto (entrega) | `6a1e03b` |
 | Hash correto? | **SIM** |
-| Push (entrega) | **Realizado** |
-| Hash local = remoto (entrega) | **SIM** |
-| Ahead / Behind (entrega) | **0 / 0** |
+| Commit de certificação C-01A | `26895d6a4954a4cfcd07ffa2e350902337ca239b` |
+| Hash curto (certificação) | `26895d6` |
+| Push | **Realizado** |
+| Hash local = remoto | **SIM** |
+| Ahead / Behind | **0 / 0** |
