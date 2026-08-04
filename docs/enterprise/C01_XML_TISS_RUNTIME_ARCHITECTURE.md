@@ -66,3 +66,25 @@ Esta arquitetura é **exclusivamente estrutural**:
 - não existe SOAP
 - não existe comunicação de rede
 - não existe banco / APIs
+
+---
+
+## Regra Permanente do BLOCO C
+
+Vigente a partir da Sprint C-01A. Documento oficial:
+[`BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md).
+
+Nenhum Runtime do BLOCO C poderá conhecer diretamente:
+
+- Operadoras;
+- SOAP;
+- XML específico;
+- Namespaces;
+- Versões TISS;
+- URLs;
+- Endpoints;
+- Schemas XSD.
+
+Todos os Runtimes deverão trabalhar exclusivamente sobre contratos canônicos.
+
+Toda especialização ficará restrita a Adapters específicos nas Sprints futuras.

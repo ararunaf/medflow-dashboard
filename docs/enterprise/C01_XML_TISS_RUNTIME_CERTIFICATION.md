@@ -32,4 +32,25 @@ Toda a Sprint C-01 permanece **exclusivamente estrutural**. Não há XML funcion
 
 ## Roadmap
 
-Roadmap permanece **CONGELADO**. Não iniciar C-01A nesta certificação.
+Roadmap permanece **CONGELADO**.
+
+Sprint C-01A (gate administrativo) certificou oficialmente a C-01 em 2026-08-04.
+Não iniciar C-02 nesta certificação de entrega C-01.
+
+Documento final: [`C01_XML_TISS_RUNTIME_FINAL_CERTIFICATION.md`](./C01_XML_TISS_RUNTIME_FINAL_CERTIFICATION.md).
+
+## Regra Permanente do BLOCO C
+
+Registrada em [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md).
+
+## Governança Git (C-01A)
+
+| Item | Valor |
+|------|-------|
+| Branch | `feat/inf-10-enterprise-scalability-runtime` |
+| Commit de entrega C-01 | `6a1e03b5fd9e25fd10416b43bb981cc45cf0705f` |
+| Hash curto | `6a1e03b` |
+| Hash correto? | **SIM** |
+| Push (entrega) | **Realizado** |
+| Hash local = remoto (entrega) | **SIM** |
+| Ahead / Behind (entrega) | **0 / 0** |
