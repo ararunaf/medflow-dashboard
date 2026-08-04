@@ -18,6 +18,7 @@
  *   → XMLTISSRuntimePort (C-01) — structural foundation only
  *   → XMLValidationRuntimePort (C-02) — structural foundation only
  *   → SOAPRuntimePort (C-03) — structural transport encapsulator only
+ *   → OperatorRuntimePort (C-04) — structural OperatorCapabilityProfile foundation only
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -98,6 +99,8 @@ import { createXMLValidationRuntimePort } from "../xml-validation-runtime/provid
 import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
 import { createSOAPRuntimePort } from "../soap-runtime/providers/create-soap-runtime-port";
 import type { SOAPRuntimePort } from "../soap-runtime/ports/soap-runtime-port";
+import { createOperatorRuntimePort } from "../operator-runtime/providers/create-operator-runtime-port";
+import type { OperatorRuntimePort } from "../operator-runtime/ports/operator-runtime-port";
 import { createXSDRuntimePort } from "../xsd-runtime/providers/create-xsd-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../namespace-runtime/providers/create-namespace-runtime-port";
@@ -164,6 +167,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly xmlSchemaRuntimePort: XMLSchemaRuntimePort;
   private readonly xmlValidationRuntimePort: XMLValidationRuntimePort;
   private readonly soapRuntimePort: SOAPRuntimePort;
+  private readonly operatorRuntimePort: OperatorRuntimePort;
   private readonly xsdRuntimePort: XSDRuntimePort;
   private readonly namespaceRuntimePort: NamespaceRuntimePort;
   private readonly queueRuntimePort: QueueRuntimePort;
@@ -591,6 +595,27 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getValidationRuntimePort: () => this.validationRuntimePort,
         },
       });
+    // C-04: Enterprise Operator Runtime Foundation — Operator Capability Model.
+    // Sem operadoras reais / sem lógica condicional por operadora /
+    // sem autenticação / sem SOAP/XML/REST funcional / sem banco / sem APIs.
+    // Peers estruturais (SOAP/XML/XMLValidation/Quality/AutoFill/TISSMapping/
+    // Audit/Validation) via lazy getters — shape-check apenas em health().
+    // OPERATOR CAPABILITY MODEL (Regra Permanente nº 7).
+    this.operatorRuntimePort =
+      options.operatorRuntimePort ??
+      createOperatorRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getSOAPRuntimePort: () => this.soapRuntimePort,
+          getXMLRuntimePort: () => this.xmlRuntimePort,
+          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
+          getQualityRuntimePort: () => this.qualityRuntimePort,
+          getAutoFillRuntimePort: () => this.autoFillRuntimePort,
+          getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
+          getAuditRuntimePort: () => this.auditRuntimePort,
+          getValidationRuntimePort: () => this.validationRuntimePort,
+        },
+      });
     this.xsdRuntimePort =
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =
@@ -887,6 +912,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.soapRuntimePort;
   }
 
+  getOperatorRuntimePort(): OperatorRuntimePort {
+    return this.operatorRuntimePort;
+  }
+
   getXSDRuntimePort(): XSDRuntimePort {
     return this.xsdRuntimePort;
   }
@@ -979,6 +1008,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlSchemaRuntimeHealth,
       xmlValidationRuntimeHealth,
       soapRuntimeHealth,
+      operatorRuntimeHealth,
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
       queueRuntimeHealth,
@@ -1024,6 +1054,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.xmlSchemaRuntimePort.health(),
       this.xmlValidationRuntimePort.health(),
       this.soapRuntimePort.health(),
+      this.operatorRuntimePort.health(),
       this.xsdRuntimePort.health(),
       this.namespaceRuntimePort.health(),
       this.queueRuntimePort.health(),
@@ -1071,6 +1102,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlSchemaRuntimeHealth.ok &&
       xmlValidationRuntimeHealth.ok &&
       soapRuntimeHealth.ok &&
+      operatorRuntimeHealth.ok &&
       xsdRuntimeHealth.ok &&
       namespaceRuntimeHealth.ok &&
       queueRuntimeHealth.ok &&
@@ -1119,6 +1151,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlSchemaRuntimeOk: xmlSchemaRuntimeHealth.ok,
       xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,
       soapRuntimeOk: soapRuntimeHealth.ok,
+      operatorRuntimeOk: operatorRuntimeHealth.ok,
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
       queueRuntimeOk: queueRuntimeHealth.ok,
@@ -1135,7 +1168,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       aiProviderRuntimeOk: aiProviderRuntimeHealth.ok,
       aiProviderOk: aiProviderHealth.ok,
       message: ok
-        ? "Enterprise Runtime pronto (SOAPRuntime/XMLTISSRuntime/QualityRuntime/AuditRuntime/AIOrchestrationRuntime/ValidationRuntime/DocumentExtractionRuntime/IntelligentCaptureRuntime/UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
+        ? "Enterprise Runtime pronto (OperatorRuntime/SOAPRuntime/XMLTISSRuntime/QualityRuntime/AuditRuntime/AIOrchestrationRuntime/ValidationRuntime/DocumentExtractionRuntime/IntelligentCaptureRuntime/UploadRuntime/WatchFolderRuntime/ScannerRuntime/TISSRuntime/ScalabilityRuntime/ObservabilityRuntime/PersistentQueueRuntime/SchedulerRuntime/WorkerRuntime/QueueRuntime/NamespaceRuntime/XSDRuntime/XMLValidationRuntime/XMLSchemaRuntime/XMLSerializerRuntime/XMLGenerationRuntime/XMLRuntime/RulePackEngine/TISSCatalog/TISSProvider + AIProviderRuntime + DocumentSearchRuntime/SearchProvider + StorageManagerRuntime/StorageProvider + DocumentClassificationRuntime/Provider + OCRRuntime + CaptureEngineRuntime + DocumentIntakeRuntime + Orchestrator + DocumentIntake)."
         : "Enterprise Runtime degradado — ver Ports.",
     };
   }
