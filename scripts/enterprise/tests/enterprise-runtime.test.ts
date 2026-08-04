@@ -31,6 +31,9 @@ describe("ARCH-01 Enterprise Runtime", () => {
     const captureRuntime = runtime.getCaptureEngineRuntimePort();
     const ocrRuntime = runtime.getOCRRuntimePort();
     const classificationRuntime = runtime.getDocumentClassificationRuntimePort();
+    const documentExtractionRuntime = runtime.getDocumentExtractionRuntimePort();
+    const validationRuntime = runtime.getValidationRuntimePort();
+    const aiOrchestrationRuntime = runtime.getAIOrchestrationRuntimePort();
     const storageManagerRuntime = runtime.getStorageManagerRuntimePort();
     const documentSearchRuntime = runtime.getDocumentSearchRuntimePort();
     const aiProvider = runtime.getAIProviderPort();
@@ -41,12 +44,18 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.ok(captureRuntime);
     assert.ok(ocrRuntime);
     assert.ok(classificationRuntime);
+    assert.ok(documentExtractionRuntime);
+    assert.ok(validationRuntime);
+    assert.ok(aiOrchestrationRuntime);
     assert.ok(storageManagerRuntime);
     assert.ok(documentSearchRuntime);
     assert.ok(aiProvider);
     assert.ok(aiProviderRuntime);
     assert.equal(aiProvider.providerId, "openai");
     assert.equal(aiProviderRuntime.providerId, "default");
+    assert.equal(documentExtractionRuntime.providerId, "enterprise");
+    assert.equal(validationRuntime.providerId, "enterprise");
+    assert.equal(aiOrchestrationRuntime.providerId, "enterprise");
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
@@ -57,6 +66,9 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(health.ocrRuntimeOk, true);
     assert.equal(health.ocrProviderOk, true);
     assert.equal(health.documentClassificationRuntimeOk, true);
+    assert.equal(health.documentExtractionRuntimeOk, true);
+    assert.equal(health.validationRuntimeOk, true);
+    assert.equal(health.aiOrchestrationRuntimeOk, true);
     assert.equal(health.storageManagerRuntimeOk, true);
     assert.equal(health.documentSearchRuntimeOk, true);
     assert.equal(health.aiProviderRuntimeOk, true);
@@ -223,6 +235,9 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(typeof runtime.getCaptureEngineRuntimePort, "function");
     assert.equal(typeof runtime.getOCRRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentClassificationRuntimePort, "function");
+    assert.equal(typeof runtime.getDocumentExtractionRuntimePort, "function");
+    assert.equal(typeof runtime.getValidationRuntimePort, "function");
+    assert.equal(typeof runtime.getAIOrchestrationRuntimePort, "function");
     assert.equal(typeof runtime.getStorageManagerRuntimePort, "function");
     assert.equal(typeof runtime.getDocumentSearchRuntimePort, "function");
     assert.equal(typeof runtime.getAIProviderPort, "function");

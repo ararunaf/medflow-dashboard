@@ -15,6 +15,9 @@
  * OCR: acesso exclusivo via OCR Runtime → OCRProviderPort (OCR-01).
  * F3-CAP-06: Document Classification Runtime estrutural — sem IA / sem ML / sem LLM / sem OCR real / sem template matching / sem roteamento automático / sem visão computacional.
  * Classification: acesso exclusivo via Classification Runtime (F3-CAP-06) → ProviderPort (CLASS-01).
+ * F3-CAP-07: Document Extraction Runtime estrutural — sem extração real / sem OCR / sem IA / sem ML / sem LLM / sem Regex / sem Template Matching / sem leitura de campos / sem preenchimento de guias.
+ * F3-CAP-08: Validation Runtime estrutural — sem validação real / sem auditoria / sem IA / sem ML / sem LLM / sem correção automática / sem regras TISS / sem regras de operadoras / sem aprovação/rejeição automática.
+ * F3-CAP-09: AI Orchestration Runtime estrutural — sem IA real / sem OpenAI / sem Azure OpenAI / sem Gemini / sem Claude / sem Ollama / sem Llama / sem ML / sem Prompt Engineering / sem HTTP / sem agentes funcionais / sem workflow / sem decisão automática.
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
  * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…10).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
@@ -23,6 +26,9 @@ import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-
 import type { CaptureEngineRuntimePort } from "../capture-engine-runtime/ports/capture-engine-runtime-port";
 import type { DocumentClassificationProviderPort } from "../document-classification-provider/ports/document-classification-provider-port";
 import type { DocumentClassificationRuntimePort } from "../document-classification-runtime/ports/document-classification-runtime-port";
+import type { DocumentExtractionRuntimePort } from "../document-extraction-runtime/ports/document-extraction-runtime-port";
+import type { ValidationRuntimePort } from "../validation-runtime/ports/validation-runtime-port";
+import type { AIOrchestrationRuntimePort } from "../ai-orchestration-runtime/ports/ai-orchestration-runtime-port";
 import type { DocumentIntakePort } from "../document-intake/ports/document-intake-port";
 import type { CreateIntakeResult } from "../document-intake/ports/types";
 import type { StartExecutionResult } from "../canonical-execution-orchestrator/ports/types";
@@ -74,6 +80,9 @@ export type EnterpriseRuntimeHealth = {
   ocrProviderOk?: boolean;
   documentClassificationRuntimeOk?: boolean;
   documentClassificationProviderOk?: boolean;
+  documentExtractionRuntimeOk?: boolean;
+  validationRuntimeOk?: boolean;
+  aiOrchestrationRuntimeOk?: boolean;
   storageManagerRuntimeOk?: boolean;
   storageProviderOk?: boolean;
   searchProviderOk?: boolean;
@@ -155,6 +164,9 @@ export type EnterpriseRuntimeOptions = {
   ocrProviderPort?: OCRProviderPort;
   documentClassificationProviderPort?: DocumentClassificationProviderPort;
   documentClassificationRuntimePort?: DocumentClassificationRuntimePort;
+  documentExtractionRuntimePort?: DocumentExtractionRuntimePort;
+  validationRuntimePort?: ValidationRuntimePort;
+  aiOrchestrationRuntimePort?: AIOrchestrationRuntimePort;
   storageProviderPort?: StorageProviderPort;
   storageManagerRuntimePort?: StorageManagerRuntimePort;
   searchProviderPort?: SearchProviderPort;
@@ -232,6 +244,15 @@ export interface EnterpriseRuntime {
 
   /** Resolve DocumentClassificationProviderPort (CLASS-01) — Adapter oficial. */
   getDocumentClassificationProviderPort(): DocumentClassificationProviderPort;
+
+  /** Resolve DocumentExtractionRuntimePort (F3-CAP-07). */
+  getDocumentExtractionRuntimePort(): DocumentExtractionRuntimePort;
+
+  /** Resolve ValidationRuntimePort (F3-CAP-08). */
+  getValidationRuntimePort(): ValidationRuntimePort;
+
+  /** Resolve AIOrchestrationRuntimePort (F3-CAP-09). */
+  getAIOrchestrationRuntimePort(): AIOrchestrationRuntimePort;
 
   /** Resolve StorageManagerRuntimePort (DIP-05 / STORAGE-01). */
   getStorageManagerRuntimePort(): StorageManagerRuntimePort;
