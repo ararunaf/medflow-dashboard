@@ -7,7 +7,9 @@
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_04.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_05.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_05.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_06.md)  
-**Documento de arquitetura:** [`C04_OPERATOR_RUNTIME_ARCHITECTURE.md`](./C04_OPERATOR_RUNTIME_ARCHITECTURE.md)
+**Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_08.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_08.md)  
+**Documento de arquitetura:** [`C04_OPERATOR_RUNTIME_ARCHITECTURE.md`](./C04_OPERATOR_RUNTIME_ARCHITECTURE.md)  
+**Certificação final:** [`C04_OPERATOR_RUNTIME_FINAL_CERTIFICATION.md`](./C04_OPERATOR_RUNTIME_FINAL_CERTIFICATION.md)
 
 ---
 
@@ -72,4 +74,6 @@ Implementação funcional de operadora **não** faz parte desta Sprint e **não*
 
 ## Vigência
 
-Esta regra é **permanente** para todo o BLOCO C. Sprints futuras (C-04A em diante) devem respeitá-la sem exceção silenciosa.
+Esta regra é **permanente** para todo o BLOCO C. Sprints futuras (C-04A / C-05 em diante) devem respeitá-la sem exceção silenciosa.
+
+Complemento oficial (C-04A): **RULE_08 — Capability Negotiation** — toda decisão operacional consulta o Capability Profile.

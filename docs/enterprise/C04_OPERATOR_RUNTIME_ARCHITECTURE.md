@@ -86,3 +86,15 @@ Documento oficial:
 - nenhuma operadora possui tratamento especial;
 - nenhuma lógica condicional existe;
 - toda futura especialização ocorrerá exclusivamente por **Adapters** e **Capability Profiles**.
+
+## Regra Permanente nº 8 — Capability Negotiation
+
+Documento oficial:
+[`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_08.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_08.md).
+
+- toda decisão operacional depende exclusivamente do `OperatorCapabilityProfile`;
+- nenhuma decisão utiliza regras fixas baseadas em operadoras;
+- nenhuma operadora recebe tratamento especial;
+- toda integração futura inicia consultando o Capability Profile;
+- o pipeline adapta-se às capacidades declaradas — nunca o contrário;
+- toda evolução futura ocorre por contratos canônicos e Adapters.
