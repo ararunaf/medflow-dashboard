@@ -207,7 +207,7 @@ certifica o encerramento oficial da C-07.
 |------|------|
 | Commit de entrega C-07 | `470542d1a4dea80344e77cec70117be4f834cb82` |
 | Mensagem (entrega) | `feat(protocol-runtime): add C-07 Enterprise Protocol Runtime Foundation` |
-| Commit de certificação C-07A | _(preenchido no commit de governança)_ |
+| Commit de certificação C-07A | `67c400934b25c1320c18675fdab349a288dd294d` |
 | Mensagem (certificação) | `docs(enterprise): certify C-07A Enterprise Protocol Runtime Gate` |
 
 ---
@@ -221,8 +221,8 @@ certifica o encerramento oficial da C-07.
 | Commit de entrega confirmado | `470542d1a4dea80344e77cec70117be4f834cb82` |
 | Hash curto (entrega) | `470542d` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | _(preenchido no commit de governança)_ |
-| Hash curto (certificação) | _(preenchido no commit de governança)_ |
+| Commit de certificação confirmado | `67c400934b25c1320c18675fdab349a288dd294d` |
+| Hash curto (certificação) | `67c4009` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
