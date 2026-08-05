@@ -20,8 +20,9 @@ export type CanonicalXMLGenerationStatus =
   | (string & {});
 
 /**
- * Metadata canônica de um pedido/resultado XML.
+ * Metadata canônica de um pedido/resultado/documento XML.
  * Estrutural — sem semântica de operadora/contrato/tenant.
+ * D-01: campos encoding/version/standalone preenchidos pelo XMLParser.
  */
 export type CanonicalXMLMetadata = {
   kind: "canonical-xml-metadata";
@@ -35,6 +36,12 @@ export type CanonicalXMLMetadata = {
   /** Códigos opacos de Rule Pack — resolvidos via RulePackEnginePort. */
   rulePackCodes?: readonly string[];
   customAttributes?: Readonly<Record<string, string | number | boolean | null>>;
+  /** D-01 — encoding declarado no XML (parser). */
+  encoding?: string | null;
+  /** D-01 — versão XML declarada (parser). */
+  version?: string | null;
+  /** D-01 — standalone declarado (parser). */
+  standalone?: boolean | null;
 };
 
 /**
@@ -147,10 +154,13 @@ export type CanonicalXMLProviderHealth = {
   tissCatalogOk?: boolean;
   rulePackEngineOk?: boolean;
   xmlGenerationRuntimeOk?: boolean;
+  /** D-01 — parser XML funcional disponível. */
+  xmlParserOk?: boolean;
 };
 
 /**
  * Capacidades canônicas declaradas do provedor XML Runtime.
+ * D-01: parserImplemented = true; demais capacidades funcionais = false.
  */
 export type CanonicalXMLProviderCapabilities = {
   kind: "canonical-xml-provider-capabilities";
@@ -159,9 +169,26 @@ export type CanonicalXMLProviderCapabilities = {
   supportsCancel: boolean;
   supportsHealth: boolean;
   supportsCanonicalResult: boolean;
+  supportsParse: boolean;
   consumesTISSCatalogPort: boolean;
   consumesRulePackEnginePort: boolean;
   consumesXMLGenerationRuntimePort: boolean;
+  /** D-01 — única capacidade funcional habilitada. */
+  parserImplemented: true;
+  xsdImplemented: false;
+  xmlValidationImplemented: false;
+  schemaImplemented: false;
+  xpathImplemented: false;
+  soapImplemented: false;
+  tissKnowledgeImplemented: false;
+  operatorKnowledgeImplemented: false;
+  httpImplemented: false;
+  batchImplemented: false;
+  workflowImplemented: false;
+  returnImplemented: false;
+  reconciliationImplemented: false;
+  authorizationImplemented: false;
+  persistenceImplemented: false;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
   implementsAnsValidation: false;

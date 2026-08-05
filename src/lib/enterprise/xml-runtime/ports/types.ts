@@ -14,8 +14,10 @@
 import type { RulePackEnginePort } from "../../rule-pack-engine/ports/rule-pack-engine-port";
 import type { TISSCatalogPort } from "../../tiss-catalog/ports/tiss-catalog-port";
 import type { XMLGenerationRuntimePort } from "../../xml-generation-runtime/ports/xml-generation-runtime-port";
+import type { CanonicalXMLParsingResult, XMLRuntimeContext } from "../parser/canonical";
 import type {
   CanonicalXMLGeneration,
+  CanonicalXMLMetadata,
   CanonicalXMLProviderCapabilities,
   CanonicalXMLProviderHealth,
   CanonicalXMLRequest,
@@ -37,6 +39,16 @@ export type {
   CanonicalXMLStatistics,
 } from "./canonical";
 export type { XMLRuntimeCapabilities };
+export type {
+  CanonicalXMLAttribute,
+  CanonicalXMLDocument,
+  CanonicalXMLHeader,
+  CanonicalXMLNode,
+  CanonicalXMLParserStatistics,
+  CanonicalXMLParsingError,
+  CanonicalXMLParsingResult,
+  XMLRuntimeContext,
+} from "../parser/canonical";
 
 /** Provedores / mecanismos do XML Runtime. */
 export type XMLRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
@@ -76,6 +88,7 @@ export type XMLRuntimePortCapabilities = {
   engine: XMLRuntimeCapabilities;
   canonical: CanonicalXMLProviderCapabilities;
   supportsCanonicalResult: boolean;
+  supportsParse: boolean;
   supportsTimeout: boolean;
   supportsRetry: boolean;
   supportsCancellation: boolean;
@@ -83,6 +96,21 @@ export type XMLRuntimePortCapabilities = {
   consumesTISSCatalogPort: boolean;
   consumesRulePackEnginePort: boolean;
   consumesXMLGenerationRuntimePort: boolean;
+  parserImplemented: true;
+  xsdImplemented: false;
+  xmlValidationImplemented: false;
+  schemaImplemented: false;
+  xpathImplemented: false;
+  soapImplemented: false;
+  tissKnowledgeImplemented: false;
+  operatorKnowledgeImplemented: false;
+  httpImplemented: false;
+  batchImplemented: false;
+  workflowImplemented: false;
+  returnImplemented: false;
+  reconciliationImplemented: false;
+  authorizationImplemented: false;
+  persistenceImplemented: false;
   implementsRealXml: false;
   implementsOperatorDispatch: false;
   implementsAnsValidation: false;
@@ -177,6 +205,20 @@ export type ListXMLGenerationsInput = XMLRuntimeOperationalControls & {
 export type ListXMLGenerationsResult = XMLRuntimeOperationEnvelope & {
   generations: readonly CanonicalXMLGeneration[];
   statistics?: CanonicalXMLStatistics;
+};
+
+/** D-01 — entrada do parser XML funcional. */
+export type ParseXMLInput = XMLRuntimeOperationalControls & {
+  /** XML em string. */
+  xml: string;
+  metadata?: CanonicalXMLMetadata;
+};
+
+/** D-01 — resultado do parser XML funcional. */
+export type ParseXMLResult = XMLRuntimeOperationEnvelope & {
+  parsing?: CanonicalXMLParsingResult;
+  context?: XMLRuntimeContext | null;
+  document?: CanonicalXMLParsingResult["document"];
 };
 
 /** Dependências Enterprise injetadas no adapter. */

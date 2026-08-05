@@ -21,6 +21,8 @@ import type {
   GetXMLGenerationResult,
   ListXMLGenerationsInput,
   ListXMLGenerationsResult,
+  ParseXMLInput,
+  ParseXMLResult,
   ValidateXMLInput,
   ValidateXMLResult,
   XMLRuntimeEnterpriseDeps,
@@ -107,6 +109,7 @@ export class MockXMLRuntimeAdapter implements XMLRuntimePort {
       engine: { ...DEFAULT_MOCK_XML_RUNTIME_CAPABILITIES },
       canonical: toCanonicalXMLProviderCapabilities(DEFAULT_MOCK_XML_RUNTIME_CAPABILITIES),
       supportsCanonicalResult: true,
+      supportsParse: true,
       supportsTimeout: true,
       supportsRetry: true,
       supportsCancellation: true,
@@ -114,6 +117,21 @@ export class MockXMLRuntimeAdapter implements XMLRuntimePort {
       consumesTISSCatalogPort: true,
       consumesRulePackEnginePort: true,
       consumesXMLGenerationRuntimePort: true,
+      parserImplemented: true,
+      xsdImplemented: false,
+      xmlValidationImplemented: false,
+      schemaImplemented: false,
+      xpathImplemented: false,
+      soapImplemented: false,
+      tissKnowledgeImplemented: false,
+      operatorKnowledgeImplemented: false,
+      httpImplemented: false,
+      batchImplemented: false,
+      workflowImplemented: false,
+      returnImplemented: false,
+      reconciliationImplemented: false,
+      authorizationImplemented: false,
+      persistenceImplemented: false,
       implementsRealXml: false,
       implementsOperatorDispatch: false,
       implementsAnsValidation: false,
@@ -139,8 +157,14 @@ export class MockXMLRuntimeAdapter implements XMLRuntimePort {
     return {
       ...health,
       provider: this.providerId,
+      xmlParserOk: this.healthy === true && health.xmlParserOk !== false,
       message: this.message,
     };
+  }
+
+  async parse(input: ParseXMLInput): Promise<ParseXMLResult> {
+    const result = await this.delegate.parse(input);
+    return { ...result, provider: this.providerId, simulated: true };
   }
 
   async generate(input: GenerateXMLInput): Promise<GenerateXMLResult> {

@@ -87,6 +87,7 @@
     "enterprise:tiss-catalog:test": "npx tsx --test scripts/enterprise/tests/tiss-catalog-engine.test.ts",
     "enterprise:rule-pack-engine:test": "npx tsx --test scripts/enterprise/tests/rule-pack-engine-engine.test.ts",
     "enterprise:xml-runtime:test": "npx tsx --test scripts/enterprise/tests/xml-runtime-engine.test.ts",
+    "enterprise:xml-parser:test": "npx tsx --test scripts/enterprise/tests/xml-parser-engine.test.ts",
     "enterprise:xml-generation-runtime:test": "npx tsx --test scripts/enterprise/tests/xml-generation-runtime-engine.test.ts",
     "enterprise:xml-serializer-runtime:test": "npx tsx --test scripts/enterprise/tests/xml-serializer-runtime-engine.test.ts",
     "enterprise:xml-schema-runtime:test": "npx tsx --test scripts/enterprise/tests/xml-schema-runtime-engine.test.ts",

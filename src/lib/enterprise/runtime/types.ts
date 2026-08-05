@@ -114,6 +114,8 @@ export type EnterpriseRuntimeHealth = {
   tissCatalogOk?: boolean;
   rulePackEngineOk?: boolean;
   xmlRuntimeOk?: boolean;
+  /** D-01 — parser XML funcional do XML Runtime. */
+  xmlParserOk?: boolean;
   xmlGenerationRuntimeOk?: boolean;
   xmlSerializerRuntimeOk?: boolean;
   xmlSchemaRuntimeOk?: boolean;

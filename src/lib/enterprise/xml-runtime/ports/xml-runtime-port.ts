@@ -1,5 +1,5 @@
 /**
- * XMLRuntimePort — contrato único do Enterprise XML Runtime (TISS-04).
+ * XMLRuntimePort — contrato único do Enterprise XML Runtime (TISS-04 + D-01).
  *
  * Application / TISS Runtime dependem exclusivamente desta interface.
  * Nenhum acesso direto ao XML Store é permitido.
@@ -10,6 +10,7 @@
  *     → XMLRuntimePort → XMLGenerationRuntimePort
  *     → Adapter → XML Generation Store → Canonical XML Result
  *
+ * D-01: parse(xml) — parser XML genérico funcional (sem TISS / sem Operadoras).
  * TISS-04/TISS-05: fundação estrutural + geração canônica — sem XML TISS/ANS real.
  */
 import type {
@@ -21,6 +22,8 @@ import type {
   GetXMLGenerationResult,
   ListXMLGenerationsInput,
   ListXMLGenerationsResult,
+  ParseXMLInput,
+  ParseXMLResult,
   ValidateXMLInput,
   ValidateXMLResult,
   XMLRuntimeHealth,
@@ -51,6 +54,13 @@ export interface XMLRuntimePort {
 
   getGeneration(input: GetXMLGenerationInput): Promise<GetXMLGenerationResult>;
   listGenerations(input?: ListXMLGenerationsInput): Promise<ListXMLGenerationsResult>;
+
+  /**
+   * D-01 — Parser XML funcional genérico.
+   * Recebe XML em string, valida sintaxe, constrói DOM canônico.
+   * Sem TISS. Sem Operadoras. Sem XSD. Sem SOAP. Sem XPath.
+   */
+  parse(input: ParseXMLInput): Promise<ParseXMLResult>;
 
   health(): Promise<XMLRuntimeHealth>;
   capabilities(): XMLRuntimePortCapabilities;

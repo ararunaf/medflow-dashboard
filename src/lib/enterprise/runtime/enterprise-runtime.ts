@@ -1343,6 +1343,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       rulePackEngineOk: rulePackEngineHealth.ok,
       xmlGenerationRuntimeOk: xmlGenerationRuntimeHealth.ok,
       xmlRuntimeOk: xmlRuntimeHealth.ok,
+      xmlParserOk: xmlRuntimeHealth.xmlParserOk === true,
       xmlSerializerRuntimeOk: xmlSerializerRuntimeHealth.ok,
       xmlSchemaRuntimeOk: xmlSchemaRuntimeHealth.ok,
       xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,

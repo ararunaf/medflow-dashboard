@@ -6,6 +6,7 @@
  *
  * Consome exclusivamente TISSCatalogPort + RulePackEnginePort + XMLGenerationRuntimePort.
  */
+import { XMLParser } from "../parser/xml-parser";
 import {
   DEFAULT_XML_RUNTIME_CAPABILITIES,
   toCanonicalXMLProviderCapabilities,
@@ -27,6 +28,8 @@ import type {
   GetXMLGenerationResult,
   ListXMLGenerationsInput,
   ListXMLGenerationsResult,
+  ParseXMLInput,
+  ParseXMLResult,
   ValidateXMLInput,
   ValidateXMLResult,
   XMLRuntimeEnterpriseDeps,
@@ -53,7 +56,7 @@ const FOUNDATION_CONFIGURATION: CanonicalXMLRuntimeConfiguration = {
   mode: "foundation",
   priority: "NORMAL",
   notes:
-    "TISS-04/TISS-05 Enterprise XML Runtime — structural + canonical generation via XMLGenerationRuntimePort; no real XML.",
+    "TISS-04/TISS-05/D-01 Enterprise XML Runtime — structural + canonical generation + functional XML parser; no TISS/operator knowledge in parser.",
 };
 
 export type DefaultXMLRuntimeAdapterOptions = {
@@ -130,6 +133,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
   private readonly now: () => string;
   private readonly sleep: (ms: number) => Promise<void>;
   private failAttemptsRemaining: number;
+  private readonly xmlParser: XMLParser;
 
   constructor(options: DefaultXMLRuntimeAdapterOptions) {
     if (!options.enterpriseDeps?.getTISSCatalogPort) {
@@ -154,13 +158,13 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
     this.healthy = options.healthy ?? true;
     this.message =
       options.message ??
-      `${this.providerId} XML Runtime ready (structural + canonical generation — no real XML).`;
+      `${this.providerId} XML Runtime ready (structural + canonical generation + D-01 XML parser).`;
     this.metadata = {
       name: this.providerId === "default" ? "Default XML Runtime" : "Enterprise XML Runtime",
       version: DEFAULT_XML_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official TISS-04/TISS-05 Enterprise XML Runtime — Catalog + RulePackEngine + XMLGenerationRuntimePort.",
+        "Official TISS-04/TISS-05/D-01 Enterprise XML Runtime — Catalog + RulePackEngine + XMLGenerationRuntimePort + generic XMLParser.",
     };
     this.store = options.store ?? new InMemoryXMLRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
@@ -170,6 +174,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
     this.now = options.now ?? (() => new Date().toISOString());
     this.sleep = options.sleep ?? defaultSleep;
     this.failAttemptsRemaining = options.failAttempts ?? 0;
+    this.xmlParser = new XMLParser();
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -184,6 +189,7 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
       engine: { ...DEFAULT_XML_RUNTIME_CAPABILITIES },
       canonical: toCanonicalXMLProviderCapabilities(DEFAULT_XML_RUNTIME_CAPABILITIES),
       supportsCanonicalResult: true,
+      supportsParse: true,
       supportsTimeout: true,
       supportsRetry: true,
       supportsCancellation: true,
@@ -191,6 +197,21 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
       consumesTISSCatalogPort: true,
       consumesRulePackEnginePort: true,
       consumesXMLGenerationRuntimePort: true,
+      parserImplemented: true,
+      xsdImplemented: false,
+      xmlValidationImplemented: false,
+      schemaImplemented: false,
+      xpathImplemented: false,
+      soapImplemented: false,
+      tissKnowledgeImplemented: false,
+      operatorKnowledgeImplemented: false,
+      httpImplemented: false,
+      batchImplemented: false,
+      workflowImplemented: false,
+      returnImplemented: false,
+      reconciliationImplemented: false,
+      authorizationImplemented: false,
+      persistenceImplemented: false,
       implementsRealXml: false,
       implementsOperatorDispatch: false,
       implementsAnsValidation: false,
@@ -247,8 +268,23 @@ export class DefaultXMLRuntimeAdapter implements XMLRuntimePort {
       tissCatalogOk,
       rulePackEngineOk,
       xmlGenerationRuntimeOk,
+      xmlParserOk: this.healthy === true,
       message: this.healthy ? (storeHealth.message ?? this.message) : "XML Runtime unhealthy.",
     };
+  }
+
+  async parse(input: ParseXMLInput): Promise<ParseXMLResult> {
+    return this.runOperation("parse", input, async () => {
+      const parsing = this.xmlParser.parse(input.xml, { metadata: input.metadata });
+      return {
+        ok: parsing.ok,
+        parsing,
+        context: parsing.context ?? null,
+        document: parsing.document ?? null,
+        code: parsing.code ?? (parsing.ok ? "XML_PARSER_OK" : "XML_PARSER_FAILED"),
+        message: parsing.message,
+      };
+    });
   }
 
   async generate(input: GenerateXMLInput): Promise<GenerateXMLResult> {

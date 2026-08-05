@@ -526,19 +526,28 @@ describe("TISS-04 auditoria — sem bypass / sem lógica de operadora/contrato/t
       /XMLSerializer/,
       /XMLWriter/,
       /createElementNS/,
-      /<\?xml/,
       /ansTISS/i,
       /xml-export-service/,
     ];
+    /** D-01: apenas o parser funcional pode reconhecer prolog `<?xml`. */
+    const xmlPrologPattern = /<\?xml/;
 
     for (const file of files) {
       const source = readFileSync(file, "utf8");
       const codeWithoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      const isParserModule = file.replace(/\\/g, "/").includes("/xml-runtime/parser/");
       for (const pattern of forbidden) {
         assert.equal(
           pattern.test(codeWithoutComments),
           false,
           `Padrão proibido ${pattern} em ${file}`,
+        );
+      }
+      if (!isParserModule) {
+        assert.equal(
+          xmlPrologPattern.test(codeWithoutComments),
+          false,
+          `Padrão proibido ${xmlPrologPattern} fora do parser D-01 em ${file}`,
         );
       }
     }

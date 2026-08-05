@@ -1,7 +1,9 @@
 /**
- * XMLRuntimeCapabilities — capacidades declarativas (TISS-04).
+ * XMLRuntimeCapabilities — capacidades declarativas (TISS-04 + D-01).
  *
- * Apenas declaração estrutural. Sem XML real. Sem operadoras. Sem regras ANS.
+ * D-01: parserImplemented = true (única capacidade funcional).
+ * Demais capacidades funcionais: false.
+ * Sem XSD / SOAP / TISS / Operadoras / XPath / Schema Validation.
  */
 
 import type { CanonicalXMLProviderCapabilities } from "./canonical";
@@ -12,6 +14,7 @@ export type XMLRuntimeCapabilities = {
   supportsCancel?: boolean;
   supportsHealth?: boolean;
   supportsCanonicalResult?: boolean;
+  supportsParse?: boolean;
   supportsTimeout?: boolean;
   supportsRetry?: boolean;
   supportsCancellation?: boolean;
@@ -19,6 +22,22 @@ export type XMLRuntimeCapabilities = {
   consumesTISSCatalogPort?: boolean;
   consumesRulePackEnginePort?: boolean;
   consumesXMLGenerationRuntimePort?: boolean;
+  /** D-01 — parser XML funcional. */
+  parserImplemented?: true;
+  xsdImplemented?: false;
+  xmlValidationImplemented?: false;
+  schemaImplemented?: false;
+  xpathImplemented?: false;
+  soapImplemented?: false;
+  tissKnowledgeImplemented?: false;
+  operatorKnowledgeImplemented?: false;
+  httpImplemented?: false;
+  batchImplemented?: false;
+  workflowImplemented?: false;
+  returnImplemented?: false;
+  reconciliationImplemented?: false;
+  authorizationImplemented?: false;
+  persistenceImplemented?: false;
   implementsRealXml?: false;
   implementsOperatorDispatch?: false;
   implementsAnsValidation?: false;
@@ -44,6 +63,7 @@ export const DEFAULT_XML_RUNTIME_CAPABILITIES: XMLRuntimeCapabilities = {
   supportsCancel: true,
   supportsHealth: true,
   supportsCanonicalResult: true,
+  supportsParse: true,
   supportsTimeout: true,
   supportsRetry: true,
   supportsCancellation: true,
@@ -51,6 +71,21 @@ export const DEFAULT_XML_RUNTIME_CAPABILITIES: XMLRuntimeCapabilities = {
   consumesTISSCatalogPort: true,
   consumesRulePackEnginePort: true,
   consumesXMLGenerationRuntimePort: true,
+  parserImplemented: true,
+  xsdImplemented: false,
+  xmlValidationImplemented: false,
+  schemaImplemented: false,
+  xpathImplemented: false,
+  soapImplemented: false,
+  tissKnowledgeImplemented: false,
+  operatorKnowledgeImplemented: false,
+  httpImplemented: false,
+  batchImplemented: false,
+  workflowImplemented: false,
+  returnImplemented: false,
+  reconciliationImplemented: false,
+  authorizationImplemented: false,
+  persistenceImplemented: false,
   implementsRealXml: false,
   implementsOperatorDispatch: false,
   implementsAnsValidation: false,
@@ -75,9 +110,25 @@ export function toCanonicalXMLProviderCapabilities(
     supportsCancel: capabilities.supportsCancel === true,
     supportsHealth: capabilities.supportsHealth === true,
     supportsCanonicalResult: capabilities.supportsCanonicalResult === true,
+    supportsParse: capabilities.supportsParse === true,
     consumesTISSCatalogPort: capabilities.consumesTISSCatalogPort === true,
     consumesRulePackEnginePort: capabilities.consumesRulePackEnginePort === true,
     consumesXMLGenerationRuntimePort: capabilities.consumesXMLGenerationRuntimePort === true,
+    parserImplemented: true,
+    xsdImplemented: false,
+    xmlValidationImplemented: false,
+    schemaImplemented: false,
+    xpathImplemented: false,
+    soapImplemented: false,
+    tissKnowledgeImplemented: false,
+    operatorKnowledgeImplemented: false,
+    httpImplemented: false,
+    batchImplemented: false,
+    workflowImplemented: false,
+    returnImplemented: false,
+    reconciliationImplemented: false,
+    authorizationImplemented: false,
+    persistenceImplemented: false,
     implementsRealXml: false,
     implementsOperatorDispatch: false,
     implementsAnsValidation: false,

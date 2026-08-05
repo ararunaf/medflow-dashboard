@@ -1,5 +1,5 @@
 /**
- * Enterprise XML Runtime — Ports & Adapters (TISS-04).
+ * Enterprise XML Runtime — Ports & Adapters (TISS-04 + D-01).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → TISS Runtime
@@ -8,6 +8,7 @@
  *     → DefaultXMLGenerationAdapter → InMemoryXMLGenerationRuntimeStore
  *     → Canonical XML Result
  *
+ * D-01: XMLParser funcional genérico (parse) — sem TISS / sem Operadoras.
  * TISS-04/TISS-05: fundação estrutural + geração canônica do Enterprise XML Runtime.
  * Sem geração XML real. Sem envio a operadoras. Sem validações clínicas/ANS.
  * Sem regras de negócio específicas. Sem acesso direto ao XML Store.
@@ -27,15 +28,25 @@ export type {
   CanonicalXMLResult,
   CanonicalXMLRuntimeConfiguration,
   CanonicalXMLStatistics,
+  CanonicalXMLAttribute,
+  CanonicalXMLDocument,
+  CanonicalXMLHeader,
+  CanonicalXMLNode,
+  CanonicalXMLParserStatistics,
+  CanonicalXMLParsingError,
+  CanonicalXMLParsingResult,
   GenerateXMLInput,
   GenerateXMLResult,
   GetXMLGenerationInput,
   GetXMLGenerationResult,
   ListXMLGenerationsInput,
   ListXMLGenerationsResult,
+  ParseXMLInput,
+  ParseXMLResult,
   ValidateXMLInput,
   ValidateXMLResult,
   XMLRuntimeCapabilities,
+  XMLRuntimeContext,
   XMLRuntimeEnterpriseDeps,
   XMLRuntimeHealth,
   XMLRuntimeInfo,
@@ -99,3 +110,11 @@ export {
 export { XMLRuntimeProvider, createXMLRuntimePort, getXMLRuntimeFactory } from "./providers";
 
 export { getXMLRuntimeHealthSummary, type XMLRuntimeHealthSummary } from "./demo";
+
+export {
+  XMLParser,
+  defaultXMLParser,
+  parseXML,
+  createEmptyXMLRuntimeContext,
+  type XMLParserOptions,
+} from "./parser";
