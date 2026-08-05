@@ -67,6 +67,7 @@ import type { BatchRuntimePort } from "../batch-runtime/ports/batch-runtime-port
 import type { ProtocolRuntimePort } from "../protocol-runtime/ports/protocol-runtime-port";
 import type { ReturnRuntimePort } from "../return-runtime/ports/return-runtime-port";
 import type { ReconciliationRuntimePort } from "../reconciliation-runtime/ports/reconciliation-runtime-port";
+import type { WorkflowRuntimePort } from "../workflow-runtime/ports/workflow-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
@@ -124,6 +125,7 @@ export type EnterpriseRuntimeHealth = {
   protocolRuntimeOk?: boolean;
   returnRuntimeOk?: boolean;
   reconciliationRuntimeOk?: boolean;
+  workflowRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
@@ -220,6 +222,7 @@ export type EnterpriseRuntimeOptions = {
   protocolRuntimePort?: ProtocolRuntimePort;
   returnRuntimePort?: ReturnRuntimePort;
   reconciliationRuntimePort?: ReconciliationRuntimePort;
+  workflowRuntimePort?: WorkflowRuntimePort;
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
@@ -366,6 +369,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve ReconciliationRuntimePort (C-09) — Enterprise Reconciliation Runtime Foundation. */
   getReconciliationRuntimePort(): ReconciliationRuntimePort;
+
+  /** Resolve WorkflowRuntimePort (C-10) — Enterprise Corporate Workflow Runtime Foundation. */
+  getWorkflowRuntimePort(): WorkflowRuntimePort;
 
   /** Resolve XSDRuntimePort (TISS-09) — Enterprise XSD Runtime. */
   getXSDRuntimePort(): XSDRuntimePort;
