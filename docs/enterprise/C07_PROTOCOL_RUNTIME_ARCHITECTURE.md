@@ -91,6 +91,19 @@ Flags literais `false`:
 - Mensageria será apenas um Adapter
 - A seleção de protocolo ocorrerá futuramente pelo `ProtocolResolver`
 
+## ASYNCHRONOUS BY DESIGN (RULE_13)
+
+Registrada oficialmente na Sprint C-07A:
+
+- retornos poderão ocorrer de forma **assíncrona**;
+- o núcleo **nunca** dependerá de resposta imediata da operadora;
+- o Workflow permanece **soberano** (RULE_10);
+- a arquitetura deve suportar ACK, timeout, reprocessamento e retomada;
+- **nenhuma** dessas funcionalidades foi implementada nesta Sprint — apenas a regra permanente.
+
+Documento oficial:
+[`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_13.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_13.md)
+
 ## Integrações estruturais
 
 Peers via `enterpriseDeps` (shape-check em `health()` apenas):
@@ -104,6 +117,6 @@ getEnterpriseRuntime().getProtocolRuntimePort()
 health.protocolRuntimeOk
 ```
 
-## Não-objetivos (C-07)
+## Não-objetivos (C-07 / C-07A)
 
-SOAP · REST · gRPC · Mensageria · HTTP · TLS · Autenticação · Banco · APIs · Operadoras · Resolução funcional de protocolos
+SOAP · REST · gRPC · Mensageria · HTTP · TLS · Autenticação · Banco · APIs · Operadoras · Resolução funcional de protocolos · ACK / timeout / reprocessamento / retomada funcional

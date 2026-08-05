@@ -12,6 +12,7 @@
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_09.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_09.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_10.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_10.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_11.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_11.md)  
+**Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_13.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_13.md)  
 **Documento de arquitetura:** [`C07_PROTOCOL_RUNTIME_ARCHITECTURE.md`](./C07_PROTOCOL_RUNTIME_ARCHITECTURE.md)  
 **Certificação:** [`C07_PROTOCOL_RUNTIME_CERTIFICATION.md`](./C07_PROTOCOL_RUNTIME_CERTIFICATION.md)
 
@@ -123,6 +124,7 @@ protocolResolutionImplemented = false
 - **RULE_07** — Operator Capability Model: resolução futura usa `OperatorCapabilityProfile`
 - **RULE_08** — Capability Negotiation: `ProtocolCapabilities` declara capacidades
 - **RULE_11** — State Machine First: estados canônicos de protocolo declarados antes de fluxos
+- **RULE_13** — Asynchronous By Design: retornos de integração podem ser assíncronos; o núcleo não presume resposta imediata
 
 ---
 
