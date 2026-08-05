@@ -209,7 +209,7 @@ e certifica o encerramento oficial da C-08.
 |------|------|
 | Commit de entrega C-08 | `790c1d4fe0cf751b041821ccabd023c4b6d6a7fe` |
 | Mensagem (entrega) | `feat(return-runtime): add C-08 Enterprise Return Runtime Foundation` |
-| Commit de certificação C-08A | _(preenchido após commit desta certificação)_ |
+| Commit de certificação C-08A | `3a66aa575ea794c0445089386a67a6d9a65d437b` |
 | Mensagem (certificação) | `docs(enterprise): certify C-08A Enterprise Return Runtime Gate` |
 
 ---
@@ -223,8 +223,8 @@ e certifica o encerramento oficial da C-08.
 | Commit de entrega confirmado | `790c1d4fe0cf751b041821ccabd023c4b6d6a7fe` |
 | Hash curto (entrega) | `790c1d4` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | _(preenchido após commit desta certificação)_ |
-| Hash curto (certificação) | _(preenchido após commit desta certificação)_ |
+| Commit de certificação confirmado | `3a66aa575ea794c0445089386a67a6d9a65d437b` |
+| Hash curto (certificação) | `3a66aa5` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
