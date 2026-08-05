@@ -213,7 +213,7 @@ e certifica o encerramento oficial da C-09.
 |------|------|
 | Commit de entrega C-09 | `8be077ed0190a3441b84c2ed099821549bf7884c` |
 | Mensagem (entrega) | `feat(reconciliation-runtime): add C-09 Enterprise Reconciliation Runtime Foundation` |
-| Commit de certificação C-09A | `PENDING_CERT_HASH` |
+| Commit de certificação C-09A | `c3426891fa6713fa2938d1c3e81967c8c5718d7b` |
 | Mensagem (certificação) | `docs(enterprise): certify C-09A Enterprise Reconciliation Runtime Gate` |
 
 ---
@@ -227,8 +227,8 @@ e certifica o encerramento oficial da C-09.
 | Commit de entrega confirmado | `8be077ed0190a3441b84c2ed099821549bf7884c` |
 | Hash curto (entrega) | `8be077e` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | `PENDING_CERT_HASH` |
-| Hash curto (certificação) | `PENDING` |
+| Commit de certificação confirmado | `c3426891fa6713fa2938d1c3e81967c8c5718d7b` |
+| Hash curto (certificação) | `c342689` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
