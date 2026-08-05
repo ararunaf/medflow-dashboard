@@ -1,9 +1,10 @@
 # C-10 — Workflow Runtime Architecture
 
 **Sprint:** C-10 — Enterprise Corporate Workflow Runtime Foundation
-**Gate:** C-10A — Enterprise Corporate Workflow Runtime Gate (futuro)
+**Gate:** C-10A — Enterprise Corporate Workflow Runtime Gate (certificado)
 **Padrão:** ECS-01
 **Regra permanente:** nº 18 — WORKFLOW IS PURE ORCHESTRATION
+**Regra permanente:** nº 19 — WORKFLOW EXECUTION IS STATELESS
 
 ---
 
@@ -106,6 +107,20 @@ Registrada oficialmente na Sprint C-10:
 - nenhuma implementação funcional foi realizada nesta Sprint.
 
 Ver [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_18.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_18.md).
+
+## Regra Permanente nº 19 — WORKFLOW EXECUTION IS STATELESS
+
+Registrada oficialmente na Sprint C-10A:
+
+- cada execução do Workflow é **independente**;
+- `workflowExecutionId` identifica **uma única** execução;
+- `transactionId` identifica a **transação corporativa**;
+- o Workflow reconstrói seu contexto a partir dos contratos canônicos e dos
+  resultados dos demais Runtimes;
+- nenhuma dependência de memória interna persistente entre execuções;
+- nenhuma implementação funcional foi realizada nesta Sprint.
+
+Ver [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_19.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_19.md).
 
 ## Integrações estruturais
 

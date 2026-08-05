@@ -1,8 +1,8 @@
 # C-10 — Workflow Runtime Certification
 
 **Sprint:** C-10 — Enterprise Corporate Workflow Runtime Foundation
-**Gate:** C-10A — Enterprise Corporate Workflow Runtime Gate (não iniciado nesta Sprint)
-**Status:** Foundation estrutural entregue — checklist de certificação da Sprint C-10
+**Gate:** C-10A — Enterprise Corporate Workflow Runtime Gate (certificado)
+**Status:** Foundation estrutural entregue — Gate C-10A encerrado; BLOCO C encerrado
 **Padrão:** ECS-01
 **Data:** 2026-08-05
 
@@ -32,6 +32,7 @@
 | `workflowExecutionId` gerado e único a cada execução | ✓ |
 | `workflowExecutionId` independente de `transactionId` | ✓ |
 | Regra Permanente nº 18 documentada | ✓ |
+| Regra Permanente nº 19 documentada (C-10A) | ✓ |
 | `workflowImplemented = false` | ✓ |
 | `workflowExecutionImplemented = false` | ✓ |
 | `automaticDecisionImplemented = false` | ✓ |
@@ -74,12 +75,15 @@ npm run enterprise:workflow-runtime:test
 
 - [`C10_ENTERPRISE_WORKFLOW_RUNTIME.md`](./C10_ENTERPRISE_WORKFLOW_RUNTIME.md)
 - [`C10_WORKFLOW_RUNTIME_ARCHITECTURE.md`](./C10_WORKFLOW_RUNTIME_ARCHITECTURE.md)
+- [`C10_WORKFLOW_RUNTIME_FINAL_CERTIFICATION.md`](./C10_WORKFLOW_RUNTIME_FINAL_CERTIFICATION.md)
 - [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_18.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_18.md)
+- [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_19.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_19.md)
 
 ## Encerramento
 
 Este documento certifica a entrega **estrutural** da Sprint C-10, incluindo o
 wiring do composition root (`getWorkflowRuntimePort()` + `workflowRuntimeOk`).
-O Gate C-10A (GO/NO-GO) é emitido no relatório obrigatório da Sprint após a
-execução dos gates (build / tsc / lint / smoke / Enterprise / Workflow Runtime).
+O Gate C-10A foi executado e certificado em
+[`C10_WORKFLOW_RUNTIME_FINAL_CERTIFICATION.md`](./C10_WORKFLOW_RUNTIME_FINAL_CERTIFICATION.md),
+com a Regra Permanente nº 19 e o encerramento oficial do BLOCO C.
 C-10A **não** inicia implementação funcional — permanece foundation-only.
