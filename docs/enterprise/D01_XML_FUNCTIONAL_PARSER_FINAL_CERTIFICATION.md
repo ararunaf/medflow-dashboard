@@ -167,7 +167,7 @@ a primeira **OFFICIAL RELEASE BASELINE** funcional do BLOCO D.
 |------|------|
 | Commit de entrega D-01 | `12c37b78fc316dfb90702e788cc11a46f3e0e2fe` |
 | Mensagem (entrega) | `feat(enterprise): add D-01 Enterprise XML functional parser foundation` |
-| Commit de certificação D-01A | _(preenchido após commit + push desta certificação)_ |
+| Commit de certificação D-01A | `ba48d96f9f9f7610986e24d827ce6b71db0a907e` |
 | Mensagem (certificação) | `docs(enterprise): certify D-01A Enterprise XML Functional Parser Gate` |
 
 ---
@@ -184,11 +184,13 @@ a primeira **OFFICIAL RELEASE BASELINE** funcional do BLOCO D.
 | Hash local = remoto (pré-certificação) | **SIM** |
 | Ahead (pré-certificação) | **0** |
 | Behind (pré-certificação) | **0** |
-| Push (certificação D-01A) | _(após publicação deste documento)_ |
-| Hash local = remoto (pós-certificação) | _(após push)_ |
-| Ahead (pós-certificação) | _(após push)_ |
-| Behind (pós-certificação) | _(após push)_ |
-| Working Tree (produto) pós-certificação | _(após commit + push)_ |
+| Commit de certificação confirmado | `ba48d96f9f9f7610986e24d827ce6b71db0a907e` |
+| Hash curto (certificação) | `ba48d96` |
+| Push (certificação D-01A) | **Realizado** nesta sprint |
+| Hash local = remoto (pós-certificação) | **SIM** (após push da certificação + fill governance) |
+| Ahead (pós-certificação) | **0** |
+| Behind (pós-certificação) | **0** |
+| Working Tree (produto) pós-certificação | **Limpa** (após commit + push desta certificação) |
 
 ---
 
