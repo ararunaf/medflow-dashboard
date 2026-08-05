@@ -212,7 +212,7 @@ e certifica o encerramento oficial da C-10 e do **BLOCO C — Integração Corpo
 |------|------|
 | Commit de entrega C-10 | `284167f2cee2bce2a8b19cc17bab4c8a6c17075a` |
 | Mensagem (entrega) | `feat(workflow-runtime): add C-10 Enterprise Corporate Workflow Runtime Foundation` |
-| Commit de certificação C-10A | *(preenchido após commit desta certificação)* |
+| Commit de certificação C-10A | `7087295692495d33996382d3e7290f4decb2c3b9` |
 | Mensagem (certificação) | `docs(enterprise): certify C-10A Enterprise Corporate Workflow Runtime Gate` |
 
 ---
@@ -226,8 +226,8 @@ e certifica o encerramento oficial da C-10 e do **BLOCO C — Integração Corpo
 | Commit de entrega confirmado | `284167f2cee2bce2a8b19cc17bab4c8a6c17075a` |
 | Hash curto (entrega) | `284167f` |
 | Hash correto (Etapa 3)? | **SIM** |
-| Commit de certificação confirmado | *(após commit + push)* |
-| Hash curto (certificação) | *(após commit + push)* |
+| Commit de certificação confirmado | `7087295692495d33996382d3e7290f4decb2c3b9` |
+| Hash curto (certificação) | `7087295` |
 | Push | **Realizado** (entrega já publicada; certificação publicada nesta sprint) |
 | Hash local = remoto | **SIM** (após push da certificação) |
 | Ahead | **0** (após push da certificação) |
