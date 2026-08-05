@@ -14,8 +14,10 @@
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_11.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_11.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_12.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_12.md)  
 **Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_13.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_13.md)  
+**Documento irmão:** [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_15.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_15.md)  
 **Documento de arquitetura:** [`C08_RETURN_RUNTIME_ARCHITECTURE.md`](./C08_RETURN_RUNTIME_ARCHITECTURE.md)  
-**Certificação:** [`C08_RETURN_RUNTIME_CERTIFICATION.md`](./C08_RETURN_RUNTIME_CERTIFICATION.md)
+**Certificação:** [`C08_RETURN_RUNTIME_CERTIFICATION.md`](./C08_RETURN_RUNTIME_CERTIFICATION.md)  
+**Certificação final:** [`C08_RETURN_RUNTIME_FINAL_CERTIFICATION.md`](./C08_RETURN_RUNTIME_FINAL_CERTIFICATION.md)
 
 ---
 
@@ -102,6 +104,7 @@ workflowIntegrationImplemented = false
 | RULE_10 Workflow Before Integration | Workflow ocorre após correlação/validação/estado |
 | RULE_11 State Machine First | `ReturnStateMachine` declara estados sem transições |
 | RULE_13 Asynchronous By Design | Retornos podem chegar de forma assíncrona |
+| RULE_15 Immutable Transaction History | Correlação e estados posteriores são novos eventos (append-only) |
 
 ---
 

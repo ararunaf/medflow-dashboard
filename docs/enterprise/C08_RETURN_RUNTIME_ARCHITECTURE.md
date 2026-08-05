@@ -63,6 +63,18 @@ Nenhum retorno poderá ser processado antes de ser correlacionado com sua transa
 
 Ver [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_14.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_14.md).
 
+## IMMUTABLE TRANSACTION HISTORY (RULE_15)
+
+Registrada oficialmente na Sprint C-08A:
+
+- histórico da transação será **append-only**;
+- nenhuma informação histórica poderá ser sobrescrita;
+- toda alteração será registrada como **novo evento**;
+- auditoria reconstruirá o histórico a partir dos eventos;
+- nenhuma implementação funcional foi realizada nesta Sprint.
+
+Ver [`BLOCO_C_PERMANENT_ARCHITECTURE_RULE_15.md`](./BLOCO_C_PERMANENT_ARCHITECTURE_RULE_15.md).
+
 ## Integrações estruturais
 
 Peers preparados via `enterpriseDeps` (shape-check em `health()` apenas):
