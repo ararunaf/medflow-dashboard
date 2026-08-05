@@ -22,6 +22,7 @@
  *   → AuthorizationRuntimePort (C-05) — structural AuthorizationStrategy / AuthorizationPolicy foundation only
  *   → BatchRuntimePort (C-06) — structural BatchManifest / BatchStateMachine foundation only
  *   → ProtocolRuntimePort (C-07) — structural ProtocolProfile / ProtocolResolver foundation only
+ *   → ReturnRuntimePort (C-08) — structural ReturnManifest / ReturnCorrelation / ReturnStateMachine foundation only
  *   → StorageManagerRuntimePort → Orchestrator
  *   → StorageProviderPort → DefaultStorageProviderAdapter (STORAGE-01)
  *   → DocumentSearchRuntimePort → Orchestrator
@@ -110,6 +111,8 @@ import { createBatchRuntimePort } from "../batch-runtime/providers/create-batch-
 import type { BatchRuntimePort } from "../batch-runtime/ports/batch-runtime-port";
 import { createProtocolRuntimePort } from "../protocol-runtime/providers/create-protocol-runtime-port";
 import type { ProtocolRuntimePort } from "../protocol-runtime/ports/protocol-runtime-port";
+import { createReturnRuntimePort } from "../return-runtime/providers/create-return-runtime-port";
+import type { ReturnRuntimePort } from "../return-runtime/ports/return-runtime-port";
 import { createXSDRuntimePort } from "../xsd-runtime/providers/create-xsd-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../namespace-runtime/providers/create-namespace-runtime-port";
@@ -180,6 +183,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly authorizationRuntimePort: AuthorizationRuntimePort;
   private readonly batchRuntimePort: BatchRuntimePort;
   private readonly protocolRuntimePort: ProtocolRuntimePort;
+  private readonly returnRuntimePort: ReturnRuntimePort;
   private readonly xsdRuntimePort: XSDRuntimePort;
   private readonly namespaceRuntimePort: NamespaceRuntimePort;
   private readonly queueRuntimePort: QueueRuntimePort;
@@ -689,6 +693,27 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
         },
       });
+    // C-08: Enterprise Return Runtime Foundation — ReturnManifest / ReturnCorrelation /
+    // ReturnStateMachine. Sem processamento de retorno / sem correlação automática /
+    // sem reconciliação / sem parser XML / sem SOAP / sem operadoras / sem banco /
+    // sem workflow. Peers estruturais (Protocol/Batch/Authorization/Operator/SOAP/
+    // XML/XMLValidation/Audit) via lazy getters — shape-check apenas em health().
+    // CORRELATION BEFORE PROCESSING (Regra Permanente nº 14).
+    this.returnRuntimePort =
+      options.returnRuntimePort ??
+      createReturnRuntimePort({
+        provider: "enterprise",
+        enterpriseDeps: {
+          getProtocolRuntimePort: () => this.protocolRuntimePort,
+          getBatchRuntimePort: () => this.batchRuntimePort,
+          getAuthorizationRuntimePort: () => this.authorizationRuntimePort,
+          getOperatorRuntimePort: () => this.operatorRuntimePort,
+          getSOAPRuntimePort: () => this.soapRuntimePort,
+          getXMLRuntimePort: () => this.xmlRuntimePort,
+          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
+          getAuditRuntimePort: () => this.auditRuntimePort,
+        },
+      });
     this.xsdRuntimePort =
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =
@@ -1001,6 +1026,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.protocolRuntimePort;
   }
 
+  getReturnRuntimePort(): ReturnRuntimePort {
+    return this.returnRuntimePort;
+  }
+
   getXSDRuntimePort(): XSDRuntimePort {
     return this.xsdRuntimePort;
   }
@@ -1097,6 +1126,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       authorizationRuntimeHealth,
       batchRuntimeHealth,
       protocolRuntimeHealth,
+      returnRuntimeHealth,
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
       queueRuntimeHealth,
@@ -1146,6 +1176,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.authorizationRuntimePort.health(),
       this.batchRuntimePort.health(),
       this.protocolRuntimePort.health(),
+      this.returnRuntimePort.health(),
       this.xsdRuntimePort.health(),
       this.namespaceRuntimePort.health(),
       this.queueRuntimePort.health(),
@@ -1197,6 +1228,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       authorizationRuntimeHealth.ok &&
       batchRuntimeHealth.ok &&
       protocolRuntimeHealth.ok &&
+      returnRuntimeHealth.ok &&
       xsdRuntimeHealth.ok &&
       namespaceRuntimeHealth.ok &&
       queueRuntimeHealth.ok &&
@@ -1249,6 +1281,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       authorizationRuntimeOk: authorizationRuntimeHealth.ok,
       batchRuntimeOk: batchRuntimeHealth.ok,
       protocolRuntimeOk: protocolRuntimeHealth.ok,
+      returnRuntimeOk: returnRuntimeHealth.ok,
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
       queueRuntimeOk: queueRuntimeHealth.ok,

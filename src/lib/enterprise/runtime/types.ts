@@ -65,6 +65,7 @@ import type { OperatorRuntimePort } from "../operator-runtime/ports/operator-run
 import type { AuthorizationRuntimePort } from "../authorization-runtime/ports/authorization-runtime-port";
 import type { BatchRuntimePort } from "../batch-runtime/ports/batch-runtime-port";
 import type { ProtocolRuntimePort } from "../protocol-runtime/ports/protocol-runtime-port";
+import type { ReturnRuntimePort } from "../return-runtime/ports/return-runtime-port";
 import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
@@ -120,6 +121,7 @@ export type EnterpriseRuntimeHealth = {
   authorizationRuntimeOk?: boolean;
   batchRuntimeOk?: boolean;
   protocolRuntimeOk?: boolean;
+  returnRuntimeOk?: boolean;
   xsdRuntimeOk?: boolean;
   namespaceRuntimeOk?: boolean;
   queueRuntimeOk?: boolean;
@@ -214,6 +216,7 @@ export type EnterpriseRuntimeOptions = {
   authorizationRuntimePort?: AuthorizationRuntimePort;
   batchRuntimePort?: BatchRuntimePort;
   protocolRuntimePort?: ProtocolRuntimePort;
+  returnRuntimePort?: ReturnRuntimePort;
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
@@ -354,6 +357,9 @@ export interface EnterpriseRuntime {
 
   /** Resolve ProtocolRuntimePort (C-07) — Enterprise Protocol Runtime Foundation. */
   getProtocolRuntimePort(): ProtocolRuntimePort;
+
+  /** Resolve ReturnRuntimePort (C-08) — Enterprise Return Runtime Foundation. */
+  getReturnRuntimePort(): ReturnRuntimePort;
 
   /** Resolve XSDRuntimePort (TISS-09) — Enterprise XSD Runtime. */
   getXSDRuntimePort(): XSDRuntimePort;
