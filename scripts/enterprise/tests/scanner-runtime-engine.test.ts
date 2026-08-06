@@ -366,10 +366,7 @@ describe("F3-CAP-01 ausência de Scanner real / drivers / OCR / bypass", () => {
       }
     }
 
-    const capabilitiesSrc = readFileSync(
-      join(root, "ports/capabilities.ts"),
-      "utf8",
-    );
+    const capabilitiesSrc = readFileSync(join(root, "ports/capabilities.ts"), "utf8");
     assert.match(capabilitiesSrc, /scannerImplemented:\s*false/);
     assert.match(capabilitiesSrc, /twainImplemented:\s*false/);
     assert.match(capabilitiesSrc, /wiaImplemented:\s*false/);
@@ -402,10 +399,7 @@ describe("F3-CAP-01 ausência de Scanner real / drivers / OCR / bypass", () => {
     assert.match(adapter, /getQueueRuntimePort/);
     assert.match(adapter, /getWorkerRuntimePort/);
     assert.match(adapter, /getTISSRuntimePort/);
-    assert.equal(
-      /getCaptureEngineRuntimePort\(\)\.\w+\s*\(/.test(adapter),
-      false,
-    );
+    assert.equal(/getCaptureEngineRuntimePort\(\)\.\w+\s*\(/.test(adapter), false);
     assert.equal(/getOCRRuntimePort\(\)\.\w+\s*\(/.test(adapter), false);
     assert.equal(
       /getQueueRuntimePort\(\)\.(enqueue|dequeue|peek|ack|nack|purge)\s*\(/.test(adapter),
@@ -427,9 +421,6 @@ describe("F3-CAP-01 ausência de Scanner real / drivers / OCR / bypass", () => {
     assert.ok(files.some((f) => f.endsWith("/registry/scanner-runtime-registry.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
-    assert.equal(
-      files.filter((f) => /adapters\/.*scanner-runtime-adapter\.ts$/.test(f)).length,
-      2,
-    );
+    assert.equal(files.filter((f) => /adapters\/.*scanner-runtime-adapter\.ts$/.test(f)).length, 2);
   });
 });

@@ -400,10 +400,7 @@ describe("C-03 SOAPRuntimePort contract", () => {
     assert.equal(DEFAULT_SOAP_RUNTIME_ENGINE_CAPABILITIES.mtomImplemented, false);
     assert.equal(DEFAULT_SOAP_RUNTIME_ENGINE_CAPABILITIES.compressionImplemented, false);
     assert.equal(DEFAULT_SOAP_RUNTIME_ENGINE_CAPABILITIES.retryImplemented, false);
-    assert.equal(
-      DEFAULT_SOAP_RUNTIME_ENGINE_CAPABILITIES.operatorCommunicationImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_SOAP_RUNTIME_ENGINE_CAPABILITIES.operatorCommunicationImplemented, false);
   });
 
   it("contratos estruturais (envelope/fault) sem implementação", () => {

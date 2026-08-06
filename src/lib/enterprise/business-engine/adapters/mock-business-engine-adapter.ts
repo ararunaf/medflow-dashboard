@@ -1,9 +1,9 @@
 /**
- * MockBusinessEngineAdapter — E-02.
+ * MockBusinessEngineAdapter — E-03.
  *
  * Adapter mock para testes.
  */
-import { E02_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E03_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -11,6 +11,8 @@ import type {
   BusinessEngineInfo,
   ExecuteBusinessRuleInput,
   ExecuteBusinessRuleResult,
+  ExecuteBusinessTransactionInput,
+  ExecuteBusinessTransactionResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -46,7 +48,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E02_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E03_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -56,6 +58,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessEngineOk: ok,
       businessRuleCatalogOk: ok,
       businessRuleExecutionOk: ok,
+      businessTransactionOk: ok,
     };
   }
 
@@ -110,6 +113,21 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       message: "rule executed (mock)",
       actions: [],
       facts: input.facts,
+    };
+  }
+
+  async executeTransaction(
+    _input: ExecuteBusinessTransactionInput,
+  ): Promise<ExecuteBusinessTransactionResult> {
+    return {
+      kind: "canonical-business-transaction-result",
+      ok: true,
+      transactionId: _input.transactionId,
+      code: "BUSINESS_TRANSACTION_MOCK_EXECUTED",
+      message: "transaction executed (mock)",
+      stepResults: [],
+      committed: true,
+      output: {},
     };
   }
 }

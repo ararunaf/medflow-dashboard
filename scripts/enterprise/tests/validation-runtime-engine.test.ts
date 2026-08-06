@@ -135,9 +135,7 @@ function sampleExtractionResult(
   };
 }
 
-function sampleValidationContext(
-  overrides: Partial<ValidationContext> = {},
-): ValidationContext {
+function sampleValidationContext(overrides: Partial<ValidationContext> = {}): ValidationContext {
   return {
     kind: "canonical-validation-context",
     classificationContext: sampleClassificationContext(),

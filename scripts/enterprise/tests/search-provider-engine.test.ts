@@ -354,10 +354,7 @@ describe("SEARCH-01 cadeia Enterprise / Capture / Search / Storage / Orchestrato
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.getSearchProviderPort().providerId, "storage-backed");
     assert.equal(runtime.getDocumentSearchRuntimePort().providerId, "default");
-    assert.equal(
-      runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch,
-      true,
-    );
+    assert.equal(runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch, true);
 
     const health = await runtime.health();
     assert.equal(health.ok, true);
@@ -491,9 +488,9 @@ describe("SEARCH-01 cadeia Enterprise / Capture / Search / Storage / Orchestrato
       runtimeId: "test",
       ocrProviderPort: createOCRProviderPort({ provider: "mock" }),
     });
-    await runtime.getSearchProviderPort().indexDocument(
-      sampleDoc({ documentId: "doc-orch", storageKey: undefined }),
-    );
+    await runtime
+      .getSearchProviderPort()
+      .indexDocument(sampleDoc({ documentId: "doc-orch", storageKey: undefined }));
     const result = await runtime.getDocumentSearchRuntimePort().search({
       kind: "canonical-search-request",
       mode: "by-id",
@@ -532,9 +529,7 @@ describe("SEARCH-01 auditoria — sem bypass / sem backend direto", () => {
     for (const file of files) {
       const source = readFileSync(file, "utf8");
       // Allow comments mentioning forbidden engines as "not implemented"
-      const codeWithoutComments = source
-        .replace(/\/\*[\s\S]*?\*\//g, "")
-        .replace(/\/\/.*$/gm, "");
+      const codeWithoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       for (const pattern of forbidden) {
         assert.equal(
           pattern.test(codeWithoutComments),

@@ -426,10 +426,7 @@ describe("INF-03 Scheduler Foundation — integração estrutural com Worker Fou
     assert.equal(typeof workerPort.getWorker, "function");
     assert.equal(typeof workerPort.registerWorker, "function");
     assert.equal(schedulerPort.capabilities().usesExecutionWorkerPortOnly, true);
-    assert.equal(
-      (schedulerPort as { workerStore?: unknown }).workerStore,
-      undefined,
-    );
+    assert.equal((schedulerPort as { workerStore?: unknown }).workerStore, undefined);
   });
 });
 
@@ -546,10 +543,7 @@ describe("INF-03 Scheduler Foundation — integração estrutural com Orchestrat
     assert.equal(context.context?.capability.structuralTransportOnly, true);
     assert.equal(context.context?.state.processingPerformed, false);
 
-    assert.equal(
-      (context.context as { scheduler?: unknown } | undefined)?.scheduler,
-      undefined,
-    );
+    assert.equal((context.context as { scheduler?: unknown } | undefined)?.scheduler, undefined);
 
     const schedulerCaps = orchestrator.getExecutionSchedulerPort().capabilities();
     assert.equal(schedulerCaps.structuralSchedulerOnly, true);

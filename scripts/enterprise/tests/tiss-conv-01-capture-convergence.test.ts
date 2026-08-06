@@ -20,7 +20,10 @@ import {
   toCatalogGuideTypeCode,
   tussRequiresAuthorizationFromEnterprise,
 } from "../../../src/lib/capture/enterprise/tiss-knowledge-gateway.ts";
-import { isTussInCatalog, tussRequiresAuthorization } from "../../../src/lib/capture/audit/data/tuss-catalog.ts";
+import {
+  isTussInCatalog,
+  tussRequiresAuthorization,
+} from "../../../src/lib/capture/audit/data/tuss-catalog.ts";
 import { ALL_TEMPLATES } from "../../../src/lib/capture/parser/templates/index.ts";
 import {
   resetEnterpriseRuntimeForTests,

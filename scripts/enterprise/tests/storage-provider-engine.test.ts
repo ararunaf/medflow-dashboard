@@ -252,10 +252,7 @@ describe("STORAGE-01 cadeia Enterprise / Capture / OCR / Classification / Storag
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.getStorageProviderPort().providerId, "supabase");
     assert.equal(runtime.getStorageManagerRuntimePort().providerId, "default");
-    assert.equal(
-      runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage,
-      true,
-    );
+    assert.equal(runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage, true);
     assert.equal(
       runtime.getStorageManagerRuntimePort().capabilities().usesStorageProviderPort,
       true,
@@ -436,16 +433,8 @@ describe("STORAGE-01 auditoria — sem bypass / sem acesso direto no produto", (
       for (const file of collectTsFiles(dir)) {
         if (file.includes("enterprise-storage-bridge")) continue;
         const source = readFileSync(file, "utf8");
-        assert.equal(
-          /storage\.from\s*\(/.test(source),
-          false,
-          `Bypass storage.from em ${file}`,
-        );
-        assert.equal(
-          /client\.storage/.test(source),
-          false,
-          `Bypass client.storage em ${file}`,
-        );
+        assert.equal(/storage\.from\s*\(/.test(source), false, `Bypass storage.from em ${file}`);
+        assert.equal(/client\.storage/.test(source), false, `Bypass client.storage em ${file}`);
       }
     }
   });

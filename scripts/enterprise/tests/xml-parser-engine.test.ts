@@ -92,9 +92,7 @@ describe("D-01 XMLParser — functional foundation", () => {
   });
 
   it("identifica Encoding e Version no Header", () => {
-    const result = parseXML(
-      `<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?><doc/>`,
-    );
+    const result = parseXML(`<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?><doc/>`);
     assert.equal(result.ok, true);
     assert.equal(result.document?.header?.kind, "canonical-xml-header");
     assert.equal(result.document?.header?.version, "1.0");

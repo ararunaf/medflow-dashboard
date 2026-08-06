@@ -109,7 +109,10 @@ describe("F3-CAP-04 IntelligentCaptureRuntimePort contract", () => {
   });
 
   it("identity declara Enterprise Intelligent Capture Runtime Foundation vendor-agnostic", () => {
-    assert.equal(INTELLIGENT_CAPTURE_RUNTIME_IDENTITY.name, "Enterprise Intelligent Capture Runtime");
+    assert.equal(
+      INTELLIGENT_CAPTURE_RUNTIME_IDENTITY.name,
+      "Enterprise Intelligent Capture Runtime",
+    );
     assert.equal(INTELLIGENT_CAPTURE_RUNTIME_IDENTITY.layer, "Foundation");
     assert.ok(INTELLIGENT_CAPTURE_RUNTIME_IDENTITY.version);
     assert.equal(INTELLIGENT_CAPTURE_RUNTIME_IDENTITY.vendorAgnostic, true);
@@ -219,19 +222,34 @@ describe("F3-CAP-04 IntelligentCaptureRuntimePort contract", () => {
     assert.equal(stats.watchFolderIntegrationImplementedCount, 0);
     assert.equal(stats.uploadIntegrationImplementedCount, 0);
     assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.runtimeReady, true);
-    assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.scannerIntegrationImplemented, false);
+    assert.equal(
+      DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.scannerIntegrationImplemented,
+      false,
+    );
     assert.equal(
       DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.watchFolderIntegrationImplemented,
       false,
     );
-    assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.uploadIntegrationImplemented, false);
-    assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.capturePipelineImplemented, false);
-    assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.documentRoutingImplemented, false);
+    assert.equal(
+      DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.uploadIntegrationImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.capturePipelineImplemented,
+      false,
+    );
+    assert.equal(
+      DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.documentRoutingImplemented,
+      false,
+    );
     assert.equal(
       DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.automaticSelectionImplemented,
       false,
     );
-    assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.automaticCaptureImplemented, false);
+    assert.equal(
+      DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.automaticCaptureImplemented,
+      false,
+    );
     assert.equal(DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.ocrPipelineImplemented, false);
     assert.equal(
       DEFAULT_INTELLIGENT_CAPTURE_RUNTIME_CAPABILITIES.classificationPipelineImplemented,

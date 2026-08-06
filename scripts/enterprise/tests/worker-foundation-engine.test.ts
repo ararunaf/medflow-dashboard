@@ -373,10 +373,7 @@ describe("INF-02 Worker Foundation — integração estrutural com Message Queue
       executionMessageQueueId: queue.queue!.executionMessageQueueId,
     });
     assert.equal(registered.ok, true);
-    assert.equal(
-      registered.worker?.executionMessageQueueId,
-      queue.queue!.executionMessageQueueId,
-    );
+    assert.equal(registered.worker?.executionMessageQueueId, queue.queue!.executionMessageQueueId);
     assert.equal(registered.messagesConsumed, false);
     assert.equal(registered.executionPerformed, false);
 
@@ -389,16 +386,15 @@ describe("INF-02 Worker Foundation — integração estrutural com Message Queue
   });
 
   it("Worker NÃO acessa adapters/stores da Message Queue diretamente", () => {
-    const workerPort = createExecutionWorkerPort({ provider: "mock" }) as MockExecutionWorkerAdapter;
+    const workerPort = createExecutionWorkerPort({
+      provider: "mock",
+    }) as MockExecutionWorkerAdapter;
     const queuePort = workerPort.getExecutionQueuePort();
     assert.ok(queuePort);
     assert.equal(typeof queuePort.getQueue, "function");
     assert.equal(typeof queuePort.enqueue, "function");
     assert.equal(workerPort.capabilities().usesExecutionQueuePortOnly, true);
-    assert.equal(
-      (workerPort as { messageQueueStore?: unknown }).messageQueueStore,
-      undefined,
-    );
+    assert.equal((workerPort as { messageQueueStore?: unknown }).messageQueueStore, undefined);
   });
 });
 
@@ -505,10 +501,7 @@ describe("INF-02 Worker Foundation — integração estrutural com Orchestrator"
     assert.equal(context.context?.capability.structuralTransportOnly, true);
     assert.equal(context.context?.state.processingPerformed, false);
 
-    assert.equal(
-      (context.context as { worker?: unknown } | undefined)?.worker,
-      undefined,
-    );
+    assert.equal((context.context as { worker?: unknown } | undefined)?.worker, undefined);
 
     const workerCaps = orchestrator.getExecutionWorkerPort().capabilities();
     assert.equal(workerCaps.structuralWorkerOnly, true);

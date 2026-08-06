@@ -320,10 +320,7 @@ describe("F3-CAP-12 AutoFillRuntimePort contract", () => {
     assert.equal(prepared.session?.status, "prepared");
     assert.equal(prepared.result?.runtimeReady, true);
     assert.equal(prepared.session?.autoFillContext?.kind, "canonical-auto-fill-context");
-    assert.equal(
-      prepared.session?.autoFillContext?.canonicalGuide?.kind,
-      "canonical-tiss-guide",
-    );
+    assert.equal(prepared.session?.autoFillContext?.canonicalGuide?.kind, "canonical-tiss-guide");
     assert.equal(
       prepared.session?.autoFillContext?.mappingResult?.kind,
       "canonical-tiss-mapping-result",
@@ -391,10 +388,7 @@ describe("F3-CAP-12 AutoFillRuntimePort contract", () => {
       DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES.validationIntegrationImplemented,
       false,
     );
-    assert.equal(
-      DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES.auditIntegrationImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES.auditIntegrationImplemented, false);
     assert.equal(
       DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES.qualityIntegrationImplemented,
       false,

@@ -203,7 +203,7 @@ describe("D-02 XSD Validator — functional cases", () => {
       </xs:schema>
     `;
     assertInvalid("<root></root>", xsd);
-    assertValid("<root id=\"123\"></root>", xsd);
+    assertValid('<root id="123"></root>', xsd);
   });
 
   it("atributos opcionais não são exigidos", () => {
@@ -233,10 +233,7 @@ describe("D-02 XSD Validator — functional cases", () => {
         </xs:element>
       </xs:schema>
     `;
-    assertValid(
-      "<root><flag>true</flag><amount>19.99</amount><when>2026-08-06</when></root>",
-      xsd,
-    );
+    assertValid("<root><flag>true</flag><amount>19.99</amount><when>2026-08-06</when></root>", xsd);
     assertInvalid(
       "<root><flag>nope</flag><amount>19.99</amount><when>2026-08-06</when></root>",
       xsd,
@@ -292,7 +289,7 @@ describe("D-02 XSD Validator — functional cases", () => {
         <xs:element name="root" type="xs:string"/>
       </xs:schema>
     `;
-    const document = parse("<?xml version=\"1.0\"?><emptyNotRoot></emptyNotRoot>");
+    const document = parse('<?xml version="1.0"?><emptyNotRoot></emptyNotRoot>');
     const result = validateXSD(document, xsd);
     assert.equal(result.ok, true);
     assert.equal(result.valid, false);

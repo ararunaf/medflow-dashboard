@@ -52,11 +52,30 @@ export interface CanonicalBusinessRuleExecutionResult {
   readonly output?: Record<string, unknown>;
 }
 
+export interface CanonicalBusinessTransactionStep {
+  readonly kind: "canonical-business-transaction-step";
+  readonly stepId: string;
+  readonly ruleId: string;
+  readonly facts: Record<string, unknown>;
+}
+
+export interface CanonicalBusinessTransactionResult {
+  readonly kind: "canonical-business-transaction-result";
+  readonly ok: boolean;
+  readonly transactionId: string;
+  readonly code: string;
+  readonly message: string;
+  readonly stepResults: readonly CanonicalBusinessRuleExecutionResult[];
+  readonly committed: boolean;
+  readonly output: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
   readonly businessRuleCatalogOk: boolean;
   readonly businessRuleExecutionOk: boolean;
+  readonly businessTransactionOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {

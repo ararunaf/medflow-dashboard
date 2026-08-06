@@ -354,10 +354,7 @@ describe("C-08 ReturnRuntimePort contract", () => {
     const registry = createDefaultReturnRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new ReturnRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe ReturnRuntimePort + health.returnRuntimeOk", async () => {
@@ -481,16 +478,10 @@ describe("C-08 ReturnRuntimePort contract", () => {
 
   it("capabilities engine declara todas as flags *Implemented = false", () => {
     assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.returnProcessingImplemented, false);
-    assert.equal(
-      DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.automaticCorrelationImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.automaticCorrelationImplemented, false);
     assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.statusUpdateImplemented, false);
     assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.reconciliationImplemented, false);
-    assert.equal(
-      DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.workflowIntegrationImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.workflowIntegrationImplemented, false);
     assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.xmlParserImplemented, false);
     assert.equal(DEFAULT_RETURN_RUNTIME_ENGINE_CAPABILITIES.soapImplemented, false);
     assert.equal(

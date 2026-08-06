@@ -378,10 +378,7 @@ describe("C-06 BatchRuntimePort contract", () => {
     const registry = createDefaultBatchRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new BatchRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe BatchRuntimePort + health.batchRuntimeOk", async () => {
@@ -510,10 +507,7 @@ describe("C-06 BatchRuntimePort contract", () => {
     assert.equal(DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES.queueImplemented, false);
     assert.equal(DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES.soapFunctionalImplemented, false);
     assert.equal(DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES.xmlFunctionalImplemented, false);
-    assert.equal(
-      DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES.operatorCommunicationImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES.operatorCommunicationImplemented, false);
     assert.equal(DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES.knowsOperatorOrCooperative, false);
   });
 });

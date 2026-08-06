@@ -176,10 +176,7 @@ describe("DIP-01 DocumentIntakeRuntimePort contract", () => {
     const testPort = createDocumentIntakeRuntimePort({ provider: "test", enterpriseDeps: deps });
     assert.equal(testPort.providerId, "test");
 
-    assert.throws(
-      () => createDocumentIntakeRuntimePort({ provider: "default" }),
-      /enterpriseDeps/,
-    );
+    assert.throws(() => createDocumentIntakeRuntimePort({ provider: "default" }), /enterpriseDeps/);
   });
 
   it("Provider desconhecido não existe — ids restritos a default|mock|test", () => {
@@ -300,4 +297,3 @@ describe("DIP-01 integração Enterprise Runtime", () => {
     assert.equal(typeof runtime.registerCaptureDocumentIntake, "function");
   });
 });
-

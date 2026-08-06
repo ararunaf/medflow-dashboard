@@ -332,10 +332,7 @@ describe("C-04 OperatorRuntimePort contract", () => {
     const registry = createDefaultOperatorRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new OperatorRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe OperatorRuntimePort + health.operatorRuntimeOk", async () => {

@@ -431,7 +431,10 @@ describe("EPC-24 Sprint 03 — integração estrutural Orchestrator + Execution 
     assert.equal(started.executionContext?.capability.implementsOcr, false);
     assert.equal(started.executionContext?.capability.implementsAi, false);
     assert.equal(started.executionContext?.capability.implementsTissRules, false);
-    assert.equal(started.executionContext?.stages.every((s) => s.portRef.length > 0), true);
+    assert.equal(
+      started.executionContext?.stages.every((s) => s.portRef.length > 0),
+      true,
+    );
     assert.equal(started.result?.enginesInvoked, false);
 
     const got = await port.getExecution({ executionId: started.context!.executionId });

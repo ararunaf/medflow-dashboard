@@ -42,9 +42,7 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../../..");
 
-function sampleRequest(
-  overrides: Partial<CanonicalStorageRequest> = {},
-): CanonicalStorageRequest {
+function sampleRequest(overrides: Partial<CanonicalStorageRequest> = {}): CanonicalStorageRequest {
   return {
     kind: "canonical-storage-request",
     identity: {
@@ -247,10 +245,7 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     });
     assert.equal(testPort.providerId, "test");
 
-    assert.throws(
-      () => createStorageManagerRuntimePort({ provider: "default" }),
-      /enterpriseDeps/,
-    );
+    assert.throws(() => createStorageManagerRuntimePort({ provider: "default" }), /enterpriseDeps/);
   });
 
   it("Provider desconhecido não existe — ids restritos a default|mock|test", () => {
@@ -332,7 +327,8 @@ describe("DIP-05 StorageManagerRuntimePort contract", () => {
     assert.equal(mock?.status, "ready");
     assert.equal(mock?.implementsRealStorage, true);
     const structural = refs.references.filter(
-      (r) => r.providerReferenceId !== "supabase-storage" && r.providerReferenceId !== "mock-storage",
+      (r) =>
+        r.providerReferenceId !== "supabase-storage" && r.providerReferenceId !== "mock-storage",
     );
     for (const ref of structural) {
       assert.equal(ref.connected, false);
@@ -422,15 +418,15 @@ describe("DIP-05 integração Enterprise / Capture / OCR / Classification / Orch
     });
     assert.equal(storageExec.ok, true);
 
-    assert.equal(
-      runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage,
-      true,
-    );
+    assert.equal(runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage, true);
     assert.equal(
       runtime.getStorageManagerRuntimePort().capabilities().usesStorageProviderPort,
       true,
     );
-    assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsStorageManager, false);
+    assert.equal(
+      runtime.getCaptureEngineRuntimePort().capabilities().implementsStorageManager,
+      false,
+    );
     assert.equal(
       runtime.getCaptureEngineRuntimePort().capabilities().usesStorageManagerRuntime,
       true,

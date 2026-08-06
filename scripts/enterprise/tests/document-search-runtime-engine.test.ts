@@ -44,9 +44,7 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../../..");
 
-function sampleRequest(
-  overrides: Partial<CanonicalSearchRequest> = {},
-): CanonicalSearchRequest {
+function sampleRequest(overrides: Partial<CanonicalSearchRequest> = {}): CanonicalSearchRequest {
   return {
     kind: "canonical-search-request",
     identity: {
@@ -277,10 +275,7 @@ describe("DIP-06 DocumentSearchRuntimePort contract", () => {
     });
     assert.equal(testPort.providerId, "test");
 
-    assert.throws(
-      () => createDocumentSearchRuntimePort({ provider: "default" }),
-      /enterpriseDeps/,
-    );
+    assert.throws(() => createDocumentSearchRuntimePort({ provider: "default" }), /enterpriseDeps/);
   });
 
   it("Provider desconhecido não existe — ids restritos a default|mock|test", () => {
@@ -453,10 +448,7 @@ describe("DIP-06 integração Enterprise / Capture / OCR / Classification / Stor
     });
     assert.equal(searchExec.ok, true);
 
-    assert.equal(
-      runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch,
-      true,
-    );
+    assert.equal(runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch, true);
     assert.equal(runtime.getCaptureEngineRuntimePort().capabilities().implementsSearch, false);
     assert.equal(
       runtime.getCaptureEngineRuntimePort().capabilities().usesDocumentSearchRuntime,
@@ -518,9 +510,7 @@ describe("DIP-06 / SEARCH-01 — sem motores externos; busca só via SearchProvi
 
     for (const rel of files) {
       const source = readFileSync(join(moduleDir, rel), "utf8");
-      const codeWithoutComments = source
-        .replace(/\/\*[\s\S]*?\*\//g, "")
-        .replace(/\/\/.*$/gm, "");
+      const codeWithoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       for (const pattern of forbidden) {
         assert.equal(
           pattern.test(codeWithoutComments),

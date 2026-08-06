@@ -381,7 +381,10 @@ describe("INF-07 ausência de Scheduler real / Cron / bypass", () => {
 
   it("Worker Runtime wiring inclui getSchedulerRuntimePort sem schedule/cancel", () => {
     const workerAdapter = readFileSync(
-      join(repoRoot, "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts"),
+      join(
+        repoRoot,
+        "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts",
+      ),
       "utf8",
     );
     assert.match(workerAdapter, /getSchedulerRuntimePort/);

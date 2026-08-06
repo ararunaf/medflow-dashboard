@@ -510,7 +510,8 @@ describe("EPC-24 Sprint 11 — Orchestrator integra Execution Constraint Registr
     assert.equal(started.result?.enginesInvoked, false);
 
     assert.equal(
-      (resolver as { getExecutionConstraintRegistryPort?: unknown }).getExecutionConstraintRegistryPort,
+      (resolver as { getExecutionConstraintRegistryPort?: unknown })
+        .getExecutionConstraintRegistryPort,
       undefined,
     );
     assert.equal(
@@ -519,15 +520,18 @@ describe("EPC-24 Sprint 11 — Orchestrator integra Execution Constraint Registr
       undefined,
     );
     assert.equal(
-      (eventBus as { getExecutionConstraintRegistryPort?: unknown }).getExecutionConstraintRegistryPort,
+      (eventBus as { getExecutionConstraintRegistryPort?: unknown })
+        .getExecutionConstraintRegistryPort,
       undefined,
     );
     assert.equal(
-      (registry as { getExecutionConstraintRegistryPort?: unknown }).getExecutionConstraintRegistryPort,
+      (registry as { getExecutionConstraintRegistryPort?: unknown })
+        .getExecutionConstraintRegistryPort,
       undefined,
     );
     assert.equal(
-      (trace as { getExecutionConstraintRegistryPort?: unknown }).getExecutionConstraintRegistryPort,
+      (trace as { getExecutionConstraintRegistryPort?: unknown })
+        .getExecutionConstraintRegistryPort,
       undefined,
     );
     assert.equal(

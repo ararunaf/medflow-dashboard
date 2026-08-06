@@ -425,14 +425,19 @@ describe("INF-09 ausência de backends de observabilidade / bypass", () => {
     assert.match(queueAdapter, /usesObservabilityRuntimePort/);
     assert.match(queueAdapter, /observabilityRuntimeOk/);
     assert.equal(
-      /observabilityRuntimePort\.(register|unregister|observe|release|list)\s*\(/.test(queueAdapter),
+      /observabilityRuntimePort\.(register|unregister|observe|release|list)\s*\(/.test(
+        queueAdapter,
+      ),
       false,
     );
   });
 
   it("Worker Runtime wiring inclui getObservabilityRuntimePort sem observe/release", () => {
     const workerAdapter = readFileSync(
-      join(repoRoot, "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts"),
+      join(
+        repoRoot,
+        "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts",
+      ),
       "utf8",
     );
     assert.match(workerAdapter, /getObservabilityRuntimePort/);
@@ -542,7 +547,10 @@ describe("INF-09 ausência de backends de observabilidade / bypass", () => {
       ),
       false,
     );
-    assert.equal(/getTISSRuntimePort\(\)\.(process|getSession|listSessions)\s*\(/.test(obsAdapter), false);
+    assert.equal(
+      /getTISSRuntimePort\(\)\.(process|getSession|listSessions)\s*\(/.test(obsAdapter),
+      false,
+    );
   });
 
   it("sem Provider/Adapter/Factory/Registry paralelo", () => {

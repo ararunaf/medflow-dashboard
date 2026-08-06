@@ -389,10 +389,7 @@ describe("C-09 ReconciliationRuntimePort contract", () => {
     const registry = createDefaultReconciliationRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new ReconciliationRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe ReconciliationRuntimePort + health.reconciliationRuntimeOk", async () => {

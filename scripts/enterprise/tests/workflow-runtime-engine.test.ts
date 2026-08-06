@@ -82,9 +82,7 @@ function assertStructuralFlagsFalse(obj: Record<string, unknown>) {
   }
 }
 
-function sampleStateMachine(
-  overrides: Partial<WorkflowStateMachine> = {},
-): WorkflowStateMachine {
+function sampleStateMachine(overrides: Partial<WorkflowStateMachine> = {}): WorkflowStateMachine {
   return createEmptyWorkflowStateMachine(overrides);
 }
 
@@ -108,9 +106,7 @@ function sampleExecution(overrides: Partial<WorkflowExecution> = {}): WorkflowEx
   });
 }
 
-function sampleResult(
-  overrides: Partial<WorkflowExecutionResult> = {},
-): WorkflowExecutionResult {
+function sampleResult(overrides: Partial<WorkflowExecutionResult> = {}): WorkflowExecutionResult {
   return createEmptyWorkflowExecutionResult({
     transactionId: "tx-structural",
     status: "CREATED",
@@ -365,10 +361,7 @@ describe("C-10 WorkflowRuntimePort contract", () => {
     const registry = createDefaultWorkflowRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new WorkflowRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe WorkflowRuntimePort + health.workflowRuntimeOk", async () => {
@@ -491,17 +484,8 @@ describe("C-10 WorkflowRuntimePort contract", () => {
 
   it("capabilities engine declara todas as flags *Implemented = false", () => {
     assert.equal(DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.workflowImplemented, false);
-    assert.equal(
-      DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.workflowExecutionImplemented,
-      false,
-    );
-    assert.equal(
-      DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.automaticDecisionImplemented,
-      false,
-    );
-    assert.equal(
-      DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.runtimeExecutionImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.workflowExecutionImplemented, false);
+    assert.equal(DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.automaticDecisionImplemented, false);
+    assert.equal(DEFAULT_WORKFLOW_RUNTIME_ENGINE_CAPABILITIES.runtimeExecutionImplemented, false);
   });
 });

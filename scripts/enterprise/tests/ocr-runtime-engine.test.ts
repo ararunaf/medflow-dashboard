@@ -615,8 +615,14 @@ describe("F3-CAP-05 ausência de OCR real / vendors no Runtime", () => {
     );
     assert.match(enterpriseRuntime, /createOCRRuntimePort/);
     assert.match(enterpriseRuntime, /provider:\s*"enterprise"/);
-    assert.match(enterpriseRuntime, /getIntelligentCaptureRuntimePort:\s*\(\)\s*=>\s*this\.intelligentCaptureRuntimePort/);
-    assert.match(enterpriseRuntime, /getScannerRuntimePort:\s*\(\)\s*=>\s*this\.scannerRuntimePort/);
+    assert.match(
+      enterpriseRuntime,
+      /getIntelligentCaptureRuntimePort:\s*\(\)\s*=>\s*this\.intelligentCaptureRuntimePort/,
+    );
+    assert.match(
+      enterpriseRuntime,
+      /getScannerRuntimePort:\s*\(\)\s*=>\s*this\.scannerRuntimePort/,
+    );
     assert.match(enterpriseRuntime, /F3-CAP-05/);
   });
 
@@ -628,10 +634,7 @@ describe("F3-CAP-05 ausência de OCR real / vendors no Runtime", () => {
     assert.ok(files.some((f) => f.endsWith("/registry/ocr-runtime-registry.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
-    assert.equal(
-      files.filter((f) => /adapters\/.*ocr-runtime-adapter\.ts$/.test(f)).length,
-      2,
-    );
+    assert.equal(files.filter((f) => /adapters\/.*ocr-runtime-adapter\.ts$/.test(f)).length, 2);
   });
 
   it("produto não instancia Adapter OCR diretamente via Enterprise Runtime", () => {

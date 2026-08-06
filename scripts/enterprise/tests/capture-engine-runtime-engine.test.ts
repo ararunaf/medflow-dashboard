@@ -38,9 +38,7 @@ import {
   resetEnterpriseRuntimeForTests,
 } from "../../../src/lib/enterprise/runtime/index.ts";
 
-function sampleRequest(
-  overrides: Partial<CanonicalCaptureRequest> = {},
-): CanonicalCaptureRequest {
+function sampleRequest(overrides: Partial<CanonicalCaptureRequest> = {}): CanonicalCaptureRequest {
   return {
     kind: "canonical-capture-request",
     identity: {
@@ -305,10 +303,7 @@ describe("DIP-02 CaptureEngineRuntimePort contract", () => {
     const testPort = createCaptureEngineRuntimePort({ provider: "test", enterpriseDeps: deps });
     assert.equal(testPort.providerId, "test");
 
-    assert.throws(
-      () => createCaptureEngineRuntimePort({ provider: "default" }),
-      /enterpriseDeps/,
-    );
+    assert.throws(() => createCaptureEngineRuntimePort({ provider: "default" }), /enterpriseDeps/);
   });
 
   it("Provider desconhecido não existe — ids restritos a default|mock|test", () => {

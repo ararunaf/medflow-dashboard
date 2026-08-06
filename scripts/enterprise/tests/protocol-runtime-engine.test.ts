@@ -305,16 +305,19 @@ describe("C-07 ProtocolRuntimePort contract", () => {
   });
 
   it("ProtocolState declara estados canônicos sem seleção de protocolo", () => {
-    assert.deepEqual([...PROTOCOL_CANONICAL_STATES], [
-      "DECLARED",
-      "PROFILED",
-      "CAPABLE",
-      "PENDING_RESOLUTION",
-      "RESOLVED",
-      "ACTIVE",
-      "FAILED",
-      "DISABLED",
-    ]);
+    assert.deepEqual(
+      [...PROTOCOL_CANONICAL_STATES],
+      [
+        "DECLARED",
+        "PROFILED",
+        "CAPABLE",
+        "PENDING_RESOLUTION",
+        "RESOLVED",
+        "ACTIVE",
+        "FAILED",
+        "DISABLED",
+      ],
+    );
   });
 
   it("ProtocolContext prevê observabilidade RULE_04 sem processar", () => {
@@ -349,10 +352,7 @@ describe("C-07 ProtocolRuntimePort contract", () => {
     const registry = createDefaultProtocolRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new ProtocolRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe ProtocolRuntimePort + health.protocolRuntimeOk", async () => {
@@ -484,10 +484,7 @@ describe("C-07 ProtocolRuntimePort contract", () => {
     assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.restImplemented, false);
     assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.grpcImplemented, false);
     assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.messagingImplemented, false);
-    assert.equal(
-      DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.protocolResolutionImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.protocolResolutionImplemented, false);
     assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.httpImplemented, false);
     assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.tlsImplemented, false);
     assert.equal(DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES.authenticationImplemented, false);

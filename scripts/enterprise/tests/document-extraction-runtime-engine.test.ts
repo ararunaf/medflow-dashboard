@@ -183,10 +183,7 @@ describe("F3-CAP-07 DocumentExtractionRuntimePort contract", () => {
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
     assert.equal(registry.snapshot().count, 4);
-    assert.equal(
-      registry.get("enterprise")?.capabilities.fieldExtractionImplemented,
-      false,
-    );
+    assert.equal(registry.get("enterprise")?.capabilities.fieldExtractionImplemented, false);
   });
 
   it("openJob → submitRequest → registerDocument → getResult → closeJob → stats (sem extração real)", async () => {
@@ -326,7 +323,10 @@ describe("F3-CAP-07 DocumentExtractionRuntimePort contract", () => {
   });
 
   it("capabilities engine declara todas as flags *Implemented = false", () => {
-    assert.equal(DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.fieldExtractionImplemented, false);
+    assert.equal(
+      DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.fieldExtractionImplemented,
+      false,
+    );
     assert.equal(
       DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.structuredExtractionImplemented,
       false,
@@ -335,7 +335,10 @@ describe("F3-CAP-07 DocumentExtractionRuntimePort contract", () => {
       DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.medicalGuideExtractionImplemented,
       false,
     );
-    assert.equal(DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.tableExtractionImplemented, false);
+    assert.equal(
+      DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.tableExtractionImplemented,
+      false,
+    );
     assert.equal(
       DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.templateExtractionImplemented,
       false,
@@ -352,7 +355,10 @@ describe("F3-CAP-07 DocumentExtractionRuntimePort contract", () => {
       DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.barcodeExtractionImplemented,
       false,
     );
-    assert.equal(DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.qrExtractionImplemented, false);
+    assert.equal(
+      DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.qrExtractionImplemented,
+      false,
+    );
     assert.equal(
       DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES.pipelineSelectionImplemented,
       false,

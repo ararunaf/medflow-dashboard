@@ -43,7 +43,7 @@ import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/
 import { createRulePackEnginePort } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
 import { createXMLRuntimePort } from "../../../src/lib/enterprise/xml-runtime/index.ts";
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
-import { createQueueRuntimePort } from '../../../src/lib/enterprise/queue-runtime/index.ts';
+import { createQueueRuntimePort } from "../../../src/lib/enterprise/queue-runtime/index.ts";
 import { createSchedulerRuntimePort } from "../../../src/lib/enterprise/scheduler-runtime/index.ts";
 import { createWorkerRuntimePort } from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import { createPersistentQueueRuntimePort } from "../../../src/lib/enterprise/persistent-queue-runtime/index.ts";
@@ -363,43 +363,41 @@ describe("TISS-10 cadeia Enterprise / TISS / XML / … / XSD / Namespace", () =>
                 ({
                   providerId: "mock",
                   health: async () => ({ ok: true, provider: "mock" }),
-                  capabilities: () =>
-                    ({
-                      provider: "mock",
-                      adapterId: "stub",
-                      supportsProcess: true,
-                      supportsGetSession: true,
-                      supportsListSessions: true,
-                      supportsHealth: true,
-                      supportsCapabilities: true,
-                      usesEnterpriseRuntimePorts: true,
-                      usesCanonicalExecutionOrchestrator: true,
-                      usesTISSProviderPort: true,
-                      usesTISSCatalogPort: true,
-                      usesRulePackEnginePort: true,
-                      usesXMLRuntimePort: true,
-                      usesXMLGenerationRuntimePort: true,
-                      usesXMLSerializerRuntimePort: true,
-                      usesXMLSchemaRuntimePort: true,
-                      usesXMLValidationRuntimePort: true,
-                      usesXSDRuntimePort: true,
-                      usesNamespaceRuntimePort: true,
-                      usesQueueRuntimePort: true,
-                      usesWorkerRuntimePort: true,
-                      usesSchedulerRuntimePort: true,
-                      usesPersistentQueueRuntimePort: true,
-                      usesObservabilityRuntimePort: true,
-                      implementsRealXml: false,
-                      implementsOperatorDispatch: false,
-                    }),
+                  capabilities: () => ({
+                    provider: "mock",
+                    adapterId: "stub",
+                    supportsProcess: true,
+                    supportsGetSession: true,
+                    supportsListSessions: true,
+                    supportsHealth: true,
+                    supportsCapabilities: true,
+                    usesEnterpriseRuntimePorts: true,
+                    usesCanonicalExecutionOrchestrator: true,
+                    usesTISSProviderPort: true,
+                    usesTISSCatalogPort: true,
+                    usesRulePackEnginePort: true,
+                    usesXMLRuntimePort: true,
+                    usesXMLGenerationRuntimePort: true,
+                    usesXMLSerializerRuntimePort: true,
+                    usesXMLSchemaRuntimePort: true,
+                    usesXMLValidationRuntimePort: true,
+                    usesXSDRuntimePort: true,
+                    usesNamespaceRuntimePort: true,
+                    usesQueueRuntimePort: true,
+                    usesWorkerRuntimePort: true,
+                    usesSchedulerRuntimePort: true,
+                    usesPersistentQueueRuntimePort: true,
+                    usesObservabilityRuntimePort: true,
+                    implementsRealXml: false,
+                    implementsOperatorDispatch: false,
+                  }),
                   process: async () => ({ ok: true }),
                   getSession: async () => ({ ok: false }),
                   listSessions: async () => ({ ok: true, sessions: [] }),
                 }) as TISSRuntimePort,
             },
           }),
-        getScalabilityRuntimePort: () =>
-          createScalabilityRuntimePort({ provider: "mock" }),
+        getScalabilityRuntimePort: () => createScalabilityRuntimePort({ provider: "mock" }),
       },
     });
 
@@ -451,10 +449,7 @@ describe("TISS-10 cadeia Enterprise / TISS / XML / … / XSD / Namespace", () =>
 
   it("TISS Runtime consome exclusivamente NamespaceRuntimePort (sem adapter paralelo)", async () => {
     const adapterSource = readFileSync(
-      join(
-        repoRoot,
-        "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts",
-      ),
+      join(repoRoot, "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts"),
       "utf8",
     );
     assert.match(adapterSource, /getNamespaceRuntimePort/);
@@ -509,11 +504,7 @@ describe("TISS-10 auditoria — sem bypass / sem namespace oficial / sem XML TIS
     for (const file of files) {
       const source = readFileSync(file, "utf8");
       for (const pattern of forbidden) {
-        assert.equal(
-          pattern.test(source),
-          false,
-          `Forbidden pattern ${pattern} in ${file}`,
-        );
+        assert.equal(pattern.test(source), false, `Forbidden pattern ${pattern} in ${file}`);
       }
     }
   });
@@ -530,10 +521,7 @@ describe("TISS-10 auditoria — sem bypass / sem namespace oficial / sem XML TIS
 
   it("TISS Runtime wiring inclui getNamespaceRuntimePort", () => {
     const tissAdapter = readFileSync(
-      join(
-        repoRoot,
-        "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts",
-      ),
+      join(repoRoot, "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts"),
       "utf8",
     );
     assert.match(tissAdapter, /getNamespaceRuntimePort/);

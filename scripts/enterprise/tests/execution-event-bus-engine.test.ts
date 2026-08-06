@@ -32,9 +32,7 @@ import {
   createExecutionContextPort,
   type ExecutionContextPort,
 } from "../../../src/lib/enterprise/execution-context/index.ts";
-import {
-  createExecutionStateMachinePort,
-} from "../../../src/lib/enterprise/execution-state-machine/index.ts";
+import { createExecutionStateMachinePort } from "../../../src/lib/enterprise/execution-state-machine/index.ts";
 import {
   createPipelineResolverPort,
   type PipelineResolverPort,
@@ -533,10 +531,7 @@ describe("EPC-24 Sprint 05 — Orchestrator integra Execution Event Bus", () => 
     assert.equal(context.context?.state.processingPerformed, false);
 
     // Context não embute Event Bus de negócio — apenas refs
-    assert.equal(
-      (context.context as { eventBus?: unknown } | undefined)?.eventBus,
-      undefined,
-    );
+    assert.equal((context.context as { eventBus?: unknown } | undefined)?.eventBus, undefined);
 
     const busCaps = orchestrator.getExecutionEventBusPort().capabilities();
     assert.equal(busCaps.structuralEventBusOnly, true);
@@ -575,9 +570,7 @@ describe("EPC-24 Sprint 05 — Orchestrator integra Execution Event Bus", () => 
       executionEventBus: bus,
     });
     const port = factory.create({ provider: "mock" });
-    assert.ok(
-      (port as MockCanonicalExecutionOrchestratorAdapter).getExecutionEventBusPort,
-    );
+    assert.ok((port as MockCanonicalExecutionOrchestratorAdapter).getExecutionEventBusPort);
     const started = await port.startExecution();
     assert.equal(started.ok, true);
   });

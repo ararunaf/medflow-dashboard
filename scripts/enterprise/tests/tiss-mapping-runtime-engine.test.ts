@@ -407,10 +407,7 @@ describe("F3-CAP-11 TISSMappingRuntimePort contract", () => {
       DEFAULT_TISS_MAPPING_RUNTIME_ENGINE_CAPABILITIES.templateMappingImplemented,
       false,
     );
-    assert.equal(
-      DEFAULT_TISS_MAPPING_RUNTIME_ENGINE_CAPABILITIES.canonicalModelImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_TISS_MAPPING_RUNTIME_ENGINE_CAPABILITIES.canonicalModelImplemented, false);
     assert.equal(
       DEFAULT_TISS_MAPPING_RUNTIME_ENGINE_CAPABILITIES.guideTransformationImplemented,
       false,

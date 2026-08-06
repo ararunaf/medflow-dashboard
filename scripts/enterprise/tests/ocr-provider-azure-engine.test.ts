@@ -76,10 +76,7 @@ function analyzeSucceededBody() {
   };
 }
 
-function mockAzureFetch(options?: {
-  failAnalyzeTimes?: number;
-  hangPoll?: boolean;
-}): typeof fetch {
+function mockAzureFetch(options?: { failAnalyzeTimes?: number; hangPoll?: boolean }): typeof fetch {
   let analyzeFailures = options?.failAnalyzeTimes ?? 0;
   return async (input, init) => {
     const url = String(input);

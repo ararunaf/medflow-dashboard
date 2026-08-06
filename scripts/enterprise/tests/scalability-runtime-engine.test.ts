@@ -259,10 +259,7 @@ describe("INF-10 cadeia Enterprise / Queue / Worker / Scheduler / Persistent Que
     assert.equal(runtime.getTISSRuntimePort().providerId, "default");
     assert.equal(runtime.getScalabilityRuntimePort().capabilities().usesQueueRuntimePort, true);
     assert.equal(runtime.getScalabilityRuntimePort().capabilities().usesWorkerRuntimePort, true);
-    assert.equal(
-      runtime.getScalabilityRuntimePort().capabilities().usesSchedulerRuntimePort,
-      true,
-    );
+    assert.equal(runtime.getScalabilityRuntimePort().capabilities().usesSchedulerRuntimePort, true);
     assert.equal(
       runtime.getScalabilityRuntimePort().capabilities().usesPersistentQueueRuntimePort,
       true,
@@ -274,10 +271,7 @@ describe("INF-10 cadeia Enterprise / Queue / Worker / Scheduler / Persistent Que
     );
     assert.equal(runtime.getQueueRuntimePort().capabilities().usesScalabilityRuntimePort, true);
     assert.equal(runtime.getWorkerRuntimePort().capabilities().usesScalabilityRuntimePort, true);
-    assert.equal(
-      runtime.getSchedulerRuntimePort().capabilities().usesScalabilityRuntimePort,
-      true,
-    );
+    assert.equal(runtime.getSchedulerRuntimePort().capabilities().usesScalabilityRuntimePort, true);
     assert.equal(
       runtime.getPersistentQueueRuntimePort().capabilities().usesScalabilityRuntimePort,
       true,
@@ -440,7 +434,10 @@ describe("INF-10 ausência de backends de escalabilidade / bypass", () => {
 
   it("Worker Runtime wiring inclui getScalabilityRuntimePort sem observe/release", () => {
     const workerAdapter = readFileSync(
-      join(repoRoot, "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts"),
+      join(
+        repoRoot,
+        "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts",
+      ),
       "utf8",
     );
     assert.match(workerAdapter, /getScalabilityRuntimePort/);
@@ -558,7 +555,10 @@ describe("INF-10 ausência de backends de escalabilidade / bypass", () => {
       ),
       false,
     );
-    assert.equal(/getTISSRuntimePort\(\)\.(process|getSession|listSessions)\s*\(/.test(obsAdapter), false);
+    assert.equal(
+      /getTISSRuntimePort\(\)\.(process|getSession|listSessions)\s*\(/.test(obsAdapter),
+      false,
+    );
   });
 
   it("sem Provider/Adapter/Factory/Registry paralelo", () => {

@@ -348,10 +348,7 @@ describe("C-05 AuthorizationRuntimePort contract", () => {
     const registry = createDefaultAuthorizationRuntimeRegistry();
     assert.equal(registry.has("enterprise"), true);
     const factory = new AuthorizationRuntimeFactory({ registry });
-    assert.throws(
-      () => factory.create({ provider: "unknown" as never }),
-      /não está registrado/,
-    );
+    assert.throws(() => factory.create({ provider: "unknown" as never }), /não está registrado/);
   });
 
   it("Enterprise Runtime expõe AuthorizationRuntimePort + health.authorizationRuntimeOk", async () => {
@@ -489,10 +486,7 @@ describe("C-05 AuthorizationRuntimePort contract", () => {
       DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES.batchAuthorizationImplemented,
       false,
     );
-    assert.equal(
-      DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES.statusPollingImplemented,
-      false,
-    );
+    assert.equal(DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES.statusPollingImplemented, false);
     assert.equal(
       DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES.preAuthorizationImplemented,
       false,

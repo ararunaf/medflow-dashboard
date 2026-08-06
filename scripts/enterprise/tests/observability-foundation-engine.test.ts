@@ -228,7 +228,10 @@ describe("INF-04 Observability Foundation — modelos canônicos e store", () =>
     assert.equal(resolved.observation?.metadata.value, "registered-structural");
     assert.equal(resolved.observation?.configuration.kind, "canonical-observation-configuration");
     assert.equal(resolved.observation?.configuration.backendConnected, false);
-    assert.equal(resolved.observation?.configuration.schedulerPortContract, "ExecutionSchedulerPort");
+    assert.equal(
+      resolved.observation?.configuration.schedulerPortContract,
+      "ExecutionSchedulerPort",
+    );
     assert.equal(resolved.observation?.capability.kind, "canonical-observation-capabilities");
     assert.equal(resolved.observation?.capability, STRUCTURAL_OBSERVABILITY_FOUNDATION_CAPABILITY);
     assert.equal(resolved.observation?.executionSchedulerId, "execution-scheduler-1");
@@ -361,10 +364,7 @@ describe("INF-04 Observability Foundation — integração estrutural com Schedu
     assert.equal(typeof schedulerPort.getSchedule, "function");
     assert.equal(typeof schedulerPort.registerSchedule, "function");
     assert.equal(observabilityPort.capabilities().usesExecutionSchedulerPortOnly, true);
-    assert.equal(
-      (observabilityPort as { schedulerStore?: unknown }).schedulerStore,
-      undefined,
-    );
+    assert.equal((observabilityPort as { schedulerStore?: unknown }).schedulerStore, undefined);
   });
 });
 
@@ -567,9 +567,7 @@ describe("INF-04 Observability Foundation — integração estrutural com Orches
       executionObservability,
     });
     const port = factory.create({ provider: "mock" });
-    assert.ok(
-      (port as MockCanonicalExecutionOrchestratorAdapter).getExecutionObservabilityPort,
-    );
+    assert.ok((port as MockCanonicalExecutionOrchestratorAdapter).getExecutionObservabilityPort);
     const started = await port.startExecution();
     assert.equal(started.ok, true);
   });

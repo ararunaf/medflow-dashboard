@@ -587,9 +587,7 @@ describe("EPC-24 Sprint 06 — Orchestrator integra Execution Registry", () => {
       executionRegistry: registry,
     });
     const port = factory.create({ provider: "mock" });
-    assert.ok(
-      (port as MockCanonicalExecutionOrchestratorAdapter).getExecutionRegistryPort,
-    );
+    assert.ok((port as MockCanonicalExecutionOrchestratorAdapter).getExecutionRegistryPort);
     const started = await port.startExecution();
     assert.equal(started.ok, true);
   });

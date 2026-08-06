@@ -189,10 +189,7 @@ describe("EPC-24 Execution Policy Registry — registro e modelos canônicos", (
     assert.equal(registered.policy?.kind, "execution-policy");
     assert.equal(registered.policy?.id, "execution-policy-fixed-1");
     assert.equal(registered.policy?.executionPolicyId, "execution-policy-fixed-1");
-    assert.equal(
-      registered.policy?.executionPolicyRegistryId,
-      "execution-policy-registry-fixed-1",
-    );
+    assert.equal(registered.policy?.executionPolicyRegistryId, "execution-policy-registry-fixed-1");
     assert.equal(registered.policy?.key, "structural-platform-policy");
     assert.equal(registered.policy?.policyInterpreted, false);
     assert.equal(registered.policy?.rulesApplied, false);
@@ -504,8 +501,7 @@ describe("EPC-24 Sprint 10 — Orchestrator integra Execution Policy Registry", 
       undefined,
     );
     assert.equal(
-      (stateMachine as { getExecutionPolicyRegistryPort?: unknown })
-        .getExecutionPolicyRegistryPort,
+      (stateMachine as { getExecutionPolicyRegistryPort?: unknown }).getExecutionPolicyRegistryPort,
       undefined,
     );
     assert.equal(
@@ -538,9 +534,7 @@ describe("EPC-24 Sprint 10 — Orchestrator integra Execution Policy Registry", 
       executionPolicyRegistry: policyRegistry,
     });
     const port = factory.create({ provider: "mock" });
-    assert.ok(
-      (port as MockCanonicalExecutionOrchestratorAdapter).getExecutionPolicyRegistryPort,
-    );
+    assert.ok((port as MockCanonicalExecutionOrchestratorAdapter).getExecutionPolicyRegistryPort);
     const started = await port.startExecution();
     assert.equal(started.ok, true);
   });

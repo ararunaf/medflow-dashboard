@@ -177,10 +177,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(storageSession.session?.status, "coordinated");
     assert.equal(storageSession.session?.realStorageExecuted, false);
     assert.equal(storageSession.session?.realUploadExecuted, false);
-    assert.equal(
-      runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage,
-      true,
-    );
+    assert.equal(runtime.getStorageManagerRuntimePort().capabilities().implementsRealStorage, true);
     assert.equal(
       runtime.getStorageManagerRuntimePort().capabilities().usesStorageProviderPort,
       true,
@@ -194,10 +191,7 @@ describe("ARCH-01 Enterprise Runtime", () => {
     assert.equal(searchSession.session?.status, "coordinated");
     assert.equal(searchSession.session?.realSearchExecuted, false);
     assert.equal(searchSession.session?.realIndexingExecuted, false);
-    assert.equal(
-      runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch,
-      true,
-    );
+    assert.equal(runtime.getDocumentSearchRuntimePort().capabilities().implementsRealSearch, true);
     assert.equal(typeof runtime.getSearchProviderPort, "function");
     assert.equal(runtime.getSearchProviderPort().providerId, "storage-backed");
   });

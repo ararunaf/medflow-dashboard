@@ -332,7 +332,10 @@ describe("INF-05 ausência de backends / workers / bypass", () => {
     const processStart = tissAdapter.indexOf("async process(");
     assert.ok(processStart > 0);
     const processBody = tissAdapter.slice(processStart);
-    assert.equal(/queueRuntimePort\.(enqueue|dequeue|peek|ack|nack|purge)\s*\(/.test(processBody), false);
+    assert.equal(
+      /queueRuntimePort\.(enqueue|dequeue|peek|ack|nack|purge)\s*\(/.test(processBody),
+      false,
+    );
   });
 
   it("sem Provider/Adapter/Factory/Registry paralelo", () => {
@@ -343,9 +346,6 @@ describe("INF-05 ausência de backends / workers / bypass", () => {
     assert.ok(files.some((f) => f.endsWith("/registry/queue-runtime-registry.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
-    assert.equal(
-      files.filter((f) => /adapters\/.*queue-runtime-adapter\.ts$/.test(f)).length,
-      2,
-    );
+    assert.equal(files.filter((f) => /adapters\/.*queue-runtime-adapter\.ts$/.test(f)).length, 2);
   });
 });

@@ -226,7 +226,10 @@ describe("INF-05 Health Center Foundation — modelos canônicos e store", () =>
     assert.equal(resolved.component?.identity.kind, "canonical-health-component-identity");
     assert.equal(resolved.component?.status.kind, "canonical-health-component-status");
     assert.equal(resolved.component?.status.value, "registered-structural");
-    assert.equal(resolved.component?.configuration.kind, "canonical-health-component-configuration");
+    assert.equal(
+      resolved.component?.configuration.kind,
+      "canonical-health-component-configuration",
+    );
     assert.equal(resolved.component?.configuration.backendConnected, false);
     assert.equal(
       resolved.component?.configuration.observabilityPortContract,
@@ -604,9 +607,7 @@ describe("INF-05 Health Center Foundation — integração estrutural com Orches
       executionHealthCenter,
     });
     const port = factory.create({ provider: "mock" });
-    assert.ok(
-      (port as MockCanonicalExecutionOrchestratorAdapter).getExecutionHealthCenterPort,
-    );
+    assert.ok((port as MockCanonicalExecutionOrchestratorAdapter).getExecutionHealthCenterPort);
     const started = await port.startExecution();
     assert.equal(started.ok, true);
   });

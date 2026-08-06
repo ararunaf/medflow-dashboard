@@ -43,8 +43,9 @@ import { createAIAuditorPort } from "../../../src/lib/enterprise/ai-auditor/inde
 
 describe("EPC-24 CanonicalExecutionOrchestratorPort contract", () => {
   it("mock adapter satisfaz o Port e responde healthy", async () => {
-    const port: CanonicalExecutionOrchestratorPort =
-      new MockCanonicalExecutionOrchestratorAdapter({ provider: "mock" });
+    const port: CanonicalExecutionOrchestratorPort = new MockCanonicalExecutionOrchestratorAdapter({
+      provider: "mock",
+    });
     assert.equal(port.providerId, "mock");
 
     const health = await port.health();
@@ -437,7 +438,10 @@ describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => 
     const started = await port.startExecution({ intakeRef: "intake-ports-ref" });
     assert.equal(started.ok, true);
     assert.equal(started.result?.enginesInvoked, false);
-    assert.equal(started.context?.steps.every((s) => s.portRef.length > 0), true);
+    assert.equal(
+      started.context?.steps.every((s) => s.portRef.length > 0),
+      true,
+    );
 
     // Ports Foundation injetados expõem capabilities; Orquestrador não executa OCR/IA/regras.
     const ocrCaps = foundationPorts.ocrProvider?.capabilities();

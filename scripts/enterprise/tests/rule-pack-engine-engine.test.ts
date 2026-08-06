@@ -48,7 +48,7 @@ import {
 } from "../../../src/lib/enterprise/rule-pack-engine/index.ts";
 import { createTISSCatalogPort } from "../../../src/lib/enterprise/tiss-catalog/index.ts";
 import { createTISSRuntimePort } from "../../../src/lib/enterprise/tiss-runtime/index.ts";
-import { createQueueRuntimePort } from '../../../src/lib/enterprise/queue-runtime/index.ts';
+import { createQueueRuntimePort } from "../../../src/lib/enterprise/queue-runtime/index.ts";
 import { createSchedulerRuntimePort } from "../../../src/lib/enterprise/scheduler-runtime/index.ts";
 import { createWorkerRuntimePort } from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import { createPersistentQueueRuntimePort } from "../../../src/lib/enterprise/persistent-queue-runtime/index.ts";
@@ -394,43 +394,41 @@ describe("TISS-03 cadeia Enterprise / TISS Runtime / Rule Pack Engine", () => {
                 ({
                   providerId: "mock",
                   health: async () => ({ ok: true, provider: "mock" }),
-                  capabilities: () =>
-                    ({
-                      provider: "mock",
-                      adapterId: "stub",
-                      supportsProcess: true,
-                      supportsGetSession: true,
-                      supportsListSessions: true,
-                      supportsHealth: true,
-                      supportsCapabilities: true,
-                      usesEnterpriseRuntimePorts: true,
-                      usesCanonicalExecutionOrchestrator: true,
-                      usesTISSProviderPort: true,
-                      usesTISSCatalogPort: true,
-                      usesRulePackEnginePort: true,
-                      usesXMLRuntimePort: true,
-                      usesXMLGenerationRuntimePort: true,
-                      usesXMLSerializerRuntimePort: true,
-                      usesXMLSchemaRuntimePort: true,
-                      usesXMLValidationRuntimePort: true,
-                      usesXSDRuntimePort: true,
-                      usesNamespaceRuntimePort: true,
-                      usesQueueRuntimePort: true,
-                      usesWorkerRuntimePort: true,
-                      usesSchedulerRuntimePort: true,
-                      usesPersistentQueueRuntimePort: true,
-                      usesObservabilityRuntimePort: true,
-                      implementsRealXml: false,
-                      implementsOperatorDispatch: false,
-                    }),
+                  capabilities: () => ({
+                    provider: "mock",
+                    adapterId: "stub",
+                    supportsProcess: true,
+                    supportsGetSession: true,
+                    supportsListSessions: true,
+                    supportsHealth: true,
+                    supportsCapabilities: true,
+                    usesEnterpriseRuntimePorts: true,
+                    usesCanonicalExecutionOrchestrator: true,
+                    usesTISSProviderPort: true,
+                    usesTISSCatalogPort: true,
+                    usesRulePackEnginePort: true,
+                    usesXMLRuntimePort: true,
+                    usesXMLGenerationRuntimePort: true,
+                    usesXMLSerializerRuntimePort: true,
+                    usesXMLSchemaRuntimePort: true,
+                    usesXMLValidationRuntimePort: true,
+                    usesXSDRuntimePort: true,
+                    usesNamespaceRuntimePort: true,
+                    usesQueueRuntimePort: true,
+                    usesWorkerRuntimePort: true,
+                    usesSchedulerRuntimePort: true,
+                    usesPersistentQueueRuntimePort: true,
+                    usesObservabilityRuntimePort: true,
+                    implementsRealXml: false,
+                    implementsOperatorDispatch: false,
+                  }),
                   process: async () => ({ ok: true }),
                   getSession: async () => ({ ok: false }),
                   listSessions: async () => ({ ok: true, sessions: [] }),
                 }) as TISSRuntimePort,
             },
           }),
-        getScalabilityRuntimePort: () =>
-          createScalabilityRuntimePort({ provider: "mock" }),
+        getScalabilityRuntimePort: () => createScalabilityRuntimePort({ provider: "mock" }),
       },
     });
 
@@ -651,15 +649,10 @@ describe("TISS-03A Enterprise Base Rule Packs", () => {
       const interpreted = await port.interpretPack({ code });
       assert.equal(interpreted.ok, true, `interpret ${code}`);
       assert.equal(interpreted.catalogConsumed, true, `catalogConsumed ${code}`);
-      assert.ok(
-        (interpreted.resolvedCatalogCodes?.length ?? 0) >= 1,
-        `resolved codes ${code}`,
-      );
+      assert.ok((interpreted.resolvedCatalogCodes?.length ?? 0) >= 1, `resolved codes ${code}`);
 
       const attrs =
-        code === BASE_METADATA_PRESENCE_PACK_CODE
-          ? { correlationId: "corr-tiss-03a" }
-          : undefined;
+        code === BASE_METADATA_PRESENCE_PACK_CODE ? { correlationId: "corr-tiss-03a" } : undefined;
       const executed = await port.executePack({ code, attributes: attrs });
       assert.equal(executed.ok, true, `execute ${code}`);
       assert.equal(executed.result?.kind, "canonical-rule-execution-result");
@@ -716,9 +709,7 @@ describe("TISS-03A Enterprise Base Rule Packs", () => {
     assert.equal(executed.ok, true);
     assert.equal(executed.result?.expectedResultMet, true);
     assert.ok(
-      executed.result?.findings.some(
-        (f) => f.attributes?.multiVersionCompatibilityOk === true,
-      ),
+      executed.result?.findings.some((f) => f.attributes?.multiVersionCompatibilityOk === true),
     );
   });
 
@@ -746,9 +737,7 @@ describe("TISS-03A Enterprise Base Rule Packs", () => {
       const executed = await port.executePack({
         code,
         attributes:
-          code === BASE_METADATA_PRESENCE_PACK_CODE
-            ? { correlationId: "corr-runtime" }
-            : undefined,
+          code === BASE_METADATA_PRESENCE_PACK_CODE ? { correlationId: "corr-runtime" } : undefined,
       });
       assert.equal(executed.result?.catalogConsumed, true, code);
     }

@@ -175,10 +175,7 @@ describe("ARCH-02 AI Provider Runtime", () => {
   });
 
   it("operational-gpt-openai não contém fetch/api.openai.com (sem bypass)", () => {
-    const bridge = readFileSync(
-      join(repoRoot, "src/lib/server/operational-gpt-openai.ts"),
-      "utf8",
-    );
+    const bridge = readFileSync(join(repoRoot, "src/lib/server/operational-gpt-openai.ts"), "utf8");
     assert.equal(bridge.includes("api.openai.com"), false);
     assert.equal(/\bfetch\s*\(/.test(bridge), false);
     assert.match(bridge, /getEnterpriseRuntime/);

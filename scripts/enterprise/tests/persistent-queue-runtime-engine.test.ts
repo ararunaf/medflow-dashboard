@@ -241,13 +241,19 @@ describe("INF-08 cadeia Enterprise / Queue / Worker / Scheduler / TISS / Persist
     assert.equal(runtime.getSchedulerRuntimePort().providerId, "enterprise");
     assert.equal(runtime.getTISSRuntimePort().providerId, "default");
     assert.equal(runtime.getPersistentQueueRuntimePort().capabilities().usesQueueRuntimePort, true);
-    assert.equal(runtime.getPersistentQueueRuntimePort().capabilities().usesWorkerRuntimePort, true);
+    assert.equal(
+      runtime.getPersistentQueueRuntimePort().capabilities().usesWorkerRuntimePort,
+      true,
+    );
     assert.equal(
       runtime.getPersistentQueueRuntimePort().capabilities().usesSchedulerRuntimePort,
       true,
     );
     assert.equal(runtime.getQueueRuntimePort().capabilities().usesPersistentQueueRuntimePort, true);
-    assert.equal(runtime.getWorkerRuntimePort().capabilities().usesPersistentQueueRuntimePort, true);
+    assert.equal(
+      runtime.getWorkerRuntimePort().capabilities().usesPersistentQueueRuntimePort,
+      true,
+    );
     assert.equal(
       runtime.getSchedulerRuntimePort().capabilities().usesPersistentQueueRuntimePort,
       true,
@@ -394,7 +400,10 @@ describe("INF-08 ausência de backends persistentes / bypass", () => {
 
   it("Worker Runtime wiring inclui getPersistentQueueRuntimePort sem persist/release", () => {
     const workerAdapter = readFileSync(
-      join(repoRoot, "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts"),
+      join(
+        repoRoot,
+        "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts",
+      ),
       "utf8",
     );
     assert.match(workerAdapter, /getPersistentQueueRuntimePort/);

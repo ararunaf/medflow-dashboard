@@ -480,10 +480,7 @@ describe("EPC-24 Sprint 04 — Orchestrator integra Execution State Machine", ()
     assert.equal(context.context?.state.processingPerformed, false);
 
     // Context não embute máquina de estados de negócio — apenas refs
-    assert.equal(
-      (context.context as { lifecycle?: unknown } | undefined)?.lifecycle,
-      undefined,
-    );
+    assert.equal((context.context as { lifecycle?: unknown } | undefined)?.lifecycle, undefined);
 
     const smCaps = orchestrator.getExecutionStateMachinePort().capabilities();
     assert.equal(smCaps.structuralLifecycleOnly, true);
@@ -517,9 +514,7 @@ describe("EPC-24 Sprint 04 — Orchestrator integra Execution State Machine", ()
       executionStateMachine: sm,
     });
     const port = factory.create({ provider: "mock" });
-    assert.ok(
-      (port as MockCanonicalExecutionOrchestratorAdapter).getExecutionStateMachinePort,
-    );
+    assert.ok((port as MockCanonicalExecutionOrchestratorAdapter).getExecutionStateMachinePort);
     const started = await port.startExecution();
     assert.equal(started.ok, true);
   });

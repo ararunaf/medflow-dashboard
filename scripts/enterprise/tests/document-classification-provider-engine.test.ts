@@ -106,7 +106,10 @@ describe("CLASS-01 DocumentClassificationProviderPort contract", () => {
       "default",
     );
     assert.equal(createDocumentClassificationProviderPort({ provider: "mock" }).providerId, "mock");
-    assert.equal((await createDocumentClassificationProviderPort({ provider: "mock" }).health()).ok, true);
+    assert.equal(
+      (await createDocumentClassificationProviderPort({ provider: "mock" }).health()).ok,
+      true,
+    );
   });
 
   it("classify rule-based produz tipos documentais a partir do OCR text", async () => {
@@ -331,10 +334,7 @@ describe("CLASS-01 cadeia Enterprise / Capture / OCR / Classification / Orchestr
     assert.equal(classificationSession.ok, true);
     assert.equal(classificationSession.session?.status, "coordinated");
     assert.equal(classificationSession.session?.realClassificationExecuted, false);
-    assert.equal(
-      classificationSession.session?.providerReferenceId,
-      "rule-based-classifier",
-    );
+    assert.equal(classificationSession.session?.providerReferenceId, "rule-based-classifier");
   });
 
   it("Canonical Execution Orchestrator permanece no caminho de classify()", async () => {
@@ -381,11 +381,7 @@ describe("CLASS-01 auditoria — sem IA / sem bypass", () => {
     for (const file of files) {
       const source = readFileSync(file, "utf8");
       for (const pattern of forbidden) {
-        assert.equal(
-          pattern.test(source),
-          false,
-          `Padrão proibido ${pattern} em ${file}`,
-        );
+        assert.equal(pattern.test(source), false, `Padrão proibido ${pattern} em ${file}`);
       }
       for (const token of FORBIDDEN_AI_TOKENS) {
         if (token === "embedding") continue; // aparece só em flags implementsEmbeddings: false

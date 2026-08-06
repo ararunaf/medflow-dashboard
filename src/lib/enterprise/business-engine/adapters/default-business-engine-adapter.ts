@@ -1,12 +1,13 @@
 /**
- * DefaultBusinessEngineAdapter — E-02.
+ * DefaultBusinessEngineAdapter — E-03.
  *
  * Adapter oficial da Enterprise Business Engine.
- * `businessRuleCatalogImplemented` e `businessRuleExecutionImplemented = true`.
+ * `businessRuleCatalogImplemented`, `businessRuleExecutionImplemented` e `businessTransactionImplemented = true`.
  */
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
 import { BusinessRuleExecutionEngine } from "../business-rule-execution";
-import { E02_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { BusinessTransactionEngine } from "../business-transaction";
+import { E03_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -14,6 +15,8 @@ import type {
   BusinessEngineInfo,
   ExecuteBusinessRuleInput,
   ExecuteBusinessRuleResult,
+  ExecuteBusinessTransactionInput,
+  ExecuteBusinessTransactionResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -35,6 +38,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
 
   private readonly catalog = new BusinessRuleCatalog(new InMemoryBusinessRuleCatalogStore());
   private readonly executor = new BusinessRuleExecutionEngine();
+  private readonly transaction = new BusinessTransactionEngine();
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
@@ -52,7 +56,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E02_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E03_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -62,6 +66,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       businessEngineOk: ok,
       businessRuleCatalogOk: ok,
       businessRuleExecutionOk: ok,
+      businessTransactionOk: ok,
     };
   }
 
@@ -118,5 +123,18 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       };
     }
     return this.executor.execute(found.rule, input.facts);
+  }
+
+  async executeTransaction(
+    input: ExecuteBusinessTransactionInput,
+  ): Promise<ExecuteBusinessTransactionResult> {
+    const steps = input.steps.map((step) => {
+      const found = this.catalog.find(step.ruleId);
+      if (!found.ok || !found.rule) {
+        throw new Error(`rule not found: ${step.ruleId}`);
+      }
+      return { stepId: step.stepId, rule: found.rule, facts: step.facts };
+    });
+    return this.transaction.execute({ transactionId: input.transactionId, steps });
   }
 }

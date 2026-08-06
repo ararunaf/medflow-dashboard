@@ -7,6 +7,8 @@ import type {
   CanonicalBusinessRuleCatalogResult,
   CanonicalBusinessRuleCatalogStats,
   CanonicalBusinessRuleExecutionResult,
+  CanonicalBusinessTransactionResult,
+  CanonicalBusinessTransactionStep,
 } from "./canonical";
 import type { BusinessEngineCapabilities } from "./capabilities";
 
@@ -25,6 +27,7 @@ export interface BusinessEngineHealth {
   readonly businessEngineOk: boolean;
   readonly businessRuleCatalogOk: boolean;
   readonly businessRuleExecutionOk: boolean;
+  readonly businessTransactionOk: boolean;
 }
 
 export interface RegisterBusinessRuleInput {
@@ -81,6 +84,14 @@ export interface ExecuteBusinessRuleInput {
 
 export type ExecuteBusinessRuleResult = CanonicalBusinessRuleExecutionResult;
 
+export interface ExecuteBusinessTransactionInput {
+  readonly transactionId: string;
+  readonly steps: readonly CanonicalBusinessTransactionStep[];
+  readonly requestId?: string;
+}
+
+export type ExecuteBusinessTransactionResult = CanonicalBusinessTransactionResult;
+
 export type {
   BusinessEngineCapabilities,
   CanonicalBusinessRule,
@@ -88,4 +99,6 @@ export type {
   CanonicalBusinessRuleCatalogResult,
   CanonicalBusinessRuleCatalogStats,
   CanonicalBusinessRuleExecutionResult,
+  CanonicalBusinessTransactionResult,
+  CanonicalBusinessTransactionStep,
 };

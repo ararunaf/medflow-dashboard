@@ -352,7 +352,10 @@ describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
     assert.match(queueAdapter, /getWorkerRuntimePort/);
     assert.match(queueAdapter, /usesWorkerRuntimePort/);
     assert.match(queueAdapter, /workerRuntimeOk/);
-    assert.equal(/workerRuntimePort\.(register|unregister|allocate|release|heartbeat)\s*\(/.test(queueAdapter), false);
+    assert.equal(
+      /workerRuntimePort\.(register|unregister|allocate|release|heartbeat)\s*\(/.test(queueAdapter),
+      false,
+    );
   });
 
   it("TISS Runtime wiring inclui getWorkerRuntimePort sem allocate/register no process", () => {
@@ -375,7 +378,10 @@ describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
 
   it("Worker Runtime não consome Queue (enqueue/dequeue) nas operações", () => {
     const workerAdapter = readFileSync(
-      join(repoRoot, "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts"),
+      join(
+        repoRoot,
+        "src/lib/enterprise/worker-runtime/adapters/default-worker-runtime-adapter.ts",
+      ),
       "utf8",
     );
     assert.match(workerAdapter, /getQueueRuntimePort/);
@@ -394,9 +400,6 @@ describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
     assert.ok(files.some((f) => f.endsWith("/registry/worker-runtime-registry.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
-    assert.equal(
-      files.filter((f) => /adapters\/.*worker-runtime-adapter\.ts$/.test(f)).length,
-      2,
-    );
+    assert.equal(files.filter((f) => /adapters\/.*worker-runtime-adapter\.ts$/.test(f)).length, 2);
   });
 });
