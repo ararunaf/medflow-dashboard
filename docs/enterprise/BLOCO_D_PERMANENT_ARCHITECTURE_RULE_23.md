@@ -128,7 +128,8 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | D-09    | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Concluída / certificada   |
 | D-10    | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Concluída / certificada   |
 | D-11    | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Concluída / certificada   |
-| AUDIT-D | AUDIT-D-R              | —                                | Enterprise Block D Architecture Audit                                     | Autorizada (não iniciada) |
+| AUDIT-D | AUDIT-D-R              | —                                | Enterprise Block D Architecture Audit                                     | Concluída / certificada   |
+| E-01    | E-01A                  | —                                | Bloco E — Enterprise Business Engine                                      | Autorizada (não iniciada) |
 
 **Regras do Roadmap:**
 
@@ -279,6 +280,19 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | Data                                     | 2026-08-06                                                                                  |
 | Resultado                                | D-11 torna-se a **décima primeira OFFICIAL RELEASE BASELINE** do BLOCO D; BLOCO D concluído |
 | Próxima Sprint autorizada (não iniciada) | **AUDIT-D** — Enterprise Block D Architecture Audit                                         |
+
+## 10. Aplicação na Sprint AUDIT-D
+
+| Item                                     | Valor                                                                                                                                                                                                     |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sprint de entrega                        | AUDIT-D — Enterprise Block D Architecture Audit                                                                                                                                                           |
+| Sprint de gate                           | AUDIT-D-R — Enterprise Block D Architecture Audit Release                                                                                                                                                 |
+| Escopo da auditoria                      | Aderência à RULE_23, sequência D-01 a D-11, ausência de duplicação, reutilização de Ports/Adapters/Engines, consistência das APIs, organização, cobertura de testes, documentação, ausência de regressões |
+| Inconsistências encontradas              | Nenhuma                                                                                                                                                                                                   |
+| Commit de entrega                        | `1f509ca`                                                                                                                                                                                                 |
+| Data                                     | 2026-08-06                                                                                                                                                                                                |
+| Resultado                                | **BLOCO D auditado, certificado e congelado**                                                                                                                                                             |
+| Próxima Sprint autorizada (não iniciada) | **Bloco E — Enterprise Business Engine**                                                                                                                                                                  |
 
 ---
 
