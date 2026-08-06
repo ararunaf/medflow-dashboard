@@ -123,8 +123,8 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | D-04   | D-04R                  | `namespaceValidationImplemented` | Enterprise XML Namespace Runtime — Namespace Validation                   | Concluída / certificada   |
 | D-05   | D-05R                  | `versionValidationImplemented`   | Enterprise XML Version Runtime — Version Validation                       | Concluída / certificada   |
 | D-06   | D-06R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Concluída / certificada   |
-| D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Autorizada (não iniciada) |
-| D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Planejada                 |
+| D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Concluída / certificada   |
+| D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Autorizada (não iniciada) |
 | D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Planejada                 |
 | D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Planejada                 |
 | D-11   | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Planejada                 |
@@ -218,6 +218,18 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | Data                                     | 2026-08-06                                                                                                             |
 | Resultado                                | D-06 torna-se a **sexta OFFICIAL RELEASE BASELINE** do BLOCO D                                                         |
 | Próxima Sprint autorizada (não iniciada) | **D-07** — Enterprise XML Operator Validation Runtime — Operator-Specific Validation (`operatorValidationImplemented`) |
+
+## 10. Aplicação na Sprint D-07R
+
+| Item                                     | Valor                                                                            |
+| ---------------------------------------- | -------------------------------------------------------------------------------- |
+| Sprint de entrega                        | D-07 — Enterprise XML Operator Validation Runtime — Operator-Specific Validation |
+| Sprint de gate                           | D-07R — XML Operator Validation Release Certification                            |
+| Capacidade certificada                   | Operator Validation (`operatorValidationImplemented = true`)                     |
+| Commit de entrega                        | `ff472a7`                                                                        |
+| Data                                     | 2026-08-06                                                                       |
+| Resultado                                | D-07 torna-se a **sétima OFFICIAL RELEASE BASELINE** do BLOCO D                  |
+| Próxima Sprint autorizada (não iniciada) | **D-08** — Enterprise XML Repair Runtime — XML Repair (`xmlRepairImplemented`)   |
 
 ---
 
