@@ -44,6 +44,10 @@ import type {
 } from "../operator-validation/canonical";
 import type { CanonicalXMLRepairContext, CanonicalXMLRepairResult } from "../xml-repair/canonical";
 import type {
+  CanonicalXMLAutomaticCorrectionContext,
+  CanonicalXMLAutomaticCorrectionResult,
+} from "../automatic-correction/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -85,6 +89,11 @@ export type {
 } from "../operator-validation/canonical";
 
 export type { CanonicalXMLRepairContext, CanonicalXMLRepairResult } from "../xml-repair/canonical";
+
+export type {
+  CanonicalXMLAutomaticCorrectionContext,
+  CanonicalXMLAutomaticCorrectionResult,
+} from "../automatic-correction/canonical";
 
 export type {
   AuditResult,
@@ -209,7 +218,10 @@ export type XMLValidationRuntimeHealth = {
   xmlRepairOk?: boolean;
   /** D-08 — XML Repair funcional. */
   xmlRepairImplemented: boolean;
-  automaticCorrectionImplemented: false;
+  /** D-09 — health da capability Automatic Correction. */
+  automaticCorrectionOk?: boolean;
+  /** D-09 — Automatic Correction funcional. */
+  automaticCorrectionImplemented: boolean;
   validationReportImplemented: false;
 };
 
@@ -257,7 +269,8 @@ export type XMLValidationRuntimeCapabilities = {
   operatorValidationImplemented: boolean;
   /** D-08 — XML Repair funcional. */
   xmlRepairImplemented: boolean;
-  automaticCorrectionImplemented: false;
+  /** D-09 — Automatic Correction funcional. */
+  automaticCorrectionImplemented: boolean;
   validationReportImplemented: false;
   /** Compat TISS-08. */
   implementsOfficialXsd: false;
@@ -547,4 +560,21 @@ export type RepairXMLResult = XMLValidationRuntimeOperationEnvelope & {
   repair?: CanonicalXMLRepairResult;
   context?: CanonicalXMLRepairContext | null;
   repaired?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-09 — Automatic Correction funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type CorrectXMLInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Regras de correção automática a serem aplicadas. */
+  rules: import("../automatic-correction/canonical").XMLAutomaticCorrectionRule[];
+};
+
+export type CorrectXMLResult = XMLValidationRuntimeOperationEnvelope & {
+  correction?: CanonicalXMLAutomaticCorrectionResult;
+  context?: CanonicalXMLAutomaticCorrectionContext | null;
+  corrected?: boolean;
 };

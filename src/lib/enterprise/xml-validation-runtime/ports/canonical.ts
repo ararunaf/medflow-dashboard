@@ -240,7 +240,7 @@ export type XMLValidationReportContract = {
   notes?: string;
   validationReportImplemented: false;
   xmlValidationImplemented: false;
-  automaticCorrectionImplemented: false;
+  automaticCorrectionImplemented: boolean;
   xmlRepairImplemented: boolean;
 };
 
@@ -343,7 +343,7 @@ export type XMLValidationResult = {
   businessValidationImplemented: boolean;
   operatorValidationImplemented: boolean;
   xmlRepairImplemented: boolean;
-  automaticCorrectionImplemented: false;
+  automaticCorrectionImplemented: boolean;
   validationReportImplemented: false;
   status: XMLValidationStatus;
   message?: string;
@@ -418,7 +418,7 @@ export type XMLValidationHealth = {
   businessValidationImplemented: boolean;
   operatorValidationImplemented: boolean;
   xmlRepairImplemented: boolean;
-  automaticCorrectionImplemented: false;
+  automaticCorrectionImplemented: boolean;
   validationReportImplemented: false;
 };
 
@@ -448,7 +448,7 @@ export type XMLValidationCapabilities = {
   businessValidationImplemented: boolean;
   operatorValidationImplemented: boolean;
   xmlRepairImplemented: boolean;
-  automaticCorrectionImplemented: false;
+  automaticCorrectionImplemented: boolean;
   validationReportImplemented: false;
   /** Compat TISS-08. */
   implementsOfficialXsd: false;

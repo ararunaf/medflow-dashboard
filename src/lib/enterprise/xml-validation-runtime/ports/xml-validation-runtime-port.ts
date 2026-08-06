@@ -17,6 +17,8 @@
  * SOAP / TISS / Operadoras / Auto Repair / Workflow / Persistência.
  */
 import type {
+  CorrectXMLInput,
+  CorrectXMLResult,
   GetXMLValidationResultInput,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
@@ -125,6 +127,16 @@ export interface XMLValidationRuntimePort {
    * Capability D-08 (`xmlRepairImplemented = true`).
    */
   repairXML(input: RepairXMLInput): Promise<RepairXMLResult>;
+
+  // -------------------------------------------------------------------------
+  // D-09 — Automatic Correction funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Aplica correções automáticas genéricas em CanonicalXMLDocument.
+   * Capability D-09 (`automaticCorrectionImplemented = true`).
+   */
+  correctXML(input: CorrectXMLInput): Promise<CorrectXMLResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

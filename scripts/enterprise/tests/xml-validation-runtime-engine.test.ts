@@ -117,10 +117,14 @@ function assertFunctionalFlagsForD06(obj: Record<string, unknown>) {
     "operatorValidationImplemented deveria ser true (D-07)",
   );
   assert.equal(obj.xmlRepairImplemented, true, "xmlRepairImplemented deveria ser true (D-08)");
+  assert.equal(
+    obj.automaticCorrectionImplemented,
+    true,
+    "automaticCorrectionImplemented deveria ser true (D-09)",
+  );
   const flags = [
     "xmlValidationImplemented",
     "schemaSelectionImplemented",
-    "automaticCorrectionImplemented",
     "validationReportImplemented",
   ];
   for (const flag of flags) {
@@ -361,7 +365,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(registry.snapshot().count, 4);
     assert.equal(registry.get("enterprise")?.capabilities.xmlValidationImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.xsdValidationImplemented, true);
-    assert.equal(registry.get("enterprise")?.capabilities.automaticCorrectionImplemented, false);
+    assert.equal(registry.get("enterprise")?.capabilities.automaticCorrectionImplemented, true);
   });
 
   it("validate → getResult → listResults → stats (sem validação XML)", async () => {
@@ -436,7 +440,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assertFunctionalFlagsForD06(summary.health as unknown as Record<string, unknown>);
   });
 
-  it("capabilities engine declara xsd (D-02), namespace (D-04), version (D-05), business (D-06), operator (D-07) e repair (D-08) ativas, demais false", () => {
+  it("capabilities engine declara xsd (D-02), namespace (D-04), version (D-05), business (D-06), operator (D-07), repair (D-08) e automatic-correction (D-09) ativas, demais false", () => {
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented,
       false,
@@ -465,7 +469,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlRepairImplemented, true);
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.automaticCorrectionImplemented,
-      false,
+      true,
     );
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.validationReportImplemented,

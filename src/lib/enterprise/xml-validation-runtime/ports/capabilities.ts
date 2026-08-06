@@ -45,7 +45,8 @@ export type XMLValidationRuntimeEngineCapabilities = {
   operatorValidationImplemented?: true;
   /** D-08 — XML Repair funcional. */
   xmlRepairImplemented?: true;
-  automaticCorrectionImplemented?: false;
+  /** D-09 — Automatic Correction funcional. */
+  automaticCorrectionImplemented?: true;
   validationReportImplemented?: false;
   /** Compat TISS-08. */
   implementsOfficialXsd?: false;
@@ -116,7 +117,7 @@ export const DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES: XMLValidationRu
     businessValidationImplemented: true,
     operatorValidationImplemented: true,
     xmlRepairImplemented: true,
-    automaticCorrectionImplemented: false,
+    automaticCorrectionImplemented: true,
     validationReportImplemented: false,
     implementsOfficialXsd: false,
     implementsXsdValidation: true,
@@ -165,7 +166,7 @@ export function toXMLValidationCapabilities(
     businessValidationImplemented: true,
     operatorValidationImplemented: true,
     xmlRepairImplemented: true,
-    automaticCorrectionImplemented: false,
+    automaticCorrectionImplemented: true,
     validationReportImplemented: false,
     implementsOfficialXsd: false,
     implementsXsdValidation: true,
