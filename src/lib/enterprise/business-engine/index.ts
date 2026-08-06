@@ -7,6 +7,7 @@
  * E-04: Business Workflow.
  * E-05: Business Process Orchestration.
  * E-06: Business Decision Table.
+ * E-07: Business Event Log.
  */
 export type {
   BusinessEngineCapabilities,
@@ -16,6 +17,7 @@ export type {
   BusinessEngineProviderId,
   CanonicalBusinessDecisionTable,
   CanonicalBusinessDecisionTableResult,
+  CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,
@@ -41,14 +43,24 @@ export type {
   ExecuteBusinessWorkflowResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
+  FindBusinessEventInput,
+  FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
+  ListBusinessEventsByCorrelationIdInput,
+  ListBusinessEventsByCorrelationIdResult,
+  ListBusinessEventsByTransactionIdInput,
+  ListBusinessEventsByTransactionIdResult,
+  ListBusinessEventsByTypeInput,
+  ListBusinessEventsByTypeResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
   RegisterBusinessDecisionTableInput,
   RegisterBusinessDecisionTableResult,
+  RegisterBusinessEventInput,
+  RegisterBusinessEventResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "./ports";
@@ -60,6 +72,7 @@ export {
   E04_BUSINESS_ENGINE_CAPABILITIES,
   E05_BUSINESS_ENGINE_CAPABILITIES,
   E06_BUSINESS_ENGINE_CAPABILITIES,
+  E07_BUSINESS_ENGINE_CAPABILITIES,
 } from "./ports";
 export { DefaultBusinessEngineAdapter, MockBusinessEngineAdapter } from "./adapters";
 export { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "./business-rule-catalog";
@@ -71,5 +84,6 @@ export {
   BusinessDecisionTableEngine,
   InMemoryBusinessDecisionTableStore,
 } from "./business-decision-table";
+export { BusinessEventLogEngine, InMemoryBusinessEventLogStore } from "./business-event-log";
 export { createBusinessEnginePort } from "./providers/create-business-engine-port";
 export { businessEngineRegistry } from "./registry/business-engine-registry";

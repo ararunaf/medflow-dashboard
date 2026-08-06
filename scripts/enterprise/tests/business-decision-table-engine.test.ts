@@ -6,7 +6,7 @@ import assert from "node:assert";
 import {
   BusinessDecisionTableEngine,
   BusinessRuleCatalog,
-  E06_BUSINESS_ENGINE_CAPABILITIES,
+  E07_BUSINESS_ENGINE_CAPABILITIES,
   InMemoryBusinessRuleCatalogStore,
 } from "../../../src/lib/enterprise/business-engine";
 import { DefaultBusinessEngineAdapter } from "../../../src/lib/enterprise/business-engine/adapters/default-business-engine-adapter";
@@ -56,7 +56,7 @@ describe("E-06 Business Decision Table — functional cases", () => {
   it("executa Decision Table com First Match", async () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E06_BUSINESS_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, E07_BUSINESS_ENGINE_CAPABILITIES);
 
     const ruleA = makeRule(
       "rule-a",
@@ -146,12 +146,13 @@ describe("E-06 Business Decision Table — functional cases", () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
     assert.equal(caps.businessDecisionTableImplemented, true);
+    assert.equal(caps.businessEventLogImplemented, true);
     assert.equal(caps.businessRuleCatalogImplemented, true);
     assert.equal(caps.businessRuleExecutionImplemented, true);
     assert.equal(caps.businessTransactionImplemented, true);
     assert.equal(caps.businessWorkflowImplemented, true);
     assert.equal(caps.businessProcessOrchestrationImplemented, true);
-    assert.equal(caps.businessEventLogImplemented, false);
+    assert.equal(caps.businessEventLogImplemented, true);
     assert.equal(caps.businessAuditTrailImplemented, false);
     assert.equal(caps.businessReportImplemented, false);
     assert.equal(caps.businessEngineImplemented, false);

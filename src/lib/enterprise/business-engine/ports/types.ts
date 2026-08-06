@@ -4,6 +4,7 @@
 import type {
   CanonicalBusinessDecisionTable,
   CanonicalBusinessDecisionTableResult,
+  CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,
@@ -37,6 +38,7 @@ export interface BusinessEngineHealth {
   readonly businessWorkflowOk: boolean;
   readonly businessProcessOrchestrationOk: boolean;
   readonly businessDecisionTableOk: boolean;
+  readonly businessEventLogOk: boolean;
 }
 
 export interface RegisterBusinessRuleInput {
@@ -143,10 +145,65 @@ export interface ExecuteBusinessDecisionTableInput {
 
 export type ExecuteBusinessDecisionTableResult = CanonicalBusinessDecisionTableResult;
 
+export interface RegisterBusinessEventInput {
+  readonly event: CanonicalBusinessEvent;
+  readonly requestId?: string;
+}
+
+export type RegisterBusinessEventResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+};
+
+export interface FindBusinessEventInput {
+  readonly eventId: string;
+  readonly requestId?: string;
+}
+
+export type FindBusinessEventResult = CanonicalBusinessEvent | null;
+
+export interface ListBusinessEventsByTypeInput {
+  readonly eventType: string;
+  readonly requestId?: string;
+}
+
+export type ListBusinessEventsByTypeResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly events: CanonicalBusinessEvent[];
+};
+
+export interface ListBusinessEventsByCorrelationIdInput {
+  readonly correlationId: string;
+  readonly requestId?: string;
+}
+
+export type ListBusinessEventsByCorrelationIdResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly events: CanonicalBusinessEvent[];
+};
+
+export interface ListBusinessEventsByTransactionIdInput {
+  readonly transactionId: string;
+  readonly requestId?: string;
+}
+
+export type ListBusinessEventsByTransactionIdResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly events: CanonicalBusinessEvent[];
+};
+
 export type {
   BusinessEngineCapabilities,
   CanonicalBusinessDecisionTable,
   CanonicalBusinessDecisionTableResult,
+  CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,

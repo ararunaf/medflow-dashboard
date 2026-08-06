@@ -6,7 +6,7 @@ import assert from "node:assert";
 import {
   BusinessRuleCatalog,
   BusinessRuleExecutionEngine,
-  E06_BUSINESS_ENGINE_CAPABILITIES,
+  E07_BUSINESS_ENGINE_CAPABILITIES,
   InMemoryBusinessRuleCatalogStore,
 } from "../../../src/lib/enterprise/business-engine";
 import { DefaultBusinessEngineAdapter } from "../../../src/lib/enterprise/business-engine/adapters/default-business-engine-adapter";
@@ -96,11 +96,12 @@ describe("E-02 Business Rule Execution — functional cases", () => {
   it("Port executa regra via BusinessRuleCatalog", async () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E06_BUSINESS_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, E07_BUSINESS_ENGINE_CAPABILITIES);
     assert.equal(caps.businessTransactionImplemented, true);
     assert.equal(caps.businessWorkflowImplemented, true);
     assert.equal(caps.businessProcessOrchestrationImplemented, true);
     assert.equal(caps.businessDecisionTableImplemented, true);
+    assert.equal(caps.businessEventLogImplemented, true);
     const rule = makeRule(
       "r5",
       "Port test",

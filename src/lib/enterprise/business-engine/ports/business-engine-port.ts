@@ -7,6 +7,7 @@
  * E-04: Business Workflow (`businessWorkflowImplemented = true`).
  * E-05: Business Process Orchestration (`businessProcessOrchestrationImplemented = true`).
  * E-06: Business Decision Table (`businessDecisionTableImplemented = true`).
+ * E-07: Business Event Log (`businessEventLogImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
@@ -25,14 +26,24 @@ import type {
   ExecuteBusinessWorkflowResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
+  FindBusinessEventInput,
+  FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
+  ListBusinessEventsByCorrelationIdInput,
+  ListBusinessEventsByCorrelationIdResult,
+  ListBusinessEventsByTransactionIdInput,
+  ListBusinessEventsByTransactionIdResult,
+  ListBusinessEventsByTypeInput,
+  ListBusinessEventsByTypeResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
   RegisterBusinessDecisionTableInput,
   RegisterBusinessDecisionTableResult,
+  RegisterBusinessEventInput,
+  RegisterBusinessEventResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "./types";
@@ -93,4 +104,23 @@ export interface BusinessEnginePort {
   executeDecisionTable(
     input: ExecuteBusinessDecisionTableInput,
   ): Promise<ExecuteBusinessDecisionTableResult>;
+
+  /** E-07 — registra um evento de negócio. */
+  registerEvent(input: RegisterBusinessEventInput): Promise<RegisterBusinessEventResult>;
+
+  /** E-07 — encontra evento por eventId. */
+  findEvent(input: FindBusinessEventInput): Promise<FindBusinessEventResult>;
+
+  /** E-07 — lista eventos por tipo. */
+  listEventsByType(input: ListBusinessEventsByTypeInput): Promise<ListBusinessEventsByTypeResult>;
+
+  /** E-07 — lista eventos por correlationId. */
+  listEventsByCorrelationId(
+    input: ListBusinessEventsByCorrelationIdInput,
+  ): Promise<ListBusinessEventsByCorrelationIdResult>;
+
+  /** E-07 — lista eventos por transactionId. */
+  listEventsByTransactionId(
+    input: ListBusinessEventsByTransactionIdInput,
+  ): Promise<ListBusinessEventsByTransactionIdResult>;
 }

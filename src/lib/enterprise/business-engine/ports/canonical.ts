@@ -132,6 +132,16 @@ export interface CanonicalBusinessDecisionTableResult {
   readonly output?: Record<string, unknown>;
 }
 
+export interface CanonicalBusinessEvent {
+  readonly kind: "canonical-business-event";
+  readonly eventId: string;
+  readonly eventType: string;
+  readonly timestamp: number;
+  readonly correlationId: string;
+  readonly transactionId: string;
+  readonly payload: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
@@ -141,6 +151,7 @@ export interface CanonicalBusinessRuleCatalogHealth {
   readonly businessWorkflowOk: boolean;
   readonly businessProcessOrchestrationOk: boolean;
   readonly businessDecisionTableOk: boolean;
+  readonly businessEventLogOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {

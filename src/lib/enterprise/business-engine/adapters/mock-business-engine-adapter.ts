@@ -1,9 +1,9 @@
 /**
- * MockBusinessEngineAdapter — E-06.
+ * MockBusinessEngineAdapter — E-07.
  *
  * Adapter mock para testes.
  */
-import { E06_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E07_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -21,14 +21,24 @@ import type {
   ExecuteBusinessWorkflowResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
+  FindBusinessEventInput,
+  FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
+  ListBusinessEventsByCorrelationIdInput,
+  ListBusinessEventsByCorrelationIdResult,
+  ListBusinessEventsByTransactionIdInput,
+  ListBusinessEventsByTransactionIdResult,
+  ListBusinessEventsByTypeInput,
+  ListBusinessEventsByTypeResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
   RegisterBusinessDecisionTableInput,
   RegisterBusinessDecisionTableResult,
+  RegisterBusinessEventInput,
+  RegisterBusinessEventResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "../ports/types";
@@ -58,7 +68,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E06_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E07_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -72,6 +82,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessWorkflowOk: ok,
       businessProcessOrchestrationOk: ok,
       businessDecisionTableOk: ok,
+      businessEventLogOk: ok,
     };
   }
 
@@ -201,6 +212,51 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       code: "BUSINESS_DECISION_TABLE_MOCK_EXECUTED",
       message: "decision table executed (mock)",
       rule: null,
+    };
+  }
+
+  async registerEvent(_input: RegisterBusinessEventInput): Promise<RegisterBusinessEventResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_EVENT_LOG_MOCK_REGISTERED",
+      message: "event registered (mock)",
+    };
+  }
+
+  async findEvent(_input: FindBusinessEventInput): Promise<FindBusinessEventResult> {
+    return null;
+  }
+
+  async listEventsByType(
+    _input: ListBusinessEventsByTypeInput,
+  ): Promise<ListBusinessEventsByTypeResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_EVENT_LOG_MOCK_LIST_BY_TYPE",
+      message: "events listed (mock)",
+      events: [],
+    };
+  }
+
+  async listEventsByCorrelationId(
+    _input: ListBusinessEventsByCorrelationIdInput,
+  ): Promise<ListBusinessEventsByCorrelationIdResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_EVENT_LOG_MOCK_LIST_BY_CORRELATION",
+      message: "events listed (mock)",
+      events: [],
+    };
+  }
+
+  async listEventsByTransactionId(
+    _input: ListBusinessEventsByTransactionIdInput,
+  ): Promise<ListBusinessEventsByTransactionIdResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_EVENT_LOG_MOCK_LIST_BY_TRANSACTION",
+      message: "events listed (mock)",
+      events: [],
     };
   }
 }

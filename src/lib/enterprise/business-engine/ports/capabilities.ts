@@ -63,3 +63,8 @@ export const E06_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
   ...E05_BUSINESS_ENGINE_CAPABILITIES,
   businessDecisionTableImplemented: true,
 };
+
+export const E07_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
+  ...E06_BUSINESS_ENGINE_CAPABILITIES,
+  businessEventLogImplemented: true,
+};
