@@ -1,8 +1,8 @@
 # BLOCO E — Regra Permanente de Arquitetura — Enterprise Business Engine
 
 **Bloco:** BLOCO E — Enterprise Business Engine  
-**Status:** Arquitetura homologada (ARCH-E01)  
-**Próxima Sprint autorizada (não iniciada):** E-01 — Business Rule Catalog  
+**Status:** E-01 certificada e congelada  
+**Próxima Sprint autorizada (não iniciada):** E-02 — Business Rule Execution  
 **Data:** 2026-08-06  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -74,7 +74,8 @@ A Enterprise Business Engine é responsável por:
 | Sprint   | Sprint de certificação | Capability                                | Nome oficial                                                | Status                    |
 | -------- | ---------------------- | ----------------------------------------- | ----------------------------------------------------------- | ------------------------- |
 | ARCH-E01 | ARCH-E01-A             | —                                         | Enterprise Business Engine Architecture                     | Concluída / certificada   |
-| E-01     | E-01R                  | `businessRuleCatalogImplemented`          | Enterprise Business Engine — Business Rule Catalog          | Autorizada (não iniciada) |
+| E-01     | E-01R                  | `businessRuleCatalogImplemented`          | Enterprise Business Engine — Business Rule Catalog          | Concluída / certificada   |
+| E-02     | E-02R                  | `businessRuleExecutionImplemented`        | Enterprise Business Engine — Business Rule Execution        | Autorizada (não iniciada) |
 | E-02     | E-02R                  | `businessRuleExecutionImplemented`        | Enterprise Business Engine — Business Rule Execution        | Planejada                 |
 | E-03     | E-03R                  | `businessTransactionImplemented`          | Enterprise Business Engine — Business Transaction           | Planejada                 |
 | E-04     | E-04R                  | `businessWorkflowImplemented`             | Enterprise Business Engine — Business Workflow              | Planejada                 |
