@@ -126,8 +126,8 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Concluída / certificada   |
 | D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Concluída / certificada   |
 | D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Concluída / certificada   |
-| D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Autorizada (não iniciada) |
-| D-11   | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Planejada                 |
+| D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Concluída / certificada   |
+| D-11   | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Autorizada (não iniciada) |
 
 **Regras do Roadmap:**
 
@@ -254,6 +254,18 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | Data                                     | 2026-08-06                                                                                   |
 | Resultado                                | D-09 torna-se a **nona OFFICIAL RELEASE BASELINE** do BLOCO D                                |
 | Próxima Sprint autorizada (não iniciada) | **D-10** — Enterprise XML Report Runtime — Validation Report (`validationReportImplemented`) |
+
+## 10. Aplicação na Sprint D-10R
+
+| Item                                     | Valor                                                                                              |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Sprint de entrega                        | D-10 — Enterprise XML Report Runtime — Validation Report                                           |
+| Sprint de gate                           | D-10R — XML Validation Report Release Certification                                                |
+| Capacidade certificada                   | Validation Report (`validationReportImplemented = true`)                                           |
+| Commit de entrega                        | `983f7d3`                                                                                          |
+| Data                                     | 2026-08-06                                                                                         |
+| Resultado                                | D-10 torna-se a **décima OFFICIAL RELEASE BASELINE** do BLOCO D                                    |
+| Próxima Sprint autorizada (não iniciada) | **D-11** — Enterprise XML Validation Runtime — Generic XML Validation (`xmlValidationImplemented`) |
 
 ---
 
