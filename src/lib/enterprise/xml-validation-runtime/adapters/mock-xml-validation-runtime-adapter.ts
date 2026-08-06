@@ -16,6 +16,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  RepairXMLInput,
+  RepairXMLResult,
   ValidateBusinessInput,
   ValidateBusinessResult,
   ValidateNamespaceInput,
@@ -138,7 +140,7 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       versionValidationImplemented: true,
       businessValidationImplemented: true,
       operatorValidationImplemented: true,
-      xmlRepairImplemented: false,
+      xmlRepairImplemented: true,
       automaticCorrectionImplemented: false,
       validationReportImplemented: false,
       implementsOfficialXsd: false,
@@ -207,6 +209,11 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
 
   async validateOperator(input: ValidateOperatorInput): Promise<ValidateOperatorResult> {
     const result = await this.delegate.validateOperator(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async repairXML(input: RepairXMLInput): Promise<RepairXMLResult> {
+    const result = await this.delegate.repairXML(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 

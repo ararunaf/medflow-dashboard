@@ -21,6 +21,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  RepairXMLInput,
+  RepairXMLResult,
   ValidateBusinessInput,
   ValidateBusinessResult,
   ValidateNamespaceInput,
@@ -113,6 +115,16 @@ export interface XMLValidationRuntimePort {
    * Capability D-07 (`operatorValidationImplemented = true`).
    */
   validateOperator(input: ValidateOperatorInput): Promise<ValidateOperatorResult>;
+
+  // -------------------------------------------------------------------------
+  // D-08 — XML Repair funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Aplica reparos genéricos em CanonicalXMLDocument.
+   * Capability D-08 (`xmlRepairImplemented = true`).
+   */
+  repairXML(input: RepairXMLInput): Promise<RepairXMLResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

@@ -42,6 +42,7 @@ import type {
   CanonicalOperatorValidationContext,
   CanonicalOperatorValidationResult,
 } from "../operator-validation/canonical";
+import type { CanonicalXMLRepairContext, CanonicalXMLRepairResult } from "../xml-repair/canonical";
 import type {
   AuditResult,
   AutoFillResult,
@@ -82,6 +83,8 @@ export type {
   CanonicalOperatorValidationContext,
   CanonicalOperatorValidationResult,
 } from "../operator-validation/canonical";
+
+export type { CanonicalXMLRepairContext, CanonicalXMLRepairResult } from "../xml-repair/canonical";
 
 export type {
   AuditResult,
@@ -202,7 +205,10 @@ export type XMLValidationRuntimeHealth = {
   operatorValidationOk?: boolean;
   /** D-07 — Operator Validation funcional. */
   operatorValidationImplemented: boolean;
-  xmlRepairImplemented: false;
+  /** D-08 — health da capability XML Repair. */
+  xmlRepairOk?: boolean;
+  /** D-08 — XML Repair funcional. */
+  xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
 };
@@ -249,7 +255,8 @@ export type XMLValidationRuntimeCapabilities = {
   businessValidationImplemented: boolean;
   /** D-07 — Operator Validation funcional. */
   operatorValidationImplemented: boolean;
-  xmlRepairImplemented: false;
+  /** D-08 — XML Repair funcional. */
+  xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
   /** Compat TISS-08. */
@@ -523,4 +530,21 @@ export type ValidateOperatorResult = XMLValidationRuntimeOperationEnvelope & {
   validation?: CanonicalOperatorValidationResult;
   context?: CanonicalOperatorValidationContext | null;
   valid?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-08 — XML Repair funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type RepairXMLInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Regras de reparo a serem aplicadas. */
+  rules: import("../xml-repair/canonical").XMLRepairRule[];
+};
+
+export type RepairXMLResult = XMLValidationRuntimeOperationEnvelope & {
+  repair?: CanonicalXMLRepairResult;
+  context?: CanonicalXMLRepairContext | null;
+  repaired?: boolean;
 };

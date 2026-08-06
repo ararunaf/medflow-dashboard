@@ -241,7 +241,7 @@ export type XMLValidationReportContract = {
   validationReportImplemented: false;
   xmlValidationImplemented: false;
   automaticCorrectionImplemented: false;
-  xmlRepairImplemented: false;
+  xmlRepairImplemented: boolean;
 };
 
 /**
@@ -342,7 +342,7 @@ export type XMLValidationResult = {
   versionValidationImplemented: boolean;
   businessValidationImplemented: boolean;
   operatorValidationImplemented: boolean;
-  xmlRepairImplemented: false;
+  xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
   status: XMLValidationStatus;
@@ -417,7 +417,7 @@ export type XMLValidationHealth = {
   versionValidationImplemented: boolean;
   businessValidationImplemented: boolean;
   operatorValidationImplemented: boolean;
-  xmlRepairImplemented: false;
+  xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
 };
@@ -447,7 +447,7 @@ export type XMLValidationCapabilities = {
   versionValidationImplemented: boolean;
   businessValidationImplemented: boolean;
   operatorValidationImplemented: boolean;
-  xmlRepairImplemented: false;
+  xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
   /** Compat TISS-08. */
