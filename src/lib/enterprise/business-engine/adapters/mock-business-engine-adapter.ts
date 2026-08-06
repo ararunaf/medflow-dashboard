@@ -1,14 +1,16 @@
 /**
- * MockBusinessEngineAdapter — E-05.
+ * MockBusinessEngineAdapter — E-06.
  *
  * Adapter mock para testes.
  */
-import { E05_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E06_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessDecisionTableInput,
+  ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
   ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
@@ -17,12 +19,16 @@ import type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessDecisionTableInput,
+  FindBusinessDecisionTableResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
+  RegisterBusinessDecisionTableInput,
+  RegisterBusinessDecisionTableResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "../ports/types";
@@ -52,7 +58,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E05_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E06_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -65,6 +71,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessTransactionOk: ok,
       businessWorkflowOk: ok,
       businessProcessOrchestrationOk: ok,
+      businessDecisionTableOk: ok,
     };
   }
 
@@ -164,6 +171,36 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       processResults: [],
       completed: true,
       output: {},
+    };
+  }
+
+  async registerDecisionTable(
+    _input: RegisterBusinessDecisionTableInput,
+  ): Promise<RegisterBusinessDecisionTableResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_DECISION_TABLE_MOCK_REGISTERED",
+      message: "decision table registered (mock)",
+    };
+  }
+
+  async findDecisionTable(
+    _input: FindBusinessDecisionTableInput,
+  ): Promise<FindBusinessDecisionTableResult> {
+    return null;
+  }
+
+  async executeDecisionTable(
+    _input: ExecuteBusinessDecisionTableInput,
+  ): Promise<ExecuteBusinessDecisionTableResult> {
+    return {
+      kind: "canonical-business-decision-table-result",
+      ok: true,
+      tableId: _input.tableId,
+      matched: false,
+      code: "BUSINESS_DECISION_TABLE_MOCK_EXECUTED",
+      message: "decision table executed (mock)",
+      rule: null,
     };
   }
 }

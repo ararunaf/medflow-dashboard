@@ -1,20 +1,23 @@
 /**
- * DefaultBusinessEngineAdapter — E-05.
+ * DefaultBusinessEngineAdapter — E-06.
  *
  * Adapter oficial da Enterprise Business Engine.
- * Capabilities E-01 a E-05 ativas.
+ * Capabilities E-01 a E-06 ativas.
  */
+import { BusinessDecisionTableEngine } from "../business-decision-table";
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
 import { BusinessRuleExecutionEngine } from "../business-rule-execution";
 import { BusinessTransactionEngine } from "../business-transaction";
 import { BusinessWorkflowEngine } from "../business-workflow";
 import { BusinessProcessOrchestrationEngine } from "../business-process-orchestration";
-import { E05_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E06_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessDecisionTableInput,
+  ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
   ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
@@ -23,12 +26,16 @@ import type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessDecisionTableInput,
+  FindBusinessDecisionTableResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
+  RegisterBusinessDecisionTableInput,
+  RegisterBusinessDecisionTableResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "../ports/types";
@@ -47,6 +54,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   private readonly transaction = new BusinessTransactionEngine();
   private readonly workflow = new BusinessWorkflowEngine();
   private readonly orchestration = new BusinessProcessOrchestrationEngine();
+  private readonly decisionTable = new BusinessDecisionTableEngine(this.catalog);
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
@@ -64,7 +72,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E05_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E06_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -77,6 +85,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       businessTransactionOk: ok,
       businessWorkflowOk: ok,
       businessProcessOrchestrationOk: ok,
+      businessDecisionTableOk: ok,
     };
   }
 
@@ -184,5 +193,23 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       return { processId: process.processId, workflows };
     });
     return this.orchestration.execute({ orchestrationId: input.orchestrationId, processes });
+  }
+
+  async registerDecisionTable(
+    input: RegisterBusinessDecisionTableInput,
+  ): Promise<RegisterBusinessDecisionTableResult> {
+    return this.decisionTable.register(input.table);
+  }
+
+  async findDecisionTable(
+    input: FindBusinessDecisionTableInput,
+  ): Promise<FindBusinessDecisionTableResult> {
+    return this.decisionTable.find(input.tableId) ?? null;
+  }
+
+  async executeDecisionTable(
+    input: ExecuteBusinessDecisionTableInput,
+  ): Promise<ExecuteBusinessDecisionTableResult> {
+    return this.decisionTable.execute(input.tableId, input.facts);
   }
 }

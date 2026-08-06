@@ -2,6 +2,8 @@
  * Tipos vendor-agnósticos da Enterprise Business Engine.
  */
 import type {
+  CanonicalBusinessDecisionTable,
+  CanonicalBusinessDecisionTableResult,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,
@@ -34,6 +36,7 @@ export interface BusinessEngineHealth {
   readonly businessTransactionOk: boolean;
   readonly businessWorkflowOk: boolean;
   readonly businessProcessOrchestrationOk: boolean;
+  readonly businessDecisionTableOk: boolean;
 }
 
 export interface RegisterBusinessRuleInput {
@@ -114,8 +117,36 @@ export interface ExecuteBusinessProcessOrchestrationInput {
 
 export type ExecuteBusinessProcessOrchestrationResult = CanonicalBusinessProcessOrchestrationResult;
 
+export interface RegisterBusinessDecisionTableInput {
+  readonly table: CanonicalBusinessDecisionTable;
+  readonly requestId?: string;
+}
+
+export type RegisterBusinessDecisionTableResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+};
+
+export interface FindBusinessDecisionTableInput {
+  readonly tableId: string;
+  readonly requestId?: string;
+}
+
+export type FindBusinessDecisionTableResult = CanonicalBusinessDecisionTable | null;
+
+export interface ExecuteBusinessDecisionTableInput {
+  readonly tableId: string;
+  readonly facts: Record<string, unknown>;
+  readonly requestId?: string;
+}
+
+export type ExecuteBusinessDecisionTableResult = CanonicalBusinessDecisionTableResult;
+
 export type {
   BusinessEngineCapabilities,
+  CanonicalBusinessDecisionTable,
+  CanonicalBusinessDecisionTableResult,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,

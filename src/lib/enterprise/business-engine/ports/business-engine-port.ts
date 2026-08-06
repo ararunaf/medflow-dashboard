@@ -6,12 +6,15 @@
  * E-03: Business Transaction (`businessTransactionImplemented = true`).
  * E-04: Business Workflow (`businessWorkflowImplemented = true`).
  * E-05: Business Process Orchestration (`businessProcessOrchestrationImplemented = true`).
+ * E-06: Business Decision Table (`businessDecisionTableImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessDecisionTableInput,
+  ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
   ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
@@ -20,12 +23,16 @@ import type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessDecisionTableInput,
+  FindBusinessDecisionTableResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
+  RegisterBusinessDecisionTableInput,
+  RegisterBusinessDecisionTableResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "./types";
@@ -71,4 +78,19 @@ export interface BusinessEnginePort {
   executeProcessOrchestration(
     input: ExecuteBusinessProcessOrchestrationInput,
   ): Promise<ExecuteBusinessProcessOrchestrationResult>;
+
+  /** E-06 — registra uma Decision Table. */
+  registerDecisionTable(
+    input: RegisterBusinessDecisionTableInput,
+  ): Promise<RegisterBusinessDecisionTableResult>;
+
+  /** E-06 — encontra uma Decision Table por tableId. */
+  findDecisionTable(
+    input: FindBusinessDecisionTableInput,
+  ): Promise<FindBusinessDecisionTableResult>;
+
+  /** E-06 — executa uma Decision Table contra fatos. */
+  executeDecisionTable(
+    input: ExecuteBusinessDecisionTableInput,
+  ): Promise<ExecuteBusinessDecisionTableResult>;
 }

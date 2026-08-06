@@ -58,3 +58,8 @@ export const E05_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
   ...E04_BUSINESS_ENGINE_CAPABILITIES,
   businessProcessOrchestrationImplemented: true,
 };
+
+export const E06_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
+  ...E05_BUSINESS_ENGINE_CAPABILITIES,
+  businessDecisionTableImplemented: true,
+};

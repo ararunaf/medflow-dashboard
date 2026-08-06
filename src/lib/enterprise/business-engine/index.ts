@@ -6,6 +6,7 @@
  * E-03: Business Transaction.
  * E-04: Business Workflow.
  * E-05: Business Process Orchestration.
+ * E-06: Business Decision Table.
  */
 export type {
   BusinessEngineCapabilities,
@@ -13,6 +14,8 @@ export type {
   BusinessEngineInfo,
   BusinessEnginePort,
   BusinessEngineProviderId,
+  CanonicalBusinessDecisionTable,
+  CanonicalBusinessDecisionTableResult,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,
@@ -26,6 +29,8 @@ export type {
   CanonicalBusinessTransactionStep,
   CanonicalBusinessWorkflowResult,
   CanonicalBusinessWorkflowStage,
+  ExecuteBusinessDecisionTableInput,
+  ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
   ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
@@ -34,12 +39,16 @@ export type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessDecisionTableInput,
+  FindBusinessDecisionTableResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessRulesInput,
   ListBusinessRulesResult,
+  RegisterBusinessDecisionTableInput,
+  RegisterBusinessDecisionTableResult,
   RegisterBusinessRuleInput,
   RegisterBusinessRuleResult,
 } from "./ports";
@@ -50,6 +59,7 @@ export {
   E03_BUSINESS_ENGINE_CAPABILITIES,
   E04_BUSINESS_ENGINE_CAPABILITIES,
   E05_BUSINESS_ENGINE_CAPABILITIES,
+  E06_BUSINESS_ENGINE_CAPABILITIES,
 } from "./ports";
 export { DefaultBusinessEngineAdapter, MockBusinessEngineAdapter } from "./adapters";
 export { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "./business-rule-catalog";
@@ -57,5 +67,9 @@ export { BusinessRuleExecutionEngine } from "./business-rule-execution";
 export { BusinessTransactionEngine } from "./business-transaction";
 export { BusinessWorkflowEngine } from "./business-workflow";
 export { BusinessProcessOrchestrationEngine } from "./business-process-orchestration";
+export {
+  BusinessDecisionTableEngine,
+  InMemoryBusinessDecisionTableStore,
+} from "./business-decision-table";
 export { createBusinessEnginePort } from "./providers/create-business-engine-port";
 export { businessEngineRegistry } from "./registry/business-engine-registry";

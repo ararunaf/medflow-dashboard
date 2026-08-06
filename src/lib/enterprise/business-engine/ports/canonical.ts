@@ -111,6 +111,27 @@ export interface CanonicalBusinessProcessOrchestrationResult {
   readonly output: Record<string, unknown>;
 }
 
+export interface CanonicalBusinessDecisionTable {
+  readonly kind: "canonical-business-decision-table";
+  readonly tableId: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly rows: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalBusinessDecisionTableResult {
+  readonly kind: "canonical-business-decision-table-result";
+  readonly ok: boolean;
+  readonly tableId: string;
+  readonly matched: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly ruleId?: string;
+  readonly rule?: CanonicalBusinessRule | null;
+  readonly output?: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
@@ -119,6 +140,7 @@ export interface CanonicalBusinessRuleCatalogHealth {
   readonly businessTransactionOk: boolean;
   readonly businessWorkflowOk: boolean;
   readonly businessProcessOrchestrationOk: boolean;
+  readonly businessDecisionTableOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {
