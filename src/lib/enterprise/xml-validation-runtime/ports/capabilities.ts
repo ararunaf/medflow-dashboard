@@ -34,7 +34,8 @@ export type XMLValidationRuntimeEngineCapabilities = {
   xmlValidationImplemented?: false;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented?: true;
-  namespaceValidationImplemented?: false;
+  /** D-04 — Namespace Validation funcional. */
+  namespaceValidationImplemented?: true;
   schemaSelectionImplemented?: false;
   versionValidationImplemented?: false;
   businessValidationImplemented?: false;
@@ -105,7 +106,7 @@ export const DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES: XMLValidationRu
     runtimeReady: true,
     xmlValidationImplemented: false,
     xsdValidationImplemented: true,
-    namespaceValidationImplemented: false,
+    namespaceValidationImplemented: true,
     schemaSelectionImplemented: false,
     versionValidationImplemented: false,
     businessValidationImplemented: false,
@@ -154,7 +155,7 @@ export function toXMLValidationCapabilities(
     runtimeReady: true,
     xmlValidationImplemented: false,
     xsdValidationImplemented: true,
-    namespaceValidationImplemented: false,
+    namespaceValidationImplemented: true,
     schemaSelectionImplemented: false,
     versionValidationImplemented: false,
     businessValidationImplemented: false,

@@ -21,6 +21,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  ValidateNamespaceInput,
+  ValidateNamespaceResult,
   ValidateXMLInput,
   ValidateXMLResult,
   ValidateXSDInput,
@@ -62,9 +64,19 @@ export interface XMLValidationRuntimePort {
 
   /**
    * Valida CanonicalXMLDocument contra XSD.
-   * Capability única D-02 (`xsdValidationImplemented = true`).
+   * Capability D-02 (`xsdValidationImplemented = true`).
    */
   validateXsd(input: ValidateXSDInput): Promise<ValidateXSDResult>;
+
+  // -------------------------------------------------------------------------
+  // D-04 — Namespace Validation funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Valida namespace de CanonicalXMLDocument.
+   * Capability D-04 (`namespaceValidationImplemented = true`).
+   */
+  validateNamespace(input: ValidateNamespaceInput): Promise<ValidateNamespaceResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

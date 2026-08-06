@@ -27,6 +27,10 @@ import type {
   XMLValidationRuntimeContext,
 } from "../xsd-validation/canonical";
 import type {
+  CanonicalNamespaceValidationContext,
+  CanonicalNamespaceValidationResult,
+} from "../namespace-validation/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -46,6 +50,11 @@ export type {
   CanonicalXSDValidationResult,
   XMLValidationRuntimeContext,
 };
+
+export type {
+  CanonicalNamespaceValidationContext,
+  CanonicalNamespaceValidationResult,
+} from "../namespace-validation/canonical";
 
 export type {
   AuditResult,
@@ -150,7 +159,9 @@ export type XMLValidationRuntimeHealth = {
   xsdValidationImplemented: true;
   /** D-02 — health da capability XSD Validation. */
   xsdValidationOk?: boolean;
-  namespaceValidationImplemented: false;
+  /** D-04 — health da capability Namespace Validation. */
+  namespaceValidationOk?: boolean;
+  namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
   businessValidationImplemented: false;
@@ -193,7 +204,8 @@ export type XMLValidationRuntimeCapabilities = {
   xmlValidationImplemented: false;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
-  namespaceValidationImplemented: false;
+  /** D-04 — Namespace Validation funcional. */
+  namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
   businessValidationImplemented: false;
@@ -389,5 +401,26 @@ export type ValidateXSDInput = XMLValidationRuntimeOperationalControls & {
 export type ValidateXSDResult = XMLValidationRuntimeOperationEnvelope & {
   validation?: CanonicalXSDValidationResult;
   context?: XMLValidationRuntimeContext | null;
+  valid?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-04 — Namespace Validation funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type ValidateNamespaceInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** URI do namespace esperada. */
+  namespaceUri: string;
+  /** Prefixo esperado. Se omitido, qualquer prefixo que mapeie para a URI é aceito. */
+  prefix?: string;
+  /** Nome do elemento raiz esperado (localName). */
+  rootElementName?: string;
+};
+
+export type ValidateNamespaceResult = XMLValidationRuntimeOperationEnvelope & {
+  validation?: CanonicalNamespaceValidationResult;
+  context?: CanonicalNamespaceValidationContext | null;
   valid?: boolean;
 };

@@ -90,11 +90,19 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
-function assertDisabledFunctionalFlagsExceptXsd(obj: Record<string, unknown>) {
-  assert.equal(obj.xsdValidationImplemented, true, "xsdValidationImplemented deveria ser true (D-02)");
+function assertFunctionalFlagsForD04(obj: Record<string, unknown>) {
+  assert.equal(
+    obj.xsdValidationImplemented,
+    true,
+    "xsdValidationImplemented deveria ser true (D-02)",
+  );
+  assert.equal(
+    obj.namespaceValidationImplemented,
+    true,
+    "namespaceValidationImplemented deveria ser true (D-04)",
+  );
   const flags = [
     "xmlValidationImplemented",
-    "namespaceValidationImplemented",
     "schemaSelectionImplemented",
     "versionValidationImplemented",
     "businessValidationImplemented",
@@ -280,7 +288,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(health.provider, "mock");
     assert.equal(health.runtimeReady, true);
     assert.equal(health.validationEngineReady, true);
-    assertDisabledFunctionalFlagsExceptXsd(health as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD04(health as unknown as Record<string, unknown>);
 
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_XML_VALIDATION_RUNTIME_ADAPTER_ID);
@@ -289,7 +297,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(caps.supportsListResults, true);
     assert.equal(caps.supportsStats, true);
     assert.equal(caps.runtimeReady, true);
-    assertDisabledFunctionalFlagsExceptXsd(caps as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD04(caps as unknown as Record<string, unknown>);
   });
 
   it("DefaultXMLValidationRuntimeAdapter é o adapter enterprise oficial (enterpriseDeps opcional)", () => {
@@ -378,7 +386,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(validated.result?.status, "validated");
     assert.equal(validated.result?.xmlContext?.kind, "canonical-xml-validation-context");
     assert.equal(validated.result?.xmlContext?.canonicalGuide?.kind, "canonical-tiss-guide");
-    assertDisabledFunctionalFlagsExceptXsd(validated.result as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD04(validated.result as unknown as Record<string, unknown>);
 
     const loaded = await port.getResult({ resultId: validated.result!.resultId });
     assert.equal(loaded.ok, true);
@@ -413,15 +421,18 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.capabilities.runtimeReady, true);
     assert.equal(summary.info.providerType, "XML_VALIDATION_RUNTIME");
-    assertDisabledFunctionalFlagsExceptXsd(summary.health as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD04(summary.health as unknown as Record<string, unknown>);
   });
 
-  it("capabilities engine declara xsdValidationImplemented = true e demais flags *Implemented = false", () => {
-    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented, false);
+  it("capabilities engine declara xsdValidationImplemented (D-02) e namespaceValidationImplemented (D-04) ativas, demais false", () => {
+    assert.equal(
+      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented,
+      false,
+    );
     assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xsdValidationImplemented, true);
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.namespaceValidationImplemented,
-      false,
+      true,
     );
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.schemaSelectionImplemented,
@@ -692,35 +703,34 @@ describe("C-02 cadeia Enterprise / TISS compatibility", () => {
                 ({
                   providerId: "mock",
                   health: async () => ({ ok: true, provider: "mock" }),
-                  capabilities: () =>
-                    ({
-                      provider: "mock",
-                      adapterId: "stub",
-                      supportsProcess: true,
-                      supportsGetSession: true,
-                      supportsListSessions: true,
-                      supportsHealth: true,
-                      supportsCapabilities: true,
-                      usesEnterpriseRuntimePorts: true,
-                      usesCanonicalExecutionOrchestrator: true,
-                      usesTISSProviderPort: true,
-                      usesTISSCatalogPort: true,
-                      usesRulePackEnginePort: true,
-                      usesXMLRuntimePort: true,
-                      usesXMLGenerationRuntimePort: true,
-                      usesXMLSerializerRuntimePort: true,
-                      usesXMLSchemaRuntimePort: true,
-                      usesXMLValidationRuntimePort: true,
-                      usesXSDRuntimePort: true,
-                      usesNamespaceRuntimePort: true,
-                      usesQueueRuntimePort: true,
-                      usesWorkerRuntimePort: true,
-                      usesSchedulerRuntimePort: true,
-                      usesPersistentQueueRuntimePort: true,
-                      usesObservabilityRuntimePort: true,
-                      implementsRealXml: false,
-                      implementsOperatorDispatch: false,
-                    }),
+                  capabilities: () => ({
+                    provider: "mock",
+                    adapterId: "stub",
+                    supportsProcess: true,
+                    supportsGetSession: true,
+                    supportsListSessions: true,
+                    supportsHealth: true,
+                    supportsCapabilities: true,
+                    usesEnterpriseRuntimePorts: true,
+                    usesCanonicalExecutionOrchestrator: true,
+                    usesTISSProviderPort: true,
+                    usesTISSCatalogPort: true,
+                    usesRulePackEnginePort: true,
+                    usesXMLRuntimePort: true,
+                    usesXMLGenerationRuntimePort: true,
+                    usesXMLSerializerRuntimePort: true,
+                    usesXMLSchemaRuntimePort: true,
+                    usesXMLValidationRuntimePort: true,
+                    usesXSDRuntimePort: true,
+                    usesNamespaceRuntimePort: true,
+                    usesQueueRuntimePort: true,
+                    usesWorkerRuntimePort: true,
+                    usesSchedulerRuntimePort: true,
+                    usesPersistentQueueRuntimePort: true,
+                    usesObservabilityRuntimePort: true,
+                    implementsRealXml: false,
+                    implementsOperatorDispatch: false,
+                  }),
                   process: async () => ({ ok: true }),
                   getSession: async () => ({ ok: false }),
                   listSessions: async () => ({ ok: true, sessions: [] }),

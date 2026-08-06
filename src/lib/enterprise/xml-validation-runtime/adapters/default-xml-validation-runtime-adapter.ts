@@ -30,6 +30,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  ValidateNamespaceInput,
+  ValidateNamespaceResult,
   ValidateXMLInput,
   ValidateXMLResult,
   ValidateXSDInput,
@@ -47,6 +49,7 @@ import type {
   XMLValidationStatsResult,
 } from "../ports/types";
 import { InMemoryXMLValidationRuntimeStore, type XMLValidationRuntimeStore } from "../store";
+import { NamespaceValidator } from "../namespace-validation/namespace-validator";
 import { XSDValidator } from "../xsd-validation/xsd-validator";
 
 export const DEFAULT_XML_VALIDATION_RUNTIME_ADAPTER_ID =
@@ -114,7 +117,8 @@ function structuralFlags() {
   return {
     xmlValidationImplemented: false,
     xsdValidationImplemented: true,
-    namespaceValidationImplemented: false,
+    /** D-04 — Namespace Validation funcional. */
+    namespaceValidationImplemented: true,
     schemaSelectionImplemented: false,
     versionValidationImplemented: false,
     businessValidationImplemented: false,
@@ -199,6 +203,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
   private readonly sleep: (ms: number) => Promise<void>;
   private failAttemptsRemaining: number;
   private readonly xsdValidator: XSDValidator;
+  private readonly namespaceValidator: NamespaceValidator;
 
   constructor(options: DefaultXMLValidationRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
@@ -227,6 +232,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
     this.sleep = options.sleep ?? defaultSleep;
     this.failAttemptsRemaining = options.failAttempts ?? 0;
     this.xsdValidator = new XSDValidator();
+    this.namespaceValidator = new NamespaceValidator();
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -377,6 +383,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       runtimeReady: true,
       ...structuralFlags(),
       xsdValidationOk: this.healthy === true,
+      namespaceValidationOk: this.healthy === true,
       message: this.healthy
         ? ok
           ? "XML Validation Runtime pronto (C-02 estrutural + D-02 XSD Validation)."
@@ -388,6 +395,28 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
   async validateXsd(input: ValidateXSDInput): Promise<ValidateXSDResult> {
     return this.runOperation("validateXsd", input, async () => {
       const validation = this.xsdValidator.validate(input.document, input.xsd, {
+        rootElementName: input.rootElementName,
+      });
+      return {
+        ok: validation.ok,
+        validation,
+        context: validation.context ?? null,
+        valid: validation.valid,
+        code: validation.code,
+        message: validation.message,
+      };
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // D-04 — Namespace Validation funcional.
+  // -------------------------------------------------------------------------
+
+  async validateNamespace(input: ValidateNamespaceInput): Promise<ValidateNamespaceResult> {
+    return this.runOperation("validateNamespace", input, async () => {
+      const validation = this.namespaceValidator.validate(input.document, {
+        namespaceUri: input.namespaceUri,
+        prefix: input.prefix,
         rootElementName: input.rootElementName,
       });
       return {

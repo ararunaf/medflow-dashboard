@@ -75,9 +75,13 @@ export type {
   XMLValidationVersionContract,
   ValidateXSDInput,
   ValidateXSDResult,
+  ValidateNamespaceInput,
+  ValidateNamespaceResult,
   CanonicalValidationIssue,
   CanonicalValidationStatistics,
   CanonicalXSDValidationResult,
+  CanonicalNamespaceValidationContext,
+  CanonicalNamespaceValidationResult,
   XMLValidationRuntimeContext,
 } from "./types";
 

@@ -337,7 +337,7 @@ export type XMLValidationResult = {
   xmlValidationImplemented: false;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
-  namespaceValidationImplemented: false;
+  namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
   businessValidationImplemented: false;
@@ -412,7 +412,7 @@ export type XMLValidationHealth = {
   xmlValidationImplemented: false;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
-  namespaceValidationImplemented: false;
+  namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
   businessValidationImplemented: false;
@@ -442,7 +442,7 @@ export type XMLValidationCapabilities = {
   xmlValidationImplemented: false;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
-  namespaceValidationImplemented: false;
+  namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
   businessValidationImplemented: false;

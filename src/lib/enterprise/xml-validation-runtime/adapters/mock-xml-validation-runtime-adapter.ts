@@ -16,6 +16,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  ValidateNamespaceInput,
+  ValidateNamespaceResult,
   ValidateXMLInput,
   ValidateXMLResult,
   ValidateXSDInput,
@@ -125,7 +127,7 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       runtimeReady: true,
       xmlValidationImplemented: false,
       xsdValidationImplemented: true,
-      namespaceValidationImplemented: false,
+      namespaceValidationImplemented: true,
       schemaSelectionImplemented: false,
       versionValidationImplemented: false,
       businessValidationImplemented: false,
@@ -179,6 +181,11 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
 
   async validateXsd(input: ValidateXSDInput): Promise<ValidateXSDResult> {
     const result = await this.delegate.validateXsd(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async validateNamespace(input: ValidateNamespaceInput): Promise<ValidateNamespaceResult> {
+    const result = await this.delegate.validateNamespace(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 
