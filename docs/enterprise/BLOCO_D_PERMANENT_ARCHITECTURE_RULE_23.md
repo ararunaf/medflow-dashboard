@@ -113,21 +113,21 @@ RULE_23 complementa RULE_20: além de evoluir uma capacidade por vez, cada entre
 
 **Fonte única e oficial do roadmap de implementação.**
 
-A ordem das Sprints segue a matriz canônica de capabilities em `XMLValidationRuntimeCapabilities` (`src/lib/enterprise/xml-validation-runtime/ports/canonical.ts`) e as entregas já homologadas.
+A ordem das Sprints segue uma sequência funcional coerente derivada da matriz canônica de capabilities em `XMLValidationRuntimeCapabilities` (`src/lib/enterprise/xml-validation-runtime/ports/canonical.ts`), respeitando as dependências entre as validações. O fechamento `xmlValidationImplemented` é a capability agregadora do runtime, portanto é a última Sprint do Bloco D.
 
 | Sprint | Sprint de certificação | Capability                       | Nome oficial                                                              | Status                    |
 | ------ | ---------------------- | -------------------------------- | ------------------------------------------------------------------------- | ------------------------- |
 | D-01   | D-01A                  | `parserImplemented`              | Enterprise XML Functional Parser Foundation                               | Concluída / certificada   |
 | D-02   | D-02R                  | `xsdValidationImplemented`       | Enterprise XML Validation Runtime — XSD Validation                        | Concluída / certificada   |
 | D-03   | D-03R                  | `schemaSelectionImplemented`     | Enterprise XML Schema Runtime — Schema Selection                          | Concluída / certificada   |
-| D-04   | D-04R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Autorizada (não iniciada) |
-| D-05   | D-05R                  | `namespaceValidationImplemented` | Enterprise XML Namespace Runtime — Namespace Validation                   | Planejada                 |
-| D-06   | D-06R                  | `versionValidationImplemented`   | Enterprise XML Version Runtime — Version Validation                       | Planejada                 |
-| D-07   | D-07R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Planejada                 |
-| D-08   | D-08R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Planejada                 |
-| D-09   | D-09R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Planejada                 |
-| D-10   | D-10R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Planejada                 |
-| D-11   | D-11R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Planejada                 |
+| D-04   | D-04R                  | `namespaceValidationImplemented` | Enterprise XML Namespace Runtime — Namespace Validation                   | Autorizada (não iniciada) |
+| D-05   | D-05R                  | `versionValidationImplemented`   | Enterprise XML Version Runtime — Version Validation                       | Planejada                 |
+| D-06   | D-06R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Planejada                 |
+| D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Planejada                 |
+| D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Planejada                 |
+| D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Planejada                 |
+| D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Planejada                 |
+| D-11   | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Planejada                 |
 
 **Regras do Roadmap:**
 
@@ -167,15 +167,15 @@ A ordem das Sprints segue a matriz canônica de capabilities em `XMLValidationRu
 
 ## 9. Aplicação na Sprint D-03R
 
-| Item                                     | Valor                                                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Sprint de entrega                        | D-03 — Enterprise XML Schema Runtime Functional Foundation                                         |
-| Sprint de gate                           | D-03R — XML Schema Runtime Release Certification                                                   |
-| Capacidade certificada                   | Schema Selection (`schemaSelectionImplemented = true`)                                             |
-| Commit de entrega                        | `31deb22`                                                                                          |
-| Data                                     | 2026-08-06                                                                                         |
-| Resultado                                | D-03 torna-se a **terceira OFFICIAL RELEASE BASELINE** do BLOCO D                                  |
-| Próxima Sprint autorizada (não iniciada) | **D-04** — Enterprise XML Validation Runtime — Generic XML Validation (`xmlValidationImplemented`) |
+| Item                                     | Valor                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Sprint de entrega                        | D-03 — Enterprise XML Schema Runtime Functional Foundation                                            |
+| Sprint de gate                           | D-03R — XML Schema Runtime Release Certification                                                      |
+| Capacidade certificada                   | Schema Selection (`schemaSelectionImplemented = true`)                                                |
+| Commit de entrega                        | `31deb22`                                                                                             |
+| Data                                     | 2026-08-06                                                                                            |
+| Resultado                                | D-03 torna-se a **terceira OFFICIAL RELEASE BASELINE** do BLOCO D                                     |
+| Próxima Sprint autorizada (não iniciada) | **D-04** — Enterprise XML Namespace Runtime — Namespace Validation (`namespaceValidationImplemented`) |
 
 ---
 
