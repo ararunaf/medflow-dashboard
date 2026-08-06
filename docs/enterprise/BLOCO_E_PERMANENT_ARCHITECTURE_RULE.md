@@ -1,8 +1,8 @@
 # BLOCO E — Regra Permanente de Arquitetura — Enterprise Business Engine
 
 **Bloco:** BLOCO E — Enterprise Business Engine  
-**Status:** E-04 certificada e congelada  
-**Próxima Sprint autorizada (não iniciada):** E-05 — Business Process Orchestration  
+**Status:** E-05 certificada e congelada  
+**Próxima Sprint autorizada (não iniciada):** E-06 — Business Decision Table  
 **Data:** 2026-08-06  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -78,8 +78,8 @@ A Enterprise Business Engine é responsável por:
 | E-02     | E-02R                  | `businessRuleExecutionImplemented`        | Enterprise Business Engine — Business Rule Execution        | Concluída / certificada   |
 | E-03     | E-03R                  | `businessTransactionImplemented`          | Enterprise Business Engine — Business Transaction           | Concluída / certificada   |
 | E-04     | E-04R                  | `businessWorkflowImplemented`             | Enterprise Business Engine — Business Workflow              | Concluída / certificada   |
-| E-05     | E-05R                  | `businessProcessOrchestrationImplemented` | Enterprise Business Engine — Business Process Orchestration | Autorizada (não iniciada) |
-| E-06     | E-06R                  | `businessDecisionTableImplemented`        | Enterprise Business Engine — Business Decision Table        | Planejada                 |
+| E-05     | E-05R                  | `businessProcessOrchestrationImplemented` | Enterprise Business Engine — Business Process Orchestration | Concluída / certificada   |
+| E-06     | E-06R                  | `businessDecisionTableImplemented`        | Enterprise Business Engine — Business Decision Table        | Autorizada (não iniciada) |
 | E-07     | E-07R                  | `businessEventLogImplemented`             | Enterprise Business Engine — Business Event Log             | Planejada                 |
 | E-08     | E-08R                  | `businessAuditTrailImplemented`           | Enterprise Business Engine — Business Audit Trail           | Planejada                 |
 | E-09     | E-09R                  | `businessReportImplemented`               | Enterprise Business Engine — Business Report                | Planejada                 |
