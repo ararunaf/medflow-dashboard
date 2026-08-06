@@ -121,8 +121,8 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | D-02   | D-02R                  | `xsdValidationImplemented`       | Enterprise XML Validation Runtime — XSD Validation                        | Concluída / certificada   |
 | D-03   | D-03R                  | `schemaSelectionImplemented`     | Enterprise XML Schema Runtime — Schema Selection                          | Concluída / certificada   |
 | D-04   | D-04R                  | `namespaceValidationImplemented` | Enterprise XML Namespace Runtime — Namespace Validation                   | Concluída / certificada   |
-| D-05   | D-05R                  | `versionValidationImplemented`   | Enterprise XML Version Runtime — Version Validation                       | Autorizada (não iniciada) |
-| D-06   | D-06R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Planejada                 |
+| D-05   | D-05R                  | `versionValidationImplemented`   | Enterprise XML Version Runtime — Version Validation                       | Concluída / certificada   |
+| D-06   | D-06R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Autorizada (não iniciada) |
 | D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Planejada                 |
 | D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Planejada                 |
 | D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Planejada                 |
@@ -195,6 +195,22 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 
 ## 11. O que esta regra NÃO é
 
+## 10. Aplicação na Sprint D-05R
+
+| Item                                     | Valor                                                                                                    |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Sprint de entrega                        | D-05 — Enterprise XML Version Runtime — Version Validation                                               |
+| Sprint de gate                           | D-05R — XML Version Validation Release Certification                                                     |
+| Capacidade certificada                   | Version Validation (`versionValidationImplemented = true`)                                               |
+| Commit de entrega                        | `c6aa570`                                                                                                |
+| Data                                     | 2026-08-06                                                                                               |
+| Resultado                                | D-05 torna-se a **quinta OFFICIAL RELEASE BASELINE** do BLOCO D                                          |
+| Próxima Sprint autorizada (não iniciada) | **D-06** — Enterprise XML Business Validation Runtime — Business Rules (`businessValidationImplemented`) |
+
+---
+
+## 11. O que esta regra NÃO é
+
 - Não implementa XSD / XML Validation / SOAP / Operadoras / Workflow / Authorization
 - Não altera XML Parser, XML Runtime, Enterprise Runtime ou Contratos Canônicos
 - Não autoriza iniciar a Sprint seguinte dentro da Sprint de certificação
@@ -203,7 +219,7 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 
 ---
 
-## 11. Vigência
+## 12. Vigência
 
 A partir de **D-01A — Enterprise XML Functional Parser Gate**, toda Sprint somente poderá servir de base para a Sprint seguinte quando cumprir **RELEASE BASELINE CERTIFICATION** e for publicada como **OFFICIAL RELEASE BASELINE**.
 
