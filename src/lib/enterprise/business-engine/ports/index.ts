@@ -7,6 +7,8 @@ export type {
   BusinessEngineHealth,
   BusinessEngineInfo,
   BusinessEngineProviderId,
+  ExecuteBusinessRuleInput,
+  ExecuteBusinessRuleResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -19,6 +21,7 @@ export type {
 export {
   DEFAULT_BUSINESS_ENGINE_CAPABILITIES,
   E01_BUSINESS_ENGINE_CAPABILITIES,
+  E02_BUSINESS_ENGINE_CAPABILITIES,
 } from "./capabilities";
 export type {
   CanonicalBusinessRule,
@@ -27,4 +30,5 @@ export type {
   CanonicalBusinessRuleCatalogResult,
   CanonicalBusinessRuleCatalogStats,
   CanonicalBusinessRuleCondition,
+  CanonicalBusinessRuleExecutionResult,
 } from "./canonical";

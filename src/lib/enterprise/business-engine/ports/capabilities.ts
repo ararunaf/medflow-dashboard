@@ -1,7 +1,8 @@
 /**
  * Capability matrix da Enterprise Business Engine — BLOCO E.
  *
- * Apenas `businessRuleCatalogImplemented` é ativada pela E-01.
+ * E-01: `businessRuleCatalogImplemented`
+ * E-02: `businessRuleExecutionImplemented`
  */
 
 export interface BusinessEngineCapabilities {
@@ -33,4 +34,9 @@ export const DEFAULT_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = 
 export const E01_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
   ...DEFAULT_BUSINESS_ENGINE_CAPABILITIES,
   businessRuleCatalogImplemented: true,
+};
+
+export const E02_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
+  ...E01_BUSINESS_ENGINE_CAPABILITIES,
+  businessRuleExecutionImplemented: true,
 };

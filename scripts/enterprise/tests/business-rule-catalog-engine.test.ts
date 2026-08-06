@@ -6,7 +6,6 @@ import assert from "node:assert";
 import {
   BusinessRuleCatalog,
   createBusinessEnginePort,
-  DEFAULT_BUSINESS_ENGINE_CAPABILITIES,
   E01_BUSINESS_ENGINE_CAPABILITIES,
   InMemoryBusinessRuleCatalogStore,
   MockBusinessEngineAdapter,
@@ -70,10 +69,11 @@ describe("E-01 Business Rule Catalog — functional cases", () => {
     assert.equal(stats.ruleIds[0], "r1");
   });
 
-  it("DefaultBusinessEngineAdapter implementa o Port", async () => {
+  it("DefaultBusinessEngineAdapter implementa o Port e mantém catalog", async () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E01_BUSINESS_ENGINE_CAPABILITIES);
+    assert.equal(caps.businessRuleCatalogImplemented, true);
+    assert.equal(caps.businessRuleExecutionImplemented, true);
     const rule = makeRule();
     const reg = await adapter.registerRule({ rule });
     assert.equal(reg.ok, true);
@@ -84,6 +84,7 @@ describe("E-01 Business Rule Catalog — functional cases", () => {
     const health = await adapter.health();
     assert.equal(health.ok, true);
     assert.equal(health.businessRuleCatalogOk, true);
+    assert.equal(health.businessRuleExecutionOk, true);
   });
 
   it("MockBusinessEngineAdapter implementa o Port", async () => {
@@ -99,7 +100,7 @@ describe("E-01 Business Rule Catalog — functional cases", () => {
     assert.equal(identity.provider, "default");
     const caps = port.getCapabilities();
     assert.equal(caps.businessRuleCatalogImplemented, true);
-    assert.equal(caps.businessRuleExecutionImplemented, false);
+    assert.equal(caps.businessRuleExecutionImplemented, true);
   });
 
   it("registry resolve default e mock sem fallback silencioso", () => {

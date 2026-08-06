@@ -40,10 +40,23 @@ export interface CanonicalBusinessRuleCatalogResult {
   readonly rule?: CanonicalBusinessRule | null;
 }
 
+export interface CanonicalBusinessRuleExecutionResult {
+  readonly kind: "canonical-business-rule-execution-result";
+  readonly ok: boolean;
+  readonly ruleId: string;
+  readonly matched: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly actions: readonly CanonicalBusinessRuleAction[];
+  readonly facts?: Record<string, unknown>;
+  readonly output?: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
   readonly businessRuleCatalogOk: boolean;
+  readonly businessRuleExecutionOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {

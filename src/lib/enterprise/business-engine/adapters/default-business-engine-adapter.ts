@@ -1,16 +1,19 @@
 /**
- * DefaultBusinessEngineAdapter — E-01.
+ * DefaultBusinessEngineAdapter — E-02.
  *
  * Adapter oficial da Enterprise Business Engine.
- * Apenas `businessRuleCatalogImplemented = true`.
+ * `businessRuleCatalogImplemented` e `businessRuleExecutionImplemented = true`.
  */
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
-import { E01_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { BusinessRuleExecutionEngine } from "../business-rule-execution";
+import { E02_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessRuleInput,
+  ExecuteBusinessRuleResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -31,6 +34,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   readonly providerId = DEFAULT_BUSINESS_ENGINE_ADAPTER_ID;
 
   private readonly catalog = new BusinessRuleCatalog(new InMemoryBusinessRuleCatalogStore());
+  private readonly executor = new BusinessRuleExecutionEngine();
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
@@ -48,7 +52,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E01_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E02_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -57,6 +61,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       ok,
       businessEngineOk: ok,
       businessRuleCatalogOk: ok,
+      businessRuleExecutionOk: ok,
     };
   }
 
@@ -96,5 +101,22 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       message: "stats retrieved",
       stats: this.catalog.stats(),
     };
+  }
+
+  async executeRule(input: ExecuteBusinessRuleInput): Promise<ExecuteBusinessRuleResult> {
+    const found = this.catalog.find(input.ruleId);
+    if (!found.ok || !found.rule) {
+      return {
+        kind: "canonical-business-rule-execution-result",
+        ok: false,
+        ruleId: input.ruleId,
+        matched: false,
+        code: "BUSINESS_RULE_EXECUTION_NOT_FOUND",
+        message: found.message,
+        actions: [],
+        facts: input.facts,
+      };
+    }
+    return this.executor.execute(found.rule, input.facts);
   }
 }

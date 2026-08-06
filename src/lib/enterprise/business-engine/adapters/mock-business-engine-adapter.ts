@@ -1,14 +1,16 @@
 /**
- * MockBusinessEngineAdapter — E-01.
+ * MockBusinessEngineAdapter — E-02.
  *
  * Adapter mock para testes.
  */
-import { E01_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E02_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessRuleInput,
+  ExecuteBusinessRuleResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -44,7 +46,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E01_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E02_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -53,6 +55,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       ok,
       businessEngineOk: ok,
       businessRuleCatalogOk: ok,
+      businessRuleExecutionOk: ok,
     };
   }
 
@@ -94,6 +97,19 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       code: "BUSINESS_RULE_CATALOG_MOCK_STATS",
       message: "stats retrieved (mock)",
       stats: { totalRules: 0, ruleIds: [], tags: [] },
+    };
+  }
+
+  async executeRule(input: ExecuteBusinessRuleInput): Promise<ExecuteBusinessRuleResult> {
+    return {
+      kind: "canonical-business-rule-execution-result",
+      ok: true,
+      ruleId: input.ruleId,
+      matched: true,
+      code: "BUSINESS_RULE_MOCK_EXECUTED",
+      message: "rule executed (mock)",
+      actions: [],
+      facts: input.facts,
     };
   }
 }

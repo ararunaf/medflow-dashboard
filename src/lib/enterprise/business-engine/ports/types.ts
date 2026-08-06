@@ -6,6 +6,7 @@ import type {
   CanonicalBusinessRuleCatalogHealth,
   CanonicalBusinessRuleCatalogResult,
   CanonicalBusinessRuleCatalogStats,
+  CanonicalBusinessRuleExecutionResult,
 } from "./canonical";
 import type { BusinessEngineCapabilities } from "./capabilities";
 
@@ -23,6 +24,7 @@ export interface BusinessEngineHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
   readonly businessRuleCatalogOk: boolean;
+  readonly businessRuleExecutionOk: boolean;
 }
 
 export interface RegisterBusinessRuleInput {
@@ -71,10 +73,19 @@ export interface GetBusinessRuleCatalogStatsResult {
   readonly stats: CanonicalBusinessRuleCatalogStats;
 }
 
+export interface ExecuteBusinessRuleInput {
+  readonly ruleId: string;
+  readonly facts: Record<string, unknown>;
+  readonly requestId?: string;
+}
+
+export type ExecuteBusinessRuleResult = CanonicalBusinessRuleExecutionResult;
+
 export type {
   BusinessEngineCapabilities,
   CanonicalBusinessRule,
   CanonicalBusinessRuleCatalogHealth,
   CanonicalBusinessRuleCatalogResult,
   CanonicalBusinessRuleCatalogStats,
+  CanonicalBusinessRuleExecutionResult,
 };

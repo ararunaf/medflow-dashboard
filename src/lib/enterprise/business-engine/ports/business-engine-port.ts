@@ -2,12 +2,15 @@
  * BusinessEnginePort — contrato único da Enterprise Business Engine.
  *
  * E-01: Business Rule Catalog (`businessRuleCatalogImplemented = true`).
+ * E-02: Business Rule Execution (`businessRuleExecutionImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessRuleInput,
+  ExecuteBusinessRuleResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -43,4 +46,7 @@ export interface BusinessEnginePort {
   getCatalogStats(
     input?: GetBusinessRuleCatalogStatsInput,
   ): Promise<GetBusinessRuleCatalogStatsResult>;
+
+  /** E-02 — executa regra por ruleId contra fatos. */
+  executeRule(input: ExecuteBusinessRuleInput): Promise<ExecuteBusinessRuleResult>;
 }
