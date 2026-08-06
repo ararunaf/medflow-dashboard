@@ -68,7 +68,7 @@ const BUILTIN_REGISTRATIONS: readonly XMLValidationRuntimeRegistration[] = [
     vendor: "medicflow-enterprise",
     capabilities: DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
     description:
-      "Official C-02 Enterprise XML Validation Runtime — structural canonical XML validation foundation (no real XML validation).",
+      "Official C-02/D-02 Enterprise XML Validation Runtime — structural foundation + XSD Validation functional capability.",
   },
 ];
 

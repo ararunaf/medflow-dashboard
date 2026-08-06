@@ -19,6 +19,13 @@ import type { AutoFillRuntimePort } from "../../auto-fill-runtime/ports/auto-fil
 import type { QualityRuntimePort } from "../../quality-runtime/ports/quality-runtime-port";
 import type { ValidationRuntimePort } from "../../validation-runtime/ports/validation-runtime-port";
 import type { XMLTISSRuntimePort } from "../../xml-tiss-runtime/ports/xml-tiss-runtime-port";
+import type { CanonicalXMLDocument } from "../../xml-runtime/parser/canonical";
+import type {
+  CanonicalValidationIssue,
+  CanonicalValidationStatistics,
+  CanonicalXSDValidationResult,
+  XMLValidationRuntimeContext,
+} from "../xsd-validation/canonical";
 import type {
   AuditResult,
   AutoFillResult,
@@ -32,6 +39,13 @@ import type {
   XMLValidationStatistics,
 } from "./canonical";
 import type { XMLValidationRuntimeEngineCapabilities } from "./capabilities";
+
+export type {
+  CanonicalValidationIssue,
+  CanonicalValidationStatistics,
+  CanonicalXSDValidationResult,
+  XMLValidationRuntimeContext,
+};
 
 export type {
   AuditResult,
@@ -107,6 +121,7 @@ export type XMLValidationRuntimeStructuredLog = {
 /**
  * Resultado de health check do XML Validation Runtime.
  * Peers estruturais: shape-check apenas (sem consumo funcional).
+ * D-02: xsdValidationOk / xsdValidationImplemented = true.
  */
 export type XMLValidationRuntimeHealth = {
   ok: boolean;
@@ -131,7 +146,10 @@ export type XMLValidationRuntimeHealth = {
   validationEngineReady: true;
   runtimeReady: true;
   xmlValidationImplemented: false;
-  xsdValidationImplemented: false;
+  /** D-02 — XSD Validation funcional. */
+  xsdValidationImplemented: true;
+  /** D-02 — health da capability XSD Validation. */
+  xsdValidationOk?: boolean;
   namespaceValidationImplemented: false;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
@@ -144,7 +162,7 @@ export type XMLValidationRuntimeHealth = {
 
 /**
  * Capacidades declaradas pelo adapter (Port level).
- * Todas as flags `*Implemented` permanecem literalmente `false`.
+ * D-02: xsdValidationImplemented = true; demais capacidades funcionais = false.
  */
 export type XMLValidationRuntimeCapabilities = {
   provider: XMLValidationRuntimeProviderId;
@@ -173,7 +191,8 @@ export type XMLValidationRuntimeCapabilities = {
   validationEngineReady: true;
   runtimeReady: true;
   xmlValidationImplemented: false;
-  xsdValidationImplemented: false;
+  /** D-02 — XSD Validation funcional. */
+  xsdValidationImplemented: true;
   namespaceValidationImplemented: false;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
@@ -184,7 +203,7 @@ export type XMLValidationRuntimeCapabilities = {
   validationReportImplemented: false;
   /** Compat TISS-08. */
   implementsOfficialXsd: false;
-  implementsXsdValidation: false;
+  implementsXsdValidation: true;
   implementsRealXmlValidation: false;
   implementsOfficialTissValidation: false;
   implementsOfficialAnsValidation: false;
@@ -352,4 +371,23 @@ export type XMLValidationStatsInput = XMLValidationRuntimeOperationalControls & 
 export type XMLValidationStatsResult = XMLValidationRuntimeOperationEnvelope & {
   statistics?: XMLValidationStatistics;
   result?: import("./canonical").XMLValidationResult;
+};
+
+// ---------------------------------------------------------------------------
+// D-02 — XSD Validation funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type ValidateXSDInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Schema XSD em string, ou CanonicalXMLDocument já parseado. */
+  xsd: string | CanonicalXMLDocument;
+  /** Nome do elemento raiz esperado (localName). */
+  rootElementName?: string;
+};
+
+export type ValidateXSDResult = XMLValidationRuntimeOperationEnvelope & {
+  validation?: CanonicalXSDValidationResult;
+  context?: XMLValidationRuntimeContext | null;
+  valid?: boolean;
 };

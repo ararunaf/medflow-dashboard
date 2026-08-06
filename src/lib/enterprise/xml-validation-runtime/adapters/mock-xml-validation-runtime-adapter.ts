@@ -18,6 +18,8 @@ import type {
   ListXMLValidationResultsResult,
   ValidateXMLInput,
   ValidateXMLResult,
+  ValidateXSDInput,
+  ValidateXSDResult,
   XMLValidationRuntimeCapabilities,
   XMLValidationRuntimeEnterpriseDeps,
   XMLValidationRuntimeHealth,
@@ -122,7 +124,7 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       validationEngineReady: true,
       runtimeReady: true,
       xmlValidationImplemented: false,
-      xsdValidationImplemented: false,
+      xsdValidationImplemented: true,
       namespaceValidationImplemented: false,
       schemaSelectionImplemented: false,
       versionValidationImplemented: false,
@@ -132,7 +134,7 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       automaticCorrectionImplemented: false,
       validationReportImplemented: false,
       implementsOfficialXsd: false,
-      implementsXsdValidation: false,
+      implementsXsdValidation: true,
       implementsRealXmlValidation: false,
       implementsOfficialTissValidation: false,
       implementsOfficialAnsValidation: false,
@@ -172,6 +174,11 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
 
   async validate(input: ValidateXMLInput): Promise<ValidateXMLResult> {
     const result = await this.delegate.validate(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async validateXsd(input: ValidateXSDInput): Promise<ValidateXSDResult> {
+    const result = await this.delegate.validateXsd(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 

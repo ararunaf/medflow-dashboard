@@ -120,6 +120,8 @@ export type EnterpriseRuntimeHealth = {
   xmlSerializerRuntimeOk?: boolean;
   xmlSchemaRuntimeOk?: boolean;
   xmlValidationRuntimeOk?: boolean;
+  /** D-02 — XSD Validation funcional do XML Validation Runtime. */
+  xsdValidationOk?: boolean;
   soapRuntimeOk?: boolean;
   operatorRuntimeOk?: boolean;
   authorizationRuntimeOk?: boolean;

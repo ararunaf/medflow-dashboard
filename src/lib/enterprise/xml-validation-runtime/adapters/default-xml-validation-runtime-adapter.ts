@@ -1,12 +1,12 @@
 /**
- * DefaultXMLValidationRuntimeAdapter — C-02 / ECS-01.
+ * DefaultXMLValidationRuntimeAdapter — C-02 / D-02.
  *
  * Adapter oficial do Enterprise XML Validation Runtime.
- * Responde estruturalmente (validate/getResult/listResults/stats) sem
- * depender de Ports Enterprise.
+ * C-02: responde estruturalmente (validate/getResult/listResults/stats).
+ * D-02: capability funcional XSD Validation (`validateXsd`).
  *
- * Sem validação XML. Sem XSD. Sem parser. Sem correção automática. Sem SOAP.
- * Sem banco. Sem persistência.
+ * Sem XPath. Sem Transformation. Sem SOAP. Sem TISS. Sem Operadoras.
+ * Sem Auto Repair. Sem Workflow. Sem Persistência.
  */
 import {
   DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
@@ -32,6 +32,8 @@ import type {
   ListXMLValidationResultsResult,
   ValidateXMLInput,
   ValidateXMLResult,
+  ValidateXSDInput,
+  ValidateXSDResult,
   XMLValidationRuntimeCapabilities,
   XMLValidationRuntimeEnterpriseDeps,
   XMLValidationRuntimeHealth,
@@ -45,6 +47,7 @@ import type {
   XMLValidationStatsResult,
 } from "../ports/types";
 import { InMemoryXMLValidationRuntimeStore, type XMLValidationRuntimeStore } from "../store";
+import { XSDValidator } from "../xsd-validation/xsd-validator";
 
 export const DEFAULT_XML_VALIDATION_RUNTIME_ADAPTER_ID =
   "default-enterprise-xml-validation-runtime";
@@ -110,7 +113,7 @@ function portShapeOk(port: unknown): boolean {
 function structuralFlags() {
   return {
     xmlValidationImplemented: false,
-    xsdValidationImplemented: false,
+    xsdValidationImplemented: true,
     namespaceValidationImplemented: false,
     schemaSelectionImplemented: false,
     versionValidationImplemented: false,
@@ -195,13 +198,14 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
   private readonly now?: () => string;
   private readonly sleep: (ms: number) => Promise<void>;
   private failAttemptsRemaining: number;
+  private readonly xsdValidator: XSDValidator;
 
   constructor(options: DefaultXMLValidationRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
     this.healthy = options.healthy ?? true;
     this.message =
       options.message ??
-      `${this.providerId} XML Validation Runtime ready (structural only — no real XML validation).`;
+      `${this.providerId} XML Validation Runtime ready (C-02 structural + D-02 XSD Validation).`;
     this.metadata = {
       name:
         this.providerId === "default"
@@ -211,7 +215,8 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       vendor: XML_VALIDATION_RUNTIME_IDENTITY.vendor,
       layer: XML_VALIDATION_RUNTIME_IDENTITY.layer,
       vendorAgnostic: XML_VALIDATION_RUNTIME_IDENTITY.vendorAgnostic,
-      description: XML_VALIDATION_RUNTIME_IDENTITY.description,
+      description:
+        "C-02 structural foundation + D-02 XSD Validation functional capability (no TISS/operator knowledge).",
     };
     this.store = options.store ?? new InMemoryXMLValidationRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps ?? {};
@@ -221,6 +226,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
     this.now = options.now;
     this.sleep = options.sleep ?? defaultSleep;
     this.failAttemptsRemaining = options.failAttempts ?? 0;
+    this.xsdValidator = new XSDValidator();
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -257,7 +263,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       runtimeReady: true,
       ...structuralFlags(),
       implementsOfficialXsd: false,
-      implementsXsdValidation: false,
+      implementsXsdValidation: true,
       implementsRealXmlValidation: false,
       implementsOfficialTissValidation: false,
       implementsOfficialAnsValidation: false,
@@ -370,12 +376,29 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       validationEngineReady: true,
       runtimeReady: true,
       ...structuralFlags(),
+      xsdValidationOk: this.healthy === true,
       message: this.healthy
         ? ok
-          ? "XML Validation Runtime pronto (estrutural C-02 — sem validação XML real)."
+          ? "XML Validation Runtime pronto (C-02 estrutural + D-02 XSD Validation)."
           : "XML Validation Runtime degradado — ver Ports Enterprise."
         : "XML Validation Runtime unhealthy.",
     };
+  }
+
+  async validateXsd(input: ValidateXSDInput): Promise<ValidateXSDResult> {
+    return this.runOperation("validateXsd", input, async () => {
+      const validation = this.xsdValidator.validate(input.document, input.xsd, {
+        rootElementName: input.rootElementName,
+      });
+      return {
+        ok: validation.ok,
+        validation,
+        context: validation.context ?? null,
+        valid: validation.valid,
+        code: validation.code,
+        message: validation.message,
+      };
+    });
   }
 
   async validate(input: ValidateXMLInput): Promise<ValidateXMLResult> {

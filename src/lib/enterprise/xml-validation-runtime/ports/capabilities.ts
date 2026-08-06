@@ -1,9 +1,9 @@
 /**
- * XMLValidationRuntimeEngineCapabilities — capacidades declarativas (C-02 / ECS-01).
+ * XMLValidationRuntimeEngineCapabilities — capacidades declarativas (C-02 / D-02).
  *
- * Apenas declaração estrutural. Sem validação XML. Sem XSD. Sem parser.
- * Sem correção automática. Sem SOAP. Sem operadoras. Integrações estruturais
- * declaradas como preparadas — sem consumo funcional.
+ * D-02: xsdValidationImplemented = true (única capability funcional).
+ * Demais capacidades funcionais: false.
+ * Sem XPath / Transformation / SOAP / TISS / Operadoras / Auto Repair.
  */
 
 import type { XMLValidationCapabilities } from "./canonical";
@@ -32,7 +32,8 @@ export type XMLValidationRuntimeEngineCapabilities = {
   validationEngineReady?: true;
   runtimeReady?: true;
   xmlValidationImplemented?: false;
-  xsdValidationImplemented?: false;
+  /** D-02 — XSD Validation funcional. */
+  xsdValidationImplemented?: true;
   namespaceValidationImplemented?: false;
   schemaSelectionImplemented?: false;
   versionValidationImplemented?: false;
@@ -43,7 +44,8 @@ export type XMLValidationRuntimeEngineCapabilities = {
   validationReportImplemented?: false;
   /** Compat TISS-08. */
   implementsOfficialXsd?: false;
-  implementsXsdValidation?: false;
+  /** D-02 — mesma capability que xsdValidationImplemented. */
+  implementsXsdValidation?: true;
   implementsRealXmlValidation?: false;
   implementsOfficialTissValidation?: false;
   implementsOfficialAnsValidation?: false;
@@ -102,7 +104,7 @@ export const DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES: XMLValidationRu
     validationEngineReady: true,
     runtimeReady: true,
     xmlValidationImplemented: false,
-    xsdValidationImplemented: false,
+    xsdValidationImplemented: true,
     namespaceValidationImplemented: false,
     schemaSelectionImplemented: false,
     versionValidationImplemented: false,
@@ -112,7 +114,7 @@ export const DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES: XMLValidationRu
     automaticCorrectionImplemented: false,
     validationReportImplemented: false,
     implementsOfficialXsd: false,
-    implementsXsdValidation: false,
+    implementsXsdValidation: true,
     implementsRealXmlValidation: false,
     implementsOfficialTissValidation: false,
     implementsOfficialAnsValidation: false,
@@ -151,7 +153,7 @@ export function toXMLValidationCapabilities(
     validationEngineReady: true,
     runtimeReady: true,
     xmlValidationImplemented: false,
-    xsdValidationImplemented: false,
+    xsdValidationImplemented: true,
     namespaceValidationImplemented: false,
     schemaSelectionImplemented: false,
     versionValidationImplemented: false,
@@ -161,7 +163,7 @@ export function toXMLValidationCapabilities(
     automaticCorrectionImplemented: false,
     validationReportImplemented: false,
     implementsOfficialXsd: false,
-    implementsXsdValidation: false,
+    implementsXsdValidation: true,
     implementsRealXmlValidation: false,
     implementsOfficialTissValidation: false,
     implementsOfficialAnsValidation: false,

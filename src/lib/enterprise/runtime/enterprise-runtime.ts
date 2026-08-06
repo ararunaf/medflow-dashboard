@@ -1347,6 +1347,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlSerializerRuntimeOk: xmlSerializerRuntimeHealth.ok,
       xmlSchemaRuntimeOk: xmlSchemaRuntimeHealth.ok,
       xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,
+      xsdValidationOk: xmlValidationRuntimeHealth.xsdValidationOk === true,
       soapRuntimeOk: soapRuntimeHealth.ok,
       operatorRuntimeOk: operatorRuntimeHealth.ok,
       authorizationRuntimeOk: authorizationRuntimeHealth.ok,

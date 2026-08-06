@@ -90,10 +90,10 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
-function assertStructuralFlagsFalse(obj: Record<string, unknown>) {
+function assertDisabledFunctionalFlagsExceptXsd(obj: Record<string, unknown>) {
+  assert.equal(obj.xsdValidationImplemented, true, "xsdValidationImplemented deveria ser true (D-02)");
   const flags = [
     "xmlValidationImplemented",
-    "xsdValidationImplemented",
     "namespaceValidationImplemented",
     "schemaSelectionImplemented",
     "versionValidationImplemented",
@@ -280,7 +280,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(health.provider, "mock");
     assert.equal(health.runtimeReady, true);
     assert.equal(health.validationEngineReady, true);
-    assertStructuralFlagsFalse(health as unknown as Record<string, unknown>);
+    assertDisabledFunctionalFlagsExceptXsd(health as unknown as Record<string, unknown>);
 
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_XML_VALIDATION_RUNTIME_ADAPTER_ID);
@@ -289,7 +289,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(caps.supportsListResults, true);
     assert.equal(caps.supportsStats, true);
     assert.equal(caps.runtimeReady, true);
-    assertStructuralFlagsFalse(caps as unknown as Record<string, unknown>);
+    assertDisabledFunctionalFlagsExceptXsd(caps as unknown as Record<string, unknown>);
   });
 
   it("DefaultXMLValidationRuntimeAdapter é o adapter enterprise oficial (enterpriseDeps opcional)", () => {
@@ -340,7 +340,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(registry.has("enterprise"), true);
     assert.equal(registry.snapshot().count, 4);
     assert.equal(registry.get("enterprise")?.capabilities.xmlValidationImplemented, false);
-    assert.equal(registry.get("enterprise")?.capabilities.xsdValidationImplemented, false);
+    assert.equal(registry.get("enterprise")?.capabilities.xsdValidationImplemented, true);
     assert.equal(registry.get("enterprise")?.capabilities.automaticCorrectionImplemented, false);
   });
 
@@ -378,7 +378,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(validated.result?.status, "validated");
     assert.equal(validated.result?.xmlContext?.kind, "canonical-xml-validation-context");
     assert.equal(validated.result?.xmlContext?.canonicalGuide?.kind, "canonical-tiss-guide");
-    assertStructuralFlagsFalse(validated.result as unknown as Record<string, unknown>);
+    assertDisabledFunctionalFlagsExceptXsd(validated.result as unknown as Record<string, unknown>);
 
     const loaded = await port.getResult({ resultId: validated.result!.resultId });
     assert.equal(loaded.ok, true);
@@ -413,12 +413,12 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.capabilities.runtimeReady, true);
     assert.equal(summary.info.providerType, "XML_VALIDATION_RUNTIME");
-    assertStructuralFlagsFalse(summary.health as unknown as Record<string, unknown>);
+    assertDisabledFunctionalFlagsExceptXsd(summary.health as unknown as Record<string, unknown>);
   });
 
-  it("capabilities engine declara todas as flags *Implemented = false", () => {
+  it("capabilities engine declara xsdValidationImplemented = true e demais flags *Implemented = false", () => {
     assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented, false);
-    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xsdValidationImplemented, false);
+    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xsdValidationImplemented, true);
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.namespaceValidationImplemented,
       false,
@@ -541,9 +541,9 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     resetEnterpriseRuntimeForTests();
   });
 
-  it("módulo não importa OpenAI/Azure/Gemini/Claude/HTTP/ML/DB/parser/XSD funcional", () => {
+  it("módulo não importa OpenAI/Azure/Gemini/Claude/HTTP/ML/DB/parser (exceto D-02 xsd-validation)", () => {
     const moduleRoot = join(repoRoot, "src/lib/enterprise/xml-validation-runtime");
-    const files = collectTsFiles(moduleRoot);
+    const files = collectTsFiles(moduleRoot).filter((f) => !f.includes("xsd-validation"));
     assert.ok(files.length > 0);
     const forbidden = [
       /from ["']openai/i,

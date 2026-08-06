@@ -330,12 +330,13 @@ export type XMLValidationResult = {
   officialTissValidation: false;
   /** Sempre false — nenhuma regra de validação carregada. */
   validationRulesLoaded: false;
-  /** Sempre true — engine estrutural pronto (sem validação real). */
+  /** Sempre true — engine estrutural pronto (C-02) + XSD Validation (D-02). */
   validationEngineReady: true;
-  /** Sempre true — runtime estrutural pronto (C-02). */
+  /** Sempre true — runtime pronto (C-02 / D-02). */
   runtimeReady: true;
   xmlValidationImplemented: false;
-  xsdValidationImplemented: false;
+  /** D-02 — XSD Validation funcional. */
+  xsdValidationImplemented: true;
   namespaceValidationImplemented: false;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
@@ -409,7 +410,8 @@ export type XMLValidationHealth = {
   validationEngineReady: true;
   runtimeReady: true;
   xmlValidationImplemented: false;
-  xsdValidationImplemented: false;
+  /** D-02 — XSD Validation funcional. */
+  xsdValidationImplemented: true;
   namespaceValidationImplemented: false;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
@@ -425,7 +427,7 @@ export type CanonicalXMLValidationHealth = XMLValidationHealth;
 
 /**
  * Capacidades canônicas declaradas do provedor XML Validation Runtime.
- * Todas as flags `*Implemented` permanecem literalmente `false`.
+ * D-02: xsdValidationImplemented = true; demais capacidades funcionais = false.
  */
 export type XMLValidationCapabilities = {
   kind: "canonical-xml-validation-capabilities";
@@ -438,7 +440,8 @@ export type XMLValidationCapabilities = {
   validationEngineReady: true;
   runtimeReady: true;
   xmlValidationImplemented: false;
-  xsdValidationImplemented: false;
+  /** D-02 — XSD Validation funcional. */
+  xsdValidationImplemented: true;
   namespaceValidationImplemented: false;
   schemaSelectionImplemented: false;
   versionValidationImplemented: false;
@@ -449,7 +452,7 @@ export type XMLValidationCapabilities = {
   validationReportImplemented: false;
   /** Compat TISS-08. */
   implementsOfficialXsd: false;
-  implementsXsdValidation: false;
+  implementsXsdValidation: true;
   implementsRealXmlValidation: false;
   implementsOfficialTissValidation: false;
   implementsOfficialAnsValidation: false;

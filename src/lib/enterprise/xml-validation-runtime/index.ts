@@ -101,6 +101,12 @@ export type {
   XMLValidationSummary,
   XMLValidationVersion,
   XMLValidationVersionContract,
+  ValidateXSDInput,
+  ValidateXSDResult,
+  CanonicalValidationIssue,
+  CanonicalValidationStatistics,
+  CanonicalXSDValidationResult,
+  XMLValidationRuntimeContext,
 } from "./ports";
 
 export {
@@ -180,3 +186,11 @@ export {
   getXMLValidationRuntimeHealthSummary,
   type XMLValidationRuntimeHealthSummary,
 } from "./demo";
+
+export {
+  XSDValidator,
+  defaultXSDValidator,
+  validateXSD,
+  createEmptyXMLValidationRuntimeContext,
+  type XSDValidatorOptions,
+} from "./xsd-validation";
