@@ -17,6 +17,8 @@ import type {
   GenerateXMLValidationReportInput,
   GenerateXMLValidationReportResult,
   GetXMLValidationResultInput,
+  ValidateGenericXMLInput,
+  ValidateGenericXMLResult,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
@@ -137,7 +139,8 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       usesAIOrchestrationRuntimePort: true,
       validationEngineReady: true,
       runtimeReady: true,
-      xmlValidationImplemented: false,
+      /** D-11 — Generic XML Validation funcional. */
+      xmlValidationImplemented: true,
       xsdValidationImplemented: true,
       namespaceValidationImplemented: true,
       schemaSelectionImplemented: false,
@@ -230,6 +233,11 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
     input: GenerateXMLValidationReportInput,
   ): Promise<GenerateXMLValidationReportResult> {
     const result = await this.delegate.generateXMLValidationReport(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async validateGenericXML(input: ValidateGenericXMLInput): Promise<ValidateGenericXMLResult> {
+    const result = await this.delegate.validateGenericXML(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 

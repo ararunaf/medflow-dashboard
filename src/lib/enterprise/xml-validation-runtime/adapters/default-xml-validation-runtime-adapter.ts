@@ -31,6 +31,8 @@ import type {
   GenerateXMLValidationReportInput,
   GenerateXMLValidationReportResult,
   GetXMLValidationResultInput,
+  ValidateGenericXMLInput,
+  ValidateGenericXMLResult,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
@@ -66,6 +68,7 @@ import { NamespaceValidator } from "../namespace-validation/namespace-validator"
 import { OperatorValidator } from "../operator-validation/operator-validator";
 import { VersionValidator } from "../version-validation/version-validator";
 import { XMLAutomaticCorrector } from "../automatic-correction/xml-automatic-correction-engine";
+import { XMLGenericValidator } from "../generic-xml-validation/xml-generic-validator";
 import { XMLRepairEngine } from "../xml-repair/xml-repair-engine";
 import { XMLValidationReportEngine } from "../validation-report/xml-validation-report-engine";
 import { XSDValidator } from "../xsd-validation/xsd-validator";
@@ -133,7 +136,8 @@ function portShapeOk(port: unknown): boolean {
 
 function structuralFlags() {
   return {
-    xmlValidationImplemented: false,
+    /** D-11 — Generic XML Validation funcional. */
+    xmlValidationImplemented: true,
     xsdValidationImplemented: true,
     /** D-04 — Namespace Validation funcional. */
     namespaceValidationImplemented: true,
@@ -234,6 +238,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
   private readonly xmlRepairEngine: XMLRepairEngine;
   private readonly xmlAutomaticCorrector: XMLAutomaticCorrector;
   private readonly xmlValidationReportEngine: XMLValidationReportEngine;
+  private readonly xmlGenericValidator: XMLGenericValidator;
 
   constructor(options: DefaultXMLValidationRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
@@ -269,6 +274,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
     this.xmlRepairEngine = new XMLRepairEngine();
     this.xmlAutomaticCorrector = new XMLAutomaticCorrector();
     this.xmlValidationReportEngine = new XMLValidationReportEngine();
+    this.xmlGenericValidator = new XMLGenericValidator();
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -426,6 +432,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       xmlRepairOk: this.healthy === true,
       automaticCorrectionOk: this.healthy === true,
       validationReportOk: this.healthy === true,
+      xmlValidationOk: this.healthy === true,
       message: this.healthy
         ? ok
           ? "XML Validation Runtime pronto (C-02 estrutural + D-02 XSD Validation)."
@@ -591,6 +598,27 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
         context: report.context ?? null,
         code: report.code,
         message: report.message,
+      };
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // D-11 — Generic XML Validation funcional.
+  // -------------------------------------------------------------------------
+
+  async validateGenericXML(input: ValidateGenericXMLInput): Promise<ValidateGenericXMLResult> {
+    return this.runOperation("validateGenericXML", input, async () => {
+      const validation = this.xmlGenericValidator.validate({
+        document: input.document,
+        options: input.options,
+        rules: input.rules,
+      });
+      return {
+        ok: validation.ok,
+        validation,
+        context: validation.context ?? null,
+        code: validation.code,
+        message: validation.message,
       };
     });
   }

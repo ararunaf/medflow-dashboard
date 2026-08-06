@@ -53,6 +53,12 @@ import type {
   XMLValidationReportInput,
 } from "../validation-report/canonical";
 import type {
+  CanonicalGenericXMLValidationContext,
+  CanonicalGenericXMLValidationResult,
+  XMLGenericValidationOptions,
+  XMLGenericValidationRules,
+} from "../generic-xml-validation/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -104,6 +110,11 @@ export type {
   CanonicalXMLValidationReport,
   CanonicalXMLValidationReportContext,
 } from "../validation-report/canonical";
+
+export type {
+  CanonicalGenericXMLValidationContext,
+  CanonicalGenericXMLValidationResult,
+} from "../generic-xml-validation/canonical";
 
 export type {
   AuditResult,
@@ -203,7 +214,8 @@ export type XMLValidationRuntimeHealth = {
   storedContextCount?: number;
   validationEngineReady: true;
   runtimeReady: true;
-  xmlValidationImplemented: false;
+  /** D-11 — Generic XML Validation funcional. */
+  xmlValidationImplemented: boolean;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
   /** D-02 — health da capability XSD Validation. */
@@ -236,6 +248,8 @@ export type XMLValidationRuntimeHealth = {
   validationReportOk?: boolean;
   /** D-10 — Validation Report funcional. */
   validationReportImplemented: boolean;
+  /** D-11 — health da capability Generic XML Validation. */
+  xmlValidationOk?: boolean;
 };
 
 /**
@@ -268,7 +282,8 @@ export type XMLValidationRuntimeCapabilities = {
   usesAIOrchestrationRuntimePort: boolean;
   validationEngineReady: true;
   runtimeReady: true;
-  xmlValidationImplemented: false;
+  /** D-11 — Generic XML Validation funcional. */
+  xmlValidationImplemented: boolean;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
   /** D-04 — Namespace Validation funcional. */
@@ -603,4 +618,22 @@ export type GenerateXMLValidationReportInput = XMLValidationRuntimeOperationalCo
 export type GenerateXMLValidationReportResult = XMLValidationRuntimeOperationEnvelope & {
   report?: CanonicalXMLValidationReport;
   context?: CanonicalXMLValidationReportContext | null;
+};
+
+// ---------------------------------------------------------------------------
+// D-11 — Generic XML Validation funcional.
+// ---------------------------------------------------------------------------
+
+export type ValidateGenericXMLInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Opções de orquestração. */
+  options: XMLGenericValidationOptions;
+  /** Regras específicas para os sub-validadores. */
+  rules?: XMLGenericValidationRules;
+};
+
+export type ValidateGenericXMLResult = XMLValidationRuntimeOperationEnvelope & {
+  validation?: CanonicalGenericXMLValidationResult;
+  context?: CanonicalGenericXMLValidationContext | null;
 };

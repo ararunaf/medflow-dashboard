@@ -172,7 +172,7 @@ export type XMLValidationStructureContract = {
   structureId?: string;
   notes?: string;
   structureValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Schema XML (somente contrato — sem XSD funcional). */
@@ -183,7 +183,7 @@ export type XMLValidationSchemaContract = {
   notes?: string;
   schemaSelectionImplemented: false;
   xsdValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Namespace XML (somente contrato). */
@@ -193,7 +193,7 @@ export type XMLValidationNamespaceContract = {
   prefix?: string;
   notes?: string;
   namespaceValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Versionamento estrutural (somente contrato). */
@@ -203,7 +203,7 @@ export type XMLValidationVersionContract = {
   label?: string;
   notes?: string;
   versionValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Integridade estrutural (somente contrato). */
@@ -212,7 +212,7 @@ export type XMLValidationIntegrityContract = {
   integrityId?: string;
   notes?: string;
   integrityValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Consistência estrutural (somente contrato). */
@@ -221,7 +221,7 @@ export type XMLValidationConsistencyContract = {
   consistencyId?: string;
   notes?: string;
   consistencyValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Compatibilidade estrutural (somente contrato). */
@@ -230,7 +230,7 @@ export type XMLValidationCompatibilityContract = {
   compatibilityId?: string;
   notes?: string;
   compatibilityValidationImplemented: false;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
 };
 
 /** Relatório de validação estrutural (somente contrato). */
@@ -239,7 +239,7 @@ export type XMLValidationReportContract = {
   reportId?: string;
   notes?: string;
   validationReportImplemented: boolean;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
   automaticCorrectionImplemented: boolean;
   xmlRepairImplemented: boolean;
 };
@@ -334,7 +334,7 @@ export type XMLValidationResult = {
   validationEngineReady: true;
   /** Sempre true — runtime pronto (C-02 / D-02). */
   runtimeReady: true;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
   namespaceValidationImplemented: boolean;
@@ -409,7 +409,7 @@ export type XMLValidationHealth = {
   aiOrchestrationRuntimeOk?: boolean;
   validationEngineReady: true;
   runtimeReady: true;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
   namespaceValidationImplemented: boolean;
@@ -439,7 +439,7 @@ export type XMLValidationCapabilities = {
   supportsCanonicalValidation: boolean;
   validationEngineReady: true;
   runtimeReady: true;
-  xmlValidationImplemented: false;
+  xmlValidationImplemented: boolean;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented: true;
   namespaceValidationImplemented: boolean;

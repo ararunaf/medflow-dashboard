@@ -22,6 +22,8 @@ import type {
   GenerateXMLValidationReportInput,
   GenerateXMLValidationReportResult,
   GetXMLValidationResultInput,
+  ValidateGenericXMLInput,
+  ValidateGenericXMLResult,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
@@ -151,6 +153,16 @@ export interface XMLValidationRuntimePort {
   generateXMLValidationReport(
     input: GenerateXMLValidationReportInput,
   ): Promise<GenerateXMLValidationReportResult>;
+
+  // -------------------------------------------------------------------------
+  // D-11 — Generic XML Validation funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Orquestra validação genérica XML integrando D-02 a D-10.
+   * Capability D-11 (`xmlValidationImplemented = true`).
+   */
+  validateGenericXML(input: ValidateGenericXMLInput): Promise<ValidateGenericXMLResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

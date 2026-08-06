@@ -31,7 +31,8 @@ export type XMLValidationRuntimeEngineCapabilities = {
   usesAIOrchestrationRuntimePort?: boolean;
   validationEngineReady?: true;
   runtimeReady?: true;
-  xmlValidationImplemented?: false;
+  /** D-11 — Generic XML Validation funcional. */
+  xmlValidationImplemented?: true;
   /** D-02 — XSD Validation funcional. */
   xsdValidationImplemented?: true;
   /** D-04 — Namespace Validation funcional. */
@@ -110,7 +111,7 @@ export const DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES: XMLValidationRu
     usesAIOrchestrationRuntimePort: true,
     validationEngineReady: true,
     runtimeReady: true,
-    xmlValidationImplemented: false,
+    xmlValidationImplemented: true,
     xsdValidationImplemented: true,
     namespaceValidationImplemented: true,
     schemaSelectionImplemented: false,
@@ -159,7 +160,7 @@ export function toXMLValidationCapabilities(
     supportsCanonicalValidation: capabilities.supportsCanonicalValidation === true,
     validationEngineReady: true,
     runtimeReady: true,
-    xmlValidationImplemented: false,
+    xmlValidationImplemented: true,
     xsdValidationImplemented: true,
     namespaceValidationImplemented: true,
     schemaSelectionImplemented: false,

@@ -117,6 +117,8 @@ export type {
   CorrectXMLResult,
   GenerateXMLValidationReportInput,
   GenerateXMLValidationReportResult,
+  ValidateGenericXMLInput,
+  ValidateGenericXMLResult,
   CanonicalValidationIssue,
   CanonicalValidationStatistics,
   CanonicalXSDValidationResult,
@@ -134,6 +136,8 @@ export type {
   CanonicalXMLAutomaticCorrectionResult,
   CanonicalXMLValidationReport,
   CanonicalXMLValidationReportContext,
+  CanonicalGenericXMLValidationContext,
+  CanonicalGenericXMLValidationResult,
   XMLValidationRuntimeContext,
 } from "./ports";
 

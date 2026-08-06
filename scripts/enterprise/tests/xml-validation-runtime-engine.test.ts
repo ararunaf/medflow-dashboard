@@ -127,7 +127,12 @@ function assertFunctionalFlagsForD06(obj: Record<string, unknown>) {
     true,
     "validationReportImplemented deveria ser true (D-10)",
   );
-  const flags = ["xmlValidationImplemented", "schemaSelectionImplemented"];
+  assert.equal(
+    obj.xmlValidationImplemented,
+    true,
+    "xmlValidationImplemented deveria ser true (D-11)",
+  );
+  const flags = ["schemaSelectionImplemented"];
   for (const flag of flags) {
     assert.equal(obj[flag], false, `${flag} deveria ser false`);
   }
@@ -364,7 +369,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
     assert.equal(registry.snapshot().count, 4);
-    assert.equal(registry.get("enterprise")?.capabilities.xmlValidationImplemented, false);
+    assert.equal(registry.get("enterprise")?.capabilities.xmlValidationImplemented, true);
     assert.equal(registry.get("enterprise")?.capabilities.xsdValidationImplemented, true);
     assert.equal(registry.get("enterprise")?.capabilities.automaticCorrectionImplemented, true);
   });
@@ -441,11 +446,8 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assertFunctionalFlagsForD06(summary.health as unknown as Record<string, unknown>);
   });
 
-  it("capabilities engine declara xsd (D-02), namespace (D-04), version (D-05), business (D-06), operator (D-07), repair (D-08), automatic-correction (D-09) e validation-report (D-10) ativas, demais false", () => {
-    assert.equal(
-      DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented,
-      false,
-    );
+  it("capabilities engine declara xsd (D-02), namespace (D-04), version (D-05), business (D-06), operator (D-07), repair (D-08), automatic-correction (D-09), validation-report (D-10) e generic-xml-validation (D-11) ativas, demais false", () => {
+    assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented, true);
     assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xsdValidationImplemented, true);
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.namespaceValidationImplemented,
