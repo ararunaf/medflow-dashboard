@@ -87,6 +87,8 @@ export type {
   RepairXMLResult,
   CorrectXMLInput,
   CorrectXMLResult,
+  GenerateXMLValidationReportInput,
+  GenerateXMLValidationReportResult,
   CanonicalValidationIssue,
   CanonicalValidationStatistics,
   CanonicalXSDValidationResult,
@@ -102,6 +104,8 @@ export type {
   CanonicalXMLRepairResult,
   CanonicalXMLAutomaticCorrectionContext,
   CanonicalXMLAutomaticCorrectionResult,
+  CanonicalXMLValidationReport,
+  CanonicalXMLValidationReportContext,
   XMLValidationRuntimeContext,
 } from "./types";
 

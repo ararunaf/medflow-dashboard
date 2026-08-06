@@ -28,6 +28,8 @@ import type {
 import type {
   CorrectXMLInput,
   CorrectXMLResult,
+  GenerateXMLValidationReportInput,
+  GenerateXMLValidationReportResult,
   GetXMLValidationResultInput,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
@@ -65,6 +67,7 @@ import { OperatorValidator } from "../operator-validation/operator-validator";
 import { VersionValidator } from "../version-validation/version-validator";
 import { XMLAutomaticCorrector } from "../automatic-correction/xml-automatic-correction-engine";
 import { XMLRepairEngine } from "../xml-repair/xml-repair-engine";
+import { XMLValidationReportEngine } from "../validation-report/xml-validation-report-engine";
 import { XSDValidator } from "../xsd-validation/xsd-validator";
 
 export const DEFAULT_XML_VALIDATION_RUNTIME_ADAPTER_ID =
@@ -145,7 +148,8 @@ function structuralFlags() {
     xmlRepairImplemented: true,
     /** D-09 — Automatic Correction funcional. */
     automaticCorrectionImplemented: true,
-    validationReportImplemented: false,
+    /** D-10 — Validation Report funcional. */
+    validationReportImplemented: true,
   } as const;
 }
 
@@ -229,6 +233,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
   private readonly operatorValidator: OperatorValidator;
   private readonly xmlRepairEngine: XMLRepairEngine;
   private readonly xmlAutomaticCorrector: XMLAutomaticCorrector;
+  private readonly xmlValidationReportEngine: XMLValidationReportEngine;
 
   constructor(options: DefaultXMLValidationRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
@@ -263,6 +268,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
     this.operatorValidator = new OperatorValidator();
     this.xmlRepairEngine = new XMLRepairEngine();
     this.xmlAutomaticCorrector = new XMLAutomaticCorrector();
+    this.xmlValidationReportEngine = new XMLValidationReportEngine();
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -419,6 +425,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       operatorValidationOk: this.healthy === true,
       xmlRepairOk: this.healthy === true,
       automaticCorrectionOk: this.healthy === true,
+      validationReportOk: this.healthy === true,
       message: this.healthy
         ? ok
           ? "XML Validation Runtime pronto (C-02 estrutural + D-02 XSD Validation)."
@@ -562,6 +569,28 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
         corrected: correction.corrected,
         code: correction.code,
         message: correction.message,
+      };
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // D-10 — Validation Report funcional.
+  // -------------------------------------------------------------------------
+
+  async generateXMLValidationReport(
+    input: GenerateXMLValidationReportInput,
+  ): Promise<GenerateXMLValidationReportResult> {
+    return this.runOperation("generateXMLValidationReport", input, async () => {
+      const report = this.xmlValidationReportEngine.generate({
+        reportId: input.reportId,
+        results: input.results,
+      });
+      return {
+        ok: report.ok,
+        report,
+        context: report.context ?? null,
+        code: report.code,
+        message: report.message,
       };
     });
   }

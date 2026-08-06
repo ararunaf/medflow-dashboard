@@ -19,6 +19,8 @@
 import type {
   CorrectXMLInput,
   CorrectXMLResult,
+  GenerateXMLValidationReportInput,
+  GenerateXMLValidationReportResult,
   GetXMLValidationResultInput,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
@@ -137,6 +139,18 @@ export interface XMLValidationRuntimePort {
    * Capability D-09 (`automaticCorrectionImplemented = true`).
    */
   correctXML(input: CorrectXMLInput): Promise<CorrectXMLResult>;
+
+  // -------------------------------------------------------------------------
+  // D-10 — Validation Report funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Gera relatório consolidado de resultados de validação.
+   * Capability D-10 (`validationReportImplemented = true`).
+   */
+  generateXMLValidationReport(
+    input: GenerateXMLValidationReportInput,
+  ): Promise<GenerateXMLValidationReportResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

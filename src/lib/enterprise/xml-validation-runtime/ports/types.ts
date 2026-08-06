@@ -48,6 +48,11 @@ import type {
   CanonicalXMLAutomaticCorrectionResult,
 } from "../automatic-correction/canonical";
 import type {
+  CanonicalXMLValidationReport,
+  CanonicalXMLValidationReportContext,
+  XMLValidationReportInput,
+} from "../validation-report/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -94,6 +99,11 @@ export type {
   CanonicalXMLAutomaticCorrectionContext,
   CanonicalXMLAutomaticCorrectionResult,
 } from "../automatic-correction/canonical";
+
+export type {
+  CanonicalXMLValidationReport,
+  CanonicalXMLValidationReportContext,
+} from "../validation-report/canonical";
 
 export type {
   AuditResult,
@@ -222,7 +232,10 @@ export type XMLValidationRuntimeHealth = {
   automaticCorrectionOk?: boolean;
   /** D-09 — Automatic Correction funcional. */
   automaticCorrectionImplemented: boolean;
-  validationReportImplemented: false;
+  /** D-10 — health da capability Validation Report. */
+  validationReportOk?: boolean;
+  /** D-10 — Validation Report funcional. */
+  validationReportImplemented: boolean;
 };
 
 /**
@@ -271,7 +284,8 @@ export type XMLValidationRuntimeCapabilities = {
   xmlRepairImplemented: boolean;
   /** D-09 — Automatic Correction funcional. */
   automaticCorrectionImplemented: boolean;
-  validationReportImplemented: false;
+  /** D-10 — Validation Report funcional. */
+  validationReportImplemented: boolean;
   /** Compat TISS-08. */
   implementsOfficialXsd: false;
   implementsXsdValidation: true;
@@ -577,4 +591,16 @@ export type CorrectXMLResult = XMLValidationRuntimeOperationEnvelope & {
   correction?: CanonicalXMLAutomaticCorrectionResult;
   context?: CanonicalXMLAutomaticCorrectionContext | null;
   corrected?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-10 — Validation Report funcional.
+// ---------------------------------------------------------------------------
+
+export type GenerateXMLValidationReportInput = XMLValidationRuntimeOperationalControls &
+  XMLValidationReportInput;
+
+export type GenerateXMLValidationReportResult = XMLValidationRuntimeOperationEnvelope & {
+  report?: CanonicalXMLValidationReport;
+  context?: CanonicalXMLValidationReportContext | null;
 };

@@ -14,6 +14,8 @@ import type { XMLValidationRuntimePort } from "../ports/xml-validation-runtime-p
 import type {
   CorrectXMLInput,
   CorrectXMLResult,
+  GenerateXMLValidationReportInput,
+  GenerateXMLValidationReportResult,
   GetXMLValidationResultInput,
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
@@ -144,7 +146,7 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       operatorValidationImplemented: true,
       xmlRepairImplemented: true,
       automaticCorrectionImplemented: true,
-      validationReportImplemented: false,
+      validationReportImplemented: true,
       implementsOfficialXsd: false,
       implementsXsdValidation: true,
       implementsRealXmlValidation: false,
@@ -221,6 +223,13 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
 
   async correctXML(input: CorrectXMLInput): Promise<CorrectXMLResult> {
     const result = await this.delegate.correctXML(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async generateXMLValidationReport(
+    input: GenerateXMLValidationReportInput,
+  ): Promise<GenerateXMLValidationReportResult> {
+    const result = await this.delegate.generateXMLValidationReport(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 

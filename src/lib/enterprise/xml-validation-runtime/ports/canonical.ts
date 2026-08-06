@@ -238,7 +238,7 @@ export type XMLValidationReportContract = {
   kind: "canonical-xml-validation-report";
   reportId?: string;
   notes?: string;
-  validationReportImplemented: false;
+  validationReportImplemented: boolean;
   xmlValidationImplemented: false;
   automaticCorrectionImplemented: boolean;
   xmlRepairImplemented: boolean;
@@ -344,7 +344,7 @@ export type XMLValidationResult = {
   operatorValidationImplemented: boolean;
   xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: boolean;
-  validationReportImplemented: false;
+  validationReportImplemented: boolean;
   status: XMLValidationStatus;
   message?: string;
   code?: string;
@@ -419,7 +419,7 @@ export type XMLValidationHealth = {
   operatorValidationImplemented: boolean;
   xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: boolean;
-  validationReportImplemented: false;
+  validationReportImplemented: boolean;
 };
 
 /** Alias TISS-08 → C-02. */
@@ -449,7 +449,7 @@ export type XMLValidationCapabilities = {
   operatorValidationImplemented: boolean;
   xmlRepairImplemented: boolean;
   automaticCorrectionImplemented: boolean;
-  validationReportImplemented: false;
+  validationReportImplemented: boolean;
   /** Compat TISS-08. */
   implementsOfficialXsd: false;
   implementsXsdValidation: true;
