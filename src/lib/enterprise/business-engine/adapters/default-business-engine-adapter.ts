@@ -1,19 +1,22 @@
 /**
- * DefaultBusinessEngineAdapter — E-04.
+ * DefaultBusinessEngineAdapter — E-05.
  *
  * Adapter oficial da Enterprise Business Engine.
- * Capabilities E-01 a E-04 ativas.
+ * Capabilities E-01 a E-05 ativas.
  */
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
 import { BusinessRuleExecutionEngine } from "../business-rule-execution";
 import { BusinessTransactionEngine } from "../business-transaction";
 import { BusinessWorkflowEngine } from "../business-workflow";
-import { E04_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { BusinessProcessOrchestrationEngine } from "../business-process-orchestration";
+import { E05_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessProcessOrchestrationInput,
+  ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
@@ -43,6 +46,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   private readonly executor = new BusinessRuleExecutionEngine();
   private readonly transaction = new BusinessTransactionEngine();
   private readonly workflow = new BusinessWorkflowEngine();
+  private readonly orchestration = new BusinessProcessOrchestrationEngine();
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
@@ -60,7 +64,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E04_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E05_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -72,6 +76,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       businessRuleExecutionOk: ok,
       businessTransactionOk: ok,
       businessWorkflowOk: ok,
+      businessProcessOrchestrationOk: ok,
     };
   }
 
@@ -157,5 +162,27 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       return { stageId: stage.stageId, transactionId: stage.transactionId, steps };
     });
     return this.workflow.execute({ workflowId: input.workflowId, stages });
+  }
+
+  async executeProcessOrchestration(
+    input: ExecuteBusinessProcessOrchestrationInput,
+  ): Promise<ExecuteBusinessProcessOrchestrationResult> {
+    const processes = input.processes.map((process) => {
+      const workflows = process.workflows.map((workflow) => {
+        const stages = workflow.stages.map((stage) => {
+          const steps = stage.steps.map((step) => {
+            const found = this.catalog.find(step.ruleId);
+            if (!found.ok || !found.rule) {
+              throw new Error(`rule not found: ${step.ruleId}`);
+            }
+            return { stepId: step.stepId, rule: found.rule, facts: step.facts };
+          });
+          return { stageId: stage.stageId, transactionId: stage.transactionId, steps };
+        });
+        return { workflowId: workflow.workflowId, stages };
+      });
+      return { processId: process.processId, workflows };
+    });
+    return this.orchestration.execute({ orchestrationId: input.orchestrationId, processes });
   }
 }

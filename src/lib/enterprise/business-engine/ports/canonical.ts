@@ -88,6 +88,29 @@ export interface CanonicalBusinessWorkflowResult {
   readonly output: Record<string, unknown>;
 }
 
+export interface CanonicalBusinessProcessWorkflow {
+  readonly kind: "canonical-business-process-workflow";
+  readonly workflowId: string;
+  readonly stages: readonly CanonicalBusinessWorkflowStage[];
+}
+
+export interface CanonicalBusinessProcess {
+  readonly kind: "canonical-business-process";
+  readonly processId: string;
+  readonly workflows: readonly CanonicalBusinessProcessWorkflow[];
+}
+
+export interface CanonicalBusinessProcessOrchestrationResult {
+  readonly kind: "canonical-business-process-orchestration-result";
+  readonly ok: boolean;
+  readonly orchestrationId: string;
+  readonly code: string;
+  readonly message: string;
+  readonly processResults: readonly CanonicalBusinessWorkflowResult[];
+  readonly completed: boolean;
+  readonly output: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
@@ -95,6 +118,7 @@ export interface CanonicalBusinessRuleCatalogHealth {
   readonly businessRuleExecutionOk: boolean;
   readonly businessTransactionOk: boolean;
   readonly businessWorkflowOk: boolean;
+  readonly businessProcessOrchestrationOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {

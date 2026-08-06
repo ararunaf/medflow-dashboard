@@ -5,6 +5,7 @@
  * E-02: `businessRuleExecutionImplemented`
  * E-03: `businessTransactionImplemented`
  * E-04: `businessWorkflowImplemented`
+ * E-05: `businessProcessOrchestrationImplemented`
  */
 
 export interface BusinessEngineCapabilities {
@@ -51,4 +52,9 @@ export const E03_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
 export const E04_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
   ...E03_BUSINESS_ENGINE_CAPABILITIES,
   businessWorkflowImplemented: true,
+};
+
+export const E05_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
+  ...E04_BUSINESS_ENGINE_CAPABILITIES,
+  businessProcessOrchestrationImplemented: true,
 };

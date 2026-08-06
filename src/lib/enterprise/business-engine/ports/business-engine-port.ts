@@ -5,12 +5,15 @@
  * E-02: Business Rule Execution (`businessRuleExecutionImplemented = true`).
  * E-03: Business Transaction (`businessTransactionImplemented = true`).
  * E-04: Business Workflow (`businessWorkflowImplemented = true`).
+ * E-05: Business Process Orchestration (`businessProcessOrchestrationImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessProcessOrchestrationInput,
+  ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
@@ -63,4 +66,9 @@ export interface BusinessEnginePort {
 
   /** E-04 — executa workflow orquestrado por transações. */
   executeWorkflow(input: ExecuteBusinessWorkflowInput): Promise<ExecuteBusinessWorkflowResult>;
+
+  /** E-05 — executa orquestração de processos de negócio. */
+  executeProcessOrchestration(
+    input: ExecuteBusinessProcessOrchestrationInput,
+  ): Promise<ExecuteBusinessProcessOrchestrationResult>;
 }

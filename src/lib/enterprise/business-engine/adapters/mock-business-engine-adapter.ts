@@ -1,14 +1,16 @@
 /**
- * MockBusinessEngineAdapter — E-04.
+ * MockBusinessEngineAdapter — E-05.
  *
  * Adapter mock para testes.
  */
-import { E04_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E05_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  ExecuteBusinessProcessOrchestrationInput,
+  ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
@@ -50,7 +52,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E04_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E05_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -62,6 +64,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessRuleExecutionOk: ok,
       businessTransactionOk: ok,
       businessWorkflowOk: ok,
+      businessProcessOrchestrationOk: ok,
     };
   }
 
@@ -144,6 +147,21 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       code: "BUSINESS_WORKFLOW_MOCK_EXECUTED",
       message: "workflow executed (mock)",
       stageResults: [],
+      completed: true,
+      output: {},
+    };
+  }
+
+  async executeProcessOrchestration(
+    _input: ExecuteBusinessProcessOrchestrationInput,
+  ): Promise<ExecuteBusinessProcessOrchestrationResult> {
+    return {
+      kind: "canonical-business-process-orchestration-result",
+      ok: true,
+      orchestrationId: _input.orchestrationId,
+      code: "BUSINESS_PROCESS_ORCHESTRATION_MOCK_EXECUTED",
+      message: "process orchestration executed (mock)",
+      processResults: [],
       completed: true,
       output: {},
     };

@@ -7,6 +7,8 @@ export type {
   BusinessEngineHealth,
   BusinessEngineInfo,
   BusinessEngineProviderId,
+  ExecuteBusinessProcessOrchestrationInput,
+  ExecuteBusinessProcessOrchestrationResult,
   ExecuteBusinessRuleInput,
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
@@ -28,8 +30,11 @@ export {
   E02_BUSINESS_ENGINE_CAPABILITIES,
   E03_BUSINESS_ENGINE_CAPABILITIES,
   E04_BUSINESS_ENGINE_CAPABILITIES,
+  E05_BUSINESS_ENGINE_CAPABILITIES,
 } from "./capabilities";
 export type {
+  CanonicalBusinessProcess,
+  CanonicalBusinessProcessOrchestrationResult,
   CanonicalBusinessRule,
   CanonicalBusinessRuleAction,
   CanonicalBusinessRuleCatalogHealth,
