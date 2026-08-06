@@ -93,6 +93,18 @@ BASELINE** antes de autorizar a próxima Sprint.
 | Resultado                                | D-02 torna-se a **segunda OFFICIAL RELEASE BASELINE** do BLOCO D |
 | Próxima Sprint autorizada (não iniciada) | **D-03** — Enterprise XML Schema Runtime Functional Foundation   |
 
+## Aplicação na Sprint D-03R
+
+| Item                                     | Valor                                                             |
+| ---------------------------------------- | ----------------------------------------------------------------- |
+| Sprint de entrega                        | D-03 — Enterprise XML Schema Runtime Functional Foundation        |
+| Sprint de gate                           | D-03R — XML Schema Runtime Release Certification                  |
+| Capacidade certificada                   | Schema Selection (`schemaSelectionImplemented = true`)            |
+| Commit de entrega                        | `31deb22`                                                         |
+| Data                                     | 2026-08-06                                                        |
+| Resultado                                | D-03 torna-se a **terceira OFFICIAL RELEASE BASELINE** do BLOCO D |
+| Próxima Sprint autorizada (não iniciada) | **D-04** — próxima Sprint do BLOCO D                              |
+
 ## O que esta regra NÃO é
 
 - Não implementa XSD / XML Validation / SOAP / Operadoras / Workflow / Authorization
