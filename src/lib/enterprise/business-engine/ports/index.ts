@@ -11,6 +11,8 @@ export type {
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
   ExecuteBusinessTransactionResult,
+  ExecuteBusinessWorkflowInput,
+  ExecuteBusinessWorkflowResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -25,6 +27,7 @@ export {
   E01_BUSINESS_ENGINE_CAPABILITIES,
   E02_BUSINESS_ENGINE_CAPABILITIES,
   E03_BUSINESS_ENGINE_CAPABILITIES,
+  E04_BUSINESS_ENGINE_CAPABILITIES,
 } from "./capabilities";
 export type {
   CanonicalBusinessRule,
@@ -36,4 +39,6 @@ export type {
   CanonicalBusinessRuleExecutionResult,
   CanonicalBusinessTransactionResult,
   CanonicalBusinessTransactionStep,
+  CanonicalBusinessWorkflowResult,
+  CanonicalBusinessWorkflowStage,
 } from "./canonical";

@@ -4,6 +4,7 @@
  * E-01: Business Rule Catalog (`businessRuleCatalogImplemented = true`).
  * E-02: Business Rule Execution (`businessRuleExecutionImplemented = true`).
  * E-03: Business Transaction (`businessTransactionImplemented = true`).
+ * E-04: Business Workflow (`businessWorkflowImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
@@ -14,6 +15,8 @@ import type {
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
   ExecuteBusinessTransactionResult,
+  ExecuteBusinessWorkflowInput,
+  ExecuteBusinessWorkflowResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -57,4 +60,7 @@ export interface BusinessEnginePort {
   executeTransaction(
     input: ExecuteBusinessTransactionInput,
   ): Promise<ExecuteBusinessTransactionResult>;
+
+  /** E-04 — executa workflow orquestrado por transações. */
+  executeWorkflow(input: ExecuteBusinessWorkflowInput): Promise<ExecuteBusinessWorkflowResult>;
 }

@@ -1,9 +1,9 @@
 /**
- * MockBusinessEngineAdapter — E-03.
+ * MockBusinessEngineAdapter — E-04.
  *
  * Adapter mock para testes.
  */
-import { E03_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E04_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -13,6 +13,8 @@ import type {
   ExecuteBusinessRuleResult,
   ExecuteBusinessTransactionInput,
   ExecuteBusinessTransactionResult,
+  ExecuteBusinessWorkflowInput,
+  ExecuteBusinessWorkflowResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
   GetBusinessRuleCatalogStatsInput,
@@ -48,7 +50,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E03_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E04_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -59,6 +61,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessRuleCatalogOk: ok,
       businessRuleExecutionOk: ok,
       businessTransactionOk: ok,
+      businessWorkflowOk: ok,
     };
   }
 
@@ -127,6 +130,21 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       message: "transaction executed (mock)",
       stepResults: [],
       committed: true,
+      output: {},
+    };
+  }
+
+  async executeWorkflow(
+    _input: ExecuteBusinessWorkflowInput,
+  ): Promise<ExecuteBusinessWorkflowResult> {
+    return {
+      kind: "canonical-business-workflow-result",
+      ok: true,
+      workflowId: _input.workflowId,
+      code: "BUSINESS_WORKFLOW_MOCK_EXECUTED",
+      message: "workflow executed (mock)",
+      stageResults: [],
+      completed: true,
       output: {},
     };
   }

@@ -70,12 +70,31 @@ export interface CanonicalBusinessTransactionResult {
   readonly output: Record<string, unknown>;
 }
 
+export interface CanonicalBusinessWorkflowStage {
+  readonly kind: "canonical-business-workflow-stage";
+  readonly stageId: string;
+  readonly transactionId: string;
+  readonly steps: readonly CanonicalBusinessTransactionStep[];
+}
+
+export interface CanonicalBusinessWorkflowResult {
+  readonly kind: "canonical-business-workflow-result";
+  readonly ok: boolean;
+  readonly workflowId: string;
+  readonly code: string;
+  readonly message: string;
+  readonly stageResults: readonly CanonicalBusinessTransactionResult[];
+  readonly completed: boolean;
+  readonly output: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
   readonly businessRuleCatalogOk: boolean;
   readonly businessRuleExecutionOk: boolean;
   readonly businessTransactionOk: boolean;
+  readonly businessWorkflowOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {
