@@ -1,8 +1,8 @@
 # BLOCO E — Regra Permanente de Arquitetura — Enterprise Business Engine
 
 **Bloco:** BLOCO E — Enterprise Business Engine  
-**Status:** E-02 certificada e congelada  
-**Próxima Sprint autorizada (não iniciada):** E-03 — Business Transaction  
+**Status:** E-03 certificada e congelada  
+**Próxima Sprint autorizada (não iniciada):** E-04 — Business Workflow  
 **Data:** 2026-08-06  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -76,8 +76,8 @@ A Enterprise Business Engine é responsável por:
 | ARCH-E01 | ARCH-E01-A             | —                                         | Enterprise Business Engine Architecture                     | Concluída / certificada   |
 | E-01     | E-01R                  | `businessRuleCatalogImplemented`          | Enterprise Business Engine — Business Rule Catalog          | Concluída / certificada   |
 | E-02     | E-02R                  | `businessRuleExecutionImplemented`        | Enterprise Business Engine — Business Rule Execution        | Concluída / certificada   |
-| E-03     | E-03R                  | `businessTransactionImplemented`          | Enterprise Business Engine — Business Transaction           | Autorizada (não iniciada) |
-| E-04     | E-04R                  | `businessWorkflowImplemented`             | Enterprise Business Engine — Business Workflow              | Planejada                 |
+| E-03     | E-03R                  | `businessTransactionImplemented`          | Enterprise Business Engine — Business Transaction           | Concluída / certificada   |
+| E-04     | E-04R                  | `businessWorkflowImplemented`             | Enterprise Business Engine — Business Workflow              | Autorizada (não iniciada) |
 | E-05     | E-05R                  | `businessProcessOrchestrationImplemented` | Enterprise Business Engine — Business Process Orchestration | Planejada                 |
 | E-06     | E-06R                  | `businessDecisionTableImplemented`        | Enterprise Business Engine — Business Decision Table        | Planejada                 |
 | E-07     | E-07R                  | `businessEventLogImplemented`             | Enterprise Business Engine — Business Event Log             | Planejada                 |
