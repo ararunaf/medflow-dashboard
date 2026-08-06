@@ -35,6 +35,10 @@ import type {
   CanonicalVersionValidationResult,
 } from "../version-validation/canonical";
 import type {
+  CanonicalBusinessValidationContext,
+  CanonicalBusinessValidationResult,
+} from "../business-validation/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -64,6 +68,11 @@ export type {
   CanonicalVersionValidationContext,
   CanonicalVersionValidationResult,
 } from "../version-validation/canonical";
+
+export type {
+  CanonicalBusinessValidationContext,
+  CanonicalBusinessValidationResult,
+} from "../business-validation/canonical";
 
 export type {
   AuditResult,
@@ -176,7 +185,10 @@ export type XMLValidationRuntimeHealth = {
   versionValidationOk?: boolean;
   /** D-05 — Version Validation funcional. */
   versionValidationImplemented: boolean;
-  businessValidationImplemented: false;
+  /** D-06 — health da capability Business Validation. */
+  businessValidationOk?: boolean;
+  /** D-06 — Business Validation funcional. */
+  businessValidationImplemented: boolean;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
@@ -221,7 +233,8 @@ export type XMLValidationRuntimeCapabilities = {
   schemaSelectionImplemented: false;
   /** D-05 — Version Validation funcional. */
   versionValidationImplemented: boolean;
-  businessValidationImplemented: false;
+  /** D-06 — Business Validation funcional. */
+  businessValidationImplemented: boolean;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
@@ -456,5 +469,24 @@ export type ValidateVersionInput = XMLValidationRuntimeOperationalControls & {
 export type ValidateVersionResult = XMLValidationRuntimeOperationEnvelope & {
   validation?: CanonicalVersionValidationResult;
   context?: CanonicalVersionValidationContext | null;
+  valid?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-06 — Business Validation funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type ValidateBusinessInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Regras de negócio a serem validadas. */
+  rules: import("../business-validation/canonical").BusinessValidationRule[];
+  /** Nome do elemento raiz esperado (localName). */
+  rootElementName?: string;
+};
+
+export type ValidateBusinessResult = XMLValidationRuntimeOperationEnvelope & {
+  validation?: CanonicalBusinessValidationResult;
+  context?: CanonicalBusinessValidationContext | null;
   valid?: boolean;
 };

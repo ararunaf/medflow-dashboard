@@ -30,6 +30,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  ValidateBusinessInput,
+  ValidateBusinessResult,
   ValidateNamespaceInput,
   ValidateNamespaceResult,
   ValidateVersionInput,
@@ -51,6 +53,7 @@ import type {
   XMLValidationStatsResult,
 } from "../ports/types";
 import { InMemoryXMLValidationRuntimeStore, type XMLValidationRuntimeStore } from "../store";
+import { BusinessValidator } from "../business-validation/business-validator";
 import { NamespaceValidator } from "../namespace-validation/namespace-validator";
 import { VersionValidator } from "../version-validation/version-validator";
 import { XSDValidator } from "../xsd-validation/xsd-validator";
@@ -125,7 +128,8 @@ function structuralFlags() {
     schemaSelectionImplemented: false,
     /** D-05 — Version Validation funcional. */
     versionValidationImplemented: true,
-    businessValidationImplemented: false,
+    /** D-06 — Business Validation funcional. */
+    businessValidationImplemented: true,
     operatorValidationImplemented: false,
     xmlRepairImplemented: false,
     automaticCorrectionImplemented: false,
@@ -209,6 +213,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
   private readonly xsdValidator: XSDValidator;
   private readonly namespaceValidator: NamespaceValidator;
   private readonly versionValidator: VersionValidator;
+  private readonly businessValidator: BusinessValidator;
 
   constructor(options: DefaultXMLValidationRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
@@ -239,6 +244,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
     this.xsdValidator = new XSDValidator();
     this.namespaceValidator = new NamespaceValidator();
     this.versionValidator = new VersionValidator();
+    this.businessValidator = new BusinessValidator();
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -391,6 +397,7 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       xsdValidationOk: this.healthy === true,
       namespaceValidationOk: this.healthy === true,
       versionValidationOk: this.healthy === true,
+      businessValidationOk: this.healthy === true,
       message: this.healthy
         ? ok
           ? "XML Validation Runtime pronto (C-02 estrutural + D-02 XSD Validation)."
@@ -446,6 +453,27 @@ export class DefaultXMLValidationRuntimeAdapter implements XMLValidationRuntimeP
       const validation = this.versionValidator.validate(input.document, {
         versionId: input.versionId,
         attributeName: input.attributeName,
+        rootElementName: input.rootElementName,
+      });
+      return {
+        ok: validation.ok,
+        validation,
+        context: validation.context ?? null,
+        valid: validation.valid,
+        code: validation.code,
+        message: validation.message,
+      };
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // D-06 — Business Validation funcional.
+  // -------------------------------------------------------------------------
+
+  async validateBusiness(input: ValidateBusinessInput): Promise<ValidateBusinessResult> {
+    return this.runOperation("validateBusiness", input, async () => {
+      const validation = this.businessValidator.validate(input.document, {
+        rules: input.rules,
         rootElementName: input.rootElementName,
       });
       return {

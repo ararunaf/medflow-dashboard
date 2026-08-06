@@ -340,7 +340,7 @@ export type XMLValidationResult = {
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: boolean;
-  businessValidationImplemented: false;
+  businessValidationImplemented: boolean;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
@@ -415,7 +415,7 @@ export type XMLValidationHealth = {
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: boolean;
-  businessValidationImplemented: false;
+  businessValidationImplemented: boolean;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
@@ -445,7 +445,7 @@ export type XMLValidationCapabilities = {
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
   versionValidationImplemented: boolean;
-  businessValidationImplemented: false;
+  businessValidationImplemented: boolean;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;

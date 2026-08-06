@@ -16,6 +16,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  ValidateBusinessInput,
+  ValidateBusinessResult,
   ValidateNamespaceInput,
   ValidateNamespaceResult,
   ValidateVersionInput,
@@ -132,7 +134,7 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
       namespaceValidationImplemented: true,
       schemaSelectionImplemented: false,
       versionValidationImplemented: true,
-      businessValidationImplemented: false,
+      businessValidationImplemented: true,
       operatorValidationImplemented: false,
       xmlRepairImplemented: false,
       automaticCorrectionImplemented: false,
@@ -193,6 +195,11 @@ export class MockXMLValidationRuntimeAdapter implements XMLValidationRuntimePort
 
   async validateVersion(input: ValidateVersionInput): Promise<ValidateVersionResult> {
     const result = await this.delegate.validateVersion(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async validateBusiness(input: ValidateBusinessInput): Promise<ValidateBusinessResult> {
+    const result = await this.delegate.validateBusiness(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 

@@ -107,6 +107,8 @@ export type {
   ValidateNamespaceResult,
   ValidateVersionInput,
   ValidateVersionResult,
+  ValidateBusinessInput,
+  ValidateBusinessResult,
   CanonicalValidationIssue,
   CanonicalValidationStatistics,
   CanonicalXSDValidationResult,
@@ -114,6 +116,8 @@ export type {
   CanonicalNamespaceValidationResult,
   CanonicalVersionValidationContext,
   CanonicalVersionValidationResult,
+  CanonicalBusinessValidationContext,
+  CanonicalBusinessValidationResult,
   XMLValidationRuntimeContext,
 } from "./ports";
 

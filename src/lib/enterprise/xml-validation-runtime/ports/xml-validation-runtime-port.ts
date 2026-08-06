@@ -21,6 +21,8 @@ import type {
   GetXMLValidationResultResult,
   ListXMLValidationResultsInput,
   ListXMLValidationResultsResult,
+  ValidateBusinessInput,
+  ValidateBusinessResult,
   ValidateNamespaceInput,
   ValidateNamespaceResult,
   ValidateVersionInput,
@@ -89,6 +91,16 @@ export interface XMLValidationRuntimePort {
    * Capability D-05 (`versionValidationImplemented = true`).
    */
   validateVersion(input: ValidateVersionInput): Promise<ValidateVersionResult>;
+
+  // -------------------------------------------------------------------------
+  // D-06 — Business Validation funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Valida regras de negócio sobre CanonicalXMLDocument.
+   * Capability D-06 (`businessValidationImplemented = true`).
+   */
+  validateBusiness(input: ValidateBusinessInput): Promise<ValidateBusinessResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;
