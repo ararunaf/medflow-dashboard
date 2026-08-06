@@ -28,6 +28,8 @@ import type {
   ListCanonicalXMLSchemaResultsResult,
   RegisterCanonicalXMLSchemaInput,
   RegisterCanonicalXMLSchemaResult,
+  SelectCanonicalXMLSchemaInput,
+  SelectCanonicalXMLSchemaResult,
   XMLSchemaRuntimeHealth,
   XMLSchemaRuntimeInfo,
   XMLSchemaRuntimeOperationEnvelope,
@@ -202,6 +204,7 @@ export class DefaultXMLSchemaAdapter implements XMLSchemaRuntimePort {
       supportsRetry: true,
       supportsCancellation: true,
       supportsTelemetry: true,
+      schemaSelectionImplemented: true,
       implementsOfficialXsd: false,
       implementsXsdValidation: false,
       implementsRealTissXml: false,
@@ -236,6 +239,7 @@ export class DefaultXMLSchemaAdapter implements XMLSchemaRuntimePort {
       latencyMs: 0,
       status: ok ? "ready" : "unhealthy",
       storedResultCount: this.store.resultCount(),
+      schemaSelectionOk: ok,
       message: this.healthy
         ? (storeHealth.message ?? this.message)
         : "XML Schema Runtime unhealthy.",
@@ -319,6 +323,85 @@ export class DefaultXMLSchemaAdapter implements XMLSchemaRuntimePort {
         statistics: this.store.statistics(),
         code: "XML_SCHEMA_RUNTIME_OK",
         message: `Listed ${results.length} canonical XML schema results.`,
+      };
+    });
+  }
+
+  async select(input: SelectCanonicalXMLSchemaInput): Promise<SelectCanonicalXMLSchemaResult> {
+    return this.runOperation("select", input, async () => {
+      const all = this.store.listResults();
+      const { schemaId, name, version, documentId } = input;
+      const stamp = this.now();
+
+      const buildSelection = (
+        source: CanonicalXMLSchemaResult,
+        schema: CanonicalXMLSchema,
+        message: string,
+      ): CanonicalXMLSchemaResult => ({
+        ...source,
+        kind: "canonical-xml-schema-result",
+        ok: true,
+        resultId: createXMLSchemaResultId(),
+        operation: "select",
+        status: "completed",
+        message,
+        createdAt: stamp,
+        updatedAt: stamp,
+        schema,
+      });
+
+      for (const result of all) {
+        const schema = result.schema;
+        if (!schema) continue;
+
+        if (schemaId && result.request.schemaId === schemaId) {
+          return {
+            ok: true,
+            schema,
+            result: buildSelection(result, schema, "Schema selected by schemaId."),
+            code: "XML_SCHEMA_RUNTIME_OK",
+            message: "Schema selected by schemaId.",
+          };
+        }
+        if (documentId && result.request.documentId === documentId) {
+          return {
+            ok: true,
+            schema,
+            result: buildSelection(result, schema, "Schema selected by documentId."),
+            code: "XML_SCHEMA_RUNTIME_OK",
+            message: "Schema selected by documentId.",
+          };
+        }
+        if (name && schema.name === name) {
+          if (!version) {
+            return {
+              ok: true,
+              schema,
+              result: buildSelection(result, schema, "Schema selected by name."),
+              code: "XML_SCHEMA_RUNTIME_OK",
+              message: "Schema selected by name.",
+            };
+          }
+          if (
+            schema.version?.major === version.major &&
+            schema.version?.minor === version.minor &&
+            schema.version?.patch === version.patch
+          ) {
+            return {
+              ok: true,
+              schema,
+              result: buildSelection(result, schema, "Schema selected by name and version."),
+              code: "XML_SCHEMA_RUNTIME_OK",
+              message: "Schema selected by name and version.",
+            };
+          }
+        }
+      }
+
+      return {
+        ok: false,
+        code: "XML_SCHEMA_RUNTIME_NOT_FOUND",
+        message: "No canonical XML schema matches the selection criteria.",
       };
     });
   }

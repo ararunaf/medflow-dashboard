@@ -8,6 +8,7 @@ import type { CanonicalXMLSchemaCapabilities } from "./canonical";
 
 export type XMLSchemaRuntimeCapabilities = {
   supportsRegister?: boolean;
+  supportsSelect?: boolean;
   supportsGetResult?: boolean;
   supportsListResults?: boolean;
   supportsHealth?: boolean;
@@ -16,6 +17,8 @@ export type XMLSchemaRuntimeCapabilities = {
   supportsRetry?: boolean;
   supportsCancellation?: boolean;
   supportsTelemetry?: boolean;
+  /** D-03 — Schema Selection funcional. */
+  schemaSelectionImplemented?: boolean;
   implementsOfficialXsd?: false;
   implementsXsdValidation?: false;
   implementsRealTissXml?: false;
@@ -41,6 +44,7 @@ export function defineXMLSchemaRuntimeCapabilities(
 
 export const DEFAULT_XML_SCHEMA_RUNTIME_CAPABILITIES: XMLSchemaRuntimeCapabilities = {
   supportsRegister: true,
+  supportsSelect: true,
   supportsGetResult: true,
   supportsListResults: true,
   supportsHealth: true,
@@ -49,6 +53,7 @@ export const DEFAULT_XML_SCHEMA_RUNTIME_CAPABILITIES: XMLSchemaRuntimeCapabiliti
   supportsRetry: true,
   supportsCancellation: true,
   supportsTelemetry: true,
+  schemaSelectionImplemented: true,
   implementsOfficialXsd: false,
   implementsXsdValidation: false,
   implementsRealTissXml: false,
@@ -72,10 +77,12 @@ export function toCanonicalXMLSchemaCapabilities(
   return {
     kind: "canonical-xml-schema-capabilities",
     supportsRegister: capabilities.supportsRegister === true,
+    supportsSelect: capabilities.supportsSelect === true,
     supportsGetResult: capabilities.supportsGetResult === true,
     supportsListResults: capabilities.supportsListResults === true,
     supportsHealth: capabilities.supportsHealth === true,
     supportsCanonicalSchema: capabilities.supportsCanonicalSchema === true,
+    schemaSelectionImplemented: capabilities.schemaSelectionImplemented === true,
     implementsOfficialXsd: false,
     implementsXsdValidation: false,
     implementsRealTissXml: false,

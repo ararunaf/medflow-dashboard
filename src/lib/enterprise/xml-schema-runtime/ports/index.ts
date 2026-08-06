@@ -19,6 +19,8 @@ export type {
   ListCanonicalXMLSchemaResultsResult,
   RegisterCanonicalXMLSchemaInput,
   RegisterCanonicalXMLSchemaResult,
+  SelectCanonicalXMLSchemaInput,
+  SelectCanonicalXMLSchemaResult,
   XMLSchemaRuntimeCapabilities,
   XMLSchemaRuntimeHealth,
   XMLSchemaRuntimeInfo,

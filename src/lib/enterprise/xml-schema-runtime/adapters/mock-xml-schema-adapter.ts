@@ -16,6 +16,8 @@ import type {
   ListCanonicalXMLSchemaResultsResult,
   RegisterCanonicalXMLSchemaInput,
   RegisterCanonicalXMLSchemaResult,
+  SelectCanonicalXMLSchemaInput,
+  SelectCanonicalXMLSchemaResult,
   XMLSchemaRuntimeHealth,
   XMLSchemaRuntimeInfo,
   XMLSchemaRuntimePortCapabilities,
@@ -88,6 +90,7 @@ export class MockXMLSchemaAdapter implements XMLSchemaRuntimePort {
       supportsRetry: true,
       supportsCancellation: true,
       supportsTelemetry: true,
+      schemaSelectionImplemented: true,
       implementsOfficialXsd: false,
       implementsXsdValidation: false,
       implementsRealTissXml: false,
@@ -139,6 +142,11 @@ export class MockXMLSchemaAdapter implements XMLSchemaRuntimePort {
     input?: ListCanonicalXMLSchemaResultsInput,
   ): Promise<ListCanonicalXMLSchemaResultsResult> {
     const result = await this.delegate.listResults(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async select(input: SelectCanonicalXMLSchemaInput): Promise<SelectCanonicalXMLSchemaResult> {
+    const result = await this.delegate.select(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 }

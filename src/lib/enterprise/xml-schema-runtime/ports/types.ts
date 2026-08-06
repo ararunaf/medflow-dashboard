@@ -17,6 +17,7 @@ import type {
   CanonicalXMLSchemaRequest,
   CanonicalXMLSchemaResult,
   CanonicalXMLSchemaStatistics,
+  CanonicalXMLSchemaVersion,
 } from "./canonical";
 import type { XMLSchemaRuntimeCapabilities } from "./capabilities";
 
@@ -78,6 +79,8 @@ export type XMLSchemaRuntimePortCapabilities = {
   supportsRetry: boolean;
   supportsCancellation: boolean;
   supportsTelemetry: boolean;
+  /** D-03 — Schema Selection funcional. */
+  schemaSelectionImplemented: boolean;
   implementsOfficialXsd: false;
   implementsXsdValidation: false;
   implementsRealTissXml: false;
@@ -159,6 +162,19 @@ export type ListCanonicalXMLSchemaResultsInput = XMLSchemaRuntimeOperationalCont
 export type ListCanonicalXMLSchemaResultsResult = XMLSchemaRuntimeOperationEnvelope & {
   results: readonly CanonicalXMLSchemaResult[];
   statistics?: CanonicalXMLSchemaStatistics;
+};
+
+/** D-03 — Seleção de XML Schema por critérios canônicos. */
+export type SelectCanonicalXMLSchemaInput = XMLSchemaRuntimeOperationalControls & {
+  schemaId?: string;
+  name?: string;
+  version?: CanonicalXMLSchemaVersion;
+  documentId?: string;
+};
+
+export type SelectCanonicalXMLSchemaResult = XMLSchemaRuntimeOperationEnvelope & {
+  schema?: CanonicalXMLSchema;
+  result?: CanonicalXMLSchemaResult;
 };
 
 /** Opções de resolução do XMLSchemaRuntimePort. */

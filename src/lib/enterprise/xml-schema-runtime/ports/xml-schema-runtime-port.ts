@@ -20,6 +20,8 @@ import type {
   ListCanonicalXMLSchemaResultsResult,
   RegisterCanonicalXMLSchemaInput,
   RegisterCanonicalXMLSchemaResult,
+  SelectCanonicalXMLSchemaInput,
+  SelectCanonicalXMLSchemaResult,
   XMLSchemaRuntimeHealth,
   XMLSchemaRuntimeInfo,
   XMLSchemaRuntimePortCapabilities,
@@ -36,6 +38,12 @@ export interface XMLSchemaRuntimePort {
    * Sempre officialXsdLoaded = false e xsdValidationPerformed = false.
    */
   register(input: RegisterCanonicalXMLSchemaInput): Promise<RegisterCanonicalXMLSchemaResult>;
+
+  /**
+   * Seleciona um XML Schema canônico previamente registrado.
+   * D-03 — schema selection funcional sem XSD oficial / sem TISS/ANS / sem operadoras.
+   */
+  select(input: SelectCanonicalXMLSchemaInput): Promise<SelectCanonicalXMLSchemaResult>;
 
   getResult(input: GetCanonicalXMLSchemaResultInput): Promise<GetCanonicalXMLSchemaResultResult>;
   listResults(

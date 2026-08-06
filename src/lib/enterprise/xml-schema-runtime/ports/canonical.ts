@@ -95,6 +95,7 @@ export type CanonicalXMLSchema = {
  */
 export type CanonicalXMLSchemaOperation =
   | "register"
+  | "select"
   | "get"
   | "list"
   | "health"
@@ -177,6 +178,8 @@ export type CanonicalXMLSchemaHealth = {
   message?: string;
   status?: string;
   storedResultCount?: number;
+  /** D-03 — Schema Selection funcional. */
+  schemaSelectionOk?: boolean;
 };
 
 /**
@@ -185,10 +188,13 @@ export type CanonicalXMLSchemaHealth = {
 export type CanonicalXMLSchemaCapabilities = {
   kind: "canonical-xml-schema-capabilities";
   supportsRegister: boolean;
+  supportsSelect: boolean;
   supportsGetResult: boolean;
   supportsListResults: boolean;
   supportsHealth: boolean;
   supportsCanonicalSchema: boolean;
+  /** D-03 — Schema Selection funcional. */
+  schemaSelectionImplemented: boolean;
   implementsOfficialXsd: false;
   implementsXsdValidation: false;
   implementsRealTissXml: false;
