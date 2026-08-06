@@ -124,8 +124,8 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | D-05   | D-05R                  | `versionValidationImplemented`   | Enterprise XML Version Runtime — Version Validation                       | Concluída / certificada   |
 | D-06   | D-06R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Concluída / certificada   |
 | D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Concluída / certificada   |
-| D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Autorizada (não iniciada) |
-| D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Planejada                 |
+| D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Concluída / certificada   |
+| D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Autorizada (não iniciada) |
 | D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Planejada                 |
 | D-11   | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Planejada                 |
 
@@ -230,6 +230,18 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | Data                                     | 2026-08-06                                                                       |
 | Resultado                                | D-07 torna-se a **sétima OFFICIAL RELEASE BASELINE** do BLOCO D                  |
 | Próxima Sprint autorizada (não iniciada) | **D-08** — Enterprise XML Repair Runtime — XML Repair (`xmlRepairImplemented`)   |
+
+## 10. Aplicação na Sprint D-08R
+
+| Item                                     | Valor                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Sprint de entrega                        | D-08 — Enterprise XML Repair Runtime — XML Repair                                                      |
+| Sprint de gate                           | D-08R — XML Repair Release Certification                                                               |
+| Capacidade certificada                   | XML Repair (`xmlRepairImplemented = true`)                                                             |
+| Commit de entrega                        | `f8eb5bf`                                                                                              |
+| Data                                     | 2026-08-06                                                                                             |
+| Resultado                                | D-08 torna-se a **oitava OFFICIAL RELEASE BASELINE** do BLOCO D                                        |
+| Próxima Sprint autorizada (não iniciada) | **D-09** — Enterprise XML Correction Runtime — Automatic Correction (`automaticCorrectionImplemented`) |
 
 ---
 
