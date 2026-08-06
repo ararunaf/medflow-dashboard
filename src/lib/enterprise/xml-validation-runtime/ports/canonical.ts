@@ -339,7 +339,7 @@ export type XMLValidationResult = {
   xsdValidationImplemented: true;
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
-  versionValidationImplemented: false;
+  versionValidationImplemented: boolean;
   businessValidationImplemented: false;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
@@ -414,7 +414,7 @@ export type XMLValidationHealth = {
   xsdValidationImplemented: true;
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
-  versionValidationImplemented: false;
+  versionValidationImplemented: boolean;
   businessValidationImplemented: false;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
@@ -444,7 +444,7 @@ export type XMLValidationCapabilities = {
   xsdValidationImplemented: true;
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
-  versionValidationImplemented: false;
+  versionValidationImplemented: boolean;
   businessValidationImplemented: false;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;

@@ -23,6 +23,8 @@ import type {
   ListXMLValidationResultsResult,
   ValidateNamespaceInput,
   ValidateNamespaceResult,
+  ValidateVersionInput,
+  ValidateVersionResult,
   ValidateXMLInput,
   ValidateXMLResult,
   ValidateXSDInput,
@@ -77,6 +79,16 @@ export interface XMLValidationRuntimePort {
    * Capability D-04 (`namespaceValidationImplemented = true`).
    */
   validateNamespace(input: ValidateNamespaceInput): Promise<ValidateNamespaceResult>;
+
+  // -------------------------------------------------------------------------
+  // D-05 — Version Validation funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Valida versão em CanonicalXMLDocument.
+   * Capability D-05 (`versionValidationImplemented = true`).
+   */
+  validateVersion(input: ValidateVersionInput): Promise<ValidateVersionResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

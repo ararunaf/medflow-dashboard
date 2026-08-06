@@ -105,11 +105,15 @@ export type {
   ValidateXSDResult,
   ValidateNamespaceInput,
   ValidateNamespaceResult,
+  ValidateVersionInput,
+  ValidateVersionResult,
   CanonicalValidationIssue,
   CanonicalValidationStatistics,
   CanonicalXSDValidationResult,
   CanonicalNamespaceValidationContext,
   CanonicalNamespaceValidationResult,
+  CanonicalVersionValidationContext,
+  CanonicalVersionValidationResult,
   XMLValidationRuntimeContext,
 } from "./ports";
 

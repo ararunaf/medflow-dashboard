@@ -90,7 +90,7 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
-function assertFunctionalFlagsForD04(obj: Record<string, unknown>) {
+function assertFunctionalFlagsForD05(obj: Record<string, unknown>) {
   assert.equal(
     obj.xsdValidationImplemented,
     true,
@@ -101,10 +101,14 @@ function assertFunctionalFlagsForD04(obj: Record<string, unknown>) {
     true,
     "namespaceValidationImplemented deveria ser true (D-04)",
   );
+  assert.equal(
+    obj.versionValidationImplemented,
+    true,
+    "versionValidationImplemented deveria ser true (D-05)",
+  );
   const flags = [
     "xmlValidationImplemented",
     "schemaSelectionImplemented",
-    "versionValidationImplemented",
     "businessValidationImplemented",
     "operatorValidationImplemented",
     "xmlRepairImplemented",
@@ -288,7 +292,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(health.provider, "mock");
     assert.equal(health.runtimeReady, true);
     assert.equal(health.validationEngineReady, true);
-    assertFunctionalFlagsForD04(health as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD05(health as unknown as Record<string, unknown>);
 
     const caps = port.capabilities();
     assert.equal(caps.adapterId, MOCK_XML_VALIDATION_RUNTIME_ADAPTER_ID);
@@ -297,7 +301,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(caps.supportsListResults, true);
     assert.equal(caps.supportsStats, true);
     assert.equal(caps.runtimeReady, true);
-    assertFunctionalFlagsForD04(caps as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD05(caps as unknown as Record<string, unknown>);
   });
 
   it("DefaultXMLValidationRuntimeAdapter é o adapter enterprise oficial (enterpriseDeps opcional)", () => {
@@ -386,7 +390,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(validated.result?.status, "validated");
     assert.equal(validated.result?.xmlContext?.kind, "canonical-xml-validation-context");
     assert.equal(validated.result?.xmlContext?.canonicalGuide?.kind, "canonical-tiss-guide");
-    assertFunctionalFlagsForD04(validated.result as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD05(validated.result as unknown as Record<string, unknown>);
 
     const loaded = await port.getResult({ resultId: validated.result!.resultId });
     assert.equal(loaded.ok, true);
@@ -421,10 +425,10 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.capabilities.runtimeReady, true);
     assert.equal(summary.info.providerType, "XML_VALIDATION_RUNTIME");
-    assertFunctionalFlagsForD04(summary.health as unknown as Record<string, unknown>);
+    assertFunctionalFlagsForD05(summary.health as unknown as Record<string, unknown>);
   });
 
-  it("capabilities engine declara xsdValidationImplemented (D-02) e namespaceValidationImplemented (D-04) ativas, demais false", () => {
+  it("capabilities engine declara xsdValidationImplemented (D-02), namespaceValidationImplemented (D-04) e versionValidationImplemented (D-05) ativas, demais false", () => {
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented,
       false,
@@ -440,7 +444,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     );
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.versionValidationImplemented,
-      false,
+      true,
     );
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.businessValidationImplemented,

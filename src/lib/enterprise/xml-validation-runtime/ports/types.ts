@@ -31,6 +31,10 @@ import type {
   CanonicalNamespaceValidationResult,
 } from "../namespace-validation/canonical";
 import type {
+  CanonicalVersionValidationContext,
+  CanonicalVersionValidationResult,
+} from "../version-validation/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -55,6 +59,11 @@ export type {
   CanonicalNamespaceValidationContext,
   CanonicalNamespaceValidationResult,
 } from "../namespace-validation/canonical";
+
+export type {
+  CanonicalVersionValidationContext,
+  CanonicalVersionValidationResult,
+} from "../version-validation/canonical";
 
 export type {
   AuditResult,
@@ -163,7 +172,10 @@ export type XMLValidationRuntimeHealth = {
   namespaceValidationOk?: boolean;
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
-  versionValidationImplemented: false;
+  /** D-05 — health da capability Version Validation. */
+  versionValidationOk?: boolean;
+  /** D-05 — Version Validation funcional. */
+  versionValidationImplemented: boolean;
   businessValidationImplemented: false;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
@@ -207,7 +219,8 @@ export type XMLValidationRuntimeCapabilities = {
   /** D-04 — Namespace Validation funcional. */
   namespaceValidationImplemented: boolean;
   schemaSelectionImplemented: false;
-  versionValidationImplemented: false;
+  /** D-05 — Version Validation funcional. */
+  versionValidationImplemented: boolean;
   businessValidationImplemented: false;
   operatorValidationImplemented: false;
   xmlRepairImplemented: false;
@@ -422,5 +435,26 @@ export type ValidateNamespaceInput = XMLValidationRuntimeOperationalControls & {
 export type ValidateNamespaceResult = XMLValidationRuntimeOperationEnvelope & {
   validation?: CanonicalNamespaceValidationResult;
   context?: CanonicalNamespaceValidationContext | null;
+  valid?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-05 — Version Validation funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type ValidateVersionInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Valor de versão esperado. */
+  versionId: string;
+  /** Nome do atributo/elemento onde a versão é declarada (padrão: "version"). */
+  attributeName?: string;
+  /** Nome do elemento raiz esperado (localName). */
+  rootElementName?: string;
+};
+
+export type ValidateVersionResult = XMLValidationRuntimeOperationEnvelope & {
+  validation?: CanonicalVersionValidationResult;
+  context?: CanonicalVersionValidationContext | null;
   valid?: boolean;
 };
