@@ -125,8 +125,8 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | D-06   | D-06R                  | `businessValidationImplemented`  | Enterprise XML Business Validation Runtime — Business Rules Validation    | Concluída / certificada   |
 | D-07   | D-07R                  | `operatorValidationImplemented`  | Enterprise XML Operator Validation Runtime — Operator-Specific Validation | Concluída / certificada   |
 | D-08   | D-08R                  | `xmlRepairImplemented`           | Enterprise XML Repair Runtime — XML Repair                                | Concluída / certificada   |
-| D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Autorizada (não iniciada) |
-| D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Planejada                 |
+| D-09   | D-09R                  | `automaticCorrectionImplemented` | Enterprise XML Correction Runtime — Automatic Correction                  | Concluída / certificada   |
+| D-10   | D-10R                  | `validationReportImplemented`    | Enterprise XML Report Runtime — Validation Report                         | Autorizada (não iniciada) |
 | D-11   | D-11R                  | `xmlValidationImplemented`       | Enterprise XML Validation Runtime — Generic XML Validation                | Planejada                 |
 
 **Regras do Roadmap:**
@@ -242,6 +242,18 @@ A ordem das Sprints segue uma sequência funcional coerente derivada da matriz c
 | Data                                     | 2026-08-06                                                                                             |
 | Resultado                                | D-08 torna-se a **oitava OFFICIAL RELEASE BASELINE** do BLOCO D                                        |
 | Próxima Sprint autorizada (não iniciada) | **D-09** — Enterprise XML Correction Runtime — Automatic Correction (`automaticCorrectionImplemented`) |
+
+## 10. Aplicação na Sprint D-09R
+
+| Item                                     | Valor                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Sprint de entrega                        | D-09 — Enterprise XML Correction Runtime — Automatic Correction                              |
+| Sprint de gate                           | D-09R — XML Automatic Correction Release Certification                                       |
+| Capacidade certificada                   | Automatic Correction (`automaticCorrectionImplemented = true`)                               |
+| Commit de entrega                        | `0306291`                                                                                    |
+| Data                                     | 2026-08-06                                                                                   |
+| Resultado                                | D-09 torna-se a **nona OFFICIAL RELEASE BASELINE** do BLOCO D                                |
+| Próxima Sprint autorizada (não iniciada) | **D-10** — Enterprise XML Report Runtime — Validation Report (`validationReportImplemented`) |
 
 ---
 
