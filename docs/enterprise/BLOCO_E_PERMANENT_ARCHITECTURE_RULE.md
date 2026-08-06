@@ -1,8 +1,8 @@
 # BLOCO E — Regra Permanente de Arquitetura — Enterprise Business Engine
 
 **Bloco:** BLOCO E — Enterprise Business Engine  
-**Status:** E-06 certificada e congelada  
-**Próxima Sprint autorizada (não iniciada):** E-07 — Business Event Log  
+**Status:** E-07 certificada e congelada  
+**Próxima Sprint autorizada (não iniciada):** E-08 — Business Audit Trail  
 **Data:** 2026-08-06  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -80,8 +80,8 @@ A Enterprise Business Engine é responsável por:
 | E-04     | E-04R                  | `businessWorkflowImplemented`             | Enterprise Business Engine — Business Workflow              | Concluída / certificada   |
 | E-05     | E-05R                  | `businessProcessOrchestrationImplemented` | Enterprise Business Engine — Business Process Orchestration | Concluída / certificada   |
 | E-06     | E-06R                  | `businessDecisionTableImplemented`        | Enterprise Business Engine — Business Decision Table        | Concluída / certificada   |
-| E-07     | E-07R                  | `businessEventLogImplemented`             | Enterprise Business Engine — Business Event Log             | Autorizada (não iniciada) |
-| E-08     | E-08R                  | `businessAuditTrailImplemented`           | Enterprise Business Engine — Business Audit Trail           | Planejada                 |
+| E-07     | E-07R                  | `businessEventLogImplemented`             | Enterprise Business Engine — Business Event Log             | Concluída / certificada   |
+| E-08     | E-08R                  | `businessAuditTrailImplemented`           | Enterprise Business Engine — Business Audit Trail           | Autorizada (não iniciada) |
 | E-09     | E-09R                  | `businessReportImplemented`               | Enterprise Business Engine — Business Report                | Planejada                 |
 | E-10     | E-10R                  | `businessEngineImplemented`               | Enterprise Business Engine — Generic Business Engine        | Planejada                 |
 | AUDIT-E  | AUDIT-E-R              | —                                         | Enterprise Block E Architecture Audit                       | Planejada                 |
