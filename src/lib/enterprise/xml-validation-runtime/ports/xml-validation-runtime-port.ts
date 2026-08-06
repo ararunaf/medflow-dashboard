@@ -25,6 +25,8 @@ import type {
   ValidateBusinessResult,
   ValidateNamespaceInput,
   ValidateNamespaceResult,
+  ValidateOperatorInput,
+  ValidateOperatorResult,
   ValidateVersionInput,
   ValidateVersionResult,
   ValidateXMLInput,
@@ -101,6 +103,16 @@ export interface XMLValidationRuntimePort {
    * Capability D-06 (`businessValidationImplemented = true`).
    */
   validateBusiness(input: ValidateBusinessInput): Promise<ValidateBusinessResult>;
+
+  // -------------------------------------------------------------------------
+  // D-07 — Operator Validation funcional.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Valida identificador de operador em CanonicalXMLDocument.
+   * Capability D-07 (`operatorValidationImplemented = true`).
+   */
+  validateOperator(input: ValidateOperatorInput): Promise<ValidateOperatorResult>;
 
   /** Verificação leve de prontidão (shape-check de Ports Enterprise quando disponíveis). */
   health(): Promise<XMLValidationRuntimeHealth>;

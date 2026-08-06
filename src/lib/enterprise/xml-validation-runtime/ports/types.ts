@@ -39,6 +39,10 @@ import type {
   CanonicalBusinessValidationResult,
 } from "../business-validation/canonical";
 import type {
+  CanonicalOperatorValidationContext,
+  CanonicalOperatorValidationResult,
+} from "../operator-validation/canonical";
+import type {
   AuditResult,
   AutoFillResult,
   CanonicalGuide,
@@ -73,6 +77,11 @@ export type {
   CanonicalBusinessValidationContext,
   CanonicalBusinessValidationResult,
 } from "../business-validation/canonical";
+
+export type {
+  CanonicalOperatorValidationContext,
+  CanonicalOperatorValidationResult,
+} from "../operator-validation/canonical";
 
 export type {
   AuditResult,
@@ -189,7 +198,10 @@ export type XMLValidationRuntimeHealth = {
   businessValidationOk?: boolean;
   /** D-06 — Business Validation funcional. */
   businessValidationImplemented: boolean;
-  operatorValidationImplemented: false;
+  /** D-07 — health da capability Operator Validation. */
+  operatorValidationOk?: boolean;
+  /** D-07 — Operator Validation funcional. */
+  operatorValidationImplemented: boolean;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
@@ -235,7 +247,8 @@ export type XMLValidationRuntimeCapabilities = {
   versionValidationImplemented: boolean;
   /** D-06 — Business Validation funcional. */
   businessValidationImplemented: boolean;
-  operatorValidationImplemented: false;
+  /** D-07 — Operator Validation funcional. */
+  operatorValidationImplemented: boolean;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
@@ -488,5 +501,26 @@ export type ValidateBusinessInput = XMLValidationRuntimeOperationalControls & {
 export type ValidateBusinessResult = XMLValidationRuntimeOperationEnvelope & {
   validation?: CanonicalBusinessValidationResult;
   context?: CanonicalBusinessValidationContext | null;
+  valid?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// D-07 — Operator Validation funcional sobre CanonicalXMLDocument.
+// ---------------------------------------------------------------------------
+
+export type ValidateOperatorInput = XMLValidationRuntimeOperationalControls & {
+  /** Documento canônico produzido pelo XML Parser (D-01). */
+  document: CanonicalXMLDocument;
+  /** Identificador de operador esperado. */
+  operatorId: string;
+  /** Nome do atributo/elemento onde o operador é declarado (padrão: "operator"). */
+  fieldName?: string;
+  /** Nome do elemento raiz esperado (localName). */
+  rootElementName?: string;
+};
+
+export type ValidateOperatorResult = XMLValidationRuntimeOperationEnvelope & {
+  validation?: CanonicalOperatorValidationResult;
+  context?: CanonicalOperatorValidationContext | null;
   valid?: boolean;
 };

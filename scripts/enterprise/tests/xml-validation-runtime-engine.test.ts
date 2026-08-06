@@ -111,10 +111,14 @@ function assertFunctionalFlagsForD06(obj: Record<string, unknown>) {
     true,
     "businessValidationImplemented deveria ser true (D-06)",
   );
+  assert.equal(
+    obj.operatorValidationImplemented,
+    true,
+    "operatorValidationImplemented deveria ser true (D-07)",
+  );
   const flags = [
     "xmlValidationImplemented",
     "schemaSelectionImplemented",
-    "operatorValidationImplemented",
     "xmlRepairImplemented",
     "automaticCorrectionImplemented",
     "validationReportImplemented",
@@ -432,7 +436,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     assertFunctionalFlagsForD06(summary.health as unknown as Record<string, unknown>);
   });
 
-  it("capabilities engine declara xsd (D-02), namespace (D-04), version (D-05) e business (D-06) ativas, demais false", () => {
+  it("capabilities engine declara xsd (D-02), namespace (D-04), version (D-05), business (D-06) e operator (D-07) ativas, demais false", () => {
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlValidationImplemented,
       false,
@@ -456,7 +460,7 @@ describe("C-02 XMLValidationRuntimePort contract", () => {
     );
     assert.equal(
       DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.operatorValidationImplemented,
-      false,
+      true,
     );
     assert.equal(DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES.xmlRepairImplemented, false);
     assert.equal(

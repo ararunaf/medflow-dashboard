@@ -81,6 +81,8 @@ export type {
   ValidateVersionResult,
   ValidateBusinessInput,
   ValidateBusinessResult,
+  ValidateOperatorInput,
+  ValidateOperatorResult,
   CanonicalValidationIssue,
   CanonicalValidationStatistics,
   CanonicalXSDValidationResult,
@@ -90,6 +92,8 @@ export type {
   CanonicalVersionValidationResult,
   CanonicalBusinessValidationContext,
   CanonicalBusinessValidationResult,
+  CanonicalOperatorValidationContext,
+  CanonicalOperatorValidationResult,
   XMLValidationRuntimeContext,
 } from "./types";
 

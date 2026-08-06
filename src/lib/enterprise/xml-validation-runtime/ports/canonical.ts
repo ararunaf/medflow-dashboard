@@ -341,7 +341,7 @@ export type XMLValidationResult = {
   schemaSelectionImplemented: false;
   versionValidationImplemented: boolean;
   businessValidationImplemented: boolean;
-  operatorValidationImplemented: false;
+  operatorValidationImplemented: boolean;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
@@ -416,7 +416,7 @@ export type XMLValidationHealth = {
   schemaSelectionImplemented: false;
   versionValidationImplemented: boolean;
   businessValidationImplemented: boolean;
-  operatorValidationImplemented: false;
+  operatorValidationImplemented: boolean;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;
@@ -446,7 +446,7 @@ export type XMLValidationCapabilities = {
   schemaSelectionImplemented: false;
   versionValidationImplemented: boolean;
   businessValidationImplemented: boolean;
-  operatorValidationImplemented: false;
+  operatorValidationImplemented: boolean;
   xmlRepairImplemented: false;
   automaticCorrectionImplemented: false;
   validationReportImplemented: false;

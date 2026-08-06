@@ -41,7 +41,8 @@ export type XMLValidationRuntimeEngineCapabilities = {
   versionValidationImplemented?: true;
   /** D-06 — Business Validation funcional. */
   businessValidationImplemented?: true;
-  operatorValidationImplemented?: false;
+  /** D-07 — Operator Validation funcional. */
+  operatorValidationImplemented?: true;
   xmlRepairImplemented?: false;
   automaticCorrectionImplemented?: false;
   validationReportImplemented?: false;
@@ -112,7 +113,7 @@ export const DEFAULT_XML_VALIDATION_RUNTIME_ENGINE_CAPABILITIES: XMLValidationRu
     schemaSelectionImplemented: false,
     versionValidationImplemented: true,
     businessValidationImplemented: true,
-    operatorValidationImplemented: false,
+    operatorValidationImplemented: true,
     xmlRepairImplemented: false,
     automaticCorrectionImplemented: false,
     validationReportImplemented: false,
@@ -161,7 +162,7 @@ export function toXMLValidationCapabilities(
     schemaSelectionImplemented: false,
     versionValidationImplemented: true,
     businessValidationImplemented: true,
-    operatorValidationImplemented: false,
+    operatorValidationImplemented: true,
     xmlRepairImplemented: false,
     automaticCorrectionImplemented: false,
     validationReportImplemented: false,
