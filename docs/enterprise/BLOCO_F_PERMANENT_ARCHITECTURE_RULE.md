@@ -83,7 +83,8 @@ O Bloco F **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | F-07     | F-07R                  | `integrationRoutingImplemented`        | Enterprise Integration Engine — Integration Routing Engine        | Concluída / certificada   |
 | F-08     | F-08R                  | `integrationMonitoringImplemented`     | Enterprise Integration Engine — Integration Monitoring Engine     | Concluída / certificada   |
 | F-09     | F-09R                  | `integrationReportImplemented`         | Enterprise Integration Engine — Integration Report Engine         | Concluída / certificada   |
-| F-10     | F-10R                  | `integrationEngineImplemented`         | Enterprise Integration Engine — Generic Integration Engine        | Autorizada (não iniciada) |
+| F-10     | F-10R                  | `integrationEngineImplemented`         | Enterprise Integration Engine — Generic Integration Engine        | Concluída / certificada   |
+| AUDIT-F  | —                      | —                                      | Enterprise Integration Engine — Architecture Audit                | Autorizada (não iniciada) |
 | F-10     | F-10R                  | `integrationEngineImplemented`         | Enterprise Integration Engine — Generic Integration Engine        | Planejada                 |
 | AUDIT-F  | AUDIT-F-R              | —                                      | Enterprise Block F Architecture Audit                             | Planejada                 |
 
