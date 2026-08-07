@@ -3,6 +3,7 @@
  *
  * F-01: Integration Registry.
  * F-02: Integration Connector.
+ * F-03: Integration Pipeline.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -10,20 +11,28 @@ import type {
   FindIntegrationConnectorInput,
   FindIntegrationConnectorResult,
   FindIntegrationInput,
+  FindIntegrationPipelineInput,
+  FindIntegrationPipelineResult,
   FindIntegrationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
+  GetIntegrationPipelineStatsInput,
+  GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
   IntegrationEngineHealth,
   IntegrationEngineInfo,
   ListIntegrationConnectorsInput,
   ListIntegrationConnectorsResult,
+  ListIntegrationPipelinesInput,
+  ListIntegrationPipelinesResult,
   ListIntegrationsInput,
   ListIntegrationsResult,
   RegisterIntegrationConnectorInput,
   RegisterIntegrationConnectorResult,
   RegisterIntegrationInput,
+  RegisterIntegrationPipelineInput,
+  RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
 } from "./types";
 
@@ -72,4 +81,24 @@ export interface IntegrationEnginePort {
   getIntegrationConnectorStats(
     input?: GetIntegrationConnectorStatsInput,
   ): Promise<GetIntegrationConnectorStatsResult>;
+
+  /** F-03 — registra um pipeline de integração. */
+  registerIntegrationPipeline(
+    input: RegisterIntegrationPipelineInput,
+  ): Promise<RegisterIntegrationPipelineResult>;
+
+  /** F-03 — encontra pipeline por pipelineId. */
+  findIntegrationPipeline(
+    input: FindIntegrationPipelineInput,
+  ): Promise<FindIntegrationPipelineResult>;
+
+  /** F-03 — lista pipelines, opcionalmente filtrados por integrationId. */
+  listIntegrationPipelines(
+    input: ListIntegrationPipelinesInput,
+  ): Promise<ListIntegrationPipelinesResult>;
+
+  /** F-03 — estatísticas do catálogo de pipelines. */
+  getIntegrationPipelineStats(
+    input?: GetIntegrationPipelineStatsInput,
+  ): Promise<GetIntegrationPipelineStatsResult>;
 }

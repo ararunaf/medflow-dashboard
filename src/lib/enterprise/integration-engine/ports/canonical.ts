@@ -58,9 +58,46 @@ export interface CanonicalIntegrationConnectorStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationPipelineStage {
+  readonly kind: "canonical-integration-pipeline-stage";
+  readonly stageId: string;
+  readonly connectorId: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly order: number;
+}
+
+export interface CanonicalIntegrationPipeline {
+  readonly kind: "canonical-integration-pipeline";
+  readonly pipelineId: string;
+  readonly integrationId: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly stages: readonly CanonicalIntegrationPipelineStage[];
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationPipelineResult {
+  readonly kind: "canonical-integration-pipeline-result";
+  readonly ok: boolean;
+  readonly pipelineId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly pipeline?: CanonicalIntegrationPipeline | null;
+}
+
+export interface CanonicalIntegrationPipelineStats {
+  readonly totalPipelines: number;
+  readonly pipelineIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
   readonly integrationRegistryOk: boolean;
   readonly integrationConnectorOk: boolean;
+  readonly integrationPipelineOk: boolean;
 }

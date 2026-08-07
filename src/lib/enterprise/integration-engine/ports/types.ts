@@ -6,6 +6,9 @@ import type {
   CanonicalIntegrationConnector,
   CanonicalIntegrationConnectorResult,
   CanonicalIntegrationConnectorStats,
+  CanonicalIntegrationPipeline,
+  CanonicalIntegrationPipelineResult,
+  CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
 } from "./canonical";
@@ -15,6 +18,9 @@ export type {
   CanonicalIntegrationConnector,
   CanonicalIntegrationConnectorResult,
   CanonicalIntegrationConnectorStats,
+  CanonicalIntegrationPipeline,
+  CanonicalIntegrationPipelineResult,
+  CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
 };
@@ -32,6 +38,7 @@ export interface IntegrationEngineHealth {
   readonly integrationEngineOk: boolean;
   readonly integrationRegistryOk: boolean;
   readonly integrationConnectorOk: boolean;
+  readonly integrationPipelineOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -106,4 +113,41 @@ export interface GetIntegrationConnectorStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationConnectorStats;
+}
+
+export interface RegisterIntegrationPipelineInput {
+  readonly pipeline: CanonicalIntegrationPipeline;
+}
+
+export type RegisterIntegrationPipelineResult = CanonicalIntegrationPipelineResult;
+
+export interface FindIntegrationPipelineInput {
+  readonly pipelineId: string;
+}
+
+export type FindIntegrationPipelineResult = CanonicalIntegrationPipeline | null;
+
+export interface ListIntegrationPipelinesInput {
+  readonly integrationId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationPipelinesResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly pipelines: readonly CanonicalIntegrationPipeline[];
+  readonly total: number;
+}
+
+export interface GetIntegrationPipelineStatsInput {
+  readonly integrationId?: string;
+}
+
+export interface GetIntegrationPipelineStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationPipelineStats;
 }

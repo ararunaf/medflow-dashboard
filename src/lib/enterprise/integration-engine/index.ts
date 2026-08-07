@@ -5,3 +5,4 @@ export { createIntegrationEnginePort, getIntegrationEnginePort } from "./provide
 export { integrationEngineRegistry } from "./registry";
 export { IntegrationRegistryEngine } from "./integration-registry";
 export { IntegrationConnectorEngine } from "./integration-connector";
+export { IntegrationPipelineEngine } from "./integration-pipeline";
