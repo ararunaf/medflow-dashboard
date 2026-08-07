@@ -10,6 +10,7 @@ import type {
   CanonicalTissOperatorValidation,
   CanonicalTissLayout,
   CanonicalTissParser,
+  CanonicalTissRepair,
   CanonicalTissSchemaValidation,
   CanonicalTissSerializer,
 } from "./types";
@@ -141,6 +142,40 @@ export function createCanonicalTissOperatorValidation(
     schemaValidationId: input.schemaValidationId,
     businessValidationId: input.businessValidationId,
     operatorId: input.operatorId,
+    rule: input.rule,
+    description: input.description ?? "",
+    version: input.version ?? "",
+    tags: input.tags ?? [],
+  };
+}
+
+export function createCanonicalTissRepair(
+  input: Partial<CanonicalTissRepair> &
+    Pick<
+      CanonicalTissRepair,
+      | "repairId"
+      | "name"
+      | "knowledgeId"
+      | "layoutId"
+      | "parserId"
+      | "serializerId"
+      | "schemaValidationId"
+      | "businessValidationId"
+      | "operatorValidationId"
+      | "rule"
+    >,
+): CanonicalTissRepair {
+  return {
+    kind: "tiss-repair",
+    repairId: input.repairId,
+    name: input.name,
+    knowledgeId: input.knowledgeId,
+    layoutId: input.layoutId,
+    parserId: input.parserId,
+    serializerId: input.serializerId,
+    schemaValidationId: input.schemaValidationId,
+    businessValidationId: input.businessValidationId,
+    operatorValidationId: input.operatorValidationId,
     rule: input.rule,
     description: input.description ?? "",
     version: input.version ?? "",

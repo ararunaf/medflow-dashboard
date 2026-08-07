@@ -34,6 +34,20 @@ import type {
   GetTissOperatorValidationResult,
   GetTissOperatorValidationStatsInput,
   GetTissOperatorValidationStatsResult,
+  GetTissRepairInput,
+  GetTissRepairResult,
+  GetTissRepairStatsInput,
+  GetTissRepairStatsResult,
+  ListTissRepairsInput,
+  ListTissRepairsResult,
+  RegisterTissRepairInput,
+  RegisterTissRepairResult,
+  RemoveTissRepairInput,
+  RemoveTissRepairResult,
+  RepairTissInput,
+  RepairTissResult,
+  UpdateTissRepairInput,
+  UpdateTissRepairResult,
   ListTissKnowledgeInput,
   ListTissKnowledgeResult,
   ListTissLayoutInput,
@@ -234,4 +248,25 @@ export interface TissEnginePort {
   getTissOperatorValidationStats(
     input?: GetTissOperatorValidationStatsInput,
   ): Promise<GetTissOperatorValidationStatsResult>;
+
+  /** G-08 — registrar reparo TISS. */
+  registerTissRepair(input: RegisterTissRepairInput): Promise<RegisterTissRepairResult>;
+
+  /** G-08 — atualizar reparo TISS. */
+  updateTissRepair(input: UpdateTissRepairInput): Promise<UpdateTissRepairResult>;
+
+  /** G-08 — remover reparo TISS. */
+  removeTissRepair(input: RemoveTissRepairInput): Promise<RemoveTissRepairResult>;
+
+  /** G-08 — recuperar reparo por id. */
+  getTissRepair(input: GetTissRepairInput): Promise<GetTissRepairResult>;
+
+  /** G-08 — listar reparos. */
+  listTissRepairs(input?: ListTissRepairsInput): Promise<ListTissRepairsResult>;
+
+  /** G-08 — executar reparo em documento TISS. */
+  repairTiss(input: RepairTissInput): Promise<RepairTissResult>;
+
+  /** G-08 — estatísticas de reparos. */
+  getTissRepairStats(input?: GetTissRepairStatsInput): Promise<GetTissRepairStatsResult>;
 }

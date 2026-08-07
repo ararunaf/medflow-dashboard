@@ -8,6 +8,7 @@ export {
   G05_TISS_ENTERPRISE_CAPABILITIES,
   G06_TISS_ENTERPRISE_CAPABILITIES,
   G07_TISS_ENTERPRISE_CAPABILITIES,
+  G08_TISS_ENTERPRISE_CAPABILITIES,
 } from "./capabilities";
 export {
   createCanonicalTissBusinessValidation,
@@ -15,6 +16,7 @@ export {
   createCanonicalTissLayout,
   createCanonicalTissOperatorValidation,
   createCanonicalTissParser,
+  createCanonicalTissRepair,
   createCanonicalTissSchemaValidation,
   createCanonicalTissSerializer,
 } from "./canonical";

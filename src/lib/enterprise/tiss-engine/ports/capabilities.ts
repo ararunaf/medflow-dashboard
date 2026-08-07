@@ -65,3 +65,8 @@ export const G07_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
   ...G06_TISS_ENTERPRISE_CAPABILITIES,
   tissOperatorValidationImplemented: true,
 };
+
+export const G08_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...G07_TISS_ENTERPRISE_CAPABILITIES,
+  tissRepairImplemented: true,
+};

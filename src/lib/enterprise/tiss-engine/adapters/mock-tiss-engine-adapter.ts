@@ -8,9 +8,10 @@ import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
 import { TissOperatorValidationEngine } from "../tiss-operator-validation";
 import { TissParserEngine } from "../tiss-parser";
+import { TissRepairEngine } from "../tiss-repair";
 import { TissSchemaValidationEngine } from "../tiss-schema-validation";
 import { TissSerializerEngine } from "../tiss-serializer";
-import { G07_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
+import { G08_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
 import type {
   TissEnginePort,
   TissEngineInfo,
@@ -89,6 +90,20 @@ import type {
   UpdateTissOperatorValidationResult,
   RemoveTissOperatorValidationInput,
   RemoveTissOperatorValidationResult,
+  RegisterTissRepairInput,
+  RegisterTissRepairResult,
+  GetTissRepairInput,
+  GetTissRepairResult,
+  ListTissRepairsInput,
+  ListTissRepairsResult,
+  UpdateTissRepairInput,
+  UpdateTissRepairResult,
+  RemoveTissRepairInput,
+  RemoveTissRepairResult,
+  RepairTissInput,
+  RepairTissResult,
+  GetTissRepairStatsInput,
+  GetTissRepairStatsResult,
 } from "../ports";
 
 const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
@@ -119,19 +134,28 @@ export class MockTissEngineAdapter implements TissEnginePort {
     this.schemaValidation,
     this.businessValidation,
   );
+  private readonly repair = new TissRepairEngine(
+    this.knowledge,
+    this.layout,
+    this.parser,
+    this.serializer,
+    this.schemaValidation,
+    this.businessValidation,
+    this.operatorValidation,
+  );
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine (Mock)",
-      version: "G-07",
+      version: "G-08",
       vendor: "mock",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G07_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G08_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
@@ -144,7 +168,8 @@ export class MockTissEngineAdapter implements TissEnginePort {
         caps.tissSerializerImplemented &&
         caps.tissSchemaValidationImplemented &&
         caps.tissBusinessValidationImplemented &&
-        caps.tissOperatorValidationImplemented,
+        caps.tissOperatorValidationImplemented &&
+        caps.tissRepairImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -429,5 +454,47 @@ export class MockTissEngineAdapter implements TissEnginePort {
     input: GetTissOperatorValidationStatsInput = {},
   ): Promise<GetTissOperatorValidationStatsResult> {
     return this.operatorValidation.statsResult();
+  }
+
+  async registerTissRepair(input: RegisterTissRepairInput): Promise<RegisterTissRepairResult> {
+    return this.repair.register(input);
+  }
+
+  async updateTissRepair(input: UpdateTissRepairInput): Promise<UpdateTissRepairResult> {
+    return this.repair.update(input);
+  }
+
+  async removeTissRepair(input: RemoveTissRepairInput): Promise<RemoveTissRepairResult> {
+    return this.repair.remove(input);
+  }
+
+  async getTissRepair(input: GetTissRepairInput): Promise<GetTissRepairResult> {
+    const repair = this.repair.get(input.repairId);
+    if (!repair) {
+      return {
+        ok: false,
+        code: "TISS_REPAIR_NOT_FOUND",
+        message: "repair not found",
+        repair: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "TISS_REPAIR_FOUND",
+      message: "repair found",
+      repair,
+    };
+  }
+
+  async listTissRepairs(input: ListTissRepairsInput = {}): Promise<ListTissRepairsResult> {
+    return this.repair.listResult(input.tag);
+  }
+
+  async repairTiss(input: RepairTissInput): Promise<RepairTissResult> {
+    return this.repair.repair(input);
+  }
+
+  async getTissRepairStats(input: GetTissRepairStatsInput = {}): Promise<GetTissRepairStatsResult> {
+    return this.repair.statsResult();
   }
 }

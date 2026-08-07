@@ -1,11 +1,11 @@
-ï»¿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
- * TISS-01 â€” Enterprise TISS Provider
- * Prova: Application â†’ TISSProviderPort â†’ Adapter â†’ Factory â†’ Registry
+ * TISS-01 — Enterprise TISS Provider
+ * Prova: Application ? TISSProviderPort ? Adapter ? Factory ? Registry
  *         + TISS Runtime + Enterprise Runtime
  *         + CanonicalTISSResult / CanonicalTISSMetadata / Profile/Provider refs
  *         + timeout / retry / cancelamento / erros
- *         + ausÃªncia de bypass / lÃ³gica especÃ­fica de operadora/contrato/tenant
+ *         + ausência de bypass / lógica específica de operadora/contrato/tenant
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -103,7 +103,7 @@ describe("TISS-01 TISSProviderPort contract", () => {
     assert.equal(caps.implementsOperatorDispatch, false);
   });
 
-  it("DefaultTISSProviderAdapter Ã© o adapter enterprise oficial", () => {
+  it("DefaultTISSProviderAdapter é o adapter enterprise oficial", () => {
     assert.equal(EnterpriseTISSProviderAdapter, DefaultTISSProviderAdapter);
     const port = new DefaultTISSProviderAdapter({ provider: "enterprise" });
     assert.equal(port.providerId, "enterprise");
@@ -118,7 +118,7 @@ describe("TISS-01 TISSProviderPort contract", () => {
     assert.equal(validation.errors.length, 0);
   });
 
-  it("test / default / mock sÃ£o resolvidos pelo factory", async () => {
+  it("test / default / mock são resolvidos pelo factory", async () => {
     assert.equal(createTISSProviderPort({ provider: "test" }).providerId, "test");
     assert.equal(createTISSProviderPort({ provider: "default" }).providerId, "default");
     assert.equal(createTISSProviderPort({ provider: "mock" }).providerId, "mock");
@@ -140,7 +140,7 @@ describe("TISS-01 TISSProviderPort contract", () => {
     assert.ok(Array.isArray(result.logs));
   });
 
-  it("resolve-profile e resolve-provider retornam referÃªncias canÃ´nicas opacas", async () => {
+  it("resolve-profile e resolve-provider retornam referências canônicas opacas", async () => {
     const port = createTISSProviderPort({ provider: "enterprise" });
 
     const profile = await port.process(
@@ -163,7 +163,7 @@ describe("TISS-01 TISSProviderPort contract", () => {
     assert.equal(provider.providerReference?.providerRef, "enterprise");
   });
 
-  it("timeout Ã© implementado e retorna TISS_TIMEOUT", async () => {
+  it("timeout é implementado e retorna TISS_TIMEOUT", async () => {
     const port = new DefaultTISSProviderAdapter({
       provider: "enterprise",
       defaultTimeoutMs: 20,
@@ -180,7 +180,7 @@ describe("TISS-01 TISSProviderPort contract", () => {
     assert.equal(result.code, "TISS_TIMEOUT");
   });
 
-  it("retry recupera falha transitÃ³ria", async () => {
+  it("retry recupera falha transitória", async () => {
     const port = new DefaultTISSProviderAdapter({
       provider: "enterprise",
       failAttempts: 1,
@@ -225,10 +225,10 @@ describe("TISS-01 TISSProviderPort contract", () => {
     assert.throws(
       () =>
         factory.create({
-          // @ts-expect-error â€” provider invÃ¡lido
+          // @ts-expect-error — provider inválido
           provider: "unimed-xml",
         }),
-      /nÃ£o estÃ¡ registrado|desconhecido/,
+      /não está registrado|desconhecido/,
     );
 
     assert.equal(getTISSProviderFactory().getRegistry().has("mock"), true);
@@ -246,7 +246,7 @@ describe("TISS-01 TISSProviderPort contract", () => {
 });
 
 describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
-  it("Enterprise Runtime expÃµe TISS Provider + TISS Runtime", async () => {
+  it("Enterprise Runtime expõe TISS Provider + TISS Runtime", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.getTISSProviderPort().providerId, "enterprise");
@@ -260,7 +260,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
     assert.equal(health.orchestratorOk, true);
   });
 
-  it("fluxo: Runtime â†’ TISS Runtime â†’ ProviderPort â†’ Canonical Result", async () => {
+  it("fluxo: Runtime ? TISS Runtime ? ProviderPort ? Canonical Result", async () => {
     const orchestrator = createCanonicalExecutionOrchestratorPort({ provider: "mock" });
     const tissProvider = createTISSProviderPort({ provider: "enterprise" });
     const tissCatalog = createTISSCatalogPort({ provider: "enterprise" });
@@ -388,7 +388,7 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
     assert.equal(session.session?.realTissExecuted, false);
   });
 
-  it("Enterprise Runtime permanece ponto Ãºnico; Capture desacoplado de TISS real", async () => {
+  it("Enterprise Runtime permanece ponto único; Capture desacoplado de TISS real", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({
       runtimeId: "test",
@@ -423,8 +423,8 @@ describe("TISS-01 cadeia Enterprise / TISS Runtime / Provider", () => {
   });
 });
 
-describe("TISS-01 auditoria â€” sem bypass / sem lÃ³gica de operadora", () => {
-  it("mÃ³dulo tiss-provider nÃ£o contÃ©m backends / operadoras / XML dispatch", () => {
+describe("TISS-01 auditoria — sem bypass / sem lógica de operadora", () => {
+  it("módulo tiss-provider não contém backends / operadoras / XML dispatch", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/tiss-provider");
     const files = collectTsFiles(moduleDir);
     assert.ok(files.length > 0);
@@ -456,13 +456,13 @@ describe("TISS-01 auditoria â€” sem bypass / sem lÃ³gica de operadora", () => {
         assert.equal(
           pattern.test(codeWithoutComments),
           false,
-          `PadrÃ£o proibido ${pattern} em ${file}`,
+          `Padrão proibido ${pattern} em ${file}`,
         );
       }
     }
   });
 
-  it("mÃ³dulo tiss-runtime usa exclusivamente TISSProviderPort", () => {
+  it("módulo tiss-runtime usa exclusivamente TISSProviderPort", () => {
     const runtimeAdapter = readFileSync(
       join(repoRoot, "src/lib/enterprise/tiss-runtime/adapters/default-tiss-runtime-adapter.ts"),
       "utf8",
@@ -482,7 +482,7 @@ describe("TISS-01 auditoria â€” sem bypass / sem lÃ³gica de operadora", () => {
     assert.match(enterpriseRuntime, /getTISSRuntimePort/);
   });
 
-  it("nÃ£o existe if/switch por operadora/tenant/cliente/contrato no tiss-provider", () => {
+  it("não existe if/switch por operadora/tenant/cliente/contrato no tiss-provider", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/tiss-provider");
     for (const file of collectTsFiles(moduleDir)) {
       const source = readFileSync(file, "utf8");

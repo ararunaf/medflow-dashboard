@@ -603,3 +603,109 @@ export interface GetTissOperatorValidationStatsResult {
     operatorValidationIds: string[];
   };
 }
+
+export interface CanonicalTissRepairRule {
+  type: string;
+  options: Record<string, string>;
+}
+
+export interface CanonicalTissRepair {
+  kind: "tiss-repair";
+  repairId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  parserId: string;
+  serializerId: string;
+  schemaValidationId: string;
+  businessValidationId: string;
+  operatorValidationId: string;
+  rule: CanonicalTissRepairRule;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissRepairInput {
+  repair: CanonicalTissRepair;
+}
+
+export interface RegisterTissRepairResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  repairId?: string;
+  repair?: CanonicalTissRepair | null;
+}
+
+export interface GetTissRepairInput {
+  repairId: string;
+}
+
+export interface GetTissRepairResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  repair?: CanonicalTissRepair | null;
+}
+
+export interface ListTissRepairsInput {
+  tag?: string;
+}
+
+export interface ListTissRepairsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  repairs: CanonicalTissRepair[];
+}
+
+export interface UpdateTissRepairInput {
+  repairId: string;
+  repair: Partial<CanonicalTissRepair>;
+}
+
+export interface UpdateTissRepairResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  repair?: CanonicalTissRepair | null;
+}
+
+export interface RemoveTissRepairInput {
+  repairId: string;
+}
+
+export interface RemoveTissRepairResult {
+  ok: boolean;
+  code: string;
+  message: string;
+}
+
+export interface RepairTissInput {
+  repairId: string;
+  document: string;
+}
+
+export interface RepairTissResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  document?: string | null;
+  details?: string[];
+}
+
+export interface GetTissRepairStatsInput {
+  tag?: string;
+}
+
+export interface GetTissRepairStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    repairIds: string[];
+  };
+}
