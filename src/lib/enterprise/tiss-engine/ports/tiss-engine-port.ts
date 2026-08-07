@@ -14,14 +14,24 @@ import type {
   GetTissLayoutResult,
   GetTissLayoutStatsInput,
   GetTissLayoutStatsResult,
+  GetTissParserInput,
+  GetTissParserResult,
+  GetTissParserStatsInput,
+  GetTissParserStatsResult,
   ListTissKnowledgeInput,
   ListTissKnowledgeResult,
   ListTissLayoutInput,
   ListTissLayoutResult,
+  ListTissParsersInput,
+  ListTissParsersResult,
+  ParseTissInput,
+  ParseTissResult,
   RegisterTissKnowledgeInput,
   RegisterTissKnowledgeResult,
   RegisterTissLayoutInput,
   RegisterTissLayoutResult,
+  RegisterTissParserInput,
+  RegisterTissParserResult,
   SearchTissKnowledgeInput,
   SearchTissKnowledgeResult,
   SearchTissLayoutInput,
@@ -69,4 +79,19 @@ export interface TissEnginePort {
 
   /** G-02 — estatísticas de layouts. */
   getTissLayoutStats(input?: GetTissLayoutStatsInput): Promise<GetTissLayoutStatsResult>;
+
+  /** G-03 — registrar parser TISS. */
+  registerTissParser(input: RegisterTissParserInput): Promise<RegisterTissParserResult>;
+
+  /** G-03 — recuperar parser por id. */
+  getTissParser(input: GetTissParserInput): Promise<GetTissParserResult>;
+
+  /** G-03 — listar parsers. */
+  listTissParsers(input?: ListTissParsersInput): Promise<ListTissParsersResult>;
+
+  /** G-03 — converter documento TISS em representação canônica. */
+  parseTiss(input: ParseTissInput): Promise<ParseTissResult>;
+
+  /** G-03 — estatísticas de parsers. */
+  getTissParserStats(input?: GetTissParserStatsInput): Promise<GetTissParserStatsResult>;
 }

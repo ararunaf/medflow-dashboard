@@ -170,3 +170,89 @@ export interface GetTissLayoutStatsResult {
     layoutIds: string[];
   };
 }
+
+export interface CanonicalTissParser {
+  kind: "tiss-parser";
+  parserId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface CanonicalTissParseResult {
+  kind: "tiss-parse-result";
+  parserId: string;
+  knowledgeId: string;
+  layoutId: string;
+  root: string;
+  elements: {
+    tag: string;
+    attributes: string;
+    children: { tag: string; attributes: string; text: string }[];
+  }[];
+  raw: string;
+}
+
+export interface RegisterTissParserInput {
+  parser: CanonicalTissParser;
+}
+
+export interface RegisterTissParserResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  parserId?: string;
+  parser?: CanonicalTissParser | null;
+}
+
+export interface GetTissParserInput {
+  parserId: string;
+}
+
+export interface GetTissParserResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  parser?: CanonicalTissParser | null;
+}
+
+export interface ListTissParsersInput {
+  tag?: string;
+}
+
+export interface ListTissParsersResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  parsers: CanonicalTissParser[];
+}
+
+export interface ParseTissInput {
+  parserId: string;
+  document: string;
+}
+
+export interface ParseTissResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  result: CanonicalTissParseResult | null;
+}
+
+export interface GetTissParserStatsInput {
+  tag?: string;
+}
+
+export interface GetTissParserStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    parserIds: string[];
+  };
+}

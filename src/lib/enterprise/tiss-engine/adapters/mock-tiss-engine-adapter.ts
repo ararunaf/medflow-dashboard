@@ -1,12 +1,13 @@
 /**
- * MockTissEngineAdapter — G-02.
+ * MockTissEngineAdapter — G-03.
  *
  * Adapter mock para testes do Bloco G.
  */
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
+import { TissParserEngine } from "../tiss-parser";
 import {
-  G02_TISS_ENTERPRISE_CAPABILITIES,
+  G03_TISS_ENTERPRISE_CAPABILITIES,
   type TissEnginePort,
   type TissEngineInfo,
   type TissEngineHealth,
@@ -30,6 +31,16 @@ import {
   type SearchTissLayoutResult,
   type GetTissLayoutStatsInput,
   type GetTissLayoutStatsResult,
+  type RegisterTissParserInput,
+  type RegisterTissParserResult,
+  type GetTissParserInput,
+  type GetTissParserResult,
+  type ListTissParsersInput,
+  type ListTissParsersResult,
+  type ParseTissInput,
+  type ParseTissResult,
+  type GetTissParserStatsInput,
+  type GetTissParserStatsResult,
 } from "../ports";
 
 const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
@@ -37,25 +48,26 @@ const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
 export class MockTissEngineAdapter implements TissEnginePort {
   private readonly knowledge = new TissKnowledgeEngine();
   private readonly layout = new TissLayoutEngine(this.knowledge);
+  private readonly parser = new TissParserEngine(this.knowledge, this.layout);
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine Mock",
-      version: "G-02",
+      version: "G-03",
       vendor: "enterprise",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G02_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G03_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
     const caps = this.getCapabilities();
     return {
-      ok: caps.tissKnowledgeImplemented && caps.tissLayoutImplemented,
+      ok: caps.tissKnowledgeImplemented && caps.tissLayoutImplemented && caps.tissParserImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -139,5 +151,39 @@ export class MockTissEngineAdapter implements TissEnginePort {
 
   async getTissLayoutStats(input: GetTissLayoutStatsInput = {}): Promise<GetTissLayoutStatsResult> {
     return this.layout.statsResult(input.tag);
+  }
+
+  async registerTissParser(input: RegisterTissParserInput): Promise<RegisterTissParserResult> {
+    return this.parser.register(input);
+  }
+
+  async getTissParser(input: GetTissParserInput): Promise<GetTissParserResult> {
+    const parser = this.parser.get(input.parserId);
+    if (!parser) {
+      return {
+        ok: false,
+        code: "MOCK_TISS_PARSER_NOT_FOUND",
+        message: "parser not found",
+        parser: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "MOCK_TISS_PARSER_FOUND",
+      message: "parser found",
+      parser,
+    };
+  }
+
+  async listTissParsers(input: ListTissParsersInput = {}): Promise<ListTissParsersResult> {
+    return this.parser.listResult(input.tag);
+  }
+
+  async parseTiss(input: ParseTissInput): Promise<ParseTissResult> {
+    return this.parser.parse(input);
+  }
+
+  async getTissParserStats(input: GetTissParserStatsInput = {}): Promise<GetTissParserStatsResult> {
+    return this.parser.statsResult();
   }
 }

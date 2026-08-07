@@ -40,3 +40,8 @@ export const G02_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
   ...G01_TISS_ENTERPRISE_CAPABILITIES,
   tissLayoutImplemented: true,
 };
+
+export const G03_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...G02_TISS_ENTERPRISE_CAPABILITIES,
+  tissParserImplemented: true,
+};
