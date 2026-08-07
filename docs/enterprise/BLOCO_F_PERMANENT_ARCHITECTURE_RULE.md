@@ -1,7 +1,7 @@
 # BLOCO F — Regra Permanente de Arquitetura — Enterprise Integration Engine
 
 **Bloco:** BLOCO F — Enterprise Integration Engine  
-**Status:** Arquitetura homologada; F-01 autorizada (não iniciada)  
+**Status:** Bloco F auditado, certificado e congelado; AUDIT-F concluída  
 **Data:** 2026-08-06  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -71,22 +71,20 @@ O Bloco F **não** pode importar diretamente Adapters, Stores ou implementaçõe
 
 ## 5. Roadmap
 
-| Sprint   | Sprint de certificação | Capability                             | Nome oficial                                                      | Status                    |
-| -------- | ---------------------- | -------------------------------------- | ----------------------------------------------------------------- | ------------------------- |
-| ARCH-F01 | ARCH-F01-A             | —                                      | Enterprise Integration Engine Architecture                        | Concluída / homologada    |
-| F-01     | F-01R                  | `integrationRegistryImplemented`       | Enterprise Integration Engine — Integration Registry              | Concluída / certificada   |
-| F-02     | F-02R                  | `integrationConnectorImplemented`      | Enterprise Integration Engine — Integration Connector             | Concluída / certificada   |
-| F-03     | F-03R                  | `integrationPipelineImplemented`       | Enterprise Integration Engine — Integration Pipeline              | Concluída / certificada   |
-| F-04     | F-04R                  | `integrationMappingImplemented`        | Enterprise Integration Engine — Integration Mapping Engine        | Concluída / certificada   |
-| F-05     | F-05R                  | `integrationTransformationImplemented` | Enterprise Integration Engine — Integration Transformation Engine | Concluída / certificada   |
-| F-06     | F-06R                  | `integrationValidationImplemented`     | Enterprise Integration Engine — Integration Validation Engine     | Concluída / certificada   |
-| F-07     | F-07R                  | `integrationRoutingImplemented`        | Enterprise Integration Engine — Integration Routing Engine        | Concluída / certificada   |
-| F-08     | F-08R                  | `integrationMonitoringImplemented`     | Enterprise Integration Engine — Integration Monitoring Engine     | Concluída / certificada   |
-| F-09     | F-09R                  | `integrationReportImplemented`         | Enterprise Integration Engine — Integration Report Engine         | Concluída / certificada   |
-| F-10     | F-10R                  | `integrationEngineImplemented`         | Enterprise Integration Engine — Generic Integration Engine        | Concluída / certificada   |
-| AUDIT-F  | —                      | —                                      | Enterprise Integration Engine — Architecture Audit                | Autorizada (não iniciada) |
-| F-10     | F-10R                  | `integrationEngineImplemented`         | Enterprise Integration Engine — Generic Integration Engine        | Planejada                 |
-| AUDIT-F  | AUDIT-F-R              | —                                      | Enterprise Block F Architecture Audit                             | Planejada                 |
+| Sprint   | Sprint de certificação | Capability                             | Nome oficial                                                      | Status                  |
+| -------- | ---------------------- | -------------------------------------- | ----------------------------------------------------------------- | ----------------------- |
+| ARCH-F01 | ARCH-F01-A             | —                                      | Enterprise Integration Engine Architecture                        | Concluída / homologada  |
+| F-01     | F-01R                  | `integrationRegistryImplemented`       | Enterprise Integration Engine — Integration Registry              | Concluída / certificada |
+| F-02     | F-02R                  | `integrationConnectorImplemented`      | Enterprise Integration Engine — Integration Connector             | Concluída / certificada |
+| F-03     | F-03R                  | `integrationPipelineImplemented`       | Enterprise Integration Engine — Integration Pipeline              | Concluída / certificada |
+| F-04     | F-04R                  | `integrationMappingImplemented`        | Enterprise Integration Engine — Integration Mapping Engine        | Concluída / certificada |
+| F-05     | F-05R                  | `integrationTransformationImplemented` | Enterprise Integration Engine — Integration Transformation Engine | Concluída / certificada |
+| F-06     | F-06R                  | `integrationValidationImplemented`     | Enterprise Integration Engine — Integration Validation Engine     | Concluída / certificada |
+| F-07     | F-07R                  | `integrationRoutingImplemented`        | Enterprise Integration Engine — Integration Routing Engine        | Concluída / certificada |
+| F-08     | F-08R                  | `integrationMonitoringImplemented`     | Enterprise Integration Engine — Integration Monitoring Engine     | Concluída / certificada |
+| F-09     | F-09R                  | `integrationReportImplemented`         | Enterprise Integration Engine — Integration Report Engine         | Concluída / certificada |
+| F-10     | F-10R                  | `integrationEngineImplemented`         | Enterprise Integration Engine — Generic Integration Engine        | Concluída / certificada |
+| AUDIT-F  | AUDIT-F-R              | —                                      | Enterprise Integration Engine — Architecture Audit                | Concluída / certificada |
 
 ---
 
