@@ -76,8 +76,8 @@ O Bloco F **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | ARCH-F01 | ARCH-F01-A             | —                                      | Enterprise Integration Engine Architecture                        | Concluída / homologada    |
 | F-01     | F-01R                  | `integrationRegistryImplemented`       | Enterprise Integration Engine — Integration Registry              | Concluída / certificada   |
 | F-02     | F-02R                  | `integrationConnectorImplemented`      | Enterprise Integration Engine — Integration Connector             | Concluída / certificada   |
-| F-03     | F-03R                  | `integrationPipelineImplemented`       | Enterprise Integration Engine — Integration Pipeline              | Autorizada (não iniciada) |
-| F-04     | F-04R                  | `integrationMappingImplemented`        | Enterprise Integration Engine — Integration Mapping Engine        | Planejada                 |
+| F-03     | F-03R                  | `integrationPipelineImplemented`       | Enterprise Integration Engine — Integration Pipeline              | Concluída / certificada   |
+| F-04     | F-04R                  | `integrationMappingImplemented`        | Enterprise Integration Engine — Integration Mapping Engine        | Autorizada (não iniciada) |
 | F-05     | F-05R                  | `integrationTransformationImplemented` | Enterprise Integration Engine — Integration Transformation Engine | Planejada                 |
 | F-06     | F-06R                  | `integrationValidationImplemented`     | Enterprise Integration Engine — Integration Validation Engine     | Planejada                 |
 | F-07     | F-07R                  | `integrationRoutingImplemented`        | Enterprise Integration Engine — Integration Routing Engine        | Planejada                 |
