@@ -5,6 +5,7 @@
  */
 import { TissBusinessValidationEngine } from "../tiss-business-validation";
 import { TissCorrectionEngine } from "../tiss-correction";
+import { GenericTissEngine } from "../generic-tiss-engine";
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
 import { TissOperatorValidationEngine } from "../tiss-operator-validation";
@@ -12,7 +13,7 @@ import { TissParserEngine } from "../tiss-parser";
 import { TissRepairEngine } from "../tiss-repair";
 import { TissSchemaValidationEngine } from "../tiss-schema-validation";
 import { TissSerializerEngine } from "../tiss-serializer";
-import { G09_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
+import { G10_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
 import type {
   TissEnginePort,
   TissEngineInfo,
@@ -168,19 +169,30 @@ export class MockTissEngineAdapter implements TissEnginePort {
     this.operatorValidation,
     this.repair,
   );
+  readonly generic = new GenericTissEngine(
+    this.knowledge,
+    this.layout,
+    this.parser,
+    this.serializer,
+    this.schemaValidation,
+    this.businessValidation,
+    this.operatorValidation,
+    this.repair,
+    this.correction,
+  );
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine (Mock)",
-      version: "G-09",
+      version: "G-10",
       vendor: "mock",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G09_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G10_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
@@ -195,7 +207,8 @@ export class MockTissEngineAdapter implements TissEnginePort {
         caps.tissBusinessValidationImplemented &&
         caps.tissOperatorValidationImplemented &&
         caps.tissRepairImplemented &&
-        caps.tissCorrectionImplemented,
+        caps.tissCorrectionImplemented &&
+        caps.tissEngineImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,

@@ -10,6 +10,7 @@ export {
   G07_TISS_ENTERPRISE_CAPABILITIES,
   G08_TISS_ENTERPRISE_CAPABILITIES,
   G09_TISS_ENTERPRISE_CAPABILITIES,
+  G10_TISS_ENTERPRISE_CAPABILITIES,
 } from "./capabilities";
 export {
   createCanonicalTissBusinessValidation,

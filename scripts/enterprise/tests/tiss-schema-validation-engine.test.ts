@@ -11,7 +11,7 @@ import {
   createCanonicalTissSerializer,
   createTissEnginePort,
   DefaultTissEngineAdapter,
-  G09_TISS_ENTERPRISE_CAPABILITIES,
+  G10_TISS_ENTERPRISE_CAPABILITIES,
   MockTissEngineAdapter,
   tissEngineRegistry,
   TissKnowledgeEngine,
@@ -308,7 +308,7 @@ describe("G-05 TISS Schema Validation — functional cases", () => {
   it("DefaultAdapter implementa o Port", async () => {
     const adapter = new DefaultTissEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, G09_TISS_ENTERPRISE_CAPABILITIES);
+    assert.deepStrictEqual(caps, G10_TISS_ENTERPRISE_CAPABILITIES);
     assert.equal(caps.tissKnowledgeImplemented, true);
     assert.equal(caps.tissLayoutImplemented, true);
     assert.equal(caps.tissParserImplemented, true);
@@ -323,7 +323,7 @@ describe("G-05 TISS Schema Validation — functional cases", () => {
   it("MockAdapter implementa o Port", async () => {
     const adapter = new MockTissEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, G09_TISS_ENTERPRISE_CAPABILITIES);
+    assert.deepStrictEqual(caps, G10_TISS_ENTERPRISE_CAPABILITIES);
     assert.equal(caps.tissSchemaValidationImplemented, true);
   });
 
