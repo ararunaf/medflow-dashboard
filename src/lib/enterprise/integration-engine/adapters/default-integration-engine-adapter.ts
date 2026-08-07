@@ -1,14 +1,15 @@
 /**
- * DefaultIntegrationEngineAdapter — F-05.
+ * DefaultIntegrationEngineAdapter — F-06.
  *
  * Implementação oficial do IntegrationEnginePort.
- * Ativa F-01, F-02, F-03, F-04 e F-05.
+ * Ativa F-01, F-02, F-03, F-04, F-05 e F-06.
  */
 import { IntegrationConnectorEngine } from "../integration-connector";
 import { IntegrationMappingEngine } from "../integration-mapping";
 import { IntegrationPipelineEngine } from "../integration-pipeline";
 import { IntegrationRegistryEngine } from "../integration-registry";
 import { IntegrationTransformationEngine } from "../integration-transformation";
+import { IntegrationValidationEngine } from "../integration-validation";
 import type {
   FindIntegrationConnectorInput,
   FindIntegrationConnectorResult,
@@ -20,6 +21,8 @@ import type {
   FindIntegrationResult,
   FindIntegrationTransformationInput,
   FindIntegrationTransformationResult,
+  FindIntegrationValidationInput,
+  FindIntegrationValidationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
   GetIntegrationMappingStatsInput,
@@ -30,6 +33,8 @@ import type {
   GetIntegrationRegistryStatsResult,
   GetIntegrationTransformationStatsInput,
   GetIntegrationTransformationStatsResult,
+  GetIntegrationValidationStatsInput,
+  GetIntegrationValidationStatsResult,
   IntegrationEngineCapabilities,
   IntegrationEngineHealth,
   IntegrationEngineInfo,
@@ -41,6 +46,8 @@ import type {
   ListIntegrationPipelinesResult,
   ListIntegrationTransformationsInput,
   ListIntegrationTransformationsResult,
+  ListIntegrationValidationsInput,
+  ListIntegrationValidationsResult,
   ListIntegrationsInput,
   ListIntegrationsResult,
   RegisterIntegrationConnectorInput,
@@ -53,8 +60,10 @@ import type {
   RegisterIntegrationResult,
   RegisterIntegrationTransformationInput,
   RegisterIntegrationTransformationResult,
+  RegisterIntegrationValidationInput,
+  RegisterIntegrationValidationResult,
 } from "../ports";
-import { F05_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
+import { F06_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
 import type { IntegrationEnginePort } from "../ports";
 
 export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
@@ -65,6 +74,7 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
   readonly pipeline: IntegrationPipelineEngine;
   readonly mapping: IntegrationMappingEngine;
   readonly transformation: IntegrationTransformationEngine;
+  readonly validation: IntegrationValidationEngine;
 
   constructor() {
     this.registry = new IntegrationRegistryEngine();
@@ -77,20 +87,27 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
       this.pipeline,
       this.mapping,
     );
+    this.validation = new IntegrationValidationEngine(
+      this.registry,
+      this.connector,
+      this.pipeline,
+      this.mapping,
+      this.transformation,
+    );
   }
 
   identity(): IntegrationEngineInfo {
     return {
       id: "enterprise-integration-engine",
       name: "Enterprise Integration Engine",
-      version: "F-05",
+      version: "F-06",
       vendor: "generic",
       provider: this.providerId,
     };
   }
 
   getCapabilities(): IntegrationEngineCapabilities {
-    return F05_INTEGRATION_ENGINE_CAPABILITIES;
+    return F06_INTEGRATION_ENGINE_CAPABILITIES;
   }
 
   async health(): Promise<IntegrationEngineHealth> {
@@ -101,13 +118,15 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
         caps.integrationConnectorImplemented &&
         caps.integrationPipelineImplemented &&
         caps.integrationMappingImplemented &&
-        caps.integrationTransformationImplemented,
+        caps.integrationTransformationImplemented &&
+        caps.integrationValidationImplemented,
       integrationEngineOk: caps.integrationEngineImplemented,
       integrationRegistryOk: caps.integrationRegistryImplemented,
       integrationConnectorOk: caps.integrationConnectorImplemented,
       integrationPipelineOk: caps.integrationPipelineImplemented,
       integrationMappingOk: caps.integrationMappingImplemented,
       integrationTransformationOk: caps.integrationTransformationImplemented,
+      integrationValidationOk: caps.integrationValidationImplemented,
     };
   }
 
@@ -373,6 +392,69 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
         ...stats,
         totalTransformations: filtered.length,
         transformationIds: filtered.map((t) => t.transformationId),
+      },
+    };
+  }
+
+  async registerIntegrationValidation(
+    input: RegisterIntegrationValidationInput,
+  ): Promise<RegisterIntegrationValidationResult> {
+    return this.validation.register(input.validation);
+  }
+
+  async findIntegrationValidation(
+    input: FindIntegrationValidationInput,
+  ): Promise<FindIntegrationValidationResult> {
+    return this.validation.find(input.validationId) ?? null;
+  }
+
+  async listIntegrationValidations(
+    input: ListIntegrationValidationsInput,
+  ): Promise<ListIntegrationValidationsResult> {
+    const validations = this.validation.list(
+      input.integrationId,
+      input.connectorId,
+      input.pipelineId,
+      input.mappingId,
+      input.transformationId,
+      input.limit,
+      input.offset,
+    );
+    const total = this.validation.list(
+      input.integrationId,
+      input.connectorId,
+      input.pipelineId,
+      input.mappingId,
+      input.transformationId,
+    ).length;
+    return {
+      ok: true,
+      code: "INTEGRATION_VALIDATION_LIST_OK",
+      message: `${validations.length} validations listed`,
+      validations,
+      total,
+    };
+  }
+
+  async getIntegrationValidationStats(
+    input: GetIntegrationValidationStatsInput = {},
+  ): Promise<GetIntegrationValidationStatsResult> {
+    const stats = this.validation.stats();
+    const filtered = this.validation.list(
+      input.integrationId,
+      input.connectorId,
+      input.pipelineId,
+      input.mappingId,
+      input.transformationId,
+    );
+    return {
+      ok: true,
+      code: "INTEGRATION_VALIDATION_STATS_OK",
+      message: "stats computed",
+      stats: {
+        ...stats,
+        totalValidations: filtered.length,
+        validationIds: filtered.map((v) => v.validationId),
       },
     };
   }

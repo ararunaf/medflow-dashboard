@@ -188,6 +188,40 @@ export interface CanonicalIntegrationTransformationStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationValidation {
+  readonly kind: "canonical-integration-validation";
+  readonly validationId: string;
+  readonly integrationId: string;
+  readonly connectorId: string;
+  readonly pipelineId: string;
+  readonly mappingId: string;
+  readonly transformationId: string;
+  readonly name: string;
+  readonly rules: readonly string[];
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationValidationResult {
+  readonly kind: "canonical-integration-validation-result";
+  readonly ok: boolean;
+  readonly validationId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly validation?: CanonicalIntegrationValidation | null;
+}
+
+export interface CanonicalIntegrationValidationStats {
+  readonly totalValidations: number;
+  readonly validationIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly connectorIds: readonly string[];
+  readonly pipelineIds: readonly string[];
+  readonly mappingIds: readonly string[];
+  readonly transformationIds: readonly string[];
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
@@ -196,4 +230,5 @@ export interface CanonicalIntegrationEngineHealth {
   readonly integrationPipelineOk: boolean;
   readonly integrationMappingOk: boolean;
   readonly integrationTransformationOk: boolean;
+  readonly integrationValidationOk: boolean;
 }

@@ -6,6 +6,7 @@
  * F-03: Integration Pipeline.
  * F-04: Integration Mapping.
  * F-05: Integration Transformation.
+ * F-06: Integration Validation.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -20,6 +21,8 @@ import type {
   FindIntegrationResult,
   FindIntegrationTransformationInput,
   FindIntegrationTransformationResult,
+  FindIntegrationValidationInput,
+  FindIntegrationValidationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
   GetIntegrationMappingStatsInput,
@@ -30,6 +33,8 @@ import type {
   GetIntegrationRegistryStatsResult,
   GetIntegrationTransformationStatsInput,
   GetIntegrationTransformationStatsResult,
+  GetIntegrationValidationStatsInput,
+  GetIntegrationValidationStatsResult,
   IntegrationEngineHealth,
   IntegrationEngineInfo,
   ListIntegrationConnectorsInput,
@@ -40,6 +45,8 @@ import type {
   ListIntegrationPipelinesResult,
   ListIntegrationTransformationsInput,
   ListIntegrationTransformationsResult,
+  ListIntegrationValidationsInput,
+  ListIntegrationValidationsResult,
   ListIntegrationsInput,
   ListIntegrationsResult,
   RegisterIntegrationConnectorInput,
@@ -52,6 +59,8 @@ import type {
   RegisterIntegrationResult,
   RegisterIntegrationTransformationInput,
   RegisterIntegrationTransformationResult,
+  RegisterIntegrationValidationInput,
+  RegisterIntegrationValidationResult,
 } from "./types";
 
 export interface IntegrationEnginePort {
@@ -157,4 +166,24 @@ export interface IntegrationEnginePort {
   getIntegrationTransformationStats(
     input?: GetIntegrationTransformationStatsInput,
   ): Promise<GetIntegrationTransformationStatsResult>;
+
+  /** F-06 — registra uma validação de integração. */
+  registerIntegrationValidation(
+    input: RegisterIntegrationValidationInput,
+  ): Promise<RegisterIntegrationValidationResult>;
+
+  /** F-06 — encontra validação por validationId. */
+  findIntegrationValidation(
+    input: FindIntegrationValidationInput,
+  ): Promise<FindIntegrationValidationResult>;
+
+  /** F-06 — lista validações, opcionalmente filtradas. */
+  listIntegrationValidations(
+    input: ListIntegrationValidationsInput,
+  ): Promise<ListIntegrationValidationsResult>;
+
+  /** F-06 — estatísticas do catálogo de validações. */
+  getIntegrationValidationStats(
+    input?: GetIntegrationValidationStatsInput,
+  ): Promise<GetIntegrationValidationStatsResult>;
 }

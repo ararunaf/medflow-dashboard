@@ -17,6 +17,9 @@ import type {
   CanonicalIntegrationTransformation,
   CanonicalIntegrationTransformationResult,
   CanonicalIntegrationTransformationStats,
+  CanonicalIntegrationValidation,
+  CanonicalIntegrationValidationResult,
+  CanonicalIntegrationValidationStats,
 } from "./canonical";
 
 export type {
@@ -35,6 +38,9 @@ export type {
   CanonicalIntegrationTransformation,
   CanonicalIntegrationTransformationResult,
   CanonicalIntegrationTransformationStats,
+  CanonicalIntegrationValidation,
+  CanonicalIntegrationValidationResult,
+  CanonicalIntegrationValidationStats,
 };
 
 export interface IntegrationEngineInfo {
@@ -53,6 +59,7 @@ export interface IntegrationEngineHealth {
   readonly integrationPipelineOk: boolean;
   readonly integrationMappingOk: boolean;
   readonly integrationTransformationOk: boolean;
+  readonly integrationValidationOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -248,4 +255,49 @@ export interface GetIntegrationTransformationStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationTransformationStats;
+}
+
+export interface RegisterIntegrationValidationInput {
+  readonly validation: CanonicalIntegrationValidation;
+}
+
+export type RegisterIntegrationValidationResult = CanonicalIntegrationValidationResult;
+
+export interface FindIntegrationValidationInput {
+  readonly validationId: string;
+}
+
+export type FindIntegrationValidationResult = CanonicalIntegrationValidation | null;
+
+export interface ListIntegrationValidationsInput {
+  readonly integrationId?: string;
+  readonly connectorId?: string;
+  readonly pipelineId?: string;
+  readonly mappingId?: string;
+  readonly transformationId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationValidationsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly validations: readonly CanonicalIntegrationValidation[];
+  readonly total: number;
+}
+
+export interface GetIntegrationValidationStatsInput {
+  readonly integrationId?: string;
+  readonly connectorId?: string;
+  readonly pipelineId?: string;
+  readonly mappingId?: string;
+  readonly transformationId?: string;
+}
+
+export interface GetIntegrationValidationStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationValidationStats;
 }
