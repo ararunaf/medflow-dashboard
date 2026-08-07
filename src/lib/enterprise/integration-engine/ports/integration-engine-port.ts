@@ -10,8 +10,10 @@
  * F-07: Integration Routing.
  * F-08: Integration Monitoring.
  * F-09: Integration Report.
+ * F-10: Generic Integration Engine.
  * Demais capabilities permanecem false.
  */
+import type { GenericIntegrationEngine } from "../generic-integration-engine";
 import type { IntegrationEngineCapabilities } from "./capabilities";
 import type {
   FindIntegrationConnectorInput,
@@ -274,4 +276,7 @@ export interface IntegrationEnginePort {
   getIntegrationReportStats(
     input?: GetIntegrationReportStatsInput,
   ): Promise<GetIntegrationReportStatsResult>;
+
+  /** F-10 — retorna a fachada GenericIntegrationEngine. */
+  getGenericIntegrationEngine(): GenericIntegrationEngine;
 }

@@ -1,14 +1,15 @@
 /**
- * DefaultIntegrationEngineAdapter — F-09.
+ * DefaultIntegrationEngineAdapter — F-10.
  *
  * Implementação oficial do IntegrationEnginePort.
- * Ativa F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08 e F-09.
+ * Ativa F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-09 e F-10.
  */
 import { IntegrationConnectorEngine } from "../integration-connector";
 import { IntegrationMappingEngine } from "../integration-mapping";
 import { IntegrationMonitoringEngine } from "../integration-monitoring";
 import { IntegrationPipelineEngine } from "../integration-pipeline";
 import { IntegrationRegistryEngine } from "../integration-registry";
+import { GenericIntegrationEngine } from "../generic-integration-engine";
 import { IntegrationReportEngine } from "../integration-report";
 import { IntegrationRoutingEngine } from "../integration-routing";
 import { IntegrationTransformationEngine } from "../integration-transformation";
@@ -92,7 +93,7 @@ import type {
   ResolveIntegrationRoutingInput,
   ResolveIntegrationRoutingResult,
 } from "../ports";
-import { F09_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
+import { F10_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
 import type { IntegrationEnginePort } from "../ports";
 
 export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
@@ -107,6 +108,7 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
   readonly routing: IntegrationRoutingEngine;
   readonly monitoring: IntegrationMonitoringEngine;
   readonly report: IntegrationReportEngine;
+  readonly generic: GenericIntegrationEngine;
 
   constructor() {
     this.registry = new IntegrationRegistryEngine();
@@ -153,20 +155,31 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
       this.routing,
       this.monitoring,
     );
+    this.generic = new GenericIntegrationEngine(
+      this.registry,
+      this.connector,
+      this.pipeline,
+      this.mapping,
+      this.transformation,
+      this.validation,
+      this.routing,
+      this.monitoring,
+      this.report,
+    );
   }
 
   identity(): IntegrationEngineInfo {
     return {
       id: "enterprise-integration-engine",
       name: "Enterprise Integration Engine",
-      version: "F-09",
+      version: "F-10",
       vendor: "generic",
       provider: this.providerId,
     };
   }
 
   getCapabilities(): IntegrationEngineCapabilities {
-    return F09_INTEGRATION_ENGINE_CAPABILITIES;
+    return F10_INTEGRATION_ENGINE_CAPABILITIES;
   }
 
   async health(): Promise<IntegrationEngineHealth> {
@@ -710,6 +723,10 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
       reports,
       total,
     };
+  }
+
+  getGenericIntegrationEngine(): GenericIntegrationEngine {
+    return this.generic;
   }
 
   async getIntegrationReportStats(
