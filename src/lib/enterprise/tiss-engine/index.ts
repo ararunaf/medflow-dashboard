@@ -7,6 +7,7 @@ export { TissSchemaValidationEngine } from "./tiss-schema-validation";
 export { TissBusinessValidationEngine } from "./tiss-business-validation";
 export { TissOperatorValidationEngine } from "./tiss-operator-validation";
 export { TissRepairEngine } from "./tiss-repair";
+export { TissCorrectionEngine } from "./tiss-correction";
 export { DefaultTissEngineAdapter, MockTissEngineAdapter } from "./adapters";
 export { TissEngineRegistry, tissEngineRegistry } from "./registry";
 export { createTissEnginePort } from "./providers";

@@ -709,3 +709,110 @@ export interface GetTissRepairStatsResult {
     repairIds: string[];
   };
 }
+
+export interface CanonicalTissCorrectionRule {
+  type: string;
+  options: Record<string, string>;
+}
+
+export interface CanonicalTissCorrection {
+  kind: "tiss-correction";
+  correctionId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  parserId: string;
+  serializerId: string;
+  schemaValidationId: string;
+  businessValidationId: string;
+  operatorValidationId: string;
+  repairId: string;
+  rule: CanonicalTissCorrectionRule;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissCorrectionInput {
+  correction: CanonicalTissCorrection;
+}
+
+export interface RegisterTissCorrectionResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  correctionId?: string;
+  correction?: CanonicalTissCorrection | null;
+}
+
+export interface GetTissCorrectionInput {
+  correctionId: string;
+}
+
+export interface GetTissCorrectionResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  correction?: CanonicalTissCorrection | null;
+}
+
+export interface ListTissCorrectionsInput {
+  tag?: string;
+}
+
+export interface ListTissCorrectionsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  corrections: CanonicalTissCorrection[];
+}
+
+export interface UpdateTissCorrectionInput {
+  correctionId: string;
+  correction: Partial<CanonicalTissCorrection>;
+}
+
+export interface UpdateTissCorrectionResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  correction?: CanonicalTissCorrection | null;
+}
+
+export interface RemoveTissCorrectionInput {
+  correctionId: string;
+}
+
+export interface RemoveTissCorrectionResult {
+  ok: boolean;
+  code: string;
+  message: string;
+}
+
+export interface CorrectTissInput {
+  correctionId: string;
+  document: string;
+}
+
+export interface CorrectTissResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  document?: string | null;
+  details?: string[];
+}
+
+export interface GetTissCorrectionStatsInput {
+  tag?: string;
+}
+
+export interface GetTissCorrectionStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    correctionIds: string[];
+  };
+}

@@ -4,6 +4,7 @@
  * Adapter mock para testes do Bloco G.
  */
 import { TissBusinessValidationEngine } from "../tiss-business-validation";
+import { TissCorrectionEngine } from "../tiss-correction";
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
 import { TissOperatorValidationEngine } from "../tiss-operator-validation";
@@ -11,7 +12,7 @@ import { TissParserEngine } from "../tiss-parser";
 import { TissRepairEngine } from "../tiss-repair";
 import { TissSchemaValidationEngine } from "../tiss-schema-validation";
 import { TissSerializerEngine } from "../tiss-serializer";
-import { G08_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
+import { G09_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
 import type {
   TissEnginePort,
   TissEngineInfo,
@@ -104,6 +105,20 @@ import type {
   RepairTissResult,
   GetTissRepairStatsInput,
   GetTissRepairStatsResult,
+  RegisterTissCorrectionInput,
+  RegisterTissCorrectionResult,
+  GetTissCorrectionInput,
+  GetTissCorrectionResult,
+  ListTissCorrectionsInput,
+  ListTissCorrectionsResult,
+  UpdateTissCorrectionInput,
+  UpdateTissCorrectionResult,
+  RemoveTissCorrectionInput,
+  RemoveTissCorrectionResult,
+  CorrectTissInput,
+  CorrectTissResult,
+  GetTissCorrectionStatsInput,
+  GetTissCorrectionStatsResult,
 } from "../ports";
 
 const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
@@ -143,19 +158,29 @@ export class MockTissEngineAdapter implements TissEnginePort {
     this.businessValidation,
     this.operatorValidation,
   );
+  private readonly correction = new TissCorrectionEngine(
+    this.knowledge,
+    this.layout,
+    this.parser,
+    this.serializer,
+    this.schemaValidation,
+    this.businessValidation,
+    this.operatorValidation,
+    this.repair,
+  );
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine (Mock)",
-      version: "G-08",
+      version: "G-09",
       vendor: "mock",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G08_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G09_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
@@ -169,7 +194,8 @@ export class MockTissEngineAdapter implements TissEnginePort {
         caps.tissSchemaValidationImplemented &&
         caps.tissBusinessValidationImplemented &&
         caps.tissOperatorValidationImplemented &&
-        caps.tissRepairImplemented,
+        caps.tissRepairImplemented &&
+        caps.tissCorrectionImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -496,5 +522,57 @@ export class MockTissEngineAdapter implements TissEnginePort {
 
   async getTissRepairStats(input: GetTissRepairStatsInput = {}): Promise<GetTissRepairStatsResult> {
     return this.repair.statsResult();
+  }
+
+  async registerTissCorrection(
+    input: RegisterTissCorrectionInput,
+  ): Promise<RegisterTissCorrectionResult> {
+    return this.correction.register(input);
+  }
+
+  async updateTissCorrection(
+    input: UpdateTissCorrectionInput,
+  ): Promise<UpdateTissCorrectionResult> {
+    return this.correction.update(input);
+  }
+
+  async removeTissCorrection(
+    input: RemoveTissCorrectionInput,
+  ): Promise<RemoveTissCorrectionResult> {
+    return this.correction.remove(input);
+  }
+
+  async getTissCorrection(input: GetTissCorrectionInput): Promise<GetTissCorrectionResult> {
+    const correction = this.correction.get(input.correctionId);
+    if (!correction) {
+      return {
+        ok: false,
+        code: "TISS_CORRECTION_NOT_FOUND",
+        message: "correction not found",
+        correction: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "TISS_CORRECTION_FOUND",
+      message: "correction found",
+      correction,
+    };
+  }
+
+  async listTissCorrections(
+    input: ListTissCorrectionsInput = {},
+  ): Promise<ListTissCorrectionsResult> {
+    return this.correction.listResult(input.tag);
+  }
+
+  async correctTiss(input: CorrectTissInput): Promise<CorrectTissResult> {
+    return this.correction.correct(input);
+  }
+
+  async getTissCorrectionStats(
+    input: GetTissCorrectionStatsInput = {},
+  ): Promise<GetTissCorrectionStatsResult> {
+    return this.correction.statsResult();
   }
 }

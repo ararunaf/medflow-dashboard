@@ -13,7 +13,7 @@ import {
   createCanonicalTissSerializer,
   createTissEnginePort,
   DefaultTissEngineAdapter,
-  G08_TISS_ENTERPRISE_CAPABILITIES,
+  G09_TISS_ENTERPRISE_CAPABILITIES,
   MockTissEngineAdapter,
   tissEngineRegistry,
   TissBusinessValidationEngine,
@@ -642,10 +642,10 @@ describe("G-07 TISS Operator Validation — functional cases", () => {
   it("DefaultAdapter implementa o Port", async () => {
     const adapter = new DefaultTissEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, G08_TISS_ENTERPRISE_CAPABILITIES);
+    assert.deepStrictEqual(caps, G09_TISS_ENTERPRISE_CAPABILITIES);
     assert.equal(caps.tissOperatorValidationImplemented, true);
     assert.equal(caps.tissRepairImplemented, true);
-    assert.equal(caps.tissCorrectionImplemented, false);
+    assert.equal(caps.tissCorrectionImplemented, true);
     assert.equal(caps.tissEngineImplemented, false);
     const health = await adapter.health();
     assert.equal(health.ok, true);
@@ -655,10 +655,10 @@ describe("G-07 TISS Operator Validation — functional cases", () => {
   it("MockAdapter implementa o Port", async () => {
     const adapter = new MockTissEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, G08_TISS_ENTERPRISE_CAPABILITIES);
+    assert.deepStrictEqual(caps, G09_TISS_ENTERPRISE_CAPABILITIES);
     assert.equal(caps.tissOperatorValidationImplemented, true);
     assert.equal(caps.tissRepairImplemented, true);
-    assert.equal(caps.tissCorrectionImplemented, false);
+    assert.equal(caps.tissCorrectionImplemented, true);
     assert.equal(caps.tissEngineImplemented, false);
   });
 

@@ -6,6 +6,7 @@
 
 import type {
   CanonicalTissBusinessValidation,
+  CanonicalTissCorrection,
   CanonicalTissKnowledge,
   CanonicalTissOperatorValidation,
   CanonicalTissLayout,
@@ -176,6 +177,42 @@ export function createCanonicalTissRepair(
     schemaValidationId: input.schemaValidationId,
     businessValidationId: input.businessValidationId,
     operatorValidationId: input.operatorValidationId,
+    rule: input.rule,
+    description: input.description ?? "",
+    version: input.version ?? "",
+    tags: input.tags ?? [],
+  };
+}
+
+export function createCanonicalTissCorrection(
+  input: Partial<CanonicalTissCorrection> &
+    Pick<
+      CanonicalTissCorrection,
+      | "correctionId"
+      | "name"
+      | "knowledgeId"
+      | "layoutId"
+      | "parserId"
+      | "serializerId"
+      | "schemaValidationId"
+      | "businessValidationId"
+      | "operatorValidationId"
+      | "repairId"
+      | "rule"
+    >,
+): CanonicalTissCorrection {
+  return {
+    kind: "tiss-correction",
+    correctionId: input.correctionId,
+    name: input.name,
+    knowledgeId: input.knowledgeId,
+    layoutId: input.layoutId,
+    parserId: input.parserId,
+    serializerId: input.serializerId,
+    schemaValidationId: input.schemaValidationId,
+    businessValidationId: input.businessValidationId,
+    operatorValidationId: input.operatorValidationId,
+    repairId: input.repairId,
     rule: input.rule,
     description: input.description ?? "",
     version: input.version ?? "",

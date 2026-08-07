@@ -70,3 +70,8 @@ export const G08_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
   ...G07_TISS_ENTERPRISE_CAPABILITIES,
   tissRepairImplemented: true,
 };
+
+export const G09_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...G08_TISS_ENTERPRISE_CAPABILITIES,
+  tissCorrectionImplemented: true,
+};

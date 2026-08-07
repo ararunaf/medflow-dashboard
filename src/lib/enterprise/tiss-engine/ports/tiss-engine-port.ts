@@ -96,6 +96,20 @@ import type {
   SerializeTissResult,
   TissEngineHealth,
   TissEngineInfo,
+  RegisterTissCorrectionInput,
+  RegisterTissCorrectionResult,
+  GetTissCorrectionInput,
+  GetTissCorrectionResult,
+  ListTissCorrectionsInput,
+  ListTissCorrectionsResult,
+  UpdateTissCorrectionInput,
+  UpdateTissCorrectionResult,
+  RemoveTissCorrectionInput,
+  RemoveTissCorrectionResult,
+  CorrectTissInput,
+  CorrectTissResult,
+  GetTissCorrectionStatsInput,
+  GetTissCorrectionStatsResult,
 } from "./types";
 
 export interface TissEnginePort {
@@ -269,4 +283,27 @@ export interface TissEnginePort {
 
   /** G-08 — estatísticas de reparos. */
   getTissRepairStats(input?: GetTissRepairStatsInput): Promise<GetTissRepairStatsResult>;
+
+  /** G-09 — registrar correção TISS. */
+  registerTissCorrection(input: RegisterTissCorrectionInput): Promise<RegisterTissCorrectionResult>;
+
+  /** G-09 — atualizar correção TISS. */
+  updateTissCorrection(input: UpdateTissCorrectionInput): Promise<UpdateTissCorrectionResult>;
+
+  /** G-09 — remover correção TISS. */
+  removeTissCorrection(input: RemoveTissCorrectionInput): Promise<RemoveTissCorrectionResult>;
+
+  /** G-09 — recuperar correção por id. */
+  getTissCorrection(input: GetTissCorrectionInput): Promise<GetTissCorrectionResult>;
+
+  /** G-09 — listar correções. */
+  listTissCorrections(input?: ListTissCorrectionsInput): Promise<ListTissCorrectionsResult>;
+
+  /** G-09 — executar correção em documento TISS. */
+  correctTiss(input: CorrectTissInput): Promise<CorrectTissResult>;
+
+  /** G-09 — estatísticas de correções. */
+  getTissCorrectionStats(
+    input?: GetTissCorrectionStatsInput,
+  ): Promise<GetTissCorrectionStatsResult>;
 }
