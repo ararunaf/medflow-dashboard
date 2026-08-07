@@ -115,7 +115,7 @@ Os seguintes certificados finais foram publicados:
 Nenhuma.
 
 ## 17. Hash Completo do Commit
-`bfd55e3`
+`8c55080`
 
 ## 18. Confirmação do Push
 Realizado para `origin/feat/inf-10-enterprise-scalability-runtime`.
