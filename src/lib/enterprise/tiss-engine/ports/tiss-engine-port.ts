@@ -18,6 +18,10 @@ import type {
   GetTissParserResult,
   GetTissParserStatsInput,
   GetTissParserStatsResult,
+  GetTissBusinessValidationInput,
+  GetTissBusinessValidationResult,
+  GetTissBusinessValidationStatsInput,
+  GetTissBusinessValidationStatsResult,
   GetTissSchemaValidationInput,
   GetTissSchemaValidationResult,
   GetTissSchemaValidationStatsInput,
@@ -30,6 +34,8 @@ import type {
   ListTissKnowledgeResult,
   ListTissLayoutInput,
   ListTissLayoutResult,
+  ListTissBusinessValidationsInput,
+  ListTissBusinessValidationsResult,
   ListTissParsersInput,
   ListTissParsersResult,
   ListTissSchemaValidationsInput,
@@ -44,6 +50,8 @@ import type {
   RegisterTissLayoutResult,
   RegisterTissParserInput,
   RegisterTissParserResult,
+  RegisterTissBusinessValidationInput,
+  RegisterTissBusinessValidationResult,
   RegisterTissSchemaValidationInput,
   RegisterTissSchemaValidationResult,
   RegisterTissSerializerInput,
@@ -53,6 +61,8 @@ import type {
   SearchTissLayoutInput,
   SearchTissLayoutResult,
   SerializeTissInput,
+  ValidateTissBusinessInput,
+  ValidateTissBusinessResult,
   ValidateTissSchemaInput,
   ValidateTissSchemaResult,
   SerializeTissResult,
@@ -154,4 +164,27 @@ export interface TissEnginePort {
   getTissSchemaValidationStats(
     input?: GetTissSchemaValidationStatsInput,
   ): Promise<GetTissSchemaValidationStatsResult>;
+
+  /** G-06 — registrar validação de negócio TISS. */
+  registerTissBusinessValidation(
+    input: RegisterTissBusinessValidationInput,
+  ): Promise<RegisterTissBusinessValidationResult>;
+
+  /** G-06 — recuperar validação de negócio por id. */
+  getTissBusinessValidation(
+    input: GetTissBusinessValidationInput,
+  ): Promise<GetTissBusinessValidationResult>;
+
+  /** G-06 — listar validações de negócio. */
+  listTissBusinessValidations(
+    input?: ListTissBusinessValidationsInput,
+  ): Promise<ListTissBusinessValidationsResult>;
+
+  /** G-06 — validar regra de negócio TISS. */
+  validateTissBusiness(input: ValidateTissBusinessInput): Promise<ValidateTissBusinessResult>;
+
+  /** G-06 — estatísticas de validações de negócio. */
+  getTissBusinessValidationStats(
+    input?: GetTissBusinessValidationStatsInput,
+  ): Promise<GetTissBusinessValidationStatsResult>;
 }

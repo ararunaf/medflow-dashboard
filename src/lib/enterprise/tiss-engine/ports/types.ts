@@ -403,3 +403,85 @@ export interface GetTissSchemaValidationStatsResult {
     schemaValidationIds: string[];
   };
 }
+
+export interface CanonicalTissBusinessRule {
+  field: string;
+  expectedValue: string;
+}
+
+export interface CanonicalTissBusinessValidation {
+  kind: "tiss-business-validation";
+  businessValidationId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  parserId: string;
+  serializerId: string;
+  schemaValidationId: string;
+  rule: CanonicalTissBusinessRule;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissBusinessValidationInput {
+  businessValidation: CanonicalTissBusinessValidation;
+}
+
+export interface RegisterTissBusinessValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  businessValidationId?: string;
+  businessValidation?: CanonicalTissBusinessValidation | null;
+}
+
+export interface GetTissBusinessValidationInput {
+  businessValidationId: string;
+}
+
+export interface GetTissBusinessValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  businessValidation?: CanonicalTissBusinessValidation | null;
+}
+
+export interface ListTissBusinessValidationsInput {
+  tag?: string;
+}
+
+export interface ListTissBusinessValidationsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  businessValidations: CanonicalTissBusinessValidation[];
+}
+
+export interface ValidateTissBusinessInput {
+  businessValidationId: string;
+  document: string;
+  facts: Record<string, string>;
+}
+
+export interface ValidateTissBusinessResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  details: string[];
+}
+
+export interface GetTissBusinessValidationStatsInput {
+  tag?: string;
+}
+
+export interface GetTissBusinessValidationStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    businessValidationIds: string[];
+  };
+}

@@ -1,16 +1,17 @@
 /**
- * DefaultTissEngineAdapter — G-05.
+ * DefaultTissEngineAdapter — G-06.
  *
  * Adapter enterprise oficial do Bloco G.
- * Ativa G-01 a G-05.
+ * Ativa G-01 a G-06.
  */
+import { TissBusinessValidationEngine } from "../tiss-business-validation";
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
 import { TissParserEngine } from "../tiss-parser";
 import { TissSchemaValidationEngine } from "../tiss-schema-validation";
 import { TissSerializerEngine } from "../tiss-serializer";
 import {
-  G05_TISS_ENTERPRISE_CAPABILITIES,
+  G06_TISS_ENTERPRISE_CAPABILITIES,
   type TissEnginePort,
   type TissEngineInfo,
   type TissEngineHealth,
@@ -64,6 +65,16 @@ import {
   type ValidateTissSchemaResult,
   type GetTissSchemaValidationStatsInput,
   type GetTissSchemaValidationStatsResult,
+  type RegisterTissBusinessValidationInput,
+  type RegisterTissBusinessValidationResult,
+  type GetTissBusinessValidationInput,
+  type GetTissBusinessValidationResult,
+  type ListTissBusinessValidationsInput,
+  type ListTissBusinessValidationsResult,
+  type ValidateTissBusinessInput,
+  type ValidateTissBusinessResult,
+  type GetTissBusinessValidationStatsInput,
+  type GetTissBusinessValidationStatsResult,
 } from "../ports";
 
 const DEFAULT_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine";
@@ -79,19 +90,26 @@ export class DefaultTissEngineAdapter implements TissEnginePort {
     this.parser,
     this.serializer,
   );
+  private readonly businessValidation = new TissBusinessValidationEngine(
+    this.knowledge,
+    this.layout,
+    this.parser,
+    this.serializer,
+    this.schemaValidation,
+  );
 
   identity(): TissEngineInfo {
     return {
       id: DEFAULT_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine",
-      version: "G-05",
+      version: "G-06",
       vendor: "enterprise",
       provider: "default",
     };
   }
 
   getCapabilities() {
-    return { ...G05_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G06_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
@@ -102,7 +120,8 @@ export class DefaultTissEngineAdapter implements TissEnginePort {
         caps.tissLayoutImplemented &&
         caps.tissParserImplemented &&
         caps.tissSerializerImplemented &&
-        caps.tissSchemaValidationImplemented,
+        caps.tissSchemaValidationImplemented &&
+        caps.tissBusinessValidationImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -282,5 +301,49 @@ export class DefaultTissEngineAdapter implements TissEnginePort {
     input: GetTissSchemaValidationStatsInput = {},
   ): Promise<GetTissSchemaValidationStatsResult> {
     return this.schemaValidation.statsResult();
+  }
+
+  async registerTissBusinessValidation(
+    input: RegisterTissBusinessValidationInput,
+  ): Promise<RegisterTissBusinessValidationResult> {
+    return this.businessValidation.register(input);
+  }
+
+  async getTissBusinessValidation(
+    input: GetTissBusinessValidationInput,
+  ): Promise<GetTissBusinessValidationResult> {
+    const businessValidation = this.businessValidation.get(input.businessValidationId);
+    if (!businessValidation) {
+      return {
+        ok: false,
+        code: "TISS_BUSINESS_VALIDATION_NOT_FOUND",
+        message: "business validation not found",
+        businessValidation: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "TISS_BUSINESS_VALIDATION_FOUND",
+      message: "business validation found",
+      businessValidation,
+    };
+  }
+
+  async listTissBusinessValidations(
+    input: ListTissBusinessValidationsInput = {},
+  ): Promise<ListTissBusinessValidationsResult> {
+    return this.businessValidation.listResult(input.tag);
+  }
+
+  async validateTissBusiness(
+    input: ValidateTissBusinessInput,
+  ): Promise<ValidateTissBusinessResult> {
+    return this.businessValidation.validate(input);
+  }
+
+  async getTissBusinessValidationStats(
+    input: GetTissBusinessValidationStatsInput = {},
+  ): Promise<GetTissBusinessValidationStatsResult> {
+    return this.businessValidation.statsResult();
   }
 }
