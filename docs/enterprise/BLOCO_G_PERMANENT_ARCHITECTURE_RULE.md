@@ -1,7 +1,7 @@
 # BLOCO G — Regra Permanente de Arquitetura — TISS Enterprise
 
 **Bloco:** BLOCO G — TISS Enterprise  
-**Status:** Arquitetura homologada; G-01 autorizada (não iniciada)  
+**Status:** AUDIT-G Concluída / Certificada / Congelada  
 **Data:** 2026-08-07  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -86,11 +86,11 @@ O Bloco G **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | G-04     | G-04R                  | `tissSerializerImplemented`         | TISS Enterprise — Serializer Engine          | Concluída / certificada   |
 | G-05     | G-05R                  | `tissSchemaValidationImplemented`   | TISS Enterprise — Schema Validation Engine   | Concluída / certificada   |
 | G-06     | G-06R                  | `tissBusinessValidationImplemented` | TISS Enterprise — Business Validation Engine | Concluída / certificada   |
-| G-07     | G-07R                  | `tissOperatorValidationImplemented` | TISS Enterprise — Operator Validation Engine | Autorizada (não iniciada) |
-| G-08     | G-08R                  | `tissRepairImplemented`             | TISS Enterprise — Repair Engine              | Planejada                 |
-| G-09     | G-09R                  | `tissCorrectionImplemented`         | TISS Enterprise — Correction Engine          | Planejada                 |
-| G-10     | G-10R                  | `tissEngineImplemented`             | TISS Enterprise — Generic TISS Engine        | Planejada                 |
-| AUDIT-G  | AUDIT-G-R              | —                                   | TISS Enterprise — Architecture Audit         | Planejada                 |
+| G-07     | G-07R                  | `tissOperatorValidationImplemented` | TISS Enterprise — Operator Validation Engine | Concluída / certificada   |
+| G-08     | G-08R                  | `tissRepairImplemented`             | TISS Enterprise — Repair Engine              | Concluída / certificada   |
+| G-09     | G-09R                  | `tissCorrectionImplemented`         | TISS Enterprise — Correction Engine          | Concluída / certificada   |
+| G-10     | G-10R                  | `tissEngineImplemented`             | TISS Enterprise — Generic TISS Engine        | Concluída / certificada   |
+| AUDIT-G  | AUDIT-G-R              | —                                   | TISS Enterprise — Architecture Audit         | Concluída / auditada      |
 
 ---
 
