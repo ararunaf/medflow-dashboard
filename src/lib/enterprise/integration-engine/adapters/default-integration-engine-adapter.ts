@@ -1,14 +1,15 @@
 /**
- * DefaultIntegrationEngineAdapter — F-08.
+ * DefaultIntegrationEngineAdapter — F-09.
  *
  * Implementação oficial do IntegrationEnginePort.
- * Ativa F-01, F-02, F-03, F-04, F-05, F-06, F-07 e F-08.
+ * Ativa F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08 e F-09.
  */
 import { IntegrationConnectorEngine } from "../integration-connector";
 import { IntegrationMappingEngine } from "../integration-mapping";
 import { IntegrationMonitoringEngine } from "../integration-monitoring";
 import { IntegrationPipelineEngine } from "../integration-pipeline";
 import { IntegrationRegistryEngine } from "../integration-registry";
+import { IntegrationReportEngine } from "../integration-report";
 import { IntegrationRoutingEngine } from "../integration-routing";
 import { IntegrationTransformationEngine } from "../integration-transformation";
 import { IntegrationValidationEngine } from "../integration-validation";
@@ -22,6 +23,8 @@ import type {
   FindIntegrationMonitoringResult,
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
+  FindIntegrationReportInput,
+  FindIntegrationReportResult,
   FindIntegrationResult,
   FindIntegrationRoutingInput,
   FindIntegrationRoutingResult,
@@ -39,6 +42,8 @@ import type {
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
+  GetIntegrationReportStatsInput,
+  GetIntegrationReportStatsResult,
   GetIntegrationRoutingStatsInput,
   GetIntegrationRoutingStatsResult,
   GetIntegrationTransformationStatsInput,
@@ -56,6 +61,8 @@ import type {
   ListIntegrationMonitoringsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
+  ListIntegrationReportsInput,
+  ListIntegrationReportsResult,
   ListIntegrationRoutingsInput,
   ListIntegrationRoutingsResult,
   ListIntegrationTransformationsInput,
@@ -73,6 +80,8 @@ import type {
   RegisterIntegrationMonitoringResult,
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
+  RegisterIntegrationReportInput,
+  RegisterIntegrationReportResult,
   RegisterIntegrationResult,
   RegisterIntegrationRoutingInput,
   RegisterIntegrationRoutingResult,
@@ -83,7 +92,7 @@ import type {
   ResolveIntegrationRoutingInput,
   ResolveIntegrationRoutingResult,
 } from "../ports";
-import { F08_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
+import { F09_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
 import type { IntegrationEnginePort } from "../ports";
 
 export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
@@ -97,6 +106,7 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
   readonly validation: IntegrationValidationEngine;
   readonly routing: IntegrationRoutingEngine;
   readonly monitoring: IntegrationMonitoringEngine;
+  readonly report: IntegrationReportEngine;
 
   constructor() {
     this.registry = new IntegrationRegistryEngine();
@@ -133,20 +143,30 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
       this.validation,
       this.routing,
     );
+    this.report = new IntegrationReportEngine(
+      this.registry,
+      this.connector,
+      this.pipeline,
+      this.mapping,
+      this.transformation,
+      this.validation,
+      this.routing,
+      this.monitoring,
+    );
   }
 
   identity(): IntegrationEngineInfo {
     return {
       id: "enterprise-integration-engine",
       name: "Enterprise Integration Engine",
-      version: "F-08",
+      version: "F-09",
       vendor: "generic",
       provider: this.providerId,
     };
   }
 
   getCapabilities(): IntegrationEngineCapabilities {
-    return F08_INTEGRATION_ENGINE_CAPABILITIES;
+    return F09_INTEGRATION_ENGINE_CAPABILITIES;
   }
 
   async health(): Promise<IntegrationEngineHealth> {
@@ -160,7 +180,8 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
         caps.integrationTransformationImplemented &&
         caps.integrationValidationImplemented &&
         caps.integrationRoutingImplemented &&
-        caps.integrationMonitoringImplemented,
+        caps.integrationMonitoringImplemented &&
+        caps.integrationReportImplemented,
       integrationEngineOk: caps.integrationEngineImplemented,
       integrationRegistryOk: caps.integrationRegistryImplemented,
       integrationConnectorOk: caps.integrationConnectorImplemented,
@@ -170,6 +191,7 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
       integrationValidationOk: caps.integrationValidationImplemented,
       integrationRoutingOk: caps.integrationRoutingImplemented,
       integrationMonitoringOk: caps.integrationMonitoringImplemented,
+      integrationReportOk: caps.integrationReportImplemented,
     };
   }
 
@@ -655,6 +677,54 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
         ...stats,
         totalMonitorings: filtered.length,
         monitoringIds: filtered.map((m) => m.monitoringId),
+      },
+    };
+  }
+
+  async registerIntegrationReport(
+    input: RegisterIntegrationReportInput,
+  ): Promise<RegisterIntegrationReportResult> {
+    return this.report.register(input.report);
+  }
+
+  async findIntegrationReport(
+    input: FindIntegrationReportInput,
+  ): Promise<FindIntegrationReportResult> {
+    return this.report.find(input.reportId) ?? null;
+  }
+
+  async listIntegrationReports(
+    input: ListIntegrationReportsInput,
+  ): Promise<ListIntegrationReportsResult> {
+    const reports = this.report.list(
+      input.integrationId,
+      input.monitoringId,
+      input.limit,
+      input.offset,
+    );
+    const total = this.report.list(input.integrationId, input.monitoringId).length;
+    return {
+      ok: true,
+      code: "INTEGRATION_REPORT_LIST_OK",
+      message: `${reports.length} reports listed`,
+      reports,
+      total,
+    };
+  }
+
+  async getIntegrationReportStats(
+    input: GetIntegrationReportStatsInput = {},
+  ): Promise<GetIntegrationReportStatsResult> {
+    const stats = this.report.stats();
+    const filtered = this.report.list(input.integrationId, input.monitoringId);
+    return {
+      ok: true,
+      code: "INTEGRATION_REPORT_STATS_OK",
+      message: "stats computed",
+      stats: {
+        ...stats,
+        totalReports: filtered.length,
+        reportIds: filtered.map((r) => r.reportId),
       },
     };
   }

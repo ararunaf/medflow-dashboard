@@ -11,3 +11,4 @@ export { IntegrationTransformationEngine } from "./integration-transformation";
 export { IntegrationValidationEngine } from "./integration-validation";
 export { IntegrationRoutingEngine } from "./integration-routing";
 export { IntegrationMonitoringEngine } from "./integration-monitoring";
+export { IntegrationReportEngine } from "./integration-report";

@@ -319,6 +319,44 @@ export interface CanonicalIntegrationMonitoringStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationReport {
+  readonly kind: "canonical-integration-report";
+  readonly reportId: string;
+  readonly integrationId: string;
+  readonly monitoringId: string;
+  readonly name: string;
+  readonly summary?: string;
+  readonly sections?: readonly CanonicalIntegrationReportSection[];
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationReportSection {
+  readonly kind: "canonical-integration-report-section";
+  readonly sectionId: string;
+  readonly title: string;
+  readonly content?: Record<string, unknown>;
+  readonly metrics?: readonly CanonicalIntegrationMetric[];
+}
+
+export interface CanonicalIntegrationReportResult {
+  readonly kind: "canonical-integration-report-result";
+  readonly ok: boolean;
+  readonly reportId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly report?: CanonicalIntegrationReport | null;
+}
+
+export interface CanonicalIntegrationReportStats {
+  readonly totalReports: number;
+  readonly reportIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly monitoringIds: readonly string[];
+  readonly totalSections: number;
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
@@ -330,4 +368,5 @@ export interface CanonicalIntegrationEngineHealth {
   readonly integrationValidationOk: boolean;
   readonly integrationRoutingOk: boolean;
   readonly integrationMonitoringOk: boolean;
+  readonly integrationReportOk: boolean;
 }

@@ -9,6 +9,7 @@
  * F-06: Integration Validation.
  * F-07: Integration Routing.
  * F-08: Integration Monitoring.
+ * F-09: Integration Report.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -22,6 +23,8 @@ import type {
   FindIntegrationMonitoringResult,
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
+  FindIntegrationReportInput,
+  FindIntegrationReportResult,
   FindIntegrationResult,
   FindIntegrationRoutingInput,
   FindIntegrationRoutingResult,
@@ -39,6 +42,8 @@ import type {
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
+  GetIntegrationReportStatsInput,
+  GetIntegrationReportStatsResult,
   GetIntegrationRoutingStatsInput,
   GetIntegrationRoutingStatsResult,
   GetIntegrationTransformationStatsInput,
@@ -55,6 +60,8 @@ import type {
   ListIntegrationPipelinesResult,
   ListIntegrationMonitoringsInput,
   ListIntegrationMonitoringsResult,
+  ListIntegrationReportsInput,
+  ListIntegrationReportsResult,
   ListIntegrationRoutingsInput,
   ListIntegrationRoutingsResult,
   ListIntegrationTransformationsInput,
@@ -72,6 +79,8 @@ import type {
   RegisterIntegrationMonitoringResult,
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
+  RegisterIntegrationReportInput,
+  RegisterIntegrationReportResult,
   RegisterIntegrationResult,
   RegisterIntegrationRoutingInput,
   RegisterIntegrationRoutingResult,
@@ -249,4 +258,20 @@ export interface IntegrationEnginePort {
   getIntegrationMonitoringStats(
     input?: GetIntegrationMonitoringStatsInput,
   ): Promise<GetIntegrationMonitoringStatsResult>;
+
+  /** F-09 — registra um relatório de integração. */
+  registerIntegrationReport(
+    input: RegisterIntegrationReportInput,
+  ): Promise<RegisterIntegrationReportResult>;
+
+  /** F-09 — encontra relatório por reportId. */
+  findIntegrationReport(input: FindIntegrationReportInput): Promise<FindIntegrationReportResult>;
+
+  /** F-09 — lista relatórios, opcionalmente filtrados. */
+  listIntegrationReports(input: ListIntegrationReportsInput): Promise<ListIntegrationReportsResult>;
+
+  /** F-09 — estatísticas do catálogo de relatórios. */
+  getIntegrationReportStats(
+    input?: GetIntegrationReportStatsInput,
+  ): Promise<GetIntegrationReportStatsResult>;
 }

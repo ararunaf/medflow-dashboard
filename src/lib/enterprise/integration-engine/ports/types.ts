@@ -19,6 +19,10 @@ import type {
   CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
+  CanonicalIntegrationReport,
+  CanonicalIntegrationReportResult,
+  CanonicalIntegrationReportSection,
+  CanonicalIntegrationReportStats,
   CanonicalIntegrationRouting,
   CanonicalIntegrationRoutingResult,
   CanonicalIntegrationRoutingStats,
@@ -48,6 +52,10 @@ export type {
   CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
+  CanonicalIntegrationReport,
+  CanonicalIntegrationReportResult,
+  CanonicalIntegrationReportSection,
+  CanonicalIntegrationReportStats,
   CanonicalIntegrationRouting,
   CanonicalIntegrationRoutingResult,
   CanonicalIntegrationRoutingStats,
@@ -78,6 +86,7 @@ export interface IntegrationEngineHealth {
   readonly integrationValidationOk: boolean;
   readonly integrationRoutingOk: boolean;
   readonly integrationMonitoringOk: boolean;
+  readonly integrationReportOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -426,4 +435,43 @@ export interface GetIntegrationMonitoringStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationMonitoringStats;
+}
+
+export interface RegisterIntegrationReportInput {
+  readonly report: CanonicalIntegrationReport;
+}
+
+export type RegisterIntegrationReportResult = CanonicalIntegrationReportResult;
+
+export interface FindIntegrationReportInput {
+  readonly reportId: string;
+}
+
+export type FindIntegrationReportResult = CanonicalIntegrationReport | null;
+
+export interface ListIntegrationReportsInput {
+  readonly integrationId?: string;
+  readonly monitoringId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationReportsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly reports: readonly CanonicalIntegrationReport[];
+  readonly total: number;
+}
+
+export interface GetIntegrationReportStatsInput {
+  readonly integrationId?: string;
+  readonly monitoringId?: string;
+}
+
+export interface GetIntegrationReportStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationReportStats;
 }

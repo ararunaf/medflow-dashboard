@@ -69,3 +69,8 @@ export const F08_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities 
   ...F07_INTEGRATION_ENGINE_CAPABILITIES,
   integrationMonitoringImplemented: true,
 };
+
+export const F09_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities = {
+  ...F08_INTEGRATION_ENGINE_CAPABILITIES,
+  integrationReportImplemented: true,
+};

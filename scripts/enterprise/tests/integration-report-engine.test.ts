@@ -1,5 +1,5 @@
 /**
- * F-08 — Integration Monitoring functional tests.
+ * F-09 — Integration Report functional tests.
  */
 import { describe, it } from "node:test";
 import assert from "node:assert";
@@ -145,181 +145,167 @@ const sampleMonitoring = (
   status: "healthy" as const,
 });
 
+const sampleReport = (id: string, integrationId: string, monitoringId: string) => ({
+  kind: "canonical-integration-report" as const,
+  reportId: id,
+  integrationId,
+  monitoringId,
+  name: `report ${id}`,
+});
+
 const setup = async (adapter: DefaultIntegrationEngineAdapter) => {
-  await adapter.registerIntegration({ integration: sampleIntegration("int-m") });
+  await adapter.registerIntegration({ integration: sampleIntegration("int-rp") });
   await adapter.registerIntegrationConnector({
-    connector: sampleConnector("conn-m", "int-m"),
+    connector: sampleConnector("conn-rp", "int-rp"),
   });
   await adapter.registerIntegrationPipeline({
-    pipeline: samplePipeline("pipe-m", "int-m", "conn-m"),
+    pipeline: samplePipeline("pipe-rp", "int-rp", "conn-rp"),
   });
   await adapter.registerIntegrationMapping({
-    mapping: sampleMapping("map-m", "int-m", "conn-m", "pipe-m"),
+    mapping: sampleMapping("map-rp", "int-rp", "conn-rp", "pipe-rp"),
   });
   await adapter.registerIntegrationTransformation({
-    transformation: sampleTransformation("trans-m", "int-m", "conn-m", "pipe-m", "map-m"),
+    transformation: sampleTransformation("trans-rp", "int-rp", "conn-rp", "pipe-rp", "map-rp"),
   });
   await adapter.registerIntegrationValidation({
-    validation: sampleValidation("val-m", "int-m", "conn-m", "pipe-m", "map-m", "trans-m"),
+    validation: sampleValidation("val-rp", "int-rp", "conn-rp", "pipe-rp", "map-rp", "trans-rp"),
   });
   await adapter.registerIntegrationRouting({
-    routing: sampleRouting("route-m", "int-m", "conn-m", "pipe-m", "map-m", "trans-m", "val-m"),
+    routing: sampleRouting(
+      "route-rp",
+      "int-rp",
+      "conn-rp",
+      "pipe-rp",
+      "map-rp",
+      "trans-rp",
+      "val-rp",
+    ),
+  });
+  await adapter.registerIntegrationMonitoring({
+    monitoring: sampleMonitoring(
+      "mon-rp",
+      "int-rp",
+      "route-rp",
+      "conn-rp",
+      "pipe-rp",
+      "map-rp",
+      "trans-rp",
+      "val-rp",
+    ),
   });
 };
 
-describe("F-08 Integration Monitoring — functional cases", () => {
-  it("registra monitoramento", async () => {
+describe("F-09 Integration Report — functional cases", () => {
+  it("registra relatório", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-1",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-1", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
-    assert.equal(result.code, "INTEGRATION_MONITORING_REGISTERED");
-    assert.equal(result.monitoringId, "mon-1");
+    assert.equal(result.code, "INTEGRATION_REPORT_REGISTERED");
+    assert.equal(result.reportId, "rep-1");
   });
 
-  it("rejeita monitoramento sem monitoringId", async () => {
+  it("rejeita relatório sem reportId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: {
-        ...sampleMonitoring(
-          "mon-1",
-          "int-m",
-          "route-m",
-          "conn-m",
-          "pipe-m",
-          "map-m",
-          "trans-m",
-          "val-m",
-        ),
-        monitoringId: "",
-      },
+    const result = await adapter.registerIntegrationReport({
+      report: { ...sampleReport("rep-1", "int-rp", "mon-rp"), reportId: "" },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_MONITORING_INVALID_ID");
+    assert.equal(result.code, "INTEGRATION_REPORT_INVALID_ID");
   });
 
-  it("rejeita monitoramento sem integrationId", async () => {
+  it("rejeita relatório sem integrationId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: {
-        ...sampleMonitoring(
-          "mon-1",
-          "",
-          "route-m",
-          "conn-m",
-          "pipe-m",
-          "map-m",
-          "trans-m",
-          "val-m",
-        ),
-        integrationId: "",
-      },
+    const result = await adapter.registerIntegrationReport({
+      report: { ...sampleReport("rep-1", "", "mon-rp"), integrationId: "" },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_MONITORING_INVALID_INTEGRATION_ID");
+    assert.equal(result.code, "INTEGRATION_REPORT_INVALID_INTEGRATION_ID");
   });
 
-  it("rejeita monitoramento sem routeId", async () => {
+  it("rejeita relatório sem monitoringId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: {
-        ...sampleMonitoring("mon-1", "int-m", "", "conn-m", "pipe-m", "map-m", "trans-m", "val-m"),
-        routeId: "",
-      },
+    const result = await adapter.registerIntegrationReport({
+      report: { ...sampleReport("rep-1", "int-rp", ""), monitoringId: "" },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_MONITORING_INVALID_ROUTE_ID");
+    assert.equal(result.code, "INTEGRATION_REPORT_INVALID_MONITORING_ID");
   });
 
-  it("recupera monitoramento", async () => {
+  it("recupera relatório", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-2",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    await adapter.registerIntegrationReport({
+      report: sampleReport("rep-2", "int-rp", "mon-rp"),
     });
-    const found = await adapter.findIntegrationMonitoring({ monitoringId: "mon-2" });
+    const found = await adapter.findIntegrationReport({ reportId: "rep-2" });
     assert.ok(found);
-    assert.equal(found!.monitoringId, "mon-2");
+    assert.equal(found!.reportId, "rep-2");
   });
 
-  it("lista monitoramentos", async () => {
+  it("lista relatórios", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-3",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    await adapter.registerIntegrationReport({
+      report: sampleReport("rep-3", "int-rp", "mon-rp"),
     });
-    const result = await adapter.listIntegrationMonitorings({ integrationId: "int-m" });
+    const result = await adapter.listIntegrationReports({ integrationId: "int-rp" });
     assert.equal(result.ok, true);
-    assert.equal(result.monitorings.length, 1);
+    assert.equal(result.reports.length, 1);
     assert.equal(result.total, 1);
+  });
+
+  it("filtra por integrationId", async () => {
+    const adapter = new DefaultIntegrationEngineAdapter();
+    await setup(adapter);
+    await adapter.registerIntegrationReport({
+      report: sampleReport("rep-4", "int-rp", "mon-rp"),
+    });
+    const result = await adapter.listIntegrationReports({ integrationId: "int-rp" });
+    assert.equal(result.reports.length, 1);
+    assert.equal(result.reports[0].integrationId, "int-rp");
   });
 
   it("consolida estatísticas", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-4",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    await adapter.registerIntegrationReport({
+      report: sampleReport("rep-5", "int-rp", "mon-rp"),
     });
-    const result = await adapter.getIntegrationMonitoringStats({});
-    assert.equal(result.stats.totalMonitorings, 1);
-    assert.equal(result.stats.statusCounts.healthy, 1);
+    const result = await adapter.getIntegrationReportStats({});
+    assert.equal(result.stats.totalReports, 1);
+    assert.equal(result.stats.totalSections, 0);
+  });
+
+  it("gera métricas consolidadas", async () => {
+    const adapter = new DefaultIntegrationEngineAdapter();
+    await setup(adapter);
+    await adapter.registerIntegrationReport({
+      report: sampleReport("rep-6", "int-rp", "mon-rp"),
+    });
+    const consolidated = await (
+      adapter as unknown as { report: { consolidate: (id: string) => unknown } }
+    ).report.consolidate("rep-6");
+    assert.ok(consolidated);
+    assert.equal((consolidated as { summary: string }).summary?.includes("int-rp"), true);
+    assert.equal(
+      (consolidated as { sections: { sectionId: string }[] }).sections.some(
+        (s) => s.sectionId === "consolidated-summary",
+      ),
+      true,
+    );
   });
 
   it("reutiliza IntegrationRegistry", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-5",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-7", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
@@ -327,17 +313,8 @@ describe("F-08 Integration Monitoring — functional cases", () => {
   it("reutiliza IntegrationConnector", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-6",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-8", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
@@ -345,17 +322,8 @@ describe("F-08 Integration Monitoring — functional cases", () => {
   it("reutiliza IntegrationPipeline", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-7",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-9", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
@@ -363,17 +331,8 @@ describe("F-08 Integration Monitoring — functional cases", () => {
   it("reutiliza IntegrationMapping", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-8",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-10", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
@@ -381,17 +340,8 @@ describe("F-08 Integration Monitoring — functional cases", () => {
   it("reutiliza IntegrationTransformation", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-9",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-11", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
@@ -399,17 +349,8 @@ describe("F-08 Integration Monitoring — functional cases", () => {
   it("reutiliza IntegrationValidation", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-10",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-12", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
@@ -417,59 +358,36 @@ describe("F-08 Integration Monitoring — functional cases", () => {
   it("reutiliza IntegrationRouting", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-11",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-13", "int-rp", "mon-rp"),
     });
     assert.equal(result.ok, true);
   });
 
-  it("gera métricas", async () => {
+  it("reutiliza IntegrationMonitoring", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    await adapter.registerIntegrationMonitoring({
-      monitoring: sampleMonitoring(
-        "mon-12",
-        "int-m",
-        "route-m",
-        "conn-m",
-        "pipe-m",
-        "map-m",
-        "trans-m",
-        "val-m",
-      ),
+    const result = await adapter.registerIntegrationReport({
+      report: sampleReport("rep-14", "int-rp", "mon-rp"),
     });
-    const result = await adapter.getIntegrationMonitoringStats({});
-    assert.equal(result.stats.totalMonitorings, 1);
-    assert.equal(result.stats.totalMetrics, 0);
-    assert.equal(result.stats.totalEvents, 0);
+    assert.equal(result.ok, true);
   });
 
   it("DefaultIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
     assert.deepStrictEqual(caps, F09_INTEGRATION_ENGINE_CAPABILITIES);
-    assert.equal(caps.integrationMonitoringImplemented, true);
     assert.equal(caps.integrationReportImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
     const health = await adapter.health();
     assert.equal(health.ok, true);
-    assert.equal(health.integrationMonitoringOk, true);
+    assert.equal(health.integrationReportOk, true);
   });
 
   it("MockIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new MockIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
     assert.deepStrictEqual(caps, F09_INTEGRATION_ENGINE_CAPABILITIES);
-    assert.equal(caps.integrationMonitoringImplemented, true);
     assert.equal(caps.integrationReportImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
   });
