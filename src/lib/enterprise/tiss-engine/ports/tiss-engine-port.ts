@@ -10,12 +10,22 @@ import type {
   GetTissKnowledgeResult,
   GetTissKnowledgeStatsInput,
   GetTissKnowledgeStatsResult,
+  GetTissLayoutInput,
+  GetTissLayoutResult,
+  GetTissLayoutStatsInput,
+  GetTissLayoutStatsResult,
   ListTissKnowledgeInput,
   ListTissKnowledgeResult,
+  ListTissLayoutInput,
+  ListTissLayoutResult,
   RegisterTissKnowledgeInput,
   RegisterTissKnowledgeResult,
+  RegisterTissLayoutInput,
+  RegisterTissLayoutResult,
   SearchTissKnowledgeInput,
   SearchTissKnowledgeResult,
+  SearchTissLayoutInput,
+  SearchTissLayoutResult,
   TissEngineHealth,
   TissEngineInfo,
 } from "./types";
@@ -44,4 +54,19 @@ export interface TissEnginePort {
 
   /** G-01 — estatísticas do catálogo de conhecimento. */
   getTissKnowledgeStats(input?: GetTissKnowledgeStatsInput): Promise<GetTissKnowledgeStatsResult>;
+
+  /** G-02 — registrar layout TISS. */
+  registerTissLayout(input: RegisterTissLayoutInput): Promise<RegisterTissLayoutResult>;
+
+  /** G-02 — recuperar layout por id. */
+  getTissLayout(input: GetTissLayoutInput): Promise<GetTissLayoutResult>;
+
+  /** G-02 — listar layouts. */
+  listTissLayout(input?: ListTissLayoutInput): Promise<ListTissLayoutResult>;
+
+  /** G-02 — pesquisar layouts. */
+  searchTissLayout(input: SearchTissLayoutInput): Promise<SearchTissLayoutResult>;
+
+  /** G-02 — estatísticas de layouts. */
+  getTissLayoutStats(input?: GetTissLayoutStatsInput): Promise<GetTissLayoutStatsResult>;
 }

@@ -1,11 +1,12 @@
 /**
- * MockTissEngineAdapter — G-01.
+ * MockTissEngineAdapter — G-02.
  *
  * Adapter mock para testes do Bloco G.
  */
 import { TissKnowledgeEngine } from "../tiss-knowledge";
+import { TissLayoutEngine } from "../tiss-layout";
 import {
-  G01_TISS_ENTERPRISE_CAPABILITIES,
+  G02_TISS_ENTERPRISE_CAPABILITIES,
   type TissEnginePort,
   type TissEngineInfo,
   type TissEngineHealth,
@@ -19,31 +20,42 @@ import {
   type SearchTissKnowledgeResult,
   type GetTissKnowledgeStatsInput,
   type GetTissKnowledgeStatsResult,
+  type RegisterTissLayoutInput,
+  type RegisterTissLayoutResult,
+  type GetTissLayoutInput,
+  type GetTissLayoutResult,
+  type ListTissLayoutInput,
+  type ListTissLayoutResult,
+  type SearchTissLayoutInput,
+  type SearchTissLayoutResult,
+  type GetTissLayoutStatsInput,
+  type GetTissLayoutStatsResult,
 } from "../ports";
 
 const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
 
 export class MockTissEngineAdapter implements TissEnginePort {
   private readonly knowledge = new TissKnowledgeEngine();
+  private readonly layout = new TissLayoutEngine(this.knowledge);
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine Mock",
-      version: "G-01",
+      version: "G-02",
       vendor: "enterprise",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G01_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G02_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
     const caps = this.getCapabilities();
     return {
-      ok: caps.tissKnowledgeImplemented,
+      ok: caps.tissKnowledgeImplemented && caps.tissLayoutImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -93,5 +105,39 @@ export class MockTissEngineAdapter implements TissEnginePort {
     input: GetTissKnowledgeStatsInput = {},
   ): Promise<GetTissKnowledgeStatsResult> {
     return this.knowledge.statsResult(input.tag);
+  }
+
+  async registerTissLayout(input: RegisterTissLayoutInput): Promise<RegisterTissLayoutResult> {
+    return this.layout.register(input.layout);
+  }
+
+  async getTissLayout(input: GetTissLayoutInput): Promise<GetTissLayoutResult> {
+    const layout = this.layout.get(input.layoutId);
+    if (!layout) {
+      return {
+        ok: false,
+        code: "MOCK_TISS_LAYOUT_NOT_FOUND",
+        message: "layout not found",
+        layout: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "MOCK_TISS_LAYOUT_FOUND",
+      message: "layout found",
+      layout,
+    };
+  }
+
+  async listTissLayout(input: ListTissLayoutInput = {}): Promise<ListTissLayoutResult> {
+    return this.layout.listResult(input.tag);
+  }
+
+  async searchTissLayout(input: SearchTissLayoutInput): Promise<SearchTissLayoutResult> {
+    return this.layout.searchResult(input.query);
+  }
+
+  async getTissLayoutStats(input: GetTissLayoutStatsInput = {}): Promise<GetTissLayoutStatsResult> {
+    return this.layout.statsResult(input.tag);
   }
 }

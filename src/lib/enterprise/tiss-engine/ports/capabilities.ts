@@ -35,3 +35,8 @@ export const G01_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
   ...DEFAULT_TISS_ENTERPRISE_CAPABILITIES,
   tissKnowledgeImplemented: true,
 };
+
+export const G02_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...G01_TISS_ENTERPRISE_CAPABILITIES,
+  tissLayoutImplemented: true,
+};

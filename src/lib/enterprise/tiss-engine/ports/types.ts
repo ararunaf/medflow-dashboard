@@ -100,3 +100,73 @@ export interface GetTissKnowledgeStatsResult {
     knowledgeIds: string[];
   };
 }
+
+export interface CanonicalTissLayout {
+  kind: "tiss-layout";
+  layoutId: string;
+  name: string;
+  knowledgeId: string;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissLayoutInput {
+  layout: CanonicalTissLayout;
+}
+
+export interface RegisterTissLayoutResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  layoutId?: string;
+  layout?: CanonicalTissLayout | null;
+}
+
+export interface GetTissLayoutInput {
+  layoutId: string;
+}
+
+export interface GetTissLayoutResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  layout?: CanonicalTissLayout | null;
+}
+
+export interface ListTissLayoutInput {
+  tag?: string;
+}
+
+export interface ListTissLayoutResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  layouts: CanonicalTissLayout[];
+}
+
+export interface SearchTissLayoutInput {
+  query: string;
+}
+
+export interface SearchTissLayoutResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  layouts: CanonicalTissLayout[];
+}
+
+export interface GetTissLayoutStatsInput {
+  tag?: string;
+}
+
+export interface GetTissLayoutStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    layoutIds: string[];
+  };
+}
