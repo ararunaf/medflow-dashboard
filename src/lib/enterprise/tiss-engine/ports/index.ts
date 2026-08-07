@@ -4,11 +4,13 @@ export {
   G01_TISS_ENTERPRISE_CAPABILITIES,
   G02_TISS_ENTERPRISE_CAPABILITIES,
   G03_TISS_ENTERPRISE_CAPABILITIES,
+  G04_TISS_ENTERPRISE_CAPABILITIES,
 } from "./capabilities";
 export {
   createCanonicalTissKnowledge,
   createCanonicalTissLayout,
   createCanonicalTissParser,
+  createCanonicalTissSerializer,
 } from "./canonical";
 export type { TissEnginePort } from "./tiss-engine-port";
 export type * from "./types";

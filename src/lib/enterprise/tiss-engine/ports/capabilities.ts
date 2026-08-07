@@ -45,3 +45,8 @@ export const G03_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
   ...G02_TISS_ENTERPRISE_CAPABILITIES,
   tissParserImplemented: true,
 };
+
+export const G04_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...G03_TISS_ENTERPRISE_CAPABILITIES,
+  tissSerializerImplemented: true,
+};

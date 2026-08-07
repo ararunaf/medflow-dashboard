@@ -256,3 +256,76 @@ export interface GetTissParserStatsResult {
     parserIds: string[];
   };
 }
+
+export interface CanonicalTissSerializer {
+  kind: "tiss-serializer";
+  serializerId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  parserId: string;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissSerializerInput {
+  serializer: CanonicalTissSerializer;
+}
+
+export interface RegisterTissSerializerResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  serializerId?: string;
+  serializer?: CanonicalTissSerializer | null;
+}
+
+export interface GetTissSerializerInput {
+  serializerId: string;
+}
+
+export interface GetTissSerializerResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  serializer?: CanonicalTissSerializer | null;
+}
+
+export interface ListTissSerializersInput {
+  tag?: string;
+}
+
+export interface ListTissSerializersResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  serializers: CanonicalTissSerializer[];
+}
+
+export interface SerializeTissInput {
+  serializerId: string;
+  result: CanonicalTissParseResult;
+}
+
+export interface SerializeTissResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  document: string | null;
+}
+
+export interface GetTissSerializerStatsInput {
+  tag?: string;
+}
+
+export interface GetTissSerializerStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    serializerIds: string[];
+  };
+}

@@ -4,7 +4,12 @@
  * Modelos estruturais e genéricos. Nenhum dado TISS específico é hardcoded.
  */
 
-import type { CanonicalTissKnowledge, CanonicalTissLayout, CanonicalTissParser } from "./types";
+import type {
+  CanonicalTissKnowledge,
+  CanonicalTissLayout,
+  CanonicalTissParser,
+  CanonicalTissSerializer,
+} from "./types";
 
 export function createCanonicalTissKnowledge(
   input: Partial<CanonicalTissKnowledge> & Pick<CanonicalTissKnowledge, "knowledgeId" | "name">,
@@ -29,6 +34,26 @@ export function createCanonicalTissParser(
     name: input.name,
     knowledgeId: input.knowledgeId,
     layoutId: input.layoutId,
+    description: input.description ?? "",
+    version: input.version ?? "",
+    tags: input.tags ?? [],
+  };
+}
+
+export function createCanonicalTissSerializer(
+  input: Partial<CanonicalTissSerializer> &
+    Pick<
+      CanonicalTissSerializer,
+      "serializerId" | "name" | "knowledgeId" | "layoutId" | "parserId"
+    >,
+): CanonicalTissSerializer {
+  return {
+    kind: "tiss-serializer",
+    serializerId: input.serializerId,
+    name: input.name,
+    knowledgeId: input.knowledgeId,
+    layoutId: input.layoutId,
+    parserId: input.parserId,
     description: input.description ?? "",
     version: input.version ?? "",
     tags: input.tags ?? [],

@@ -1,14 +1,15 @@
 /**
- * DefaultTissEngineAdapter — G-03.
+ * DefaultTissEngineAdapter — G-04.
  *
  * Adapter enterprise oficial do Bloco G.
- * Ativa G-01 (TISS Knowledge), G-02 (TISS Layout) e G-03 (TISS Parser).
+ * Ativa G-01 (TISS Knowledge), G-02 (TISS Layout), G-03 (TISS Parser) e G-04 (TISS Serializer).
  */
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
 import { TissParserEngine } from "../tiss-parser";
+import { TissSerializerEngine } from "../tiss-serializer";
 import {
-  G03_TISS_ENTERPRISE_CAPABILITIES,
+  G04_TISS_ENTERPRISE_CAPABILITIES,
   type TissEnginePort,
   type TissEngineInfo,
   type TissEngineHealth,
@@ -43,6 +44,16 @@ import {
   type ParseTissResult,
   type GetTissParserStatsInput,
   type GetTissParserStatsResult,
+  type RegisterTissSerializerInput,
+  type RegisterTissSerializerResult,
+  type GetTissSerializerInput,
+  type GetTissSerializerResult,
+  type ListTissSerializersInput,
+  type ListTissSerializersResult,
+  type SerializeTissInput,
+  type SerializeTissResult,
+  type GetTissSerializerStatsInput,
+  type GetTissSerializerStatsResult,
 } from "../ports";
 
 const DEFAULT_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine";
@@ -51,25 +62,30 @@ export class DefaultTissEngineAdapter implements TissEnginePort {
   private readonly knowledge = new TissKnowledgeEngine();
   private readonly layout = new TissLayoutEngine(this.knowledge);
   private readonly parser = new TissParserEngine(this.knowledge, this.layout);
+  private readonly serializer = new TissSerializerEngine(this.knowledge, this.layout, this.parser);
 
   identity(): TissEngineInfo {
     return {
       id: DEFAULT_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine",
-      version: "G-03",
+      version: "G-04",
       vendor: "enterprise",
       provider: "default",
     };
   }
 
   getCapabilities() {
-    return { ...G03_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G04_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
     const caps = this.getCapabilities();
     return {
-      ok: caps.tissKnowledgeImplemented && caps.tissLayoutImplemented && caps.tissParserImplemented,
+      ok:
+        caps.tissKnowledgeImplemented &&
+        caps.tissLayoutImplemented &&
+        caps.tissParserImplemented &&
+        caps.tissSerializerImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -187,5 +203,45 @@ export class DefaultTissEngineAdapter implements TissEnginePort {
 
   async getTissParserStats(input: GetTissParserStatsInput = {}): Promise<GetTissParserStatsResult> {
     return this.parser.statsResult();
+  }
+
+  async registerTissSerializer(
+    input: RegisterTissSerializerInput,
+  ): Promise<RegisterTissSerializerResult> {
+    return this.serializer.register(input);
+  }
+
+  async getTissSerializer(input: GetTissSerializerInput): Promise<GetTissSerializerResult> {
+    const serializer = this.serializer.get(input.serializerId);
+    if (!serializer) {
+      return {
+        ok: false,
+        code: "TISS_SERIALIZER_NOT_FOUND",
+        message: "serializer not found",
+        serializer: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "TISS_SERIALIZER_FOUND",
+      message: "serializer found",
+      serializer,
+    };
+  }
+
+  async listTissSerializers(
+    input: ListTissSerializersInput = {},
+  ): Promise<ListTissSerializersResult> {
+    return this.serializer.listResult(input.tag);
+  }
+
+  async serializeTiss(input: SerializeTissInput): Promise<SerializeTissResult> {
+    return this.serializer.serialize(input);
+  }
+
+  async getTissSerializerStats(
+    input: GetTissSerializerStatsInput = {},
+  ): Promise<GetTissSerializerStatsResult> {
+    return this.serializer.statsResult();
   }
 }

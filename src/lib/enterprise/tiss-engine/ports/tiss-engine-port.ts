@@ -18,12 +18,18 @@ import type {
   GetTissParserResult,
   GetTissParserStatsInput,
   GetTissParserStatsResult,
+  GetTissSerializerInput,
+  GetTissSerializerResult,
+  GetTissSerializerStatsInput,
+  GetTissSerializerStatsResult,
   ListTissKnowledgeInput,
   ListTissKnowledgeResult,
   ListTissLayoutInput,
   ListTissLayoutResult,
   ListTissParsersInput,
   ListTissParsersResult,
+  ListTissSerializersInput,
+  ListTissSerializersResult,
   ParseTissInput,
   ParseTissResult,
   RegisterTissKnowledgeInput,
@@ -32,10 +38,14 @@ import type {
   RegisterTissLayoutResult,
   RegisterTissParserInput,
   RegisterTissParserResult,
+  RegisterTissSerializerInput,
+  RegisterTissSerializerResult,
   SearchTissKnowledgeInput,
   SearchTissKnowledgeResult,
   SearchTissLayoutInput,
   SearchTissLayoutResult,
+  SerializeTissInput,
+  SerializeTissResult,
   TissEngineHealth,
   TissEngineInfo,
 } from "./types";
@@ -94,4 +104,21 @@ export interface TissEnginePort {
 
   /** G-03 — estatísticas de parsers. */
   getTissParserStats(input?: GetTissParserStatsInput): Promise<GetTissParserStatsResult>;
+
+  /** G-04 — registrar serializer TISS. */
+  registerTissSerializer(input: RegisterTissSerializerInput): Promise<RegisterTissSerializerResult>;
+
+  /** G-04 — recuperar serializer por id. */
+  getTissSerializer(input: GetTissSerializerInput): Promise<GetTissSerializerResult>;
+
+  /** G-04 — listar serializers. */
+  listTissSerializers(input?: ListTissSerializersInput): Promise<ListTissSerializersResult>;
+
+  /** G-04 — serializar representação canônica em documento TISS. */
+  serializeTiss(input: SerializeTissInput): Promise<SerializeTissResult>;
+
+  /** G-04 — estatísticas de serializers. */
+  getTissSerializerStats(
+    input?: GetTissSerializerStatsInput,
+  ): Promise<GetTissSerializerStatsResult>;
 }
