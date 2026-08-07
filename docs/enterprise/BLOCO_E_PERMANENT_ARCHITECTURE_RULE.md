@@ -1,8 +1,8 @@
 # BLOCO E — Regra Permanente de Arquitetura — Enterprise Business Engine
 
 **Bloco:** BLOCO E — Enterprise Business Engine  
-**Status:** E-09 certificada e congelada  
-**Próxima Sprint autorizada (não iniciada):** E-10 — Generic Business Engine  
+**Status:** Bloco E auditado, certificado e congelado  
+**Próximo Bloco autorizado (não iniciado):** Bloco F — Enterprise Integration Engine  
 **Data:** 2026-08-06  
 **Branch:** `feat/inf-10-enterprise-scalability-runtime`  
 **Repositório:** `https://github.com/ararunaf/medflow-dashboard.git`
@@ -83,9 +83,9 @@ A Enterprise Business Engine é responsável por:
 | E-07     | E-07R                  | `businessEventLogImplemented`             | Enterprise Business Engine — Business Event Log             | Concluída / certificada   |
 | E-08     | E-08R                  | `businessAuditTrailImplemented`           | Enterprise Business Engine — Business Audit Trail           | Concluída / certificada   |
 | E-09     | E-09R                  | `businessReportImplemented`               | Enterprise Business Engine — Business Report                | Concluída / certificada   |
-| E-10     | E-10R                  | `businessEngineImplemented`               | Enterprise Business Engine — Generic Business Engine        | Autorizada (não iniciada) |
-| E-10     | E-10R                  | `businessEngineImplemented`               | Enterprise Business Engine — Generic Business Engine        | Planejada                 |
-| AUDIT-E  | AUDIT-E-R              | —                                         | Enterprise Block E Architecture Audit                       | Planejada                 |
+| E-10     | E-10R                  | `businessEngineImplemented`               | Enterprise Business Engine — Generic Business Engine        | Concluída / certificada   |
+| AUDIT-E  | AUDIT-E-R              | —                                         | Enterprise Block E Architecture Audit                       | Concluída / certificada   |
+| Bloco F  | ARCH-F01               | —                                         | Enterprise Integration Engine                               | Autorizada (não iniciada) |
 
 ---
 
