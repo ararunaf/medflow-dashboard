@@ -1,9 +1,9 @@
 /**
- * MockBusinessEngineAdapter — E-08.
+ * MockBusinessEngineAdapter — E-09.
  *
  * Adapter mock para testes.
  */
-import { E08_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E09_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -31,6 +31,8 @@ import type {
   FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
+  GenerateBusinessReportInput,
+  GenerateBusinessReportResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessEventsByCorrelationIdInput,
@@ -74,7 +76,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E08_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E09_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -90,6 +92,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessDecisionTableOk: ok,
       businessEventLogOk: ok,
       businessAuditTrailOk: ok,
+      businessReportOk: ok,
     };
   }
 
@@ -287,5 +290,14 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
     _input: FindBusinessAuditTrailByTransactionIdInput,
   ): Promise<FindBusinessAuditTrailByTransactionIdResult> {
     return null;
+  }
+
+  async generateReport(_input: GenerateBusinessReportInput): Promise<GenerateBusinessReportResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_REPORT_MOCK_GENERATED",
+      message: "report generated (mock)",
+      report: null,
+    };
   }
 }

@@ -162,6 +162,15 @@ export interface CanonicalBusinessAuditTrail {
   readonly entries: readonly CanonicalBusinessAuditTrailEntry[];
 }
 
+export interface CanonicalBusinessReport {
+  readonly kind: "canonical-business-report";
+  readonly reportId: string;
+  readonly generatedAt: number;
+  readonly scope: Record<string, unknown>;
+  readonly summary: Record<string, number>;
+  readonly sections: Record<string, unknown>;
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
@@ -173,6 +182,7 @@ export interface CanonicalBusinessRuleCatalogHealth {
   readonly businessDecisionTableOk: boolean;
   readonly businessEventLogOk: boolean;
   readonly businessAuditTrailOk: boolean;
+  readonly businessReportOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {

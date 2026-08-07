@@ -8,6 +8,7 @@ import type {
   CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
+  CanonicalBusinessReport,
   CanonicalBusinessRule,
   CanonicalBusinessRuleCatalogHealth,
   CanonicalBusinessRuleCatalogResult,
@@ -41,6 +42,7 @@ export interface BusinessEngineHealth {
   readonly businessDecisionTableOk: boolean;
   readonly businessEventLogOk: boolean;
   readonly businessAuditTrailOk: boolean;
+  readonly businessReportOk: boolean;
 }
 
 export interface RegisterBusinessRuleInput {
@@ -228,6 +230,19 @@ export interface FindBusinessAuditTrailByTransactionIdInput {
 
 export type FindBusinessAuditTrailByTransactionIdResult = CanonicalBusinessAuditTrail | null;
 
+export interface GenerateBusinessReportInput {
+  readonly reportId: string;
+  readonly scope?: Record<string, unknown>;
+  readonly requestId?: string;
+}
+
+export type GenerateBusinessReportResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly report: CanonicalBusinessReport | null;
+};
+
 export type {
   BusinessEngineCapabilities,
   CanonicalBusinessAuditTrail,
@@ -236,6 +251,7 @@ export type {
   CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
+  CanonicalBusinessReport,
   CanonicalBusinessRule,
   CanonicalBusinessRuleCatalogHealth,
   CanonicalBusinessRuleCatalogResult,

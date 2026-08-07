@@ -9,6 +9,7 @@
  * E-06: Business Decision Table.
  * E-07: Business Event Log.
  * E-08: Business Audit Trail.
+ * E-09: Business Report.
  */
 export type {
   BusinessEngineCapabilities,
@@ -23,6 +24,7 @@ export type {
   CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
+  CanonicalBusinessReport,
   CanonicalBusinessRule,
   CanonicalBusinessRuleAction,
   CanonicalBusinessRuleCatalogHealth,
@@ -56,6 +58,8 @@ export type {
   FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
+  GenerateBusinessReportInput,
+  GenerateBusinessReportResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessEventsByCorrelationIdInput,
@@ -83,6 +87,7 @@ export {
   E06_BUSINESS_ENGINE_CAPABILITIES,
   E07_BUSINESS_ENGINE_CAPABILITIES,
   E08_BUSINESS_ENGINE_CAPABILITIES,
+  E09_BUSINESS_ENGINE_CAPABILITIES,
 } from "./ports";
 export { DefaultBusinessEngineAdapter, MockBusinessEngineAdapter } from "./adapters";
 export { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "./business-rule-catalog";
@@ -96,5 +101,6 @@ export {
 } from "./business-decision-table";
 export { BusinessEventLogEngine, InMemoryBusinessEventLogStore } from "./business-event-log";
 export { BusinessAuditTrailEngine, InMemoryBusinessAuditTrailStore } from "./business-audit-trail";
+export { BusinessReportEngine } from "./business-report";
 export { createBusinessEnginePort } from "./providers/create-business-engine-port";
 export { businessEngineRegistry } from "./registry/business-engine-registry";

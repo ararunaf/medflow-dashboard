@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   BusinessProcessOrchestrationEngine,
-  E08_BUSINESS_ENGINE_CAPABILITIES,
+  E09_BUSINESS_ENGINE_CAPABILITIES,
 } from "../../../src/lib/enterprise/business-engine";
 import { DefaultBusinessEngineAdapter } from "../../../src/lib/enterprise/business-engine/adapters/default-business-engine-adapter";
 import type { CanonicalBusinessRule } from "../../../src/lib/enterprise/business-engine/ports";
@@ -39,7 +39,7 @@ describe("E-05 Business Process Orchestration — functional cases", () => {
   it("executa orquestração com múltiplos workflows", async () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E08_BUSINESS_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, E09_BUSINESS_ENGINE_CAPABILITIES);
 
     const rule1 = makeRule(
       "proc-rule-1",

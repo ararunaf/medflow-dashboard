@@ -73,3 +73,8 @@ export const E08_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
   ...E07_BUSINESS_ENGINE_CAPABILITIES,
   businessAuditTrailImplemented: true,
 };
+
+export const E09_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
+  ...E08_BUSINESS_ENGINE_CAPABILITIES,
+  businessReportImplemented: true,
+};

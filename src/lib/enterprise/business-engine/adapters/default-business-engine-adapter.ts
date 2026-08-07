@@ -1,18 +1,19 @@
 /**
- * DefaultBusinessEngineAdapter — E-08.
+ * DefaultBusinessEngineAdapter — E-09.
  *
  * Adapter oficial da Enterprise Business Engine.
- * Capabilities E-01 a E-08 ativas.
+ * Capabilities E-01 a E-09 ativas.
  */
 import { BusinessAuditTrailEngine } from "../business-audit-trail";
 import { BusinessDecisionTableEngine } from "../business-decision-table";
 import { BusinessEventLogEngine } from "../business-event-log";
+import { BusinessReportEngine } from "../business-report";
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
 import { BusinessRuleExecutionEngine } from "../business-rule-execution";
 import { BusinessTransactionEngine } from "../business-transaction";
 import { BusinessWorkflowEngine } from "../business-workflow";
 import { BusinessProcessOrchestrationEngine } from "../business-process-orchestration";
-import { E08_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E09_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -40,6 +41,8 @@ import type {
   FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
+  GenerateBusinessReportInput,
+  GenerateBusinessReportResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessEventsByCorrelationIdInput,
@@ -75,6 +78,12 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   private readonly decisionTable = new BusinessDecisionTableEngine(this.catalog);
   private readonly eventLog = new BusinessEventLogEngine();
   private readonly auditTrail = new BusinessAuditTrailEngine(this.eventLog);
+  private readonly report = new BusinessReportEngine(
+    this.eventLog,
+    this.auditTrail,
+    this.catalog,
+    this.decisionTable,
+  );
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
@@ -92,7 +101,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E08_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E09_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -108,6 +117,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       businessDecisionTableOk: ok,
       businessEventLogOk: ok,
       businessAuditTrailOk: ok,
+      businessReportOk: ok,
     };
   }
 
@@ -292,5 +302,16 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
     input: FindBusinessAuditTrailByTransactionIdInput,
   ): Promise<FindBusinessAuditTrailByTransactionIdResult> {
     return this.auditTrail.findByTransactionId(input.transactionId) ?? null;
+  }
+
+  async generateReport(input: GenerateBusinessReportInput): Promise<GenerateBusinessReportResult> {
+    const scope = input.scope as { correlationId?: string; transactionId?: string } | undefined;
+    const report = this.report.generate(input.reportId, scope);
+    return {
+      ok: true,
+      code: "BUSINESS_REPORT_GENERATED",
+      message: "report generated",
+      report,
+    };
   }
 }

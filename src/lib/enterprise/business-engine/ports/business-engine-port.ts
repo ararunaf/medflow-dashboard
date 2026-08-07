@@ -9,6 +9,7 @@
  * E-06: Business Decision Table (`businessDecisionTableImplemented = true`).
  * E-07: Business Event Log (`businessEventLogImplemented = true`).
  * E-08: Business Audit Trail (`businessAuditTrailImplemented = true`).
+ * E-09: Business Report (`businessReportImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
@@ -37,6 +38,8 @@ import type {
   FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
+  GenerateBusinessReportInput,
+  GenerateBusinessReportResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessEventsByCorrelationIdInput,
@@ -143,4 +146,7 @@ export interface BusinessEnginePort {
   findAuditTrailByTransactionId(
     input: FindBusinessAuditTrailByTransactionIdInput,
   ): Promise<FindBusinessAuditTrailByTransactionIdResult>;
+
+  /** E-09 — gera um relatório consolidado. */
+  generateReport(input: GenerateBusinessReportInput): Promise<GenerateBusinessReportResult>;
 }

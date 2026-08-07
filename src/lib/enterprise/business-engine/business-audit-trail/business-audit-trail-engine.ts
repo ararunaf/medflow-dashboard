@@ -13,6 +13,7 @@ import type {
 export interface BusinessAuditTrailStore {
   getByCorrelationId(correlationId: string): CanonicalBusinessAuditTrail | undefined;
   getByTransactionId(transactionId: string): CanonicalBusinessAuditTrail | undefined;
+  all(): CanonicalBusinessAuditTrail[];
   set(trail: CanonicalBusinessAuditTrail): void;
 }
 
@@ -26,6 +27,10 @@ export class InMemoryBusinessAuditTrailStore implements BusinessAuditTrailStore 
 
   getByTransactionId(transactionId: string): CanonicalBusinessAuditTrail | undefined {
     return this.byTransaction.get(transactionId);
+  }
+
+  all(): CanonicalBusinessAuditTrail[] {
+    return [...new Set(this.byTransaction.values())];
   }
 
   set(trail: CanonicalBusinessAuditTrail): void {
@@ -95,5 +100,9 @@ export class BusinessAuditTrailEngine {
 
   findByTransactionId(transactionId: string): CanonicalBusinessAuditTrail | undefined {
     return this.store.getByTransactionId(transactionId);
+  }
+
+  all(): CanonicalBusinessAuditTrail[] {
+    return this.store.all();
   }
 }

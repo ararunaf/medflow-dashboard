@@ -29,6 +29,8 @@ export type {
   FindBusinessEventResult,
   FindBusinessRuleInput,
   FindBusinessRuleResult,
+  GenerateBusinessReportInput,
+  GenerateBusinessReportResult,
   GetBusinessRuleCatalogStatsInput,
   GetBusinessRuleCatalogStatsResult,
   ListBusinessEventsByCorrelationIdInput,
@@ -56,6 +58,7 @@ export {
   E06_BUSINESS_ENGINE_CAPABILITIES,
   E07_BUSINESS_ENGINE_CAPABILITIES,
   E08_BUSINESS_ENGINE_CAPABILITIES,
+  E09_BUSINESS_ENGINE_CAPABILITIES,
 } from "./capabilities";
 export type {
   CanonicalBusinessAuditTrail,
@@ -65,6 +68,7 @@ export type {
   CanonicalBusinessEvent,
   CanonicalBusinessProcess,
   CanonicalBusinessProcessOrchestrationResult,
+  CanonicalBusinessReport,
   CanonicalBusinessRule,
   CanonicalBusinessRuleAction,
   CanonicalBusinessRuleCatalogHealth,

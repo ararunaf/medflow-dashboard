@@ -68,6 +68,10 @@ export class BusinessDecisionTableEngine {
     return this.store.list();
   }
 
+  all(): CanonicalBusinessDecisionTable[] {
+    return this.store.list();
+  }
+
   execute(tableId: string, facts: Record<string, unknown>): CanonicalBusinessDecisionTableResult {
     const table = this.store.get(tableId);
     if (!table) {

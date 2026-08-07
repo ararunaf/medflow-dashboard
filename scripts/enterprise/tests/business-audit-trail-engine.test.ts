@@ -6,7 +6,7 @@ import assert from "node:assert";
 import {
   BusinessAuditTrailEngine,
   BusinessEventLogEngine,
-  E08_BUSINESS_ENGINE_CAPABILITIES,
+  E09_BUSINESS_ENGINE_CAPABILITIES,
 } from "../../../src/lib/enterprise/business-engine";
 import { DefaultBusinessEngineAdapter } from "../../../src/lib/enterprise/business-engine/adapters/default-business-engine-adapter";
 import type { CanonicalBusinessEvent } from "../../../src/lib/enterprise/business-engine/ports";
@@ -102,8 +102,9 @@ describe("E-08 Business Audit Trail — functional cases", () => {
   it("Port expõe capability corretamente", () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E08_BUSINESS_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, E09_BUSINESS_ENGINE_CAPABILITIES);
     assert.equal(caps.businessAuditTrailImplemented, true);
+    assert.equal(caps.businessReportImplemented, true);
     assert.equal(caps.businessEventLogImplemented, true);
     assert.equal(caps.businessDecisionTableImplemented, true);
     assert.equal(caps.businessProcessOrchestrationImplemented, true);
@@ -111,7 +112,6 @@ describe("E-08 Business Audit Trail — functional cases", () => {
     assert.equal(caps.businessTransactionImplemented, true);
     assert.equal(caps.businessRuleExecutionImplemented, true);
     assert.equal(caps.businessRuleCatalogImplemented, true);
-    assert.equal(caps.businessReportImplemented, false);
     assert.equal(caps.businessEngineImplemented, false);
   });
 });
