@@ -1,9 +1,10 @@
 /**
- * DefaultBusinessEngineAdapter — E-07.
+ * DefaultBusinessEngineAdapter — E-08.
  *
  * Adapter oficial da Enterprise Business Engine.
- * Capabilities E-01 a E-07 ativas.
+ * Capabilities E-01 a E-08 ativas.
  */
+import { BusinessAuditTrailEngine } from "../business-audit-trail";
 import { BusinessDecisionTableEngine } from "../business-decision-table";
 import { BusinessEventLogEngine } from "../business-event-log";
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
@@ -11,12 +12,14 @@ import { BusinessRuleExecutionEngine } from "../business-rule-execution";
 import { BusinessTransactionEngine } from "../business-transaction";
 import { BusinessWorkflowEngine } from "../business-workflow";
 import { BusinessProcessOrchestrationEngine } from "../business-process-orchestration";
-import { E07_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E08_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  CreateBusinessAuditTrailInput,
+  CreateBusinessAuditTrailResult,
   ExecuteBusinessDecisionTableInput,
   ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
@@ -27,6 +30,10 @@ import type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessAuditTrailByCorrelationIdInput,
+  FindBusinessAuditTrailByCorrelationIdResult,
+  FindBusinessAuditTrailByTransactionIdInput,
+  FindBusinessAuditTrailByTransactionIdResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
   FindBusinessEventInput,
@@ -67,6 +74,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   private readonly orchestration = new BusinessProcessOrchestrationEngine();
   private readonly decisionTable = new BusinessDecisionTableEngine(this.catalog);
   private readonly eventLog = new BusinessEventLogEngine();
+  private readonly auditTrail = new BusinessAuditTrailEngine(this.eventLog);
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
@@ -84,7 +92,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E07_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E08_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -99,6 +107,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       businessProcessOrchestrationOk: ok,
       businessDecisionTableOk: ok,
       businessEventLogOk: ok,
+      businessAuditTrailOk: ok,
     };
   }
 
@@ -265,5 +274,23 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       message: "events listed",
       events: this.eventLog.listByTransactionId(input.transactionId),
     };
+  }
+
+  async createAuditTrail(
+    input: CreateBusinessAuditTrailInput,
+  ): Promise<CreateBusinessAuditTrailResult> {
+    return this.auditTrail.create(input.auditId, input.correlationId, input.transactionId);
+  }
+
+  async findAuditTrailByCorrelationId(
+    input: FindBusinessAuditTrailByCorrelationIdInput,
+  ): Promise<FindBusinessAuditTrailByCorrelationIdResult> {
+    return this.auditTrail.findByCorrelationId(input.correlationId) ?? null;
+  }
+
+  async findAuditTrailByTransactionId(
+    input: FindBusinessAuditTrailByTransactionIdInput,
+  ): Promise<FindBusinessAuditTrailByTransactionIdResult> {
+    return this.auditTrail.findByTransactionId(input.transactionId) ?? null;
   }
 }

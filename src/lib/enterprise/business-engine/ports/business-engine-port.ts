@@ -8,12 +8,15 @@
  * E-05: Business Process Orchestration (`businessProcessOrchestrationImplemented = true`).
  * E-06: Business Decision Table (`businessDecisionTableImplemented = true`).
  * E-07: Business Event Log (`businessEventLogImplemented = true`).
+ * E-08: Business Audit Trail (`businessAuditTrailImplemented = true`).
  * Demais capabilities permanecem false.
  */
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  CreateBusinessAuditTrailInput,
+  CreateBusinessAuditTrailResult,
   ExecuteBusinessDecisionTableInput,
   ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
@@ -24,6 +27,10 @@ import type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessAuditTrailByCorrelationIdInput,
+  FindBusinessAuditTrailByCorrelationIdResult,
+  FindBusinessAuditTrailByTransactionIdInput,
+  FindBusinessAuditTrailByTransactionIdResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
   FindBusinessEventInput,
@@ -123,4 +130,17 @@ export interface BusinessEnginePort {
   listEventsByTransactionId(
     input: ListBusinessEventsByTransactionIdInput,
   ): Promise<ListBusinessEventsByTransactionIdResult>;
+
+  /** E-08 — cria um Audit Trail a partir dos eventos. */
+  createAuditTrail(input: CreateBusinessAuditTrailInput): Promise<CreateBusinessAuditTrailResult>;
+
+  /** E-08 — encontra Audit Trail por correlationId. */
+  findAuditTrailByCorrelationId(
+    input: FindBusinessAuditTrailByCorrelationIdInput,
+  ): Promise<FindBusinessAuditTrailByCorrelationIdResult>;
+
+  /** E-08 — encontra Audit Trail por transactionId. */
+  findAuditTrailByTransactionId(
+    input: FindBusinessAuditTrailByTransactionIdInput,
+  ): Promise<FindBusinessAuditTrailByTransactionIdResult>;
 }

@@ -2,6 +2,7 @@
  * Tipos vendor-agnósticos da Enterprise Business Engine.
  */
 import type {
+  CanonicalBusinessAuditTrail,
   CanonicalBusinessDecisionTable,
   CanonicalBusinessDecisionTableResult,
   CanonicalBusinessEvent,
@@ -39,6 +40,7 @@ export interface BusinessEngineHealth {
   readonly businessProcessOrchestrationOk: boolean;
   readonly businessDecisionTableOk: boolean;
   readonly businessEventLogOk: boolean;
+  readonly businessAuditTrailOk: boolean;
 }
 
 export interface RegisterBusinessRuleInput {
@@ -199,8 +201,36 @@ export type ListBusinessEventsByTransactionIdResult = {
   readonly events: CanonicalBusinessEvent[];
 };
 
+export interface CreateBusinessAuditTrailInput {
+  readonly auditId: string;
+  readonly correlationId: string;
+  readonly transactionId: string;
+  readonly requestId?: string;
+}
+
+export type CreateBusinessAuditTrailResult = {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+};
+
+export interface FindBusinessAuditTrailByCorrelationIdInput {
+  readonly correlationId: string;
+  readonly requestId?: string;
+}
+
+export type FindBusinessAuditTrailByCorrelationIdResult = CanonicalBusinessAuditTrail | null;
+
+export interface FindBusinessAuditTrailByTransactionIdInput {
+  readonly transactionId: string;
+  readonly requestId?: string;
+}
+
+export type FindBusinessAuditTrailByTransactionIdResult = CanonicalBusinessAuditTrail | null;
+
 export type {
   BusinessEngineCapabilities,
+  CanonicalBusinessAuditTrail,
   CanonicalBusinessDecisionTable,
   CanonicalBusinessDecisionTableResult,
   CanonicalBusinessEvent,

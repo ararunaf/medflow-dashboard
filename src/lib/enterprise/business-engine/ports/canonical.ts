@@ -142,6 +142,26 @@ export interface CanonicalBusinessEvent {
   readonly payload: Record<string, unknown>;
 }
 
+export interface CanonicalBusinessAuditTrailEntry {
+  readonly kind: "canonical-business-audit-trail-entry";
+  readonly entryId: string;
+  readonly timestamp: number;
+  readonly eventId: string;
+  readonly eventType: string;
+  readonly actor?: string;
+  readonly action: string;
+  readonly context: Record<string, unknown>;
+}
+
+export interface CanonicalBusinessAuditTrail {
+  readonly kind: "canonical-business-audit-trail";
+  readonly auditId: string;
+  readonly correlationId: string;
+  readonly transactionId: string;
+  readonly createdAt: number;
+  readonly entries: readonly CanonicalBusinessAuditTrailEntry[];
+}
+
 export interface CanonicalBusinessRuleCatalogHealth {
   readonly ok: boolean;
   readonly businessEngineOk: boolean;
@@ -152,6 +172,7 @@ export interface CanonicalBusinessRuleCatalogHealth {
   readonly businessProcessOrchestrationOk: boolean;
   readonly businessDecisionTableOk: boolean;
   readonly businessEventLogOk: boolean;
+  readonly businessAuditTrailOk: boolean;
 }
 
 export interface CanonicalBusinessRuleCatalogStats {

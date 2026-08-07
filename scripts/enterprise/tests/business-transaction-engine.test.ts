@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   BusinessTransactionEngine,
-  E07_BUSINESS_ENGINE_CAPABILITIES,
+  E08_BUSINESS_ENGINE_CAPABILITIES,
 } from "../../../src/lib/enterprise/business-engine";
 import { DefaultBusinessEngineAdapter } from "../../../src/lib/enterprise/business-engine/adapters/default-business-engine-adapter";
 import type { CanonicalBusinessRule } from "../../../src/lib/enterprise/business-engine/ports";
@@ -39,11 +39,12 @@ describe("E-03 Business Transaction — functional cases", () => {
   it("executa transação com múltiplos passos", async () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E07_BUSINESS_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, E08_BUSINESS_ENGINE_CAPABILITIES);
     assert.equal(caps.businessWorkflowImplemented, true);
     assert.equal(caps.businessProcessOrchestrationImplemented, true);
     assert.equal(caps.businessDecisionTableImplemented, true);
     assert.equal(caps.businessEventLogImplemented, true);
+    assert.equal(caps.businessAuditTrailImplemented, true);
 
     const rule1 = makeRule(
       "tx-step-1",

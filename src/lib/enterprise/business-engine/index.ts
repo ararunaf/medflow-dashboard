@@ -8,6 +8,7 @@
  * E-05: Business Process Orchestration.
  * E-06: Business Decision Table.
  * E-07: Business Event Log.
+ * E-08: Business Audit Trail.
  */
 export type {
   BusinessEngineCapabilities,
@@ -15,6 +16,8 @@ export type {
   BusinessEngineInfo,
   BusinessEnginePort,
   BusinessEngineProviderId,
+  CanonicalBusinessAuditTrail,
+  CanonicalBusinessAuditTrailEntry,
   CanonicalBusinessDecisionTable,
   CanonicalBusinessDecisionTableResult,
   CanonicalBusinessEvent,
@@ -31,6 +34,8 @@ export type {
   CanonicalBusinessTransactionStep,
   CanonicalBusinessWorkflowResult,
   CanonicalBusinessWorkflowStage,
+  CreateBusinessAuditTrailInput,
+  CreateBusinessAuditTrailResult,
   ExecuteBusinessDecisionTableInput,
   ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
@@ -41,6 +46,10 @@ export type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessAuditTrailByCorrelationIdInput,
+  FindBusinessAuditTrailByCorrelationIdResult,
+  FindBusinessAuditTrailByTransactionIdInput,
+  FindBusinessAuditTrailByTransactionIdResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
   FindBusinessEventInput,
@@ -73,6 +82,7 @@ export {
   E05_BUSINESS_ENGINE_CAPABILITIES,
   E06_BUSINESS_ENGINE_CAPABILITIES,
   E07_BUSINESS_ENGINE_CAPABILITIES,
+  E08_BUSINESS_ENGINE_CAPABILITIES,
 } from "./ports";
 export { DefaultBusinessEngineAdapter, MockBusinessEngineAdapter } from "./adapters";
 export { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "./business-rule-catalog";
@@ -85,5 +95,6 @@ export {
   InMemoryBusinessDecisionTableStore,
 } from "./business-decision-table";
 export { BusinessEventLogEngine, InMemoryBusinessEventLogStore } from "./business-event-log";
+export { BusinessAuditTrailEngine, InMemoryBusinessAuditTrailStore } from "./business-audit-trail";
 export { createBusinessEnginePort } from "./providers/create-business-engine-port";
 export { businessEngineRegistry } from "./registry/business-engine-registry";

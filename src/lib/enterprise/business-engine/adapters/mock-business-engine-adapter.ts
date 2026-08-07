@@ -1,14 +1,16 @@
 /**
- * MockBusinessEngineAdapter — E-07.
+ * MockBusinessEngineAdapter — E-08.
  *
  * Adapter mock para testes.
  */
-import { E07_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E08_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
   BusinessEngineInfo,
+  CreateBusinessAuditTrailInput,
+  CreateBusinessAuditTrailResult,
   ExecuteBusinessDecisionTableInput,
   ExecuteBusinessDecisionTableResult,
   ExecuteBusinessProcessOrchestrationInput,
@@ -19,6 +21,10 @@ import type {
   ExecuteBusinessTransactionResult,
   ExecuteBusinessWorkflowInput,
   ExecuteBusinessWorkflowResult,
+  FindBusinessAuditTrailByCorrelationIdInput,
+  FindBusinessAuditTrailByCorrelationIdResult,
+  FindBusinessAuditTrailByTransactionIdInput,
+  FindBusinessAuditTrailByTransactionIdResult,
   FindBusinessDecisionTableInput,
   FindBusinessDecisionTableResult,
   FindBusinessEventInput,
@@ -68,7 +74,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E07_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E08_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -83,6 +89,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessProcessOrchestrationOk: ok,
       businessDecisionTableOk: ok,
       businessEventLogOk: ok,
+      businessAuditTrailOk: ok,
     };
   }
 
@@ -258,5 +265,27 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       message: "events listed (mock)",
       events: [],
     };
+  }
+
+  async createAuditTrail(
+    _input: CreateBusinessAuditTrailInput,
+  ): Promise<CreateBusinessAuditTrailResult> {
+    return {
+      ok: true,
+      code: "BUSINESS_AUDIT_TRAIL_MOCK_CREATED",
+      message: "audit trail created (mock)",
+    };
+  }
+
+  async findAuditTrailByCorrelationId(
+    _input: FindBusinessAuditTrailByCorrelationIdInput,
+  ): Promise<FindBusinessAuditTrailByCorrelationIdResult> {
+    return null;
+  }
+
+  async findAuditTrailByTransactionId(
+    _input: FindBusinessAuditTrailByTransactionIdInput,
+  ): Promise<FindBusinessAuditTrailByTransactionIdResult> {
+    return null;
   }
 }
