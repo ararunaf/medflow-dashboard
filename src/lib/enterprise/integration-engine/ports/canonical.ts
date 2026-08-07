@@ -15,6 +15,17 @@ export interface CanonicalIntegration {
   readonly metadata?: Record<string, unknown>;
 }
 
+export interface CanonicalIntegrationConnector {
+  readonly kind: "canonical-integration-connector";
+  readonly connectorId: string;
+  readonly integrationId: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly configuration?: Record<string, unknown>;
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
 export interface CanonicalIntegrationRegistryResult {
   readonly kind: "canonical-integration-registry-result";
   readonly ok: boolean;
@@ -24,6 +35,15 @@ export interface CanonicalIntegrationRegistryResult {
   readonly integration?: CanonicalIntegration | null;
 }
 
+export interface CanonicalIntegrationConnectorResult {
+  readonly kind: "canonical-integration-connector-result";
+  readonly ok: boolean;
+  readonly connectorId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly connector?: CanonicalIntegrationConnector | null;
+}
+
 export interface CanonicalIntegrationRegistryStats {
   readonly totalIntegrations: number;
   readonly integrationIds: readonly string[];
@@ -31,8 +51,16 @@ export interface CanonicalIntegrationRegistryStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationConnectorStats {
+  readonly totalConnectors: number;
+  readonly connectorIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
   readonly integrationRegistryOk: boolean;
+  readonly integrationConnectorOk: boolean;
 }

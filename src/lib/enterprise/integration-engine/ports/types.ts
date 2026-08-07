@@ -3,12 +3,18 @@
  */
 import type {
   CanonicalIntegration,
+  CanonicalIntegrationConnector,
+  CanonicalIntegrationConnectorResult,
+  CanonicalIntegrationConnectorStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
 } from "./canonical";
 
 export type {
   CanonicalIntegration,
+  CanonicalIntegrationConnector,
+  CanonicalIntegrationConnectorResult,
+  CanonicalIntegrationConnectorStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
 };
@@ -25,6 +31,7 @@ export interface IntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
   readonly integrationRegistryOk: boolean;
+  readonly integrationConnectorOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -62,4 +69,41 @@ export interface GetIntegrationRegistryStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationRegistryStats;
+}
+
+export interface RegisterIntegrationConnectorInput {
+  readonly connector: CanonicalIntegrationConnector;
+}
+
+export type RegisterIntegrationConnectorResult = CanonicalIntegrationConnectorResult;
+
+export interface FindIntegrationConnectorInput {
+  readonly connectorId: string;
+}
+
+export type FindIntegrationConnectorResult = CanonicalIntegrationConnector | null;
+
+export interface ListIntegrationConnectorsInput {
+  readonly integrationId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationConnectorsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly connectors: readonly CanonicalIntegrationConnector[];
+  readonly total: number;
+}
+
+export interface GetIntegrationConnectorStatsInput {
+  readonly integrationId?: string;
+}
+
+export interface GetIntegrationConnectorStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationConnectorStats;
 }

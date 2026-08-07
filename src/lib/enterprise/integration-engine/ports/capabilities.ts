@@ -34,3 +34,8 @@ export const F01_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities 
   ...DEFAULT_INTEGRATION_ENGINE_CAPABILITIES,
   integrationRegistryImplemented: true,
 };
+
+export const F02_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities = {
+  ...F01_INTEGRATION_ENGINE_CAPABILITIES,
+  integrationConnectorImplemented: true,
+};

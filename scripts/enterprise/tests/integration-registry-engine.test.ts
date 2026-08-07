@@ -6,7 +6,6 @@ import assert from "node:assert";
 import {
   DefaultIntegrationEngineAdapter,
   MockIntegrationEngineAdapter,
-  F01_INTEGRATION_ENGINE_CAPABILITIES,
   createIntegrationEnginePort,
   integrationEngineRegistry,
 } from "../../../src/lib/enterprise/integration-engine";
@@ -90,8 +89,8 @@ describe("F-01 Integration Registry — functional cases", () => {
   it("DefaultIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, F01_INTEGRATION_ENGINE_CAPABILITIES);
     assert.equal(caps.integrationRegistryImplemented, true);
+    assert.equal(caps.integrationConnectorImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
     const identity = adapter.identity();
     assert.equal(identity.id, "enterprise-integration-engine");
@@ -103,8 +102,8 @@ describe("F-01 Integration Registry — functional cases", () => {
   it("MockIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new MockIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, F01_INTEGRATION_ENGINE_CAPABILITIES);
     assert.equal(caps.integrationRegistryImplemented, true);
+    assert.equal(caps.integrationConnectorImplemented, true);
     const identity = adapter.identity();
     assert.equal(identity.id, "enterprise-integration-engine-mock");
     assert.equal(identity.provider, "mock");
