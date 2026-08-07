@@ -82,8 +82,8 @@ O Bloco G **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | ARCH-G01 | ARCH-G01-A             | —                                   | TISS Enterprise Architecture                 | Concluída / homologada    |
 | G-01     | G-01R                  | `tissKnowledgeImplemented`          | TISS Enterprise — Knowledge Engine           | Concluída / certificada   |
 | G-02     | G-02R                  | `tissLayoutImplemented`             | TISS Enterprise — Layout Engine              | Concluída / certificada   |
-| G-03     | G-03R                  | `tissParserImplemented`             | TISS Enterprise — Parser Engine              | Autorizada (não iniciada) |
-| G-04     | G-04R                  | `tissSerializerImplemented`         | TISS Enterprise — Serializer Engine          | Planejada                 |
+| G-03     | G-03R                  | `tissParserImplemented`             | TISS Enterprise — Parser Engine              | Concluída / certificada   |
+| G-04     | G-04R                  | `tissSerializerImplemented`         | TISS Enterprise — Serializer Engine          | Autorizada (não iniciada) |
 | G-05     | G-05R                  | `tissSchemaValidationImplemented`   | TISS Enterprise — Schema Validation Engine   | Planejada                 |
 | G-06     | G-06R                  | `tissBusinessValidationImplemented` | TISS Enterprise — Business Validation Engine | Planejada                 |
 | G-07     | G-07R                  | `tissOperatorValidationImplemented` | TISS Enterprise — Operator Validation Engine | Planejada                 |
