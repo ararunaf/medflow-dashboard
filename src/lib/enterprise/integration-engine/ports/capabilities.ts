@@ -44,3 +44,8 @@ export const F03_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities 
   ...F02_INTEGRATION_ENGINE_CAPABILITIES,
   integrationPipelineImplemented: true,
 };
+
+export const F04_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities = {
+  ...F03_INTEGRATION_ENGINE_CAPABILITIES,
+  integrationMappingImplemented: true,
+};

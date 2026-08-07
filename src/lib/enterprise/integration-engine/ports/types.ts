@@ -6,6 +6,9 @@ import type {
   CanonicalIntegrationConnector,
   CanonicalIntegrationConnectorResult,
   CanonicalIntegrationConnectorStats,
+  CanonicalIntegrationMapping,
+  CanonicalIntegrationMappingResult,
+  CanonicalIntegrationMappingStats,
   CanonicalIntegrationPipeline,
   CanonicalIntegrationPipelineResult,
   CanonicalIntegrationPipelineStats,
@@ -18,6 +21,9 @@ export type {
   CanonicalIntegrationConnector,
   CanonicalIntegrationConnectorResult,
   CanonicalIntegrationConnectorStats,
+  CanonicalIntegrationMapping,
+  CanonicalIntegrationMappingResult,
+  CanonicalIntegrationMappingStats,
   CanonicalIntegrationPipeline,
   CanonicalIntegrationPipelineResult,
   CanonicalIntegrationPipelineStats,
@@ -39,6 +45,7 @@ export interface IntegrationEngineHealth {
   readonly integrationRegistryOk: boolean;
   readonly integrationConnectorOk: boolean;
   readonly integrationPipelineOk: boolean;
+  readonly integrationMappingOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -150,4 +157,45 @@ export interface GetIntegrationPipelineStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationPipelineStats;
+}
+
+export interface RegisterIntegrationMappingInput {
+  readonly mapping: CanonicalIntegrationMapping;
+}
+
+export type RegisterIntegrationMappingResult = CanonicalIntegrationMappingResult;
+
+export interface FindIntegrationMappingInput {
+  readonly mappingId: string;
+}
+
+export type FindIntegrationMappingResult = CanonicalIntegrationMapping | null;
+
+export interface ListIntegrationMappingsInput {
+  readonly integrationId?: string;
+  readonly pipelineId?: string;
+  readonly connectorId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationMappingsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly mappings: readonly CanonicalIntegrationMapping[];
+  readonly total: number;
+}
+
+export interface GetIntegrationMappingStatsInput {
+  readonly integrationId?: string;
+  readonly pipelineId?: string;
+  readonly connectorId?: string;
+}
+
+export interface GetIntegrationMappingStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationMappingStats;
 }

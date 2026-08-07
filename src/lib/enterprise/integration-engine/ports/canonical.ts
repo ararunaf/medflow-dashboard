@@ -94,10 +94,51 @@ export interface CanonicalIntegrationPipelineStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationMappingRule {
+  readonly kind: "canonical-integration-mapping-rule";
+  readonly ruleId: string;
+  readonly sourcePath: string;
+  readonly targetPath: string;
+  readonly required?: boolean;
+  readonly description?: string;
+}
+
+export interface CanonicalIntegrationMapping {
+  readonly kind: "canonical-integration-mapping";
+  readonly mappingId: string;
+  readonly integrationId: string;
+  readonly connectorId: string;
+  readonly pipelineId: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly rules: readonly CanonicalIntegrationMappingRule[];
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationMappingResult {
+  readonly kind: "canonical-integration-mapping-result";
+  readonly ok: boolean;
+  readonly mappingId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly mapping?: CanonicalIntegrationMapping | null;
+}
+
+export interface CanonicalIntegrationMappingStats {
+  readonly totalMappings: number;
+  readonly mappingIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly connectorIds: readonly string[];
+  readonly pipelineIds: readonly string[];
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
   readonly integrationRegistryOk: boolean;
   readonly integrationConnectorOk: boolean;
   readonly integrationPipelineOk: boolean;
+  readonly integrationMappingOk: boolean;
 }

@@ -1,21 +1,26 @@
 /**
- * MockIntegrationEngineAdapter — F-03.
+ * MockIntegrationEngineAdapter — F-04.
  *
  * Implementação em memória do IntegrationEnginePort para testes.
- * Ativa F-01, F-02 e F-03.
+ * Ativa F-01, F-02, F-03 e F-04.
  */
 import { IntegrationConnectorEngine } from "../integration-connector";
+import { IntegrationMappingEngine } from "../integration-mapping";
 import { IntegrationPipelineEngine } from "../integration-pipeline";
 import { IntegrationRegistryEngine } from "../integration-registry";
 import type {
   FindIntegrationConnectorInput,
   FindIntegrationConnectorResult,
   FindIntegrationInput,
+  FindIntegrationMappingInput,
+  FindIntegrationMappingResult,
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
+  GetIntegrationMappingStatsInput,
+  GetIntegrationMappingStatsResult,
   GetIntegrationPipelineStatsInput,
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
@@ -25,6 +30,8 @@ import type {
   IntegrationEngineInfo,
   ListIntegrationConnectorsInput,
   ListIntegrationConnectorsResult,
+  ListIntegrationMappingsInput,
+  ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
   ListIntegrationsInput,
@@ -32,11 +39,13 @@ import type {
   RegisterIntegrationConnectorInput,
   RegisterIntegrationConnectorResult,
   RegisterIntegrationInput,
+  RegisterIntegrationMappingInput,
+  RegisterIntegrationMappingResult,
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
 } from "../ports";
-import { F03_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
+import { F04_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
 import type { IntegrationEnginePort } from "../ports";
 
 export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
@@ -45,25 +54,27 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
   readonly registry: IntegrationRegistryEngine;
   readonly connector: IntegrationConnectorEngine;
   readonly pipeline: IntegrationPipelineEngine;
+  readonly mapping: IntegrationMappingEngine;
 
   constructor() {
     this.registry = new IntegrationRegistryEngine();
     this.connector = new IntegrationConnectorEngine(this.registry);
     this.pipeline = new IntegrationPipelineEngine(this.registry, this.connector);
+    this.mapping = new IntegrationMappingEngine(this.registry, this.connector, this.pipeline);
   }
 
   identity(): IntegrationEngineInfo {
     return {
       id: "enterprise-integration-engine-mock",
       name: "Enterprise Integration Engine (Mock)",
-      version: "F-03",
+      version: "F-04",
       vendor: "mock",
       provider: this.providerId,
     };
   }
 
   getCapabilities(): IntegrationEngineCapabilities {
-    return F03_INTEGRATION_ENGINE_CAPABILITIES;
+    return F04_INTEGRATION_ENGINE_CAPABILITIES;
   }
 
   async health(): Promise<IntegrationEngineHealth> {
@@ -72,11 +83,13 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
       ok:
         caps.integrationRegistryImplemented &&
         caps.integrationConnectorImplemented &&
-        caps.integrationPipelineImplemented,
+        caps.integrationPipelineImplemented &&
+        caps.integrationMappingImplemented,
       integrationEngineOk: caps.integrationEngineImplemented,
       integrationRegistryOk: caps.integrationRegistryImplemented,
       integrationConnectorOk: caps.integrationConnectorImplemented,
       integrationPipelineOk: caps.integrationPipelineImplemented,
+      integrationMappingOk: caps.integrationMappingImplemented,
     };
   }
 
@@ -230,6 +243,59 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
       code: "MOCK_INTEGRATION_PIPELINE_STATS_OK",
       message: "stats computed",
       stats,
+    };
+  }
+
+  async registerIntegrationMapping(
+    input: RegisterIntegrationMappingInput,
+  ): Promise<RegisterIntegrationMappingResult> {
+    return this.mapping.register(input.mapping);
+  }
+
+  async findIntegrationMapping(
+    input: FindIntegrationMappingInput,
+  ): Promise<FindIntegrationMappingResult> {
+    return this.mapping.find(input.mappingId) ?? null;
+  }
+
+  async listIntegrationMappings(
+    input: ListIntegrationMappingsInput,
+  ): Promise<ListIntegrationMappingsResult> {
+    const mappings = this.mapping.list(
+      input.integrationId,
+      input.pipelineId,
+      input.connectorId,
+      input.limit,
+      input.offset,
+    );
+    const total = this.mapping.list(
+      input.integrationId,
+      input.pipelineId,
+      input.connectorId,
+    ).length;
+    return {
+      ok: true,
+      code: "MOCK_INTEGRATION_MAPPING_LIST_OK",
+      message: `${mappings.length} mappings listed`,
+      mappings,
+      total,
+    };
+  }
+
+  async getIntegrationMappingStats(
+    input: GetIntegrationMappingStatsInput = {},
+  ): Promise<GetIntegrationMappingStatsResult> {
+    const stats = this.mapping.stats();
+    const filtered = this.mapping.list(input.integrationId, input.pipelineId, input.connectorId);
+    return {
+      ok: true,
+      code: "MOCK_INTEGRATION_MAPPING_STATS_OK",
+      message: "stats computed",
+      stats: {
+        ...stats,
+        totalMappings: filtered.length,
+        mappingIds: filtered.map((m) => m.mappingId),
+      },
     };
   }
 }

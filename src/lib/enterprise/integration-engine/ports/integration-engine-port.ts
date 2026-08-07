@@ -4,6 +4,7 @@
  * F-01: Integration Registry.
  * F-02: Integration Connector.
  * F-03: Integration Pipeline.
+ * F-04: Integration Mapping.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -11,11 +12,15 @@ import type {
   FindIntegrationConnectorInput,
   FindIntegrationConnectorResult,
   FindIntegrationInput,
+  FindIntegrationMappingInput,
+  FindIntegrationMappingResult,
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
+  GetIntegrationMappingStatsInput,
+  GetIntegrationMappingStatsResult,
   GetIntegrationPipelineStatsInput,
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
@@ -24,6 +29,8 @@ import type {
   IntegrationEngineInfo,
   ListIntegrationConnectorsInput,
   ListIntegrationConnectorsResult,
+  ListIntegrationMappingsInput,
+  ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
   ListIntegrationsInput,
@@ -31,6 +38,8 @@ import type {
   RegisterIntegrationConnectorInput,
   RegisterIntegrationConnectorResult,
   RegisterIntegrationInput,
+  RegisterIntegrationMappingInput,
+  RegisterIntegrationMappingResult,
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
@@ -101,4 +110,22 @@ export interface IntegrationEnginePort {
   getIntegrationPipelineStats(
     input?: GetIntegrationPipelineStatsInput,
   ): Promise<GetIntegrationPipelineStatsResult>;
+
+  /** F-04 — registra um mapping. */
+  registerIntegrationMapping(
+    input: RegisterIntegrationMappingInput,
+  ): Promise<RegisterIntegrationMappingResult>;
+
+  /** F-04 — encontra mapping por mappingId. */
+  findIntegrationMapping(input: FindIntegrationMappingInput): Promise<FindIntegrationMappingResult>;
+
+  /** F-04 — lista mappings, opcionalmente filtrados. */
+  listIntegrationMappings(
+    input: ListIntegrationMappingsInput,
+  ): Promise<ListIntegrationMappingsResult>;
+
+  /** F-04 — estatísticas do catálogo de mappings. */
+  getIntegrationMappingStats(
+    input?: GetIntegrationMappingStatsInput,
+  ): Promise<GetIntegrationMappingStatsResult>;
 }
