@@ -84,8 +84,8 @@ O Bloco G **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | G-02     | G-02R                  | `tissLayoutImplemented`             | TISS Enterprise — Layout Engine              | Concluída / certificada   |
 | G-03     | G-03R                  | `tissParserImplemented`             | TISS Enterprise — Parser Engine              | Concluída / certificada   |
 | G-04     | G-04R                  | `tissSerializerImplemented`         | TISS Enterprise — Serializer Engine          | Concluída / certificada   |
-| G-05     | G-05R                  | `tissSchemaValidationImplemented`   | TISS Enterprise — Schema Validation Engine   | Autorizada (não iniciada) |
-| G-06     | G-06R                  | `tissBusinessValidationImplemented` | TISS Enterprise — Business Validation Engine | Planejada                 |
+| G-05     | G-05R                  | `tissSchemaValidationImplemented`   | TISS Enterprise — Schema Validation Engine   | Concluída / certificada   |
+| G-06     | G-06R                  | `tissBusinessValidationImplemented` | TISS Enterprise — Business Validation Engine | Autorizada (não iniciada) |
 | G-07     | G-07R                  | `tissOperatorValidationImplemented` | TISS Enterprise — Operator Validation Engine | Planejada                 |
 | G-08     | G-08R                  | `tissRepairImplemented`             | TISS Enterprise — Repair Engine              | Planejada                 |
 | G-09     | G-09R                  | `tissCorrectionImplemented`         | TISS Enterprise — Correction Engine          | Planejada                 |
