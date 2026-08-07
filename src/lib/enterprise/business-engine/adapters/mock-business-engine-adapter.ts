@@ -1,9 +1,19 @@
 /**
- * MockBusinessEngineAdapter — E-09.
+ * MockBusinessEngineAdapter — E-10.
  *
  * Adapter mock para testes.
  */
-import { E09_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { BusinessAuditTrailEngine } from "../business-audit-trail";
+import { BusinessDecisionTableEngine } from "../business-decision-table";
+import { BusinessEventLogEngine } from "../business-event-log";
+import { GenericBusinessEngine } from "../generic-business-engine";
+import { BusinessReportEngine } from "../business-report";
+import { BusinessRuleCatalog } from "../business-rule-catalog";
+import { BusinessRuleExecutionEngine } from "../business-rule-execution";
+import { BusinessTransactionEngine } from "../business-transaction";
+import { BusinessWorkflowEngine } from "../business-workflow";
+import { BusinessProcessOrchestrationEngine } from "../business-process-orchestration";
+import { E10_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -76,7 +86,7 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E09_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E10_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -94,6 +104,25 @@ export class MockBusinessEngineAdapter implements BusinessEnginePort {
       businessAuditTrailOk: ok,
       businessReportOk: ok,
     };
+  }
+
+  getGenericBusinessEngine(): GenericBusinessEngine {
+    return new GenericBusinessEngine(
+      new BusinessRuleCatalog(),
+      new BusinessRuleExecutionEngine(),
+      new BusinessTransactionEngine(),
+      new BusinessWorkflowEngine(),
+      new BusinessProcessOrchestrationEngine(),
+      new BusinessDecisionTableEngine(new BusinessRuleCatalog()),
+      new BusinessEventLogEngine(),
+      new BusinessAuditTrailEngine(new BusinessEventLogEngine()),
+      new BusinessReportEngine(
+        new BusinessEventLogEngine(),
+        new BusinessAuditTrailEngine(new BusinessEventLogEngine()),
+        new BusinessRuleCatalog(),
+        new BusinessDecisionTableEngine(new BusinessRuleCatalog()),
+      ),
+    );
   }
 
   async registerRule(input: RegisterBusinessRuleInput): Promise<RegisterBusinessRuleResult> {

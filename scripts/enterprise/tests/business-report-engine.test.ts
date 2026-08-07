@@ -9,7 +9,7 @@ import {
   BusinessReportEngine,
   BusinessRuleCatalog,
   BusinessDecisionTableEngine,
-  E09_BUSINESS_ENGINE_CAPABILITIES,
+  E10_BUSINESS_ENGINE_CAPABILITIES,
 } from "../../../src/lib/enterprise/business-engine";
 import { DefaultBusinessEngineAdapter } from "../../../src/lib/enterprise/business-engine/adapters/default-business-engine-adapter";
 import type { CanonicalBusinessEvent } from "../../../src/lib/enterprise/business-engine/ports";
@@ -124,7 +124,7 @@ describe("E-09 Business Report — functional cases", () => {
   it("Port expõe capability corretamente", async () => {
     const adapter = new DefaultBusinessEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, E09_BUSINESS_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, E10_BUSINESS_ENGINE_CAPABILITIES);
     assert.equal(caps.businessReportImplemented, true);
     assert.equal(caps.businessAuditTrailImplemented, true);
     assert.equal(caps.businessEventLogImplemented, true);
@@ -134,6 +134,6 @@ describe("E-09 Business Report — functional cases", () => {
     assert.equal(caps.businessTransactionImplemented, true);
     assert.equal(caps.businessWorkflowImplemented, true);
     assert.equal(caps.businessProcessOrchestrationImplemented, true);
-    assert.equal(caps.businessEngineImplemented, false);
+    assert.equal(caps.businessEngineImplemented, true);
   });
 });

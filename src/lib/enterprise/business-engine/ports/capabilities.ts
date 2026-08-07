@@ -78,3 +78,8 @@ export const E09_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
   ...E08_BUSINESS_ENGINE_CAPABILITIES,
   businessReportImplemented: true,
 };
+
+export const E10_BUSINESS_ENGINE_CAPABILITIES: BusinessEngineCapabilities = {
+  ...E09_BUSINESS_ENGINE_CAPABILITIES,
+  businessEngineImplemented: true,
+};

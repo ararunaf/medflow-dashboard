@@ -10,8 +10,10 @@
  * E-07: Business Event Log (`businessEventLogImplemented = true`).
  * E-08: Business Audit Trail (`businessAuditTrailImplemented = true`).
  * E-09: Business Report (`businessReportImplemented = true`).
+ * E-10: Generic Business Engine (`businessEngineImplemented = true`).
  * Demais capabilities permanecem false.
  */
+import type { GenericBusinessEngine } from "../generic-business-engine";
 import type {
   BusinessEngineCapabilities,
   BusinessEngineHealth,
@@ -149,4 +151,7 @@ export interface BusinessEnginePort {
 
   /** E-09 — gera um relatório consolidado. */
   generateReport(input: GenerateBusinessReportInput): Promise<GenerateBusinessReportResult>;
+
+  /** E-10 — retorna a fachada única do Enterprise Business Engine. */
+  getGenericBusinessEngine(): GenericBusinessEngine;
 }

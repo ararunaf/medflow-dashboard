@@ -1,19 +1,20 @@
 /**
- * DefaultBusinessEngineAdapter — E-09.
+ * DefaultBusinessEngineAdapter — E-10.
  *
  * Adapter oficial da Enterprise Business Engine.
- * Capabilities E-01 a E-09 ativas.
+ * Capabilities E-01 a E-10 ativas.
  */
 import { BusinessAuditTrailEngine } from "../business-audit-trail";
 import { BusinessDecisionTableEngine } from "../business-decision-table";
 import { BusinessEventLogEngine } from "../business-event-log";
+import { GenericBusinessEngine } from "../generic-business-engine";
 import { BusinessReportEngine } from "../business-report";
 import { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "../business-rule-catalog";
 import { BusinessRuleExecutionEngine } from "../business-rule-execution";
 import { BusinessTransactionEngine } from "../business-transaction";
 import { BusinessWorkflowEngine } from "../business-workflow";
 import { BusinessProcessOrchestrationEngine } from "../business-process-orchestration";
-import { E09_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
+import { E10_BUSINESS_ENGINE_CAPABILITIES } from "../ports/capabilities";
 import type { BusinessEnginePort } from "../ports/business-engine-port";
 import type {
   BusinessEngineCapabilities,
@@ -84,10 +85,22 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
     this.catalog,
     this.decisionTable,
   );
+  private readonly generic: GenericBusinessEngine;
   private readonly healthy: boolean;
 
   constructor(options: DefaultBusinessEngineAdapterOptions = {}) {
     this.healthy = options.healthy ?? true;
+    this.generic = new GenericBusinessEngine(
+      this.catalog,
+      this.executor,
+      this.transaction,
+      this.workflow,
+      this.orchestration,
+      this.decisionTable,
+      this.eventLog,
+      this.auditTrail,
+      this.report,
+    );
   }
 
   identity(): BusinessEngineInfo {
@@ -101,7 +114,7 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
   }
 
   getCapabilities(): BusinessEngineCapabilities {
-    return { ...E09_BUSINESS_ENGINE_CAPABILITIES };
+    return { ...E10_BUSINESS_ENGINE_CAPABILITIES };
   }
 
   async health(): Promise<BusinessEngineHealth> {
@@ -119,6 +132,10 @@ export class DefaultBusinessEngineAdapter implements BusinessEnginePort {
       businessAuditTrailOk: ok,
       businessReportOk: ok,
     };
+  }
+
+  getGenericBusinessEngine(): GenericBusinessEngine {
+    return this.generic;
   }
 
   async registerRule(input: RegisterBusinessRuleInput): Promise<RegisterBusinessRuleResult> {

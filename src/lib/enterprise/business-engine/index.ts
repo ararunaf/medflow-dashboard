@@ -88,6 +88,7 @@ export {
   E07_BUSINESS_ENGINE_CAPABILITIES,
   E08_BUSINESS_ENGINE_CAPABILITIES,
   E09_BUSINESS_ENGINE_CAPABILITIES,
+  E10_BUSINESS_ENGINE_CAPABILITIES,
 } from "./ports";
 export { DefaultBusinessEngineAdapter, MockBusinessEngineAdapter } from "./adapters";
 export { BusinessRuleCatalog, InMemoryBusinessRuleCatalogStore } from "./business-rule-catalog";
@@ -102,5 +103,6 @@ export {
 export { BusinessEventLogEngine, InMemoryBusinessEventLogStore } from "./business-event-log";
 export { BusinessAuditTrailEngine, InMemoryBusinessAuditTrailStore } from "./business-audit-trail";
 export { BusinessReportEngine } from "./business-report";
+export { GenericBusinessEngine } from "./generic-business-engine";
 export { createBusinessEnginePort } from "./providers/create-business-engine-port";
 export { businessEngineRegistry } from "./registry/business-engine-registry";
