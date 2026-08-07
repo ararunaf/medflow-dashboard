@@ -1,79 +1,94 @@
 /**
- * MockTissEngineAdapter — G-06.
+ * MockTissEngineAdapter — G-07.
  *
  * Adapter mock para testes do Bloco G.
  */
 import { TissBusinessValidationEngine } from "../tiss-business-validation";
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
+import { TissOperatorValidationEngine } from "../tiss-operator-validation";
 import { TissParserEngine } from "../tiss-parser";
 import { TissSchemaValidationEngine } from "../tiss-schema-validation";
 import { TissSerializerEngine } from "../tiss-serializer";
-import {
-  G06_TISS_ENTERPRISE_CAPABILITIES,
-  type TissEnginePort,
-  type TissEngineInfo,
-  type TissEngineHealth,
-  type RegisterTissKnowledgeInput,
-  type RegisterTissKnowledgeResult,
-  type GetTissKnowledgeInput,
-  type GetTissKnowledgeResult,
-  type ListTissKnowledgeInput,
-  type ListTissKnowledgeResult,
-  type SearchTissKnowledgeInput,
-  type SearchTissKnowledgeResult,
-  type GetTissKnowledgeStatsInput,
-  type GetTissKnowledgeStatsResult,
-  type RegisterTissLayoutInput,
-  type RegisterTissLayoutResult,
-  type GetTissLayoutInput,
-  type GetTissLayoutResult,
-  type ListTissLayoutInput,
-  type ListTissLayoutResult,
-  type SearchTissLayoutInput,
-  type SearchTissLayoutResult,
-  type GetTissLayoutStatsInput,
-  type GetTissLayoutStatsResult,
-  type RegisterTissParserInput,
-  type RegisterTissParserResult,
-  type GetTissParserInput,
-  type GetTissParserResult,
-  type ListTissParsersInput,
-  type ListTissParsersResult,
-  type ParseTissInput,
-  type ParseTissResult,
-  type GetTissParserStatsInput,
-  type GetTissParserStatsResult,
-  type RegisterTissSerializerInput,
-  type RegisterTissSerializerResult,
-  type GetTissSerializerInput,
-  type GetTissSerializerResult,
-  type ListTissSerializersInput,
-  type ListTissSerializersResult,
-  type SerializeTissInput,
-  type SerializeTissResult,
-  type GetTissSerializerStatsInput,
-  type GetTissSerializerStatsResult,
-  type RegisterTissSchemaValidationInput,
-  type RegisterTissSchemaValidationResult,
-  type GetTissSchemaValidationInput,
-  type GetTissSchemaValidationResult,
-  type ListTissSchemaValidationsInput,
-  type ListTissSchemaValidationsResult,
-  type ValidateTissSchemaInput,
-  type ValidateTissSchemaResult,
-  type GetTissSchemaValidationStatsInput,
-  type GetTissSchemaValidationStatsResult,
-  type RegisterTissBusinessValidationInput,
-  type RegisterTissBusinessValidationResult,
-  type GetTissBusinessValidationInput,
-  type GetTissBusinessValidationResult,
-  type ListTissBusinessValidationsInput,
-  type ListTissBusinessValidationsResult,
-  type ValidateTissBusinessInput,
-  type ValidateTissBusinessResult,
-  type GetTissBusinessValidationStatsInput,
-  type GetTissBusinessValidationStatsResult,
+import { G07_TISS_ENTERPRISE_CAPABILITIES } from "../ports";
+import type {
+  TissEnginePort,
+  TissEngineInfo,
+  TissEngineHealth,
+  RegisterTissKnowledgeInput,
+  RegisterTissKnowledgeResult,
+  GetTissKnowledgeInput,
+  GetTissKnowledgeResult,
+  ListTissKnowledgeInput,
+  ListTissKnowledgeResult,
+  SearchTissKnowledgeInput,
+  SearchTissKnowledgeResult,
+  GetTissKnowledgeStatsInput,
+  GetTissKnowledgeStatsResult,
+  RegisterTissLayoutInput,
+  RegisterTissLayoutResult,
+  GetTissLayoutInput,
+  GetTissLayoutResult,
+  ListTissLayoutInput,
+  ListTissLayoutResult,
+  SearchTissLayoutInput,
+  SearchTissLayoutResult,
+  GetTissLayoutStatsInput,
+  GetTissLayoutStatsResult,
+  RegisterTissParserInput,
+  RegisterTissParserResult,
+  GetTissParserInput,
+  GetTissParserResult,
+  ListTissParsersInput,
+  ListTissParsersResult,
+  ParseTissInput,
+  ParseTissResult,
+  GetTissParserStatsInput,
+  GetTissParserStatsResult,
+  RegisterTissSerializerInput,
+  RegisterTissSerializerResult,
+  GetTissSerializerInput,
+  GetTissSerializerResult,
+  ListTissSerializersInput,
+  ListTissSerializersResult,
+  SerializeTissInput,
+  SerializeTissResult,
+  GetTissSerializerStatsInput,
+  GetTissSerializerStatsResult,
+  RegisterTissSchemaValidationInput,
+  RegisterTissSchemaValidationResult,
+  GetTissSchemaValidationInput,
+  GetTissSchemaValidationResult,
+  ListTissSchemaValidationsInput,
+  ListTissSchemaValidationsResult,
+  ValidateTissSchemaInput,
+  ValidateTissSchemaResult,
+  GetTissSchemaValidationStatsInput,
+  GetTissSchemaValidationStatsResult,
+  RegisterTissBusinessValidationInput,
+  RegisterTissBusinessValidationResult,
+  GetTissBusinessValidationInput,
+  GetTissBusinessValidationResult,
+  ListTissBusinessValidationsInput,
+  ListTissBusinessValidationsResult,
+  ValidateTissBusinessInput,
+  ValidateTissBusinessResult,
+  GetTissBusinessValidationStatsInput,
+  GetTissBusinessValidationStatsResult,
+  RegisterTissOperatorValidationInput,
+  RegisterTissOperatorValidationResult,
+  GetTissOperatorValidationInput,
+  GetTissOperatorValidationResult,
+  ListTissOperatorValidationsInput,
+  ListTissOperatorValidationsResult,
+  ValidateTissOperatorInput,
+  ValidateTissOperatorResult,
+  GetTissOperatorValidationStatsInput,
+  GetTissOperatorValidationStatsResult,
+  UpdateTissOperatorValidationInput,
+  UpdateTissOperatorValidationResult,
+  RemoveTissOperatorValidationInput,
+  RemoveTissOperatorValidationResult,
 } from "../ports";
 
 const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
@@ -96,19 +111,27 @@ export class MockTissEngineAdapter implements TissEnginePort {
     this.serializer,
     this.schemaValidation,
   );
+  private readonly operatorValidation = new TissOperatorValidationEngine(
+    this.knowledge,
+    this.layout,
+    this.parser,
+    this.serializer,
+    this.schemaValidation,
+    this.businessValidation,
+  );
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
-      name: "Enterprise TISS Engine Mock",
-      version: "G-06",
-      vendor: "enterprise",
+      name: "Enterprise TISS Engine (Mock)",
+      version: "G-07",
+      vendor: "mock",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G06_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G07_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
@@ -120,7 +143,8 @@ export class MockTissEngineAdapter implements TissEnginePort {
         caps.tissParserImplemented &&
         caps.tissSerializerImplemented &&
         caps.tissSchemaValidationImplemented &&
-        caps.tissBusinessValidationImplemented,
+        caps.tissBusinessValidationImplemented &&
+        caps.tissOperatorValidationImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -145,12 +169,12 @@ export class MockTissEngineAdapter implements TissEnginePort {
     if (!knowledge) {
       return {
         ok: false,
-        code: "MOCK_TISS_KNOWLEDGE_NOT_FOUND",
+        code: "TISS_KNOWLEDGE_NOT_FOUND",
         message: "knowledge not found",
         knowledge: null,
       };
     }
-    return { ok: true, code: "MOCK_TISS_KNOWLEDGE_FOUND", message: "knowledge found", knowledge };
+    return { ok: true, code: "TISS_KNOWLEDGE_FOUND", message: "knowledge found", knowledge };
   }
 
   async listTissKnowledge(input: ListTissKnowledgeInput = {}): Promise<ListTissKnowledgeResult> {
@@ -176,12 +200,12 @@ export class MockTissEngineAdapter implements TissEnginePort {
     if (!layout) {
       return {
         ok: false,
-        code: "MOCK_TISS_LAYOUT_NOT_FOUND",
+        code: "TISS_LAYOUT_NOT_FOUND",
         message: "layout not found",
         layout: null,
       };
     }
-    return { ok: true, code: "MOCK_TISS_LAYOUT_FOUND", message: "layout found", layout };
+    return { ok: true, code: "TISS_LAYOUT_FOUND", message: "layout found", layout };
   }
 
   async listTissLayout(input: ListTissLayoutInput = {}): Promise<ListTissLayoutResult> {
@@ -205,12 +229,12 @@ export class MockTissEngineAdapter implements TissEnginePort {
     if (!parser) {
       return {
         ok: false,
-        code: "MOCK_TISS_PARSER_NOT_FOUND",
+        code: "TISS_PARSER_NOT_FOUND",
         message: "parser not found",
         parser: null,
       };
     }
-    return { ok: true, code: "MOCK_TISS_PARSER_FOUND", message: "parser found", parser };
+    return { ok: true, code: "TISS_PARSER_FOUND", message: "parser found", parser };
   }
 
   async listTissParsers(input: ListTissParsersInput = {}): Promise<ListTissParsersResult> {
@@ -236,14 +260,14 @@ export class MockTissEngineAdapter implements TissEnginePort {
     if (!serializer) {
       return {
         ok: false,
-        code: "MOCK_TISS_SERIALIZER_NOT_FOUND",
+        code: "TISS_SERIALIZER_NOT_FOUND",
         message: "serializer not found",
         serializer: null,
       };
     }
     return {
       ok: true,
-      code: "MOCK_TISS_SERIALIZER_FOUND",
+      code: "TISS_SERIALIZER_FOUND",
       message: "serializer found",
       serializer,
     };
@@ -278,14 +302,14 @@ export class MockTissEngineAdapter implements TissEnginePort {
     if (!schemaValidation) {
       return {
         ok: false,
-        code: "MOCK_TISS_SCHEMA_VALIDATION_NOT_FOUND",
+        code: "TISS_SCHEMA_VALIDATION_NOT_FOUND",
         message: "schema validation not found",
         schemaValidation: null,
       };
     }
     return {
       ok: true,
-      code: "MOCK_TISS_SCHEMA_VALIDATION_FOUND",
+      code: "TISS_SCHEMA_VALIDATION_FOUND",
       message: "schema validation found",
       schemaValidation,
     };
@@ -320,14 +344,14 @@ export class MockTissEngineAdapter implements TissEnginePort {
     if (!businessValidation) {
       return {
         ok: false,
-        code: "MOCK_TISS_BUSINESS_VALIDATION_NOT_FOUND",
+        code: "TISS_BUSINESS_VALIDATION_NOT_FOUND",
         message: "business validation not found",
         businessValidation: null,
       };
     }
     return {
       ok: true,
-      code: "MOCK_TISS_BUSINESS_VALIDATION_FOUND",
+      code: "TISS_BUSINESS_VALIDATION_FOUND",
       message: "business validation found",
       businessValidation,
     };
@@ -349,5 +373,61 @@ export class MockTissEngineAdapter implements TissEnginePort {
     input: GetTissBusinessValidationStatsInput = {},
   ): Promise<GetTissBusinessValidationStatsResult> {
     return this.businessValidation.statsResult();
+  }
+
+  async registerTissOperatorValidation(
+    input: RegisterTissOperatorValidationInput,
+  ): Promise<RegisterTissOperatorValidationResult> {
+    return this.operatorValidation.register(input);
+  }
+
+  async getTissOperatorValidation(
+    input: GetTissOperatorValidationInput,
+  ): Promise<GetTissOperatorValidationResult> {
+    const operatorValidation = this.operatorValidation.get(input.operatorValidationId);
+    if (!operatorValidation) {
+      return {
+        ok: false,
+        code: "TISS_OPERATOR_VALIDATION_NOT_FOUND",
+        message: "operator validation not found",
+        operatorValidation: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "TISS_OPERATOR_VALIDATION_FOUND",
+      message: "operator validation found",
+      operatorValidation,
+    };
+  }
+
+  async listTissOperatorValidations(
+    input: ListTissOperatorValidationsInput = {},
+  ): Promise<ListTissOperatorValidationsResult> {
+    return this.operatorValidation.listResult(input.tag);
+  }
+
+  async validateTissOperator(
+    input: ValidateTissOperatorInput,
+  ): Promise<ValidateTissOperatorResult> {
+    return this.operatorValidation.validate(input);
+  }
+
+  async updateTissOperatorValidation(
+    input: UpdateTissOperatorValidationInput,
+  ): Promise<UpdateTissOperatorValidationResult> {
+    return this.operatorValidation.update(input);
+  }
+
+  async removeTissOperatorValidation(
+    input: RemoveTissOperatorValidationInput,
+  ): Promise<RemoveTissOperatorValidationResult> {
+    return this.operatorValidation.remove(input);
+  }
+
+  async getTissOperatorValidationStats(
+    input: GetTissOperatorValidationStatsInput = {},
+  ): Promise<GetTissOperatorValidationStatsResult> {
+    return this.operatorValidation.statsResult();
   }
 }

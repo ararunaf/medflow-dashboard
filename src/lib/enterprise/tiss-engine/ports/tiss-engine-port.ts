@@ -30,12 +30,18 @@ import type {
   GetTissSerializerResult,
   GetTissSerializerStatsInput,
   GetTissSerializerStatsResult,
+  GetTissOperatorValidationInput,
+  GetTissOperatorValidationResult,
+  GetTissOperatorValidationStatsInput,
+  GetTissOperatorValidationStatsResult,
   ListTissKnowledgeInput,
   ListTissKnowledgeResult,
   ListTissLayoutInput,
   ListTissLayoutResult,
   ListTissBusinessValidationsInput,
   ListTissBusinessValidationsResult,
+  ListTissOperatorValidationsInput,
+  ListTissOperatorValidationsResult,
   ListTissParsersInput,
   ListTissParsersResult,
   ListTissSchemaValidationsInput,
@@ -52,7 +58,13 @@ import type {
   RegisterTissParserResult,
   RegisterTissBusinessValidationInput,
   RegisterTissBusinessValidationResult,
+  RegisterTissOperatorValidationInput,
+  RegisterTissOperatorValidationResult,
   RegisterTissSchemaValidationInput,
+  RemoveTissOperatorValidationInput,
+  RemoveTissOperatorValidationResult,
+  UpdateTissOperatorValidationInput,
+  UpdateTissOperatorValidationResult,
   RegisterTissSchemaValidationResult,
   RegisterTissSerializerInput,
   RegisterTissSerializerResult,
@@ -63,6 +75,8 @@ import type {
   SerializeTissInput,
   ValidateTissBusinessInput,
   ValidateTissBusinessResult,
+  ValidateTissOperatorInput,
+  ValidateTissOperatorResult,
   ValidateTissSchemaInput,
   ValidateTissSchemaResult,
   SerializeTissResult,
@@ -187,4 +201,37 @@ export interface TissEnginePort {
   getTissBusinessValidationStats(
     input?: GetTissBusinessValidationStatsInput,
   ): Promise<GetTissBusinessValidationStatsResult>;
+
+  /** G-07 — registrar validação de operadora TISS. */
+  registerTissOperatorValidation(
+    input: RegisterTissOperatorValidationInput,
+  ): Promise<RegisterTissOperatorValidationResult>;
+
+  /** G-07 — atualizar validação de operadora TISS. */
+  updateTissOperatorValidation(
+    input: UpdateTissOperatorValidationInput,
+  ): Promise<UpdateTissOperatorValidationResult>;
+
+  /** G-07 — remover validação de operadora TISS. */
+  removeTissOperatorValidation(
+    input: RemoveTissOperatorValidationInput,
+  ): Promise<RemoveTissOperatorValidationResult>;
+
+  /** G-07 — recuperar validação de operadora por id. */
+  getTissOperatorValidation(
+    input: GetTissOperatorValidationInput,
+  ): Promise<GetTissOperatorValidationResult>;
+
+  /** G-07 — listar validações de operadora. */
+  listTissOperatorValidations(
+    input?: ListTissOperatorValidationsInput,
+  ): Promise<ListTissOperatorValidationsResult>;
+
+  /** G-07 — validar regra de operadora TISS. */
+  validateTissOperator(input: ValidateTissOperatorInput): Promise<ValidateTissOperatorResult>;
+
+  /** G-07 — estatísticas de validações de operadora. */
+  getTissOperatorValidationStats(
+    input?: GetTissOperatorValidationStatsInput,
+  ): Promise<GetTissOperatorValidationStatsResult>;
 }

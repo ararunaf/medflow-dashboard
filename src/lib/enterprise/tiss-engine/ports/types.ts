@@ -485,3 +485,121 @@ export interface GetTissBusinessValidationStatsResult {
     businessValidationIds: string[];
   };
 }
+
+export interface CanonicalTissOperatorRule {
+  field: string;
+  expectedValue: string;
+}
+
+export interface CanonicalTissOperatorValidation {
+  kind: "tiss-operator-validation";
+  operatorValidationId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  parserId: string;
+  serializerId: string;
+  schemaValidationId: string;
+  businessValidationId: string;
+  operatorId: string;
+  rule: CanonicalTissOperatorRule;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissOperatorValidationInput {
+  operatorValidation: CanonicalTissOperatorValidation;
+}
+
+export interface RegisterTissOperatorValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  operatorValidationId?: string;
+  operatorValidation?: CanonicalTissOperatorValidation | null;
+}
+
+export interface GetTissOperatorValidationInput {
+  operatorValidationId: string;
+}
+
+export interface GetTissOperatorValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  operatorValidation?: CanonicalTissOperatorValidation | null;
+}
+
+export interface GetTissOperatorValidationInput {
+  operatorValidationId: string;
+}
+
+export interface GetTissOperatorValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  operatorValidation?: CanonicalTissOperatorValidation | null;
+}
+
+export interface ListTissOperatorValidationsInput {
+  tag?: string;
+}
+
+export interface ListTissOperatorValidationsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  operatorValidations: CanonicalTissOperatorValidation[];
+}
+
+export interface ValidateTissOperatorInput {
+  operatorValidationId: string;
+  document: string;
+  operatorId: string;
+  facts: Record<string, string>;
+}
+
+export interface ValidateTissOperatorResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  details: string[];
+}
+
+export interface UpdateTissOperatorValidationInput {
+  operatorValidationId: string;
+  operatorValidation: Partial<CanonicalTissOperatorValidation>;
+}
+
+export interface UpdateTissOperatorValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  operatorValidation?: CanonicalTissOperatorValidation | null;
+}
+
+export interface RemoveTissOperatorValidationInput {
+  operatorValidationId: string;
+}
+
+export interface RemoveTissOperatorValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+}
+
+export interface GetTissOperatorValidationStatsInput {
+  tag?: string;
+}
+
+export interface GetTissOperatorValidationStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    operatorValidationIds: string[];
+  };
+}

@@ -7,6 +7,7 @@
 import type {
   CanonicalTissBusinessValidation,
   CanonicalTissKnowledge,
+  CanonicalTissOperatorValidation,
   CanonicalTissLayout,
   CanonicalTissParser,
   CanonicalTissSchemaValidation,
@@ -106,6 +107,40 @@ export function createCanonicalTissBusinessValidation(
     parserId: input.parserId,
     serializerId: input.serializerId,
     schemaValidationId: input.schemaValidationId,
+    rule: input.rule,
+    description: input.description ?? "",
+    version: input.version ?? "",
+    tags: input.tags ?? [],
+  };
+}
+
+export function createCanonicalTissOperatorValidation(
+  input: Partial<CanonicalTissOperatorValidation> &
+    Pick<
+      CanonicalTissOperatorValidation,
+      | "operatorValidationId"
+      | "name"
+      | "knowledgeId"
+      | "layoutId"
+      | "parserId"
+      | "serializerId"
+      | "schemaValidationId"
+      | "businessValidationId"
+      | "operatorId"
+      | "rule"
+    >,
+): CanonicalTissOperatorValidation {
+  return {
+    kind: "tiss-operator-validation",
+    operatorValidationId: input.operatorValidationId,
+    name: input.name,
+    knowledgeId: input.knowledgeId,
+    layoutId: input.layoutId,
+    parserId: input.parserId,
+    serializerId: input.serializerId,
+    schemaValidationId: input.schemaValidationId,
+    businessValidationId: input.businessValidationId,
+    operatorId: input.operatorId,
     rule: input.rule,
     description: input.description ?? "",
     version: input.version ?? "",
