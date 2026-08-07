@@ -222,6 +222,41 @@ export interface CanonicalIntegrationValidationStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationRouting {
+  readonly kind: "canonical-integration-routing";
+  readonly routeId: string;
+  readonly integrationId: string;
+  readonly connectorId: string;
+  readonly pipelineId: string;
+  readonly mappingId: string;
+  readonly transformationId: string;
+  readonly validationId: string;
+  readonly name: string;
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationRoutingResult {
+  readonly kind: "canonical-integration-routing-result";
+  readonly ok: boolean;
+  readonly routeId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly route?: CanonicalIntegrationRouting | null;
+}
+
+export interface CanonicalIntegrationRoutingStats {
+  readonly totalRoutes: number;
+  readonly routeIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly connectorIds: readonly string[];
+  readonly pipelineIds: readonly string[];
+  readonly mappingIds: readonly string[];
+  readonly transformationIds: readonly string[];
+  readonly validationIds: readonly string[];
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
@@ -231,4 +266,5 @@ export interface CanonicalIntegrationEngineHealth {
   readonly integrationMappingOk: boolean;
   readonly integrationTransformationOk: boolean;
   readonly integrationValidationOk: boolean;
+  readonly integrationRoutingOk: boolean;
 }

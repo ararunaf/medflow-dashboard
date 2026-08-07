@@ -1,5 +1,5 @@
 /**
- * F-06 — Integration Validation functional tests.
+ * F-07 — Integration Routing functional tests.
  */
 import { describe, it } from "node:test";
 import assert from "node:assert";
@@ -102,129 +102,149 @@ const sampleValidation = (
   rules: ["required"],
 });
 
+const sampleRouting = (
+  id: string,
+  integrationId: string,
+  connectorId: string,
+  pipelineId: string,
+  mappingId: string,
+  transformationId: string,
+  validationId: string,
+) => ({
+  kind: "canonical-integration-routing" as const,
+  routeId: id,
+  integrationId,
+  connectorId,
+  pipelineId,
+  mappingId,
+  transformationId,
+  validationId,
+  name: `routing ${id}`,
+});
+
 const setup = async (adapter: DefaultIntegrationEngineAdapter) => {
-  await adapter.registerIntegration({ integration: sampleIntegration("int-v") });
+  await adapter.registerIntegration({ integration: sampleIntegration("int-r") });
   await adapter.registerIntegrationConnector({
-    connector: sampleConnector("conn-v", "int-v"),
+    connector: sampleConnector("conn-r", "int-r"),
   });
   await adapter.registerIntegrationPipeline({
-    pipeline: samplePipeline("pipe-v", "int-v", "conn-v"),
+    pipeline: samplePipeline("pipe-r", "int-r", "conn-r"),
   });
   await adapter.registerIntegrationMapping({
-    mapping: sampleMapping("map-v", "int-v", "conn-v", "pipe-v"),
+    mapping: sampleMapping("map-r", "int-r", "conn-r", "pipe-r"),
   });
   await adapter.registerIntegrationTransformation({
-    transformation: sampleTransformation("trans-v", "int-v", "conn-v", "pipe-v", "map-v"),
+    transformation: sampleTransformation("trans-r", "int-r", "conn-r", "pipe-r", "map-r"),
+  });
+  await adapter.registerIntegrationValidation({
+    validation: sampleValidation("val-r", "int-r", "conn-r", "pipe-r", "map-r", "trans-r"),
   });
 };
 
-describe("F-06 Integration Validation — functional cases", () => {
-  it("registra validação", async () => {
+describe("F-07 Integration Routing — functional cases", () => {
+  it("registra rota", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-1", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-1", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
     assert.equal(result.ok, true);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_REGISTERED");
-    assert.equal(result.validationId, "val-1");
+    assert.equal(result.code, "INTEGRATION_ROUTING_REGISTERED");
+    assert.equal(result.routeId, "route-1");
   });
 
-  it("rejeita validação sem validationId", async () => {
+  it("rejeita rota sem routeId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: {
-        ...sampleValidation("val-1", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
-        validationId: "",
+    const result = await adapter.registerIntegrationRouting({
+      routing: {
+        ...sampleRouting("route-1", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
+        routeId: "",
       },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_INVALID_ID");
+    assert.equal(result.code, "INTEGRATION_ROUTING_INVALID_ID");
   });
 
-  it("rejeita validação sem integrationId", async () => {
+  it("rejeita rota sem integrationId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: {
-        ...sampleValidation("val-1", "", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: {
+        ...sampleRouting("route-1", "", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
         integrationId: "",
       },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_INVALID_INTEGRATION_ID");
+    assert.equal(result.code, "INTEGRATION_ROUTING_INVALID_INTEGRATION_ID");
   });
 
-  it("rejeita validação sem connectorId", async () => {
+  it("rejeita rota sem connectorId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: {
-        ...sampleValidation("val-1", "int-v", "", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: {
+        ...sampleRouting("route-1", "int-r", "", "pipe-r", "map-r", "trans-r", "val-r"),
         connectorId: "",
       },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_INVALID_CONNECTOR_ID");
+    assert.equal(result.code, "INTEGRATION_ROUTING_INVALID_CONNECTOR_ID");
   });
 
-  it("rejeita validação sem pipelineId", async () => {
+  it("rejeita rota sem pipelineId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: {
-        ...sampleValidation("val-1", "int-v", "conn-v", "", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: {
+        ...sampleRouting("route-1", "int-r", "conn-r", "", "map-r", "trans-r", "val-r"),
         pipelineId: "",
       },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_INVALID_PIPELINE_ID");
+    assert.equal(result.code, "INTEGRATION_ROUTING_INVALID_PIPELINE_ID");
   });
 
-  it("rejeita validação sem mappingId", async () => {
+  it("rejeita rota sem validationId", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: {
-        ...sampleValidation("val-1", "int-v", "conn-v", "pipe-v", "", "trans-v"),
-        mappingId: "",
+    const result = await adapter.registerIntegrationRouting({
+      routing: {
+        ...sampleRouting("route-1", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", ""),
+        validationId: "",
       },
     });
     assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_INVALID_MAPPING_ID");
+    assert.equal(result.code, "INTEGRATION_ROUTING_INVALID_VALIDATION_ID");
   });
 
-  it("rejeita validação sem transformationId", async () => {
+  it("recupera rota", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: {
-        ...sampleValidation("val-1", "int-v", "conn-v", "pipe-v", "map-v", ""),
-        transformationId: "",
-      },
+    await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-2", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
-    assert.equal(result.ok, false);
-    assert.equal(result.code, "INTEGRATION_VALIDATION_INVALID_TRANSFORMATION_ID");
-  });
-
-  it("valida integração existente", async () => {
-    const adapter = new DefaultIntegrationEngineAdapter();
-    await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-2", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
-    });
-    assert.equal(result.ok, true);
-    const found = await adapter.findIntegrationValidation({ validationId: "val-2" });
+    const found = await adapter.findIntegrationRouting({ routeId: "route-2" });
     assert.ok(found);
-    assert.equal(found!.validationId, "val-2");
+    assert.equal(found!.routeId, "route-2");
+  });
+
+  it("resolve rota", async () => {
+    const adapter = new DefaultIntegrationEngineAdapter();
+    await setup(adapter);
+    await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-3", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
+    });
+    const resolved = await adapter.resolveIntegrationRouting({ integrationId: "int-r" });
+    assert.equal(resolved.ok, true);
+    assert.equal(resolved.route!.routeId, "route-3");
   });
 
   it("reutiliza IntegrationRegistry", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-3", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-4", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
     assert.equal(result.ok, true);
   });
@@ -232,8 +252,8 @@ describe("F-06 Integration Validation — functional cases", () => {
   it("reutiliza IntegrationConnector", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-4", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-5", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
     assert.equal(result.ok, true);
   });
@@ -241,8 +261,8 @@ describe("F-06 Integration Validation — functional cases", () => {
   it("reutiliza IntegrationPipeline", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-5", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-6", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
     assert.equal(result.ok, true);
   });
@@ -250,8 +270,8 @@ describe("F-06 Integration Validation — functional cases", () => {
   it("reutiliza IntegrationMapping", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-6", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-7", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
     assert.equal(result.ok, true);
   });
@@ -259,8 +279,17 @@ describe("F-06 Integration Validation — functional cases", () => {
   it("reutiliza IntegrationTransformation", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    const result = await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-7", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-8", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
+    });
+    assert.equal(result.ok, true);
+  });
+
+  it("reutiliza IntegrationValidation", async () => {
+    const adapter = new DefaultIntegrationEngineAdapter();
+    await setup(adapter);
+    const result = await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-9", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
     assert.equal(result.ok, true);
   });
@@ -268,30 +297,28 @@ describe("F-06 Integration Validation — functional cases", () => {
   it("gera estatísticas", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     await setup(adapter);
-    await adapter.registerIntegrationValidation({
-      validation: sampleValidation("val-8", "int-v", "conn-v", "pipe-v", "map-v", "trans-v"),
+    await adapter.registerIntegrationRouting({
+      routing: sampleRouting("route-10", "int-r", "conn-r", "pipe-r", "map-r", "trans-r", "val-r"),
     });
-    const result = await adapter.getIntegrationValidationStats({});
-    assert.equal(result.stats.totalValidations, 1);
+    const result = await adapter.getIntegrationRoutingStats({});
+    assert.equal(result.stats.totalRoutes, 1);
   });
 
   it("DefaultIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
     assert.deepStrictEqual(caps, F07_INTEGRATION_ENGINE_CAPABILITIES);
-    assert.equal(caps.integrationValidationImplemented, true);
     assert.equal(caps.integrationRoutingImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
     const health = await adapter.health();
     assert.equal(health.ok, true);
-    assert.equal(health.integrationValidationOk, true);
+    assert.equal(health.integrationRoutingOk, true);
   });
 
   it("MockIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new MockIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
     assert.deepStrictEqual(caps, F07_INTEGRATION_ENGINE_CAPABILITIES);
-    assert.equal(caps.integrationValidationImplemented, true);
     assert.equal(caps.integrationRoutingImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
   });

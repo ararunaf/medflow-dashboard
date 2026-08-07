@@ -1,13 +1,14 @@
 /**
- * MockIntegrationEngineAdapter — F-06.
+ * MockIntegrationEngineAdapter — F-07.
  *
  * Implementação em memória do IntegrationEnginePort para testes.
- * Ativa F-01, F-02, F-03, F-04, F-05 e F-06.
+ * Ativa F-01, F-02, F-03, F-04, F-05, F-06 e F-07.
  */
 import { IntegrationConnectorEngine } from "../integration-connector";
 import { IntegrationMappingEngine } from "../integration-mapping";
 import { IntegrationPipelineEngine } from "../integration-pipeline";
 import { IntegrationRegistryEngine } from "../integration-registry";
+import { IntegrationRoutingEngine } from "../integration-routing";
 import { IntegrationTransformationEngine } from "../integration-transformation";
 import { IntegrationValidationEngine } from "../integration-validation";
 import type {
@@ -19,6 +20,8 @@ import type {
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
+  FindIntegrationRoutingInput,
+  FindIntegrationRoutingResult,
   FindIntegrationTransformationInput,
   FindIntegrationTransformationResult,
   FindIntegrationValidationInput,
@@ -31,6 +34,8 @@ import type {
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
+  GetIntegrationRoutingStatsInput,
+  GetIntegrationRoutingStatsResult,
   GetIntegrationTransformationStatsInput,
   GetIntegrationTransformationStatsResult,
   GetIntegrationValidationStatsInput,
@@ -44,6 +49,8 @@ import type {
   ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
+  ListIntegrationRoutingsInput,
+  ListIntegrationRoutingsResult,
   ListIntegrationTransformationsInput,
   ListIntegrationTransformationsResult,
   ListIntegrationValidationsInput,
@@ -58,12 +65,16 @@ import type {
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
+  RegisterIntegrationRoutingInput,
+  RegisterIntegrationRoutingResult,
   RegisterIntegrationTransformationInput,
   RegisterIntegrationTransformationResult,
   RegisterIntegrationValidationInput,
   RegisterIntegrationValidationResult,
+  ResolveIntegrationRoutingInput,
+  ResolveIntegrationRoutingResult,
 } from "../ports";
-import { F06_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
+import { F07_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
 import type { IntegrationEnginePort } from "../ports";
 
 export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
@@ -75,6 +86,7 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
   readonly mapping: IntegrationMappingEngine;
   readonly transformation: IntegrationTransformationEngine;
   readonly validation: IntegrationValidationEngine;
+  readonly routing: IntegrationRoutingEngine;
 
   constructor() {
     this.registry = new IntegrationRegistryEngine();
@@ -94,20 +106,28 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
       this.mapping,
       this.transformation,
     );
+    this.routing = new IntegrationRoutingEngine(
+      this.registry,
+      this.connector,
+      this.pipeline,
+      this.mapping,
+      this.transformation,
+      this.validation,
+    );
   }
 
   identity(): IntegrationEngineInfo {
     return {
       id: "enterprise-integration-engine-mock",
       name: "Enterprise Integration Engine (Mock)",
-      version: "F-06",
+      version: "F-07",
       vendor: "mock",
       provider: this.providerId,
     };
   }
 
   getCapabilities(): IntegrationEngineCapabilities {
-    return F06_INTEGRATION_ENGINE_CAPABILITIES;
+    return F07_INTEGRATION_ENGINE_CAPABILITIES;
   }
 
   async health(): Promise<IntegrationEngineHealth> {
@@ -119,7 +139,8 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
         caps.integrationPipelineImplemented &&
         caps.integrationMappingImplemented &&
         caps.integrationTransformationImplemented &&
-        caps.integrationValidationImplemented,
+        caps.integrationValidationImplemented &&
+        caps.integrationRoutingImplemented,
       integrationEngineOk: caps.integrationEngineImplemented,
       integrationRegistryOk: caps.integrationRegistryImplemented,
       integrationConnectorOk: caps.integrationConnectorImplemented,
@@ -127,6 +148,7 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
       integrationMappingOk: caps.integrationMappingImplemented,
       integrationTransformationOk: caps.integrationTransformationImplemented,
       integrationValidationOk: caps.integrationValidationImplemented,
+      integrationRoutingOk: caps.integrationRoutingImplemented,
     };
   }
 
@@ -455,6 +477,92 @@ export class MockIntegrationEngineAdapter implements IntegrationEnginePort {
         ...stats,
         totalValidations: filtered.length,
         validationIds: filtered.map((v) => v.validationId),
+      },
+    };
+  }
+
+  async registerIntegrationRouting(
+    input: RegisterIntegrationRoutingInput,
+  ): Promise<RegisterIntegrationRoutingResult> {
+    return this.routing.register(input.routing);
+  }
+
+  async findIntegrationRouting(
+    input: FindIntegrationRoutingInput,
+  ): Promise<FindIntegrationRoutingResult> {
+    return this.routing.find(input.routeId) ?? null;
+  }
+
+  async resolveIntegrationRouting(
+    input: ResolveIntegrationRoutingInput,
+  ): Promise<ResolveIntegrationRoutingResult> {
+    const route = this.routing.resolve(input.integrationId);
+    if (!route) {
+      return {
+        ok: false,
+        code: "MOCK_INTEGRATION_ROUTING_NOT_FOUND",
+        message: `no route for integration ${input.integrationId}`,
+        route: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "MOCK_INTEGRATION_ROUTING_RESOLVED",
+      message: `route resolved for integration ${input.integrationId}`,
+      route,
+    };
+  }
+
+  async listIntegrationRoutings(
+    input: ListIntegrationRoutingsInput,
+  ): Promise<ListIntegrationRoutingsResult> {
+    const routings = this.routing.list(
+      input.integrationId,
+      input.connectorId,
+      input.pipelineId,
+      input.mappingId,
+      input.transformationId,
+      input.validationId,
+      input.limit,
+      input.offset,
+    );
+    const total = this.routing.list(
+      input.integrationId,
+      input.connectorId,
+      input.pipelineId,
+      input.mappingId,
+      input.transformationId,
+      input.validationId,
+    ).length;
+    return {
+      ok: true,
+      code: "MOCK_INTEGRATION_ROUTING_LIST_OK",
+      message: `${routings.length} routings listed`,
+      routings,
+      total,
+    };
+  }
+
+  async getIntegrationRoutingStats(
+    input: GetIntegrationRoutingStatsInput = {},
+  ): Promise<GetIntegrationRoutingStatsResult> {
+    const stats = this.routing.stats();
+    const filtered = this.routing.list(
+      input.integrationId,
+      input.connectorId,
+      input.pipelineId,
+      input.mappingId,
+      input.transformationId,
+      input.validationId,
+    );
+    return {
+      ok: true,
+      code: "MOCK_INTEGRATION_ROUTING_STATS_OK",
+      message: "stats computed",
+      stats: {
+        ...stats,
+        totalRoutes: filtered.length,
+        routeIds: filtered.map((r) => r.routeId),
       },
     };
   }

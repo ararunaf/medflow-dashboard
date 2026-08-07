@@ -14,6 +14,9 @@ import type {
   CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
+  CanonicalIntegrationRouting,
+  CanonicalIntegrationRoutingResult,
+  CanonicalIntegrationRoutingStats,
   CanonicalIntegrationTransformation,
   CanonicalIntegrationTransformationResult,
   CanonicalIntegrationTransformationStats,
@@ -35,6 +38,9 @@ export type {
   CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
+  CanonicalIntegrationRouting,
+  CanonicalIntegrationRoutingResult,
+  CanonicalIntegrationRoutingStats,
   CanonicalIntegrationTransformation,
   CanonicalIntegrationTransformationResult,
   CanonicalIntegrationTransformationStats,
@@ -60,6 +66,7 @@ export interface IntegrationEngineHealth {
   readonly integrationMappingOk: boolean;
   readonly integrationTransformationOk: boolean;
   readonly integrationValidationOk: boolean;
+  readonly integrationRoutingOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -300,4 +307,62 @@ export interface GetIntegrationValidationStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationValidationStats;
+}
+
+export interface RegisterIntegrationRoutingInput {
+  readonly routing: CanonicalIntegrationRouting;
+}
+
+export type RegisterIntegrationRoutingResult = CanonicalIntegrationRoutingResult;
+
+export interface FindIntegrationRoutingInput {
+  readonly routeId: string;
+}
+
+export type FindIntegrationRoutingResult = CanonicalIntegrationRouting | null;
+
+export interface ResolveIntegrationRoutingInput {
+  readonly integrationId: string;
+}
+
+export interface ResolveIntegrationRoutingResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly route: CanonicalIntegrationRouting | null;
+}
+
+export interface ListIntegrationRoutingsInput {
+  readonly integrationId?: string;
+  readonly connectorId?: string;
+  readonly pipelineId?: string;
+  readonly mappingId?: string;
+  readonly transformationId?: string;
+  readonly validationId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationRoutingsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly routings: readonly CanonicalIntegrationRouting[];
+  readonly total: number;
+}
+
+export interface GetIntegrationRoutingStatsInput {
+  readonly integrationId?: string;
+  readonly connectorId?: string;
+  readonly pipelineId?: string;
+  readonly mappingId?: string;
+  readonly transformationId?: string;
+  readonly validationId?: string;
+}
+
+export interface GetIntegrationRoutingStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationRoutingStats;
 }

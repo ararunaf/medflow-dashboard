@@ -6,7 +6,7 @@ import assert from "node:assert";
 import {
   DefaultIntegrationEngineAdapter,
   MockIntegrationEngineAdapter,
-  F06_INTEGRATION_ENGINE_CAPABILITIES,
+  F07_INTEGRATION_ENGINE_CAPABILITIES,
 } from "../../../src/lib/enterprise/integration-engine";
 
 const sampleIntegration = (id: string) => ({
@@ -209,10 +209,11 @@ describe("F-04 Integration Mapping — functional cases", () => {
   it("DefaultIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new DefaultIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, F06_INTEGRATION_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, F07_INTEGRATION_ENGINE_CAPABILITIES);
     assert.equal(caps.integrationMappingImplemented, true);
     assert.equal(caps.integrationTransformationImplemented, true);
     assert.equal(caps.integrationValidationImplemented, true);
+    assert.equal(caps.integrationRoutingImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
     const health = await adapter.health();
     assert.equal(health.ok, true);
@@ -222,10 +223,11 @@ describe("F-04 Integration Mapping — functional cases", () => {
   it("MockIntegrationEngineAdapter implementa o Port", async () => {
     const adapter = new MockIntegrationEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, F06_INTEGRATION_ENGINE_CAPABILITIES);
+    assert.deepStrictEqual(caps, F07_INTEGRATION_ENGINE_CAPABILITIES);
     assert.equal(caps.integrationMappingImplemented, true);
     assert.equal(caps.integrationTransformationImplemented, true);
     assert.equal(caps.integrationValidationImplemented, true);
+    assert.equal(caps.integrationRoutingImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
   });
 });

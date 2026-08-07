@@ -7,6 +7,7 @@
  * F-04: Integration Mapping.
  * F-05: Integration Transformation.
  * F-06: Integration Validation.
+ * F-07: Integration Routing.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -19,6 +20,8 @@ import type {
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
+  FindIntegrationRoutingInput,
+  FindIntegrationRoutingResult,
   FindIntegrationTransformationInput,
   FindIntegrationTransformationResult,
   FindIntegrationValidationInput,
@@ -31,6 +34,8 @@ import type {
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
+  GetIntegrationRoutingStatsInput,
+  GetIntegrationRoutingStatsResult,
   GetIntegrationTransformationStatsInput,
   GetIntegrationTransformationStatsResult,
   GetIntegrationValidationStatsInput,
@@ -43,6 +48,8 @@ import type {
   ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
+  ListIntegrationRoutingsInput,
+  ListIntegrationRoutingsResult,
   ListIntegrationTransformationsInput,
   ListIntegrationTransformationsResult,
   ListIntegrationValidationsInput,
@@ -57,10 +64,14 @@ import type {
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
+  RegisterIntegrationRoutingInput,
+  RegisterIntegrationRoutingResult,
   RegisterIntegrationTransformationInput,
   RegisterIntegrationTransformationResult,
   RegisterIntegrationValidationInput,
   RegisterIntegrationValidationResult,
+  ResolveIntegrationRoutingInput,
+  ResolveIntegrationRoutingResult,
 } from "./types";
 
 export interface IntegrationEnginePort {
@@ -186,4 +197,27 @@ export interface IntegrationEnginePort {
   getIntegrationValidationStats(
     input?: GetIntegrationValidationStatsInput,
   ): Promise<GetIntegrationValidationStatsResult>;
+
+  /** F-07 — registra uma rota de integração. */
+  registerIntegrationRouting(
+    input: RegisterIntegrationRoutingInput,
+  ): Promise<RegisterIntegrationRoutingResult>;
+
+  /** F-07 — encontra rota por routeId. */
+  findIntegrationRouting(input: FindIntegrationRoutingInput): Promise<FindIntegrationRoutingResult>;
+
+  /** F-07 — resolve a rota ativa de uma integração. */
+  resolveIntegrationRouting(
+    input: ResolveIntegrationRoutingInput,
+  ): Promise<ResolveIntegrationRoutingResult>;
+
+  /** F-07 — lista rotas, opcionalmente filtradas. */
+  listIntegrationRoutings(
+    input: ListIntegrationRoutingsInput,
+  ): Promise<ListIntegrationRoutingsResult>;
+
+  /** F-07 — estatísticas do catálogo de rotas. */
+  getIntegrationRoutingStats(
+    input?: GetIntegrationRoutingStatsInput,
+  ): Promise<GetIntegrationRoutingStatsResult>;
 }
