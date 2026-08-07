@@ -1,14 +1,15 @@
 /**
- * MockTissEngineAdapter — G-04.
+ * MockTissEngineAdapter — G-05.
  *
  * Adapter mock para testes do Bloco G.
  */
 import { TissKnowledgeEngine } from "../tiss-knowledge";
 import { TissLayoutEngine } from "../tiss-layout";
 import { TissParserEngine } from "../tiss-parser";
+import { TissSchemaValidationEngine } from "../tiss-schema-validation";
 import { TissSerializerEngine } from "../tiss-serializer";
 import {
-  G04_TISS_ENTERPRISE_CAPABILITIES,
+  G05_TISS_ENTERPRISE_CAPABILITIES,
   type TissEnginePort,
   type TissEngineInfo,
   type TissEngineHealth,
@@ -52,6 +53,16 @@ import {
   type SerializeTissResult,
   type GetTissSerializerStatsInput,
   type GetTissSerializerStatsResult,
+  type RegisterTissSchemaValidationInput,
+  type RegisterTissSchemaValidationResult,
+  type GetTissSchemaValidationInput,
+  type GetTissSchemaValidationResult,
+  type ListTissSchemaValidationsInput,
+  type ListTissSchemaValidationsResult,
+  type ValidateTissSchemaInput,
+  type ValidateTissSchemaResult,
+  type GetTissSchemaValidationStatsInput,
+  type GetTissSchemaValidationStatsResult,
 } from "../ports";
 
 const MOCK_TISS_ENGINE_ADAPTER_ID = "enterprise-tiss-engine-mock";
@@ -61,19 +72,25 @@ export class MockTissEngineAdapter implements TissEnginePort {
   private readonly layout = new TissLayoutEngine(this.knowledge);
   private readonly parser = new TissParserEngine(this.knowledge, this.layout);
   private readonly serializer = new TissSerializerEngine(this.knowledge, this.layout, this.parser);
+  private readonly schemaValidation = new TissSchemaValidationEngine(
+    this.knowledge,
+    this.layout,
+    this.parser,
+    this.serializer,
+  );
 
   identity(): TissEngineInfo {
     return {
       id: MOCK_TISS_ENGINE_ADAPTER_ID,
       name: "Enterprise TISS Engine Mock",
-      version: "G-04",
+      version: "G-05",
       vendor: "enterprise",
       provider: "mock",
     };
   }
 
   getCapabilities() {
-    return { ...G04_TISS_ENTERPRISE_CAPABILITIES };
+    return { ...G05_TISS_ENTERPRISE_CAPABILITIES };
   }
 
   async health(): Promise<TissEngineHealth> {
@@ -83,7 +100,8 @@ export class MockTissEngineAdapter implements TissEnginePort {
         caps.tissKnowledgeImplemented &&
         caps.tissLayoutImplemented &&
         caps.tissParserImplemented &&
-        caps.tissSerializerImplemented,
+        caps.tissSerializerImplemented &&
+        caps.tissSchemaValidationImplemented,
       tissEngineOk: caps.tissEngineImplemented,
       tissKnowledgeOk: caps.tissKnowledgeImplemented,
       tissLayoutOk: caps.tissLayoutImplemented,
@@ -113,12 +131,7 @@ export class MockTissEngineAdapter implements TissEnginePort {
         knowledge: null,
       };
     }
-    return {
-      ok: true,
-      code: "MOCK_TISS_KNOWLEDGE_FOUND",
-      message: "knowledge found",
-      knowledge,
-    };
+    return { ok: true, code: "MOCK_TISS_KNOWLEDGE_FOUND", message: "knowledge found", knowledge };
   }
 
   async listTissKnowledge(input: ListTissKnowledgeInput = {}): Promise<ListTissKnowledgeResult> {
@@ -149,12 +162,7 @@ export class MockTissEngineAdapter implements TissEnginePort {
         layout: null,
       };
     }
-    return {
-      ok: true,
-      code: "MOCK_TISS_LAYOUT_FOUND",
-      message: "layout found",
-      layout,
-    };
+    return { ok: true, code: "MOCK_TISS_LAYOUT_FOUND", message: "layout found", layout };
   }
 
   async listTissLayout(input: ListTissLayoutInput = {}): Promise<ListTissLayoutResult> {
@@ -183,12 +191,7 @@ export class MockTissEngineAdapter implements TissEnginePort {
         parser: null,
       };
     }
-    return {
-      ok: true,
-      code: "MOCK_TISS_PARSER_FOUND",
-      message: "parser found",
-      parser,
-    };
+    return { ok: true, code: "MOCK_TISS_PARSER_FOUND", message: "parser found", parser };
   }
 
   async listTissParsers(input: ListTissParsersInput = {}): Promise<ListTissParsersResult> {
@@ -241,5 +244,47 @@ export class MockTissEngineAdapter implements TissEnginePort {
     input: GetTissSerializerStatsInput = {},
   ): Promise<GetTissSerializerStatsResult> {
     return this.serializer.statsResult();
+  }
+
+  async registerTissSchemaValidation(
+    input: RegisterTissSchemaValidationInput,
+  ): Promise<RegisterTissSchemaValidationResult> {
+    return this.schemaValidation.register(input);
+  }
+
+  async getTissSchemaValidation(
+    input: GetTissSchemaValidationInput,
+  ): Promise<GetTissSchemaValidationResult> {
+    const schemaValidation = this.schemaValidation.get(input.schemaValidationId);
+    if (!schemaValidation) {
+      return {
+        ok: false,
+        code: "MOCK_TISS_SCHEMA_VALIDATION_NOT_FOUND",
+        message: "schema validation not found",
+        schemaValidation: null,
+      };
+    }
+    return {
+      ok: true,
+      code: "MOCK_TISS_SCHEMA_VALIDATION_FOUND",
+      message: "schema validation found",
+      schemaValidation,
+    };
+  }
+
+  async listTissSchemaValidations(
+    input: ListTissSchemaValidationsInput = {},
+  ): Promise<ListTissSchemaValidationsResult> {
+    return this.schemaValidation.listResult(input.tag);
+  }
+
+  async validateTissSchema(input: ValidateTissSchemaInput): Promise<ValidateTissSchemaResult> {
+    return this.schemaValidation.validate(input);
+  }
+
+  async getTissSchemaValidationStats(
+    input: GetTissSchemaValidationStatsInput = {},
+  ): Promise<GetTissSchemaValidationStatsResult> {
+    return this.schemaValidation.statsResult();
   }
 }

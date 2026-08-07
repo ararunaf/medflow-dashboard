@@ -50,3 +50,8 @@ export const G04_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
   ...G03_TISS_ENTERPRISE_CAPABILITIES,
   tissSerializerImplemented: true,
 };
+
+export const G05_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...G04_TISS_ENTERPRISE_CAPABILITIES,
+  tissSchemaValidationImplemented: true,
+};

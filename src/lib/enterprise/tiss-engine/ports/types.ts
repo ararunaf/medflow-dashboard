@@ -329,3 +329,77 @@ export interface GetTissSerializerStatsResult {
     serializerIds: string[];
   };
 }
+
+export interface CanonicalTissSchemaValidation {
+  kind: "tiss-schema-validation";
+  schemaValidationId: string;
+  name: string;
+  knowledgeId: string;
+  layoutId: string;
+  parserId: string;
+  serializerId: string;
+  description?: string;
+  version?: string;
+  tags?: string[];
+}
+
+export interface RegisterTissSchemaValidationInput {
+  schemaValidation: CanonicalTissSchemaValidation;
+}
+
+export interface RegisterTissSchemaValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  schemaValidationId?: string;
+  schemaValidation?: CanonicalTissSchemaValidation | null;
+}
+
+export interface GetTissSchemaValidationInput {
+  schemaValidationId: string;
+}
+
+export interface GetTissSchemaValidationResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  schemaValidation?: CanonicalTissSchemaValidation | null;
+}
+
+export interface ListTissSchemaValidationsInput {
+  tag?: string;
+}
+
+export interface ListTissSchemaValidationsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  schemaValidations: CanonicalTissSchemaValidation[];
+}
+
+export interface ValidateTissSchemaInput {
+  schemaValidationId: string;
+  document: string;
+}
+
+export interface ValidateTissSchemaResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  details: string[];
+}
+
+export interface GetTissSchemaValidationStatsInput {
+  tag?: string;
+}
+
+export interface GetTissSchemaValidationStatsResult {
+  ok: boolean;
+  code: string;
+  message: string;
+  stats: {
+    total: number;
+    byTag: Record<string, number>;
+    schemaValidationIds: string[];
+  };
+}

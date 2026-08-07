@@ -8,6 +8,7 @@ import type {
   CanonicalTissKnowledge,
   CanonicalTissLayout,
   CanonicalTissParser,
+  CanonicalTissSchemaValidation,
   CanonicalTissSerializer,
 } from "./types";
 
@@ -54,6 +55,27 @@ export function createCanonicalTissSerializer(
     knowledgeId: input.knowledgeId,
     layoutId: input.layoutId,
     parserId: input.parserId,
+    description: input.description ?? "",
+    version: input.version ?? "",
+    tags: input.tags ?? [],
+  };
+}
+
+export function createCanonicalTissSchemaValidation(
+  input: Partial<CanonicalTissSchemaValidation> &
+    Pick<
+      CanonicalTissSchemaValidation,
+      "schemaValidationId" | "name" | "knowledgeId" | "layoutId" | "parserId" | "serializerId"
+    >,
+): CanonicalTissSchemaValidation {
+  return {
+    kind: "tiss-schema-validation",
+    schemaValidationId: input.schemaValidationId,
+    name: input.name,
+    knowledgeId: input.knowledgeId,
+    layoutId: input.layoutId,
+    parserId: input.parserId,
+    serializerId: input.serializerId,
     description: input.description ?? "",
     version: input.version ?? "",
     tags: input.tags ?? [],

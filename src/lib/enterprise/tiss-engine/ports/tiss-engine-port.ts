@@ -18,6 +18,10 @@ import type {
   GetTissParserResult,
   GetTissParserStatsInput,
   GetTissParserStatsResult,
+  GetTissSchemaValidationInput,
+  GetTissSchemaValidationResult,
+  GetTissSchemaValidationStatsInput,
+  GetTissSchemaValidationStatsResult,
   GetTissSerializerInput,
   GetTissSerializerResult,
   GetTissSerializerStatsInput,
@@ -28,6 +32,8 @@ import type {
   ListTissLayoutResult,
   ListTissParsersInput,
   ListTissParsersResult,
+  ListTissSchemaValidationsInput,
+  ListTissSchemaValidationsResult,
   ListTissSerializersInput,
   ListTissSerializersResult,
   ParseTissInput,
@@ -38,6 +44,8 @@ import type {
   RegisterTissLayoutResult,
   RegisterTissParserInput,
   RegisterTissParserResult,
+  RegisterTissSchemaValidationInput,
+  RegisterTissSchemaValidationResult,
   RegisterTissSerializerInput,
   RegisterTissSerializerResult,
   SearchTissKnowledgeInput,
@@ -45,6 +53,8 @@ import type {
   SearchTissLayoutInput,
   SearchTissLayoutResult,
   SerializeTissInput,
+  ValidateTissSchemaInput,
+  ValidateTissSchemaResult,
   SerializeTissResult,
   TissEngineHealth,
   TissEngineInfo,
@@ -121,4 +131,27 @@ export interface TissEnginePort {
   getTissSerializerStats(
     input?: GetTissSerializerStatsInput,
   ): Promise<GetTissSerializerStatsResult>;
+
+  /** G-05 — registrar validação de schema TISS. */
+  registerTissSchemaValidation(
+    input: RegisterTissSchemaValidationInput,
+  ): Promise<RegisterTissSchemaValidationResult>;
+
+  /** G-05 — recuperar validação de schema por id. */
+  getTissSchemaValidation(
+    input: GetTissSchemaValidationInput,
+  ): Promise<GetTissSchemaValidationResult>;
+
+  /** G-05 — listar validações de schema. */
+  listTissSchemaValidations(
+    input?: ListTissSchemaValidationsInput,
+  ): Promise<ListTissSchemaValidationsResult>;
+
+  /** G-05 — validar schema de documento TISS. */
+  validateTissSchema(input: ValidateTissSchemaInput): Promise<ValidateTissSchemaResult>;
+
+  /** G-05 — estatísticas de validações de schema. */
+  getTissSchemaValidationStats(
+    input?: GetTissSchemaValidationStatsInput,
+  ): Promise<GetTissSchemaValidationStatsResult>;
 }

@@ -8,7 +8,7 @@ import {
   createCanonicalTissLayout,
   createTissEnginePort,
   DefaultTissEngineAdapter,
-  G04_TISS_ENTERPRISE_CAPABILITIES,
+  G05_TISS_ENTERPRISE_CAPABILITIES,
   MockTissEngineAdapter,
   tissEngineRegistry,
   TissKnowledgeEngine,
@@ -202,11 +202,12 @@ describe("G-02 TISS Layout — functional cases", () => {
   it("DefaultAdapter implementa o Port", async () => {
     const adapter = new DefaultTissEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, G04_TISS_ENTERPRISE_CAPABILITIES);
+    assert.deepStrictEqual(caps, G05_TISS_ENTERPRISE_CAPABILITIES);
     assert.equal(caps.tissKnowledgeImplemented, true);
     assert.equal(caps.tissLayoutImplemented, true);
     assert.equal(caps.tissParserImplemented, true);
     assert.equal(caps.tissSerializerImplemented, true);
+    assert.equal(caps.tissSchemaValidationImplemented, true);
     const health = await adapter.health();
     assert.equal(health.ok, true);
     assert.equal(health.tissLayoutOk, true);
@@ -215,11 +216,12 @@ describe("G-02 TISS Layout — functional cases", () => {
   it("MockAdapter implementa o Port", async () => {
     const adapter = new MockTissEngineAdapter();
     const caps = adapter.getCapabilities();
-    assert.deepStrictEqual(caps, G04_TISS_ENTERPRISE_CAPABILITIES);
+    assert.deepStrictEqual(caps, G05_TISS_ENTERPRISE_CAPABILITIES);
     assert.equal(caps.tissKnowledgeImplemented, true);
     assert.equal(caps.tissLayoutImplemented, true);
     assert.equal(caps.tissParserImplemented, true);
     assert.equal(caps.tissSerializerImplemented, true);
+    assert.equal(caps.tissSchemaValidationImplemented, true);
   });
 
   it("Registry resolve corretamente", () => {
