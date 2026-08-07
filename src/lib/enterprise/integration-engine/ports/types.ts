@@ -9,6 +9,11 @@ import type {
   CanonicalIntegrationMapping,
   CanonicalIntegrationMappingResult,
   CanonicalIntegrationMappingStats,
+  CanonicalIntegrationMetric,
+  CanonicalIntegrationMonitoring,
+  CanonicalIntegrationMonitoringEvent,
+  CanonicalIntegrationMonitoringResult,
+  CanonicalIntegrationMonitoringStats,
   CanonicalIntegrationPipeline,
   CanonicalIntegrationPipelineResult,
   CanonicalIntegrationPipelineStats,
@@ -33,6 +38,11 @@ export type {
   CanonicalIntegrationMapping,
   CanonicalIntegrationMappingResult,
   CanonicalIntegrationMappingStats,
+  CanonicalIntegrationMetric,
+  CanonicalIntegrationMonitoring,
+  CanonicalIntegrationMonitoringEvent,
+  CanonicalIntegrationMonitoringResult,
+  CanonicalIntegrationMonitoringStats,
   CanonicalIntegrationPipeline,
   CanonicalIntegrationPipelineResult,
   CanonicalIntegrationPipelineStats,
@@ -67,6 +77,7 @@ export interface IntegrationEngineHealth {
   readonly integrationTransformationOk: boolean;
   readonly integrationValidationOk: boolean;
   readonly integrationRoutingOk: boolean;
+  readonly integrationMonitoringOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -365,4 +376,54 @@ export interface GetIntegrationRoutingStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationRoutingStats;
+}
+
+export interface RegisterIntegrationMonitoringInput {
+  readonly monitoring: CanonicalIntegrationMonitoring;
+}
+
+export type RegisterIntegrationMonitoringResult = CanonicalIntegrationMonitoringResult;
+
+export interface FindIntegrationMonitoringInput {
+  readonly monitoringId: string;
+}
+
+export type FindIntegrationMonitoringResult = CanonicalIntegrationMonitoring | null;
+
+export interface ListIntegrationMonitoringsInput {
+  readonly integrationId?: string;
+  readonly routeId?: string;
+  readonly connectorId?: string;
+  readonly pipelineId?: string;
+  readonly mappingId?: string;
+  readonly transformationId?: string;
+  readonly validationId?: string;
+  readonly status?: "healthy" | "degraded" | "unhealthy";
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationMonitoringsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly monitorings: readonly CanonicalIntegrationMonitoring[];
+  readonly total: number;
+}
+
+export interface GetIntegrationMonitoringStatsInput {
+  readonly integrationId?: string;
+  readonly routeId?: string;
+  readonly connectorId?: string;
+  readonly pipelineId?: string;
+  readonly mappingId?: string;
+  readonly transformationId?: string;
+  readonly validationId?: string;
+}
+
+export interface GetIntegrationMonitoringStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationMonitoringStats;
 }

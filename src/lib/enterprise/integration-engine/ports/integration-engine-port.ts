@@ -8,6 +8,7 @@
  * F-05: Integration Transformation.
  * F-06: Integration Validation.
  * F-07: Integration Routing.
+ * F-08: Integration Monitoring.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -17,6 +18,8 @@ import type {
   FindIntegrationInput,
   FindIntegrationMappingInput,
   FindIntegrationMappingResult,
+  FindIntegrationMonitoringInput,
+  FindIntegrationMonitoringResult,
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
@@ -30,6 +33,8 @@ import type {
   GetIntegrationConnectorStatsResult,
   GetIntegrationMappingStatsInput,
   GetIntegrationMappingStatsResult,
+  GetIntegrationMonitoringStatsInput,
+  GetIntegrationMonitoringStatsResult,
   GetIntegrationPipelineStatsInput,
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
@@ -48,6 +53,8 @@ import type {
   ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
+  ListIntegrationMonitoringsInput,
+  ListIntegrationMonitoringsResult,
   ListIntegrationRoutingsInput,
   ListIntegrationRoutingsResult,
   ListIntegrationTransformationsInput,
@@ -61,6 +68,8 @@ import type {
   RegisterIntegrationInput,
   RegisterIntegrationMappingInput,
   RegisterIntegrationMappingResult,
+  RegisterIntegrationMonitoringInput,
+  RegisterIntegrationMonitoringResult,
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
@@ -220,4 +229,24 @@ export interface IntegrationEnginePort {
   getIntegrationRoutingStats(
     input?: GetIntegrationRoutingStatsInput,
   ): Promise<GetIntegrationRoutingStatsResult>;
+
+  /** F-08 — registra um monitoramento de integração. */
+  registerIntegrationMonitoring(
+    input: RegisterIntegrationMonitoringInput,
+  ): Promise<RegisterIntegrationMonitoringResult>;
+
+  /** F-08 — encontra monitoramento por monitoringId. */
+  findIntegrationMonitoring(
+    input: FindIntegrationMonitoringInput,
+  ): Promise<FindIntegrationMonitoringResult>;
+
+  /** F-08 — lista monitoramentos, opcionalmente filtrados. */
+  listIntegrationMonitorings(
+    input: ListIntegrationMonitoringsInput,
+  ): Promise<ListIntegrationMonitoringsResult>;
+
+  /** F-08 — estatísticas do catálogo de monitoramentos. */
+  getIntegrationMonitoringStats(
+    input?: GetIntegrationMonitoringStatsInput,
+  ): Promise<GetIntegrationMonitoringStatsResult>;
 }

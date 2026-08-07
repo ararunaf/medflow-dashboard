@@ -257,6 +257,68 @@ export interface CanonicalIntegrationRoutingStats {
   readonly tags: readonly string[];
 }
 
+export interface CanonicalIntegrationMonitoring {
+  readonly kind: "canonical-integration-monitoring";
+  readonly monitoringId: string;
+  readonly integrationId: string;
+  readonly routeId: string;
+  readonly connectorId: string;
+  readonly pipelineId: string;
+  readonly mappingId: string;
+  readonly transformationId: string;
+  readonly validationId: string;
+  readonly name: string;
+  readonly metrics?: readonly CanonicalIntegrationMetric[];
+  readonly events?: readonly CanonicalIntegrationMonitoringEvent[];
+  readonly status?: "healthy" | "degraded" | "unhealthy";
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationMetric {
+  readonly kind: "canonical-integration-metric";
+  readonly metricId: string;
+  readonly name: string;
+  readonly value: number;
+  readonly unit?: string;
+  readonly timestamp?: number;
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationMonitoringEvent {
+  readonly kind: "canonical-integration-monitoring-event";
+  readonly eventId: string;
+  readonly type: string;
+  readonly description?: string;
+  readonly timestamp: number;
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationMonitoringResult {
+  readonly kind: "canonical-integration-monitoring-result";
+  readonly ok: boolean;
+  readonly monitoringId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly monitoring?: CanonicalIntegrationMonitoring | null;
+}
+
+export interface CanonicalIntegrationMonitoringStats {
+  readonly totalMonitorings: number;
+  readonly monitoringIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly routeIds: readonly string[];
+  readonly connectorIds: readonly string[];
+  readonly pipelineIds: readonly string[];
+  readonly mappingIds: readonly string[];
+  readonly transformationIds: readonly string[];
+  readonly validationIds: readonly string[];
+  readonly totalMetrics: number;
+  readonly totalEvents: number;
+  readonly statusCounts: { healthy: number; degraded: number; unhealthy: number };
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
@@ -267,4 +329,5 @@ export interface CanonicalIntegrationEngineHealth {
   readonly integrationTransformationOk: boolean;
   readonly integrationValidationOk: boolean;
   readonly integrationRoutingOk: boolean;
+  readonly integrationMonitoringOk: boolean;
 }

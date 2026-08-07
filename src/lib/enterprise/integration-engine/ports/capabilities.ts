@@ -64,3 +64,8 @@ export const F07_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities 
   ...F06_INTEGRATION_ENGINE_CAPABILITIES,
   integrationRoutingImplemented: true,
 };
+
+export const F08_INTEGRATION_ENGINE_CAPABILITIES: IntegrationEngineCapabilities = {
+  ...F07_INTEGRATION_ENGINE_CAPABILITIES,
+  integrationMonitoringImplemented: true,
+};
