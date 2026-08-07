@@ -14,6 +14,9 @@ import type {
   CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
+  CanonicalIntegrationTransformation,
+  CanonicalIntegrationTransformationResult,
+  CanonicalIntegrationTransformationStats,
 } from "./canonical";
 
 export type {
@@ -29,6 +32,9 @@ export type {
   CanonicalIntegrationPipelineStats,
   CanonicalIntegrationRegistryResult,
   CanonicalIntegrationRegistryStats,
+  CanonicalIntegrationTransformation,
+  CanonicalIntegrationTransformationResult,
+  CanonicalIntegrationTransformationStats,
 };
 
 export interface IntegrationEngineInfo {
@@ -46,6 +52,7 @@ export interface IntegrationEngineHealth {
   readonly integrationConnectorOk: boolean;
   readonly integrationPipelineOk: boolean;
   readonly integrationMappingOk: boolean;
+  readonly integrationTransformationOk: boolean;
 }
 
 export interface RegisterIntegrationInput {
@@ -198,4 +205,47 @@ export interface GetIntegrationMappingStatsResult {
   readonly code: string;
   readonly message: string;
   readonly stats: CanonicalIntegrationMappingStats;
+}
+
+export interface RegisterIntegrationTransformationInput {
+  readonly transformation: CanonicalIntegrationTransformation;
+}
+
+export type RegisterIntegrationTransformationResult = CanonicalIntegrationTransformationResult;
+
+export interface FindIntegrationTransformationInput {
+  readonly transformationId: string;
+}
+
+export type FindIntegrationTransformationResult = CanonicalIntegrationTransformation | null;
+
+export interface ListIntegrationTransformationsInput {
+  readonly integrationId?: string;
+  readonly pipelineId?: string;
+  readonly connectorId?: string;
+  readonly mappingId?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface ListIntegrationTransformationsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly transformations: readonly CanonicalIntegrationTransformation[];
+  readonly total: number;
+}
+
+export interface GetIntegrationTransformationStatsInput {
+  readonly integrationId?: string;
+  readonly pipelineId?: string;
+  readonly connectorId?: string;
+  readonly mappingId?: string;
+}
+
+export interface GetIntegrationTransformationStatsResult {
+  readonly ok: boolean;
+  readonly code: string;
+  readonly message: string;
+  readonly stats: CanonicalIntegrationTransformationStats;
 }

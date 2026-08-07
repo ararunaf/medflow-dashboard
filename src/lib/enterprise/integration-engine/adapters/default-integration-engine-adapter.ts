@@ -1,13 +1,14 @@
 /**
- * DefaultIntegrationEngineAdapter — F-04.
+ * DefaultIntegrationEngineAdapter — F-05.
  *
  * Implementação oficial do IntegrationEnginePort.
- * Ativa F-01, F-02, F-03 e F-04.
+ * Ativa F-01, F-02, F-03, F-04 e F-05.
  */
 import { IntegrationConnectorEngine } from "../integration-connector";
 import { IntegrationMappingEngine } from "../integration-mapping";
 import { IntegrationPipelineEngine } from "../integration-pipeline";
 import { IntegrationRegistryEngine } from "../integration-registry";
+import { IntegrationTransformationEngine } from "../integration-transformation";
 import type {
   FindIntegrationConnectorInput,
   FindIntegrationConnectorResult,
@@ -17,6 +18,8 @@ import type {
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
+  FindIntegrationTransformationInput,
+  FindIntegrationTransformationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
   GetIntegrationMappingStatsInput,
@@ -25,6 +28,8 @@ import type {
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
+  GetIntegrationTransformationStatsInput,
+  GetIntegrationTransformationStatsResult,
   IntegrationEngineCapabilities,
   IntegrationEngineHealth,
   IntegrationEngineInfo,
@@ -34,6 +39,8 @@ import type {
   ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
+  ListIntegrationTransformationsInput,
+  ListIntegrationTransformationsResult,
   ListIntegrationsInput,
   ListIntegrationsResult,
   RegisterIntegrationConnectorInput,
@@ -44,8 +51,10 @@ import type {
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
+  RegisterIntegrationTransformationInput,
+  RegisterIntegrationTransformationResult,
 } from "../ports";
-import { F04_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
+import { F05_INTEGRATION_ENGINE_CAPABILITIES } from "../ports";
 import type { IntegrationEnginePort } from "../ports";
 
 export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
@@ -55,26 +64,33 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
   readonly connector: IntegrationConnectorEngine;
   readonly pipeline: IntegrationPipelineEngine;
   readonly mapping: IntegrationMappingEngine;
+  readonly transformation: IntegrationTransformationEngine;
 
   constructor() {
     this.registry = new IntegrationRegistryEngine();
     this.connector = new IntegrationConnectorEngine(this.registry);
     this.pipeline = new IntegrationPipelineEngine(this.registry, this.connector);
     this.mapping = new IntegrationMappingEngine(this.registry, this.connector, this.pipeline);
+    this.transformation = new IntegrationTransformationEngine(
+      this.registry,
+      this.connector,
+      this.pipeline,
+      this.mapping,
+    );
   }
 
   identity(): IntegrationEngineInfo {
     return {
       id: "enterprise-integration-engine",
       name: "Enterprise Integration Engine",
-      version: "F-04",
+      version: "F-05",
       vendor: "generic",
       provider: this.providerId,
     };
   }
 
   getCapabilities(): IntegrationEngineCapabilities {
-    return F04_INTEGRATION_ENGINE_CAPABILITIES;
+    return F05_INTEGRATION_ENGINE_CAPABILITIES;
   }
 
   async health(): Promise<IntegrationEngineHealth> {
@@ -84,12 +100,14 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
         caps.integrationRegistryImplemented &&
         caps.integrationConnectorImplemented &&
         caps.integrationPipelineImplemented &&
-        caps.integrationMappingImplemented,
+        caps.integrationMappingImplemented &&
+        caps.integrationTransformationImplemented,
       integrationEngineOk: caps.integrationEngineImplemented,
       integrationRegistryOk: caps.integrationRegistryImplemented,
       integrationConnectorOk: caps.integrationConnectorImplemented,
       integrationPipelineOk: caps.integrationPipelineImplemented,
       integrationMappingOk: caps.integrationMappingImplemented,
+      integrationTransformationOk: caps.integrationTransformationImplemented,
     };
   }
 
@@ -295,6 +313,66 @@ export class DefaultIntegrationEngineAdapter implements IntegrationEnginePort {
         ...stats,
         totalMappings: filtered.length,
         mappingIds: filtered.map((m) => m.mappingId),
+      },
+    };
+  }
+
+  async registerIntegrationTransformation(
+    input: RegisterIntegrationTransformationInput,
+  ): Promise<RegisterIntegrationTransformationResult> {
+    return this.transformation.register(input.transformation);
+  }
+
+  async findIntegrationTransformation(
+    input: FindIntegrationTransformationInput,
+  ): Promise<FindIntegrationTransformationResult> {
+    return this.transformation.find(input.transformationId) ?? null;
+  }
+
+  async listIntegrationTransformations(
+    input: ListIntegrationTransformationsInput,
+  ): Promise<ListIntegrationTransformationsResult> {
+    const transformations = this.transformation.list(
+      input.integrationId,
+      input.pipelineId,
+      input.connectorId,
+      input.mappingId,
+      input.limit,
+      input.offset,
+    );
+    const total = this.transformation.list(
+      input.integrationId,
+      input.pipelineId,
+      input.connectorId,
+      input.mappingId,
+    ).length;
+    return {
+      ok: true,
+      code: "INTEGRATION_TRANSFORMATION_LIST_OK",
+      message: `${transformations.length} transformations listed`,
+      transformations,
+      total,
+    };
+  }
+
+  async getIntegrationTransformationStats(
+    input: GetIntegrationTransformationStatsInput = {},
+  ): Promise<GetIntegrationTransformationStatsResult> {
+    const stats = this.transformation.stats();
+    const filtered = this.transformation.list(
+      input.integrationId,
+      input.pipelineId,
+      input.connectorId,
+      input.mappingId,
+    );
+    return {
+      ok: true,
+      code: "INTEGRATION_TRANSFORMATION_STATS_OK",
+      message: "stats computed",
+      stats: {
+        ...stats,
+        totalTransformations: filtered.length,
+        transformationIds: filtered.map((t) => t.transformationId),
       },
     };
   }

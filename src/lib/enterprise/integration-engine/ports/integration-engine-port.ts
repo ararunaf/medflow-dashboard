@@ -5,6 +5,7 @@
  * F-02: Integration Connector.
  * F-03: Integration Pipeline.
  * F-04: Integration Mapping.
+ * F-05: Integration Transformation.
  * Demais capabilities permanecem false.
  */
 import type { IntegrationEngineCapabilities } from "./capabilities";
@@ -17,6 +18,8 @@ import type {
   FindIntegrationPipelineInput,
   FindIntegrationPipelineResult,
   FindIntegrationResult,
+  FindIntegrationTransformationInput,
+  FindIntegrationTransformationResult,
   GetIntegrationConnectorStatsInput,
   GetIntegrationConnectorStatsResult,
   GetIntegrationMappingStatsInput,
@@ -25,6 +28,8 @@ import type {
   GetIntegrationPipelineStatsResult,
   GetIntegrationRegistryStatsInput,
   GetIntegrationRegistryStatsResult,
+  GetIntegrationTransformationStatsInput,
+  GetIntegrationTransformationStatsResult,
   IntegrationEngineHealth,
   IntegrationEngineInfo,
   ListIntegrationConnectorsInput,
@@ -33,6 +38,8 @@ import type {
   ListIntegrationMappingsResult,
   ListIntegrationPipelinesInput,
   ListIntegrationPipelinesResult,
+  ListIntegrationTransformationsInput,
+  ListIntegrationTransformationsResult,
   ListIntegrationsInput,
   ListIntegrationsResult,
   RegisterIntegrationConnectorInput,
@@ -43,6 +50,8 @@ import type {
   RegisterIntegrationPipelineInput,
   RegisterIntegrationPipelineResult,
   RegisterIntegrationResult,
+  RegisterIntegrationTransformationInput,
+  RegisterIntegrationTransformationResult,
 } from "./types";
 
 export interface IntegrationEnginePort {
@@ -128,4 +137,24 @@ export interface IntegrationEnginePort {
   getIntegrationMappingStats(
     input?: GetIntegrationMappingStatsInput,
   ): Promise<GetIntegrationMappingStatsResult>;
+
+  /** F-05 — registra uma transformação de integração. */
+  registerIntegrationTransformation(
+    input: RegisterIntegrationTransformationInput,
+  ): Promise<RegisterIntegrationTransformationResult>;
+
+  /** F-05 — encontra transformação por transformationId. */
+  findIntegrationTransformation(
+    input: FindIntegrationTransformationInput,
+  ): Promise<FindIntegrationTransformationResult>;
+
+  /** F-05 — lista transformações, opcionalmente filtradas. */
+  listIntegrationTransformations(
+    input: ListIntegrationTransformationsInput,
+  ): Promise<ListIntegrationTransformationsResult>;
+
+  /** F-05 — estatísticas do catálogo de transformações. */
+  getIntegrationTransformationStats(
+    input?: GetIntegrationTransformationStatsInput,
+  ): Promise<GetIntegrationTransformationStatsResult>;
 }

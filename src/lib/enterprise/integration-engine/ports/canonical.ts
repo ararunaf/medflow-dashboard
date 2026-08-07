@@ -134,6 +134,60 @@ export interface CanonicalIntegrationMappingStats {
   readonly tags: readonly string[];
 }
 
+export type CanonicalIntegrationTransformationStepKind =
+  | "trim"
+  | "uppercase"
+  | "lowercase"
+  | "concat"
+  | "split"
+  | "replace"
+  | "substring"
+  | "normalize"
+  | "cast"
+  | "date-format"
+  | "number-format"
+  | "boolean"
+  | "default";
+
+export interface CanonicalIntegrationTransformationStep {
+  readonly kind: "canonical-integration-transformation-step";
+  readonly stepId: string;
+  readonly type: CanonicalIntegrationTransformationStepKind;
+  readonly params?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationTransformation {
+  readonly kind: "canonical-integration-transformation";
+  readonly transformationId: string;
+  readonly mappingId: string;
+  readonly integrationId: string;
+  readonly connectorId: string;
+  readonly pipelineId: string;
+  readonly name: string;
+  readonly steps: readonly CanonicalIntegrationTransformationStep[];
+  readonly tags?: readonly string[];
+  readonly metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalIntegrationTransformationResult {
+  readonly kind: "canonical-integration-transformation-result";
+  readonly ok: boolean;
+  readonly transformationId?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly transformation?: CanonicalIntegrationTransformation | null;
+}
+
+export interface CanonicalIntegrationTransformationStats {
+  readonly totalTransformations: number;
+  readonly transformationIds: readonly string[];
+  readonly mappingIds: readonly string[];
+  readonly integrationIds: readonly string[];
+  readonly connectorIds: readonly string[];
+  readonly pipelineIds: readonly string[];
+  readonly tags: readonly string[];
+}
+
 export interface CanonicalIntegrationEngineHealth {
   readonly ok: boolean;
   readonly integrationEngineOk: boolean;
@@ -141,4 +195,5 @@ export interface CanonicalIntegrationEngineHealth {
   readonly integrationConnectorOk: boolean;
   readonly integrationPipelineOk: boolean;
   readonly integrationMappingOk: boolean;
+  readonly integrationTransformationOk: boolean;
 }

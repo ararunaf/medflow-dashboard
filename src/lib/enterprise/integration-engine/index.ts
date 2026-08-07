@@ -7,3 +7,4 @@ export { IntegrationRegistryEngine } from "./integration-registry";
 export { IntegrationConnectorEngine } from "./integration-connector";
 export { IntegrationPipelineEngine } from "./integration-pipeline";
 export { IntegrationMappingEngine } from "./integration-mapping";
+export { IntegrationTransformationEngine } from "./integration-transformation";

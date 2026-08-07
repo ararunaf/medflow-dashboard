@@ -93,6 +93,7 @@ describe("F-01 Integration Registry — functional cases", () => {
     assert.equal(caps.integrationConnectorImplemented, true);
     assert.equal(caps.integrationPipelineImplemented, true);
     assert.equal(caps.integrationMappingImplemented, true);
+    assert.equal(caps.integrationTransformationImplemented, true);
     assert.equal(caps.integrationEngineImplemented, false);
     const identity = adapter.identity();
     assert.equal(identity.id, "enterprise-integration-engine");
@@ -108,6 +109,7 @@ describe("F-01 Integration Registry — functional cases", () => {
     assert.equal(caps.integrationConnectorImplemented, true);
     assert.equal(caps.integrationPipelineImplemented, true);
     assert.equal(caps.integrationMappingImplemented, true);
+    assert.equal(caps.integrationTransformationImplemented, true);
     const identity = adapter.identity();
     assert.equal(identity.id, "enterprise-integration-engine-mock");
     assert.equal(identity.provider, "mock");
