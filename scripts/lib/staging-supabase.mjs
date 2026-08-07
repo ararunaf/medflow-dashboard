@@ -1,5 +1,5 @@
 /** Projeto Supabase dedicado ao ambiente staging (MedicFlow). */
-export const STAGING_SUPABASE_PROJECT_REF = "utodixhxrvegzafcldpu";
+export const STAGING_SUPABASE_PROJECT_REF = "vbfulflzekrnejwetcyr";
 export const STAGING_SUPABASE_HOST = `${STAGING_SUPABASE_PROJECT_REF}.supabase.co`;
 export const STAGING_SUPABASE_URL = `https://${STAGING_SUPABASE_HOST}`;
 
