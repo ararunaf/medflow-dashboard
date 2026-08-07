@@ -1,0 +1,37 @@
+/**
+ * TISSEnterpriseCapabilities — G-01.
+ *
+ * Matriz progressiva de capabilities do Bloco G.
+ * Apenas `tissKnowledgeImplemented` será ativada na G-01.
+ */
+
+export interface TISSEnterpriseCapabilities {
+  tissKnowledgeImplemented: boolean;
+  tissLayoutImplemented: boolean;
+  tissParserImplemented: boolean;
+  tissSerializerImplemented: boolean;
+  tissSchemaValidationImplemented: boolean;
+  tissBusinessValidationImplemented: boolean;
+  tissOperatorValidationImplemented: boolean;
+  tissRepairImplemented: boolean;
+  tissCorrectionImplemented: boolean;
+  tissEngineImplemented: boolean;
+}
+
+export const DEFAULT_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  tissKnowledgeImplemented: false,
+  tissLayoutImplemented: false,
+  tissParserImplemented: false,
+  tissSerializerImplemented: false,
+  tissSchemaValidationImplemented: false,
+  tissBusinessValidationImplemented: false,
+  tissOperatorValidationImplemented: false,
+  tissRepairImplemented: false,
+  tissCorrectionImplemented: false,
+  tissEngineImplemented: false,
+};
+
+export const G01_TISS_ENTERPRISE_CAPABILITIES: TISSEnterpriseCapabilities = {
+  ...DEFAULT_TISS_ENTERPRISE_CAPABILITIES,
+  tissKnowledgeImplemented: true,
+};
