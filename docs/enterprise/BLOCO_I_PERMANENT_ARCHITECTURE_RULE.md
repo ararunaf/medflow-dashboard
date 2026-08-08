@@ -36,9 +36,9 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | I-05 | Workflow Monitoring Engine | ✅ Certificada / Congelada |
 | I-06 | Workflow Metrics Engine | ✅ Certificada / Congelada |
 | I-07 | Workflow Recovery Engine | ✅ Certificada / Congelada |
-| I-08 | Workflow Audit Engine | 🚧 Autorizada (não iniciada) |
-| I-09 | Workflow Retry Engine | ⛔ Não autorizada |
-| I-10 | Generic Workflow Engine (fachada) | ⛔ Não autorizada |
+| I-08 | Generic Workflow Engine (fachada) | ✅ Certificada / Congelada |
+| I-09 | Workflow Audit Engine | 🚧 Autorizada (não iniciada) |
+| I-10 | Workflow Retry Engine | ⛔ Não autorizada |
 
 ---
 
@@ -53,7 +53,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | `workflowMonitoringImplemented` | `true` |
 | `workflowMetricsImplemented` | `true` |
 | `workflowRecoveryImplemented` | `true` |
-| `workflowFacadeImplemented` | `false` |
+| `workflowFacadeImplemented` | `true` |
 
 ---
 
@@ -80,6 +80,9 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `src/lib/enterprise/workflow-engine/recovery/enterprise-workflow-recovery-engine.ts`
 - `src/lib/enterprise/workflow-engine/recovery/index.ts`
 - `scripts/enterprise/tests/enterprise-workflow-recovery-engine.test.ts`
+- `src/lib/enterprise/workflow-engine/generic-workflow-engine/generic-workflow-engine.ts`
+- `src/lib/enterprise/workflow-engine/generic-workflow-engine/index.ts`
+- `scripts/enterprise/tests/generic-workflow-engine.test.ts`
 
 ---
 
@@ -92,6 +95,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `docs/enterprise/I05_ENTERPRISE_WORKFLOW_MONITORING_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I06_ENTERPRISE_WORKFLOW_METRICS_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I07_ENTERPRISE_WORKFLOW_RECOVERY_FINAL_CERTIFICATION.md`
+- `docs/enterprise/I08_GENERIC_WORKFLOW_FINAL_CERTIFICATION.md`
 - `docs/enterprise/ENTERPRISE_MASTER_ARCHITECTURE.md`
 - `docs/enterprise/ENTERPRISE_DEPENDENCY_MAP.md`
 
