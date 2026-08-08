@@ -10,6 +10,10 @@ import type {
   CanonicalIntegration,
   CanonicalIntegrationConnector,
 } from "../../integration-engine/ports";
+import {
+  H01_TISS_INTEGRATION_CAPABILITIES,
+  type TISSIntegrationCapabilities,
+} from "../ports/capabilities";
 
 export interface TissCommunicationChannel {
   readonly kind: "tiss-communication-channel";
@@ -38,31 +42,10 @@ export interface TissCommunicationStats {
   readonly tags: readonly string[];
 }
 
-export interface TISSIntegrationCapabilities {
-  readonly tissCommunicationImplemented: boolean;
-  readonly tissSoapImplemented: boolean;
-  readonly tissAuthenticationImplemented: boolean;
-  readonly tissSubmissionImplemented: boolean;
-  readonly tissBatchImplemented: boolean;
-  readonly tissReturnProcessingImplemented: boolean;
-  readonly tissStatusTrackingImplemented: boolean;
-  readonly tissRetryImplemented: boolean;
-  readonly tissAuditImplemented: boolean;
-  readonly tissIntegrationEngineImplemented: boolean;
-}
-
-export const H01_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
-  tissCommunicationImplemented: true,
-  tissSoapImplemented: false,
-  tissAuthenticationImplemented: false,
-  tissSubmissionImplemented: false,
-  tissBatchImplemented: false,
-  tissReturnProcessingImplemented: false,
-  tissStatusTrackingImplemented: false,
-  tissRetryImplemented: false,
-  tissAuditImplemented: false,
-  tissIntegrationEngineImplemented: false,
-};
+export {
+  H01_TISS_INTEGRATION_CAPABILITIES,
+  type TISSIntegrationCapabilities,
+} from "../ports/capabilities";
 
 function channelToConnector(channel: TissCommunicationChannel): CanonicalIntegrationConnector {
   return {
