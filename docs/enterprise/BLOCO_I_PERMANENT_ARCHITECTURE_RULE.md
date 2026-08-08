@@ -35,8 +35,8 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | I-04 | Workflow Execution Engine | ✅ Certificada / Congelada |
 | I-05 | Workflow Monitoring Engine | ✅ Certificada / Congelada |
 | I-06 | Workflow Metrics Engine | ✅ Certificada / Congelada |
-| I-07 | Workflow Recovery Engine | 🚧 Autorizada (não iniciada) |
-| I-08 | Workflow Audit Engine | ⛔ Não autorizada |
+| I-07 | Workflow Recovery Engine | ✅ Certificada / Congelada |
+| I-08 | Workflow Audit Engine | 🚧 Autorizada (não iniciada) |
 | I-09 | Workflow Retry Engine | ⛔ Não autorizada |
 | I-10 | Generic Workflow Engine (fachada) | ⛔ Não autorizada |
 
@@ -52,7 +52,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | `workflowExecutionImplemented` | `true` |
 | `workflowMonitoringImplemented` | `true` |
 | `workflowMetricsImplemented` | `true` |
-| `workflowRecoveryImplemented` | `false` |
+| `workflowRecoveryImplemented` | `true` |
 | `workflowFacadeImplemented` | `false` |
 
 ---
@@ -77,6 +77,9 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `src/lib/enterprise/workflow-engine/metrics/enterprise-workflow-metrics-engine.ts`
 - `src/lib/enterprise/workflow-engine/metrics/index.ts`
 - `scripts/enterprise/tests/enterprise-workflow-metrics-engine.test.ts`
+- `src/lib/enterprise/workflow-engine/recovery/enterprise-workflow-recovery-engine.ts`
+- `src/lib/enterprise/workflow-engine/recovery/index.ts`
+- `scripts/enterprise/tests/enterprise-workflow-recovery-engine.test.ts`
 
 ---
 
@@ -88,6 +91,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `docs/enterprise/I04_ENTERPRISE_WORKFLOW_EXECUTION_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I05_ENTERPRISE_WORKFLOW_MONITORING_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I06_ENTERPRISE_WORKFLOW_METRICS_FINAL_CERTIFICATION.md`
+- `docs/enterprise/I07_ENTERPRISE_WORKFLOW_RECOVERY_FINAL_CERTIFICATION.md`
 - `docs/enterprise/ENTERPRISE_MASTER_ARCHITECTURE.md`
 - `docs/enterprise/ENTERPRISE_DEPENDENCY_MAP.md`
 
