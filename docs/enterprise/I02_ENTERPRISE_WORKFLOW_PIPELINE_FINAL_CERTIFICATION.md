@@ -137,7 +137,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-02R
 
-`I02R_COMMIT_HASH`
+`1507db8` — `docs(enterprise): I-02R final certification`
 
 ## 9. Confirmação final
 
