@@ -34,8 +34,8 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | I-03 | Workflow State Machine Engine | ✅ Certificada / Congelada |
 | I-04 | Workflow Execution Engine | ✅ Certificada / Congelada |
 | I-05 | Workflow Monitoring Engine | ✅ Certificada / Congelada |
-| I-06 | Workflow Metrics Engine | 🚧 Autorizada (não iniciada) |
-| I-07 | Workflow Recovery Engine | ⛔ Não autorizada |
+| I-06 | Workflow Metrics Engine | ✅ Certificada / Congelada |
+| I-07 | Workflow Recovery Engine | 🚧 Autorizada (não iniciada) |
 | I-08 | Workflow Audit Engine | ⛔ Não autorizada |
 | I-09 | Workflow Retry Engine | ⛔ Não autorizada |
 | I-10 | Generic Workflow Engine (fachada) | ⛔ Não autorizada |
@@ -51,7 +51,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | `workflowStateMachineImplemented` | `true` |
 | `workflowExecutionImplemented` | `true` |
 | `workflowMonitoringImplemented` | `true` |
-| `workflowMetricsImplemented` | `false` |
+| `workflowMetricsImplemented` | `true` |
 | `workflowRecoveryImplemented` | `false` |
 | `workflowFacadeImplemented` | `false` |
 
@@ -74,6 +74,9 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `src/lib/enterprise/workflow-engine/monitoring/enterprise-workflow-monitoring-engine.ts`
 - `src/lib/enterprise/workflow-engine/monitoring/index.ts`
 - `scripts/enterprise/tests/enterprise-workflow-monitoring-engine.test.ts`
+- `src/lib/enterprise/workflow-engine/metrics/enterprise-workflow-metrics-engine.ts`
+- `src/lib/enterprise/workflow-engine/metrics/index.ts`
+- `scripts/enterprise/tests/enterprise-workflow-metrics-engine.test.ts`
 
 ---
 
@@ -84,6 +87,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `docs/enterprise/I03_ENTERPRISE_WORKFLOW_STATE_MACHINE_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I04_ENTERPRISE_WORKFLOW_EXECUTION_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I05_ENTERPRISE_WORKFLOW_MONITORING_FINAL_CERTIFICATION.md`
+- `docs/enterprise/I06_ENTERPRISE_WORKFLOW_METRICS_FINAL_CERTIFICATION.md`
 - `docs/enterprise/ENTERPRISE_MASTER_ARCHITECTURE.md`
 - `docs/enterprise/ENTERPRISE_DEPENDENCY_MAP.md`
 
@@ -91,4 +95,4 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 
 ## 7. Baseline congelada
 
-As Sprints I-01, I-02, I-03, I-04 e I-05 estão oficialmente congeladas. A I-06 está autorizada, mas não iniciada.
+As Sprints I-01, I-02, I-03, I-04, I-05 e I-06 estão oficialmente congeladas. A I-07 está autorizada, mas não iniciada.
