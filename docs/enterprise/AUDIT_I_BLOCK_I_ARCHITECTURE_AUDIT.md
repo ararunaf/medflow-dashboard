@@ -136,7 +136,13 @@ Nenhuma engine do Bloco I duplica lógica dos Blocos A-H ou entre si.
 
 ## 7. Commit da AUDIT-I
 
-`f391b02` — `docs(enterprise): AUDIT-I final certification`
+- `f391b02` — `docs(enterprise): AUDIT-I final certification`  
+  Commit técnico de encerramento da auditoria. Registra a certificação final, o roadmap congelado e as validações executadas.
+
+- `1b355de` — `docs(enterprise): AUDIT-I update commit hash reference`  
+  Atualização exclusivamente documental de rastreabilidade. Não altera código, testes, capabilities, engines, blocos, ports, providers, adapters, registries, fachadas ou roadmap.
+
+Apenas o documento `docs/enterprise/AUDIT_I_BLOCK_I_ARCHITECTURE_AUDIT.md` foi modificado entre `f391b02` e `1b355de`. Não houve qualquer alteração funcional.
 
 ## 8. Confirmação final
 
