@@ -67,3 +67,8 @@ export const H09_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
   ...H08_TISS_INTEGRATION_CAPABILITIES,
   tissAuditImplemented: true,
 };
+
+export const H10_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
+  ...H09_TISS_INTEGRATION_CAPABILITIES,
+  tissIntegrationEngineImplemented: true,
+};
