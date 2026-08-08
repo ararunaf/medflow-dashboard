@@ -161,7 +161,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-06R
 
-`I06R_COMMIT_HASH`
+`a4fdeca` — `docs(enterprise): I-06R final certification`
 
 ## 9. Confirmação final
 
