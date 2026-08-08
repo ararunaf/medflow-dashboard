@@ -146,7 +146,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-04R
 
-`I04R_COMMIT_HASH`
+`4faecfe` — `docs(enterprise): I-04R final certification`
 
 ## 9. Confirmação final
 
