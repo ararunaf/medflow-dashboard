@@ -85,14 +85,14 @@ O Bloco H **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | ARCH-H01 | ARCH-H01-A             | —                                     | TISS Integration Architecture                   | Concluída            |
 | H-01     | H-01R                  | `tissCommunicationImplemented`        | TISS Enterprise — Communication Engine          | Concluída / certificada |
 | H-02     | H-02R                  | `tissSoapImplemented`                 | TISS Enterprise — SOAP Engine                   | Concluída / certificada |
-| H-03     | H-03R                  | `tissAuthenticationImplemented`       | TISS Enterprise — Authentication Engine         | Autorizada (não iniciada) |
-| H-04     | H-04R                  | `tissSubmissionImplemented`           | TISS Enterprise — Submission Engine             | Não iniciada         |
-| H-05     | H-05R                  | `tissBatchImplemented`                | TISS Enterprise — Batch Engine                  | Não iniciada         |
-| H-06     | H-06R                  | `tissReturnProcessingImplemented`     | TISS Enterprise — Return Processing Engine      | Não iniciada         |
-| H-07     | H-07R                  | `tissStatusTrackingImplemented`       | TISS Enterprise — Status Tracking Engine        | Não iniciada         |
-| H-08     | H-08R                  | `tissRetryImplemented`                | TISS Enterprise — Retry Engine                  | Não iniciada         |
-| H-09     | H-09R                  | `tissAuditImplemented`                | TISS Enterprise — Audit Engine                  | Não iniciada         |
-| H-10     | H-10R                  | `tissIntegrationEngineImplemented`    | TISS Enterprise — Generic TISS Integration Engine | Não iniciada       |
+| H-03     | H-03R                  | `tissAuthenticationImplemented`       | TISS Enterprise — Authentication Engine         | Concluída / certificada |
+| H-04     | H-04R                  | `tissSubmissionImplemented`           | TISS Enterprise — Submission Engine             | Autorizada (não iniciada) |
+| H-05     | H-05R                  | `tissBatchImplemented`                | TISS Enterprise — Batch Engine                  | Planejada            |
+| H-06     | H-06R                  | `tissReturnProcessingImplemented`     | TISS Enterprise — Return Processing Engine      | Planejada            |
+| H-07     | H-07R                  | `tissStatusTrackingImplemented`       | TISS Enterprise — Status Tracking Engine        | Planejada            |
+| H-08     | H-08R                  | `tissRetryImplemented`                | TISS Enterprise — Retry Engine                  | Planejada            |
+| H-09     | H-09R                  | `tissAuditImplemented`                | TISS Enterprise — Audit Engine                  | Planejada            |
+| H-10     | H-10R                  | `tissIntegrationEngineImplemented`    | TISS Enterprise — Generic TISS Integration Engine | Planejada            |
 | AUDIT-H  | AUDIT-H-R              | —                                     | TISS Integration — Architecture Audit           | Não iniciada         |
 
 ---
