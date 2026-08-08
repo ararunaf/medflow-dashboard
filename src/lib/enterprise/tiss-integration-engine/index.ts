@@ -3,3 +3,4 @@ export * from "./communication";
 export * from "./soap";
 export * from "./authentication";
 export * from "./submission";
+export * from "./batch";

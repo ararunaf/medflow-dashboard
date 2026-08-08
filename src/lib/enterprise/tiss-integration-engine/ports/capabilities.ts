@@ -42,3 +42,8 @@ export const H04_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
   ...H03_TISS_INTEGRATION_CAPABILITIES,
   tissSubmissionImplemented: true,
 };
+
+export const H05_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
+  ...H04_TISS_INTEGRATION_CAPABILITIES,
+  tissBatchImplemented: true,
+};
