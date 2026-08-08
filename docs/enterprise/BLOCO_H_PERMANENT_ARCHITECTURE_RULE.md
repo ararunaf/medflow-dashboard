@@ -88,8 +88,8 @@ O Bloco H **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | H-03     | H-03R                  | `tissAuthenticationImplemented`       | TISS Enterprise — Authentication Engine         | Concluída / certificada |
 | H-04     | H-04R                  | `tissSubmissionImplemented`           | TISS Enterprise — Submission Engine             | Concluída / certificada |
 | H-05     | H-05R                  | `tissBatchImplemented`                | TISS Enterprise — Batch Engine                  | Concluída / certificada |
-| H-06     | H-06R                  | `tissReturnProcessingImplemented`     | TISS Enterprise — Return Processing Engine      | Autorizada (não iniciada) |
-| H-07     | H-07R                  | `tissStatusTrackingImplemented`       | TISS Enterprise — Status Tracking Engine        | Planejada            |
+| H-06     | H-06R                  | `tissReturnProcessingImplemented`     | TISS Enterprise — Return Processing Engine      | Concluída / certificada |
+| H-07     | H-07R                  | `tissStatusTrackingImplemented`       | TISS Enterprise — Status Tracking Engine        | Autorizada (não iniciada) |
 | H-08     | H-08R                  | `tissRetryImplemented`                | TISS Enterprise — Retry Engine                  | Planejada            |
 | H-09     | H-09R                  | `tissAuditImplemented`                | TISS Enterprise — Audit Engine                  | Planejada            |
 | H-10     | H-10R                  | `tissIntegrationEngineImplemented`    | TISS Enterprise — Generic TISS Integration Engine | Planejada            |
