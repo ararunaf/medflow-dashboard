@@ -83,8 +83,8 @@ O Bloco H **não** pode importar diretamente Adapters, Stores ou implementaçõe
 | Sprint   | Sprint de certificação | Capability                            | Nome oficial                                    | Status               |
 | -------- | ---------------------- | ------------------------------------- | ----------------------------------------------- | -------------------- |
 | ARCH-H01 | ARCH-H01-A             | —                                     | TISS Integration Architecture                   | Concluída            |
-| H-01     | H-01R                  | `tissCommunicationImplemented`        | TISS Enterprise — Communication Engine          | Não iniciada         |
-| H-02     | H-02R                  | `tissSoapImplemented`                 | TISS Enterprise — SOAP Engine                   | Não iniciada         |
+| H-01     | H-01R                  | `tissCommunicationImplemented`        | TISS Enterprise — Communication Engine          | Concluída / certificada |
+| H-02     | H-02R                  | `tissSoapImplemented`                 | TISS Enterprise — SOAP Engine                   | Autorizada (não iniciada) |
 | H-03     | H-03R                  | `tissAuthenticationImplemented`       | TISS Enterprise — Authentication Engine         | Não iniciada         |
 | H-04     | H-04R                  | `tissSubmissionImplemented`           | TISS Enterprise — Submission Engine             | Não iniciada         |
 | H-05     | H-05R                  | `tissBatchImplemented`                | TISS Enterprise — Batch Engine                  | Não iniciada         |
