@@ -132,7 +132,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-07R
 
-`I07R_COMMIT_HASH`
+`a8741ec` — `docs(enterprise): I-07R final certification`
 
 ## 9. Confirmação final
 
