@@ -6,3 +6,4 @@ export * from "./submission";
 export * from "./batch";
 export * from "./return-processing";
 export * from "./status-tracking";
+export * from "./retry";
