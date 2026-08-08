@@ -144,7 +144,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-03R
 
-`I03R_COMMIT_HASH`
+`694b5e4` — `docs(enterprise): I-03R final certification`
 
 ## 9. Confirmação final
 
