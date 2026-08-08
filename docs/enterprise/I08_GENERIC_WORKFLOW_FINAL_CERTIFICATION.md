@@ -132,7 +132,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-08R
 
-`I08R_COMMIT_HASH`
+`072c27a` — `docs(enterprise): I-08R final certification`
 
 ## 9. Confirmação final
 
