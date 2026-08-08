@@ -52,3 +52,8 @@ export const H06_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
   ...H05_TISS_INTEGRATION_CAPABILITIES,
   tissReturnProcessingImplemented: true,
 };
+
+export const H07_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
+  ...H06_TISS_INTEGRATION_CAPABILITIES,
+  tissStatusTrackingImplemented: true,
+};
