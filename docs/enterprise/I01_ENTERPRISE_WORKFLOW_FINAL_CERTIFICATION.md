@@ -122,7 +122,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado nesta certific
 
 ## 8. Commit da I-01R
 
-`I01R_COMMIT_HASH`
+`8191c86` — `docs(enterprise): I-01R final certification`
 
 ## 9. Confirmação final
 
