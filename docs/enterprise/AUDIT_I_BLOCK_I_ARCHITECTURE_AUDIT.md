@@ -136,7 +136,7 @@ Nenhuma engine do Bloco I duplica lógica dos Blocos A-H ou entre si.
 
 ## 7. Commit da AUDIT-I
 
-`AUDIT_I_COMMIT_HASH`
+`f391b02` — `docs(enterprise): AUDIT-I final certification`
 
 ## 8. Confirmação final
 
