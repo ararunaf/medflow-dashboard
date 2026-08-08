@@ -32,3 +32,8 @@ export const H02_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
   ...H01_TISS_INTEGRATION_CAPABILITIES,
   tissSoapImplemented: true,
 };
+
+export const H03_TISS_INTEGRATION_CAPABILITIES: TISSIntegrationCapabilities = {
+  ...H02_TISS_INTEGRATION_CAPABILITIES,
+  tissAuthenticationImplemented: true,
+};
