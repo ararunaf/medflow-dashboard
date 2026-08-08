@@ -20,7 +20,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 4. **Nenhuma duplicação de lógica:** toda reutilização ocorre via Ports e fachadas certificadas.
 5. **Nenhuma fachada duplicada:** a fachada `GenericTissIntegrationEngine` do Bloco H é a fachada final de integração TISS. O Bloco I não criará outra fachada de integração TISS.
 6. **Congelamento obrigatório:** cada Sprint certificada é congelada; nenhuma Sprint congelada pode ser alterada sem uma Sprint de certificação explícita.
-7. **I-03 congelada:** as Sprints I-01, I-02 e I-03 estão congeladas após certificações formais.
+7. **I-04 congelada:** as Sprints I-01, I-02, I-03 e I-04 estão congeladas após certificações formais.
 
 ---
 
@@ -32,8 +32,8 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | I-01 | Enterprise Workflow Engine | ✅ Certificada / Congelada |
 | I-02 | Workflow Pipeline Engine | ✅ Certificada / Congelada |
 | I-03 | Workflow State Machine Engine | ✅ Certificada / Congelada |
-| I-04 | Workflow Execution Engine | 🚧 Autorizada (não iniciada) |
-| I-05 | Workflow Monitoring Engine | ⛔ Não autorizada |
+| I-04 | Workflow Execution Engine | ✅ Certificada / Congelada |
+| I-05 | Workflow Monitoring Engine | 🚧 Autorizada (não iniciada) |
 | I-06 | Workflow Metrics Engine | ⛔ Não autorizada |
 | I-07 | Workflow Recovery Engine | ⛔ Não autorizada |
 | I-08 | Workflow Audit Engine | ⛔ Não autorizada |
@@ -49,7 +49,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 | `workflowEngineImplemented` | `true` |
 | `workflowPipelineImplemented` | `true` |
 | `workflowStateMachineImplemented` | `true` |
-| `workflowExecutionImplemented` | `false` |
+| `workflowExecutionImplemented` | `true` |
 | `workflowMonitoringImplemented` | `false` |
 | `workflowMetricsImplemented` | `false` |
 | `workflowRecoveryImplemented` | `false` |
@@ -68,6 +68,9 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `src/lib/enterprise/workflow-engine/state-machine/enterprise-workflow-state-machine-engine.ts`
 - `src/lib/enterprise/workflow-engine/state-machine/index.ts`
 - `scripts/enterprise/tests/enterprise-workflow-state-machine-engine.test.ts`
+- `src/lib/enterprise/workflow-engine/execution/enterprise-workflow-execution-engine.ts`
+- `src/lib/enterprise/workflow-engine/execution/index.ts`
+- `scripts/enterprise/tests/enterprise-workflow-execution-engine.test.ts`
 
 ---
 
@@ -76,6 +79,7 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 - `docs/enterprise/I01_ENTERPRISE_WORKFLOW_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I02_ENTERPRISE_WORKFLOW_PIPELINE_FINAL_CERTIFICATION.md`
 - `docs/enterprise/I03_ENTERPRISE_WORKFLOW_STATE_MACHINE_FINAL_CERTIFICATION.md`
+- `docs/enterprise/I04_ENTERPRISE_WORKFLOW_EXECUTION_FINAL_CERTIFICATION.md`
 - `docs/enterprise/ENTERPRISE_MASTER_ARCHITECTURE.md`
 - `docs/enterprise/ENTERPRISE_DEPENDENCY_MAP.md`
 
@@ -83,4 +87,4 @@ Camada de orquestração Enterprise situada imediatamente acima do Bloco H (TISS
 
 ## 7. Baseline congelada
 
-As Sprints I-01, I-02 e I-03 estão oficialmente congeladas. A I-04 está autorizada, mas não iniciada.
+As Sprints I-01, I-02, I-03 e I-04 estão oficialmente congeladas. A I-05 está autorizada, mas não iniciada.
