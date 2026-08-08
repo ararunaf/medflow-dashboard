@@ -155,7 +155,7 @@ Nenhum arquivo dos Blocos A, B, C, D, E, F, G ou H foi modificado.
 
 ## 8. Commit da I-05R
 
-`I05R_COMMIT_HASH`
+`dc1db3f` — `docs(enterprise): I-05R final certification`
 
 ## 9. Confirmação final
 
