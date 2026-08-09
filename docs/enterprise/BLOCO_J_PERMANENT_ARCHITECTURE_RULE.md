@@ -57,7 +57,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | Sprint | Nome | Status |
 | ------ | ---- | ------ |
 | ARCH-J00 | Enterprise Master Architecture Discovery | ✅ Certificada |
-| J-01 | Enterprise Command Engine | ⛔ Não autorizada |
+| J-01 | Enterprise Command Engine | ✅ Certificada / Congelada |
 | J-02 | Enterprise Orchestration Engine | ⛔ Não autorizada |
 | J-03 | Enterprise Saga Engine | ⛔ Não autorizada |
 | J-04 | Enterprise Policy Engine | ⛔ Não autorizada |
@@ -73,7 +73,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 ## 6. Capabilities preliminares
 
 ```text
-enterpriseCommandImplemented: false
+enterpriseCommandImplemented: true
 enterpriseOrchestrationImplemented: false
 enterpriseSagaImplemented: false
 enterprisePolicyImplemented: false
@@ -87,6 +87,13 @@ enterpriseMasterOrchestrationImplemented: false
 
 ---
 
-## 7. Recomendação
+## 7. Componentes certificados
+
+- `src/lib/enterprise/master-orchestration/ports/capabilities.ts`
+- `src/lib/enterprise/master-orchestration/command/enterprise-command-engine.ts`
+- `src/lib/enterprise/master-orchestration/command/index.ts`
+- `scripts/enterprise/tests/enterprise-command-engine.test.ts`
+
+## 8. Recomendação
 
 A arquitetura do Bloco J está apta a ser iniciada. A Sprint J-01 pode ser autorizada quando houver requisito funcional aprovado, desde que respeite as regras permanentes deste documento.

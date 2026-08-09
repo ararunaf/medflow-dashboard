@@ -1,0 +1,37 @@
+/**
+ * Capability matrix da Enterprise Master Orchestration — BLOCO J.
+ *
+ * J-01: `enterpriseCommandImplemented`
+ */
+
+export interface EnterpriseMasterOrchestrationCapabilities {
+  enterpriseCommandImplemented: boolean;
+  enterpriseOrchestrationImplemented: boolean;
+  enterpriseSagaImplemented: boolean;
+  enterprisePolicyImplemented: boolean;
+  enterpriseGovernanceImplemented: boolean;
+  enterpriseConsoleImplemented: boolean;
+  enterpriseMasterRoutingImplemented: boolean;
+  enterpriseMasterMonitoringImplemented: boolean;
+  enterpriseMasterRecoveryImplemented: boolean;
+  enterpriseMasterOrchestrationImplemented: boolean;
+}
+
+export const DEFAULT_ENTERPRISE_MASTER_ORCHESTRATION_CAPABILITIES: EnterpriseMasterOrchestrationCapabilities =
+  {
+    enterpriseCommandImplemented: false,
+    enterpriseOrchestrationImplemented: false,
+    enterpriseSagaImplemented: false,
+    enterprisePolicyImplemented: false,
+    enterpriseGovernanceImplemented: false,
+    enterpriseConsoleImplemented: false,
+    enterpriseMasterRoutingImplemented: false,
+    enterpriseMasterMonitoringImplemented: false,
+    enterpriseMasterRecoveryImplemented: false,
+    enterpriseMasterOrchestrationImplemented: false,
+  };
+
+export const J01_ENTERPRISE_COMMAND_CAPABILITIES: EnterpriseMasterOrchestrationCapabilities = {
+  ...DEFAULT_ENTERPRISE_MASTER_ORCHESTRATION_CAPABILITIES,
+  enterpriseCommandImplemented: true,
+};
