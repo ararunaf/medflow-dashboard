@@ -26,3 +26,9 @@ export const EPC20A_TISS_VOCABULARY_DISCOVERY_CAPABILITIES: EnterpriseTissIntell
     ...BASELINE_TISS_INTELLIGENCE_CAPABILITIES,
     tissVocabularyDiscoveryImplemented: true,
   };
+
+export const EPC20B_TISS_VOCABULARY_CANONICAL_MODEL_CAPABILITIES: EnterpriseTissIntelligenceCapabilities =
+  {
+    ...EPC20A_TISS_VOCABULARY_DISCOVERY_CAPABILITIES,
+    tissVocabularyCanonicalModelImplemented: true,
+  };

@@ -19,7 +19,7 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 |---|---|
 | ARCH-TI00 | ✅ Descoberta arquitetural |
 | EPC-20A Vocabulary Discovery | ✅ Implementada |
-| EPC-20B Vocabulary Canonical Model | ⏳ Não iniciada |
+| EPC-20B Vocabulary Canonical Model | ✅ Implementada |
 | EPC-20C Vocabulary Registry | ⏳ Não iniciada |
 | EPC-20D Vocabulary Query Engine | ⏳ Não iniciada |
 | EPC-20E GenericTissVocabularyEngine | ⏳ Não iniciada |
@@ -31,15 +31,20 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 - `src/lib/enterprise/tiss-intelligence/ports/capabilities.ts`
 - `src/lib/enterprise/tiss-intelligence/vocabulary-discovery/enterprise-tiss-vocabulary-discovery-engine.ts`
 - `src/lib/enterprise/tiss-intelligence/vocabulary-discovery/index.ts`
+- `src/lib/enterprise/tiss-intelligence/vocabulary-canonical/models.ts`
+- `src/lib/enterprise/tiss-intelligence/vocabulary-canonical/enterprise-tiss-vocabulary-canonical-engine.ts`
+- `src/lib/enterprise/tiss-intelligence/vocabulary-canonical/index.ts`
 - `scripts/enterprise/tests/enterprise-tiss-vocabulary-discovery-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-tiss-vocabulary-canonical-engine.test.ts`
 - `docs/enterprise/EPC20A_TISS_VOCABULARY_DISCOVERY.md`
+- `docs/enterprise/EPC20B_TISS_VOCABULARY_CANONICAL_MODEL.md`
 
 ## 5. Capabilities
 
 | Capability | Valor |
 |---|---|
 | `tissVocabularyDiscoveryImplemented` | `true` |
-| `tissVocabularyCanonicalModelImplemented` | `false` |
+| `tissVocabularyCanonicalModelImplemented` | `true` |
 | `tissVocabularyRegistryImplemented` | `false` |
 | `tissVocabularyQueryEngineImplemented` | `false` |
 | `tissGenericVocabularyEngineImplemented` | `false` |
@@ -48,6 +53,21 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 
 ```text
 EnterpriseTissVocabularyDiscoveryEngine (EPC-20A)
+            │
+            ▼
+EnterpriseTissVocabularyCanonicalEngine (EPC-20B)
+            │
+            ▼
+EnterpriseTissVocabularyRegistryEngine (EPC-20C)
+            │
+            ▼
+EnterpriseTissVocabularyQueryEngine (EPC-20D)
+            │
+            ▼
+GenericTissVocabularyEngine (EPC-20E)
+
+Cadeia de consumo da EPC-20B:
+  ├─ EnterpriseTissVocabularyDiscoveryEngine (EPC-20A)
   ├─ GenericTissEngine (H)
   ├─ GenericTissIntegrationEngine (H)
   ├─ GenericWorkflowEngine (I)
@@ -68,4 +88,4 @@ EnterpriseTissVocabularyDiscoveryEngine (EPC-20A)
 
 ## 8. Recomendação
 
-A Fase 4 foi iniciada corretamente com EPC-20A. A próxima sprint, EPC-20B, pode ser autorizada quando houver requisito funcional aprovado.
+A Fase 4 evoluiu corretamente de EPC-20A para EPC-20B. A próxima sprint, EPC-20C, pode ser autorizada quando houver requisito funcional aprovado.
