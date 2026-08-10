@@ -40,3 +40,8 @@ export const EPC21D_TISS_MAPPING_QUERY_ENGINE_CAPABILITIES: EnterpriseTissMappin
   ...EPC21C_TISS_MAPPING_REGISTRY_CAPABILITIES,
   tissMappingQueryEngineImplemented: true,
 };
+
+export const EPC21E_GENERIC_TISS_MAPPING_ENGINE_CAPABILITIES: EnterpriseTissMappingCapabilities = {
+  ...EPC21D_TISS_MAPPING_QUERY_ENGINE_CAPABILITIES,
+  tissGenericMappingEngineImplemented: true,
+};

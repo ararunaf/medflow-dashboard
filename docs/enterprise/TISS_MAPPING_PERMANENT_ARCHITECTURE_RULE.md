@@ -25,7 +25,7 @@ Este documento rege a Fase 5 — TISS Mapping Foundation do projeto `medflow-das
 | EPC-21B Mapping Canonical Model | ✅ Implementada |
 | EPC-21C Mapping Registry | ✅ Implementada |
 | EPC-21D Mapping Query Engine | ✅ Implementada |
-| EPC-21E GenericTissMappingEngine | ⏳ Não iniciada |
+| EPC-21E GenericTissMappingEngine | ✅ Implementada |
 | EPC-21R Final Certification | ⏳ Não iniciada |
 | AUDIT-21 Final Audit | ⏳ Não iniciada |
 
@@ -37,7 +37,7 @@ Este documento rege a Fase 5 — TISS Mapping Foundation do projeto `medflow-das
 | `tissMappingCanonicalModelImplemented` | `true` |
 | `tissMappingRegistryImplemented` | `true` |
 | `tissMappingQueryEngineImplemented` | `true` |
-| `tissGenericMappingEngineImplemented` | `false` |
+| `tissGenericMappingEngineImplemented` | `true` |
 
 ## 5. Cadeia arquitetural
 
