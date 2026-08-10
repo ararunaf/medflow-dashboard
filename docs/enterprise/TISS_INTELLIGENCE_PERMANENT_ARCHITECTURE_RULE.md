@@ -25,7 +25,14 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 | EPC-20E GenericTissVocabularyEngine | ✅ Certificada |
 | EPC-20R Final Certification | ✅ Certificada |
 | AUDIT-20 Final Audit | ✅ Certificada / Congelada / Encerrada |
-| ARCH-21 | 🚧 Autorizada (não iniciada) |
+| ARCH-21 Mapping Discovery | ✅ Descoberta concluída |
+| EPC-21A Mapping Discovery | ⏳ Não iniciada |
+| EPC-21B Mapping Canonical Model | ⏳ Não iniciada |
+| EPC-21C Mapping Registry | ⏳ Não iniciada |
+| EPC-21D Mapping Query Engine | ⏳ Não iniciada |
+| EPC-21E GenericTissMappingEngine | ⏳ Não iniciada |
+| EPC-21R Final Certification | ⏳ Não iniciada |
+| AUDIT-21 Final Audit | ⏳ Não iniciada |
 
 ## 4. Componentes certificados
 
