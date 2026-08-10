@@ -23,14 +23,14 @@ Este documento rege a Fase 7 — Enterprise Runtime Foundation do projeto `medfl
 
 | Entrega | Status |
 |---|---|
-| ARCH-23 Runtime Discovery | ✅ Concluída |
-| EPC-23A Runtime Discovery Engine | ✅ Implementada |
-| EPC-23B Runtime Canonical Model | ✅ Implementada |
-| EPC-23C Runtime Registry | ✅ Implementada |
-| EPC-23D Runtime Orchestration Engine | ✅ Implementada |
-| EPC-23E EnterpriseGenericTissRuntimeEngine | ✅ Implementada |
-| EPC-23R Runtime Final Certification | ⏳ Não iniciada |
-| AUDIT-23 Runtime Final Audit | ⏳ Não iniciada |
+| ARCH-23 Runtime Discovery | ✅ Certificada / Congelada |
+| EPC-23A Runtime Discovery Engine | ✅ Certificada / Congelada |
+| EPC-23B Runtime Canonical Model | ✅ Certificada / Congelada |
+| EPC-23C Runtime Registry | ✅ Certificada / Congelada |
+| EPC-23D Runtime Orchestration Engine | ✅ Certificada / Congelada |
+| EPC-23E EnterpriseGenericTissRuntimeEngine | ✅ Certificada / Congelada |
+| EPC-23R Runtime Final Certification | ✅ Certificada / Congelada |
+| AUDIT-23 Runtime Final Audit | ⏳ Autorizada (não iniciada) |
 
 ## 4. Capabilities
 
