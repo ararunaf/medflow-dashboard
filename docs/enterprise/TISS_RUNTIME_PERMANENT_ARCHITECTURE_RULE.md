@@ -23,14 +23,15 @@ Este documento rege a Fase 7 — Enterprise Runtime Foundation do projeto `medfl
 
 | Entrega | Status |
 |---|---|
-| ARCH-23 Runtime Discovery | ✅ Certificada / Congelada |
-| EPC-23A Runtime Discovery Engine | ✅ Certificada / Congelada |
-| EPC-23B Runtime Canonical Model | ✅ Certificada / Congelada |
-| EPC-23C Runtime Registry | ✅ Certificada / Congelada |
-| EPC-23D Runtime Orchestration Engine | ✅ Certificada / Congelada |
-| EPC-23E EnterpriseGenericTissRuntimeEngine | ✅ Certificada / Congelada |
-| EPC-23R Runtime Final Certification | ✅ Certificada / Congelada |
-| AUDIT-23 Runtime Final Audit | ⏳ Autorizada (não iniciada) |
+| ARCH-23 Runtime Discovery | ✅ Certificada / Congelada / Encerrada |
+| EPC-23A Runtime Discovery Engine | ✅ Certificada / Congelada / Encerrada |
+| EPC-23B Runtime Canonical Model | ✅ Certificada / Congelada / Encerrada |
+| EPC-23C Runtime Registry | ✅ Certificada / Congelada / Encerrada |
+| EPC-23D Runtime Orchestration Engine | ✅ Certificada / Congelada / Encerrada |
+| EPC-23E EnterpriseGenericTissRuntimeEngine | ✅ Certificada / Congelada / Encerrada |
+| EPC-23R Runtime Final Certification | ✅ Certificada / Congelada / Encerrada |
+| AUDIT-23 Runtime Final Audit | ✅ Certificada / Congelada / Encerrada |
+| Fase 8 | ⏳ Não iniciada |
 
 ## 4. Capabilities
 
@@ -174,4 +175,4 @@ A Runtime Foundation:
 
 ## 15. Conclusão
 
-A Fase 7 foi implementada estruturalmente em todas as sprints EPC-23A, EPC-23B, EPC-23C, EPC-23D e EPC-23E. O `EnterpriseGenericTissRuntimeEngine` foi estabelecido como o único Gateway oficial da TISS Runtime Foundation. Nenhum código funcional, execução real, persistência, cache, fila, IA, XML, SOAP, REST, GraphQL, OCR, Rule Engine, algoritmo ou integração externa foi introduzido. A Fase 7 permanece 100% estrutural. A Fase 8 não foi iniciada.
+A Fase 7 foi implementada estruturalmente em todas as sprints EPC-23A, EPC-23B, EPC-23C, EPC-23D e EPC-23E, certificada na EPC-23R e auditada na AUDIT-23. O `EnterpriseGenericTissRuntimeEngine` foi estabelecido como o único Gateway oficial da TISS Runtime Foundation. Nenhum código funcional, execução real, persistência, cache, fila, IA, XML, SOAP, REST, GraphQL, OCR, Rule Engine, algoritmo ou integração externa foi introduzido. A Fase 7 está 100% estrutural, auditada, certificada, congelada e encerrada. A Fase 8 não foi iniciada.
