@@ -21,7 +21,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | Entrega | Status |
 |---|---|
 | ARCH-22 Intelligence Discovery | ✅ Concluída |
-| EPC-22A Intelligence Discovery Engine | ⏳ Não iniciada |
+| EPC-22A Intelligence Discovery Engine | ✅ Implementada |
 | EPC-22B Intelligence Canonical Model | ⏳ Não iniciada |
 | EPC-22C Intelligence Registry | ⏳ Não iniciada |
 | EPC-22D Intelligence Decision Engine | ⏳ Não iniciada |
@@ -33,7 +33,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 
 | Capability | Valor |
 |---|---|
-| `tissIntelligenceDiscoveryImplemented` | `false` |
+| `tissIntelligenceDiscoveryImplemented` | `true` |
 | `tissIntelligenceCanonicalModelImplemented` | `false` |
 | `tissIntelligenceRegistryImplemented` | `false` |
 | `tissIntelligenceDecisionEngineImplemented` | `false` |
@@ -100,3 +100,16 @@ A Fase 6 poderá reutilizar, sem modificar:
 ## 9. Condição de permanência
 
 Todas as sprints da Fase 6 permanecem estruturais até que uma sprint específica autorize funcionalidade. Nenhum parser, IA, LLM, algoritmo, consulta real, cache, persistência, runtime, XML, SOAP, TUSS, OCR, Edge Function ou Supabase será introduzido sem autorização explícita.
+
+## 10. Future Decision Layer
+
+> **Diretriz arquitetural futura.**
+>
+> A camada de decisão (`EnterpriseTissIntelligenceDecisionEngine` — EPC-22D) ainda não foi implementada. Sua evolução está prevista para sprints futuras e poderá contemplar os seguintes conceitos, sem antecipar design ou código:
+>
+> - **Rule Evaluation** — estruturação de regras de negócio TISS para análise de conformidade.
+> - **Recommendation** — geração de sugestões baseadas nos contratos canônicos de Vocabulary, Mapping e Intelligence.
+> - **Explainability** — rastreabilidade das decisões produzidas.
+> - **Decision Output** — contrato canônico representando o resultado de uma decisão.
+>
+> Nenhuma classe, interface, capability ou arquivo foi criado para estes conceitos nesta sprint. A documentação acima serve apenas como diretriz arquitetural futura.
