@@ -35,3 +35,8 @@ export const EPC21C_TISS_MAPPING_REGISTRY_CAPABILITIES: EnterpriseTissMappingCap
   ...EPC21B_TISS_MAPPING_CANONICAL_MODEL_CAPABILITIES,
   tissMappingRegistryImplemented: true,
 };
+
+export const EPC21D_TISS_MAPPING_QUERY_ENGINE_CAPABILITIES: EnterpriseTissMappingCapabilities = {
+  ...EPC21C_TISS_MAPPING_REGISTRY_CAPABILITIES,
+  tissMappingQueryEngineImplemented: true,
+};
