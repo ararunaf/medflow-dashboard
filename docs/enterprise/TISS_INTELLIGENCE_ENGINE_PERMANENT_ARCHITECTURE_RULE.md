@@ -25,7 +25,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | EPC-22B Intelligence Canonical Model | ✅ Implementada |
 | EPC-22C Intelligence Registry | ✅ Implementada |
 | EPC-22D Intelligence Decision Engine | ✅ Implementada |
-| EPC-22E EnterpriseGenericTissIntelligenceEngine | ⏳ Não iniciada |
+| EPC-22E EnterpriseGenericTissIntelligenceEngine | ✅ Implementada |
 | EPC-22R Final Certification | ⏳ Não iniciada |
 | AUDIT-22 Final Audit | ⏳ Não iniciada |
 
@@ -37,7 +37,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | `tissIntelligenceCanonicalModelImplemented` | `true` |
 | `tissIntelligenceRegistryImplemented` | `true` |
 | `tissIntelligenceDecisionEngineImplemented` | `true` |
-| `tissGenericIntelligenceEngineImplemented` | `false` |
+| `tissGenericIntelligenceEngineImplemented` | `true` |
 
 ## 5. Cadeia arquitetural
 
@@ -210,3 +210,53 @@ A `EnterpriseTissIntelligenceDecisionEngine` comprova documentalmente que:
 - **NÃO consome XML.**
 - **NÃO consome SOAP.**
 - Permanece **completamente estrutural**.
+
+## 16. Architectural Gateway Proof
+
+### 16.1 Consumidores permitidos
+
+- Módulos enterprise futuros que precisem acessar a TISS Intelligence Foundation.
+- Pontos de entrada controlados (Console, Orchestration, Governance, etc.).
+- Qualquer acesso externo passa exclusivamente por `EnterpriseGenericTissIntelligenceEngine`.
+
+### 16.2 Consumidores proibidos
+
+- Acesso direto à `EnterpriseTissIntelligenceDiscoveryEngine`.
+- Acesso direto à `EnterpriseTissIntelligenceCanonicalEngine`.
+- Acesso direto à `EnterpriseTissIntelligenceRegistryEngine`.
+- Acesso direto à `EnterpriseTissIntelligenceDecisionEngine`.
+- Acesso direto às engines internas de Vocabulary ou Mapping.
+
+### 16.3 Prova de encapsulamento
+
+A `EnterpriseGenericTissIntelligenceEngine` encapsula as quatro engines internas da Fase 6, expondo apenas referências estruturais e a função `getCapabilities()`. Não expõe métodos de negócio, regras, IA, decisão, inferência, recomendação, explicabilidade, scoring ou execução.
+
+### 16.4 Prova de inexistência de acessos laterais
+
+A engine consome exclusivamente as camadas imediatamente inferiores e os Gateways oficiais das fases anteriores. Não existe dependência cruzada entre as camadas internas da Vocabulary, Mapping e Intelligence.
+
+### 16.5 Prova de inexistência de dependências circulares
+
+A cadeia segue estritamente o fluxo top-down:
+
+```text
+Generic Intelligence → Decision → Registry → Canonical → Discovery → Mapping → Vocabulary → Blocos H/I/J
+```
+
+Nenhuma camada inferior consome uma camada superior.
+
+### 16.6 Prova documental de unicidade do Gateway
+
+Nenhuma outra engine da Fase 6 é exportada como ponto de acesso público. O `index.ts` do `generic-intelligence` exporta apenas `EnterpriseGenericTissIntelligenceEngine`. Os diretórios `intelligence-discovery`, `intelligence-canonical`, `intelligence-registry` e `intelligence-decision` não são expostos como pontos de entrada globais, mantendo seu consumo reservado à cadeia interna.
+
+## 17. Foundation Independence Matrix
+
+| Foundation | Independência | Gateway oficial |
+|---|---|---|
+| **Vocabulary Foundation (Fase 4)** | Continua independente, sem alterações | `EnterpriseGenericTissVocabularyEngine` |
+| **Mapping Foundation (Fase 5)** | Continua independente, sem alterações | `EnterpriseGenericTissMappingEngine` |
+| **Intelligence Foundation (Fase 6)** | Continua independente, sem alterar Vocabulary nem Mapping | `EnterpriseGenericTissIntelligenceEngine` |
+
+- Nenhuma Foundation altera outra.
+- A comunicação entre as fundações ocorre exclusivamente pelos Gateways oficiais.
+- As engines internas de cada Foundation permanecem encapsuladas.
