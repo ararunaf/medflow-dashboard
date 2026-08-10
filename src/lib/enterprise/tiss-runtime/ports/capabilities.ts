@@ -21,3 +21,11 @@ export const EPC23B_TISS_RUNTIME_CANONICAL_CAPABILITIES: EnterpriseTissRuntimeCa
   tissRuntimeOrchestrationImplemented: false,
   tissGenericRuntimeEngineImplemented: false,
 };
+
+export const EPC23C_TISS_RUNTIME_REGISTRY_CAPABILITIES: EnterpriseTissRuntimeCapabilities = {
+  tissRuntimeDiscoveryImplemented: true,
+  tissRuntimeCanonicalModelImplemented: true,
+  tissRuntimeRegistryImplemented: true,
+  tissRuntimeOrchestrationImplemented: false,
+  tissGenericRuntimeEngineImplemented: false,
+};
