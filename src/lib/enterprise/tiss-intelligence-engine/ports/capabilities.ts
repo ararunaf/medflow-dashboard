@@ -32,3 +32,9 @@ export const EPC22B_TISS_INTELLIGENCE_CANONICAL_MODEL_CAPABILITIES: EnterpriseTi
     ...EPC22A_TISS_INTELLIGENCE_DISCOVERY_CAPABILITIES,
     tissIntelligenceCanonicalModelImplemented: true,
   };
+
+export const EPC22C_TISS_INTELLIGENCE_REGISTRY_CAPABILITIES: EnterpriseTissIntelligenceCapabilities =
+  {
+    ...EPC22B_TISS_INTELLIGENCE_CANONICAL_MODEL_CAPABILITIES,
+    tissIntelligenceRegistryImplemented: true,
+  };

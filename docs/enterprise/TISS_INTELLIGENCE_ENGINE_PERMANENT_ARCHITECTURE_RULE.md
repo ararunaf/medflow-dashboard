@@ -23,7 +23,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | ARCH-22 Intelligence Discovery | ✅ Concluída |
 | EPC-22A Intelligence Discovery Engine | ✅ Implementada |
 | EPC-22B Intelligence Canonical Model | ✅ Implementada |
-| EPC-22C Intelligence Registry | ⏳ Não iniciada |
+| EPC-22C Intelligence Registry | ✅ Implementada |
 | EPC-22D Intelligence Decision Engine | ⏳ Não iniciada |
 | EPC-22E EnterpriseGenericTissIntelligenceEngine | ⏳ Não iniciada |
 | EPC-22R Final Certification | ⏳ Não iniciada |
@@ -35,7 +35,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 |---|---|
 | `tissIntelligenceDiscoveryImplemented` | `true` |
 | `tissIntelligenceCanonicalModelImplemented` | `true` |
-| `tissIntelligenceRegistryImplemented` | `false` |
+| `tissIntelligenceRegistryImplemented` | `true` |
 | `tissIntelligenceDecisionEngineImplemented` | `false` |
 | `tissGenericIntelligenceEngineImplemented` | `false` |
 
@@ -134,3 +134,46 @@ Os modelos da camada Intelligence (`TissIntelligenceContext`, `TissDecisionScena
 > - **Decision Output** — contrato canônico representando o resultado de uma decisão.
 >
 > Nenhuma classe, interface, capability ou arquivo foi criado para estes conceitos nesta sprint. A documentação acima serve apenas como diretriz arquitetural futura.
+
+## 12. Intelligence Responsibility Matrix
+
+| Camada | Responsabilidade | Consome |
+|---|---|---|
+| **Discovery** | Identifica o domínio da inteligência | Gateways Vocabulary + Mapping + Blocos H/I/J |
+| **Canonical** | Modela semanticamente o domínio | Discovery + Gateways + Blocos H/I/J |
+| **Registry** | Organiza e referencia contratos | Canonical + Discovery + Gateways + Blocos H/I/J |
+| **Decision** | Futura tomada de decisão | Registry + Gateways + Blocos H/I/J |
+| **Gateway** | Futura exposição pública | Decision + Gateways + Blocos H/I/J |
+
+A Registry:
+
+- Não substitui a Canonical.
+- Não antecipa a Decision.
+- Não executa decisões.
+- Apenas referencia contratos homologados.
+
+## 13. Structural Isolation Proof
+
+A `EnterpriseTissIntelligenceRegistryEngine` comprova isolamento estrutural:
+
+- **Não importa nenhuma engine interna da Vocabulary Foundation.**
+  - Não referencia `EnterpriseTissVocabularyDiscoveryEngine`.
+  - Não referencia `EnterpriseTissVocabularyCanonicalEngine`.
+  - Não referencia `EnterpriseTissVocabularyRegistryEngine`.
+  - Não referencia `EnterpriseTissVocabularyQueryEngine`.
+
+- **Não importa nenhuma engine interna da Mapping Foundation.**
+  - Não referencia `EnterpriseTissMappingDiscoveryEngine`.
+  - Não referencia `EnterpriseTissMappingCanonicalEngine`.
+  - Não referencia `EnterpriseTissMappingRegistryEngine`.
+  - Não referencia `EnterpriseTissMappingQueryEngine`.
+
+- **Consome apenas os Gateways oficiais e as engines Intelligence autorizadas.**
+  - `EnterpriseTissIntelligenceCanonicalEngine`
+  - `EnterpriseTissIntelligenceDiscoveryEngine`
+  - `EnterpriseGenericTissMappingEngine`
+  - `EnterpriseGenericTissVocabularyEngine`
+  - `GenericTissEngine`
+  - `GenericTissIntegrationEngine`
+  - `GenericWorkflowEngine`
+  - `EnterpriseMasterOrchestrationEngine`
