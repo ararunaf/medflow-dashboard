@@ -17,14 +17,15 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 
 | Entrega | Status |
 |---|---|
-| ARCH-TI00 | ✅ Descoberta arquitetural |
-| EPC-20A Vocabulary Discovery | ✅ Implementada |
-| EPC-20B Vocabulary Canonical Model | ✅ Implementada |
-| EPC-20C Vocabulary Registry | ✅ Implementada |
-| EPC-20D Vocabulary Query Engine | ✅ Implementada |
-| EPC-20E GenericTissVocabularyEngine | ✅ Implementada |
-| EPC-20R Final Certification | ✅ Certificada e Congelada |
-| AUDIT-20 Final Audit | 🚧 Autorizada (não iniciada) |
+| ARCH-20 TISS Vocabulary Foundation | ✅ Certificada |
+| EPC-20A Vocabulary Discovery | ✅ Certificada |
+| EPC-20B Vocabulary Canonical Model | ✅ Certificada |
+| EPC-20C Vocabulary Registry | ✅ Certificada |
+| EPC-20D Vocabulary Query Engine | ✅ Certificada |
+| EPC-20E GenericTissVocabularyEngine | ✅ Certificada |
+| EPC-20R Final Certification | ✅ Certificada |
+| AUDIT-20 Final Audit | ✅ Certificada / Congelada / Encerrada |
+| ARCH-21 | 🚧 Autorizada (não iniciada) |
 
 ## 4. Componentes certificados
 
@@ -51,6 +52,7 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 - `docs/enterprise/EPC20D_TISS_VOCABULARY_QUERY_ENGINE.md`
 - `docs/enterprise/EPC20E_GENERIC_TISS_VOCABULARY_ENGINE.md`
 - `docs/enterprise/EPC20R_TISS_VOCABULARY_FINAL_CERTIFICATION.md`
+- `docs/enterprise/AUDIT_20_TISS_VOCABULARY_ARCHITECTURE_AUDIT.md`
 
 ## 5. Capabilities
 
