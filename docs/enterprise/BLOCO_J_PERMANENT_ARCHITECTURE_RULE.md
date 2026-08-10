@@ -64,7 +64,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | J-05 | Enterprise Governance Engine | ✅ Certificada / Congelada |
 | J-06 | Enterprise Console Engine | ✅ Certificada / Congelada |
 | J-07 | Enterprise Master Routing Engine | ✅ Certificada / Congelada |
-| J-08 | Enterprise Master Monitoring Engine | ⛔ Não autorizada |
+| J-08 | Enterprise Master Monitoring Engine | ✅ Certificada / Congelada |
 | J-09 | Enterprise Master Recovery Engine | ⛔ Não autorizada |
 | J-10 | Generic Enterprise Orchestration Engine (fachada) | ⛔ Não autorizada |
 
@@ -80,7 +80,7 @@ enterprisePolicyImplemented: true
 enterpriseGovernanceImplemented: true
 enterpriseConsoleImplemented: true
 enterpriseMasterRoutingImplemented: true
-enterpriseMasterMonitoringImplemented: false
+enterpriseMasterMonitoringImplemented: true
 enterpriseMasterRecoveryImplemented: false
 enterpriseMasterOrchestrationImplemented: false
 ```
@@ -104,6 +104,8 @@ enterpriseMasterOrchestrationImplemented: false
 - `src/lib/enterprise/master-orchestration/console/index.ts`
 - `src/lib/enterprise/master-orchestration/routing/enterprise-master-routing-engine.ts`
 - `src/lib/enterprise/master-orchestration/routing/index.ts`
+- `src/lib/enterprise/master-orchestration/monitoring/enterprise-master-monitoring-engine.ts`
+- `src/lib/enterprise/master-orchestration/monitoring/index.ts`
 - `scripts/enterprise/tests/enterprise-command-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-orchestration-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-saga-engine.test.ts`
@@ -111,42 +113,52 @@ enterpriseMasterOrchestrationImplemented: false
 - `scripts/enterprise/tests/enterprise-governance-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-console-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-master-routing-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-master-monitoring-engine.test.ts`
 
-## 8. Cadeia de dependências J-01 a J-07
+## 8. Cadeia de dependências J-01 a J-08
 
 ```text
-EnterpriseMasterRoutingEngine (J-07)
-  ├─ EnterpriseConsoleEngine (J-06)
-  │    ├─ EnterpriseGovernanceEngine (J-05)
-  │    │    ├─ EnterprisePolicyEngine (J-04)
-  │    │    │    ├─ EnterpriseSagaEngine (J-03)
-  │    │    │    │    ├─ EnterpriseOrchestrationEngine (J-02)
+EnterpriseMasterMonitoringEngine (J-08)
+  ├─ EnterpriseMasterRoutingEngine (J-07)
+  │    ├─ EnterpriseConsoleEngine (J-06)
+  │    │    ├─ EnterpriseGovernanceEngine (J-05)
+  │    │    │    ├─ EnterprisePolicyEngine (J-04)
+  │    │    │    │    ├─ EnterpriseSagaEngine (J-03)
+  │    │    │    │    │    ├─ EnterpriseOrchestrationEngine (J-02)
+  │    │    │    │    │    │    ├─ EnterpriseCommandEngine (J-01)
+  │    │    │    │    │    │    │    ├─ GenericBusinessEngine (E)
+  │    │    │    │    │    │    │    ├─ GenericIntegrationEngine (F)
+  │    │    │    │    │    │    │    ├─ GenericTissEngine (G)
+  │    │    │    │    │    │    │    ├─ GenericTissIntegrationEngine (H)
+  │    │    │    │    │    │    │    └─ GenericWorkflowEngine (I)
+  │    │    │    │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
+  │    │    │    │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
   │    │    │    │    │    ├─ EnterpriseCommandEngine (J-01)
-  │    │    │    │    │    │    ├─ GenericBusinessEngine (E)
-  │    │    │    │    │    │    ├─ GenericIntegrationEngine (F)
-  │    │    │    │    │    │    ├─ GenericTissEngine (G)
-  │    │    │    │    │    │    ├─ GenericTissIntegrationEngine (H)
-  │    │    │    │    │    │    └─ GenericWorkflowEngine (I)
   │    │    │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │    │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    │    │    │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    │    │    │    ├─ EnterpriseCommandEngine (J-01)
   │    │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    │    │    ├─ EnterpriseSagaEngine (J-03)
   │    │    │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    │    │    ├─ EnterpriseCommandEngine (J-01)
   │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    │    ├─ EnterprisePolicyEngine (J-04)
   │    │    ├─ EnterpriseSagaEngine (J-03)
   │    │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    │    ├─ EnterpriseCommandEngine (J-01)
   │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    ├─ EnterpriseGovernanceEngine (J-05)
   │    ├─ EnterprisePolicyEngine (J-04)
   │    ├─ EnterpriseSagaEngine (J-03)
   │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    ├─ EnterpriseCommandEngine (J-01)
   │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  ├─ EnterpriseConsoleEngine (J-06)
   ├─ EnterpriseGovernanceEngine (J-05)
   ├─ EnterprisePolicyEngine (J-04)
   ├─ EnterpriseSagaEngine (J-03)
@@ -157,7 +169,7 @@ EnterpriseMasterRoutingEngine (J-07)
 ```
 
 Não existem imports diretos para Adapters, Providers, Registries, Stores ou engines dos Blocos A-H.
-Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03, J-04, J-05, J-06 e J-07. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
+Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03, J-04, J-05, J-06, J-07 e J-08. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
 
 ## 9. Matriz de acoplamento EnterpriseGovernanceEngine (J-05)
 
@@ -223,6 +235,54 @@ As 11 dependências diretas são obrigatórias conforme a especificação da Spr
 - Nenhum Port, Provider, Factory, Registry, Adapter ou Store foi criado ao longo das 7 sprints.
 - Todas as engines anteriores permanecem congeladas e sem modificações.
 
-## 14. Recomendação
+## 14. Matriz de acoplamento EnterpriseMasterMonitoringEngine (J-08)
+
+| Métrica | Valor |
+|---|---|
+| Imports diretos | 12 |
+| Dependências obrigatórias (diretas) | 12 (masterRouting + console + governance + policy + saga + orchestration + command + 5 fachadas) |
+| Dependências opcionais | 0 |
+| Dependências redundantes | 0 |
+| Dependências transitivas até fachadas | 18 camadas |
+| Acoplamentos indevidos (Adapters/Providers/Registries/Stores/Blocos A-H) | 0 |
+
+As 12 dependências diretas são obrigatórias conforme a especificação da Sprint J-08. Não há redundâncias passíveis de remoção sem violar o contrato de consumo exclusivo. Não há dependências circulares.
+
+## 15. Análise de estabilidade arquitetural J-07 × J-08
+
+Conforme `git diff` executado entre as sprints, as engines J-01 a J-07 não foram alteradas.
+
+- Nenhuma engine J-01 a J-07 sofreu alteração.
+- Nenhuma fachada E, F, G, H, I sofreu alteração.
+- Nenhum Port foi alterado.
+- Nenhum Provider foi alterado.
+- Nenhum Adapter foi alterado.
+- Nenhum Registry foi alterado.
+- Nenhuma capability anterior mudou — `J08_ENTERPRISE_MASTER_MONITORING_CAPABILITIES` estende `J07_ENTERPRISE_MASTER_ROUTING_CAPABILITIES` e ativa apenas `enterpriseMasterMonitoringImplemented`.
+- Nenhum import novo apareceu nas engines antigas; `EnterpriseMasterMonitoringEngine` é o único arquivo com imports adicionais.
+
+## 16. Painel consolidado do Bloco J
+
+| Indicador | Valor |
+|---|---|
+| Total de engines | 8 |
+| Engines congeladas | 8 |
+| Capabilities TRUE | 8 (J-01 a J-08) |
+| Capabilities FALSE | 2 (`enterpriseMasterRecoveryImplemented`, `enterpriseMasterOrchestrationImplemented`) |
+| Ports criados | 0 |
+| Providers criados | 0 |
+| Factories criadas | 0 |
+| Registries criados | 0 |
+| Adapters criados | 0 |
+| Stores criados | 0 |
+| Componentes reutilizados | 40+ (5 fachadas por engine × 8 = 40 referências, além das cadeias) |
+| Reutilização (%) | 100% (nenhum componente estrutural novo) |
+| Profundidade arquitetural | 8 |
+| Imports diretos totais | 62 (5 + 6 + 7 + 8 + 9 + 10 + 11 + 12) |
+| Dependências circulares | 0 |
+| Crescimento lateral | 0 |
+| Regressões | 0 |
+
+## 17. Recomendação
 
 A arquitetura do Bloco J está apta a ser iniciada. A Sprint J-01 pode ser autorizada quando houver requisito funcional aprovado, desde que respeite as regras permanentes deste documento.

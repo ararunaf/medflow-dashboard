@@ -67,3 +67,9 @@ export const J07_ENTERPRISE_MASTER_ROUTING_CAPABILITIES: EnterpriseMasterOrchest
     ...J06_ENTERPRISE_CONSOLE_CAPABILITIES,
     enterpriseMasterRoutingImplemented: true,
   };
+
+export const J08_ENTERPRISE_MASTER_MONITORING_CAPABILITIES: EnterpriseMasterOrchestrationCapabilities =
+  {
+    ...J07_ENTERPRISE_MASTER_ROUTING_CAPABILITIES,
+    enterpriseMasterMonitoringImplemented: true,
+  };
