@@ -23,8 +23,8 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 | EPC-20C Vocabulary Registry | ✅ Implementada |
 | EPC-20D Vocabulary Query Engine | ✅ Implementada |
 | EPC-20E GenericTissVocabularyEngine | ✅ Implementada |
-| EPC-20R Final Certification | 🚧 Autorizada (não iniciada) |
-| AUDIT-20 Final Audit | ⏳ Não iniciada |
+| EPC-20R Final Certification | ✅ Certificada e Congelada |
+| AUDIT-20 Final Audit | 🚧 Autorizada (não iniciada) |
 
 ## 4. Componentes certificados
 
@@ -50,6 +50,7 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 - `docs/enterprise/EPC20C_TISS_VOCABULARY_REGISTRY.md`
 - `docs/enterprise/EPC20D_TISS_VOCABULARY_QUERY_ENGINE.md`
 - `docs/enterprise/EPC20E_GENERIC_TISS_VOCABULARY_ENGINE.md`
+- `docs/enterprise/EPC20R_TISS_VOCABULARY_FINAL_CERTIFICATION.md`
 
 ## 5. Capabilities
 
