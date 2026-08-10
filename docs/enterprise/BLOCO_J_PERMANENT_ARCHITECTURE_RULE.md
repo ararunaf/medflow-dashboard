@@ -67,6 +67,8 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | J-08 | Enterprise Master Monitoring Engine | ✅ Certificada / Congelada |
 | J-09 | Enterprise Master Recovery Engine | ✅ Certificada / Congelada |
 | J-10 | EnterpriseMasterOrchestrationEngine — Topo da Master Layer | ✅ Certificada / Congelada |
+| J-10R | Final Certification — Baseline congelada `913720d6` | ✅ Certificada |
+| AUDIT-J | Auditoria final do Bloco J | 🚧 Autorizada (não iniciada) |
 
 ---
 
