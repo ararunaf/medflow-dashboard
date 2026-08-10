@@ -261,3 +261,9 @@ Nenhuma outra engine da Fase 6 é exportada como ponto de acesso público. O `in
 - Nenhuma Foundation altera outra.
 - A comunicação entre as fundações ocorre exclusivamente pelos Gateways oficiais.
 - As engines internas de cada Foundation permanecem encapsuladas.
+
+## 18. Fase 7 — Enterprise Runtime Foundation
+
+A Fase 7 (Runtime Foundation) foi arquiteturalmente descoberta e documentada em `ARCH23_RUNTIME_FOUNDATION_DISCOVERY.md`. Ela consumirá a Fase 6 exclusivamente pelo Gateway oficial `EnterpriseGenericTissIntelligenceEngine`.
+
+A Fase 7 permanece sem implementação de código. A EPC-23A ainda não foi iniciada.
