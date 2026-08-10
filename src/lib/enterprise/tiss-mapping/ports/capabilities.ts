@@ -30,3 +30,8 @@ export const EPC21B_TISS_MAPPING_CANONICAL_MODEL_CAPABILITIES: EnterpriseTissMap
   ...EPC21A_TISS_MAPPING_DISCOVERY_CAPABILITIES,
   tissMappingCanonicalModelImplemented: true,
 };
+
+export const EPC21C_TISS_MAPPING_REGISTRY_CAPABILITIES: EnterpriseTissMappingCapabilities = {
+  ...EPC21B_TISS_MAPPING_CANONICAL_MODEL_CAPABILITIES,
+  tissMappingRegistryImplemented: true,
+};
