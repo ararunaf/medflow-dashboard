@@ -20,14 +20,14 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 
 | Entrega | Status |
 |---|---|
-| ARCH-22 Intelligence Discovery | ✅ Concluída / Congelada |
-| EPC-22A Intelligence Discovery Engine | ✅ Certificada / Congelada |
-| EPC-22B Intelligence Canonical Model | ✅ Certificada / Congelada |
-| EPC-22C Intelligence Registry | ✅ Certificada / Congelada |
-| EPC-22D Intelligence Decision Engine | ✅ Certificada / Congelada |
-| EPC-22E EnterpriseGenericTissIntelligenceEngine | ✅ Certificada / Congelada |
-| EPC-22R Final Certification | ✅ Certificada / Congelada |
-| AUDIT-22 Final Audit | ⏳ Autorizada (não iniciada) |
+| ARCH-22 Intelligence Discovery | ✅ Certificada / Congelada / Encerrada |
+| EPC-22A Intelligence Discovery Engine | ✅ Certificada / Congelada / Encerrada |
+| EPC-22B Intelligence Canonical Model | ✅ Certificada / Congelada / Encerrada |
+| EPC-22C Intelligence Registry | ✅ Certificada / Congelada / Encerrada |
+| EPC-22D Intelligence Decision Engine | ✅ Certificada / Congelada / Encerrada |
+| EPC-22E EnterpriseGenericTissIntelligenceEngine | ✅ Certificada / Congelada / Encerrada |
+| EPC-22R Final Certification | ✅ Certificada / Congelada / Encerrada |
+| AUDIT-22 Final Audit | ✅ Certificada / Congelada / Encerrada |
 | Fase 7 | ⏳ Não iniciada |
 
 ## 4. Capabilities
