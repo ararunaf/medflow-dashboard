@@ -59,7 +59,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | ARCH-J00 | Enterprise Master Architecture Discovery | ✅ Certificada |
 | J-01 | Enterprise Command Engine | ✅ Certificada / Congelada |
 | J-02 | Enterprise Orchestration Engine | ✅ Certificada / Congelada |
-| J-03 | Enterprise Saga Engine | ⛔ Não autorizada |
+| J-03 | Enterprise Saga Engine | ✅ Certificada / Congelada |
 | J-04 | Enterprise Policy Engine | ⛔ Não autorizada |
 | J-05 | Enterprise Governance Engine | ⛔ Não autorizada |
 | J-06 | Enterprise Console Engine | ⛔ Não autorizada |
@@ -75,7 +75,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 ```text
 enterpriseCommandImplemented: true
 enterpriseOrchestrationImplemented: true
-enterpriseSagaImplemented: false
+enterpriseSagaImplemented: true
 enterprisePolicyImplemented: false
 enterpriseGovernanceImplemented: false
 enterpriseConsoleImplemented: false
@@ -94,8 +94,11 @@ enterpriseMasterOrchestrationImplemented: false
 - `src/lib/enterprise/master-orchestration/command/index.ts`
 - `src/lib/enterprise/master-orchestration/orchestration/enterprise-orchestration-engine.ts`
 - `src/lib/enterprise/master-orchestration/orchestration/index.ts`
+- `src/lib/enterprise/master-orchestration/saga/enterprise-saga-engine.ts`
+- `src/lib/enterprise/master-orchestration/saga/index.ts`
 - `scripts/enterprise/tests/enterprise-command-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-orchestration-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-saga-engine.test.ts`
 
 ## 8. Recomendação
 
