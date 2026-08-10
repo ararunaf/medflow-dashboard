@@ -22,7 +22,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 |---|---|
 | ARCH-22 Intelligence Discovery | ✅ Concluída |
 | EPC-22A Intelligence Discovery Engine | ✅ Implementada |
-| EPC-22B Intelligence Canonical Model | ⏳ Não iniciada |
+| EPC-22B Intelligence Canonical Model | ✅ Implementada |
 | EPC-22C Intelligence Registry | ⏳ Não iniciada |
 | EPC-22D Intelligence Decision Engine | ⏳ Não iniciada |
 | EPC-22E EnterpriseGenericTissIntelligenceEngine | ⏳ Não iniciada |
@@ -34,7 +34,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | Capability | Valor |
 |---|---|
 | `tissIntelligenceDiscoveryImplemented` | `true` |
-| `tissIntelligenceCanonicalModelImplemented` | `false` |
+| `tissIntelligenceCanonicalModelImplemented` | `true` |
 | `tissIntelligenceRegistryImplemented` | `false` |
 | `tissIntelligenceDecisionEngineImplemented` | `false` |
 | `tissGenericIntelligenceEngineImplemented` | `false` |
@@ -101,7 +101,28 @@ A Fase 6 poderá reutilizar, sem modificar:
 
 Todas as sprints da Fase 6 permanecem estruturais até que uma sprint específica autorize funcionalidade. Nenhum parser, IA, LLM, algoritmo, consulta real, cache, persistência, runtime, XML, SOAP, TUSS, OCR, Edge Function ou Supabase será introduzido sem autorização explícita.
 
-## 10. Future Decision Layer
+## 10. Semantic Responsibility Matrix
+
+A TISS Intelligence Foundation é composta por três responsabilidades semânticas distintas e não sobrepostas:
+
+```text
+Vocabulary
+    ↓ conceitos
+Mapping
+    ↓ relacionamentos
+Intelligence
+    ↓ contexto decisório
+```
+
+| Foundation | Responde a | Representa | Não representa |
+|---|---|---|---|
+| Vocabulary | "O que existe?" | Conceitos, termos, definições canônicas | Cenários, critérios, recomendações, decisões |
+| Mapping | "Como os conceitos se relacionam?" | Relações, mapeamentos, fontes, alvos | Regras de decisão, perfis de recomendação |
+| Intelligence | "Como essas informações podem apoiar decisões?" | Contextos, cenários, critérios, evidências, perfis de recomendação, domínios de decisão | Conceitos em si, catálogos ou relações diretas de mapeamento |
+
+Os modelos da camada Intelligence (`TissIntelligenceContext`, `TissDecisionScenario`, `TissDecisionCriterion`, `TissRecommendationProfile`, `TissEvidenceReference`, `TissDecisionDomain`) são estruturas semânticas de decisão. Eles não duplicam conceitos da Vocabulary Foundation, nem relações da Mapping Foundation. A evolução para Rule Evaluation, Recommendation, Explainability e Decision Output ocorrerá em sprints futuras.
+
+## 11. Future Decision Layer
 
 > **Diretriz arquitetural futura.**
 >

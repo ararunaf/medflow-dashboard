@@ -26,3 +26,9 @@ export const EPC22A_TISS_INTELLIGENCE_DISCOVERY_CAPABILITIES: EnterpriseTissInte
     ...BASELINE_TISS_INTELLIGENCE_CAPABILITIES,
     tissIntelligenceDiscoveryImplemented: true,
   };
+
+export const EPC22B_TISS_INTELLIGENCE_CANONICAL_MODEL_CAPABILITIES: EnterpriseTissIntelligenceCapabilities =
+  {
+    ...EPC22A_TISS_INTELLIGENCE_DISCOVERY_CAPABILITIES,
+    tissIntelligenceCanonicalModelImplemented: true,
+  };
