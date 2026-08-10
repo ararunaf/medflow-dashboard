@@ -32,3 +32,9 @@ export const EPC20B_TISS_VOCABULARY_CANONICAL_MODEL_CAPABILITIES: EnterpriseTiss
     ...EPC20A_TISS_VOCABULARY_DISCOVERY_CAPABILITIES,
     tissVocabularyCanonicalModelImplemented: true,
   };
+
+export const EPC20C_TISS_VOCABULARY_REGISTRY_CAPABILITIES: EnterpriseTissIntelligenceCapabilities =
+  {
+    ...EPC20B_TISS_VOCABULARY_CANONICAL_MODEL_CAPABILITIES,
+    tissVocabularyRegistryImplemented: true,
+  };
