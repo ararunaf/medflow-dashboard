@@ -38,3 +38,9 @@ export const EPC22C_TISS_INTELLIGENCE_REGISTRY_CAPABILITIES: EnterpriseTissIntel
     ...EPC22B_TISS_INTELLIGENCE_CANONICAL_MODEL_CAPABILITIES,
     tissIntelligenceRegistryImplemented: true,
   };
+
+export const EPC22D_TISS_INTELLIGENCE_DECISION_CAPABILITIES: EnterpriseTissIntelligenceCapabilities =
+  {
+    ...EPC22C_TISS_INTELLIGENCE_REGISTRY_CAPABILITIES,
+    tissIntelligenceDecisionEngineImplemented: true,
+  };

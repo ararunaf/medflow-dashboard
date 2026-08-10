@@ -24,7 +24,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | EPC-22A Intelligence Discovery Engine | ✅ Implementada |
 | EPC-22B Intelligence Canonical Model | ✅ Implementada |
 | EPC-22C Intelligence Registry | ✅ Implementada |
-| EPC-22D Intelligence Decision Engine | ⏳ Não iniciada |
+| EPC-22D Intelligence Decision Engine | ✅ Implementada |
 | EPC-22E EnterpriseGenericTissIntelligenceEngine | ⏳ Não iniciada |
 | EPC-22R Final Certification | ⏳ Não iniciada |
 | AUDIT-22 Final Audit | ⏳ Não iniciada |
@@ -36,7 +36,7 @@ Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto 
 | `tissIntelligenceDiscoveryImplemented` | `true` |
 | `tissIntelligenceCanonicalModelImplemented` | `true` |
 | `tissIntelligenceRegistryImplemented` | `true` |
-| `tissIntelligenceDecisionEngineImplemented` | `false` |
+| `tissIntelligenceDecisionEngineImplemented` | `true` |
 | `tissGenericIntelligenceEngineImplemented` | `false` |
 
 ## 5. Cadeia arquitetural
@@ -142,7 +142,7 @@ Os modelos da camada Intelligence (`TissIntelligenceContext`, `TissDecisionScena
 | **Discovery** | Identifica o domínio da inteligência | Gateways Vocabulary + Mapping + Blocos H/I/J |
 | **Canonical** | Modela semanticamente o domínio | Discovery + Gateways + Blocos H/I/J |
 | **Registry** | Organiza e referencia contratos | Canonical + Discovery + Gateways + Blocos H/I/J |
-| **Decision** | Futura tomada de decisão | Registry + Gateways + Blocos H/I/J |
+| **Decision** | Prepara futura tomada de decisão | Registry + Canonical + Discovery + Gateways + Blocos H/I/J |
 | **Gateway** | Futura exposição pública | Decision + Gateways + Blocos H/I/J |
 
 A Registry:
@@ -177,3 +177,36 @@ A `EnterpriseTissIntelligenceRegistryEngine` comprova isolamento estrutural:
   - `GenericTissIntegrationEngine`
   - `GenericWorkflowEngine`
   - `EnterpriseMasterOrchestrationEngine`
+
+## 14. Decision Readiness Matrix
+
+| Camada | Responsabilidade | Consome |
+|---|---|---|
+| **Discovery** | Identifica o contexto de inteligência | Gateways Vocabulary + Mapping + Blocos H/I/J |
+| **Canonical** | Representa semanticamente o domínio | Discovery + Gateways + Blocos H/I/J |
+| **Registry** | Organiza e referencia contratos | Canonical + Discovery + Gateways + Blocos H/I/J |
+| **Decision** | Prepara futura decisão | Registry + Canonical + Discovery + Gateways + Blocos H/I/J |
+| **Gateway** | Futura exposição pública | Decision + Gateways + Blocos H/I/J |
+
+A `EnterpriseTissIntelligenceDecisionEngine` **NÃO** contém:
+
+- Regras
+- Inferência
+- IA
+- Recomendação
+- Explainability
+- Algoritmo
+
+Apenas referencia contratos homologados.
+
+## 15. Future Intelligence Boundary
+
+A `EnterpriseTissIntelligenceDecisionEngine` comprova documentalmente que:
+
+- **NÃO invade responsabilidades das futuras integrações.**
+- **NÃO executa funcionalidades clínicas.**
+- **NÃO acessa bancos.**
+- **NÃO consome OCR.**
+- **NÃO consome XML.**
+- **NÃO consome SOAP.**
+- Permanece **completamente estrutural**.
