@@ -20,14 +20,15 @@ Este documento rege a Fase 5 — TISS Mapping Foundation do projeto `medflow-das
 
 | Entrega | Status |
 |---|---|
-| ARCH-21 Mapping Discovery | ✅ Concluída |
-| EPC-21A Mapping Discovery | ✅ Implementada |
-| EPC-21B Mapping Canonical Model | ✅ Implementada |
-| EPC-21C Mapping Registry | ✅ Implementada |
-| EPC-21D Mapping Query Engine | ✅ Implementada |
-| EPC-21E GenericTissMappingEngine | ✅ Implementada |
-| EPC-21R Final Certification | ⏳ Não iniciada |
-| AUDIT-21 Final Audit | ⏳ Não iniciada |
+| ARCH-21 Mapping Discovery | ✅ Certificada / Congelada |
+| EPC-21A Mapping Discovery | ✅ Certificada / Congelada |
+| EPC-21B Mapping Canonical Model | ✅ Certificada / Congelada |
+| EPC-21C Mapping Registry | ✅ Certificada / Congelada |
+| EPC-21D Mapping Query Engine | ✅ Certificada / Congelada |
+| EPC-21E GenericTissMappingEngine | ✅ Certificada / Congelada |
+| EPC-21R Final Certification | ✅ Certificada / Congelada |
+| AUDIT-21 Final Audit | 🚧 Autorizada (não iniciada) |
+| EPC-22 TISS Intelligence Engine | ⏳ Não iniciada |
 
 ## 4. Capabilities
 
