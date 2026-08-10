@@ -62,7 +62,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | J-03 | Enterprise Saga Engine | ✅ Certificada / Congelada |
 | J-04 | Enterprise Policy Engine | ✅ Certificada / Congelada |
 | J-05 | Enterprise Governance Engine | ✅ Certificada / Congelada |
-| J-06 | Enterprise Console Engine | ⛔ Não autorizada |
+| J-06 | Enterprise Console Engine | ✅ Certificada / Congelada |
 | J-07 | Enterprise Master Routing Engine | ⛔ Não autorizada |
 | J-08 | Enterprise Master Monitoring Engine | ⛔ Não autorizada |
 | J-09 | Enterprise Master Recovery Engine | ⛔ Não autorizada |
@@ -78,7 +78,7 @@ enterpriseOrchestrationImplemented: true
 enterpriseSagaImplemented: true
 enterprisePolicyImplemented: true
 enterpriseGovernanceImplemented: true
-enterpriseConsoleImplemented: false
+enterpriseConsoleImplemented: true
 enterpriseMasterRoutingImplemented: false
 enterpriseMasterMonitoringImplemented: false
 enterpriseMasterRecoveryImplemented: false
@@ -100,34 +100,44 @@ enterpriseMasterOrchestrationImplemented: false
 - `src/lib/enterprise/master-orchestration/policy/index.ts`
 - `src/lib/enterprise/master-orchestration/governance/enterprise-governance-engine.ts`
 - `src/lib/enterprise/master-orchestration/governance/index.ts`
+- `src/lib/enterprise/master-orchestration/console/enterprise-console-engine.ts`
+- `src/lib/enterprise/master-orchestration/console/index.ts`
 - `scripts/enterprise/tests/enterprise-command-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-orchestration-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-saga-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-policy-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-governance-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-console-engine.test.ts`
 
-## 8. Cadeia de dependências J-01 a J-05
+## 8. Cadeia de dependências J-01 a J-06
 
 ```text
-EnterpriseGovernanceEngine (J-05)
-  ├─ EnterprisePolicyEngine (J-04)
-  │    ├─ EnterpriseSagaEngine (J-03)
-  │    │    ├─ EnterpriseOrchestrationEngine (J-02)
+EnterpriseConsoleEngine (J-06)
+  ├─ EnterpriseGovernanceEngine (J-05)
+  │    ├─ EnterprisePolicyEngine (J-04)
+  │    │    ├─ EnterpriseSagaEngine (J-03)
+  │    │    │    ├─ EnterpriseOrchestrationEngine (J-02)
+  │    │    │    │    ├─ EnterpriseCommandEngine (J-01)
+  │    │    │    │    │    ├─ GenericBusinessEngine (E)
+  │    │    │    │    │    ├─ GenericIntegrationEngine (F)
+  │    │    │    │    │    ├─ GenericTissEngine (G)
+  │    │    │    │    │    ├─ GenericTissIntegrationEngine (H)
+  │    │    │    │    │    └─ GenericWorkflowEngine (I)
+  │    │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
+  │    │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
   │    │    │    ├─ EnterpriseCommandEngine (J-01)
-  │    │    │    │    ├─ GenericBusinessEngine (E)
-  │    │    │    │    ├─ GenericIntegrationEngine (F)
-  │    │    │    │    ├─ GenericTissEngine (G)
-  │    │    │    │    ├─ GenericTissIntegrationEngine (H)
-  │    │    │    │    └─ GenericWorkflowEngine (I)
   │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    │    ├─ EnterpriseCommandEngine (J-01)
   │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    ├─ EnterpriseSagaEngine (J-03)
   │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    ├─ EnterpriseCommandEngine (J-01)
   │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  ├─ EnterprisePolicyEngine (J-04)
   ├─ EnterpriseSagaEngine (J-03)
   ├─ EnterpriseOrchestrationEngine (J-02)
   ├─ EnterpriseCommandEngine (J-01)
@@ -136,7 +146,7 @@ EnterpriseGovernanceEngine (J-05)
 ```
 
 Não existem imports diretos para Adapters, Providers, Registries, Stores ou engines dos Blocos A-H.
-Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03, J-04 e J-05. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
+Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03, J-04, J-05 e J-06. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
 
 ## 9. Matriz de acoplamento EnterpriseGovernanceEngine (J-05)
 
@@ -151,6 +161,27 @@ Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-
 
 As 9 dependências diretas são obrigatórias conforme a especificação da Sprint J-05. Não há redundâncias passíveis de remoção sem violar o contrato de consumo exclusivo. Não há dependências circulares.
 
-## 10. Recomendação
+## 10. Matriz de acoplamento EnterpriseConsoleEngine (J-06)
+
+| Métrica | Valor |
+|---|---|
+| Imports diretos | 10 |
+| Dependências obrigatórias (diretas) | 10 (governance + policy + saga + orchestration + command + 5 fachadas) |
+| Dependências opcionais | 0 |
+| Dependências redundantes | 0 |
+| Dependências transitivas até fachadas | 15 camadas |
+| Acoplamentos indevidos (Adapters/Providers/Registries/Stores/Blocos A-H) | 0 |
+
+As 10 dependências diretas são obrigatórias conforme a especificação da Sprint J-06. Não há redundâncias passíveis de remoção sem violar o contrato de consumo exclusivo. Não há dependências circulares.
+
+## 11. Análise de impacto arquitetural J-05 × J-06
+
+- Nenhuma engine anterior (J-01 a J-05) foi modificada.
+- Nenhuma fachada (E, F, G, H, I) foi modificada.
+- Nenhuma capability anterior mudou — `J06_ENTERPRISE_CONSOLE_CAPABILITIES` estende `J05_ENTERPRISE_GOVERNANCE_CAPABILITIES` e ativa apenas `enterpriseConsoleImplemented`.
+- Nenhum import novo apareceu nas engines anteriores; `EnterpriseConsoleEngine` é o único arquivo com imports adicionais.
+- Nenhum acoplamento adicional foi introduzido além dos 10 campos obrigatórios de J-06.
+
+## 12. Recomendação
 
 A arquitetura do Bloco J está apta a ser iniciada. A Sprint J-01 pode ser autorizada quando houver requisito funcional aprovado, desde que respeite as regras permanentes deste documento.
