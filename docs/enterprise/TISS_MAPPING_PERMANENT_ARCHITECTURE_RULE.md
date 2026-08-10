@@ -28,7 +28,8 @@ Este documento rege a Fase 5 — TISS Mapping Foundation do projeto `medflow-das
 | EPC-21E GenericTissMappingEngine | ✅ Certificada / Congelada |
 | EPC-21R Final Certification | ✅ Certificada / Congelada / Encerrada |
 | AUDIT-21 Final Audit | ✅ Certificada / Congelada / Encerrada |
-| ARCH-22 | 🚧 Autorizada (não iniciada) |
+| ARCH-22 | ✅ Concluída |
+| EPC-22A Intelligence Discovery Engine | 🚧 Autorizada (não iniciada) |
 | EPC-22 TISS Intelligence Engine | ⏳ Não iniciada |
 
 ## 4. Capabilities

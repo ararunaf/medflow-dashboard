@@ -1,0 +1,102 @@
+# TISS Intelligence Engine — Permanent Architecture Rule
+
+## 1. Escopo
+
+Este documento rege a Fase 6 — Enterprise TISS Intelligence Engine do projeto `medflow-dashboard`.
+
+## 2. Princípios permanentes
+
+- Uma sprint ativa exatamente uma capability.
+- Nenhuma engine das Fases 4 e 5 pode ser alterada pelas sprints da Fase 6.
+- Nenhum Bloco A-J pode ser alterado pelas sprints da Fase 6.
+- Nenhum Port, Provider, Adapter, Registry, Factory, Store ou Model existente pode ser modificado.
+- Criar novos Ports, Providers, Factories, Registries, Adapters ou Stores somente mediante necessidade técnica comprovada.
+- Reutilizar antes de criar.
+- Cada engine da Fase 6 deve conter apenas propriedades `readonly`, construtor e `getCapabilities()` até que uma sprint específica autorize funcionalidade.
+- A Fase 6 consome as Fases 4 e 5 exclusivamente através dos Gateways oficiais.
+- A Fase 6 nunca importa diretamente as engines internas de Vocabulary ou Mapping.
+
+## 3. Roadmap
+
+| Entrega | Status |
+|---|---|
+| ARCH-22 Intelligence Discovery | ✅ Concluída |
+| EPC-22A Intelligence Discovery Engine | ⏳ Não iniciada |
+| EPC-22B Intelligence Canonical Model | ⏳ Não iniciada |
+| EPC-22C Intelligence Registry | ⏳ Não iniciada |
+| EPC-22D Intelligence Decision Engine | ⏳ Não iniciada |
+| EPC-22E EnterpriseGenericTissIntelligenceEngine | ⏳ Não iniciada |
+| EPC-22R Final Certification | ⏳ Não iniciada |
+| AUDIT-22 Final Audit | ⏳ Não iniciada |
+
+## 4. Capabilities
+
+| Capability | Valor |
+|---|---|
+| `tissIntelligenceDiscoveryImplemented` | `false` |
+| `tissIntelligenceCanonicalModelImplemented` | `false` |
+| `tissIntelligenceRegistryImplemented` | `false` |
+| `tissIntelligenceDecisionEngineImplemented` | `false` |
+| `tissGenericIntelligenceEngineImplemented` | `false` |
+
+## 5. Cadeia arquitetural
+
+```text
+EnterpriseGenericTissIntelligenceEngine
+            │
+            ▼
+EnterpriseTissIntelligenceDecisionEngine
+            │
+            ▼
+EnterpriseTissIntelligenceRegistryEngine
+            │
+            ▼
+EnterpriseTissIntelligenceCanonicalEngine
+            │
+            ▼
+EnterpriseTissIntelligenceDiscoveryEngine
+            │
+            ▼
+EnterpriseGenericTissMappingEngine
+            │
+            ▼
+EnterpriseGenericTissVocabularyEngine
+            │
+            ▼
+  ├─ GenericTissEngine
+  ├─ GenericTissIntegrationEngine
+  ├─ GenericWorkflowEngine
+  └─ EnterpriseMasterOrchestrationEngine
+```
+
+## 6. Regras de encapsulamento
+
+- `EnterpriseGenericTissIntelligenceEngine` será o único ponto oficial de acesso à TISS Intelligence Foundation.
+- Nenhuma engine interna de Vocabulary, Mapping ou Intelligence será consumida diretamente por módulos externos.
+- A Fase 6 consome a Fase 5 (`EnterpriseGenericTissMappingEngine`) e a Fase 4 (`EnterpriseGenericTissVocabularyEngine`) somente pelos respectivos Gateways.
+- Não são permitidos acessos laterais entre as engines das fundações.
+- Não são permitidos ciclos de dependência.
+
+## 7. Fronteiras arquiteturais
+
+| Foundation | Pergunta que responde |
+|---|---|
+| Vocabulary Foundation | "O que existe?" |
+| Mapping Foundation | "Como os conceitos se relacionam?" |
+| Intelligence Foundation | "Como utilizar essas informações para tomada de decisão?" |
+| Integrações futuras | "Executar as decisões produzidas pela camada de inteligência" |
+
+## 8. Reutilização autorizada
+
+A Fase 6 poderá reutilizar, sem modificar:
+
+- `EnterpriseGenericTissVocabularyEngine`
+- `EnterpriseGenericTissMappingEngine`
+- `GenericTissEngine`
+- `GenericTissIntegrationEngine`
+- `GenericWorkflowEngine`
+- `EnterpriseMasterOrchestrationEngine`
+
+## 9. Condição de permanência
+
+Todas as sprints da Fase 6 permanecem estruturais até que uma sprint específica autorize funcionalidade. Nenhum parser, IA, LLM, algoritmo, consulta real, cache, persistência, runtime, XML, SOAP, TUSS, OCR, Edge Function ou Supabase será introduzido sem autorização explícita.
