@@ -22,7 +22,7 @@ Este documento rege a Fase 5 — TISS Mapping Foundation do projeto `medflow-das
 |---|---|
 | ARCH-21 Mapping Discovery | ✅ Concluída |
 | EPC-21A Mapping Discovery | ✅ Implementada |
-| EPC-21B Mapping Canonical Model | ⏳ Não iniciada |
+| EPC-21B Mapping Canonical Model | ✅ Implementada |
 | EPC-21C Mapping Registry | ⏳ Não iniciada |
 | EPC-21D Mapping Query Engine | ⏳ Não iniciada |
 | EPC-21E GenericTissMappingEngine | ⏳ Não iniciada |
@@ -34,7 +34,7 @@ Este documento rege a Fase 5 — TISS Mapping Foundation do projeto `medflow-das
 | Capability | Valor |
 |---|---|
 | `tissMappingDiscoveryImplemented` | `true` |
-| `tissMappingCanonicalModelImplemented` | `false` |
+| `tissMappingCanonicalModelImplemented` | `true` |
 | `tissMappingRegistryImplemented` | `false` |
 | `tissMappingQueryEngineImplemented` | `false` |
 | `tissGenericMappingEngineImplemented` | `false` |

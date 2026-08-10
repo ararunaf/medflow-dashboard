@@ -25,3 +25,8 @@ export const EPC21A_TISS_MAPPING_DISCOVERY_CAPABILITIES: EnterpriseTissMappingCa
   ...BASELINE_TISS_MAPPING_CAPABILITIES,
   tissMappingDiscoveryImplemented: true,
 };
+
+export const EPC21B_TISS_MAPPING_CANONICAL_MODEL_CAPABILITIES: EnterpriseTissMappingCapabilities = {
+  ...EPC21A_TISS_MAPPING_DISCOVERY_CAPABILITIES,
+  tissMappingCanonicalModelImplemented: true,
+};
