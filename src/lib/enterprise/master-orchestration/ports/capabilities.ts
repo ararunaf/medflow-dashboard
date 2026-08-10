@@ -79,3 +79,9 @@ export const J09_ENTERPRISE_MASTER_RECOVERY_CAPABILITIES: EnterpriseMasterOrches
     ...J08_ENTERPRISE_MASTER_MONITORING_CAPABILITIES,
     enterpriseMasterRecoveryImplemented: true,
   };
+
+export const J10_ENTERPRISE_MASTER_ORCHESTRATION_CAPABILITIES: EnterpriseMasterOrchestrationCapabilities =
+  {
+    ...J09_ENTERPRISE_MASTER_RECOVERY_CAPABILITIES,
+    enterpriseMasterOrchestrationImplemented: true,
+  };
