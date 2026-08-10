@@ -35,3 +35,9 @@ export const J01_ENTERPRISE_COMMAND_CAPABILITIES: EnterpriseMasterOrchestrationC
   ...DEFAULT_ENTERPRISE_MASTER_ORCHESTRATION_CAPABILITIES,
   enterpriseCommandImplemented: true,
 };
+
+export const J02_ENTERPRISE_ORCHESTRATION_CAPABILITIES: EnterpriseMasterOrchestrationCapabilities =
+  {
+    ...J01_ENTERPRISE_COMMAND_CAPABILITIES,
+    enterpriseOrchestrationImplemented: true,
+  };
