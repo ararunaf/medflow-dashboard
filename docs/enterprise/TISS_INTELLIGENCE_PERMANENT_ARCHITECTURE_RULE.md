@@ -22,9 +22,8 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 | EPC-20B Vocabulary Canonical Model | ✅ Implementada |
 | EPC-20C Vocabulary Registry | ✅ Implementada |
 | EPC-20D Vocabulary Query Engine | ✅ Implementada |
-| EPC-20E GenericTissVocabularyEngine | 🚧 Autorizada (não iniciada) |
-| EPC-20E GenericTissVocabularyEngine | ⏳ Não iniciada |
-| EPC-20R Final Certification | ⏳ Não iniciada |
+| EPC-20E GenericTissVocabularyEngine | ✅ Implementada |
+| EPC-20R Final Certification | 🚧 Autorizada (não iniciada) |
 | AUDIT-20 Final Audit | ⏳ Não iniciada |
 
 ## 4. Componentes certificados
@@ -39,14 +38,18 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 - `src/lib/enterprise/tiss-intelligence/vocabulary-registry/index.ts`
 - `src/lib/enterprise/tiss-intelligence/vocabulary-query/enterprise-tiss-vocabulary-query-engine.ts`
 - `src/lib/enterprise/tiss-intelligence/vocabulary-query/index.ts`
+- `src/lib/enterprise/tiss-intelligence/generic-vocabulary/enterprise-generic-tiss-vocabulary-engine.ts`
+- `src/lib/enterprise/tiss-intelligence/generic-vocabulary/index.ts`
 - `scripts/enterprise/tests/enterprise-tiss-vocabulary-discovery-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-tiss-vocabulary-canonical-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-tiss-vocabulary-registry-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-tiss-vocabulary-query-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-generic-tiss-vocabulary-engine.test.ts`
 - `docs/enterprise/EPC20A_TISS_VOCABULARY_DISCOVERY.md`
 - `docs/enterprise/EPC20B_TISS_VOCABULARY_CANONICAL_MODEL.md`
 - `docs/enterprise/EPC20C_TISS_VOCABULARY_REGISTRY.md`
 - `docs/enterprise/EPC20D_TISS_VOCABULARY_QUERY_ENGINE.md`
+- `docs/enterprise/EPC20E_GENERIC_TISS_VOCABULARY_ENGINE.md`
 
 ## 5. Capabilities
 
@@ -56,7 +59,7 @@ Este documento rege a Fase 4 — TISS Intelligence do projeto `medflow-dashboard
 | `tissVocabularyCanonicalModelImplemented` | `true` |
 | `tissVocabularyRegistryImplemented` | `true` |
 | `tissVocabularyQueryEngineImplemented` | `true` |
-| `tissGenericVocabularyEngineImplemented` | `false` |
+| `tissGenericVocabularyEngineImplemented` | `true` |
 
 ## 6. Cadeia de dependências
 
@@ -73,9 +76,10 @@ EnterpriseTissVocabularyRegistryEngine (EPC-20C)
 EnterpriseTissVocabularyQueryEngine (EPC-20D)
             │
             ▼
-GenericTissVocabularyEngine (EPC-20E)
+EnterpriseGenericTissVocabularyEngine (EPC-20E)
 
-Cadeia de consumo da EPC-20D:
+Cadeia de consumo da EPC-20E:
+  ├─ EnterpriseTissVocabularyQueryEngine (EPC-20D)
   ├─ EnterpriseTissVocabularyRegistryEngine (EPC-20C)
   ├─ EnterpriseTissVocabularyCanonicalEngine (EPC-20B)
   ├─ EnterpriseTissVocabularyDiscoveryEngine (EPC-20A)
@@ -90,8 +94,8 @@ Cadeia de consumo da EPC-20D:
 
 | Métrica | Valor |
 |---|---|
-| Imports diretos | 7 |
-| Dependências obrigatórias (diretas) | 7 (registry + canonical + discovery + tiss + tissIntegration + workflow + masterOrchestration) |
+| Imports diretos | 8 |
+| Dependências obrigatórias (diretas) | 8 (query + registry + canonical + discovery + tiss + tissIntegration + workflow + masterOrchestration) |
 | Dependências opcionais | 0 |
 | Dependências redundantes | 0 |
 | Dependências circulares | 0 |
@@ -99,4 +103,4 @@ Cadeia de consumo da EPC-20D:
 
 ## 8. Recomendação
 
-A Fase 4 evoluiu corretamente de EPC-20A até EPC-20D. A próxima sprint, EPC-20E, pode ser autorizada quando houver requisito funcional aprovado.
+A Fase 4 evoluiu corretamente de EPC-20A até EPC-20E. `EnterpriseGenericTissVocabularyEngine` é o Gateway oficial do Vocabulário TISS. A próxima entrega, EPC-20R, pode ser autorizada para certificação quando houver requisito aprovado.

@@ -44,3 +44,9 @@ export const EPC20D_TISS_VOCABULARY_QUERY_ENGINE_CAPABILITIES: EnterpriseTissInt
     ...EPC20C_TISS_VOCABULARY_REGISTRY_CAPABILITIES,
     tissVocabularyQueryEngineImplemented: true,
   };
+
+export const EPC20E_GENERIC_TISS_VOCABULARY_ENGINE_CAPABILITIES: EnterpriseTissIntelligenceCapabilities =
+  {
+    ...EPC20D_TISS_VOCABULARY_QUERY_ENGINE_CAPABILITIES,
+    tissGenericVocabularyEngineImplemented: true,
+  };
