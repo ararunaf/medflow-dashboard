@@ -61,7 +61,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | J-02 | Enterprise Orchestration Engine | ✅ Certificada / Congelada |
 | J-03 | Enterprise Saga Engine | ✅ Certificada / Congelada |
 | J-04 | Enterprise Policy Engine | ✅ Certificada / Congelada |
-| J-05 | Enterprise Governance Engine | ⛔ Não autorizada |
+| J-05 | Enterprise Governance Engine | ✅ Certificada / Congelada |
 | J-06 | Enterprise Console Engine | ⛔ Não autorizada |
 | J-07 | Enterprise Master Routing Engine | ⛔ Não autorizada |
 | J-08 | Enterprise Master Monitoring Engine | ⛔ Não autorizada |
@@ -77,7 +77,7 @@ enterpriseCommandImplemented: true
 enterpriseOrchestrationImplemented: true
 enterpriseSagaImplemented: true
 enterprisePolicyImplemented: true
-enterpriseGovernanceImplemented: false
+enterpriseGovernanceImplemented: true
 enterpriseConsoleImplemented: false
 enterpriseMasterRoutingImplemented: false
 enterpriseMasterMonitoringImplemented: false
@@ -98,28 +98,37 @@ enterpriseMasterOrchestrationImplemented: false
 - `src/lib/enterprise/master-orchestration/saga/index.ts`
 - `src/lib/enterprise/master-orchestration/policy/enterprise-policy-engine.ts`
 - `src/lib/enterprise/master-orchestration/policy/index.ts`
+- `src/lib/enterprise/master-orchestration/governance/enterprise-governance-engine.ts`
+- `src/lib/enterprise/master-orchestration/governance/index.ts`
 - `scripts/enterprise/tests/enterprise-command-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-orchestration-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-saga-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-policy-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-governance-engine.test.ts`
 
-## 8. Cadeia de dependências J-01 a J-04
+## 8. Cadeia de dependências J-01 a J-05
 
 ```text
-EnterprisePolicyEngine (J-04)
-  ├─ EnterpriseSagaEngine (J-03)
-  │    ├─ EnterpriseOrchestrationEngine (J-02)
+EnterpriseGovernanceEngine (J-05)
+  ├─ EnterprisePolicyEngine (J-04)
+  │    ├─ EnterpriseSagaEngine (J-03)
+  │    │    ├─ EnterpriseOrchestrationEngine (J-02)
+  │    │    │    ├─ EnterpriseCommandEngine (J-01)
+  │    │    │    │    ├─ GenericBusinessEngine (E)
+  │    │    │    │    ├─ GenericIntegrationEngine (F)
+  │    │    │    │    ├─ GenericTissEngine (G)
+  │    │    │    │    ├─ GenericTissIntegrationEngine (H)
+  │    │    │    │    └─ GenericWorkflowEngine (I)
+  │    │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
+  │    │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
   │    │    ├─ EnterpriseCommandEngine (J-01)
-  │    │    │    ├─ GenericBusinessEngine (E)
-  │    │    │    ├─ GenericIntegrationEngine (F)
-  │    │    │    ├─ GenericTissEngine (G)
-  │    │    │    ├─ GenericTissIntegrationEngine (H)
-  │    │    │    └─ GenericWorkflowEngine (I)
   │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    ├─ EnterpriseOrchestrationEngine (J-02)
   │    ├─ EnterpriseCommandEngine (J-01)
   │    └─ GenericBusinessEngine / GenericIntegrationEngine /
   │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  ├─ EnterpriseSagaEngine (J-03)
   ├─ EnterpriseOrchestrationEngine (J-02)
   ├─ EnterpriseCommandEngine (J-01)
   └─ GenericBusinessEngine / GenericIntegrationEngine /
@@ -127,8 +136,21 @@ EnterprisePolicyEngine (J-04)
 ```
 
 Não existem imports diretos para Adapters, Providers, Registries, Stores ou engines dos Blocos A-H.
-Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03 e J-04. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
+Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03, J-04 e J-05. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
 
-## 9. Recomendação
+## 9. Matriz de acoplamento EnterpriseGovernanceEngine (J-05)
+
+| Métrica | Valor |
+|---|---|
+| Imports diretos | 9 |
+| Dependências obrigatórias (diretas) | 9 (policy + saga + orchestration + command + 5 fachadas) |
+| Dependências opcionais | 0 |
+| Dependências redundantes | 0 |
+| Dependências transitivas até fachadas | 11 camadas |
+| Acoplamentos indevidos (Adapters/Providers/Registries/Stores/Blocos A-H) | 0 |
+
+As 9 dependências diretas são obrigatórias conforme a especificação da Sprint J-05. Não há redundâncias passíveis de remoção sem violar o contrato de consumo exclusivo. Não há dependências circulares.
+
+## 10. Recomendação
 
 A arquitetura do Bloco J está apta a ser iniciada. A Sprint J-01 pode ser autorizada quando houver requisito funcional aprovado, desde que respeite as regras permanentes deste documento.
