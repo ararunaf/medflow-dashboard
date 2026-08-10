@@ -27,7 +27,7 @@ Este documento rege a Fase 7 — Enterprise Runtime Foundation do projeto `medfl
 | EPC-23A Runtime Discovery Engine | ✅ Implementada |
 | EPC-23B Runtime Canonical Model | ✅ Implementada |
 | EPC-23C Runtime Registry | ✅ Implementada |
-| EPC-23D Runtime Orchestration Engine | ⏳ Não iniciada |
+| EPC-23D Runtime Orchestration Engine | ✅ Implementada |
 | EPC-23E EnterpriseGenericTissRuntimeEngine | ⏳ Não iniciada |
 | EPC-23R Runtime Final Certification | ⏳ Não iniciada |
 | AUDIT-23 Runtime Final Audit | ⏳ Não iniciada |
