@@ -1,0 +1,15 @@
+export interface EnterpriseTissRuntimeCapabilities {
+  tissRuntimeDiscoveryImplemented: boolean;
+  tissRuntimeCanonicalModelImplemented: boolean;
+  tissRuntimeRegistryImplemented: boolean;
+  tissRuntimeOrchestrationImplemented: boolean;
+  tissGenericRuntimeEngineImplemented: boolean;
+}
+
+export const EPC23A_TISS_RUNTIME_DISCOVERY_CAPABILITIES: EnterpriseTissRuntimeCapabilities = {
+  tissRuntimeDiscoveryImplemented: true,
+  tissRuntimeCanonicalModelImplemented: false,
+  tissRuntimeRegistryImplemented: false,
+  tissRuntimeOrchestrationImplemented: false,
+  tissGenericRuntimeEngineImplemented: false,
+};
