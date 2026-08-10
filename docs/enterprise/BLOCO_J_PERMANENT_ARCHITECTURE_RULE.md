@@ -60,7 +60,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 | J-01 | Enterprise Command Engine | ✅ Certificada / Congelada |
 | J-02 | Enterprise Orchestration Engine | ✅ Certificada / Congelada |
 | J-03 | Enterprise Saga Engine | ✅ Certificada / Congelada |
-| J-04 | Enterprise Policy Engine | ⛔ Não autorizada |
+| J-04 | Enterprise Policy Engine | ✅ Certificada / Congelada |
 | J-05 | Enterprise Governance Engine | ⛔ Não autorizada |
 | J-06 | Enterprise Console Engine | ⛔ Não autorizada |
 | J-07 | Enterprise Master Routing Engine | ⛔ Não autorizada |
@@ -76,7 +76,7 @@ O Bloco J é a **camada de orquestração master** da plataforma Enterprise. Ele
 enterpriseCommandImplemented: true
 enterpriseOrchestrationImplemented: true
 enterpriseSagaImplemented: true
-enterprisePolicyImplemented: false
+enterprisePolicyImplemented: true
 enterpriseGovernanceImplemented: false
 enterpriseConsoleImplemented: false
 enterpriseMasterRoutingImplemented: false
@@ -96,10 +96,39 @@ enterpriseMasterOrchestrationImplemented: false
 - `src/lib/enterprise/master-orchestration/orchestration/index.ts`
 - `src/lib/enterprise/master-orchestration/saga/enterprise-saga-engine.ts`
 - `src/lib/enterprise/master-orchestration/saga/index.ts`
+- `src/lib/enterprise/master-orchestration/policy/enterprise-policy-engine.ts`
+- `src/lib/enterprise/master-orchestration/policy/index.ts`
 - `scripts/enterprise/tests/enterprise-command-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-orchestration-engine.test.ts`
 - `scripts/enterprise/tests/enterprise-saga-engine.test.ts`
+- `scripts/enterprise/tests/enterprise-policy-engine.test.ts`
 
-## 8. Recomendação
+## 8. Cadeia de dependências J-01 a J-04
+
+```text
+EnterprisePolicyEngine (J-04)
+  ├─ EnterpriseSagaEngine (J-03)
+  │    ├─ EnterpriseOrchestrationEngine (J-02)
+  │    │    ├─ EnterpriseCommandEngine (J-01)
+  │    │    │    ├─ GenericBusinessEngine (E)
+  │    │    │    ├─ GenericIntegrationEngine (F)
+  │    │    │    ├─ GenericTissEngine (G)
+  │    │    │    ├─ GenericTissIntegrationEngine (H)
+  │    │    │    └─ GenericWorkflowEngine (I)
+  │    │    └─ GenericBusinessEngine / GenericIntegrationEngine /
+  │    │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  │    ├─ EnterpriseCommandEngine (J-01)
+  │    └─ GenericBusinessEngine / GenericIntegrationEngine /
+  │       GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+  ├─ EnterpriseOrchestrationEngine (J-02)
+  ├─ EnterpriseCommandEngine (J-01)
+  └─ GenericBusinessEngine / GenericIntegrationEngine /
+     GenericTissEngine / GenericTissIntegrationEngine / GenericWorkflowEngine
+```
+
+Não existem imports diretos para Adapters, Providers, Registries, Stores ou engines dos Blocos A-H.
+Não existem dependências circulares diretas nem indiretas entre J-01, J-02, J-03 e J-04. Cada engine de ordem superior consome apenas engines de ordem inferior ou fachadas certificadas.
+
+## 9. Recomendação
 
 A arquitetura do Bloco J está apta a ser iniciada. A Sprint J-01 pode ser autorizada quando houver requisito funcional aprovado, desde que respeite as regras permanentes deste documento.

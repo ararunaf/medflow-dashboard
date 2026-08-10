@@ -46,3 +46,8 @@ export const J03_ENTERPRISE_SAGA_CAPABILITIES: EnterpriseMasterOrchestrationCapa
   ...J02_ENTERPRISE_ORCHESTRATION_CAPABILITIES,
   enterpriseSagaImplemented: true,
 };
+
+export const J04_ENTERPRISE_POLICY_CAPABILITIES: EnterpriseMasterOrchestrationCapabilities = {
+  ...J03_ENTERPRISE_SAGA_CAPABILITIES,
+  enterprisePolicyImplemented: true,
+};
