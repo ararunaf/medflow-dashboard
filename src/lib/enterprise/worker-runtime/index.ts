@@ -85,6 +85,8 @@ export {
   DEFAULT_WORKER_POLL_INTERVAL_MS,
   WorkerQueueConsumer,
   type WorkerQueueConsumerOptions,
+  type WorkerQueueProcessMessage,
+  type WorkerQueueProcessMessageContext,
   type WorkerQueueProcessOutcome,
   type WorkerQueueProcessedEvent,
   type WorkerQueueSessionStartInput,

@@ -19,9 +19,10 @@
 | **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ✅ Concluída |
 | **TISS-RUNTIME-01D** | Discovery da arquitetura funcional do TISS Runtime | ✅ Concluída |
 | **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ✅ Concluída |
-| **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ⏳ Próxima |
+| **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ✅ Concluída |
+| **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ⏳ Próxima |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ⏳ TISS-RUNTIME-01B
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ⏳ TISS-RUNTIME-01C
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -132,6 +133,17 @@ getEnterpriseRuntime()
 
 ---
 
+## Escopo concluído (TISS-RUNTIME-01B)
+
+### TISS-RUNTIME-01B
+- Capability OCR operacional: Job **RECEIVED** → `WorkerRuntimePort` → `OCRRuntimePort.process` → Job **OCR_COMPLETED** → reenqueue via `QueueRuntimePort`
+- Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
+- Entrypoint `processTissReceivedOcr` via `getEnterpriseRuntime()`
+- Parser **não** executado (`parserExecuted: false`); demais capabilities fora de escopo
+- Sem novo Port / Gateway / Runtime / Pipeline
+
+---
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-01B** — ativar OCR operacional no Worker (consumo via `QueueRuntimePort`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-01C** — ativar Parser / Extraction operacional no Worker (consumo de `OCR_COMPLETED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

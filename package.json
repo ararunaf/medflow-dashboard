@@ -106,6 +106,7 @@
     "enterprise:dead-letter-runtime:test": "npx tsx --test scripts/enterprise/tests/dead-letter-runtime-engine.test.ts",
     "enterprise:retry-infrastructure:test": "npx tsx --test scripts/enterprise/tests/retry-infrastructure-engine.test.ts",
     "enterprise:tiss-runtime-01a:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-01a-received-enqueue.test.ts",
+    "enterprise:tiss-runtime-01b:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-01b-ocr-capability.test.ts",
     "enterprise:worker-runtime:test": "npx tsx --test scripts/enterprise/tests/worker-runtime-engine.test.ts",
     "enterprise:scheduler-runtime:test": "npx tsx --test scripts/enterprise/tests/scheduler-runtime-engine.test.ts",
     "enterprise:persistent-queue-runtime:test": "npx tsx --test scripts/enterprise/tests/persistent-queue-runtime-engine.test.ts",

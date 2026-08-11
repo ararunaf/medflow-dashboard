@@ -1,13 +1,15 @@
 /**
- * OPER-INF-D / OPER-INF-R / TISS-RUNTIME-01A — motores operacionais internos do Queue Runtime.
+ * OPER-INF-D / OPER-INF-R / TISS-RUNTIME-01A / TISS-RUNTIME-01B — motores operacionais internos do Queue Runtime.
  *
  * DeadLetterRuntimePort é contrato INTERNO — não é Port Enterprise novo.
  * DefaultRetryInfrastructure NÃO é Port — reutiliza Scheduler/Worker/Queue Ports.
  * enqueueTissReceivedJob NÃO é Port — registra Job TISS RECEIVED via QueueRuntimePort.
+ * processTissOcrJob NÃO é Port — capability OCR via OCRRuntimePort + reenqueue OCR_COMPLETED.
  *
  * Dead Letter: armazenamento definitivo via QueueRuntimePort.
  * Retry: decisão de reenvio + agendamento (nunca executa processamento).
  * TISS-01A: Documento → enqueue → Job RECEIVED (sem OCR/Parser/XML).
+ * TISS-01B: Job RECEIVED → Worker → OCR → Job OCR_COMPLETED (sem Parser).
  */
 export type {
   DeadLetterGetByIdInput,
@@ -74,3 +76,14 @@ export {
   type TissJobLogicalStatus,
   type TissReceivedJob,
 } from "./enqueue-tiss-received-job";
+
+export {
+  TISS_JOB_STATUS_OCR_COMPLETED,
+  processTissOcrJob,
+  createTissOcrProcessMessage,
+  type ProcessTissOcrJobInput,
+  type ProcessTissOcrJobResult,
+  type TissOcrCompletedJob,
+  type TissOcrJobLogicalStatus,
+  type TissOcrProcessMessageDeps,
+} from "./process-tiss-ocr-job";

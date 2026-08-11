@@ -44,3 +44,12 @@ export {
   type RegisterTissReceivedJobResult,
   type TissReceivedJob,
 } from "./register-tiss-received-job";
+
+export {
+  processTissReceivedOcr,
+  TISS_JOB_STATUS_OCR_COMPLETED,
+  ENTERPRISE_TISS_QUEUE_NAME,
+  type ProcessTissReceivedOcrInput,
+  type ProcessTissReceivedOcrResult,
+  type TissOcrCompletedJob,
+} from "./process-tiss-received-ocr";

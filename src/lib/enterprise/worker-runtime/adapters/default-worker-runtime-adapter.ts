@@ -52,6 +52,7 @@ import type {
 import {
   DEFAULT_WORKER_POLL_INTERVAL_MS,
   WorkerQueueConsumer,
+  type WorkerQueueProcessMessage,
   type WorkerQueueProcessedEvent,
 } from "../operational";
 import { InMemoryWorkerRuntimeStore, type WorkerRuntimeStore } from "../store";
@@ -83,6 +84,11 @@ export type DefaultWorkerRuntimeAdapterOptions = {
   sleep?: (ms: number) => Promise<void>;
   /** Força falha transitória nas N primeiras tentativas (testes de retry de envelope). */
   failAttempts?: number;
+  /**
+   * Hook de capability (TISS-RUNTIME-01B+) — injetável sem alterar WorkerRuntimePort.
+   * Default: undefined → ack imediato (comportamento OPER-INF-W preservado).
+   */
+  processMessage?: WorkerQueueProcessMessage;
 };
 
 function readSignal(input: WorkerRuntimeOperationalControls): AbortSignal | undefined {
@@ -190,6 +196,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         sleep: this.sleep,
         now: this.now,
         onProcessed: (event) => this.onQueueProcessed(event),
+        processMessage: options.processMessage,
       });
     }
   }
@@ -202,6 +209,14 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
   /** Consumidor operacional ativo (OPER-INF-W) — null em modo estrutural. */
   getConsumer(): WorkerQueueConsumer | null {
     return this.consumer;
+  }
+
+  /**
+   * Liga capability operacional no consumer existente (TISS-RUNTIME-01B).
+   * Não cria Port — apenas configura o hook OPER-INF-W.
+   */
+  setProcessMessage(handler: WorkerQueueProcessMessage | undefined): void {
+    this.consumer?.setProcessMessage(handler);
   }
 
   capabilities(): WorkerRuntimePortCapabilities {

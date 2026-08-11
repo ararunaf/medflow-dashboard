@@ -1,11 +1,15 @@
 /**
- * WorkerQueueConsumer — OPER-INF-W
+ * WorkerQueueConsumer — OPER-INF-W (+ hook de capability TISS-RUNTIME-01B)
  *
  * Motor operacional interno do Worker Runtime.
  * Consome exclusivamente QueueRuntimePort (dequeue/claim → lock → ack/nack).
  * Sem acesso direto a banco. Sem Scheduler. Sem paralelismo. Sem Dead Letter / Retry Engine.
+ *
+ * processMessage (opcional): permite ativar uma capability (ex.: OCR) após o claim,
+ * sem criar Port/Gateway/Runtime novos e sem alterar o contrato WorkerRuntimePort.
  */
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
+import type { CanonicalQueueMessage } from "../../queue-runtime/ports/canonical";
 
 export const DEFAULT_WORKER_POLL_INTERVAL_MS = 50;
 
@@ -19,12 +23,28 @@ export type WorkerQueueProcessedEvent = {
   at: string;
 };
 
+export type WorkerQueueProcessMessageContext = {
+  workerId: string;
+  queueName: string;
+  message: CanonicalQueueMessage;
+};
+
+/** Resultado de settle após capability — default OPER-INF-W = ack imediato. */
+export type WorkerQueueProcessMessage = (
+  ctx: WorkerQueueProcessMessageContext,
+) => Promise<"ack" | "nack" | "nack-error">;
+
 export type WorkerQueueConsumerOptions = {
   getQueueRuntimePort: () => QueueRuntimePort;
   pollIntervalMs?: number;
   sleep?: (ms: number) => Promise<void>;
   now?: () => string;
   onProcessed?: (event: WorkerQueueProcessedEvent) => void;
+  /**
+   * Hook operacional de capability (TISS-RUNTIME-01B+).
+   * Quando ausente, preserva comportamento OPER-INF-W (ack imediato após claim).
+   */
+  processMessage?: WorkerQueueProcessMessage;
 };
 
 export type WorkerQueueSessionStartInput = {
@@ -81,6 +101,7 @@ export class WorkerQueueConsumer {
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly now: () => string;
   private readonly onProcessed?: (event: WorkerQueueProcessedEvent) => void;
+  private processMessage?: WorkerQueueProcessMessage;
   private readonly sessions = new Map<string, WorkerQueueSession>();
 
   constructor(options: WorkerQueueConsumerOptions) {
@@ -89,6 +110,12 @@ export class WorkerQueueConsumer {
     this.sleep = options.sleep ?? defaultSleep;
     this.now = options.now ?? (() => new Date().toISOString());
     this.onProcessed = options.onProcessed;
+    this.processMessage = options.processMessage;
+  }
+
+  /** Liga/desliga capability operacional sem recriar o consumer (TISS-RUNTIME-01B). */
+  setProcessMessage(handler: WorkerQueueProcessMessage | undefined): void {
+    this.processMessage = handler;
   }
 
   isActive(workerId: string): boolean {
@@ -203,19 +230,18 @@ export class WorkerQueueConsumer {
     session.lockAcquiredAt = stamp;
 
     try {
+      let settle: "ack" | "nack" | "nack-error" = "ack";
       if (session.forceNack || session.stopping) {
-        await queue.nack({
-          queueName: session.queueName,
-          messageId,
-        });
-        this.emit({
+        settle = "nack";
+      } else if (this.processMessage && dequeued.queueMessage) {
+        settle = await this.processMessage({
           workerId: session.workerId,
           queueName: session.queueName,
-          messageId,
-          outcome: "nack",
-          at: this.now(),
+          message: dequeued.queueMessage,
         });
-      } else {
+      }
+
+      if (settle === "ack") {
         await queue.ack({
           queueName: session.queueName,
           messageId,
@@ -225,6 +251,18 @@ export class WorkerQueueConsumer {
           queueName: session.queueName,
           messageId,
           outcome: "ack",
+          at: this.now(),
+        });
+      } else {
+        await queue.nack({
+          queueName: session.queueName,
+          messageId,
+        });
+        this.emit({
+          workerId: session.workerId,
+          queueName: session.queueName,
+          messageId,
+          outcome: settle === "nack-error" ? "nack-error" : "nack",
           at: this.now(),
         });
       }

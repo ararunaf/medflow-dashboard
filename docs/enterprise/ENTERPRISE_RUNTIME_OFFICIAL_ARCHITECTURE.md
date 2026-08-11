@@ -146,7 +146,8 @@ getEnterpriseRuntime()
 | **OPER-INF-R** | ✓ Homologado — Retry operacional (decisão de reenvio via Ports existentes) |
 | **TISS-RUNTIME-01D** | ✓ Discovery funcional TISS — [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md) |
 | **TISS-RUNTIME-01A** | ✓ Entrada operacional do boletim — Job TISS RECEIVED via `QueueRuntimePort` |
-| **TISS-RUNTIME-01B** | ⏳ OCR operacional no Worker (consumo via `QueueRuntimePort`) |
+| **TISS-RUNTIME-01B** | ✓ OCR operacional no Worker — Job RECEIVED → OCR → OCR_COMPLETED via Ports existentes |
+| **TISS-RUNTIME-01C** | ⏳ Parser / Extraction operacional no mesmo pipeline |
 
 ---
 

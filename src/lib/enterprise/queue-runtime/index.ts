@@ -8,12 +8,14 @@
  *     → DeadLetterRuntimePort (OPER-INF-D — contrato interno, sem Port Enterprise novo)
  *     → DefaultRetryInfrastructure (OPER-INF-R — NÃO é Port; Scheduler + Worker + Queue)
  *     → enqueueTissReceivedJob (TISS-RUNTIME-01A — Job RECEIVED via QueueRuntimePort)
+ *     → processTissOcrJob (TISS-RUNTIME-01B — OCR → OCR_COMPLETED via Worker/OCRRuntimePort)
  *     → Canonical Queue Result
  *
  * OPER-INF-Q: backend persistente ativado no adapter — mesma interface pública.
  * OPER-INF-D: Dead Letter operacional via DeadLetterRuntimePort → QueueRuntimePort.
  * OPER-INF-R: Retry operacional (decide + agenda; nunca processa) via Ports existentes.
  * TISS-RUNTIME-01A: entrada funcional TISS — Documento → Queue → Job RECEIVED (sem OCR/Parser/XML).
+ * TISS-RUNTIME-01B: capability OCR — Job RECEIVED → Worker → OCR → Job OCR_COMPLETED (sem Parser).
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
@@ -174,4 +176,12 @@ export {
   type EnqueueTissReceivedJobResult,
   type TissJobLogicalStatus,
   type TissReceivedJob,
+  TISS_JOB_STATUS_OCR_COMPLETED,
+  processTissOcrJob,
+  createTissOcrProcessMessage,
+  type ProcessTissOcrJobInput,
+  type ProcessTissOcrJobResult,
+  type TissOcrCompletedJob,
+  type TissOcrJobLogicalStatus,
+  type TissOcrProcessMessageDeps,
 } from "./operational";
