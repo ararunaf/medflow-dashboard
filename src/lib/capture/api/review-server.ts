@@ -1,5 +1,6 @@
 /**
  * Server functions — Workspace de Revisão (MEDICFLOW-REVIEW-WORKSPACE-01).
+ * EPC-24D: execução/leitura exclusivamente via Enterprise Runtime gateways.
  */
 import { createServerFn } from "@tanstack/react-start";
 import {
@@ -10,9 +11,9 @@ import {
   runQuery,
 } from "@/lib/server/fn-helpers";
 import {
-  getReviewWorkspaceSnapshot,
-  setReviewApprovalDecision,
-} from "../review/review-workspace-store";
+  getReviewWorkspaceSnapshotViaEnterprise,
+  setReviewApprovalViaEnterprise,
+} from "../enterprise/process-review-via-enterprise";
 import type { ReviewApprovalStatus } from "../review/types";
 
 function parseSessionId(raw: unknown): { sessionId: string } {
@@ -39,11 +40,11 @@ function parseApprovalInput(raw: unknown) {
 export const getReviewWorkspaceFn = createServerFn({ method: "GET" })
   .inputValidator(parseSessionId)
   .handler(async ({ data }) => {
-    return runQuery((ctx) => getReviewWorkspaceSnapshot(ctx, data.sessionId));
+    return runQuery((ctx) => getReviewWorkspaceSnapshotViaEnterprise(ctx, data.sessionId));
   });
 
 export const setReviewApprovalFn = createServerFn({ method: "POST" })
   .inputValidator(parseApprovalInput)
   .handler(async ({ data }) => {
-    return runMutation((ctx) => setReviewApprovalDecision(ctx, data));
+    return runMutation((ctx) => setReviewApprovalViaEnterprise(ctx, data));
   });

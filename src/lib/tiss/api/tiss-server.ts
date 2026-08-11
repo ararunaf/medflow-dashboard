@@ -39,11 +39,9 @@ import {
   createTissGuide,
   createTissReturn,
   createTussProcedure,
-  exportTissBatchXml,
   listInsuranceContracts,
   listInsuranceProviders,
   listInsuranceRules,
-  listTissBatchExports,
   listTissBatches,
   listTissDenialAppeals,
   listTissDenials,
@@ -59,6 +57,10 @@ import {
   updateTissDenialStatus,
   updateTissReturnStatus,
 } from "@/lib/services/tiss";
+import {
+  exportTissBatchXmlViaEnterprise,
+  listTissBatchExportsViaEnterprise,
+} from "@/lib/capture/enterprise/process-xml-via-enterprise";
 
 const GUIDE_TYPES = new Set<TissGuideType>(["consulta", "sadt", "honorario_individual"]);
 const GUIDE_STATUSES = new Set<TissGuideStatus>([
@@ -206,8 +208,10 @@ export const listTissBatchExportsFn = createServerFn({ method: "GET" })
     return { batchId: expectUuid(obj.batchId, "batchId") };
   })
   .handler(
-    async ({ data }): Promise<QueryResult<Awaited<ReturnType<typeof listTissBatchExports>>>> => {
-      return runQuery((ctx) => listTissBatchExports(ctx, data.batchId));
+    async ({
+      data,
+    }): Promise<QueryResult<Awaited<ReturnType<typeof listTissBatchExportsViaEnterprise>>>> => {
+      return runQuery((ctx) => listTissBatchExportsViaEnterprise(ctx, data.batchId));
     },
   );
 
@@ -428,7 +432,10 @@ export const exportTissBatchXmlFn = createServerFn({ method: "POST" })
     return { batchId: expectUuid(o.batchId, "batchId") };
   })
   .handler(async ({ data }): Promise<MutationResult<{ xml: string; exportId: string }>> => {
-    return runMutation((ctx) => exportTissBatchXml(ctx, data.batchId));
+    return runMutation(async (ctx) => {
+      const result = await exportTissBatchXmlViaEnterprise(ctx, data.batchId);
+      return { xml: result.xml, exportId: result.exportId };
+    });
   });
 
 export const listInsuranceContractsFn = createServerFn({ method: "GET" })

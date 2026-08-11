@@ -30,7 +30,7 @@ ARC-24     Descoberta + regra + plano          ← FEITO (docs only)
 EPC-24A    Orquestração canônica no caminho Capture  ← FEITO (binding; sem cutover)
 EPC-24B    Migrar Intake+Extraction (parse)    ← FEITO (sem cutover; OCR intocado)
 EPC-24C    Migrar Audit/Contract/Risk/Correction ← FEITO (sem cutover; fallback legado)
-EPC-24D    Migrar Review→TISS/XML/Bloco C
+EPC-24D    Migrar Review→TISS/XML/Bloco C      ← FEITO (sem cutover; fallback legado)
 EPC-24E    Cutover único + remoções + certificação
 ```
 
@@ -104,17 +104,22 @@ Cada sprint exige: build + `tsc --noEmit` + lint + smoke = PASS, paridade funcio
 
 ### EPC-24D — TISS / XML / Bloco C Handoff
 
-**Objetivo:** Ligar Review/APPROVED ao faturamento TISS via Foundations; aposentar XML proprietário como destino.
+**Status:** ✅ Concluída (2026-08-10) — Review / TISS-XML / Bloco C via Runtime Ports; **sem cutover**; fallback legado 100%.
+
+**Objetivo:** Ligar Review/APPROVED ao faturamento TISS via Foundations; aposentar XML proprietário como destino (cutover em EPC-24E).
 
 | Item | Detalhe |
 |------|---------|
-| PRESERVAR | UI Review/Processing; Bloco C runtimes (ativar) |
-| MIGRAR | Handoff APPROVED → Batch/Protocol/Workflow runtimes |
-| MIGRAR | `xml-export-service` → XML Generation / Serializer / Validation / XML-TISS |
-| REMOVER | Builder `medflowTissExport` após paridade de export |
-| Critério | Lote/guia/XML gerados via Ports; sem regressão no export TISS UI |
+| PRESERVAR | UI Review/Processing; Bloco C runtimes (ativados estruturalmente); builder XML legado como fallback |
+| MIGRAR | Handoff APPROVED → Batch/Protocol/Workflow runtimes (coordenação estrutural) |
+| MIGRAR | `xml-export-service` → XML Generation / XML-TISS via gateway (fallback legado) |
+| MIGRAR | Review workspace → ValidationRuntimePort via gateway (fallback legado) |
+| REMOVER | Builder `medflowTissExport` — **adiado para EPC-24E** após paridade |
+| Critério | Review/XML/Bloco C coordenados via Ports; sem regressão no export TISS UI |
 
-**Entregáveis:** ponte Capture→TISS oficial; XML Enterprise no caminho; certificação C-block parcial.
+**Entregáveis:** `process-review-via-enterprise.ts`, `process-xml-via-enterprise.ts`, `process-bloco-c-via-enterprise.ts`; wiring em `review-server` / `tiss-server`; docs `EPC24D_*`; AER-GA03-A1 atualizado (dual-path reduzido).
+
+**Confirmação dual-path:** AER-GA03-A1 **continua existente apenas como fallback** (Review/XML/Bloco C 100% legado funcional; cutover só em EPC-24E).
 
 ---
 

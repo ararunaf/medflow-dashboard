@@ -5,17 +5,17 @@
 import { ValidationError } from "@/lib/domain/operations/errors";
 import type { Json, JsonObject } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { getCaptureAuditReport } from "../audit/services/preventive-audit-service";
-import { getCaptureContractIntelligenceReport } from "../contract/services/contract-intelligence-service";
-import { getCaptureRiskAssessmentReport } from "../risk/services/glosa-risk-service";
-import { getCaptureCorrectionProposals } from "../correction";
+import { getCaptureAuditReportViaEnterprise } from "../enterprise/process-audit-via-enterprise";
+import { getCaptureContractIntelligenceReportViaEnterprise } from "../enterprise/process-contract-via-enterprise";
+import { getCaptureRiskAssessmentReportViaEnterprise } from "../enterprise/process-risk-via-enterprise";
+import { getCaptureCorrectionProposalsViaEnterprise } from "../enterprise/process-correction-via-enterprise";
 import {
   getCaptureSession,
   getCaptureSessionStatus,
   transitionCaptureSession,
 } from "../infrastructure/capture-session-store";
 import { getCaptureOcrResult } from "../ocr/services/ocr-service";
-import { getCaptureStructuredGuide } from "../parser/services/tiss-parser-service";
+import { getCaptureStructuredGuideViaEnterprise } from "../enterprise/process-parser-via-enterprise";
 import type { CaptureSessionStatus } from "../types";
 import { parseReviewMetadata } from "./review-workspace-service";
 import type {
@@ -103,17 +103,19 @@ export type ReviewWorkspaceSnapshot = {
   } | null;
   ocr: Awaited<ReturnType<typeof getCaptureOcrResult>> | null;
   ocrSummary: JsonObject | null;
-  structuredGuide: Awaited<ReturnType<typeof getCaptureStructuredGuide>> | null;
+  structuredGuide: Awaited<ReturnType<typeof getCaptureStructuredGuideViaEnterprise>> | null;
   parserSummary: JsonObject | null;
-  auditReport: Awaited<ReturnType<typeof getCaptureAuditReport>> | null;
+  auditReport: Awaited<ReturnType<typeof getCaptureAuditReportViaEnterprise>> | null;
   auditSummary: JsonObject | null;
   contractIntelligenceReport: Awaited<
-    ReturnType<typeof getCaptureContractIntelligenceReport>
+    ReturnType<typeof getCaptureContractIntelligenceReportViaEnterprise>
   > | null;
   contractIntelligenceSummary: JsonObject | null;
-  riskAssessmentReport: Awaited<ReturnType<typeof getCaptureRiskAssessmentReport>> | null;
+  riskAssessmentReport: Awaited<
+    ReturnType<typeof getCaptureRiskAssessmentReportViaEnterprise>
+  > | null;
   riskAssessmentSummary: JsonObject | null;
-  correctionStore: Awaited<ReturnType<typeof getCaptureCorrectionProposals>> | null;
+  correctionStore: Awaited<ReturnType<typeof getCaptureCorrectionProposalsViaEnterprise>> | null;
   correctionSummary: JsonObject | null;
 };
 
@@ -147,31 +149,34 @@ export async function getReviewWorkspaceSnapshot(
   }
 
   try {
-    structuredGuide = await getCaptureStructuredGuide(ctx, sessionId);
+    structuredGuide = await getCaptureStructuredGuideViaEnterprise(ctx, sessionId);
   } catch {
     /* Parser ainda indisponível */
   }
 
   try {
-    auditReport = await getCaptureAuditReport(ctx, sessionId);
+    auditReport = await getCaptureAuditReportViaEnterprise(ctx, sessionId);
   } catch {
     /* Auditoria ainda indisponível */
   }
 
   try {
-    contractIntelligenceReport = await getCaptureContractIntelligenceReport(ctx, sessionId);
+    contractIntelligenceReport = await getCaptureContractIntelligenceReportViaEnterprise(
+      ctx,
+      sessionId,
+    );
   } catch {
     /* Inteligência contratual ainda indisponível */
   }
 
   try {
-    riskAssessmentReport = await getCaptureRiskAssessmentReport(ctx, sessionId);
+    riskAssessmentReport = await getCaptureRiskAssessmentReportViaEnterprise(ctx, sessionId);
   } catch {
     /* Avaliação de risco ainda indisponível */
   }
 
   try {
-    correctionStore = await getCaptureCorrectionProposals(ctx, sessionId);
+    correctionStore = await getCaptureCorrectionProposalsViaEnterprise(ctx, sessionId);
   } catch {
     /* Correções ainda indisponíveis */
   }

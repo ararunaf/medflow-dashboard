@@ -183,7 +183,7 @@ SEARCH-GATE-01 / STORAGE-GATE-01 permanecem com ressalvas não bloqueantes (incl
 | AER-GA02-B3 | Application 0/43 | GATE-ARCH-02 | Architecture | Alta | **Bloqueante** | **Resolvida** | ARCH-01 + decisão ECS-01 |
 | AER-GA02-B4 | Staging Foundation pendente | GATE-ARCH-02 | Infrastructure | Média | **Bloqueante** | Aceita | Release/staging Foundation |
 
-| AER-GA03-A1 | Dual-path Captura (estrutural vs funcional) | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita (reduzido em EPC-24C; cutover pendente) | EPC-24D…E (cutover em EPC-24E) |
+| AER-GA03-A1 | Dual-path Captura (estrutural vs funcional) | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita (reduzido em EPC-24D; cutover pendente) | EPC-24E (cutover) |
 | AER-GA03-A2 | OCR real fora do OCR Runtime | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | **Resolvida** | OCR-01 / OCR-GATE-01 |
 | AER-GA03-A3 | Storage Captura fora do Storage Manager | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | Aceita | STORAGE-CONV-01 (ver AER-STG-A1) |
 | AER-GA03-A4 | TISS produto vs `enterprise/tiss-*` | GATE-ARCH-03 | Architecture | Alta | Não bloqueante | **Resolvida** | TISS-CONV-01 |
@@ -436,7 +436,7 @@ Inventário oficial DEV-ORG-01…07 (`EPC-CERT-02_ORGANIZATION_CERTIFICATION.md`
 ### 6.5 GATE-ARCH-03 / 03A
 
 #### Alta
-- **AER-GA03-A1** Dual-path Captura — **Aceita** — eliminação **iniciada** em EPC-24A; **reduzida** em EPC-24B (Intake/Parser); **reduzida novamente** em EPC-24C (Audit/Contract/Risk/Correction via Runtime Ports; fallback legado permanece; cutover **não** executado; permanece parcial até EPC-24E) 
+- **AER-GA03-A1** Dual-path Captura — **Aceita** — eliminação **iniciada** em EPC-24A; **reduzida** em EPC-24B (Intake/Parser); **reduzida** em EPC-24C (Audit/Contract/Risk/Correction); **reduzida novamente** em EPC-24D (Review/TISS-XML/Bloco C via Runtime Ports; fallback legado permanece; cutover **não** executado; Dual Path continua **apenas como mecanismo de fallback** até EPC-24E) 
 - **AER-GA03-A2** OCR fora do OCR Runtime — **Resolvida** (OCR-01 / OCR-GATE-01)  
 - **AER-GA03-A3** Storage fora do Storage Manager — **Aceita** — estado atual em **AER-STG-A1** / STORAGE-CONV-01  
 - **AER-GA03-A4** TISS dual-path — **Resolvida** (TISS-CONV-01)  

@@ -1,5 +1,5 @@
 /**
- * EPC-24A / EPC-24B / EPC-24C — Enterprise Runtime Convergence Binding
+ * EPC-24A / EPC-24B / EPC-24C / EPC-24D — Enterprise Runtime Convergence Binding
  *
  * Liga o pipeline operacional de Captura ao Enterprise Runtime sem cutover.
  *
@@ -13,8 +13,12 @@
  *   - Risk via QualityRuntimePort (+ fallback legado)
  *   - Correction via AutoFillRuntimePort (+ fallback legado)
  *
- * PRESERVAR: comportamento funcional idêntico (OCR→…→correção).
- * MIGRAR (futuro EPC-24D+): Review/TISS/XML → Ports.
+ * EPC-24D:
+ *   - Review via ValidationRuntimePort (+ fallback legado)
+ *   - TISS/XML via XMLGenerationRuntimePort / XMLTISSRuntimePort (+ fallback legado)
+ *   - Bloco C via Workflow/Batch/Protocol Ports (+ fallback services TISS)
+ *
+ * PRESERVAR: comportamento funcional idêntico (OCR→…→correção; Review/XML).
  * REMOVER (futuro EPC-24E): dual-path AER-GA03-A1 após paridade certificada.
  *
  * Fluxo oficial deste binding:
@@ -23,6 +27,9 @@
  *     → Document Intake (EPC-24B)
  *     → CanonicalExecutionOrchestratorPort (coordenação estrutural)
  *     → OCR (inalterado) → Parser via Extraction → Audit → Contract → Risk → Correction
+ *
+ * Review / TISS/XML / Bloco C são coordenados via Runtime nos respectivos
+ * Server Fns (review-server / tiss-server) — fora do bound OCR→Correction.
  *
  * Dual-path AER-GA03-A1 permanece parcialmente (reduzido; cutover = EPC-24E).
  */
@@ -52,6 +59,12 @@ export type CaptureRuntimeBindingProbe = {
   rulePackEngineOk: boolean;
   qualityRuntimeOk: boolean;
   autoFillRuntimeOk: boolean;
+  validationRuntimeOk: boolean;
+  xmlGenerationRuntimeOk: boolean;
+  xmlTissRuntimeOk: boolean;
+  workflowRuntimeOk: boolean;
+  batchRuntimeOk: boolean;
+  protocolRuntimeOk: boolean;
 };
 
 export type RunCaptureOperationalPipelineBoundOptions = {
@@ -61,7 +74,8 @@ export type RunCaptureOperationalPipelineBoundOptions = {
 
 /**
  * Probe estrutural do binding: prova que Capture entra pelo composition root
- * e alcança Orchestrator + Capture Engine + Intake + Extraction + Decision Ports.
+ * e alcança Orchestrator + Capture Engine + Intake + Extraction + Decision +
+ * Review/XML/Bloco C Ports.
  * Best-effort.
  */
 export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRuntimeBindingProbe | null> {
@@ -76,6 +90,12 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
       rulePackHealth,
       qualityHealth,
       autoFillHealth,
+      validationHealth,
+      xmlGenHealth,
+      xmlTissHealth,
+      workflowHealth,
+      batchHealth,
+      protocolHealth,
     ] = await Promise.all([
       runtime.getOrchestratorPort().health(),
       runtime.getCaptureEngineRuntimePort().health(),
@@ -85,6 +105,12 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
       runtime.getRulePackEnginePort().health(),
       runtime.getQualityRuntimePort().health(),
       runtime.getAutoFillRuntimePort().health(),
+      runtime.getValidationRuntimePort().health(),
+      runtime.getXMLGenerationRuntimePort().health(),
+      runtime.getXMLTISSRuntimePort().health(),
+      runtime.getWorkflowRuntimePort().health(),
+      runtime.getBatchRuntimePort().health(),
+      runtime.getProtocolRuntimePort().health(),
     ]);
     return {
       runtimeId: runtime.runtimeId,
@@ -97,6 +123,12 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
       rulePackEngineOk: rulePackHealth.ok,
       qualityRuntimeOk: qualityHealth.ok,
       autoFillRuntimeOk: autoFillHealth.ok,
+      validationRuntimeOk: validationHealth.ok,
+      xmlGenerationRuntimeOk: xmlGenHealth.ok,
+      xmlTissRuntimeOk: xmlTissHealth.ok,
+      workflowRuntimeOk: workflowHealth.ok,
+      batchRuntimeOk: batchHealth.ok,
+      protocolRuntimeOk: protocolHealth.ok,
     };
   } catch {
     return null;
@@ -109,8 +141,9 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
  * Comportamento observável idêntico à orquestração imperativa anterior
  * (mesmos estágios, mesmos catches aninhados, mesmas mensagens de falha engolida).
  *
- * EPC-24C: Audit / Contract / Risk / Correction coordenados via Runtime Ports.
- * Não fecha AER-GA03-A1. Não altera OCR / Parser engines / XML / Foundations.
+ * EPC-24C/D: Decision + Review/XML/Bloco C coordenados via Runtime Ports
+ * (Review/XML nos Server Fns dedicados). Não fecha AER-GA03-A1.
+ * Não altera OCR / Parser engines / Foundations / UI / banco / APIs.
  */
 export async function runCaptureOperationalPipelineBound(
   ctx: ServiceCtx,
@@ -120,7 +153,7 @@ export async function runCaptureOperationalPipelineBound(
 ): Promise<void> {
   // Composition root oficial — Capture entra exclusivamente pelo Runtime.
   void resolveCaptureEnterpriseRuntime();
-  // Coordenação estrutural (Orchestrator / Capture Engine / Intake / Extraction / Decision).
+  // Coordenação estrutural (Orchestrator / Capture Engine / Intake / Extraction / Decision / Review-XML-BlocoC).
   void probeCaptureEnterpriseRuntimeBinding();
 
   // EPC-24B — Intake canônico via Runtime (awaited; best-effort; sem alterar upload).
