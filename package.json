@@ -109,6 +109,7 @@
     "enterprise:tiss-runtime-01b:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-01b-ocr-capability.test.ts",
     "enterprise:tiss-runtime-01c:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-01c-parser-capability.test.ts",
     "enterprise:tiss-runtime-02a:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-02a-validation-capability.test.ts",
+    "enterprise:tiss-runtime-02b:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-02b-enrichment-capability.test.ts",
     "enterprise:worker-runtime:test": "npx tsx --test scripts/enterprise/tests/worker-runtime-engine.test.ts",
     "enterprise:scheduler-runtime:test": "npx tsx --test scripts/enterprise/tests/scheduler-runtime-engine.test.ts",
     "enterprise:persistent-queue-runtime:test": "npx tsx --test scripts/enterprise/tests/persistent-queue-runtime-engine.test.ts",

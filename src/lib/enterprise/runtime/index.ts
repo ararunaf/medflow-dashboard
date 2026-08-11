@@ -69,3 +69,11 @@ export {
   type ProcessTissParsedValidatedResult,
   type TissValidationCompletedJob,
 } from "./process-tiss-parsed-validated";
+
+export {
+  processTissValidatedEnriched,
+  TISS_JOB_STATUS_ENRICHED,
+  type ProcessTissValidatedEnrichedInput,
+  type ProcessTissValidatedEnrichedResult,
+  type TissEnrichmentCompletedJob,
+} from "./process-tiss-validated-enriched";

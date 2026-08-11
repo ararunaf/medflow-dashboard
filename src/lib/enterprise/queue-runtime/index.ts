@@ -18,6 +18,7 @@
  * TISS-RUNTIME-01B: capability OCR — Job RECEIVED → Worker → OCR → Job OCR_COMPLETED (sem Parser).
  * TISS-RUNTIME-01C: capability Parser — Job OCR_COMPLETED → Worker → Parser → Job PARSED (sem Validação).
  * TISS-RUNTIME-02A: capability Validation — Job PARSED → Worker → Validation → Job VALIDATED (sem Enriquecimento).
+ * TISS-RUNTIME-02B: capability Enrichment — Job VALIDATED → Worker → Enrichment → Job ENRICHED (sem XML).
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
@@ -202,4 +203,12 @@ export {
   type TissValidationCompletedJob,
   type TissValidationJobLogicalStatus,
   type TissValidationProcessMessageDeps,
+  TISS_JOB_STATUS_ENRICHED,
+  processTissEnrichmentJob,
+  createTissEnrichmentProcessMessage,
+  type ProcessTissEnrichmentJobInput,
+  type ProcessTissEnrichmentJobResult,
+  type TissEnrichmentCompletedJob,
+  type TissEnrichmentJobLogicalStatus,
+  type TissEnrichmentProcessMessageDeps,
 } from "./operational";

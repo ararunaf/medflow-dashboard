@@ -149,6 +149,7 @@ getEnterpriseRuntime()
 | **TISS-RUNTIME-01B** | ✓ OCR operacional no Worker — Job RECEIVED → OCR → OCR_COMPLETED via Ports existentes |
 | **TISS-RUNTIME-01C** | ✓ Parser / Extraction operacional no mesmo pipeline |
 | **TISS-RUNTIME-02A** | ✓ Validation operacional no Worker — Job PARSED → Validation → VALIDATED via `ValidationRuntimePort` |
+| **TISS-RUNTIME-02B** | ✓ Enrichment operacional no Worker — Job VALIDATED → Enrichment → ENRICHED via `AutoFillRuntimePort` |
 
 ---
 
