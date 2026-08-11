@@ -85,3 +85,11 @@ export {
   type ProcessTissEnrichedXmlGeneratedResult,
   type TissXmlCompletedJob,
 } from "./process-tiss-enriched-xml-generated";
+
+export {
+  processTissXmlGeneratedBatchCreated,
+  TISS_JOB_STATUS_BATCH_CREATED,
+  type ProcessTissXmlGeneratedBatchCreatedInput,
+  type ProcessTissXmlGeneratedBatchCreatedResult,
+  type TissBatchCompletedJob,
+} from "./process-tiss-xml-generated-batch-created";

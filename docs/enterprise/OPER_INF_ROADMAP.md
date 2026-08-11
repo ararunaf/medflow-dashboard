@@ -24,8 +24,9 @@
 | **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ✅ Concluída |
 | **TISS-RUNTIME-02B** | Ativar Enriquecimento operacional no Worker (consumo de `VALIDATED`) | ✅ Concluída |
 | **TISS-RUNTIME-03A** | Ativar XML TISS operacional no Worker (consumo de `ENRICHED`) | ✅ Concluída |
+| **TISS-RUNTIME-03B** | Ativar Lote operacional no Worker (consumo de `XML_GENERATED`) | ✅ Concluída |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ⏳ TISS-RUNTIME-03B
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ✓ TISS-RUNTIME-03B · ⏳ TISS-RUNTIME-04A
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -179,6 +180,14 @@ getEnterpriseRuntime()
 - Batch / Protocolo / Persistência / Auditoria **não** executados (`batchExecuted: false`, `protocolExecuted: false`, `persistenceExecuted: false`, `auditExecuted: false`); demais capabilities fora de escopo
 - Sem novo Port / Gateway / Runtime / Pipeline
 
+## Escopo concluído (TISS-RUNTIME-03B)
+
+- Capability Lote operacional: Job **XML_GENERATED** → `WorkerRuntimePort` → `BatchRuntimePort` (prepareBatch / getBatch) → Job **BATCH_CREATED** → reenqueue via `QueueRuntimePort`
+- Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
+- Entrypoint `processTissXmlGeneratedBatchCreated` via `getEnterpriseRuntime()`
+- Protocolo / Persistência / Auditoria **não** executados (`protocolExecuted: false`, `persistenceExecuted: false`, `auditExecuted: false`); demais capabilities fora de escopo
+- Sem novo Port / Gateway / Runtime / Pipeline
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-03B** — ativar Lote operacional no Worker (consumo de `XML_GENERATED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-04A** — ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

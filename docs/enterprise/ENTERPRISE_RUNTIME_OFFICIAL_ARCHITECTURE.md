@@ -151,6 +151,7 @@ getEnterpriseRuntime()
 | **TISS-RUNTIME-02A** | ✓ Validation operacional no Worker — Job PARSED → Validation → VALIDATED via `ValidationRuntimePort` |
 | **TISS-RUNTIME-02B** | ✓ Enrichment operacional no Worker — Job VALIDATED → Enrichment → ENRICHED via `AutoFillRuntimePort` |
 | **TISS-RUNTIME-03A** | ✓ XML TISS operacional no Worker — Job ENRICHED → XML → XML_GENERATED via `XMLTISSRuntimePort` |
+| **TISS-RUNTIME-03B** | ✓ Batch operacional no Worker — Job XML_GENERATED → Batch → BATCH_CREATED via `BatchRuntimePort` |
 
 ---
 
