@@ -1,12 +1,13 @@
 /**
- * DefaultQueueRuntimeAdapter — INF-05.
+ * DefaultQueueRuntimeAdapter — INF-05 / OPER-INF-Q.
  *
  * Adapter oficial do Enterprise Queue Runtime.
- * Responde exclusivamente de forma estrutural (sem fila real / sem workers).
- * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem processamento assíncrono.
+ * OPER-INF-Q: backend persistente (Supabase preferencial; memory durable fallback).
+ * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem processamento por workers.
  */
 import {
   DEFAULT_QUEUE_RUNTIME_CAPABILITIES,
+  DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES,
   toCanonicalQueueCapabilities,
 } from "../ports/capabilities";
 import {
@@ -48,6 +49,7 @@ import type {
   StatsInput,
   StatsResult,
 } from "../ports/types";
+import { createQueueRuntimeBackend, type QueueRuntimePersistenceBackend } from "../backend";
 import { InMemoryQueueRuntimeStore, type QueueRuntimeStore } from "../store";
 
 export const DEFAULT_QUEUE_RUNTIME_ADAPTER_ID = "default-enterprise-queue";
@@ -62,6 +64,17 @@ export type DefaultQueueRuntimeAdapterOptions = {
   healthy?: boolean;
   message?: string;
   store?: QueueRuntimeStore;
+  /**
+   * OPER-INF-Q — backend persistente.
+   * Default operacional: createQueueRuntimeBackend().
+   * `null` força modo estrutural (mock/test).
+   */
+  backend?: QueueRuntimePersistenceBackend | null;
+  /**
+   * OPER-INF-Q — quando true (default), ativa flags/backend operacionais.
+   * Mock força false.
+   */
+  operational?: boolean;
   /** INF-06 — Worker Runtime preparado (sem alocação/execução). */
   enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   defaultTimeoutMs?: number;
@@ -95,7 +108,7 @@ async function defaultSleep(ms: number): Promise<void> {
 }
 
 /**
- * Adapter oficial INF-05 — Queue Runtime default / enterprise.
+ * Adapter oficial INF-05 / OPER-INF-Q — Queue Runtime default / enterprise.
  */
 export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   readonly providerId: Extract<QueueRuntimeProviderId, "enterprise" | "default">;
@@ -104,6 +117,8 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   private readonly message: string;
   private readonly metadata: QueueRuntimeProviderMetadata;
   private readonly store: QueueRuntimeStore;
+  private readonly backend: QueueRuntimePersistenceBackend | null;
+  private readonly operational: boolean;
   private readonly enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
@@ -111,19 +126,27 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   private readonly now: () => string;
   private readonly sleep: (ms: number) => Promise<void>;
   private failAttemptsRemaining: number;
+  private hydrated = false;
 
   constructor(options: DefaultQueueRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
+    this.operational = options.operational ?? true;
     this.healthy = options.healthy ?? true;
+    this.backend =
+      options.backend === null
+        ? null
+        : (options.backend ?? (this.operational ? createQueueRuntimeBackend() : null));
     this.message =
       options.message ??
-      `${this.providerId} Queue Runtime ready (structural only — no real queue / no workers).`;
+      (this.operational
+        ? `${this.providerId} Queue Runtime ready (OPER-INF-Q — persistent backend active).`
+        : `${this.providerId} Queue Runtime ready (structural only — no persistent backend).`);
     this.metadata = {
       name: this.providerId === "default" ? "Default Queue Runtime" : "Enterprise Queue Runtime",
       version: DEFAULT_QUEUE_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official INF-05 Enterprise Queue Runtime — canonical queue infrastructure only.",
+        "Official INF-05 Enterprise Queue Runtime — OPER-INF-Q persistent backend via QueueRuntimePort.",
     };
     this.store = options.store ?? new InMemoryQueueRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
@@ -146,12 +169,20 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     return this.store;
   }
 
+  /** Backend persistente ativo (OPER-INF-Q) — null em modo estrutural. */
+  getBackend(): QueueRuntimePersistenceBackend | null {
+    return this.backend;
+  }
+
   capabilities(): QueueRuntimePortCapabilities {
+    const engine = this.operational
+      ? DEFAULT_QUEUE_RUNTIME_CAPABILITIES
+      : DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES;
     return {
       provider: this.providerId,
       adapterId: DEFAULT_QUEUE_RUNTIME_ADAPTER_ID,
-      engine: { ...DEFAULT_QUEUE_RUNTIME_CAPABILITIES },
-      canonical: toCanonicalQueueCapabilities(DEFAULT_QUEUE_RUNTIME_CAPABILITIES),
+      engine: { ...engine },
+      canonical: toCanonicalQueueCapabilities(engine),
       supportsCanonicalQueue: true,
       supportsTimeout: true,
       supportsRetry: true,
@@ -163,12 +194,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       usesObservabilityRuntimePort: true,
       usesScalabilityRuntimePort: true,
       runtimeReady: true,
-      realQueueBackend: false,
-      messagesPublished: false,
-      messagesConsumed: false,
+      realQueueBackend: this.operational,
+      messagesPublished: this.operational,
+      messagesConsumed: this.operational,
       workersInvoked: false,
       processingPerformed: false,
-      persistenceImplemented: false,
+      persistenceImplemented: this.operational,
       implementsRabbitMq: false,
       implementsKafka: false,
       implementsAzureServiceBus: false,
@@ -189,17 +220,28 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   }
 
   providerInfo(): QueueRuntimeInfo {
+    const caps = this.operational
+      ? DEFAULT_QUEUE_RUNTIME_CAPABILITIES
+      : DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES;
     return {
       providerId: this.providerId,
       metadata: this.metadata,
       status: this.healthy ? "ready" : "unhealthy",
       providerType: "QUEUE_RUNTIME",
-      capabilities: { ...DEFAULT_QUEUE_RUNTIME_CAPABILITIES },
+      capabilities: { ...caps },
     };
   }
 
   async health(): Promise<QueueRuntimeHealth> {
+    await this.ensureHydrated();
     const storeHealth = this.store.health();
+    let backendOk = true;
+    let backendMessage: string | undefined;
+    if (this.backend) {
+      const backendHealth = await this.backend.health();
+      backendOk = backendHealth.ok;
+      backendMessage = backendHealth.message;
+    }
     let workerRuntimeOk = true;
     let schedulerRuntimeOk = true;
     let persistentQueueRuntimeOk = true;
@@ -245,6 +287,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     const ok =
       this.healthy &&
       storeHealth.ok &&
+      backendOk &&
       workerRuntimeOk &&
       schedulerRuntimeOk &&
       persistentQueueRuntimeOk &&
@@ -264,20 +307,23 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       observabilityRuntimeOk,
       scalabilityRuntimeOk,
       runtimeReady: true,
-      realQueueBackend: false,
-      messagesPublished: false,
-      messagesConsumed: false,
+      realQueueBackend: this.operational,
+      messagesPublished: this.operational,
+      messagesConsumed: this.operational,
       workersInvoked: false,
       processingPerformed: false,
-      persistenceImplemented: false,
-      message: this.healthy ? (storeHealth.message ?? this.message) : "Queue Runtime unhealthy.",
+      persistenceImplemented: this.operational,
+      message: this.healthy
+        ? (backendMessage ?? storeHealth.message ?? this.message)
+        : "Queue Runtime unhealthy.",
     };
   }
 
   async enqueue(input: EnqueueInput): Promise<EnqueueResult> {
     return this.runOperation("enqueue", input, async () => {
+      await this.ensureHydrated();
       const stamp = this.now();
-      const queue = this.ensureQueue(input.queueId, input.queueName, stamp);
+      const queue = await this.ensureQueue(input.queueId, input.queueName, stamp);
       const messageId = input.messageId ?? createQueueMessageId();
       const message: CanonicalQueueMessage = {
         kind: "canonical-queue-message",
@@ -295,24 +341,28 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         status: "enqueued",
         registeredAt: stamp,
         updatedAt: stamp,
-        messagesPublished: false,
+        messagesPublished: this.operational,
         messagesConsumed: false,
         workersInvoked: false,
         processingPerformed: false,
-        persistenceImplemented: false,
-        realQueueBackend: false,
+        persistenceImplemented: this.operational,
+        realQueueBackend: this.operational,
       };
       this.store.setMessage(message);
-      const updatedQueue = this.attachMessage(queue, messageId, stamp);
+      await this.backend?.persistMessage(message);
+      const updatedQueue = await this.attachMessage(queue, messageId, stamp);
       const result = this.buildResult({
         operation: "enqueue",
         status: "enqueued",
         queue: updatedQueue,
         message,
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Queue Runtime structural enqueue (INF-05 foundation — no real publish).",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational enqueue (OPER-INF-Q — persisted)."
+          : "Canonical Queue Runtime structural enqueue (INF-05 foundation — no real publish).",
+        messagesPublished: this.operational,
+        messagesConsumed: false,
       });
       return {
         ok: true,
@@ -327,6 +377,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async dequeue(input: DequeueInput): Promise<DequeueResult> {
     return this.runOperation("dequeue", input, async () => {
+      await this.ensureHydrated();
       const stamp = this.now();
       const queue = this.resolveQueue(input.queueId, input.queueName);
       if (!queue) {
@@ -349,19 +400,25 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         ...next,
         status: "dequeued",
         updatedAt: stamp,
-        messagesConsumed: false,
+        messagesConsumed: this.operational,
         processingPerformed: false,
+        realQueueBackend: this.operational,
+        persistenceImplemented: this.operational,
       };
       this.store.setMessage(message);
+      await this.backend?.persistMessage(message);
       const result = this.buildResult({
         operation: "dequeue",
         status: "dequeued",
         queue,
         message,
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Queue Runtime structural dequeue (INF-05 foundation — no real consume).",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational dequeue (OPER-INF-Q — persisted)."
+          : "Canonical Queue Runtime structural dequeue (INF-05 foundation — no real consume).",
+        messagesPublished: this.operational,
+        messagesConsumed: this.operational,
       });
       return {
         ok: true,
@@ -376,6 +433,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async peek(input: PeekInput): Promise<PeekResult> {
     return this.runOperation("peek", input, async () => {
+      await this.ensureHydrated();
       const queue = this.resolveQueue(input.queueId, input.queueName);
       if (!queue) {
         return {
@@ -403,9 +461,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         queue,
         message,
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Queue Runtime structural peek (INF-05 foundation — no side-effects).",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational peek (OPER-INF-Q)."
+          : "Canonical Queue Runtime structural peek (INF-05 foundation — no side-effects).",
+        messagesPublished: this.operational,
+        messagesConsumed: false,
       });
       return {
         ok: true,
@@ -420,6 +481,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async ack(input: AckInput): Promise<AckResult> {
     return this.runOperation("ack", input, async () => {
+      await this.ensureHydrated();
       const existing = this.store.getMessage(input.messageId);
       if (!existing) {
         return {
@@ -433,15 +495,23 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         ...existing,
         status: "acked",
         updatedAt: stamp,
+        realQueueBackend: this.operational,
+        persistenceImplemented: this.operational,
+        messagesConsumed: this.operational,
       };
       this.store.setMessage(message);
+      await this.backend?.persistMessage(message);
       const result = this.buildResult({
         operation: "ack",
         status: "acked",
         message,
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Queue Runtime structural ack (INF-05 foundation — no real ack).",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational ack (OPER-INF-Q — persisted)."
+          : "Canonical Queue Runtime structural ack (INF-05 foundation — no real ack).",
+        messagesPublished: this.operational,
+        messagesConsumed: this.operational,
       });
       return {
         ok: true,
@@ -455,6 +525,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async nack(input: NackInput): Promise<NackResult> {
     return this.runOperation("nack", input, async () => {
+      await this.ensureHydrated();
       const existing = this.store.getMessage(input.messageId);
       if (!existing) {
         return {
@@ -468,15 +539,22 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         ...existing,
         status: "nacked",
         updatedAt: stamp,
+        realQueueBackend: this.operational,
+        persistenceImplemented: this.operational,
       };
       this.store.setMessage(message);
+      await this.backend?.persistMessage(message);
       const result = this.buildResult({
         operation: "nack",
         status: "nacked",
         message,
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Queue Runtime structural nack (INF-05 foundation — no real nack).",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational nack (OPER-INF-Q — persisted)."
+          : "Canonical Queue Runtime structural nack (INF-05 foundation — no real nack).",
+        messagesPublished: this.operational,
+        messagesConsumed: false,
       });
       return {
         ok: true,
@@ -490,6 +568,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async purge(input: PurgeInput): Promise<PurgeResult> {
     return this.runOperation("purge", input, async () => {
+      await this.ensureHydrated();
       const queue = this.resolveQueue(input.queueId, input.queueName);
       if (!queue) {
         return {
@@ -501,13 +580,17 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       const stamp = this.now();
       const before = this.store.listMessages(queue.queueId);
       const purgedCount = this.store.removeMessagesByQueue(queue.queueId);
+      await this.backend?.removeMessagesByQueue(queue.queueId);
       const cleared: CanonicalQueue = {
         ...queue,
         messageIds: [],
         messageCount: 0,
         updatedAt: stamp,
+        realQueueBackend: this.operational,
+        persistenceImplemented: this.operational,
       };
       this.store.setQueue(cleared);
+      await this.backend?.persistQueue(cleared);
       const batch: CanonicalQueueBatch = {
         kind: "canonical-queue-batch",
         batchId: createQueueBatchId(),
@@ -515,7 +598,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         messageIds: before.map((m) => m.messageId),
         messageCount: purgedCount,
         createdAt: stamp,
-        realQueueBackend: false,
+        realQueueBackend: this.operational,
         processingPerformed: false,
       };
       const result = this.buildResult({
@@ -524,9 +607,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         queue: cleared,
         batch,
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Queue Runtime structural purge (INF-05 foundation — no real purge).",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational purge (OPER-INF-Q — persisted)."
+          : "Canonical Queue Runtime structural purge (INF-05 foundation — no real purge).",
+        messagesPublished: this.operational,
+        messagesConsumed: false,
       });
       return {
         ok: true,
@@ -542,14 +628,38 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
 
   async stats(input: StatsInput = {}): Promise<StatsResult> {
     return this.runOperation("stats", input, async () => {
-      const statistics = this.store.statistics();
+      await this.ensureHydrated();
+      const base = this.store.statistics();
+      const statistics = this.operational
+        ? {
+            ...base,
+            realQueueBackendCount: 1,
+            messagesPublishedCount:
+              base.enqueuedMessages +
+                base.dequeuedMessages +
+                base.ackedMessages +
+                base.nackedMessages +
+                base.purgedMessages >
+              0
+                ? base.totalMessages
+                : 0,
+            messagesConsumedCount: base.dequeuedMessages + base.ackedMessages,
+            workersInvokedCount: 0,
+            processingPerformedCount: 0,
+            persistenceImplementedCount: 1,
+          }
+        : base;
       const stamp = this.now();
       const result = this.buildResult({
         operation: "stats",
         status: "pending",
         stamp,
-        code: "QUEUE_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Queue Runtime structural statistics.",
+        code: this.operational ? "QUEUE_RUNTIME_OK" : "QUEUE_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Queue Runtime operational statistics (OPER-INF-Q)."
+          : "Canonical Queue Runtime structural statistics.",
+        messagesPublished: this.operational,
+        messagesConsumed: this.operational,
       });
       return {
         ok: true,
@@ -561,11 +671,27 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     });
   }
 
-  private ensureQueue(
+  private async ensureHydrated(): Promise<void> {
+    if (this.hydrated || !this.backend || !this.operational) {
+      this.hydrated = true;
+      return;
+    }
+    const queues = await this.backend.loadQueues();
+    for (const queue of queues) {
+      this.store.setQueue(queue);
+    }
+    const messages = await this.backend.loadMessages();
+    for (const message of messages) {
+      this.store.setMessage(message);
+    }
+    this.hydrated = true;
+  }
+
+  private async ensureQueue(
     queueId: string | undefined,
     queueName: string | undefined,
     stamp: string,
-  ): CanonicalQueue {
+  ): Promise<CanonicalQueue> {
     const byId = queueId ? this.store.getQueue(queueId) : undefined;
     if (byId) return byId;
     const name = queueName ?? "canonical-foundation-queue";
@@ -584,12 +710,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       messageCount: 0,
       createdAt: stamp,
       updatedAt: stamp,
-      realQueueBackend: false,
-      messagesPublished: false,
-      messagesConsumed: false,
+      realQueueBackend: this.operational,
+      messagesPublished: this.operational,
+      messagesConsumed: this.operational,
       workersInvoked: false,
       processingPerformed: false,
-      persistenceImplemented: false,
+      persistenceImplemented: this.operational,
     };
     created.identity = {
       kind: "canonical-queue-identity",
@@ -597,6 +723,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       queueName: created.queueName,
     };
     this.store.setQueue(created);
+    await this.backend?.persistQueue(created);
     return created;
   }
 
@@ -613,7 +740,11 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     return all[0];
   }
 
-  private attachMessage(queue: CanonicalQueue, messageId: string, stamp: string): CanonicalQueue {
+  private async attachMessage(
+    queue: CanonicalQueue,
+    messageId: string,
+    stamp: string,
+  ): Promise<CanonicalQueue> {
     const messageIds = queue.messageIds.includes(messageId)
       ? queue.messageIds
       : [...queue.messageIds, messageId];
@@ -622,8 +753,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       messageIds,
       messageCount: messageIds.length,
       updatedAt: stamp,
+      realQueueBackend: this.operational,
+      persistenceImplemented: this.operational,
+      messagesPublished: this.operational,
     };
     this.store.setQueue(updated);
+    await this.backend?.persistQueue(updated);
     return updated;
   }
 
@@ -636,6 +771,8 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     queue?: CanonicalQueue;
     message?: CanonicalQueueMessage;
     batch?: CanonicalQueueBatch;
+    messagesPublished?: boolean;
+    messagesConsumed?: boolean;
   }): CanonicalQueueResult {
     return {
       kind: "canonical-queue-result",
@@ -653,12 +790,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         version: this.metadata.version,
         label: this.metadata.name,
       },
-      realQueueBackend: false,
-      messagesPublished: false,
-      messagesConsumed: false,
+      realQueueBackend: this.operational,
+      messagesPublished: args.messagesPublished ?? this.operational,
+      messagesConsumed: args.messagesConsumed ?? false,
       workersInvoked: false,
       processingPerformed: false,
-      persistenceImplemented: false,
+      persistenceImplemented: this.operational,
       runtimeReady: true,
       status: args.status,
       messageText: args.messageText,

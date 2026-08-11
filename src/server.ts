@@ -11,8 +11,11 @@ import { getClientIpFromRequest } from "./lib/security/request-client";
 import { logStartupDiagnostics } from "./lib/env/startup-diagnostics";
 import { isHealthPath, resolveHealthResponse } from "./lib/server/health-checks";
 import { handleCaptureHttpRequest } from "./lib/capture/api/capture-http-router";
+import { bindServerQueueRuntimeBackend } from "./lib/server/queue-runtime-backend";
 
 initServerErrorMonitoring();
+// OPER-INF-Q — ativa backend persistente do QueueRuntimePort (Supabase quando disponível).
+bindServerQueueRuntimeBackend();
 
 let startupLogged = false;
 function logStartupOnce() {

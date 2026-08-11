@@ -1,17 +1,16 @@
 /**
- * Enterprise Queue Runtime — Ports & Adapters (INF-05).
+ * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → QueueRuntimePort
  *     → DefaultQueueRuntimeAdapter / EnterpriseQueueRuntimeAdapter / MockQueueRuntimeAdapter
- *     → InMemoryQueueRuntimeStore
+ *     → InMemoryQueueRuntimeStore + Persistence Backend (Supabase | memory durable)
  *     → Canonical Queue Result
  *
- * INF-05: infraestrutura canônica de gerenciamento estrutural de filas futuras.
+ * OPER-INF-Q: backend persistente ativado no adapter — mesma interface pública.
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
- * Sem workers. Sem scheduler. Sem processamento assíncrono real.
- * Sem persistência real. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture.
- * Sem acesso direto ao Queue Runtime Store.
+ * Sem workers. Sem scheduler. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture.
+ * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort.
  */
 export type {
@@ -105,6 +104,21 @@ export {
   type StoredCanonicalQueueMessage,
   type QueueRuntimeStore,
 } from "./store";
+
+export {
+  MEMORY_QUEUE_RUNTIME_BACKEND_ID,
+  SUPABASE_QUEUE_RUNTIME_BACKEND_ID,
+  MemoryQueueRuntimeBackend,
+  SupabaseQueueRuntimeBackend,
+  createQueueRuntimeBackend,
+  getInjectedQueueRuntimeBackend,
+  injectQueueRuntimeBackend,
+  type CreateQueueRuntimeBackendOptions,
+  type MemoryQueueRuntimeBackendOptions,
+  type QueueRuntimePersistenceBackend,
+  type QueueRuntimePersistenceBackendHealth,
+  type SupabaseQueueRuntimeBackendOptions,
+} from "./backend";
 
 export { QueueRuntimeProvider, createQueueRuntimePort, getQueueRuntimeFactory } from "./providers";
 

@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * INF-05 — Enterprise Queue Runtime
- * Prova: Application → QueueRuntimePort → Adapter → Factory → Registry → Store
+ * INF-05 / OPER-INF-Q — Enterprise Queue Runtime
+ * Prova: Application → QueueRuntimePort → Adapter → Factory → Registry → Store + Backend
  *         + Enterprise Runtime + TISS Runtime (dependência preparada sem consumo)
  *         + enqueue / dequeue / peek / ack / nack / purge / stats / health
- *         + ausência de RabbitMQ / Kafka / Azure / Redis / Workers / Scheduler
+ *         + backend persistente operacional (sem RabbitMQ / Kafka / Azure / Redis / Workers)
  */
+process.env.MEDICFLOW_QUEUE_RUNTIME_BACKEND = "memory";
+
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -15,16 +17,19 @@ import {
   BUILTIN_QUEUE_RUNTIME_PROVIDER_COUNT,
   DEFAULT_QUEUE_RUNTIME_ADAPTER_ID,
   DEFAULT_QUEUE_RUNTIME_CAPABILITIES,
+  DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES,
   DefaultQueueRuntimeAdapter,
   EnterpriseQueueRuntimeAdapter,
   IN_MEMORY_QUEUE_RUNTIME_STORE_ID,
   InMemoryQueueRuntimeStore,
+  MEMORY_QUEUE_RUNTIME_BACKEND_ID,
   MOCK_QUEUE_RUNTIME_ADAPTER_ID,
   MockQueueRuntimeAdapter,
   QueueRuntimeFactory,
   QueueRuntimeProvider,
   QueueRuntimeRegistry,
   createDefaultQueueRuntimeRegistry,
+  createQueueRuntimeBackend,
   createQueueRuntimeFactory,
   createQueueRuntimePort,
   getQueueRuntimeFactory,
@@ -52,7 +57,7 @@ function collectTsFiles(dir: string): string[] {
 }
 
 describe("INF-05 QueueRuntimePort contract", () => {
-  it("mock adapter satisfaz o Port e responde healthy", async () => {
+  it("mock adapter satisfaz o Port e responde healthy (estrutural)", async () => {
     const port: QueueRuntimePort = new MockQueueRuntimeAdapter({
       provider: "mock",
     });
@@ -116,19 +121,23 @@ describe("INF-05 QueueRuntimePort contract", () => {
     );
   });
 
-  it("enqueue → dequeue → peek → ack → nack → purge → stats com flags estruturais", async () => {
+  it("OPER-INF-Q enqueue → dequeue → peek → ack → nack → purge → stats com backend persistente", async () => {
     resetQueueRuntimeIdSequences();
     const port = createQueueRuntimePort({ provider: "enterprise" });
+    const adapter = port as DefaultQueueRuntimeAdapter;
+    assert.ok(adapter.getBackend());
+    assert.equal(adapter.getBackend()?.backendId, MEMORY_QUEUE_RUNTIME_BACKEND_ID);
 
     const enqueued = await port.enqueue({
       queueName: "foundation-queue",
-      payloadRef: "payload://structural-01",
-      correlationId: "corr-inf-05",
+      payloadRef: "payload://operational-01",
+      correlationId: "corr-oper-inf-q",
     });
     assert.equal(enqueued.ok, true);
     assert.ok(enqueued.result?.resultId);
-    assert.equal(enqueued.result?.realQueueBackend, false);
-    assert.equal(enqueued.result?.messagesPublished, false);
+    assert.equal(enqueued.result?.realQueueBackend, true);
+    assert.equal(enqueued.result?.messagesPublished, true);
+    assert.equal(enqueued.result?.persistenceImplemented, true);
     assert.equal(enqueued.result?.workersInvoked, false);
     assert.equal(enqueued.result?.runtimeReady, true);
     assert.equal(enqueued.queueMessage?.status, "enqueued");
@@ -141,7 +150,7 @@ describe("INF-05 QueueRuntimePort contract", () => {
     const dequeued = await port.dequeue({ queueName: "foundation-queue" });
     assert.equal(dequeued.ok, true);
     assert.equal(dequeued.queueMessage?.status, "dequeued");
-    assert.equal(dequeued.result?.messagesConsumed, false);
+    assert.equal(dequeued.result?.messagesConsumed, true);
 
     const acked = await port.ack({ messageId: dequeued.queueMessage!.messageId });
     assert.equal(acked.ok, true);
@@ -149,7 +158,7 @@ describe("INF-05 QueueRuntimePort contract", () => {
 
     const enqueued2 = await port.enqueue({
       queueName: "foundation-queue",
-      payloadRef: "payload://structural-02",
+      payloadRef: "payload://operational-02",
     });
     const nacked = await port.nack({ messageId: enqueued2.queueMessage!.messageId });
     assert.equal(nacked.ok, true);
@@ -157,7 +166,7 @@ describe("INF-05 QueueRuntimePort contract", () => {
 
     const enqueued3 = await port.enqueue({
       queueName: "foundation-queue",
-      payloadRef: "payload://structural-03",
+      payloadRef: "payload://operational-03",
     });
     assert.equal(enqueued3.ok, true);
 
@@ -169,13 +178,12 @@ describe("INF-05 QueueRuntimePort contract", () => {
     const stats = await port.stats();
     assert.equal(stats.ok, true);
     assert.equal(stats.statistics?.kind, "canonical-queue-statistics");
-    assert.equal(stats.statistics?.realQueueBackendCount, 0);
-    assert.equal(stats.statistics?.messagesPublishedCount, 0);
+    assert.equal(stats.statistics?.realQueueBackendCount, 1);
+    assert.equal(stats.statistics?.persistenceImplementedCount, 1);
     assert.equal(stats.statistics?.workersInvokedCount, 0);
-    assert.equal(stats.statistics?.persistenceImplementedCount, 0);
   });
 
-  it("InMemory store oficial e estatísticas zeradas para backends reais", () => {
+  it("InMemory store permanece disponível; capabilities operacionais no default", () => {
     const store = new InMemoryQueueRuntimeStore();
     assert.equal(store.storeId, IN_MEMORY_QUEUE_RUNTIME_STORE_ID);
     const stats = store.statistics();
@@ -184,7 +192,9 @@ describe("INF-05 QueueRuntimePort contract", () => {
     assert.equal(stats.messagesPublishedCount, 0);
     assert.equal(stats.workersInvokedCount, 0);
     assert.equal(DEFAULT_QUEUE_RUNTIME_CAPABILITIES.runtimeReady, true);
-    assert.equal(DEFAULT_QUEUE_RUNTIME_CAPABILITIES.realQueueBackend, false);
+    assert.equal(DEFAULT_QUEUE_RUNTIME_CAPABILITIES.realQueueBackend, true);
+    assert.equal(DEFAULT_QUEUE_RUNTIME_CAPABILITIES.persistenceImplemented, true);
+    assert.equal(DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES.realQueueBackend, false);
   });
 
   it("retry recupera falha transitória", async () => {
@@ -193,6 +203,7 @@ describe("INF-05 QueueRuntimePort contract", () => {
       failAttempts: 1,
       defaultRetryCount: 1,
       defaultRetryBackoffMs: 1,
+      backend: createQueueRuntimeBackend({ preferMemory: true }),
     });
     const result = await port.enqueue({ queueName: "retry-queue" });
     assert.equal(result.ok, true);
@@ -228,7 +239,7 @@ describe("INF-05 QueueRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.info.providerType, "QUEUE_RUNTIME");
     assert.equal(summary.capabilities.runtimeReady, true);
-    assert.equal(summary.capabilities.realQueueBackend, false);
+    assert.equal(summary.capabilities.realQueueBackend, true);
     assert.equal(summary.capabilities.implementsRabbitMq, false);
   });
 });
@@ -275,13 +286,12 @@ describe("INF-05 cadeia Enterprise / TISS / Queue Runtime", () => {
 
     const after = await queue.stats();
     assert.equal(after.statistics?.totalMessages ?? 0, beforeCount);
-    assert.equal(after.statistics?.messagesPublishedCount, 0);
     assert.equal(after.statistics?.workersInvokedCount, 0);
   });
 });
 
-describe("INF-05 ausência de backends / workers / bypass", () => {
-  it("módulo queue-runtime não referencia backends reais nem workers", () => {
+describe("INF-05 / OPER-INF-Q ausência de backends proibidos / workers / bypass", () => {
+  it("módulo queue-runtime não referencia RabbitMQ/Kafka/Redis/Bull/Azure", () => {
     const root = join(repoRoot, "src/lib/enterprise/queue-runtime");
     const files = collectTsFiles(root);
     assert.ok(files.length > 0);
@@ -347,5 +357,16 @@ describe("INF-05 ausência de backends / workers / bypass", () => {
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
     assert.equal(files.filter((f) => /adapters\/.*queue-runtime-adapter\.ts$/.test(f)).length, 2);
+    assert.ok(files.some((f) => f.includes("/backend/supabase-queue-runtime-backend.ts")));
+  });
+
+  it("OPER-INF-Q — consumidores continuam usando apenas QueueRuntimePort", () => {
+    const enterpriseRuntime = readFileSync(
+      join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
+      "utf8",
+    );
+    assert.match(enterpriseRuntime, /createQueueRuntimePort/);
+    assert.equal(/createQueueRuntimeBackend/.test(enterpriseRuntime), false);
+    assert.equal(/SupabaseQueueRuntimeBackend/.test(enterpriseRuntime), false);
   });
 });

@@ -1,7 +1,8 @@
 /**
- * QueueRuntimeCapabilities — capacidades declarativas (INF-05).
+ * QueueRuntimeCapabilities — capacidades declarativas (INF-05 / OPER-INF-Q).
  *
- * Apenas declaração estrutural. Sem filas reais. Sem workers. Sem backends.
+ * Flags operacionais (realQueueBackend / persistenceImplemented) ativadas
+ * pelo adapter default com backend persistente. Sem workers neste Port.
  */
 
 import type { CanonicalQueueCapabilities } from "./canonical";
@@ -30,12 +31,12 @@ export type QueueRuntimeCapabilities = {
   usesObservabilityRuntimePort?: boolean;
   usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
-  realQueueBackend?: false;
-  messagesPublished?: false;
-  messagesConsumed?: false;
-  workersInvoked?: false;
-  processingPerformed?: false;
-  persistenceImplemented?: false;
+  realQueueBackend?: boolean;
+  messagesPublished?: boolean;
+  messagesConsumed?: boolean;
+  workersInvoked?: boolean;
+  processingPerformed?: boolean;
+  persistenceImplemented?: boolean;
   implementsRabbitMq?: false;
   implementsKafka?: false;
   implementsAzureServiceBus?: false;
@@ -64,6 +65,7 @@ export function defineQueueRuntimeCapabilities(
   return { ...capabilities };
 }
 
+/** Capacidades operacionais do adapter default/enterprise (OPER-INF-Q). */
 export const DEFAULT_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   supportsEnqueue: true,
   supportsDequeue: true,
@@ -84,12 +86,12 @@ export const DEFAULT_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   usesObservabilityRuntimePort: true,
   usesScalabilityRuntimePort: true,
   runtimeReady: true,
-  realQueueBackend: false,
-  messagesPublished: false,
-  messagesConsumed: false,
+  realQueueBackend: true,
+  messagesPublished: true,
+  messagesConsumed: true,
   workersInvoked: false,
   processingPerformed: false,
-  persistenceImplemented: false,
+  persistenceImplemented: true,
   implementsRabbitMq: false,
   implementsKafka: false,
   implementsAzureServiceBus: false,
@@ -108,8 +110,15 @@ export const DEFAULT_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   knowsTissPattern: false,
 };
 
+/** Capacidades estruturais do mock/test (sem backend operacional). */
 export const DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   ...DEFAULT_QUEUE_RUNTIME_CAPABILITIES,
+  realQueueBackend: false,
+  messagesPublished: false,
+  messagesConsumed: false,
+  workersInvoked: false,
+  processingPerformed: false,
+  persistenceImplemented: false,
 };
 
 export function toCanonicalQueueCapabilities(
@@ -127,12 +136,12 @@ export function toCanonicalQueueCapabilities(
     supportsHealth: capabilities.supportsHealth === true,
     supportsCanonicalQueue: capabilities.supportsCanonicalQueue === true,
     runtimeReady: true,
-    realQueueBackend: false,
-    messagesPublished: false,
-    messagesConsumed: false,
-    workersInvoked: false,
-    processingPerformed: false,
-    persistenceImplemented: false,
+    realQueueBackend: capabilities.realQueueBackend === true,
+    messagesPublished: capabilities.messagesPublished === true,
+    messagesConsumed: capabilities.messagesConsumed === true,
+    workersInvoked: capabilities.workersInvoked === true,
+    processingPerformed: capabilities.processingPerformed === true,
+    persistenceImplemented: capabilities.persistenceImplemented === true,
     implementsRabbitMq: false,
     implementsKafka: false,
     implementsAzureServiceBus: false,

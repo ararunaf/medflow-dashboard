@@ -1,11 +1,12 @@
 /**
- * Tipos vendor-agnósticos do Enterprise Queue Runtime — INF-05 / INF-06.
+ * Tipos vendor-agnósticos do Enterprise Queue Runtime — INF-05 / INF-06 / OPER-INF-Q.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → QueueRuntimePort
- *     → Adapter → Queue Runtime Store → Canonical Queue Result
+ *     → Adapter → Store + Persistence Backend → Canonical Queue Result
  *
- * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem workers. Sem filas reais.
+ * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem workers.
+ * OPER-INF-Q: backend persistente (Supabase) atrás do mesmo Port.
  * INF-06: dependência Worker Runtime preparada — sem alocação/execução de Workers.
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
@@ -104,12 +105,12 @@ export type QueueRuntimePortCapabilities = {
   /** INF-10 — dependência Scalability Runtime preparada (sem consumo). */
   usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
-  realQueueBackend: false;
-  messagesPublished: false;
-  messagesConsumed: false;
-  workersInvoked: false;
-  processingPerformed: false;
-  persistenceImplemented: false;
+  realQueueBackend: boolean;
+  messagesPublished: boolean;
+  messagesConsumed: boolean;
+  workersInvoked: boolean;
+  processingPerformed: boolean;
+  persistenceImplemented: boolean;
   implementsRabbitMq: false;
   implementsKafka: false;
   implementsAzureServiceBus: false;

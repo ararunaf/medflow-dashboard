@@ -1,10 +1,10 @@
 /**
- * Modelos canônicos do Enterprise Queue Runtime — INF-05.
+ * Modelos canônicos do Enterprise Queue Runtime — INF-05 / OPER-INF-Q.
  *
- * Infraestrutura canônica estrutural de filas futuras.
+ * Contrato canônico estável do QueueRuntimePort.
+ * Backend persistente ativado via adapter (Supabase) — sem novos Ports.
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
- * Sem workers. Sem scheduler. Sem processamento assíncrono real.
- * Sem persistência real. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture.
+ * Sem workers. Sem scheduler. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture.
  */
 
 /** Status estrutural de mensagem / operação de Queue Runtime. */
@@ -68,8 +68,8 @@ export type CanonicalQueueOperation =
   | (string & {});
 
 /**
- * Fila canônica estrutural.
- * Representa a infraestrutura de fila — sem backend real, sem workers.
+ * Fila canônica.
+ * Representa a infraestrutura de fila — workers continuam fora deste Port.
  */
 export type CanonicalQueue = {
   kind: "canonical-queue";
@@ -81,18 +81,18 @@ export type CanonicalQueue = {
   messageCount: number;
   createdAt: string;
   updatedAt: string;
-  /** Sempre false — nenhum backend real nesta fundação. */
-  realQueueBackend: false;
-  messagesPublished: false;
-  messagesConsumed: false;
-  workersInvoked: false;
-  processingPerformed: false;
-  persistenceImplemented: false;
+  /** OPER-INF-Q — true quando backend persistente está ativo. */
+  realQueueBackend: boolean;
+  messagesPublished: boolean;
+  messagesConsumed: boolean;
+  workersInvoked: boolean;
+  processingPerformed: boolean;
+  persistenceImplemented: boolean;
 };
 
 /**
- * Mensagem canônica estrutural.
- * Pode existir no store in-memory — NÃO é processada / entregue / consumida de fato.
+ * Mensagem canônica.
+ * Persistida pelo backend operacional — sem invocação de workers neste Port.
  */
 export type CanonicalQueueMessage = {
   kind: "canonical-queue-message";
@@ -104,16 +104,16 @@ export type CanonicalQueueMessage = {
   status: CanonicalQueueStatus;
   registeredAt: string;
   updatedAt: string;
-  messagesPublished: false;
-  messagesConsumed: false;
-  workersInvoked: false;
-  processingPerformed: false;
-  persistenceImplemented: false;
-  realQueueBackend: false;
+  messagesPublished: boolean;
+  messagesConsumed: boolean;
+  workersInvoked: boolean;
+  processingPerformed: boolean;
+  persistenceImplemented: boolean;
+  realQueueBackend: boolean;
 };
 
 /**
- * Lote canônico estrutural de mensagens.
+ * Lote canônico de mensagens.
  */
 export type CanonicalQueueBatch = {
   kind: "canonical-queue-batch";
@@ -123,13 +123,12 @@ export type CanonicalQueueBatch = {
   messageCount: number;
   metadata?: CanonicalQueueMetadata;
   createdAt: string;
-  realQueueBackend: false;
-  processingPerformed: false;
+  realQueueBackend: boolean;
+  processingPerformed: boolean;
 };
 
 /**
- * Resultado canônico de operação de Queue Runtime (INF-05).
- * Contém apenas referência/estrutura canônica — nunca mensageria real.
+ * Resultado canônico de operação de Queue Runtime (INF-05 / OPER-INF-Q).
  */
 export type CanonicalQueueResult = {
   kind: "canonical-queue-result";
@@ -143,14 +142,12 @@ export type CanonicalQueueResult = {
   identity?: CanonicalQueueIdentity;
   metadata?: CanonicalQueueMetadata;
   provider?: CanonicalQueueProvider;
-  /** Sempre false — nenhum backend real. */
-  realQueueBackend: false;
-  messagesPublished: false;
-  messagesConsumed: false;
-  workersInvoked: false;
-  processingPerformed: false;
-  persistenceImplemented: false;
-  /** Sempre true — runtime estrutural pronto (sem fila real). */
+  realQueueBackend: boolean;
+  messagesPublished: boolean;
+  messagesConsumed: boolean;
+  workersInvoked: boolean;
+  processingPerformed: boolean;
+  persistenceImplemented: boolean;
   runtimeReady: true;
   status: CanonicalQueueStatus;
   messageText?: string;
@@ -160,7 +157,7 @@ export type CanonicalQueueResult = {
 };
 
 /**
- * Estatísticas estruturais do Queue Runtime (in-process).
+ * Estatísticas do Queue Runtime.
  */
 export type CanonicalQueueStatistics = {
   kind: "canonical-queue-statistics";
@@ -171,12 +168,12 @@ export type CanonicalQueueStatistics = {
   ackedMessages: number;
   nackedMessages: number;
   purgedMessages: number;
-  realQueueBackendCount: 0;
-  messagesPublishedCount: 0;
-  messagesConsumedCount: 0;
-  workersInvokedCount: 0;
-  processingPerformedCount: 0;
-  persistenceImplementedCount: 0;
+  realQueueBackendCount: number;
+  messagesPublishedCount: number;
+  messagesConsumedCount: number;
+  workersInvokedCount: number;
+  processingPerformedCount: number;
+  persistenceImplementedCount: number;
 };
 
 /**
@@ -192,12 +189,12 @@ export type CanonicalQueueHealth = {
   storedQueueCount?: number;
   storedMessageCount?: number;
   runtimeReady: true;
-  realQueueBackend: false;
-  messagesPublished: false;
-  messagesConsumed: false;
-  workersInvoked: false;
-  processingPerformed: false;
-  persistenceImplemented: false;
+  realQueueBackend: boolean;
+  messagesPublished: boolean;
+  messagesConsumed: boolean;
+  workersInvoked: boolean;
+  processingPerformed: boolean;
+  persistenceImplemented: boolean;
 };
 
 /**
@@ -215,12 +212,12 @@ export type CanonicalQueueCapabilities = {
   supportsHealth: boolean;
   supportsCanonicalQueue: boolean;
   runtimeReady: true;
-  realQueueBackend: false;
-  messagesPublished: false;
-  messagesConsumed: false;
-  workersInvoked: false;
-  processingPerformed: false;
-  persistenceImplemented: false;
+  realQueueBackend: boolean;
+  messagesPublished: boolean;
+  messagesConsumed: boolean;
+  workersInvoked: boolean;
+  processingPerformed: boolean;
+  persistenceImplemented: boolean;
   implementsRabbitMq: false;
   implementsKafka: false;
   implementsAzureServiceBus: false;

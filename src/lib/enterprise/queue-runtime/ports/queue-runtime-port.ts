@@ -1,14 +1,14 @@
 /**
- * QueueRuntimePort — contrato único do Enterprise Queue Runtime (INF-05).
+ * QueueRuntimePort — contrato único do Enterprise Queue Runtime (INF-05 / OPER-INF-Q).
  *
  * Application / Enterprise Runtime / TISS Runtime dependem exclusivamente
- * desta interface para gerenciar filas canônicas estruturais.
+ * desta interface para gerenciar filas canônicas.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → QueueRuntimePort
- *     → Adapter → Queue Runtime Store → Canonical Queue Result
+ *     → Adapter → Store + Persistence Backend → Canonical Queue Result
  *
- * INF-05: infraestrutura canônica apenas — sem filas reais / workers / backends.
+ * OPER-INF-Q: backend persistente ativado no adapter — interface pública inalterada.
  */
 import type {
   AckInput,
@@ -36,39 +36,39 @@ export interface QueueRuntimePort {
   readonly providerId: QueueRuntimeProviderId;
 
   /**
-   * Registra estruturalmente uma mensagem no store in-memory.
-   * NÃO publica em fila real. NÃO invoca workers.
+   * Registra uma mensagem na fila canônica (persistida pelo backend operacional).
+   * NÃO invoca workers.
    */
   enqueue(input: EnqueueInput): Promise<EnqueueResult>;
 
   /**
-   * Obtém estruturalmente a próxima mensagem.
-   * NÃO consome de backend real. NÃO processa.
+   * Obtém a próxima mensagem enfileirada.
+   * NÃO processa / NÃO invoca workers.
    */
   dequeue(input: DequeueInput): Promise<DequeueResult>;
 
   /**
-   * Observa estruturalmente uma mensagem (sem side-effects de processamento).
+   * Observa uma mensagem (sem side-effects de processamento).
    */
   peek(input: PeekInput): Promise<PeekResult>;
 
   /**
-   * Confirma estruturalmente uma mensagem (sem ack real de backend).
+   * Confirma uma mensagem (ack persistido pelo backend).
    */
   ack(input: AckInput): Promise<AckResult>;
 
   /**
-   * Rejeita estruturalmente uma mensagem (sem nack real de backend).
+   * Rejeita uma mensagem (nack persistido pelo backend).
    */
   nack(input: NackInput): Promise<NackResult>;
 
   /**
-   * Remove estruturalmente mensagens de uma fila canônica (sem purge real).
+   * Remove mensagens de uma fila canônica (purge persistido).
    */
   purge(input: PurgeInput): Promise<PurgeResult>;
 
   /**
-   * Estatísticas estruturais do store in-memory.
+   * Estatísticas do store + backend operacional.
    */
   stats(input?: StatsInput): Promise<StatsResult>;
 

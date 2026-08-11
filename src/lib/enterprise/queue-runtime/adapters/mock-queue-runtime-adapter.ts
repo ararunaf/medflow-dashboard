@@ -80,6 +80,8 @@ export class MockQueueRuntimeAdapter implements QueueRuntimePort {
       message: this.message,
       store: options.store,
       enterpriseDeps: options.enterpriseDeps,
+      operational: false,
+      backend: null,
     });
   }
 
@@ -146,6 +148,12 @@ export class MockQueueRuntimeAdapter implements QueueRuntimePort {
       provider: this.providerId,
       message: this.message,
       runtimeReady: true,
+      realQueueBackend: false,
+      messagesPublished: false,
+      messagesConsumed: false,
+      workersInvoked: false,
+      processingPerformed: false,
+      persistenceImplemented: false,
     };
   }
 
