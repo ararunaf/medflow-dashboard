@@ -17,11 +17,13 @@
 | **OPER-INF-O** | Ativar Observability operacional via Ports existentes (somente leitura) | ✅ Concluída |
 | **ARC-25** | Documentar e congelar a arquitetura oficial do Enterprise Runtime | ✅ Concluída |
 | **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ✅ Concluída |
-| **TISS-RUNTIME-01** | Ativação operacional TISS Runtime | ⏳ Planejada |
+| **TISS-RUNTIME-01D** | Discovery da arquitetura funcional do TISS Runtime | ✅ Concluída |
+| **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ⏳ Próxima |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ⏳ TISS-RUNTIME-01
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ⏳ TISS-RUNTIME-01A
 
-**Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)
+**Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
+**Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
 
 ---
 
@@ -38,6 +40,7 @@
 - Dead Letter **não** decide reenvio — apenas armazenamento definitivo (retry = OPER-INF-R)
 - Retry **nunca executa** — apenas decide e agenda; Worker executa; Scheduler controla o tempo; Queue transporta
 - Observability **apenas coleta e expõe** — nunca executa regras, nunca altera o fluxo, nunca interfere na execução
+- TISS Runtime **reutiliza exclusivamente** a arquitetura oficial congelada e Ports existentes (ver Discovery)
 
 ---
 
@@ -105,6 +108,17 @@ getEnterpriseRuntime()
 
 ---
 
+## Escopo concluído (TISS-RUNTIME-01D)
+
+### TISS-RUNTIME-01D
+- Documento `TISS_RUNTIME_DISCOVERY.md` — pipeline funcional oficial TISS
+- Integração com Enterprise Runtime, ciclo do boletim, entradas/saídas, Ports reutilizados
+- Respostas obrigatórias (entrada, OCR, Parser, Validação, Enriquecimento, XML, Lote, Protocolo, Persistência, Auditoria, Retry, Dead Letter)
+- Sequência oficial das sprints futuras
+- Sem alteração de `src/`, Runtime, Ports, Gateways ou arquitetura
+
+---
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-01** — ativação operacional do TISS Runtime sobre a arquitetura oficial congelada.
+**TISS-RUNTIME-01A** — ativar a entrada operacional do boletim TISS no pipeline oficial (Intake → Queue via Ports existentes), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

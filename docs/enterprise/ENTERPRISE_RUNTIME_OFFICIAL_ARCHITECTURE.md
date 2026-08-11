@@ -144,7 +144,8 @@ getEnterpriseRuntime()
 | Sprint | Status |
 |--------|--------|
 | **OPER-INF-R** | ✓ Homologado — Retry operacional (decisão de reenvio via Ports existentes) |
-| **TISS-RUNTIME-01** | ⏳ Ativação operacional TISS Runtime |
+| **TISS-RUNTIME-01D** | ✓ Discovery funcional TISS — [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md) |
+| **TISS-RUNTIME-01A** | ⏳ Entrada operacional do boletim no pipeline oficial |
 
 ---
 
