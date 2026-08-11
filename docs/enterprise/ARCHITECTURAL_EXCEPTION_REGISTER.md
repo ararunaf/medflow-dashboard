@@ -1133,7 +1133,7 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 4. **Não implementado (proibido nesta Sprint):** Scheduler, Retry Engine, Dead Letter, prioridade, batch, XML, SOAP, IA.  
 5. **Interface pública:** `WorkerRuntimePort` inalterada; sem novos Ports/Gateways; Runtime inalterado.  
 6. **Cobertura:** `enterprise:worker-runtime:test`.  
-7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-Q ✅ / OPER-INF-W ✅ / OPER-INF-S ✅**; **OPER-INF-D ⏳ Próxima Sprint**.
+7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-Q ✅ / OPER-INF-W ✅ / OPER-INF-S ✅ / OPER-INF-D ✅**; **OPER-INF-R ⏳ Próxima Sprint**.
 
 #### AER-WR-B1
 - **Título:** Escape hatch `getWorkerRuntimePort()`  
@@ -1326,3 +1326,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 11/08/2026 | OPER-INF-Q | Ativação operacional QueueRuntimePort (backend persistente); sem novos Ports/Gateways/Runtime; roadmap OPER-INF-Q ✅ |
 | 11/08/2026 | OPER-INF-W | Ativação operacional WorkerRuntimePort via QueueRuntimePort (poll/claim/lock/ack/nack/heartbeat/shutdown); sem novos Ports/Gateways; Runtime inalterado; OPER-INF-W ✅; OPER-INF-S ⏳ |
 | 11/08/2026 | OPER-INF-S | Ativação operacional SchedulerRuntimePort via WorkerRuntimePort (poll temporal/schedule/cancel/heartbeat/shutdown/concorrência/recover); sem novos Ports/Gateways; Runtime inalterado; OPER-INF-S ✅; OPER-INF-D ⏳ |
+| 11/08/2026 | OPER-INF-D | Ativação operacional DeadLetterRuntimePort (contrato interno) via QueueRuntimePort (park/getById/purge/isolamento); sem Port Enterprise novo / Gateway / retry; OPER-INF-D ✅; OPER-INF-R ⏳ |

@@ -50,6 +50,11 @@ import type {
   StatsResult,
 } from "../ports/types";
 import { createQueueRuntimeBackend, type QueueRuntimePersistenceBackend } from "../backend";
+import {
+  DefaultDeadLetterRuntime,
+  ENTERPRISE_DEAD_LETTER_QUEUE_NAME,
+  type DeadLetterRuntimePort,
+} from "../operational";
 import { InMemoryQueueRuntimeStore, type QueueRuntimeStore } from "../store";
 
 export const DEFAULT_QUEUE_RUNTIME_ADAPTER_ID = "default-enterprise-queue";
@@ -75,6 +80,11 @@ export type DefaultQueueRuntimeAdapterOptions = {
    * Mock força false.
    */
   operational?: boolean;
+  /**
+   * OPER-INF-D — Dead Letter operacional (contrato interno DeadLetterRuntimePort).
+   * Default: ativo quando operational=true. `null` desativa.
+   */
+  deadLetter?: DeadLetterRuntimePort | null;
   /** INF-06 — Worker Runtime preparado (sem alocação/execução). */
   enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   defaultTimeoutMs?: number;
@@ -107,6 +117,31 @@ async function defaultSleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function isTruthyAttr(value: unknown): boolean {
+  return value === true || value === "true" || value === 1 || value === "1";
+}
+
+/** OPER-INF-D — falha permanente explícita (sem decisão de retry). */
+function isPermanentFailureNack(input: NackInput): boolean {
+  if (isTruthyAttr(input.attributes?.deadLetterIsolation)) {
+    return false;
+  }
+  return (
+    isTruthyAttr(input.attributes?.permanentFailure) ||
+    isTruthyAttr(input.attributes?.deadLetter) ||
+    isTruthyAttr(input.attributes?.permanent)
+  );
+}
+
+function readFailureReason(input: NackInput): string {
+  const fromAttrs =
+    input.attributes?.failureReason ?? input.attributes?.reason ?? input.attributes?.error;
+  if (typeof fromAttrs === "string" && fromAttrs.trim() !== "") {
+    return fromAttrs.trim();
+  }
+  return "permanent-failure";
+}
+
 /**
  * Adapter oficial INF-05 / OPER-INF-Q — Queue Runtime default / enterprise.
  */
@@ -119,6 +154,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   private readonly store: QueueRuntimeStore;
   private readonly backend: QueueRuntimePersistenceBackend | null;
   private readonly operational: boolean;
+  private readonly deadLetter: DeadLetterRuntimePort | null;
   private readonly enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
@@ -139,14 +175,14 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     this.message =
       options.message ??
       (this.operational
-        ? `${this.providerId} Queue Runtime ready (OPER-INF-Q — persistent backend active).`
+        ? `${this.providerId} Queue Runtime ready (OPER-INF-Q/D — persistent backend + DeadLetter active).`
         : `${this.providerId} Queue Runtime ready (structural only — no persistent backend).`);
     this.metadata = {
       name: this.providerId === "default" ? "Default Queue Runtime" : "Enterprise Queue Runtime",
       version: DEFAULT_QUEUE_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official INF-05 Enterprise Queue Runtime — OPER-INF-Q persistent backend via QueueRuntimePort.",
+        "Official INF-05 Enterprise Queue Runtime — OPER-INF-Q backend + OPER-INF-D DeadLetter via QueueRuntimePort.",
     };
     this.store = options.store ?? new InMemoryQueueRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
@@ -162,6 +198,18 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
         "DefaultQueueRuntimeAdapter exige enterpriseDeps.getWorkerRuntimePort (INF-06) quando deps são fornecidas.",
       );
     }
+
+    // OPER-INF-D — DeadLetterRuntimePort interno (não é Port Enterprise novo).
+    this.deadLetter =
+      options.deadLetter === null
+        ? null
+        : (options.deadLetter ??
+          (this.operational
+            ? new DefaultDeadLetterRuntime({
+                getQueueRuntimePort: () => this,
+                now: this.now,
+              })
+            : null));
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -174,10 +222,21 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     return this.backend;
   }
 
+  /**
+   * DeadLetterRuntimePort interno (OPER-INF-D) — null em modo estrutural/mock.
+   * Não exposto em EnterpriseRuntime (sem Port novo).
+   */
+  getDeadLetterRuntimePort(): DeadLetterRuntimePort | null {
+    return this.deadLetter;
+  }
+
   capabilities(): QueueRuntimePortCapabilities {
-    const engine = this.operational
-      ? DEFAULT_QUEUE_RUNTIME_CAPABILITIES
-      : DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES;
+    const engine = {
+      ...(this.operational
+        ? DEFAULT_QUEUE_RUNTIME_CAPABILITIES
+        : DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES),
+      implementsDeadLetter: this.operational && this.deadLetter !== null,
+    };
     return {
       provider: this.providerId,
       adapterId: DEFAULT_QUEUE_RUNTIME_ADAPTER_ID,
@@ -208,7 +267,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       implementsBullMq: false,
       implementsWorkers: false,
       implementsScheduler: false,
-      implementsDeadLetter: false,
+      implementsDeadLetter: this.operational && this.deadLetter !== null,
       implementsRetryReal: false,
       implementsHttp: false,
       implementsWebsocket: false,
@@ -534,7 +593,98 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
           message: "Canonical queue message not found.",
         };
       }
+
       const stamp = this.now();
+      const queue =
+        this.resolveQueue(input.queueId, input.queueName) ?? this.store.getQueue(existing.queueId);
+
+      // OPER-INF-D — rota para DeadLetterRuntimePort apenas em falha permanente explícita.
+      // Sem retry / reprocessamento nesta sprint (OPER-INF-R).
+      const permanentFailure = isPermanentFailureNack(input);
+      if (this.operational && this.deadLetter && permanentFailure) {
+        const attemptCount = readPositiveInt(
+          input.attributes?.attemptCount ?? input.attributes?.attempts,
+          1,
+        );
+        const failureReason = readFailureReason(input);
+        const parked = await this.deadLetter.park({
+          sourceMessageId: existing.messageId,
+          sourceQueueId: existing.queueId,
+          sourceQueueName: queue?.queueName,
+          failureReason,
+          attemptCount,
+          payloadRef: existing.payloadRef,
+          correlationId: existing.identity?.correlationId ?? null,
+          metadata: {
+            ...(existing.metadata?.customAttributes ?? {}),
+            nackQueueName: input.queueName ?? null,
+          },
+        });
+
+        if (!parked.ok || !parked.record) {
+          return {
+            ok: false,
+            code: parked.code ?? "QUEUE_RUNTIME_DEAD_LETTER_FAILED",
+            message: parked.message ?? "Failed to park message in DeadLetterRuntimePort.",
+          };
+        }
+
+        // Isolamento da fila principal — remove da fila de processamento.
+        this.store.removeMessage(existing.messageId);
+        await this.backend?.removeMessage(existing.messageId);
+        if (queue) {
+          await this.detachMessage(queue, existing.messageId, stamp);
+        }
+
+        const deadLettered: CanonicalQueueMessage = {
+          ...existing,
+          status: "dead-lettered",
+          updatedAt: stamp,
+          realQueueBackend: this.operational,
+          persistenceImplemented: this.operational,
+          identity: {
+            kind: "canonical-queue-identity",
+            ...(existing.identity ?? {}),
+            queueId: existing.queueId,
+            queueName: queue?.queueName ?? ENTERPRISE_DEAD_LETTER_QUEUE_NAME,
+            messageId: existing.messageId,
+            correlationId: existing.identity?.correlationId ?? null,
+          },
+          metadata: {
+            kind: "canonical-queue-metadata",
+            ...(existing.metadata ?? {}),
+            source: "dead-letter-runtime",
+            channel: "dead-letter",
+            customAttributes: {
+              ...(existing.metadata?.customAttributes ?? {}),
+              deadLetterId: parked.record.deadLetterId,
+              failureReason: parked.record.failureReason,
+              attemptCount: parked.record.attemptCount,
+              permanentFailure: true,
+            },
+          },
+        };
+
+        const result = this.buildResult({
+          operation: "nack",
+          status: "dead-lettered",
+          message: deadLettered,
+          stamp,
+          code: "QUEUE_RUNTIME_DEAD_LETTERED",
+          messageText:
+            "Canonical Queue Runtime operational dead-letter (OPER-INF-D — via DeadLetterRuntimePort).",
+          messagesPublished: this.operational,
+          messagesConsumed: false,
+        });
+        return {
+          ok: true,
+          result,
+          queueMessage: deadLettered,
+          code: "QUEUE_RUNTIME_DEAD_LETTERED",
+          message: result.messageText,
+        };
+      }
+
       const message: CanonicalQueueMessage = {
         ...existing,
         status: "nacked",
@@ -748,6 +898,27 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     const messageIds = queue.messageIds.includes(messageId)
       ? queue.messageIds
       : [...queue.messageIds, messageId];
+    const updated: CanonicalQueue = {
+      ...queue,
+      messageIds,
+      messageCount: messageIds.length,
+      updatedAt: stamp,
+      realQueueBackend: this.operational,
+      persistenceImplemented: this.operational,
+      messagesPublished: this.operational,
+    };
+    this.store.setQueue(updated);
+    await this.backend?.persistQueue(updated);
+    return updated;
+  }
+
+  /** OPER-INF-D — remove mensagem da fila principal (isolamento). */
+  private async detachMessage(
+    queue: CanonicalQueue,
+    messageId: string,
+    stamp: string,
+  ): Promise<CanonicalQueue> {
+    const messageIds = queue.messageIds.filter((id) => id !== messageId);
     const updated: CanonicalQueue = {
       ...queue,
       messageIds,

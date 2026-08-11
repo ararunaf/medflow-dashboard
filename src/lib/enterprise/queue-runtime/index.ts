@@ -1,15 +1,17 @@
 /**
- * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q).
+ * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q / OPER-INF-D).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → QueueRuntimePort
  *     → DefaultQueueRuntimeAdapter / EnterpriseQueueRuntimeAdapter / MockQueueRuntimeAdapter
  *     → InMemoryQueueRuntimeStore + Persistence Backend (Supabase | memory durable)
+ *     → DeadLetterRuntimePort (OPER-INF-D — contrato interno, sem Port Enterprise novo)
  *     → Canonical Queue Result
  *
  * OPER-INF-Q: backend persistente ativado no adapter — mesma interface pública.
+ * OPER-INF-D: Dead Letter operacional via DeadLetterRuntimePort → QueueRuntimePort.
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
- * Sem workers. Sem scheduler. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture.
+ * Sem workers. Sem scheduler. Sem retry/reprocessamento (OPER-INF-R).
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort.
  */
@@ -123,3 +125,23 @@ export {
 export { QueueRuntimeProvider, createQueueRuntimePort, getQueueRuntimeFactory } from "./providers";
 
 export { getQueueRuntimeHealthSummary, type QueueRuntimeHealthSummary } from "./demo";
+
+export {
+  DefaultDeadLetterRuntime,
+  ENTERPRISE_DEAD_LETTER_QUEUE_NAME,
+  IN_MEMORY_DEAD_LETTER_STORE_ID,
+  InMemoryDeadLetterStore,
+  createDeadLetterId,
+  resetDeadLetterIdSequences,
+  type DeadLetterGetByIdInput,
+  type DeadLetterGetByIdResult,
+  type DeadLetterMetadata,
+  type DeadLetterParkInput,
+  type DeadLetterParkResult,
+  type DeadLetterPurgeInput,
+  type DeadLetterPurgeResult,
+  type DeadLetterRecord,
+  type DeadLetterRuntimePort,
+  type DeadLetterStatsResult,
+  type DefaultDeadLetterRuntimeOptions,
+} from "./operational";

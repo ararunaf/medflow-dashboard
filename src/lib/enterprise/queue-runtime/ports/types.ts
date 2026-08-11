@@ -119,7 +119,8 @@ export type QueueRuntimePortCapabilities = {
   implementsBullMq: false;
   implementsWorkers: false;
   implementsScheduler: false;
-  implementsDeadLetter: false;
+  /** OPER-INF-D — true quando Dead Letter operacional está ativo. */
+  implementsDeadLetter: boolean;
   implementsRetryReal: false;
   implementsHttp: false;
   implementsWebsocket: false;

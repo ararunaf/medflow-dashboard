@@ -13,7 +13,8 @@
 | **OPER-INF-Q** | Ativar backend persistente do `QueueRuntimePort` | ✅ Concluída |
 | **OPER-INF-W** | Ativar Worker operacional via `QueueRuntimePort` | ✅ Concluída |
 | **OPER-INF-S** | Ativar Scheduler operacional via `WorkerRuntimePort` | ✅ Concluída |
-| **OPER-INF-D** | Próxima ativação operacional INF | ⏳ Próxima Sprint |
+| **OPER-INF-D** | Ativar Dead Letter operacional via `DeadLetterRuntimePort` → `QueueRuntimePort` | ✅ Concluída |
+| **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ⏳ Próxima Sprint |
 
 ---
 
@@ -26,10 +27,12 @@
 - Proibido reintroduzir execução paralela
 - Consumidores não acessam filas diretamente — apenas via `QueueRuntimePort`
 - Scheduler aciona Worker apenas via `WorkerRuntimePort` (nunca Queue direto)
+- Queue envia para Dead Letter apenas via `DeadLetterRuntimePort` (contrato interno)
+- Dead Letter **não** decide reenvio — apenas armazenamento definitivo (retry = OPER-INF-R)
 
 ---
 
-## Fluxo operacional atual (pós OPER-INF-S)
+## Fluxo operacional atual (pós OPER-INF-D)
 
 ```
 getEnterpriseRuntime()
@@ -37,6 +40,8 @@ getEnterpriseRuntime()
     → WorkerRuntimePort
       → QueueRuntimePort
         → Backend Persistente (OPER-INF-Q)
+        → DeadLetterRuntimePort (OPER-INF-D — contrato interno)
+          → QueueRuntimePort (isolamento enterprise-dead-letter)
 ```
 
 ---
@@ -57,8 +62,13 @@ getEnterpriseRuntime()
 - Acionamento exclusivo via `WorkerRuntimePort` (decide QUANDO acionar o Worker)
 - Sem Cron / Queue direto / novos Ports / Gateways / regras de negócio
 
+### OPER-INF-D
+- Dead Letter operacional: armazenamento definitivo, isolamento da fila principal, motivo, tentativas, timestamp, metadata, consulta por id, purge
+- Exclusivo via `DeadLetterRuntimePort` → `QueueRuntimePort` (contrato interno; sem Port Enterprise novo)
+- Sem retry / reprocessamento / scheduler / worker / regras de negócio
+
 ---
 
 ## Próxima Sprint
 
-**OPER-INF-D** — próxima ativação operacional INF (sem alterar fases futuras além desta marcação).
+**OPER-INF-R** — ativação operacional do Retry (decisão de reenvio; Dead Letter permanece somente armazenamento definitivo).
