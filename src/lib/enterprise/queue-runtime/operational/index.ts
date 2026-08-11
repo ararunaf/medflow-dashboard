@@ -16,6 +16,7 @@
  * TISS-03A: Job ENRICHED → Worker → XML TISS → Job XML_GENERATED (sem Batch).
  * TISS-03B: Job XML_GENERATED → Worker → Batch → Job BATCH_CREATED (sem Protocol).
  * TISS-04A: Job BATCH_CREATED → Worker → Protocol → Job PROTOCOL_SENT (sem Persistence).
+ * TISS-04B: Job PROTOCOL_SENT → Worker → Persistence → Job PERSISTED (sem Audit).
  */
 export type {
   DeadLetterGetByIdInput,
@@ -159,3 +160,14 @@ export {
   type TissProtocolJobLogicalStatus,
   type TissProtocolProcessMessageDeps,
 } from "./process-tiss-protocol-job";
+
+export {
+  TISS_JOB_STATUS_PERSISTED,
+  processTissPersistenceJob,
+  createTissPersistenceProcessMessage,
+  type ProcessTissPersistenceJobInput,
+  type ProcessTissPersistenceJobResult,
+  type TissPersistenceCompletedJob,
+  type TissPersistenceJobLogicalStatus,
+  type TissPersistenceProcessMessageDeps,
+} from "./process-tiss-persistence-job";

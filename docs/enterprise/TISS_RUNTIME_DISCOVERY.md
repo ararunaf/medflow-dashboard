@@ -322,7 +322,7 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | XML TISS ANS real via Ports | ✅ Job ENRICHED → Worker → XML TISS → XML_GENERATED | **TISS-RUNTIME-03A** |
 | Lote operacional via `BatchRuntimePort` | ✅ Job XML_GENERATED → Worker → Batch → BATCH_CREATED | **TISS-RUNTIME-03B** |
 | Protocolo operacional | ✅ Job BATCH_CREATED → Worker → Protocol → PROTOCOL_SENT | **TISS-RUNTIME-04A** |
-| Persistência operacional unificada | Stores / Storage; convergência | Sprint dedicada |
+| Persistência operacional unificada | ✅ Job PROTOCOL_SENT → Worker → Persistence → PERSISTED | **TISS-RUNTIME-04B** |
 | Auditoria operacional TISS na fila | Gateway real; binding operacional | Sprint dedicada |
 
 > **RULE-20 / RULE-26:** cada Sprint ativa **exatamente uma** capability. A sequência abaixo é a ordem oficial; detalhes de escopo finito em cada Sprint.
@@ -358,8 +358,9 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | 6 | **TISS-RUNTIME-03A** | Ativar XML TISS operacional no Worker (consumo de `ENRICHED`) | ✅ Concluída |
 | 7 | **TISS-RUNTIME-03B** | Ativar Lote operacional no Worker (consumo de `XML_GENERATED`) | ✅ Concluída |
 | 8 | **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ✅ Concluída |
-| 9 | **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ⏳ Próxima |
-| 10 | TISS-RUNTIME-02+ | Auditoria (uma capability por Sprint) | ⏳ Planejada |
+| 9 | **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
+| 10 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏳ Próxima |
+| 11 | TISS-RUNTIME-02+ | Completed (uma capability por Sprint) | ⏳ Planejada |
 
 Roadmap vivo: [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md).
 

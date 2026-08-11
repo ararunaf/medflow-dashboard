@@ -26,8 +26,9 @@
 | **TISS-RUNTIME-03A** | Ativar XML TISS operacional no Worker (consumo de `ENRICHED`) | ✅ Concluída |
 | **TISS-RUNTIME-03B** | Ativar Lote operacional no Worker (consumo de `XML_GENERATED`) | ✅ Concluída |
 | **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ✅ Concluída |
+| **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ✓ TISS-RUNTIME-03B · ✓ TISS-RUNTIME-04A · ⏳ TISS-RUNTIME-04B
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ✓ TISS-RUNTIME-03B · ✓ TISS-RUNTIME-04A · ✓ TISS-RUNTIME-04B · ⏳ TISS-RUNTIME-05A
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -197,6 +198,14 @@ getEnterpriseRuntime()
 - Persistência / Auditoria **não** executados (`persistenceExecuted: false`, `auditExecuted: false`); demais capabilities fora de escopo
 - Sem novo Port / Gateway / Runtime / Pipeline
 
+## Escopo concluído (TISS-RUNTIME-04B)
+
+- Capability Persistence operacional: Job **PROTOCOL_SENT** → `WorkerRuntimePort` → `PersistentQueueRuntimePort` (persist) → Job **PERSISTED** → reenqueue via `QueueRuntimePort`
+- Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
+- Entrypoint `processTissProtocolSentPersisted` via `getEnterpriseRuntime()`
+- Auditoria / Completed **não** executados (`auditExecuted: false`, `completedExecuted: false`); demais capabilities fora de escopo
+- Sem novo Port / Gateway / Runtime / Pipeline
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-04B** — ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-05A** — ativar Auditoria operacional no Worker (consumo de `PERSISTED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

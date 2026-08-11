@@ -101,3 +101,11 @@ export {
   type ProcessTissBatchCreatedProtocolSentResult,
   type TissProtocolCompletedJob,
 } from "./process-tiss-batch-created-protocol-sent";
+
+export {
+  processTissProtocolSentPersisted,
+  TISS_JOB_STATUS_PERSISTED,
+  type ProcessTissProtocolSentPersistedInput,
+  type ProcessTissProtocolSentPersistedResult,
+  type TissPersistenceCompletedJob,
+} from "./process-tiss-protocol-sent-persisted";
