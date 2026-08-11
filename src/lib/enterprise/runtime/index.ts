@@ -93,3 +93,11 @@ export {
   type ProcessTissXmlGeneratedBatchCreatedResult,
   type TissBatchCompletedJob,
 } from "./process-tiss-xml-generated-batch-created";
+
+export {
+  processTissBatchCreatedProtocolSent,
+  TISS_JOB_STATUS_PROTOCOL_SENT,
+  type ProcessTissBatchCreatedProtocolSentInput,
+  type ProcessTissBatchCreatedProtocolSentResult,
+  type TissProtocolCompletedJob,
+} from "./process-tiss-batch-created-protocol-sent";

@@ -21,6 +21,7 @@
  * TISS-RUNTIME-02B: capability Enrichment — Job VALIDATED → Worker → Enrichment → Job ENRICHED (sem XML).
  * TISS-RUNTIME-03A: capability XML TISS — Job ENRICHED → Worker → XML → Job XML_GENERATED (sem Batch).
  * TISS-RUNTIME-03B: capability Batch — Job XML_GENERATED → Worker → Batch → Job BATCH_CREATED (sem Protocol).
+ * TISS-RUNTIME-04A: capability Protocol — Job BATCH_CREATED → Worker → Protocol → Job PROTOCOL_SENT (sem Persistence).
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
@@ -229,4 +230,12 @@ export {
   type TissBatchCompletedJob,
   type TissBatchJobLogicalStatus,
   type TissBatchProcessMessageDeps,
+  TISS_JOB_STATUS_PROTOCOL_SENT,
+  processTissProtocolJob,
+  createTissProtocolProcessMessage,
+  type ProcessTissProtocolJobInput,
+  type ProcessTissProtocolJobResult,
+  type TissProtocolCompletedJob,
+  type TissProtocolJobLogicalStatus,
+  type TissProtocolProcessMessageDeps,
 } from "./operational";
