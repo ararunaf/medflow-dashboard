@@ -20,7 +20,7 @@
 | **TISS-RUNTIME-01D** | Discovery da arquitetura funcional do TISS Runtime | ✅ Concluída |
 | **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ✅ Concluída |
 | **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ✅ Concluída |
-| **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ⏳ Próxima |
+| **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ✅ Concluída |
 
 **Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ⏳ TISS-RUNTIME-01C
 
@@ -144,6 +144,14 @@ getEnterpriseRuntime()
 
 ---
 
+## Escopo concluído (TISS-RUNTIME-01C)
+
+- Capability Parser operacional: Job **OCR_COMPLETED** → `WorkerRuntimePort` → `DocumentExtractionRuntimePort` (submitRequest / getResult) → Job **PARSED** → reenqueue via `QueueRuntimePort`
+- Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
+- Entrypoint `processTissOcrParsed` via `getEnterpriseRuntime()`
+- Validação **não** executada (`validationExecuted: false`); demais capabilities fora de escopo
+- Sem novo Port / Gateway / Runtime / Pipeline
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-01C** — ativar Parser / Extraction operacional no Worker (consumo de `OCR_COMPLETED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-02A** — ativar Validação operacional no Worker (consumo de `PARSED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

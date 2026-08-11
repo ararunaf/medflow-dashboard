@@ -53,3 +53,11 @@ export {
   type ProcessTissReceivedOcrResult,
   type TissOcrCompletedJob,
 } from "./process-tiss-received-ocr";
+
+export {
+  processTissOcrParsed,
+  TISS_JOB_STATUS_PARSED,
+  type ProcessTissOcrParsedInput,
+  type ProcessTissOcrParsedResult,
+  type TissParserCompletedJob,
+} from "./process-tiss-ocr-parsed";

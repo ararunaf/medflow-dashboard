@@ -16,6 +16,7 @@
  * OPER-INF-R: Retry operacional (decide + agenda; nunca processa) via Ports existentes.
  * TISS-RUNTIME-01A: entrada funcional TISS — Documento → Queue → Job RECEIVED (sem OCR/Parser/XML).
  * TISS-RUNTIME-01B: capability OCR — Job RECEIVED → Worker → OCR → Job OCR_COMPLETED (sem Parser).
+ * TISS-RUNTIME-01C: capability Parser — Job OCR_COMPLETED → Worker → Parser → Job PARSED (sem Validação).
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
@@ -184,4 +185,12 @@ export {
   type TissOcrCompletedJob,
   type TissOcrJobLogicalStatus,
   type TissOcrProcessMessageDeps,
+  TISS_JOB_STATUS_PARSED,
+  processTissParserJob,
+  createTissParserProcessMessage,
+  type ProcessTissParserJobInput,
+  type ProcessTissParserJobResult,
+  type TissParserCompletedJob,
+  type TissParserJobLogicalStatus,
+  type TissParserProcessMessageDeps,
 } from "./operational";

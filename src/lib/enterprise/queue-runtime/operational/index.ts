@@ -10,6 +10,7 @@
  * Retry: decisão de reenvio + agendamento (nunca executa processamento).
  * TISS-01A: Documento → enqueue → Job RECEIVED (sem OCR/Parser/XML).
  * TISS-01B: Job RECEIVED → Worker → OCR → Job OCR_COMPLETED (sem Parser).
+ * TISS-01C: Job OCR_COMPLETED → Worker → Parser → Job PARSED (sem Validação).
  */
 export type {
   DeadLetterGetByIdInput,
@@ -87,3 +88,14 @@ export {
   type TissOcrJobLogicalStatus,
   type TissOcrProcessMessageDeps,
 } from "./process-tiss-ocr-job";
+
+export {
+  TISS_JOB_STATUS_PARSED,
+  processTissParserJob,
+  createTissParserProcessMessage,
+  type ProcessTissParserJobInput,
+  type ProcessTissParserJobResult,
+  type TissParserCompletedJob,
+  type TissParserJobLogicalStatus,
+  type TissParserProcessMessageDeps,
+} from "./process-tiss-parser-job";
