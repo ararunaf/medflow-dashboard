@@ -15,8 +15,13 @@
 | **OPER-INF-S** | Ativar Scheduler operacional via `WorkerRuntimePort` | ✅ Concluída |
 | **OPER-INF-D** | Ativar Dead Letter operacional via `DeadLetterRuntimePort` → `QueueRuntimePort` | ✅ Concluída |
 | **OPER-INF-O** | Ativar Observability operacional via Ports existentes (somente leitura) | ✅ Concluída |
+| **ARC-25** | Documentar e congelar a arquitetura oficial do Enterprise Runtime | ✅ Concluída |
 | **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ⏳ Próxima Sprint |
 | **TISS-RUNTIME-01** | Ativação operacional TISS Runtime | ⏳ Planejada |
+
+**Roadmap vigente:** ✓ ARC-25 · ⏳ OPER-INF-R · ⏳ TISS-RUNTIME-01
+
+**Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)
 
 ---
 
@@ -76,6 +81,15 @@ getEnterpriseRuntime()
 - Reutilização exclusiva dos Ports existentes (somente leitura via `stats` / shape)
 - Sem dashboards / Grafana / Prometheus / OpenTelemetry / alertas / tracing / logs externos
 - Sem novos Ports / Gateways / Runtimes / alteração do pipeline oficial
+
+---
+
+## Escopo concluído (ARC-25)
+
+### ARC-25
+- Documento permanente `ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`
+- Arquitetura oficial, pipeline único, cadeia operacional e regras RULE-20/23/25/26
+- Sem alteração de `src/`, Runtime, Ports, Gateways ou testes
 
 ---
 
