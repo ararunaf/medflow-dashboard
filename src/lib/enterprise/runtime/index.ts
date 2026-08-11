@@ -109,3 +109,11 @@ export {
   type ProcessTissProtocolSentPersistedResult,
   type TissPersistenceCompletedJob,
 } from "./process-tiss-protocol-sent-persisted";
+
+export {
+  processTissPersistedAudited,
+  TISS_JOB_STATUS_AUDITED,
+  type ProcessTissPersistedAuditedInput,
+  type ProcessTissPersistedAuditedResult,
+  type TissAuditCompletedJob,
+} from "./process-tiss-persisted-audited";

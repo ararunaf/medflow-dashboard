@@ -114,6 +114,7 @@
     "enterprise:tiss-runtime-03b:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-03b-batch-creation-capability.test.ts",
     "enterprise:tiss-runtime-04a:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-04a-protocol-capability.test.ts",
     "enterprise:tiss-runtime-04b:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-04b-persistence-capability.test.ts",
+    "enterprise:tiss-runtime-05a:test": "npx tsx --test scripts/enterprise/tests/tiss-runtime-05a-audit-capability.test.ts",
     "enterprise:worker-runtime:test": "npx tsx --test scripts/enterprise/tests/worker-runtime-engine.test.ts",
     "enterprise:scheduler-runtime:test": "npx tsx --test scripts/enterprise/tests/scheduler-runtime-engine.test.ts",
     "enterprise:persistent-queue-runtime:test": "npx tsx --test scripts/enterprise/tests/persistent-queue-runtime-engine.test.ts",
