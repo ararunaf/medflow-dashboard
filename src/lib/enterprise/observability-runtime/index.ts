@@ -1,20 +1,20 @@
 /**
- * Enterprise Observability Runtime — Ports & Adapters (INF-09).
+ * Enterprise Observability Runtime — Ports & Adapters (INF-09 / OPER-INF-O).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → ObservabilityRuntimePort
  *     → DefaultObservabilityRuntimeAdapter / EnterpriseObservabilityRuntimeAdapter / MockObservabilityRuntimeAdapter
  *     → InMemoryObservabilityRuntimeStore
  *     → Canonical Observability Result
+ *     → (OPER-INF-O) RuntimeObservabilityCollector — somente leitura via Ports
  *
- * INF-09: infraestrutura canônica de gerenciamento estrutural de observabilidade futura.
+ * OPER-INF-O: coleta métricas/health/status/contadores/timers/throughput/filas/
+ * workers/scheduler/dead-letter/diagnostics reutilizando exclusivamente Ports existentes.
  * Sem OpenTelemetry. Sem Application Insights. Sem Azure Monitor.
  * Sem Prometheus. Sem Grafana. Sem Elastic. Sem Datadog. Sem New Relic.
  * Sem Loki. Sem Jaeger. Sem logs/métricas/tracing reais.
  * Sem alertas reais. Sem dashboards reais. Sem telemetria HTTP.
- * Sem Workers reais. Sem Scheduler real. Sem processamento assíncrono.
- * Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture/IA.
- * Dependências Queue + Worker + Scheduler + Persistent Queue + TISS Runtime preparadas — sem consumo/execução.
+ * Sem novos Ports / Gateways / Runtimes. Sem alteração do pipeline oficial.
  * Toda comunicação exclusivamente via ObservabilityRuntimePort.
  */
 export type {
@@ -118,3 +118,18 @@ export {
   getObservabilityRuntimeHealthSummary,
   type ObservabilityRuntimeHealthSummary,
 } from "./demo";
+
+export {
+  RuntimeObservabilityCollector,
+  type OperationalActiveWorkers,
+  type OperationalCounters,
+  type OperationalDeadLetterStats,
+  type OperationalHealthChecks,
+  type OperationalPendingQueues,
+  type OperationalRuntimeDiagnostics,
+  type OperationalRuntimeStatus,
+  type OperationalSchedulerStatus,
+  type OperationalThroughput,
+  type OperationalTimers,
+  type RuntimeObservabilityCollectorOptions,
+} from "./operational";

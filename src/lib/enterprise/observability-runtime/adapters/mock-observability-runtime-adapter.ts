@@ -158,6 +158,7 @@ export class MockObservabilityRuntimeAdapter implements ObservabilityRuntimePort
       message: this.message,
       store: options.store,
       enterpriseDeps,
+      operational: false,
     });
   }
 
@@ -184,6 +185,7 @@ export class MockObservabilityRuntimeAdapter implements ObservabilityRuntimePort
       usesPersistentQueueRuntimePort: true,
       usesTISSRuntimePort: true,
       usesScalabilityRuntimePort: true,
+      operationalPortCollection: false,
       runtimeReady: true,
       ...{
         realObservabilityBackend: false as const,

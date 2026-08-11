@@ -1,9 +1,10 @@
 /**
- * Tipos vendor-agnósticos do Enterprise Observability Runtime — INF-09.
+ * Tipos vendor-agnósticos do Enterprise Observability Runtime — INF-09 / OPER-INF-O.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → ObservabilityRuntimePort
  *     → Adapter → Observability Runtime Store → Canonical Observability Result
+ *     → (OPER-INF-O) coleta somente leitura via Ports existentes
  *
  * Sem backends de observabilidade reais. Sem OpenTelemetry/App Insights/Prometheus/Grafana.
  * Sem logs/métricas/tracing/alertas/dashboards reais.
@@ -14,6 +15,7 @@ import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/schedul
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { TISSRuntimePort } from "../../tiss-runtime/ports/tiss-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
+import type { OperationalRuntimeDiagnostics } from "../operational/types";
 import type {
   CanonicalObservabilityScope,
   CanonicalObservabilityCapabilities,
@@ -71,6 +73,8 @@ export type ObservabilityRuntimeStructuredLog = {
 export type ObservabilityRuntimeHealth = CanonicalObservabilityHealth & {
   provider: ObservabilityRuntimeProviderId;
   status?: ObservabilityRuntimeStatus;
+  /** OPER-INF-O — diagnóstico operacional Port-only (somente leitura). */
+  operational?: OperationalRuntimeDiagnostics;
 };
 
 /** Capacidades do adapter no nível do Port. */
@@ -90,6 +94,8 @@ export type ObservabilityRuntimePortCapabilities = {
   usesPersistentQueueRuntimePort: boolean;
   usesTISSRuntimePort: boolean;
   usesScalabilityRuntimePort: boolean;
+  /** OPER-INF-O — coleta operacional somente leitura via Ports. */
+  operationalPortCollection: boolean;
   runtimeReady: true;
   realObservabilityBackend: false;
   openTelemetryImplemented: false;
@@ -243,12 +249,14 @@ export type ObservabilityStatsInput = ObservabilityRuntimeOperationalControls & 
 export type ObservabilityStatsResult = ObservabilityRuntimeOperationEnvelope & {
   statistics?: CanonicalObservabilityStatistics;
   result?: CanonicalObservabilityResult;
+  /** OPER-INF-O — métricas/diagnóstico operacional (somente leitura via Ports). */
+  operational?: OperationalRuntimeDiagnostics;
 };
 
 /**
  * Dependências Enterprise injetadas no adapter default/enterprise.
- * Queue + Worker + Scheduler + Persistent Queue + TISS Runtime são dependências
- * obrigatórias preparadas — NÃO consumidas nesta sprint.
+ * OPER-INF-O: Queue + Worker + Scheduler + Persistent Queue + TISS são consumidos
+ * exclusivamente em modo SOMENTE LEITURA (stats / shape health) — sem mutação / sem regras.
  */
 export type ObservabilityRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;
@@ -256,7 +264,7 @@ export type ObservabilityRuntimeEnterpriseDeps = {
   getSchedulerRuntimePort(): SchedulerRuntimePort;
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort;
   getTISSRuntimePort(): TISSRuntimePort;
-  /** INF-10 — Scalability Runtime preparado (sem consumo funcional). */
+  /** INF-10 — Scalability Runtime preparado (shape-check; sem consumo mutável). */
   getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };
 

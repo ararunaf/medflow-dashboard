@@ -1133,7 +1133,17 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 4. **Não implementado (proibido nesta Sprint):** Scheduler, Retry Engine, Dead Letter, prioridade, batch, XML, SOAP, IA.  
 5. **Interface pública:** `WorkerRuntimePort` inalterada; sem novos Ports/Gateways; Runtime inalterado.  
 6. **Cobertura:** `enterprise:worker-runtime:test`.  
-7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-Q ✅ / OPER-INF-W ✅ / OPER-INF-S ✅ / OPER-INF-D ✅**; **OPER-INF-R ⏳ Próxima Sprint**.
+7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-Q ✅ / OPER-INF-W ✅ / OPER-INF-S ✅ / OPER-INF-D ✅ / OPER-INF-O ✅**; **OPER-INF-R ⏳ Próxima Sprint**.
+
+### Atualização OPER-INF-O — Observability Runtime operacional (11/08/2026)
+
+1. **Natureza:** ativação operacional do Observability Runtime reutilizando exclusivamente Ports existentes em modo **somente leitura**.
+2. **Coleta:** métricas, health checks, runtime status, contadores, timers, throughput, filas pendentes, workers ativos, scheduler status, dead-letter stats, runtime diagnostics.
+3. **Refinamento:** Observability nunca executa regras, nunca altera o fluxo, nunca interfere na execução.
+4. **Proibido:** dashboards / Grafana / Prometheus / OpenTelemetry / alertas / tracing / logs externos / novos Ports / Gateways / Runtimes.
+5. **Runtime:** `getEnterpriseRuntime()` / pipeline oficial **inalterados**.
+6. **Cobertura:** `enterprise:observability-runtime:test`.
+7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-O ✅**; **OPER-INF-R ⏳ / TISS-RUNTIME-01 ⏳**.
 
 #### AER-WR-B1
 - **Título:** Escape hatch `getWorkerRuntimePort()`  
@@ -1327,3 +1337,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 11/08/2026 | OPER-INF-W | Ativação operacional WorkerRuntimePort via QueueRuntimePort (poll/claim/lock/ack/nack/heartbeat/shutdown); sem novos Ports/Gateways; Runtime inalterado; OPER-INF-W ✅; OPER-INF-S ⏳ |
 | 11/08/2026 | OPER-INF-S | Ativação operacional SchedulerRuntimePort via WorkerRuntimePort (poll temporal/schedule/cancel/heartbeat/shutdown/concorrência/recover); sem novos Ports/Gateways; Runtime inalterado; OPER-INF-S ✅; OPER-INF-D ⏳ |
 | 11/08/2026 | OPER-INF-D | Ativação operacional DeadLetterRuntimePort (contrato interno) via QueueRuntimePort (park/getById/purge/isolamento); sem Port Enterprise novo / Gateway / retry; OPER-INF-D ✅; OPER-INF-R ⏳ |
+| 11/08/2026 | OPER-INF-O | Ativação operacional ObservabilityRuntimePort via Ports existentes (somente leitura: stats/diagnostics); sem dashboards/OTel/Prometheus; sem novos Ports/Gateways; OPER-INF-O ✅; OPER-INF-R ⏳ |

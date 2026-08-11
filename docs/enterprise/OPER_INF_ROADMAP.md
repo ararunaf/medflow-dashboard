@@ -14,7 +14,9 @@
 | **OPER-INF-W** | Ativar Worker operacional via `QueueRuntimePort` | ✅ Concluída |
 | **OPER-INF-S** | Ativar Scheduler operacional via `WorkerRuntimePort` | ✅ Concluída |
 | **OPER-INF-D** | Ativar Dead Letter operacional via `DeadLetterRuntimePort` → `QueueRuntimePort` | ✅ Concluída |
+| **OPER-INF-O** | Ativar Observability operacional via Ports existentes (somente leitura) | ✅ Concluída |
 | **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ⏳ Próxima Sprint |
+| **TISS-RUNTIME-01** | Ativação operacional TISS Runtime | ⏳ Planejada |
 
 ---
 
@@ -29,10 +31,11 @@
 - Scheduler aciona Worker apenas via `WorkerRuntimePort` (nunca Queue direto)
 - Queue envia para Dead Letter apenas via `DeadLetterRuntimePort` (contrato interno)
 - Dead Letter **não** decide reenvio — apenas armazenamento definitivo (retry = OPER-INF-R)
+- Observability **apenas coleta e expõe** — nunca executa regras, nunca altera o fluxo, nunca interfere na execução
 
 ---
 
-## Fluxo operacional atual (pós OPER-INF-D)
+## Fluxo operacional atual (pós OPER-INF-O)
 
 ```
 getEnterpriseRuntime()
@@ -42,6 +45,7 @@ getEnterpriseRuntime()
         → Backend Persistente (OPER-INF-Q)
         → DeadLetterRuntimePort (OPER-INF-D — contrato interno)
           → QueueRuntimePort (isolamento enterprise-dead-letter)
+  → ObservabilityRuntimePort (OPER-INF-O — somente leitura dos Ports acima)
 ```
 
 ---
@@ -66,6 +70,12 @@ getEnterpriseRuntime()
 - Dead Letter operacional: armazenamento definitivo, isolamento da fila principal, motivo, tentativas, timestamp, metadata, consulta por id, purge
 - Exclusivo via `DeadLetterRuntimePort` → `QueueRuntimePort` (contrato interno; sem Port Enterprise novo)
 - Sem retry / reprocessamento / scheduler / worker / regras de negócio
+
+### OPER-INF-O
+- Observability operacional: métricas, health checks, runtime status, contadores, timers, throughput, filas pendentes, workers ativos, scheduler status, dead-letter stats, runtime diagnostics
+- Reutilização exclusiva dos Ports existentes (somente leitura via `stats` / shape)
+- Sem dashboards / Grafana / Prometheus / OpenTelemetry / alertas / tracing / logs externos
+- Sem novos Ports / Gateways / Runtimes / alteração do pipeline oficial
 
 ---
 

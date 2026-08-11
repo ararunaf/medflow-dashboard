@@ -288,7 +288,7 @@ describe("INF-09 cadeia Enterprise / Queue / Worker / Scheduler / Persistent Que
     assert.equal(health.tissRuntimeOk, true);
   });
 
-  it("Observability Runtime prepara deps Queue/Worker/Scheduler/PQR sem consumir", async () => {
+  it("Observability Runtime consome Ports apenas em leitura (stats) — sem mutação", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     const obs = runtime.getObservabilityRuntimePort();
@@ -304,6 +304,12 @@ describe("INF-09 cadeia Enterprise / Queue / Worker / Scheduler / Persistent Que
     assert.equal(obsHealth.schedulerRuntimeOk, true);
     assert.equal(obsHealth.persistentQueueRuntimeOk, true);
     assert.equal(obsHealth.tissRuntimeOk, true);
+    assert.ok(obsHealth.operational);
+    assert.equal(obsHealth.operational?.kind, "operational-runtime-diagnostics");
+    assert.equal(obsHealth.operational?.operationalCollection, true);
+    assert.equal(obsHealth.operational?.realObservabilityBackend, false);
+    assert.equal(obsHealth.operational?.openTelemetryImplemented, false);
+    assert.equal(obsHealth.operational?.prometheusImplemented, false);
 
     const beforeQueue = await queue.stats();
     const beforeQueueCount = beforeQueue.statistics?.totalMessages ?? 0;
@@ -314,7 +320,7 @@ describe("INF-09 cadeia Enterprise / Queue / Worker / Scheduler / Persistent Que
     const beforePqr = await pqr.stats();
     const beforeQueues = beforePqr.statistics?.totalQueues ?? 0;
 
-    const observed = await obs.observe({ scopeName: "inf-09-no-consume" });
+    const observed = await obs.observe({ scopeName: "oper-inf-o-read-only" });
     assert.equal(observed.ok, true);
     assert.equal(observed.result?.openTelemetryImplemented, false);
     assert.equal(observed.result?.applicationInsightsImplemented, false);
@@ -327,13 +333,10 @@ describe("INF-09 cadeia Enterprise / Queue / Worker / Scheduler / Persistent Que
     assert.equal(afterQueue.statistics?.totalMessages ?? 0, beforeQueueCount);
     const afterWorker = await worker.stats();
     assert.equal(afterWorker.statistics?.totalWorkers ?? 0, beforeWorkers);
-    assert.equal(afterWorker.statistics?.realWorkersCount, 0);
     const afterScheduler = await scheduler.stats();
     assert.equal(afterScheduler.statistics?.totalSchedules ?? 0, beforeSchedules);
-    assert.equal(afterScheduler.statistics?.realSchedulerCount, 0);
     const afterPqr = await pqr.stats();
     assert.equal(afterPqr.statistics?.totalQueues ?? 0, beforeQueues);
-    assert.equal(afterPqr.statistics?.realPersistentBackendCount, 0);
   });
 
   it("TISS Runtime prepara dependência Observability sem observar/consumir", async () => {
@@ -507,7 +510,7 @@ describe("INF-09 ausência de backends de observabilidade / bypass", () => {
     );
   });
 
-  it("Observability Runtime não consome Queue/Worker/Scheduler/PQR/TISS nas operações", () => {
+  it("Observability Runtime coleta Ports apenas via stats (somente leitura) — sem mutadores", () => {
     const obsAdapter = readFileSync(
       join(
         repoRoot,
@@ -525,6 +528,8 @@ describe("INF-09 ausência de backends de observabilidade / bypass", () => {
     assert.match(obsAdapter, /usesSchedulerRuntimePort/);
     assert.match(obsAdapter, /usesPersistentQueueRuntimePort/);
     assert.match(obsAdapter, /usesTISSRuntimePort/);
+    assert.match(obsAdapter, /operationalPortCollection/);
+    assert.match(obsAdapter, /RuntimeObservabilityCollector/);
     assert.equal(
       /getQueueRuntimePort\(\)\.(enqueue|dequeue|peek|ack|nack|purge)\s*\(/.test(obsAdapter),
       false,
@@ -553,12 +558,134 @@ describe("INF-09 ausência de backends de observabilidade / bypass", () => {
     );
   });
 
+  it("OPER-INF-O collector usa apenas stats/shape — sem mutadores nos Ports", () => {
+    const collector = readFileSync(
+      join(
+        repoRoot,
+        "src/lib/enterprise/observability-runtime/operational/runtime-observability-collector.ts",
+      ),
+      "utf8",
+    );
+    assert.match(collector, /\.stats\s*\(/);
+    assert.match(collector, /ENTERPRISE_DEAD_LETTER_QUEUE_NAME/);
+    assert.equal(
+      /\.(enqueue|dequeue|peek|ack|nack|purge|allocate|schedule|cancel|process)\s*\(/.test(
+        collector,
+      ),
+      false,
+    );
+    assert.equal(/from ["']@supabase\//.test(collector), false);
+    assert.equal(/createClient\s*\(/.test(collector), false);
+  });
+});
+
+describe("OPER-INF-O Observability operacional Port-only", () => {
+  it("stats/health expõem métricas, contadores, timers, throughput, filas, workers, scheduler, DLQ", async () => {
+    process.env.MEDICFLOW_QUEUE_RUNTIME_BACKEND = "memory";
+    resetEnterpriseRuntimeForTests();
+    const runtime = createEnterpriseRuntime({ runtimeId: "test" });
+    const obs = runtime.getObservabilityRuntimePort() as DefaultObservabilityRuntimeAdapter;
+    const queue = runtime.getQueueRuntimePort();
+
+    assert.equal(obs.capabilities().operationalPortCollection, true);
+    assert.ok(obs.getOperationalCollector());
+
+    await queue.enqueue({
+      queueName: "oper-inf-o-pending",
+      payloadRef: "payload://obs-o-1",
+    });
+
+    const stats = await obs.stats();
+    assert.equal(stats.ok, true);
+    assert.ok(stats.operational);
+    assert.equal(stats.operational?.kind, "operational-runtime-diagnostics");
+    assert.equal(stats.operational?.operationalCollection, true);
+    assert.ok(typeof stats.operational?.counters.queueTotalMessages === "number");
+    assert.ok(typeof stats.operational?.timers.collectionLatencyMs === "number");
+    assert.ok(typeof stats.operational?.throughput.messagesPublished === "number");
+    assert.ok(typeof stats.operational?.pendingQueues.pendingMessages === "number");
+    assert.ok(stats.operational!.pendingQueues.pendingMessages >= 1);
+    assert.ok(typeof stats.operational?.activeWorkers.allocatedWorkers === "number");
+    assert.ok(typeof stats.operational?.schedulerStatus.activeSchedules === "number");
+    assert.ok(typeof stats.operational?.deadLetter.totalDeadLetters === "number");
+    assert.equal(stats.operational?.realObservabilityBackend, false);
+    assert.equal(stats.operational?.prometheusImplemented, false);
+    assert.equal(stats.operational?.grafanaImplemented, false);
+    assert.equal(stats.statistics?.realMetricsImplementedCount, 0);
+
+    const health = await obs.health();
+    assert.equal(health.ok, true);
+    assert.ok(health.operational);
+    assert.equal(health.operational?.healthChecks.queueRuntimeOk, true);
+    assert.equal(health.operational?.healthChecks.workerRuntimeOk, true);
+    assert.equal(health.operational?.healthChecks.schedulerRuntimeOk, true);
+  });
+
+  it("coleta não muta Queue/Worker/Scheduler e não decide retry", async () => {
+    process.env.MEDICFLOW_QUEUE_RUNTIME_BACKEND = "memory";
+    resetEnterpriseRuntimeForTests();
+    const runtime = createEnterpriseRuntime({ runtimeId: "test" });
+    const obs = runtime.getObservabilityRuntimePort();
+    const queue = runtime.getQueueRuntimePort();
+    const worker = runtime.getWorkerRuntimePort();
+    const scheduler = runtime.getSchedulerRuntimePort();
+
+    const beforeQ = await queue.stats();
+    const beforeW = await worker.stats();
+    const beforeS = await scheduler.stats();
+
+    const snap = await obs.stats();
+    assert.equal(snap.ok, true);
+    assert.ok(snap.operational);
+
+    const afterQ = await queue.stats();
+    const afterW = await worker.stats();
+    const afterS = await scheduler.stats();
+    assert.equal(afterQ.statistics?.totalMessages, beforeQ.statistics?.totalMessages);
+    assert.equal(afterQ.statistics?.enqueuedMessages, beforeQ.statistics?.enqueuedMessages);
+    assert.equal(afterW.statistics?.totalWorkers, beforeW.statistics?.totalWorkers);
+    assert.equal(afterS.statistics?.totalSchedules, beforeS.statistics?.totalSchedules);
+
+    const root = join(repoRoot, "src/lib/enterprise/observability-runtime");
+    const files = collectTsFiles(root);
+    for (const file of files) {
+      const src = readFileSync(file, "utf8");
+      assert.equal(/implementsRetryReal\s*:\s*true/.test(src), false, file);
+      assert.equal(/from ["']@opentelemetry\//.test(src), false, file);
+      assert.equal(/from ["']prom-client["']/.test(src), false, file);
+    }
+  });
+
+  it("preserva arquitetura: sem novo Port/Gateway/Runtime; Dead Letter não no EnterpriseRuntime", () => {
+    const enterpriseRuntime = readFileSync(
+      join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
+      "utf8",
+    );
+    const enterpriseTypes = readFileSync(
+      join(repoRoot, "src/lib/enterprise/runtime/types.ts"),
+      "utf8",
+    );
+    assert.match(enterpriseRuntime, /getObservabilityRuntimePort/);
+    assert.equal(/getDeadLetterRuntimePort/.test(enterpriseTypes), false);
+    assert.equal(/createDeadLetterRuntimePort/.test(enterpriseRuntime), false);
+    assert.equal(/ObservabilityGateway/.test(enterpriseRuntime), false);
+    assert.equal(/createObservabilityGateway/.test(enterpriseRuntime), false);
+
+    const foundationRoot = join(repoRoot, "src/lib/enterprise/observability-foundation");
+    const foundationFiles = collectTsFiles(foundationRoot);
+    for (const file of foundationFiles) {
+      const src = readFileSync(file, "utf8");
+      assert.equal(/RuntimeObservabilityCollector/.test(src), false, file);
+    }
+  });
+
   it("sem Provider/Adapter/Factory/Registry paralelo", () => {
     const root = join(repoRoot, "src/lib/enterprise/observability-runtime");
     const files = collectTsFiles(root).map((f) => f.replace(/\\/g, "/"));
     assert.ok(files.some((f) => f.endsWith("/providers/create-observability-runtime-port.ts")));
     assert.ok(files.some((f) => f.endsWith("/factory/observability-runtime-factory.ts")));
     assert.ok(files.some((f) => f.endsWith("/registry/observability-runtime-registry.ts")));
+    assert.ok(files.some((f) => f.includes("/operational/runtime-observability-collector.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
     assert.equal(

@@ -1,9 +1,13 @@
 /**
- * DefaultObservabilityRuntimeAdapter — INF-09.
+ * DefaultObservabilityRuntimeAdapter — INF-09 / OPER-INF-O.
  *
  * Adapter oficial do Enterprise Observability Runtime.
- * Responde exclusivamente de forma estrutural (sem OpenTelemetry / sem App Insights / sem Prometheus).
- * Sem logs reais. Sem métricas reais. Sem tracing. Sem alertas. Sem dashboards. Sem telemetria HTTP.
+ * OPER-INF-O: coleta operacional somente leitura via Ports existentes
+ * (métricas, health checks, runtime status, contadores, timers, throughput,
+ * filas pendentes, workers ativos, scheduler status, dead-letter stats, diagnostics).
+ *
+ * Nunca executa regras. Nunca altera o fluxo. Nunca interfere na execução.
+ * Sem OpenTelemetry / App Insights / Prometheus / Grafana / alertas / tracing / dashboards.
  */
 import {
   DEFAULT_OBSERVABILITY_RUNTIME_CAPABILITIES,
@@ -46,6 +50,7 @@ import type {
   UnregisterObservabilityScopeInput,
   UnregisterObservabilityScopeResult,
 } from "../ports/types";
+import { RuntimeObservabilityCollector, type OperationalRuntimeDiagnostics } from "../operational";
 import { InMemoryObservabilityRuntimeStore, type ObservabilityRuntimeStore } from "../store";
 
 export const DEFAULT_OBSERVABILITY_RUNTIME_ADAPTER_ID = "default-enterprise-observability";
@@ -61,6 +66,11 @@ export type DefaultObservabilityRuntimeAdapterOptions = {
   message?: string;
   store?: ObservabilityRuntimeStore;
   enterpriseDeps?: ObservabilityRuntimeEnterpriseDeps;
+  /**
+   * OPER-INF-O — quando true (default com enterpriseDeps), ativa coleta Port-only.
+   * Mock força false.
+   */
+  operational?: boolean;
   defaultTimeoutMs?: number;
   defaultRetryCount?: number;
   defaultRetryBackoffMs?: number;
@@ -115,7 +125,7 @@ const STRUCTURAL_FLAGS = {
 } as const;
 
 /**
- * Adapter oficial INF-09 — Observability Runtime default / enterprise.
+ * Adapter oficial INF-09 / OPER-INF-O — Observability Runtime default / enterprise.
  */
 export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimePort {
   readonly providerId: Extract<ObservabilityRuntimeProviderId, "enterprise" | "default">;
@@ -125,6 +135,8 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
   private readonly metadata: ObservabilityRuntimeProviderMetadata;
   private readonly store: ObservabilityRuntimeStore;
   private readonly enterpriseDeps?: ObservabilityRuntimeEnterpriseDeps;
+  private readonly operational: boolean;
+  private readonly collector: RuntimeObservabilityCollector | null;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
   private readonly defaultRetryBackoffMs: number;
@@ -135,9 +147,13 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
   constructor(options: DefaultObservabilityRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
     this.healthy = options.healthy ?? true;
+    this.enterpriseDeps = options.enterpriseDeps;
+    this.operational = options.operational ?? !!options.enterpriseDeps;
     this.message =
       options.message ??
-      `${this.providerId} Observability Runtime ready (structural only — no real observability backend / no OpenTelemetry / no Application Insights).`;
+      (this.operational
+        ? `${this.providerId} Observability Runtime ready (OPER-INF-O — Port-only read collection; no OpenTelemetry / Prometheus / Grafana).`
+        : `${this.providerId} Observability Runtime ready (structural only — no real observability backend / no OpenTelemetry / no Application Insights).`);
     this.metadata = {
       name:
         this.providerId === "default"
@@ -146,10 +162,9 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       version: DEFAULT_OBSERVABILITY_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official INF-09 Enterprise Observability Runtime — canonical observability infrastructure only.",
+        "Official INF-09 / OPER-INF-O Enterprise Observability Runtime — Port-only operational collection (read-only).",
     };
     this.store = options.store ?? new InMemoryObservabilityRuntimeStore();
-    this.enterpriseDeps = options.enterpriseDeps;
     this.defaultTimeoutMs = options.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.defaultRetryCount = options.defaultRetryCount ?? DEFAULT_RETRY_COUNT;
     this.defaultRetryBackoffMs = options.defaultRetryBackoffMs ?? DEFAULT_RETRY_BACKOFF_MS;
@@ -184,11 +199,29 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
         );
       }
     }
+
+    this.collector =
+      this.operational && this.enterpriseDeps
+        ? new RuntimeObservabilityCollector({
+            enterpriseDeps: this.enterpriseDeps,
+            now: this.now,
+            getLocalStoreCounts: () => ({
+              scopes: this.store.scopeCount(),
+              signals: this.store.signalCount(),
+              envelopes: this.store.envelopeCount(),
+            }),
+          })
+        : null;
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
   getStore(): ObservabilityRuntimeStore {
     return this.store;
+  }
+
+  /** OPER-INF-O — coletor Port-only (null em modo estrutural/mock). */
+  getOperationalCollector(): RuntimeObservabilityCollector | null {
+    return this.collector;
   }
 
   capabilities(): ObservabilityRuntimePortCapabilities {
@@ -208,6 +241,7 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       usesPersistentQueueRuntimePort: true,
       usesTISSRuntimePort: true,
       usesScalabilityRuntimePort: true,
+      operationalPortCollection: this.operational && this.collector !== null,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
       implementsOpenTelemetry: false,
@@ -257,8 +291,19 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
     let persistentQueueRuntimeOk = true;
     let tissRuntimeOk = true;
     let scalabilityRuntimeOk = true;
-    if (this.enterpriseDeps) {
-      // INF-09: deps preparadas — valida Port shape sem chamar health()
+    let operational: OperationalRuntimeDiagnostics | undefined;
+
+    if (this.collector) {
+      // OPER-INF-O: coleta Port-only (stats + shape) — sem chamar sibling.health() (anti-ciclo).
+      operational = await this.collector.collect();
+      queueRuntimeOk = operational.healthChecks.queueRuntimeOk;
+      workerRuntimeOk = operational.healthChecks.workerRuntimeOk;
+      schedulerRuntimeOk = operational.healthChecks.schedulerRuntimeOk;
+      persistentQueueRuntimeOk = operational.healthChecks.persistentQueueRuntimeOk;
+      tissRuntimeOk = operational.healthChecks.tissRuntimeOk;
+      scalabilityRuntimeOk = operational.healthChecks.scalabilityRuntimeOk;
+    } else if (this.enterpriseDeps) {
+      // INF-09 estrutural: deps preparadas — valida Port shape sem chamar health()
       // (evita ciclos Observability.health ↔ Queue/Worker/Scheduler/PQR/TISS.health).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
       const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
@@ -306,7 +351,7 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       kind: "canonical-observability-health",
       ok,
       provider: this.providerId,
-      latencyMs: 0,
+      latencyMs: operational?.timers.collectionLatencyMs ?? 0,
       status: ok ? "ready" : "unhealthy",
       storedScopeCount: this.store.scopeCount(),
       storedSignalCount: this.store.signalCount(),
@@ -319,6 +364,7 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
       scalabilityRuntimeOk,
       runtimeReady: true,
       ...STRUCTURAL_FLAGS,
+      operational,
       message: this.healthy
         ? (storeHealth.message ?? this.message)
         : "Observability Runtime unhealthy.",
@@ -602,19 +648,27 @@ export class DefaultObservabilityRuntimeAdapter implements ObservabilityRuntimeP
     return this.runOperation("stats", input, async () => {
       const statistics = this.store.statistics();
       const stamp = this.now();
+      const operational = this.collector ? await this.collector.collect() : undefined;
       const result = this.buildResult({
         operation: "stats",
         status: "pending",
         stamp,
-        code: "OBSERVABILITY_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Observability Runtime structural statistics.",
+        code: this.collector
+          ? "OBSERVABILITY_RUNTIME_OPERATIONAL_OK"
+          : "OBSERVABILITY_RUNTIME_STRUCTURAL_OK",
+        messageText: this.collector
+          ? "Canonical Observability Runtime operational statistics (OPER-INF-O — Port-only read collection)."
+          : "Canonical Observability Runtime structural statistics.",
       });
       return {
         ok: true,
         statistics,
+        operational,
         result,
         code: "OBSERVABILITY_RUNTIME_OK",
-        message: `Observability Runtime stats: ${statistics.totalScopes} scopes, ${statistics.totalSignals} signals.`,
+        message: operational
+          ? `Observability Runtime stats: ${statistics.totalScopes} scopes, pending=${operational.pendingQueues.pendingMessages}, workers=${operational.activeWorkers.allocatedWorkers}, dlq=${operational.deadLetter.totalDeadLetters}.`
+          : `Observability Runtime stats: ${statistics.totalScopes} scopes, ${statistics.totalSignals} signals.`,
       };
     });
   }
