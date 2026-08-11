@@ -77,3 +77,11 @@ export {
   type ProcessTissValidatedEnrichedResult,
   type TissEnrichmentCompletedJob,
 } from "./process-tiss-validated-enriched";
+
+export {
+  processTissEnrichedXmlGenerated,
+  TISS_JOB_STATUS_XML_GENERATED,
+  type ProcessTissEnrichedXmlGeneratedInput,
+  type ProcessTissEnrichedXmlGeneratedResult,
+  type TissXmlCompletedJob,
+} from "./process-tiss-enriched-xml-generated";

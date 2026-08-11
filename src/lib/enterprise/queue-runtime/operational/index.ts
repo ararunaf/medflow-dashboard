@@ -13,6 +13,7 @@
  * TISS-01C: Job OCR_COMPLETED → Worker → Parser → Job PARSED (sem Validação).
  * TISS-02A: Job PARSED → Worker → Validation → Job VALIDATED (sem Enriquecimento).
  * TISS-02B: Job VALIDATED → Worker → Enrichment → Job ENRICHED (sem XML).
+ * TISS-03A: Job ENRICHED → Worker → XML TISS → Job XML_GENERATED (sem Batch).
  */
 export type {
   DeadLetterGetByIdInput,
@@ -123,3 +124,14 @@ export {
   type TissEnrichmentJobLogicalStatus,
   type TissEnrichmentProcessMessageDeps,
 } from "./process-tiss-enrichment-job";
+
+export {
+  TISS_JOB_STATUS_XML_GENERATED,
+  processTissXmlJob,
+  createTissXmlProcessMessage,
+  type ProcessTissXmlJobInput,
+  type ProcessTissXmlJobResult,
+  type TissXmlCompletedJob,
+  type TissXmlJobLogicalStatus,
+  type TissXmlProcessMessageDeps,
+} from "./process-tiss-xml-job";

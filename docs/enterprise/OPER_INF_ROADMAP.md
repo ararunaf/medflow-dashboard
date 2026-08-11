@@ -23,8 +23,9 @@
 | **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ✅ Concluída |
 | **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ✅ Concluída |
 | **TISS-RUNTIME-02B** | Ativar Enriquecimento operacional no Worker (consumo de `VALIDATED`) | ✅ Concluída |
+| **TISS-RUNTIME-03A** | Ativar XML TISS operacional no Worker (consumo de `ENRICHED`) | ✅ Concluída |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ⏳ TISS-RUNTIME-03A
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ⏳ TISS-RUNTIME-03B
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -170,6 +171,14 @@ getEnterpriseRuntime()
 - XML **não** executado (`xmlExecuted: false`); demais capabilities fora de escopo
 - Sem novo Port / Gateway / Runtime / Pipeline
 
+## Escopo concluído (TISS-RUNTIME-03A)
+
+- Capability XML TISS operacional: Job **ENRICHED** → `WorkerRuntimePort` → `XMLTISSRuntimePort` (prepareXMLDocument / getResult) → Job **XML_GENERATED** → reenqueue via `QueueRuntimePort`
+- Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
+- Entrypoint `processTissEnrichedXmlGenerated` via `getEnterpriseRuntime()`
+- Batch / Protocolo / Persistência / Auditoria **não** executados (`batchExecuted: false`, `protocolExecuted: false`, `persistenceExecuted: false`, `auditExecuted: false`); demais capabilities fora de escopo
+- Sem novo Port / Gateway / Runtime / Pipeline
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-03A** — ativar XML TISS operacional no Worker (consumo de `ENRICHED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-03B** — ativar Lote operacional no Worker (consumo de `XML_GENERATED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
