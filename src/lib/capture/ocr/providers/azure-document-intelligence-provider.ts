@@ -56,8 +56,9 @@ export class AzureDocumentIntelligenceProvider implements OcrProvider {
       };
     }
 
-    const { getEnterpriseRuntime } = await import("@/lib/enterprise/runtime");
-    const port = getEnterpriseRuntime().getOCRProviderPort();
+    const { resolveCaptureEnterpriseRuntime } =
+      await import("@/lib/capture/enterprise/resolve-enterprise-runtime");
+    const port = resolveCaptureEnterpriseRuntime().getOCRProviderPort();
     const validation = await port.validateConfiguration();
     if (!validation.ok) {
       return { available: false, message: "Credenciais Azure não configuradas." };

@@ -1,24 +1,15 @@
 /**
- * Bridge Captura → Enterprise Runtime (ARCH-01 / DIP-02 / DIP-03 / DIP-04 / DIP-05 / DIP-06).
+ * Bridge Captura → Enterprise Runtime (ARCH-01 / EPC-24A / DIP-02…DIP-06).
  *
- * Side-effect estrutural após upload bem-sucedido.
- * Fluxo: Produto → Enterprise Runtime → CaptureEngineRuntimePort
- *   → Orchestrator → DocumentIntakeRuntime → DocumentIntakePort
- *   → OCRRuntimePort → Orchestrator → OCR Provider Adapter (estrutural)
- *   → DocumentClassificationRuntimePort → Orchestrator
- *   → Classification Provider Adapter (referência estrutural)
- *   → StorageManagerRuntimePort → Orchestrator
- *   → Storage Provider Adapter (referência estrutural)
- *   → DocumentSearchRuntimePort → Orchestrator
- *   → Search Provider Adapter (referência estrutural).
+ * Side-effect estrutural após upload bem-sucedido (dual-path AER-GA03-A1).
+ * Fluxo: Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
+ *   → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime → …
  * NÃO altera OCR/classificação/storage/busca reais do produto, parser, auditoria, UI, APIs ou regras.
  * Falhas são engolidas — o fluxo de Captura permanece válido.
  */
-import {
-  getEnterpriseRuntime,
-  type RegisterCaptureDocumentIntakeResult,
-} from "@/lib/enterprise/runtime";
+import type { RegisterCaptureDocumentIntakeResult } from "@/lib/enterprise/runtime";
 import type { CaptureDocumentRecord, CaptureSessionRecord } from "../types";
+import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type CaptureEnterpriseBridgeInput = {
   session: CaptureSessionRecord;
@@ -34,7 +25,7 @@ export async function registerCaptureDocumentIntakeBridge(
   input: CaptureEnterpriseBridgeInput,
 ): Promise<RegisterCaptureDocumentIntakeResult | null> {
   try {
-    return await getEnterpriseRuntime().registerCaptureDocumentIntake({
+    return await resolveCaptureEnterpriseRuntime().registerCaptureDocumentIntake({
       sessionId: input.session.id,
       documentId: input.document.id,
       storagePath: input.document.storagePathOriginal,

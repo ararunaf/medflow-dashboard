@@ -1,15 +1,15 @@
 /**
- * Capture TISS Knowledge Gateway — TISS-CONV-01.
+ * Capture TISS Knowledge Gateway — TISS-CONV-01 / EPC-24A.
  *
  * Fluxo oficial exclusivo:
- *   Capture → getEnterpriseRuntime() → TISSRuntimePort
- *     → TISSCatalogPort → RulePackEnginePort → Base Rule Packs
+ *   Capture → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
+ *     → TISSRuntimePort → TISSCatalogPort → RulePackEnginePort → Base Rule Packs
  *
  * Elimina dual-path: sem TUSS_CATALOG paralelo, sem store direto,
  * sem if/switch de operadora/versão/tenant.
  */
-import { getEnterpriseRuntime } from "@/lib/enterprise/runtime";
 import { BASE_PROCEDURE_AUTHORIZATION_PACK_CODE } from "@/lib/enterprise/rule-pack-engine";
+import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type CaptureTissKnowledgeSnapshot = {
   procedureCodes: ReadonlySet<string>;
@@ -56,7 +56,7 @@ function buildAuthCodesFromPackFindings(
 }
 
 async function hydrateFromEnterprise(): Promise<CaptureTissKnowledgeSnapshot> {
-  const runtime = getEnterpriseRuntime();
+  const runtime = resolveCaptureEnterpriseRuntime();
   const tissRuntime = runtime.getTISSRuntimePort();
   const catalog = runtime.getTISSCatalogPort();
   const rulePackEngine = runtime.getRulePackEnginePort();

@@ -27,7 +27,7 @@
 
 ```text
 ARC-24     Descoberta + regra + plano          ← FEITO (docs only)
-EPC-24A    Orquestração canônica no caminho Capture
+EPC-24A    Orquestração canônica no caminho Capture  ← FEITO (binding; sem cutover)
 EPC-24B    Migrar OCR+Intake+Extraction (parse)
 EPC-24C    Migrar Audit/Contract/Risk/Correction
 EPC-24D    Migrar Review→TISS/XML/Bloco C
@@ -42,17 +42,21 @@ Cada sprint exige: build + `tsc --noEmit` + lint + smoke = PASS, paridade funcio
 
 ### EPC-24A — Canonical Orchestration Binding
 
+**Status:** ✅ Concluída (2026-08-10) — binding arquitetural; **sem cutover**; comportamento preservado.
+
 **Objetivo:** Fazer o Canonical Execution Orchestrator **dirigir** a sequência de estágios Capture via Ports, sem mudar comportamento observável.
 
 | Item | Detalhe |
 |------|---------|
 | PRESERVAR | `getEnterpriseRuntime`, Orchestrator, Capture session/UI |
-| MIGRAR | Orquestração imperativa de `uploadCaptureFileFn` → chamadas coordenadas pelo Orchestrator (facade) |
+| MIGRAR | Orquestração imperativa de `uploadCaptureFileFn` → facade `runCaptureOperationalPipelineBound` (ainda executa engines legado) |
 | REMOVER | Nada ainda |
-| Critério | Upload gera a mesma cadeia de artefatos/status; Orchestrator registra steps reais por Port |
-| Fora de escopo | Trocar engines de parser/audit; XML; filas reais |
+| Critério | Upload gera a mesma cadeia de artefatos/status; Capture entra por `getEnterpriseRuntime()`; Orchestrator/Capture Engine probeados estruturalmente |
+| Fora de escopo | Trocar engines de parser/audit; XML; filas reais; fechar AER-GA03-A1 |
 
-**Entregáveis:** wiring Orchestrator↔Capture stages; testes de coordenação; doc de binding.
+**Entregáveis:** `resolve-enterprise-runtime.ts`, `capture-runtime-binding.ts`; wiring em `capture-server`; docs `EPC24A_*`; AER-GA03-A1 atualizado (eliminação iniciada).
+
+**Confirmação dual-path:** AER-GA03-A1 **ainda existe parcialmente** (intake side-effect + pipeline legado). Eliminação **iniciada** sem regressões; cutover só em EPC-24E.
 
 ---
 

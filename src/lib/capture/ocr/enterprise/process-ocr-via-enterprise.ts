@@ -1,13 +1,13 @@
 /**
- * Bridge produto → Enterprise Foundation para OCR (OCR-01).
+ * Bridge produto → Enterprise Foundation para OCR (OCR-01 / EPC-24A).
  *
  * NÃO chama Azure/HTTP diretamente.
  * Fluxo obrigatório:
- *   Produto → Enterprise Runtime → Capture Runtime
- *     → OCR Runtime → OCRProviderPort → AzureDocumentIntelligenceAdapter → Azure
+ *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
+ *     → Capture Runtime → OCR Runtime → OCRProviderPort
+ *     → AzureDocumentIntelligenceAdapter → Azure
  */
 import { DomainError } from "@/lib/domain/operations/errors";
-import { getEnterpriseRuntime } from "@/lib/enterprise/runtime";
 import type { CanonicalOCRResult } from "@/lib/enterprise/ocr-runtime";
 import type { OCRProcessInput } from "@/lib/enterprise/ocr-provider";
 import { AzureDocumentIntelligenceAdapter, type AzureFetchFn } from "@/lib/enterprise/ocr-provider";
@@ -15,6 +15,7 @@ import { createCanonicalExecutionOrchestratorPort } from "@/lib/enterprise/canon
 import { createOCRRuntimePort } from "@/lib/enterprise/ocr-runtime";
 import type { JsonObject } from "@/lib/database.types";
 import type { RawOcrResult } from "../types/raw-ocr-result";
+import { resolveCaptureEnterpriseRuntime } from "../../enterprise/resolve-enterprise-runtime";
 
 export type ProcessCaptureOcrViaEnterpriseInput = {
   sessionId: string;
@@ -129,7 +130,9 @@ export async function processCaptureOcrViaEnterprise(
 ): Promise<{ canonical: CanonicalOCRResult; raw: RawOcrResult }> {
   const canonical = input.fetchFn
     ? await processViaInjectedAdapter(input)
-    : await getEnterpriseRuntime().getCaptureEngineRuntimePort().processOcr(toProcessInput(input));
+    : await resolveCaptureEnterpriseRuntime()
+        .getCaptureEngineRuntimePort()
+        .processOcr(toProcessInput(input));
 
   if (!canonical.ok) {
     throw new DomainError(
@@ -150,7 +153,7 @@ export async function healthCaptureOcrViaEnterprise(): Promise<{
   latencyMs?: number;
   message?: string;
 }> {
-  const health = await getEnterpriseRuntime().getOCRProviderPort().health();
+  const health = await resolveCaptureEnterpriseRuntime().getOCRProviderPort().health();
   return {
     available: health.ok,
     latencyMs: health.latencyMs,

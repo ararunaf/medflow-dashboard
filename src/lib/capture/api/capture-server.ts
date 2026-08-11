@@ -25,6 +25,7 @@ import {
   uploadCaptureDocument,
 } from "../infrastructure/capture-session-store";
 import { registerCaptureDocumentIntakeBridge } from "../enterprise/register-capture-intake";
+import { runCaptureOperationalPipelineBound } from "../enterprise/capture-runtime-binding";
 import { getCaptureOcrResult, runCaptureOcr } from "../ocr/services/ocr-service";
 import { getOcrResultSignedUrl } from "../ocr/infrastructure/ocr-storage";
 import {
@@ -107,44 +108,17 @@ export const uploadCaptureFileFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // ARCH-01 — Enterprise Runtime bridge (Document Intake via Ports).
+      // ARCH-01 / EPC-24A — Enterprise Runtime bridge (Document Intake via Ports).
       // Side-effect estrutural; nunca altera o resultado funcional da Captura.
+      // Dual-path AER-GA03-A1 permanece (eliminação iniciada; cutover não executado).
       void registerCaptureDocumentIntakeBridge({
         session: uploadResult.session,
         document: uploadResult.document,
         tenantId: ctx.tenantId,
       });
 
-      try {
-        await runCaptureOcr(ctx, data.sessionId);
-        try {
-          await runCaptureParser(ctx, data.sessionId);
-          try {
-            await runCaptureAudit(ctx, data.sessionId);
-            try {
-              await runCaptureContractIntelligence(ctx, data.sessionId);
-              try {
-                await runCaptureGlosaRisk(ctx, data.sessionId);
-                try {
-                  await runCaptureCorrectionAssistant(ctx, data.sessionId);
-                } catch {
-                  /* falha correção assistida registrada em metadata — avaliação de risco permanece válida */
-                }
-              } catch {
-                /* falha avaliação de risco registrada em metadata — inteligência contratual permanece válida */
-              }
-            } catch {
-              /* falha inteligência contratual registrada em metadata — auditoria permanece válida */
-            }
-          } catch {
-            /* falha auditoria registrada em metadata — parser permanece válido */
-          }
-        } catch {
-          /* falha parser registrada em metadata — OCR permanece válido */
-        }
-      } catch {
-        /* falha OCR registrada em metadata — upload permanece válido */
-      }
+      // EPC-24A — pipeline operacional sob binding getEnterpriseRuntime() (sem cutover).
+      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "full");
 
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };
@@ -224,23 +198,15 @@ export const retryCaptureUploadFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // ARCH-01 — Enterprise Runtime bridge (Document Intake via Ports).
+      // ARCH-01 / EPC-24A — Enterprise Runtime bridge (Document Intake via Ports).
       void registerCaptureDocumentIntakeBridge({
         session: uploadResult.session,
         document: uploadResult.document,
         tenantId: ctx.tenantId,
       });
 
-      try {
-        await runCaptureOcr(ctx, data.sessionId);
-        try {
-          await runCaptureParser(ctx, data.sessionId);
-        } catch {
-          /* falha parser registrada em metadata */
-        }
-      } catch {
-        /* falha OCR registrada em metadata */
-      }
+      // EPC-24A — retry sob o mesmo binding (OCR→parser legado; sem cutover).
+      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "retry-upload");
 
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };

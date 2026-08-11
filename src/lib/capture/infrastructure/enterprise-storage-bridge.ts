@@ -1,12 +1,16 @@
 /**
- * Bridge Captura → StorageProviderPort (STORAGE-01).
+ * Bridge Captura → StorageProviderPort (STORAGE-01 / EPC-24A).
  *
  * Único caminho autorizado de I/O de storage no domínio de captura.
  * PROIBIDO: ctx.client.storage.from(...) direto no produto.
  *
- * Fluxo:
- *   Captura → createBoundStorageProviderPort(client)
+ * Fluxo (EPC-24A):
+ *   Captura → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
+ *     → createBoundStorageProviderPort(client)  (request-scoped; AER-GA03-A3)
  *     → StorageProviderPort → Adapter → Supabase Storage Backend
+ *
+ * O Port unbound do Runtime NÃO substitui o bound client neste estágio —
+ * cutover de storage request-scoped fica para sprints posteriores.
  */
 import {
   DEFAULT_STORAGE_PROVIDER_BUCKET,
@@ -16,8 +20,11 @@ import {
 } from "@/lib/enterprise/storage-provider";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { CLINICAL_DOCUMENTS_BUCKET } from "./storage-paths";
+import { resolveCaptureEnterpriseRuntime } from "../enterprise/resolve-enterprise-runtime";
 
 export function resolveCaptureStorageProvider(ctx: ServiceCtx): StorageProviderPort {
+  // Composition root oficial — prepara cutover sem alterar I/O bound.
+  void resolveCaptureEnterpriseRuntime();
   return createBoundStorageProviderPort(ctx.client as unknown as SupabaseStorageClientLike, {
     provider: "supabase",
   });
