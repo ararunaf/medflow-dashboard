@@ -18,6 +18,7 @@
  * TISS-04A: Job BATCH_CREATED → Worker → Protocol → Job PROTOCOL_SENT (sem Persistence).
  * TISS-04B: Job PROTOCOL_SENT → Worker → Persistence → Job PERSISTED (sem Audit).
  * TISS-05A: Job PERSISTED → Worker → Audit → Job AUDITED (sem Completed).
+ * TISS-05B: Job AUDITED → Worker → Completed → Job COMPLETED (estado terminal, sem reenfileiramento).
  */
 export type {
   DeadLetterGetByIdInput,
@@ -183,3 +184,14 @@ export {
   type TissAuditJobLogicalStatus,
   type TissAuditProcessMessageDeps,
 } from "./process-tiss-audit-job";
+
+export {
+  TISS_JOB_STATUS_COMPLETED,
+  processTissCompletedJob,
+  createTissCompletedProcessMessage,
+  type ProcessTissCompletedJobInput,
+  type ProcessTissCompletedJobResult,
+  type TissCompletedTerminalJob,
+  type TissCompletedJobLogicalStatus,
+  type TissCompletedProcessMessageDeps,
+} from "./process-tiss-completed-job";

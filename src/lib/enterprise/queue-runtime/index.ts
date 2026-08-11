@@ -24,6 +24,7 @@
  * TISS-RUNTIME-04A: capability Protocol — Job BATCH_CREATED → Worker → Protocol → Job PROTOCOL_SENT (sem Persistence).
  * TISS-RUNTIME-04B: capability Persistence — Job PROTOCOL_SENT → Worker → Persistence → Job PERSISTED (sem Audit).
  * TISS-RUNTIME-05A: capability Audit — Job PERSISTED → Worker → Audit → Job AUDITED (sem Completed).
+ * TISS-RUNTIME-05B: capability Completed — Job AUDITED → Worker → Completed → Job COMPLETED (terminal).
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
@@ -256,4 +257,12 @@ export {
   type TissAuditCompletedJob,
   type TissAuditJobLogicalStatus,
   type TissAuditProcessMessageDeps,
+  TISS_JOB_STATUS_COMPLETED,
+  processTissCompletedJob,
+  createTissCompletedProcessMessage,
+  type ProcessTissCompletedJobInput,
+  type ProcessTissCompletedJobResult,
+  type TissCompletedTerminalJob,
+  type TissCompletedJobLogicalStatus,
+  type TissCompletedProcessMessageDeps,
 } from "./operational";

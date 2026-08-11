@@ -117,3 +117,11 @@ export {
   type ProcessTissPersistedAuditedResult,
   type TissAuditCompletedJob,
 } from "./process-tiss-persisted-audited";
+
+export {
+  processTissAuditedCompleted,
+  TISS_JOB_STATUS_COMPLETED,
+  type ProcessTissAuditedCompletedInput,
+  type ProcessTissAuditedCompletedResult,
+  type TissCompletedTerminalJob,
+} from "./process-tiss-audited-completed";

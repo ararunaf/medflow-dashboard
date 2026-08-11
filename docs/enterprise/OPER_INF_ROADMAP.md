@@ -28,8 +28,9 @@
 | **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ✅ Concluída |
 | **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ✅ Concluída |
+| **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ✅ Concluída |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ✓ TISS-RUNTIME-03B · ✓ TISS-RUNTIME-04A · ✓ TISS-RUNTIME-04B · ✓ TISS-RUNTIME-05A · ⏳ TISS-RUNTIME-05B
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ✓ TISS-RUNTIME-02B · ✓ TISS-RUNTIME-03A · ✓ TISS-RUNTIME-03B · ✓ TISS-RUNTIME-04A · ✓ TISS-RUNTIME-04B · ✓ TISS-RUNTIME-05A · ✓ TISS-RUNTIME-05B
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -199,14 +200,14 @@ getEnterpriseRuntime()
 - Persistência / Auditoria **não** executados (`persistenceExecuted: false`, `auditExecuted: false`); demais capabilities fora de escopo
 - Sem novo Port / Gateway / Runtime / Pipeline
 
-## Escopo concluído (TISS-RUNTIME-05A)
+## Escopo concluído (TISS-RUNTIME-05B)
 
-- Capability Audit operacional: Job **PERSISTED** → `WorkerRuntimePort` → `AuditRuntimePort` (openJob / getResult) → Job **AUDITED** → reenqueue via `QueueRuntimePort`
+- Capability Completed operacional: Job **AUDITED** → `WorkerRuntimePort` → encerramento → Job **COMPLETED** (estado terminal) → ACK definitivo via `QueueRuntimePort`
 - Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
-- Entrypoint `processTissPersistedAudited` via `getEnterpriseRuntime()`
-- Completed **não** executado (`completedExecuted: false`); demais capabilities fora de escopo
+- Entrypoint `processTissAuditedCompleted` via `getEnterpriseRuntime()`
+- Não reenfileira; não invoca nenhum outro Port; não executa processamento adicional
 - Sem novo Port / Gateway / Runtime / Pipeline
 
 ## Próxima Sprint
 
-**TISS-RUNTIME-05B** — ativar Completed operacional no Worker (consumo de `AUDITED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+Convergência final do pipeline funcional TISS: encerramento de todos os estágios, conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

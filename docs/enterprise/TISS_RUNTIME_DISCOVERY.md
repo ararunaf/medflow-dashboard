@@ -324,6 +324,7 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | Protocolo operacional | ✅ Job BATCH_CREATED → Worker → Protocol → PROTOCOL_SENT | **TISS-RUNTIME-04A** |
 | Persistência operacional unificada | ✅ Job PROTOCOL_SENT → Worker → Persistence → PERSISTED | **TISS-RUNTIME-04B** |
 | Auditoria operacional TISS na fila | ✅ Job PERSISTED → Worker → Audit → AUDITED | **TISS-RUNTIME-05A** |
+| Encerramento e conclusão | ✅ Job AUDITED → Worker → Completed → COMPLETED (estado terminal) | **TISS-RUNTIME-05B** |
 
 > **RULE-20 / RULE-26:** cada Sprint ativa **exatamente uma** capability. A sequência abaixo é a ordem oficial; detalhes de escopo finito em cada Sprint.
 
@@ -360,8 +361,8 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | 8 | **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ✅ Concluída |
 | 9 | **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
 | 10 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ✅ Concluída |
-| 11 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏳ Próxima |
-| 12 | TISS-RUNTIME-02+ | Encerramento / convergência | ⏳ Planejada |
+| 11 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ✅ Concluída |
+| 12 | TISS-RUNTIME-02+ | Encerramento / convergência | ✅ TISS pipeline funcional concluído |
 
 Roadmap vivo: [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md).
 

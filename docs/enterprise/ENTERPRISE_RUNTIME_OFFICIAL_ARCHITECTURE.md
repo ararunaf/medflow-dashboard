@@ -155,6 +155,7 @@ getEnterpriseRuntime()
 | **TISS-RUNTIME-04A** | ✓ Protocol operacional no Worker — Job BATCH_CREATED → Protocol → PROTOCOL_SENT via `ProtocolRuntimePort` |
 | **TISS-RUNTIME-04B** | ✓ Persistence operacional no Worker — Job PROTOCOL_SENT → Persistence → PERSISTED via `PersistentQueueRuntimePort` |
 | **TISS-RUNTIME-05A** | ✓ Audit operacional no Worker — Job PERSISTED → Audit → AUDITED via `AuditRuntimePort` |
+| **TISS-RUNTIME-05B** | ✓ Completed operacional no Worker — Job AUDITED → Completed → COMPLETED (estado terminal, sem reenfileiramento) |
 
 ---
 
