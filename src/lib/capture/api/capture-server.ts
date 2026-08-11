@@ -24,14 +24,13 @@ import {
   softDeleteCaptureSession,
   uploadCaptureDocument,
 } from "../infrastructure/capture-session-store";
-import { registerCaptureDocumentIntakeBridge } from "../enterprise/register-capture-intake";
 import { runCaptureOperationalPipelineBound } from "../enterprise/capture-runtime-binding";
+import {
+  getCaptureStructuredGuideViaEnterprise,
+  runCaptureParserViaEnterprise,
+} from "../enterprise/process-parser-via-enterprise";
 import { getCaptureOcrResult, runCaptureOcr } from "../ocr/services/ocr-service";
 import { getOcrResultSignedUrl } from "../ocr/infrastructure/ocr-storage";
-import {
-  getCaptureStructuredGuide,
-  runCaptureParser,
-} from "../parser/services/tiss-parser-service";
 import { getStructuredGuideSignedUrl } from "../parser/infrastructure/parser-storage";
 import { getCaptureAuditReport, runCaptureAudit } from "../audit/services/preventive-audit-service";
 import {
@@ -108,17 +107,16 @@ export const uploadCaptureFileFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // ARCH-01 / EPC-24A — Enterprise Runtime bridge (Document Intake via Ports).
-      // Side-effect estrutural; nunca altera o resultado funcional da Captura.
-      // Dual-path AER-GA03-A1 permanece (eliminação iniciada; cutover não executado).
-      void registerCaptureDocumentIntakeBridge({
-        session: uploadResult.session,
-        document: uploadResult.document,
-        tenantId: ctx.tenantId,
+      // EPC-24A/B — pipeline operacional sob binding getEnterpriseRuntime() (sem cutover).
+      // Intake canônico awaited no bound pipeline (EPC-24B); Parser via Extraction Runtime.
+      // Dual-path AER-GA03-A1 reduzido; cutover não executado.
+      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "full", {
+        intake: {
+          session: uploadResult.session,
+          document: uploadResult.document,
+          tenantId: ctx.tenantId,
+        },
       });
-
-      // EPC-24A — pipeline operacional sob binding getEnterpriseRuntime() (sem cutover).
-      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "full");
 
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };
@@ -198,15 +196,14 @@ export const retryCaptureUploadFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // ARCH-01 / EPC-24A — Enterprise Runtime bridge (Document Intake via Ports).
-      void registerCaptureDocumentIntakeBridge({
-        session: uploadResult.session,
-        document: uploadResult.document,
-        tenantId: ctx.tenantId,
+      // EPC-24A/B — retry sob o mesmo binding (Intake + Parser via Runtime; sem cutover).
+      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "retry-upload", {
+        intake: {
+          session: uploadResult.session,
+          document: uploadResult.document,
+          tenantId: ctx.tenantId,
+        },
       });
-
-      // EPC-24A — retry sob o mesmo binding (OCR→parser legado; sem cutover).
-      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "retry-upload");
 
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };
@@ -303,7 +300,7 @@ export const runCaptureParserFn = createServerFn({ method: "POST" })
     ),
   }))
   .handler(async ({ data }) => {
-    return runMutation(async (ctx) => runCaptureParser(ctx, data.sessionId));
+    return runMutation(async (ctx) => runCaptureParserViaEnterprise(ctx, data.sessionId));
   });
 
 export const getCaptureStructuredGuideFn = createServerFn({ method: "GET" })
@@ -317,7 +314,7 @@ export const getCaptureStructuredGuideFn = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }) => {
     return runQuery(async (ctx) => {
-      const guide = await getCaptureStructuredGuide(ctx, data.sessionId);
+      const guide = await getCaptureStructuredGuideViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.parser as JsonObject | undefined) ?? null;
       return { guide, summary, metadata: status.metadata };

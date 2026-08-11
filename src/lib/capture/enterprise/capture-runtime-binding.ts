@@ -1,29 +1,38 @@
 /**
- * EPC-24A — Enterprise Runtime Convergence Binding
+ * EPC-24A / EPC-24B — Enterprise Runtime Convergence Binding
  *
  * Liga o pipeline operacional de Captura ao Enterprise Runtime sem cutover.
  *
- * PRESERVAR: comportamento funcional idêntico à cadeia imperativa pré-EPC-24A.
- * MIGRAR (futuro EPC-24B+): estágios de negócio → Ports Enterprise.
+ * EPC-24B:
+ *   - Intake canônico awaited via Runtime (não fire-and-forget opaco)
+ *   - Parser/Extraction resolvido exclusivamente via DocumentExtractionRuntime
+ *     (+ fallback legado atrás do gateway enterprise)
+ *
+ * PRESERVAR: comportamento funcional idêntico (OCR→…→correção).
+ * MIGRAR (futuro EPC-24C+): Audit/Contract/Risk/Correction → Ports.
  * REMOVER (futuro EPC-24E): dual-path AER-GA03-A1 após paridade certificada.
  *
  * Fluxo oficial deste binding:
  *   Capture (upload/retry)
  *     → resolveCaptureEnterpriseRuntime()  [= getEnterpriseRuntime()]
+ *     → Document Intake (EPC-24B, awaited quando input fornecido)
  *     → CanonicalExecutionOrchestratorPort (coordenação estrutural)
- *     → pipeline operacional legado (OCR→…→correção) — sem alteração de regra
+ *     → OCR (inalterado) → Parser via Extraction Runtime → Audit → …
  *
- * Dual-path AER-GA03-A1 permanece parcialmente (intake side-effect paralelo).
- * Esta sprint inicia a eliminação sem executar o cutover.
+ * Dual-path AER-GA03-A1 permanece parcialmente (reduzido; cutover = EPC-24E).
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { runCaptureOcr } from "../ocr/services/ocr-service";
-import { runCaptureParser } from "../parser/services/tiss-parser-service";
 import { runCaptureAudit } from "../audit/services/preventive-audit-service";
 import { runCaptureContractIntelligence } from "../contract/services/contract-intelligence-service";
 import { runCaptureGlosaRisk } from "../risk/services/glosa-risk-service";
 import { runCaptureCorrectionAssistant } from "../correction";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
+import {
+  registerCaptureDocumentIntakeBridge,
+  type CaptureEnterpriseBridgeInput,
+} from "./register-capture-intake";
+import { runCaptureParserViaEnterprise } from "./process-parser-via-enterprise";
 
 export type CaptureOperationalPipelineMode = "full" | "retry-upload";
 
@@ -32,24 +41,36 @@ export type CaptureRuntimeBindingProbe = {
   entry: "getEnterpriseRuntime";
   orchestratorOk: boolean;
   captureEngineOk: boolean;
+  documentIntakeRuntimeOk: boolean;
+  documentExtractionRuntimeOk: boolean;
+};
+
+export type RunCaptureOperationalPipelineBoundOptions = {
+  /** Quando presente, Intake Enterprise é awaited no início do bound pipeline. */
+  intake?: CaptureEnterpriseBridgeInput;
 };
 
 /**
  * Probe estrutural do binding: prova que Capture entra pelo composition root
- * e alcança Orchestrator + Capture Engine Runtime. Best-effort; nunca lança.
+ * e alcança Orchestrator + Capture Engine + Intake + Extraction. Best-effort.
  */
 export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRuntimeBindingProbe | null> {
   try {
     const runtime = resolveCaptureEnterpriseRuntime();
-    const [orchestratorHealth, captureEngineHealth] = await Promise.all([
-      runtime.getOrchestratorPort().health(),
-      runtime.getCaptureEngineRuntimePort().health(),
-    ]);
+    const [orchestratorHealth, captureEngineHealth, intakeHealth, extractionHealth] =
+      await Promise.all([
+        runtime.getOrchestratorPort().health(),
+        runtime.getCaptureEngineRuntimePort().health(),
+        runtime.getDocumentIntakeRuntimePort().health(),
+        runtime.getDocumentExtractionRuntimePort().health(),
+      ]);
     return {
       runtimeId: runtime.runtimeId,
       entry: "getEnterpriseRuntime",
       orchestratorOk: orchestratorHealth.ok,
       captureEngineOk: captureEngineHealth.ok,
+      documentIntakeRuntimeOk: intakeHealth.ok,
+      documentExtractionRuntimeOk: extractionHealth.ok,
     };
   } catch {
     return null;
@@ -59,27 +80,33 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
 /**
  * Executa a cadeia operacional de Captura sob o binding Enterprise Runtime.
  *
- * Comportamento observável idêntico à orquestração imperativa anterior em
- * `uploadCaptureFileFn` / `retryCaptureUploadFn` (mesmos estágios, mesmos
- * catches aninhados, mesmas mensagens de falha engolida).
+ * Comportamento observável idêntico à orquestração imperativa anterior
+ * (mesmos estágios, mesmos catches aninhados, mesmas mensagens de falha engolida).
  *
- * Não substitui engines. Não altera Ports de negócio. Não fecha AER-GA03-A1.
+ * EPC-24B: Intake awaited (quando `options.intake`); Parser via Extraction Runtime.
+ * Não fecha AER-GA03-A1. Não altera OCR / Audit / Contract / Risk / Correction.
  */
 export async function runCaptureOperationalPipelineBound(
   ctx: ServiceCtx,
   sessionId: string,
   mode: CaptureOperationalPipelineMode = "full",
+  options?: RunCaptureOperationalPipelineBoundOptions,
 ): Promise<void> {
   // Composition root oficial — Capture entra exclusivamente pelo Runtime.
   void resolveCaptureEnterpriseRuntime();
-  // Coordenação estrutural (Orchestrator / Capture Engine) — sem dirigir engines.
+  // Coordenação estrutural (Orchestrator / Capture Engine / Intake / Extraction).
   void probeCaptureEnterpriseRuntimeBinding();
+
+  // EPC-24B — Intake canônico via Runtime (awaited; best-effort; sem alterar upload).
+  if (options?.intake) {
+    await registerCaptureDocumentIntakeBridge(options.intake);
+  }
 
   if (mode === "retry-upload") {
     try {
       await runCaptureOcr(ctx, sessionId);
       try {
-        await runCaptureParser(ctx, sessionId);
+        await runCaptureParserViaEnterprise(ctx, sessionId);
       } catch {
         /* falha parser registrada em metadata */
       }
@@ -92,7 +119,7 @@ export async function runCaptureOperationalPipelineBound(
   try {
     await runCaptureOcr(ctx, sessionId);
     try {
-      await runCaptureParser(ctx, sessionId);
+      await runCaptureParserViaEnterprise(ctx, sessionId);
       try {
         await runCaptureAudit(ctx, sessionId);
         try {

@@ -28,7 +28,7 @@
 ```text
 ARC-24     Descoberta + regra + plano          ← FEITO (docs only)
 EPC-24A    Orquestração canônica no caminho Capture  ← FEITO (binding; sem cutover)
-EPC-24B    Migrar OCR+Intake+Extraction (parse)
+EPC-24B    Migrar Intake+Extraction (parse)    ← FEITO (sem cutover; OCR intocado)
 EPC-24C    Migrar Audit/Contract/Risk/Correction
 EPC-24D    Migrar Review→TISS/XML/Bloco C
 EPC-24E    Cutover único + remoções + certificação
@@ -60,19 +60,23 @@ Cada sprint exige: build + `tsc --noEmit` + lint + smoke = PASS, paridade funcio
 
 ---
 
-### EPC-24B — Intake + OCR + Extraction Convergence
+### EPC-24B — Intake + Extraction Convergence
 
-**Objetivo:** Unificar intake e parse/extração sob Foundations; OCR permanece no Port (já convergido).
+**Status:** ✅ Concluída (2026-08-10) — Intake awaited + Parser via Extraction Runtime; **sem cutover**; OCR/Audit/Contract/Risk/Correction/XML intocados.
+
+**Objetivo:** Unificar intake e parse/extração sob Foundations; OCR permanece no Port (já convergido — não alterado nesta sprint).
 
 | Item | Detalhe |
 |------|---------|
-| PRESERVAR | OCR Provider/Runtime Azure; Document Intake Port; Classification |
-| MIGRAR | `capture/parser` → Document Extraction Runtime (+ Classification) |
-| REMOVER | Caminhos de parse que bypassam Extraction após paridade |
-| Critério | Mesmos campos/guias extraídos; intake deixa de ser “só side-effect” no Happy Path UI |
-| Fecha parcialmente | AER-GA03-A1 (intake) |
+| PRESERVAR | OCR Provider/Runtime Azure; Document Intake Port; Classification; Foundations 4–7 |
+| MIGRAR | Intake → Runtime (awaited no bound pipeline); `capture/parser` execução → Document Extraction Runtime (+ fallback legado) |
+| REMOVER | Nada ainda (legado permanece como fallback; cutover = EPC-24E) |
+| Critério | Mesmos campos/guias extraídos; intake deixa de ser fire-and-forget opaco no Happy Path UI |
+| Fecha parcialmente | AER-GA03-A1 (intake + parser sob Runtime; dual-path **reduzido**, não eliminado) |
 
-**Entregáveis:** Extraction Runtime ativado; bridge intake deixa de ser fire-and-forget opaco; paridade parser.
+**Entregáveis:** `process-parser-via-enterprise.ts`; intake awaited em binding/server; testes `epc-24b-*`; docs `EPC24B_*`.
+
+**Confirmação dual-path:** AER-GA03-A1 **continua reduzido, porém ainda não eliminado** (fallback parser legado + demais engines operacionais).
 
 ---
 

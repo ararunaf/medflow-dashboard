@@ -106,8 +106,9 @@ async function handlePostCapture(ctx: ServiceCtx, request: Request): Promise<Res
       fileBytes: bytes,
     });
 
-    // ARCH-01 — Enterprise Runtime bridge (Document Intake via Ports).
-    void registerCaptureDocumentIntakeBridge({
+    // ARCH-01 / EPC-24B — Enterprise Runtime Intake (awaited; best-effort; sem pipeline OCR).
+    // Dual-path AER-GA03-A1 reduzido; cutover não executado.
+    await registerCaptureDocumentIntakeBridge({
       session: result.session,
       document: result.document,
       tenantId: ctx.tenantId,
