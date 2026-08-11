@@ -1,7 +1,9 @@
 /**
- * WorkerRuntimeCapabilities — capacidades declarativas (INF-06).
+ * WorkerRuntimeCapabilities — capacidades declarativas (INF-06 / OPER-INF-W).
  *
- * Apenas declaração estrutural. Sem Workers reais. Sem Scheduler. Sem Thread Pool.
+ * Flags operacionais (realWorkers / queueConsumed / tasksExecuted / persistenceImplemented)
+ * ativadas pelo adapter default que consome QueueRuntimePort.
+ * Sem Scheduler. Sem Thread Pool. Sem paralelismo. Sem Dead Letter / Retry Engine.
  */
 
 import type { CanonicalWorkerCapabilities } from "./canonical";
@@ -28,20 +30,20 @@ export type WorkerRuntimeCapabilities = {
   usesObservabilityRuntimePort?: boolean;
   usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
-  realWorkers?: false;
-  tasksExecuted?: false;
+  realWorkers?: boolean;
+  tasksExecuted?: boolean;
   parallelProcessing?: false;
   schedulerImplemented?: false;
   threadPoolImplemented?: false;
-  persistenceImplemented?: false;
-  queueConsumed?: false;
+  persistenceImplemented?: boolean;
+  queueConsumed?: boolean;
   implementsRabbitMq?: false;
   implementsKafka?: false;
   implementsAzureServiceBus?: false;
   implementsAzureQueue?: false;
   implementsRedis?: false;
   implementsBullMq?: false;
-  implementsRealWorkers?: false;
+  implementsRealWorkers?: boolean;
   implementsScheduler?: false;
   implementsThreadPool?: false;
   implementsCron?: false;
@@ -65,6 +67,7 @@ export function defineWorkerRuntimeCapabilities(
   return { ...capabilities };
 }
 
+/** Capacidades operacionais do adapter default/enterprise (OPER-INF-W). */
 export const DEFAULT_WORKER_RUNTIME_CAPABILITIES: WorkerRuntimeCapabilities = {
   supportsRegister: true,
   supportsUnregister: true,
@@ -84,20 +87,20 @@ export const DEFAULT_WORKER_RUNTIME_CAPABILITIES: WorkerRuntimeCapabilities = {
   usesObservabilityRuntimePort: true,
   usesScalabilityRuntimePort: true,
   runtimeReady: true,
-  realWorkers: false,
-  tasksExecuted: false,
+  realWorkers: true,
+  tasksExecuted: true,
   parallelProcessing: false,
   schedulerImplemented: false,
   threadPoolImplemented: false,
-  persistenceImplemented: false,
-  queueConsumed: false,
+  persistenceImplemented: true,
+  queueConsumed: true,
   implementsRabbitMq: false,
   implementsKafka: false,
   implementsAzureServiceBus: false,
   implementsAzureQueue: false,
   implementsRedis: false,
   implementsBullMq: false,
-  implementsRealWorkers: false,
+  implementsRealWorkers: true,
   implementsScheduler: false,
   implementsThreadPool: false,
   implementsCron: false,
@@ -111,8 +114,14 @@ export const DEFAULT_WORKER_RUNTIME_CAPABILITIES: WorkerRuntimeCapabilities = {
   knowsTissPattern: false,
 };
 
+/** Capacidades estruturais do mock/test (sem consumo operacional de fila). */
 export const DEFAULT_MOCK_WORKER_RUNTIME_CAPABILITIES: WorkerRuntimeCapabilities = {
   ...DEFAULT_WORKER_RUNTIME_CAPABILITIES,
+  realWorkers: false,
+  tasksExecuted: false,
+  persistenceImplemented: false,
+  queueConsumed: false,
+  implementsRealWorkers: false,
 };
 
 export function toCanonicalWorkerCapabilities(
@@ -129,20 +138,20 @@ export function toCanonicalWorkerCapabilities(
     supportsHealth: capabilities.supportsHealth === true,
     supportsCanonicalWorker: capabilities.supportsCanonicalWorker === true,
     runtimeReady: true,
-    realWorkers: false,
-    tasksExecuted: false,
+    realWorkers: capabilities.realWorkers === true,
+    tasksExecuted: capabilities.tasksExecuted === true,
     parallelProcessing: false,
     schedulerImplemented: false,
     threadPoolImplemented: false,
-    persistenceImplemented: false,
-    queueConsumed: false,
+    persistenceImplemented: capabilities.persistenceImplemented === true,
+    queueConsumed: capabilities.queueConsumed === true,
     implementsRabbitMq: false,
     implementsKafka: false,
     implementsAzureServiceBus: false,
     implementsAzureQueue: false,
     implementsRedis: false,
     implementsBullMq: false,
-    implementsRealWorkers: false,
+    implementsRealWorkers: capabilities.implementsRealWorkers === true,
     implementsScheduler: false,
     implementsThreadPool: false,
     implementsCron: false,

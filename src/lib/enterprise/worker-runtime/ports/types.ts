@@ -1,11 +1,12 @@
 /**
- * Tipos vendor-agnósticos do Enterprise Worker Runtime — INF-06.
+ * Tipos vendor-agnósticos do Enterprise Worker Runtime — INF-06 / OPER-INF-W.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → WorkerRuntimePort
- *     → Adapter → Worker Runtime Store → Canonical Worker Result
+ *     → Adapter → QueueRuntimePort → Backend Persistente
  *
- * Sem Workers reais. Sem Thread Pool. Sem Scheduler. Sem backends de fila.
+ * OPER-INF-W: consumo operacional via QueueRuntimePort (sem novos Ports).
+ * Sem Thread Pool. Sem Scheduler. Sem paralelismo. Sem Dead Letter / Retry Engine.
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
@@ -92,20 +93,20 @@ export type WorkerRuntimePortCapabilities = {
   /** INF-10 — dependência Scalability Runtime preparada (sem consumo). */
   usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
   schedulerImplemented: false;
   threadPoolImplemented: false;
-  persistenceImplemented: false;
-  queueConsumed: false;
+  persistenceImplemented: boolean;
+  queueConsumed: boolean;
   implementsRabbitMq: false;
   implementsKafka: false;
   implementsAzureServiceBus: false;
   implementsAzureQueue: false;
   implementsRedis: false;
   implementsBullMq: false;
-  implementsRealWorkers: false;
+  implementsRealWorkers: boolean;
   implementsScheduler: false;
   implementsThreadPool: false;
   implementsCron: false;
@@ -221,7 +222,8 @@ export type WorkerStatsResult = WorkerRuntimeOperationEnvelope & {
 
 /**
  * Dependências Enterprise injetadas no adapter default/enterprise.
- * Queue Runtime é dependência obrigatória preparada — NÃO consumida.
+ * OPER-INF-W: QueueRuntimePort é consumido exclusivamente pelo Worker operacional
+ * (dequeue/claim, ack, nack) — sem acesso direto a banco / backends de fila.
  * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
  * Persistent Queue Runtime é dependência preparada (opcional no Port shape) — NÃO persistida/consumida.
  * Observability Runtime é dependência preparada (opcional no Port shape) — NÃO observada/emitida.

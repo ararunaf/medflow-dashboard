@@ -1,19 +1,16 @@
 /**
- * Enterprise Worker Runtime — Ports & Adapters (INF-06).
+ * Enterprise Worker Runtime — Ports & Adapters (INF-06 / OPER-INF-W).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → WorkerRuntimePort
  *     → DefaultWorkerRuntimeAdapter / EnterpriseWorkerRuntimeAdapter / MockWorkerRuntimeAdapter
- *     → InMemoryWorkerRuntimeStore
- *     → Canonical Worker Result
+ *     → QueueRuntimePort → Backend Persistente (OPER-INF-Q)
  *
- * INF-06: infraestrutura canônica de gerenciamento estrutural de Workers futuros.
- * Sem Workers reais. Sem Thread Pool. Sem Scheduler. Sem Cron.
- * Sem processamento paralelo. Sem RabbitMQ/Kafka/Azure/Redis/BullMQ.
- * Sem Retry Engine. Sem Dead Letter. Sem persistência real.
+ * OPER-INF-W: implementação operacional reutilizando exclusivamente QueueRuntimePort.
+ * Sem Thread Pool. Sem Scheduler. Sem Cron. Sem paralelismo.
+ * Sem RabbitMQ/Kafka/Azure/Redis/BullMQ. Sem Retry Engine. Sem Dead Letter.
  * Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture/IA.
- * Dependência Queue Runtime preparada — sem consumo/execução de filas.
- * Toda comunicação exclusivamente via WorkerRuntimePort.
+ * Toda comunicação exclusiva via WorkerRuntimePort (sem novos Ports/Gateways).
  */
 export type {
   AllocateWorkerInput,
@@ -72,6 +69,7 @@ export {
 } from "./ports";
 
 export {
+  DEFAULT_WORKER_QUEUE_NAME,
   DEFAULT_WORKER_RUNTIME_ADAPTER_ID,
   DEFAULT_WORKER_RUNTIME_VERSION,
   DEFAULT_MOCK_WORKER_RUNTIME_VERSION,
@@ -82,6 +80,15 @@ export {
   type DefaultWorkerRuntimeAdapterOptions,
   type MockWorkerRuntimeAdapterOptions,
 } from "./adapters";
+
+export {
+  DEFAULT_WORKER_POLL_INTERVAL_MS,
+  WorkerQueueConsumer,
+  type WorkerQueueConsumerOptions,
+  type WorkerQueueProcessOutcome,
+  type WorkerQueueProcessedEvent,
+  type WorkerQueueSessionStartInput,
+} from "./operational";
 
 export {
   WorkerRuntimeFactory,

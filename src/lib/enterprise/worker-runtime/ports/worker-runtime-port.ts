@@ -1,14 +1,14 @@
 /**
- * WorkerRuntimePort — contrato único do Enterprise Worker Runtime (INF-06).
+ * WorkerRuntimePort — contrato único do Enterprise Worker Runtime (INF-06 / OPER-INF-W).
  *
  * Application / Enterprise Runtime / Queue Runtime / TISS Runtime dependem
- * exclusivamente desta interface para gerenciar Workers canônicos estruturais.
+ * exclusivamente desta interface para gerenciar Workers canônicos.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → WorkerRuntimePort
- *     → Adapter → Worker Runtime Store → Canonical Worker Result
+ *     → Adapter → QueueRuntimePort → Backend Persistente
  *
- * INF-06: infraestrutura canônica apenas — sem Workers reais / Scheduler / Thread Pool.
+ * OPER-INF-W: implementação operacional via QueueRuntimePort — interface pública inalterada.
  */
 import type {
   AllocateWorkerInput,
@@ -34,37 +34,37 @@ export interface WorkerRuntimePort {
   readonly providerId: WorkerRuntimeProviderId;
 
   /**
-   * Registra estruturalmente um Worker no store in-memory.
-   * NÃO cria threads. NÃO executa tarefas. NÃO agenda jobs.
+   * Registra um Worker no store.
+   * OPER-INF-W: não inicia poll — allocate ativa o consumo via QueueRuntimePort.
    */
   register(input: RegisterWorkerInput): Promise<RegisterWorkerResult>;
 
   /**
-   * Remove estruturalmente um Worker do store.
-   * NÃO interrompe processamento real (não há processamento).
+   * Remove um Worker do store.
+   * OPER-INF-W: encerra graceful shutdown do poll se ativo.
    */
   unregister(input: UnregisterWorkerInput): Promise<UnregisterWorkerResult>;
 
   /**
-   * Aloca estruturalmente um Worker (marca estado canônico).
-   * NÃO executa task. NÃO consome Queue. NÃO processa em paralelo.
+   * Aloca um Worker.
+   * OPER-INF-W: inicia polling controlado / claim / lock via QueueRuntimePort.
    */
   allocate(input: AllocateWorkerInput): Promise<AllocateWorkerResult>;
 
   /**
-   * Libera estruturalmente um Worker alocado.
-   * NÃO afeta backends reais / schedulers / thread pools.
+   * Libera um Worker alocado.
+   * OPER-INF-W: graceful shutdown do consumo de fila.
    */
   release(input: ReleaseWorkerInput): Promise<ReleaseWorkerResult>;
 
   /**
-   * Registra heartbeat estrutural (atualiza timestamp in-memory).
-   * NÃO implica liveness de processo real.
+   * Registra heartbeat do Worker.
+   * OPER-INF-W: renova lock local de processamento quando houver claim ativo.
    */
   heartbeat(input: HeartbeatWorkerInput): Promise<HeartbeatWorkerResult>;
 
   /**
-   * Estatísticas estruturais do store in-memory.
+   * Estatísticas do Worker Runtime (store + contadores operacionais).
    */
   stats(input?: WorkerStatsInput): Promise<WorkerStatsResult>;
 

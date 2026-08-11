@@ -70,7 +70,7 @@ Estas dívidas **não reabrem a Fase 2**; pertencem a tratamento futuro:
 | AER-STG-M1 / STORAGE-DEBT-01 | Deprecação/coexistência EPC-02 StoragePort |
 | Dual-path Capture (AER-GA03-A1) | Consolidação em fase de produto |
 | XML export legado (AER-XMLRT-B2) | Convergência XML produto → Runtime |
-| INF backends reais | Adapters reais pós-funcional |
+| INF backends reais | OPER-INF: Q ✅ / W ✅ / S ⏳ (ver `OPER_INF_ROADMAP.md`) |
 | Escape hatches `getXxxPort` | Restrição de superfície / disciplina de produto |
 | AER-GA02-B2/B4 | Governança de trunk / staging |
 | AER-GA03A-R6 | Rebuild/redeploy `.vercel` |

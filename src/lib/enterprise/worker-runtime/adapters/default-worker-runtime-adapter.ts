@@ -1,11 +1,14 @@
 /**
- * DefaultWorkerRuntimeAdapter — INF-06.
+ * DefaultWorkerRuntimeAdapter — INF-06 / OPER-INF-W.
  *
  * Adapter oficial do Enterprise Worker Runtime.
- * Responde exclusivamente de forma estrutural (sem Workers reais / sem threads).
- * Sem Scheduler. Sem Cron. Sem processamento paralelo. Sem consumo de Queue.
+ * OPER-INF-W: consumo operacional exclusivo via QueueRuntimePort
+ * (polling controlado, claim/dequeue, lock, ack, nack, heartbeat, graceful shutdown).
+ * Sem Scheduler. Sem Cron. Sem processamento paralelo. Sem Dead Letter / Retry Engine.
+ * Sem acesso direto a banco — persistência permanece no QueueRuntimePort (OPER-INF-Q).
  */
 import {
+  DEFAULT_MOCK_WORKER_RUNTIME_CAPABILITIES,
   DEFAULT_WORKER_RUNTIME_CAPABILITIES,
   toCanonicalWorkerCapabilities,
 } from "../ports/capabilities";
@@ -46,10 +49,16 @@ import type {
   WorkerStatsInput,
   WorkerStatsResult,
 } from "../ports/types";
+import {
+  DEFAULT_WORKER_POLL_INTERVAL_MS,
+  WorkerQueueConsumer,
+  type WorkerQueueProcessedEvent,
+} from "../operational";
 import { InMemoryWorkerRuntimeStore, type WorkerRuntimeStore } from "../store";
 
 export const DEFAULT_WORKER_RUNTIME_ADAPTER_ID = "default-enterprise-worker";
 export const DEFAULT_WORKER_RUNTIME_VERSION = "1.0.0";
+export const DEFAULT_WORKER_QUEUE_NAME = "enterprise-worker-queue";
 
 const DEFAULT_TIMEOUT_MS = 5_000;
 const DEFAULT_RETRY_COUNT = 1;
@@ -61,12 +70,18 @@ export type DefaultWorkerRuntimeAdapterOptions = {
   message?: string;
   store?: WorkerRuntimeStore;
   enterpriseDeps?: WorkerRuntimeEnterpriseDeps;
+  /**
+   * OPER-INF-W — quando true (default), ativa consumo via QueueRuntimePort.
+   * Mock força false.
+   */
+  operational?: boolean;
+  pollIntervalMs?: number;
   defaultTimeoutMs?: number;
   defaultRetryCount?: number;
   defaultRetryBackoffMs?: number;
   now?: () => string;
   sleep?: (ms: number) => Promise<void>;
-  /** Força falha transitória nas N primeiras tentativas (testes de retry). */
+  /** Força falha transitória nas N primeiras tentativas (testes de retry de envelope). */
   failAttempts?: number;
 };
 
@@ -87,12 +102,34 @@ function readPositiveInt(value: unknown, fallback: number): number {
   return fallback;
 }
 
+function readStringAttr(
+  input: WorkerRuntimeOperationalControls & {
+    metadata?: { customAttributes?: Readonly<Record<string, string | number | boolean | null>> };
+  },
+  key: string,
+): string | undefined {
+  const fromAttributes = input.attributes?.[key];
+  if (typeof fromAttributes === "string" && fromAttributes.trim() !== "") {
+    return fromAttributes.trim();
+  }
+  const fromMeta = input.metadata?.customAttributes?.[key];
+  if (typeof fromMeta === "string" && fromMeta.trim() !== "") {
+    return fromMeta.trim();
+  }
+  return undefined;
+}
+
+function readBoolAttr(input: WorkerRuntimeOperationalControls, key: string): boolean {
+  const value = input.attributes?.[key];
+  return value === true || value === "true";
+}
+
 async function defaultSleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
- * Adapter oficial INF-06 — Worker Runtime default / enterprise.
+ * Adapter oficial INF-06 / OPER-INF-W — Worker Runtime default / enterprise.
  */
 export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
   readonly providerId: Extract<WorkerRuntimeProviderId, "enterprise" | "default">;
@@ -102,28 +139,37 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
   private readonly metadata: WorkerRuntimeProviderMetadata;
   private readonly store: WorkerRuntimeStore;
   private readonly enterpriseDeps?: WorkerRuntimeEnterpriseDeps;
+  private readonly operational: boolean;
+  private readonly defaultPollIntervalMs: number;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
   private readonly defaultRetryBackoffMs: number;
   private readonly now: () => string;
   private readonly sleep: (ms: number) => Promise<void>;
   private failAttemptsRemaining: number;
+  private consumer: WorkerQueueConsumer | null = null;
+  private tasksExecutedCount = 0;
+  private queueConsumedCount = 0;
 
   constructor(options: DefaultWorkerRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
+    this.operational = options.operational ?? true;
     this.healthy = options.healthy ?? true;
     this.message =
       options.message ??
-      `${this.providerId} Worker Runtime ready (structural only — no real workers / no scheduler).`;
+      (this.operational
+        ? `${this.providerId} Worker Runtime ready (OPER-INF-W — QueueRuntimePort consumer active).`
+        : `${this.providerId} Worker Runtime ready (structural only — no queue consumption).`);
     this.metadata = {
       name: this.providerId === "default" ? "Default Worker Runtime" : "Enterprise Worker Runtime",
       version: DEFAULT_WORKER_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official INF-06 Enterprise Worker Runtime — canonical worker infrastructure only.",
+        "Official INF-06 Enterprise Worker Runtime — OPER-INF-W operational consumer via QueueRuntimePort.",
     };
     this.store = options.store ?? new InMemoryWorkerRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
+    this.defaultPollIntervalMs = options.pollIntervalMs ?? DEFAULT_WORKER_POLL_INTERVAL_MS;
     this.defaultTimeoutMs = options.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.defaultRetryCount = options.defaultRetryCount ?? DEFAULT_RETRY_COUNT;
     this.defaultRetryBackoffMs = options.defaultRetryBackoffMs ?? DEFAULT_RETRY_BACKOFF_MS;
@@ -136,6 +182,16 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         "DefaultWorkerRuntimeAdapter exige enterpriseDeps.getQueueRuntimePort (INF-06) quando deps são fornecidas.",
       );
     }
+
+    if (this.operational && this.enterpriseDeps) {
+      this.consumer = new WorkerQueueConsumer({
+        getQueueRuntimePort: () => this.enterpriseDeps!.getQueueRuntimePort(),
+        pollIntervalMs: this.defaultPollIntervalMs,
+        sleep: this.sleep,
+        now: this.now,
+        onProcessed: (event) => this.onQueueProcessed(event),
+      });
+    }
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -143,12 +199,20 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
     return this.store;
   }
 
+  /** Consumidor operacional ativo (OPER-INF-W) — null em modo estrutural. */
+  getConsumer(): WorkerQueueConsumer | null {
+    return this.consumer;
+  }
+
   capabilities(): WorkerRuntimePortCapabilities {
+    const engine = this.operational
+      ? DEFAULT_WORKER_RUNTIME_CAPABILITIES
+      : DEFAULT_MOCK_WORKER_RUNTIME_CAPABILITIES;
     return {
       provider: this.providerId,
       adapterId: DEFAULT_WORKER_RUNTIME_ADAPTER_ID,
-      engine: { ...DEFAULT_WORKER_RUNTIME_CAPABILITIES },
-      canonical: toCanonicalWorkerCapabilities(DEFAULT_WORKER_RUNTIME_CAPABILITIES),
+      engine: { ...engine },
+      canonical: toCanonicalWorkerCapabilities(engine),
       supportsCanonicalWorker: true,
       supportsTimeout: true,
       supportsRetry: true,
@@ -160,20 +224,20 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       usesObservabilityRuntimePort: true,
       usesScalabilityRuntimePort: true,
       runtimeReady: true,
-      realWorkers: false,
-      tasksExecuted: false,
+      realWorkers: this.operational,
+      tasksExecuted: this.operational,
       parallelProcessing: false,
       schedulerImplemented: false,
       threadPoolImplemented: false,
-      persistenceImplemented: false,
-      queueConsumed: false,
+      persistenceImplemented: this.operational,
+      queueConsumed: this.operational,
       implementsRabbitMq: false,
       implementsKafka: false,
       implementsAzureServiceBus: false,
       implementsAzureQueue: false,
       implementsRedis: false,
       implementsBullMq: false,
-      implementsRealWorkers: false,
+      implementsRealWorkers: this.operational,
       implementsScheduler: false,
       implementsThreadPool: false,
       implementsCron: false,
@@ -189,12 +253,15 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
   }
 
   providerInfo(): WorkerRuntimeInfo {
+    const caps = this.operational
+      ? DEFAULT_WORKER_RUNTIME_CAPABILITIES
+      : DEFAULT_MOCK_WORKER_RUNTIME_CAPABILITIES;
     return {
       providerId: this.providerId,
       metadata: this.metadata,
       status: this.healthy ? "ready" : "unhealthy",
       providerType: "WORKER_RUNTIME",
-      capabilities: { ...DEFAULT_WORKER_RUNTIME_CAPABILITIES },
+      capabilities: { ...caps },
     };
   }
 
@@ -262,13 +329,13 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
       observabilityRuntimeOk,
       scalabilityRuntimeOk,
       runtimeReady: true,
-      realWorkers: false,
-      tasksExecuted: false,
+      realWorkers: this.operational,
+      tasksExecuted: this.operational,
       parallelProcessing: false,
       schedulerImplemented: false,
       threadPoolImplemented: false,
-      persistenceImplemented: false,
-      queueConsumed: false,
+      persistenceImplemented: this.operational,
+      queueConsumed: this.operational,
       message: this.healthy ? (storeHealth.message ?? this.message) : "Worker Runtime unhealthy.",
     };
   }
@@ -304,13 +371,13 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         allocated: false,
         createdAt: stamp,
         updatedAt: stamp,
-        realWorkers: false,
-        tasksExecuted: false,
+        realWorkers: this.operational,
+        tasksExecuted: this.operational,
         parallelProcessing: false,
         schedulerImplemented: false,
         threadPoolImplemented: false,
-        persistenceImplemented: false,
-        queueConsumed: false,
+        persistenceImplemented: this.operational,
+        queueConsumed: this.operational,
       };
       this.store.setWorker(worker);
       const result = this.buildResult({
@@ -318,9 +385,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "registered",
         worker,
         stamp,
-        code: "WORKER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Worker Runtime structural register (INF-06 foundation — no real workers).",
+        code: this.operational ? "WORKER_RUNTIME_OK" : "WORKER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Worker Runtime operational register (OPER-INF-W)."
+          : "Canonical Worker Runtime structural register (INF-06 foundation — no real workers).",
       });
       return {
         ok: true,
@@ -342,6 +410,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
           message: "Canonical worker not found.",
         };
       }
+      await this.consumer?.stop(input.workerId);
       const stamp = this.now();
       const worker: CanonicalWorker = {
         ...existing,
@@ -355,9 +424,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "unregistered",
         worker,
         stamp,
-        code: "WORKER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Worker Runtime structural unregister (INF-06 foundation — no real teardown).",
+        code: this.operational ? "WORKER_RUNTIME_OK" : "WORKER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Worker Runtime operational unregister (OPER-INF-W — graceful shutdown)."
+          : "Canonical Worker Runtime structural unregister (INF-06 foundation — no real teardown).",
       });
       return {
         ok: true,
@@ -390,13 +460,13 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
           allocated: false,
           createdAt: stamp,
           updatedAt: stamp,
-          realWorkers: false,
-          tasksExecuted: false,
+          realWorkers: this.operational,
+          tasksExecuted: this.operational,
           parallelProcessing: false,
           schedulerImplemented: false,
           threadPoolImplemented: false,
-          persistenceImplemented: false,
-          queueConsumed: false,
+          persistenceImplemented: this.operational,
+          queueConsumed: this.operational,
         };
         this.store.setWorker(worker);
       }
@@ -415,10 +485,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "allocated",
         registeredAt: stamp,
         updatedAt: stamp,
-        realWorkers: false,
-        tasksExecuted: false,
+        realWorkers: this.operational,
+        tasksExecuted: this.operational,
         parallelProcessing: false,
-        persistenceImplemented: false,
+        persistenceImplemented: this.operational,
       };
       this.store.setTask(task);
       const execution: CanonicalWorkerExecution = {
@@ -435,10 +505,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "allocated",
         createdAt: stamp,
         updatedAt: stamp,
-        realWorkers: false,
-        tasksExecuted: false,
+        realWorkers: this.operational,
+        tasksExecuted: this.operational,
         parallelProcessing: false,
-        persistenceImplemented: false,
+        persistenceImplemented: this.operational,
       };
       this.store.setExecution(execution);
       const updated: CanonicalWorker = {
@@ -446,11 +516,28 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "allocated",
         allocated: true,
         updatedAt: stamp,
-        tasksExecuted: false,
+        realWorkers: this.operational,
+        tasksExecuted: this.operational,
         parallelProcessing: false,
-        queueConsumed: false,
+        persistenceImplemented: this.operational,
+        queueConsumed: this.operational,
       };
       this.store.setWorker(updated);
+
+      if (this.consumer) {
+        const queueName = readStringAttr(input, "queueName") ?? DEFAULT_WORKER_QUEUE_NAME;
+        const pollIntervalMs = readPositiveInt(
+          input.attributes?.pollIntervalMs,
+          this.defaultPollIntervalMs,
+        );
+        this.consumer.start({
+          workerId: updated.workerId,
+          queueName,
+          pollIntervalMs,
+          forceNack: readBoolAttr(input, "forceNack"),
+        });
+      }
+
       const result = this.buildResult({
         operation: "allocate",
         status: "allocated",
@@ -458,9 +545,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         task,
         execution,
         stamp,
-        code: "WORKER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Worker Runtime structural allocate (INF-06 foundation — no task execution).",
+        code: this.operational ? "WORKER_RUNTIME_OK" : "WORKER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Worker Runtime operational allocate (OPER-INF-W — queue poll started)."
+          : "Canonical Worker Runtime structural allocate (INF-06 foundation — no task execution).",
       });
       return {
         ok: true,
@@ -484,6 +572,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
           message: "Canonical worker not found.",
         };
       }
+      await this.consumer?.stop(input.workerId);
       const stamp = this.now();
       const worker: CanonicalWorker = {
         ...existing,
@@ -497,9 +586,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "released",
         worker,
         stamp,
-        code: "WORKER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Worker Runtime structural release (INF-06 foundation — no real release).",
+        code: this.operational ? "WORKER_RUNTIME_OK" : "WORKER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Worker Runtime operational release (OPER-INF-W — graceful shutdown)."
+          : "Canonical Worker Runtime structural release (INF-06 foundation — no real release).",
       });
       return {
         ok: true,
@@ -522,6 +612,7 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         };
       }
       const stamp = this.now();
+      this.consumer?.renewLock(input.workerId);
       const worker: CanonicalWorker = {
         ...existing,
         status: existing.allocated ? "allocated" : "heartbeat",
@@ -537,9 +628,10 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         status: "heartbeat",
         worker,
         stamp,
-        code: "WORKER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Worker Runtime structural heartbeat (INF-06 foundation — no real liveness).",
+        code: this.operational ? "WORKER_RUNTIME_OK" : "WORKER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Worker Runtime operational heartbeat (OPER-INF-W — lock renew)."
+          : "Canonical Worker Runtime structural heartbeat (INF-06 foundation — no real liveness).",
       });
       return {
         ok: true,
@@ -553,14 +645,28 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
 
   async stats(input: WorkerStatsInput = {}): Promise<WorkerStatsResult> {
     return this.runOperation("stats", input, async () => {
-      const statistics = this.store.statistics();
+      const base = this.store.statistics();
+      const statistics = this.operational
+        ? {
+            ...base,
+            realWorkersCount: base.allocatedWorkers > 0 || base.totalWorkers > 0 ? 1 : 0,
+            tasksExecutedCount: this.tasksExecutedCount,
+            parallelProcessingCount: 0,
+            schedulerImplementedCount: 0,
+            threadPoolImplementedCount: 0,
+            persistenceImplementedCount: 1,
+            queueConsumedCount: this.queueConsumedCount,
+          }
+        : base;
       const stamp = this.now();
       const result = this.buildResult({
         operation: "stats",
         status: "pending",
         stamp,
-        code: "WORKER_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Worker Runtime structural statistics.",
+        code: this.operational ? "WORKER_RUNTIME_OK" : "WORKER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Worker Runtime operational statistics (OPER-INF-W)."
+          : "Canonical Worker Runtime structural statistics.",
       });
       return {
         ok: true,
@@ -570,6 +676,15 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         message: `Worker Runtime stats: ${statistics.totalWorkers} workers, ${statistics.totalTasks} tasks.`,
       };
     });
+  }
+
+  private onQueueProcessed(event: WorkerQueueProcessedEvent): void {
+    if (event.outcome === "ack" || event.outcome === "nack" || event.outcome === "nack-error") {
+      this.queueConsumedCount += 1;
+    }
+    if (event.outcome === "ack") {
+      this.tasksExecutedCount += 1;
+    }
   }
 
   private resolveWorker(
@@ -611,13 +726,13 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
         version: this.metadata.version,
         label: this.metadata.name,
       },
-      realWorkers: false,
-      tasksExecuted: false,
+      realWorkers: this.operational,
+      tasksExecuted: this.operational,
       parallelProcessing: false,
       schedulerImplemented: false,
       threadPoolImplemented: false,
-      persistenceImplemented: false,
-      queueConsumed: false,
+      persistenceImplemented: this.operational,
+      queueConsumed: this.operational,
       runtimeReady: true,
       status: args.status,
       messageText: args.messageText,
@@ -790,5 +905,5 @@ export class DefaultWorkerRuntimeAdapter implements WorkerRuntimePort {
   }
 }
 
-/** Alias oficial do adapter enterprise (INF-06). */
+/** Alias oficial do adapter enterprise (INF-06 / OPER-INF-W). */
 export const EnterpriseWorkerRuntimeAdapter = DefaultWorkerRuntimeAdapter;

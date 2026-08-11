@@ -1118,6 +1118,23 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 9. Documentos: `INF-06_ENTERPRISE_WORKER_RUNTIME.md`, `INF-06_WORKER_RUNTIME_ARCHITECTURE.md`, `INF-06_WORKER_RUNTIME_CERTIFICATION.md`.  
 10. **Roadmap:** INF-06A **não iniciada**.
 
+### Atualização OPER-INF-Q — Queue Runtime operacional (11/08/2026)
+
+1. **Natureza:** ativação operacional do backend persistente atrás do mesmo `QueueRuntimePort` (sem novo Port/Runtime/Gateway).  
+2. **Backend:** Supabase preferencial (bind server) + memory durable fallback.  
+3. **Interface pública:** inalterada (`enqueue/dequeue/peek/ack/nack/purge/...`).  
+4. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-Q ✅ Concluída**.
+
+### Atualização OPER-INF-W — Worker Runtime operacional (11/08/2026)
+
+1. **Natureza:** ativação operacional do Worker Runtime reutilizando exclusivamente `QueueRuntimePort` (OPER-INF-Q).  
+2. **Fluxo:** `getEnterpriseRuntime()` → `WorkerRuntimePort` → `QueueRuntimePort` → Backend Persistente.  
+3. **Implementado:** polling controlado, claim (dequeue), lock, ACK, NACK, heartbeat, graceful shutdown.  
+4. **Não implementado (proibido nesta Sprint):** Scheduler, Retry Engine, Dead Letter, prioridade, batch, XML, SOAP, IA.  
+5. **Interface pública:** `WorkerRuntimePort` inalterada; sem novos Ports/Gateways; Runtime inalterado.  
+6. **Cobertura:** `enterprise:worker-runtime:test`.  
+7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-W ✅ Concluída**; **OPER-INF-S ⏳ Próxima Sprint**.
+
 #### AER-WR-B1
 - **Título:** Escape hatch `getWorkerRuntimePort()`  
 - **Descrição:** Runtime expõe o Port diretamente (paralelo a `getQueueRuntimePort` / AER-QR-B1). Cadeia oficial permanece Produto → Enterprise Runtime → WorkerRuntimePort. Queue/TISS recebem apenas dependência preparada.  
@@ -1306,3 +1323,5 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 03/08/2026 | INF-08B | Reparo harness Enterprise Persistent Queue (**GO**); **AER-PQR-T1 Resolvida**; Enterprise 71/71 PASS; INF-08 encerrada sem pendências; INF-09 autorizada |
 | 03/08/2026 | INF-09 | Enterprise Observability Runtime Foundation; AER-OBS-B1…B2; ObservabilityRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/Persistent Queue/TISS preparadas sem consumo; harnesses atualizados proativamente (sem AER-OBS-T1); INF-09A não iniciada |
 | 03/08/2026 | INF-10 | Enterprise Scalability Runtime Foundation; AER-SCL-B1…B2; ScalabilityRuntimePort integrado ao Enterprise Runtime; deps Queue/Worker/Scheduler/Persistent Queue/Observability/TISS preparadas sem consumo; harnesses atualizados proativamente (sem AER-SCL-T1); INF-10A não iniciada |
+| 11/08/2026 | OPER-INF-Q | Ativação operacional QueueRuntimePort (backend persistente); sem novos Ports/Gateways/Runtime; roadmap OPER-INF-Q ✅ |
+| 11/08/2026 | OPER-INF-W | Ativação operacional WorkerRuntimePort via QueueRuntimePort (poll/claim/lock/ack/nack/heartbeat/shutdown); sem novos Ports/Gateways; Runtime inalterado; OPER-INF-W ✅; OPER-INF-S ⏳ |

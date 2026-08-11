@@ -1,8 +1,9 @@
 /**
- * InMemoryWorkerRuntimeStore — store in-process (INF-06).
+ * InMemoryWorkerRuntimeStore — store in-process (INF-06 / OPER-INF-W).
  *
- * Implementação oficial do Worker Runtime Store.
- * Sem banco. Sem Redis. Sem Threads. Sem Scheduler. Sem Workers reais.
+ * Implementação oficial do Worker Runtime Store (estado canônico local).
+ * Persistência de mensagens permanece no QueueRuntimePort (OPER-INF-Q).
+ * Sem Redis. Sem Threads. Sem Scheduler. Sem acesso direto a banco pelo Worker.
  */
 import type { CanonicalWorkerStatistics } from "../ports/canonical";
 import type {

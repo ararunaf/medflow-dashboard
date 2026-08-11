@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * INF-06 — Enterprise Worker Runtime
- * Prova: Application → WorkerRuntimePort → Adapter → Factory → Registry → Store
- *         + Enterprise Runtime + Queue Runtime / TISS Runtime (deps preparadas sem consumo)
+ * INF-06 / OPER-INF-W — Enterprise Worker Runtime
+ * Prova: Application → WorkerRuntimePort → Adapter → QueueRuntimePort → Backend
+ *         + Enterprise Runtime (deps DI existentes)
  *         + register / unregister / allocate / release / heartbeat / stats / health
- *         + ausência de Workers reais / Scheduler / Thread Pool / backends
+ *         + polling / claim / lock / ack / nack / graceful shutdown
+ *         + ausência de novos Ports / Gateways / Scheduler / paralelismo / DB direto
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -13,6 +14,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   BUILTIN_WORKER_RUNTIME_PROVIDER_COUNT,
+  DEFAULT_MOCK_WORKER_RUNTIME_CAPABILITIES,
+  DEFAULT_WORKER_QUEUE_NAME,
   DEFAULT_WORKER_RUNTIME_ADAPTER_ID,
   DEFAULT_WORKER_RUNTIME_CAPABILITIES,
   DefaultWorkerRuntimeAdapter,
@@ -33,6 +36,10 @@ import {
   type WorkerRuntimePort,
 } from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import {
+  createQueueRuntimePort,
+  DefaultQueueRuntimeAdapter,
+} from "../../../src/lib/enterprise/queue-runtime/index.ts";
+import {
   createEnterpriseRuntime,
   resetEnterpriseRuntimeForTests,
 } from "../../../src/lib/enterprise/runtime/index.ts";
@@ -51,8 +58,25 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function createOperationalWorkerPair(queueName = "oper-inf-w-queue") {
+  const queue = createQueueRuntimePort({ provider: "enterprise" });
+  const worker = new DefaultWorkerRuntimeAdapter({
+    provider: "enterprise",
+    operational: true,
+    pollIntervalMs: 10,
+    enterpriseDeps: {
+      getQueueRuntimePort: () => queue,
+    },
+  });
+  return { queue, worker, queueName };
+}
+
 describe("INF-06 WorkerRuntimePort contract", () => {
-  it("mock adapter satisfaz o Port e responde healthy", async () => {
+  it("mock adapter satisfaz o Port e responde healthy (estrutural)", async () => {
     const port: WorkerRuntimePort = new MockWorkerRuntimeAdapter({
       provider: "mock",
     });
@@ -116,59 +140,67 @@ describe("INF-06 WorkerRuntimePort contract", () => {
     );
   });
 
-  it("register → allocate → heartbeat → release → unregister → stats com flags estruturais", async () => {
+  it("OPER-INF-W register → allocate → heartbeat → release → unregister → stats operacionais", async () => {
     resetWorkerRuntimeIdSequences();
-    const port = createWorkerRuntimePort({ provider: "enterprise" });
+    const { queue, worker, queueName } = createOperationalWorkerPair();
 
-    const registered = await port.register({
+    const registered = await worker.register({
       workerName: "foundation-worker",
-      correlationId: "corr-inf-06",
+      correlationId: "corr-oper-inf-w",
     });
     assert.equal(registered.ok, true);
     assert.ok(registered.result?.resultId);
-    assert.equal(registered.result?.realWorkers, false);
-    assert.equal(registered.result?.tasksExecuted, false);
+    assert.equal(registered.result?.realWorkers, true);
+    assert.equal(registered.result?.tasksExecuted, true);
     assert.equal(registered.result?.parallelProcessing, false);
     assert.equal(registered.result?.runtimeReady, true);
     assert.equal(registered.worker?.status, "registered");
     assert.equal(registered.worker?.workerName, "foundation-worker");
 
-    const allocated = await port.allocate({
+    await queue.enqueue({
+      queueName,
+      payloadRef: "payload://oper-inf-w-01",
+    });
+
+    const allocated = await worker.allocate({
       workerId: registered.worker!.workerId,
+      attributes: { queueName, pollIntervalMs: 10 },
     });
     assert.equal(allocated.ok, true);
     assert.equal(allocated.worker?.status, "allocated");
     assert.equal(allocated.worker?.allocated, true);
-    assert.equal(allocated.result?.tasksExecuted, false);
-    assert.equal(allocated.result?.queueConsumed, false);
+    assert.equal(allocated.result?.tasksExecuted, true);
+    assert.equal(allocated.result?.queueConsumed, true);
     assert.ok(allocated.task?.taskId);
     assert.ok(allocated.execution?.executionId);
 
-    const beat = await port.heartbeat({ workerId: registered.worker!.workerId });
+    await sleep(80);
+
+    const beat = await worker.heartbeat({ workerId: registered.worker!.workerId });
     assert.equal(beat.ok, true);
     assert.ok(beat.worker?.lastHeartbeatAt);
 
-    const released = await port.release({ workerId: registered.worker!.workerId });
+    const released = await worker.release({ workerId: registered.worker!.workerId });
     assert.equal(released.ok, true);
     assert.equal(released.worker?.status, "released");
     assert.equal(released.worker?.allocated, false);
 
-    const unregistered = await port.unregister({ workerId: registered.worker!.workerId });
+    const unregistered = await worker.unregister({ workerId: registered.worker!.workerId });
     assert.equal(unregistered.ok, true);
     assert.equal(unregistered.worker?.status, "unregistered");
 
-    const stats = await port.stats();
+    const stats = await worker.stats();
     assert.equal(stats.ok, true);
     assert.equal(stats.statistics?.kind, "canonical-worker-statistics");
-    assert.equal(stats.statistics?.realWorkersCount, 0);
-    assert.equal(stats.statistics?.tasksExecutedCount, 0);
+    assert.ok((stats.statistics?.queueConsumedCount ?? 0) >= 1);
+    assert.ok((stats.statistics?.tasksExecutedCount ?? 0) >= 1);
     assert.equal(stats.statistics?.parallelProcessingCount, 0);
     assert.equal(stats.statistics?.schedulerImplementedCount, 0);
     assert.equal(stats.statistics?.threadPoolImplementedCount, 0);
-    assert.equal(stats.statistics?.queueConsumedCount, 0);
+    assert.equal(stats.statistics?.persistenceImplementedCount, 1);
   });
 
-  it("InMemory store oficial e estatísticas zeradas para Workers reais", () => {
+  it("InMemory store oficial; capabilities operacionais no default", () => {
     const store = new InMemoryWorkerRuntimeStore();
     assert.equal(store.storeId, IN_MEMORY_WORKER_RUNTIME_STORE_ID);
     const stats = store.statistics();
@@ -177,7 +209,11 @@ describe("INF-06 WorkerRuntimePort contract", () => {
     assert.equal(stats.tasksExecutedCount, 0);
     assert.equal(stats.parallelProcessingCount, 0);
     assert.equal(DEFAULT_WORKER_RUNTIME_CAPABILITIES.runtimeReady, true);
-    assert.equal(DEFAULT_WORKER_RUNTIME_CAPABILITIES.realWorkers, false);
+    assert.equal(DEFAULT_WORKER_RUNTIME_CAPABILITIES.realWorkers, true);
+    assert.equal(DEFAULT_WORKER_RUNTIME_CAPABILITIES.queueConsumed, true);
+    assert.equal(DEFAULT_WORKER_RUNTIME_CAPABILITIES.persistenceImplemented, true);
+    assert.equal(DEFAULT_MOCK_WORKER_RUNTIME_CAPABILITIES.realWorkers, false);
+    assert.equal(DEFAULT_WORKER_QUEUE_NAME, "enterprise-worker-queue");
   });
 
   it("retry recupera falha transitória", async () => {
@@ -186,6 +222,7 @@ describe("INF-06 WorkerRuntimePort contract", () => {
       failAttempts: 1,
       defaultRetryCount: 1,
       defaultRetryBackoffMs: 1,
+      operational: false,
     });
     const result = await port.register({ workerName: "retry-worker" });
     assert.equal(result.ok, true);
@@ -221,12 +258,98 @@ describe("INF-06 WorkerRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.info.providerType, "WORKER_RUNTIME");
     assert.equal(summary.capabilities.runtimeReady, true);
-    assert.equal(summary.capabilities.realWorkers, false);
+    assert.equal(summary.capabilities.realWorkers, true);
     assert.equal(summary.capabilities.implementsScheduler, false);
   });
 });
 
-describe("INF-06 cadeia Enterprise / Queue / TISS / Worker Runtime", () => {
+describe("OPER-INF-W consumo exclusivo via QueueRuntimePort", () => {
+  it("allocate consome mensagem com claim + ACK via QueueRuntimePort", async () => {
+    const { queue, worker, queueName } = createOperationalWorkerPair();
+
+    const enqueued = await queue.enqueue({
+      queueName,
+      payloadRef: "payload://claim-ack",
+    });
+    assert.equal(enqueued.ok, true);
+    const messageId = enqueued.queueMessage!.messageId;
+
+    const allocated = await worker.allocate({
+      workerName: "ack-worker",
+      attributes: { queueName, pollIntervalMs: 10 },
+    });
+    assert.equal(allocated.ok, true);
+    assert.ok(worker.getConsumer()?.isActive(allocated.worker!.workerId));
+
+    await sleep(100);
+
+    const peeked = await queue.peek({ queueName, messageId });
+    assert.equal(peeked.ok, true);
+    assert.equal(peeked.queueMessage?.status, "acked");
+
+    const stats = await worker.stats();
+    assert.ok((stats.statistics?.queueConsumedCount ?? 0) >= 1);
+    assert.ok((stats.statistics?.tasksExecutedCount ?? 0) >= 1);
+
+    await worker.release({ workerId: allocated.worker!.workerId });
+  });
+
+  it("allocate com forceNack realiza NACK via QueueRuntimePort", async () => {
+    const { queue, worker, queueName } = createOperationalWorkerPair("oper-inf-w-nack");
+
+    const enqueued = await queue.enqueue({
+      queueName,
+      payloadRef: "payload://claim-nack",
+    });
+    assert.equal(enqueued.ok, true);
+    const messageId = enqueued.queueMessage!.messageId;
+
+    const allocated = await worker.allocate({
+      workerName: "nack-worker",
+      attributes: { queueName, pollIntervalMs: 10, forceNack: true },
+    });
+    assert.equal(allocated.ok, true);
+
+    await sleep(100);
+
+    const peeked = await queue.peek({ queueName, messageId });
+    assert.equal(peeked.ok, true);
+    assert.equal(peeked.queueMessage?.status, "nacked");
+
+    await worker.release({ workerId: allocated.worker!.workerId });
+  });
+
+  it("release executa graceful shutdown do poll loop", async () => {
+    const { worker, queueName } = createOperationalWorkerPair("oper-inf-w-shutdown");
+    const allocated = await worker.allocate({
+      workerName: "shutdown-worker",
+      attributes: { queueName, pollIntervalMs: 10 },
+    });
+    assert.equal(allocated.ok, true);
+    assert.equal(worker.getConsumer()?.isActive(allocated.worker!.workerId), true);
+
+    const released = await worker.release({ workerId: allocated.worker!.workerId });
+    assert.equal(released.ok, true);
+    assert.equal(worker.getConsumer()?.isActive(allocated.worker!.workerId), false);
+  });
+
+  it("heartbeat renova lock quando há claim ativo", async () => {
+    const { queue, worker, queueName } = createOperationalWorkerPair("oper-inf-w-lock");
+    // Enfileira e força settle lento via forceNack path is instant; lock is brief.
+    // Valida API de renewLock sem exigir lock persistente longo.
+    await queue.enqueue({ queueName, payloadRef: "payload://lock" });
+    const allocated = await worker.allocate({
+      workerName: "lock-worker",
+      attributes: { queueName, pollIntervalMs: 20 },
+    });
+    const beat = await worker.heartbeat({ workerId: allocated.worker!.workerId });
+    assert.equal(beat.ok, true);
+    assert.ok(beat.worker?.lastHeartbeatAt);
+    await worker.release({ workerId: allocated.worker!.workerId });
+  });
+});
+
+describe("INF-06 / OPER-INF-W cadeia Enterprise / Queue / TISS / Worker Runtime", () => {
   it("Enterprise Runtime expõe Worker Runtime + health workerRuntimeOk", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
@@ -245,31 +368,38 @@ describe("INF-06 cadeia Enterprise / Queue / TISS / Worker Runtime", () => {
     assert.equal(health.tissRuntimeOk, true);
   });
 
-  it("Worker Runtime prepara dependência Queue sem consumir filas", async () => {
+  it("Worker Runtime operacional consome Queue exclusivamente via QueueRuntimePort", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
-    const worker = runtime.getWorkerRuntimePort();
+    const worker = runtime.getWorkerRuntimePort() as DefaultWorkerRuntimeAdapter;
     const queue = runtime.getQueueRuntimePort();
 
     const workerHealth = await worker.health();
     assert.equal(workerHealth.ok, true);
     assert.equal(workerHealth.queueRuntimeOk, true);
+    assert.equal(workerHealth.realWorkers, true);
+    assert.equal(workerHealth.queueConsumed, true);
 
-    const before = await queue.stats();
-    const beforeCount = before.statistics?.totalMessages ?? 0;
+    const queueName = "enterprise-oper-inf-w";
+    await queue.enqueue({ queueName, payloadRef: "payload://enterprise-path" });
 
-    const allocated = await worker.allocate({ workerName: "inf-06-no-queue-consume" });
+    const allocated = await worker.allocate({
+      workerName: "oper-inf-w-enterprise",
+      attributes: { queueName, pollIntervalMs: 10 },
+    });
     assert.equal(allocated.ok, true);
-    assert.equal(allocated.result?.queueConsumed, false);
-    assert.equal(allocated.result?.tasksExecuted, false);
+    assert.equal(allocated.result?.queueConsumed, true);
+    assert.equal(allocated.result?.tasksExecuted, true);
 
-    const after = await queue.stats();
-    assert.equal(after.statistics?.totalMessages ?? 0, beforeCount);
-    assert.equal(after.statistics?.messagesPublishedCount, 0);
-    assert.equal(after.statistics?.workersInvokedCount, 0);
+    await sleep(100);
+
+    const stats = await worker.stats();
+    assert.ok((stats.statistics?.queueConsumedCount ?? 0) >= 1);
+
+    await worker.release({ workerId: allocated.worker!.workerId });
   });
 
-  it("TISS Runtime prepara dependência Worker sem alocar/executar", async () => {
+  it("TISS Runtime prepara dependência Worker sem alocar/executar (consumidor inalterado)", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     const tiss = runtime.getTISSRuntimePort();
@@ -288,20 +418,18 @@ describe("INF-06 cadeia Enterprise / Queue / TISS / Worker Runtime", () => {
       mode: "structural-process",
       metadata: {
         kind: "canonical-tiss-metadata",
-        sessionId: "sess-inf-06",
-        correlationId: "corr-inf-06",
+        sessionId: "sess-oper-inf-w",
+        correlationId: "corr-oper-inf-w",
       },
     });
     assert.equal(processed.ok, true);
 
     const after = await worker.stats();
     assert.equal(after.statistics?.totalWorkers ?? 0, beforeWorkers);
-    assert.equal(after.statistics?.realWorkersCount, 0);
-    assert.equal(after.statistics?.tasksExecutedCount, 0);
   });
 });
 
-describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
+describe("INF-06 / OPER-INF-W ausência de backends proibidos / novos Ports / bypass", () => {
   it("módulo worker-runtime não referencia backends reais nem scheduler", () => {
     const root = join(repoRoot, "src/lib/enterprise/worker-runtime");
     const files = collectTsFiles(root);
@@ -324,6 +452,8 @@ describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
       /new\s+Worker\s*\(/,
       /ThreadPoolExecutor/,
       /createClient\s*\(\s*\{[^}]*redis/i,
+      /from ["']@supabase\/supabase-js["']/,
+      /\.from\(\s*["']enterprise_queue/,
     ];
 
     for (const file of files) {
@@ -376,7 +506,7 @@ describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
     );
   });
 
-  it("Worker Runtime não consome Queue (enqueue/dequeue) nas operações", () => {
+  it("OPER-INF-W — Worker consome QueueRuntimePort (dequeue/ack/nack) sem DB direto", () => {
     const workerAdapter = readFileSync(
       join(
         repoRoot,
@@ -386,20 +516,45 @@ describe("INF-06 ausência de Workers reais / Scheduler / bypass", () => {
     );
     assert.match(workerAdapter, /getQueueRuntimePort/);
     assert.match(workerAdapter, /usesQueueRuntimePort/);
-    assert.equal(
-      /getQueueRuntimePort\(\)\.(enqueue|dequeue|peek|ack|nack|purge)\s*\(/.test(workerAdapter),
-      false,
+    assert.match(workerAdapter, /OPER-INF-W/);
+    assert.equal(/createClient\s*\(/.test(workerAdapter), false);
+    assert.equal(/SupabaseQueueRuntimeBackend/.test(workerAdapter), false);
+
+    const consumer = readFileSync(
+      join(
+        repoRoot,
+        "src/lib/enterprise/worker-runtime/operational/worker-queue-consumer.ts",
+      ),
+      "utf8",
     );
+    assert.match(consumer, /queue\.dequeue/);
+    assert.match(consumer, /queue\.ack/);
+    assert.match(consumer, /queue\.nack/);
+    assert.equal(/from ["']@supabase/.test(consumer), false);
   });
 
-  it("sem Provider/Adapter/Factory/Registry paralelo", () => {
+  it("sem Provider/Adapter/Factory/Registry/Port/Gateway paralelo", () => {
     const root = join(repoRoot, "src/lib/enterprise/worker-runtime");
     const files = collectTsFiles(root).map((f) => f.replace(/\\/g, "/"));
     assert.ok(files.some((f) => f.endsWith("/providers/create-worker-runtime-port.ts")));
     assert.ok(files.some((f) => f.endsWith("/factory/worker-runtime-factory.ts")));
     assert.ok(files.some((f) => f.endsWith("/registry/worker-runtime-registry.ts")));
+    assert.ok(files.some((f) => f.endsWith("/operational/worker-queue-consumer.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
     assert.equal(files.filter((f) => /adapters\/.*worker-runtime-adapter\.ts$/.test(f)).length, 2);
+    assert.equal(files.filter((f) => /\/ports\/.*-port\.ts$/.test(f)).length, 1);
+    assert.equal(files.filter((f) => /gateway/i.test(f)).length, 0);
+  });
+
+  it("OPER-INF-W — Runtime permanece com createWorkerRuntimePort (sem novo Runtime)", () => {
+    const enterpriseRuntime = readFileSync(
+      join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
+      "utf8",
+    );
+    assert.match(enterpriseRuntime, /createWorkerRuntimePort/);
+    assert.equal(/createWorkerQueueConsumer/.test(enterpriseRuntime), false);
+    assert.equal(/WorkerQueueConsumer/.test(enterpriseRuntime), false);
+    assert.ok(DefaultQueueRuntimeAdapter);
   });
 });

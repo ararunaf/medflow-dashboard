@@ -84,6 +84,7 @@ export class MockWorkerRuntimeAdapter implements WorkerRuntimePort {
       message: this.message,
       store: options.store,
       enterpriseDeps,
+      operational: false,
     });
   }
 

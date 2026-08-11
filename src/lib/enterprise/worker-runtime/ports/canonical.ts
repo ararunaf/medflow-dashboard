@@ -1,10 +1,10 @@
 /**
- * Modelos canônicos do Enterprise Worker Runtime — INF-06.
+ * Modelos canônicos do Enterprise Worker Runtime — INF-06 / OPER-INF-W.
  *
- * Infraestrutura canônica estrutural de Workers futuros.
- * Sem Workers reais. Sem Thread Pool. Sem Scheduler. Sem Cron.
- * Sem processamento paralelo. Sem filas reais. Sem RabbitMQ/Kafka/Azure/Redis/BullMQ.
- * Sem Retry Engine. Sem Dead Letter. Sem persistência real.
+ * Contrato canônico estável do WorkerRuntimePort.
+ * OPER-INF-W: consumo operacional via QueueRuntimePort — sem novos Ports.
+ * Sem Thread Pool. Sem Scheduler. Sem Cron. Sem paralelismo.
+ * Sem RabbitMQ/Kafka/Azure/Redis/BullMQ. Sem Retry Engine. Sem Dead Letter.
  * Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture/IA.
  */
 
@@ -69,8 +69,8 @@ export type CanonicalWorkerOperation =
   | (string & {});
 
 /**
- * Worker canônico estrutural.
- * Representa a infraestrutura de Worker — sem execução real, sem threads.
+ * Worker canônico.
+ * OPER-INF-W: flags operacionais quando o adapter consome QueueRuntimePort.
  */
 export type CanonicalWorker = {
   kind: "canonical-worker";
@@ -83,18 +83,17 @@ export type CanonicalWorker = {
   lastHeartbeatAt?: string;
   createdAt: string;
   updatedAt: string;
-  /** Sempre false — nenhum Worker real nesta fundação. */
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
   schedulerImplemented: false;
   threadPoolImplemented: false;
-  persistenceImplemented: false;
-  queueConsumed: false;
+  persistenceImplemented: boolean;
+  queueConsumed: boolean;
 };
 
 /**
- * Task canônica estrutural (referência apenas — nunca executada).
+ * Task canônica (referência de alocação / settle via QueueRuntimePort).
  */
 export type CanonicalWorkerTask = {
   kind: "canonical-worker-task";
@@ -105,14 +104,14 @@ export type CanonicalWorkerTask = {
   status: CanonicalWorkerStatus;
   registeredAt: string;
   updatedAt: string;
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
-  persistenceImplemented: false;
+  persistenceImplemented: boolean;
 };
 
 /**
- * Execução canônica estrutural (registro apenas — nunca processada).
+ * Execução canônica (registro de settle ack/nack via QueueRuntimePort).
  */
 export type CanonicalWorkerExecution = {
   kind: "canonical-worker-execution";
@@ -124,15 +123,14 @@ export type CanonicalWorkerExecution = {
   status: CanonicalWorkerStatus;
   createdAt: string;
   updatedAt: string;
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
-  persistenceImplemented: false;
+  persistenceImplemented: boolean;
 };
 
 /**
- * Resultado canônico de operação de Worker Runtime (INF-06).
- * Contém apenas referência/estrutura canônica — nunca execução real.
+ * Resultado canônico de operação de Worker Runtime (INF-06 / OPER-INF-W).
  */
 export type CanonicalWorkerResult = {
   kind: "canonical-worker-result";
@@ -145,15 +143,13 @@ export type CanonicalWorkerResult = {
   identity?: CanonicalWorkerIdentity;
   metadata?: CanonicalWorkerMetadata;
   provider?: CanonicalWorkerProvider;
-  /** Sempre false — nenhum Worker real. */
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
   schedulerImplemented: false;
   threadPoolImplemented: false;
-  persistenceImplemented: false;
-  queueConsumed: false;
-  /** Sempre true — runtime estrutural pronto (sem Worker real). */
+  persistenceImplemented: boolean;
+  queueConsumed: boolean;
   runtimeReady: true;
   status: CanonicalWorkerStatus;
   messageText?: string;
@@ -163,7 +159,7 @@ export type CanonicalWorkerResult = {
 };
 
 /**
- * Estatísticas estruturais do Worker Runtime (in-process).
+ * Estatísticas do Worker Runtime.
  */
 export type CanonicalWorkerStatistics = {
   kind: "canonical-worker-statistics";
@@ -174,13 +170,13 @@ export type CanonicalWorkerStatistics = {
   heartbeatCount: number;
   totalTasks: number;
   totalExecutions: number;
-  realWorkersCount: 0;
-  tasksExecutedCount: 0;
-  parallelProcessingCount: 0;
-  schedulerImplementedCount: 0;
-  threadPoolImplementedCount: 0;
-  persistenceImplementedCount: 0;
-  queueConsumedCount: 0;
+  realWorkersCount: number;
+  tasksExecutedCount: number;
+  parallelProcessingCount: number;
+  schedulerImplementedCount: number;
+  threadPoolImplementedCount: number;
+  persistenceImplementedCount: number;
+  queueConsumedCount: number;
 };
 
 /**
@@ -205,13 +201,13 @@ export type CanonicalWorkerHealth = {
   observabilityRuntimeOk?: boolean;
   scalabilityRuntimeOk?: boolean;
   runtimeReady: true;
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
   schedulerImplemented: false;
   threadPoolImplemented: false;
-  persistenceImplemented: false;
-  queueConsumed: false;
+  persistenceImplemented: boolean;
+  queueConsumed: boolean;
 };
 
 /**
@@ -228,20 +224,20 @@ export type CanonicalWorkerCapabilities = {
   supportsHealth: boolean;
   supportsCanonicalWorker: boolean;
   runtimeReady: true;
-  realWorkers: false;
-  tasksExecuted: false;
+  realWorkers: boolean;
+  tasksExecuted: boolean;
   parallelProcessing: false;
   schedulerImplemented: false;
   threadPoolImplemented: false;
-  persistenceImplemented: false;
-  queueConsumed: false;
+  persistenceImplemented: boolean;
+  queueConsumed: boolean;
   implementsRabbitMq: false;
   implementsKafka: false;
   implementsAzureServiceBus: false;
   implementsAzureQueue: false;
   implementsRedis: false;
   implementsBullMq: false;
-  implementsRealWorkers: false;
+  implementsRealWorkers: boolean;
   implementsScheduler: false;
   implementsThreadPool: false;
   implementsCron: false;
