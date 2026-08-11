@@ -16,10 +16,10 @@
 | **OPER-INF-D** | Ativar Dead Letter operacional via `DeadLetterRuntimePort` → `QueueRuntimePort` | ✅ Concluída |
 | **OPER-INF-O** | Ativar Observability operacional via Ports existentes (somente leitura) | ✅ Concluída |
 | **ARC-25** | Documentar e congelar a arquitetura oficial do Enterprise Runtime | ✅ Concluída |
-| **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ⏳ Próxima Sprint |
+| **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ✅ Concluída |
 | **TISS-RUNTIME-01** | Ativação operacional TISS Runtime | ⏳ Planejada |
 
-**Roadmap vigente:** ✓ ARC-25 · ⏳ OPER-INF-R · ⏳ TISS-RUNTIME-01
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ⏳ TISS-RUNTIME-01
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)
 
@@ -36,11 +36,12 @@
 - Scheduler aciona Worker apenas via `WorkerRuntimePort` (nunca Queue direto)
 - Queue envia para Dead Letter apenas via `DeadLetterRuntimePort` (contrato interno)
 - Dead Letter **não** decide reenvio — apenas armazenamento definitivo (retry = OPER-INF-R)
+- Retry **nunca executa** — apenas decide e agenda; Worker executa; Scheduler controla o tempo; Queue transporta
 - Observability **apenas coleta e expõe** — nunca executa regras, nunca altera o fluxo, nunca interfere na execução
 
 ---
 
-## Fluxo operacional atual (pós OPER-INF-O)
+## Fluxo operacional atual (pós OPER-INF-R)
 
 ```
 getEnterpriseRuntime()
@@ -50,6 +51,10 @@ getEnterpriseRuntime()
         → Backend Persistente (OPER-INF-Q)
         → DeadLetterRuntimePort (OPER-INF-D — contrato interno)
           → QueueRuntimePort (isolamento enterprise-dead-letter)
+        → DefaultRetryInfrastructure (OPER-INF-R — NÃO é Port)
+          → QueueRuntimePort (transporte)
+          → SchedulerRuntimePort (tempo / backoff)
+          → WorkerRuntimePort (executor via Scheduler)
   → ObservabilityRuntimePort (OPER-INF-O — somente leitura dos Ports acima)
 ```
 
@@ -82,6 +87,13 @@ getEnterpriseRuntime()
 - Sem dashboards / Grafana / Prometheus / OpenTelemetry / alertas / tracing / logs externos
 - Sem novos Ports / Gateways / Runtimes / alteração do pipeline oficial
 
+### OPER-INF-R
+- Retry operacional: policy, counter, delay, exponential backoff, max attempts, status, metadata, scheduling
+- Reutilização exclusiva de `SchedulerRuntimePort` + `WorkerRuntimePort` + `QueueRuntimePort`
+- Retry **nunca** executa processamento — apenas agenda nova tentativa
+- Dead Letter permanece destino definitivo após exceder `maxAttempts`
+- Sem novos Ports / Gateways / Runtimes / alteração do Enterprise Runtime / Foundations / pipeline oficial
+
 ---
 
 ## Escopo concluído (ARC-25)
@@ -95,4 +107,4 @@ getEnterpriseRuntime()
 
 ## Próxima Sprint
 
-**OPER-INF-R** — ativação operacional do Retry (decisão de reenvio; Dead Letter permanece somente armazenamento definitivo).
+**TISS-RUNTIME-01** — ativação operacional do TISS Runtime sobre a arquitetura oficial congelada.

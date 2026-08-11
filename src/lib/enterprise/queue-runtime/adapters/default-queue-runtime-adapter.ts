@@ -1,9 +1,11 @@
 /**
- * DefaultQueueRuntimeAdapter — INF-05 / OPER-INF-Q.
+ * DefaultQueueRuntimeAdapter — INF-05 / OPER-INF-Q / OPER-INF-D / OPER-INF-R.
  *
  * Adapter oficial do Enterprise Queue Runtime.
  * OPER-INF-Q: backend persistente (Supabase preferencial; memory durable fallback).
- * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem processamento por workers.
+ * OPER-INF-D: Dead Letter operacional (contrato interno).
+ * OPER-INF-R: Retry operacional via SchedulerRuntimePort + WorkerRuntimePort + QueueRuntimePort.
+ * Sem RabbitMQ. Sem Azure. Sem Kafka. Sem Redis. Sem processamento por workers neste Port.
  */
 import {
   DEFAULT_QUEUE_RUNTIME_CAPABILITIES,
@@ -52,6 +54,7 @@ import type {
 import { createQueueRuntimeBackend, type QueueRuntimePersistenceBackend } from "../backend";
 import {
   DefaultDeadLetterRuntime,
+  DefaultRetryInfrastructure,
   ENTERPRISE_DEAD_LETTER_QUEUE_NAME,
   type DeadLetterRuntimePort,
 } from "../operational";
@@ -85,6 +88,12 @@ export type DefaultQueueRuntimeAdapterOptions = {
    * Default: ativo quando operational=true. `null` desativa.
    */
   deadLetter?: DeadLetterRuntimePort | null;
+  /**
+   * OPER-INF-R — Retry Infrastructure operacional (NÃO é Port).
+   * Default: ativo quando operational=true e enterpriseDeps expõe Scheduler+Worker.
+   * `null` desativa.
+   */
+  retry?: DefaultRetryInfrastructure | null;
   /** INF-06 — Worker Runtime preparado (sem alocação/execução). */
   enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   defaultTimeoutMs?: number;
@@ -133,13 +142,22 @@ function isPermanentFailureNack(input: NackInput): boolean {
   );
 }
 
-function readFailureReason(input: NackInput): string {
+/** OPER-INF-R — nack elegível a retry (não permanente). */
+function isRetryCandidateNack(input: NackInput): boolean {
+  if (isPermanentFailureNack(input)) return false;
+  if (isTruthyAttr(input.attributes?.skipRetry)) return false;
+  // Default operacional: todo nack não-permanente é candidato a retry.
+  // Opt-out: skipRetry=true. Opt-in explícito também aceito.
+  return true;
+}
+
+function readFailureReason(input: NackInput, fallback: string): string {
   const fromAttrs =
     input.attributes?.failureReason ?? input.attributes?.reason ?? input.attributes?.error;
   if (typeof fromAttrs === "string" && fromAttrs.trim() !== "") {
     return fromAttrs.trim();
   }
-  return "permanent-failure";
+  return fallback;
 }
 
 /**
@@ -155,6 +173,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
   private readonly backend: QueueRuntimePersistenceBackend | null;
   private readonly operational: boolean;
   private readonly deadLetter: DeadLetterRuntimePort | null;
+  private readonly retry: DefaultRetryInfrastructure | null;
   private readonly enterpriseDeps?: QueueRuntimeEnterpriseDeps;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
@@ -175,14 +194,14 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     this.message =
       options.message ??
       (this.operational
-        ? `${this.providerId} Queue Runtime ready (OPER-INF-Q/D — persistent backend + DeadLetter active).`
+        ? `${this.providerId} Queue Runtime ready (OPER-INF-Q/D/R — persistent backend + DeadLetter + Retry active).`
         : `${this.providerId} Queue Runtime ready (structural only — no persistent backend).`);
     this.metadata = {
       name: this.providerId === "default" ? "Default Queue Runtime" : "Enterprise Queue Runtime",
       version: DEFAULT_QUEUE_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official INF-05 Enterprise Queue Runtime — OPER-INF-Q backend + OPER-INF-D DeadLetter via QueueRuntimePort.",
+        "Official INF-05 Enterprise Queue Runtime — OPER-INF-Q backend + OPER-INF-D DeadLetter + OPER-INF-R Retry via existing Ports.",
     };
     this.store = options.store ?? new InMemoryQueueRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
@@ -210,6 +229,27 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
                 now: this.now,
               })
             : null));
+
+    // OPER-INF-R — Retry Infrastructure (NÃO é Port; reutiliza Scheduler + Worker + Queue).
+    if (options.retry === null) {
+      this.retry = null;
+    } else if (options.retry) {
+      this.retry = options.retry;
+    } else if (
+      this.operational &&
+      this.enterpriseDeps &&
+      typeof this.enterpriseDeps.getWorkerRuntimePort === "function" &&
+      typeof this.enterpriseDeps.getSchedulerRuntimePort === "function"
+    ) {
+      this.retry = new DefaultRetryInfrastructure({
+        getQueueRuntimePort: () => this,
+        getWorkerRuntimePort: () => this.enterpriseDeps!.getWorkerRuntimePort(),
+        getSchedulerRuntimePort: () => this.enterpriseDeps!.getSchedulerRuntimePort!(),
+        now: this.now,
+      });
+    } else {
+      this.retry = null;
+    }
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -230,12 +270,21 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     return this.deadLetter;
   }
 
+  /**
+   * Retry Infrastructure operacional (OPER-INF-R) — null sem Scheduler/Worker deps.
+   * NÃO é Port Enterprise. Não exposto em EnterpriseRuntime.
+   */
+  getRetryInfrastructure(): DefaultRetryInfrastructure | null {
+    return this.retry;
+  }
+
   capabilities(): QueueRuntimePortCapabilities {
     const engine = {
       ...(this.operational
         ? DEFAULT_QUEUE_RUNTIME_CAPABILITIES
         : DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES),
       implementsDeadLetter: this.operational && this.deadLetter !== null,
+      implementsRetryReal: this.operational && this.retry !== null,
     };
     return {
       provider: this.providerId,
@@ -268,7 +317,7 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       implementsWorkers: false,
       implementsScheduler: false,
       implementsDeadLetter: this.operational && this.deadLetter !== null,
-      implementsRetryReal: false,
+      implementsRetryReal: this.operational && this.retry !== null,
       implementsHttp: false,
       implementsWebsocket: false,
       knowsOperatorOrCooperative: false,
@@ -598,21 +647,46 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       const queue =
         this.resolveQueue(input.queueId, input.queueName) ?? this.store.getQueue(existing.queueId);
 
-      // OPER-INF-D — rota para DeadLetterRuntimePort apenas em falha permanente explícita.
-      // Sem retry / reprocessamento nesta sprint (OPER-INF-R).
+      const attemptCount = readPositiveInt(
+        input.attributes?.attemptCount ??
+          input.attributes?.attempts ??
+          existing.metadata?.customAttributes?.attemptCount,
+        1,
+      );
+
+      // OPER-INF-D — falha permanente explícita → Dead Letter (sem retry).
       const permanentFailure = isPermanentFailureNack(input);
       if (this.operational && this.deadLetter && permanentFailure) {
-        const attemptCount = readPositiveInt(
-          input.attributes?.attemptCount ?? input.attributes?.attempts,
-          1,
+        return this.parkToDeadLetter({
+          existing,
+          queue,
+          stamp,
+          attemptCount,
+          failureReason: readFailureReason(input, "permanent-failure"),
+          nackQueueName: input.queueName ?? null,
+          permanentFailure: true,
+        });
+      }
+
+      // OPER-INF-R — decisão de reenvio via Retry Infrastructure (Ports existentes).
+      if (this.operational && this.retry && isRetryCandidateNack(input)) {
+        const failureReason = readFailureReason(input, "transient-failure");
+        const maxAttempts = readPositiveInt(
+          input.attributes?.maxAttempts ?? existing.metadata?.customAttributes?.maxAttempts,
+          this.retry.getDefaultPolicy().maxAttempts,
         );
-        const failureReason = readFailureReason(input);
-        const parked = await this.deadLetter.park({
+        const baseDelayMs = readPositiveInt(
+          input.attributes?.baseDelayMs ?? input.attributes?.retryDelayMs,
+          this.retry.getDefaultPolicy().baseDelayMs,
+        );
+
+        const decided = await this.retry.decideAndSchedule({
           sourceMessageId: existing.messageId,
           sourceQueueId: existing.queueId,
-          sourceQueueName: queue?.queueName,
-          failureReason,
+          sourceQueueName: queue?.queueName ?? input.queueName,
           attemptCount,
+          failureReason,
+          policy: { maxAttempts, baseDelayMs },
           payloadRef: existing.payloadRef,
           correlationId: existing.identity?.correlationId ?? null,
           metadata: {
@@ -621,68 +695,88 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
           },
         });
 
-        if (!parked.ok || !parked.record) {
+        if (!decided.ok) {
           return {
             ok: false,
-            code: parked.code ?? "QUEUE_RUNTIME_DEAD_LETTER_FAILED",
-            message: parked.message ?? "Failed to park message in DeadLetterRuntimePort.",
+            code: decided.code ?? "QUEUE_RUNTIME_RETRY_FAILED",
+            message: decided.message ?? "Retry Infrastructure decision failed.",
           };
         }
 
-        // Isolamento da fila principal — remove da fila de processamento.
-        this.store.removeMessage(existing.messageId);
-        await this.backend?.removeMessage(existing.messageId);
-        if (queue) {
-          await this.detachMessage(queue, existing.messageId, stamp);
+        if (decided.decision === "dead-letter") {
+          if (!this.deadLetter) {
+            return {
+              ok: false,
+              code: "QUEUE_RUNTIME_DEAD_LETTER_UNAVAILABLE",
+              message: "Retry exhausted but DeadLetterRuntimePort is unavailable.",
+            };
+          }
+          return this.parkToDeadLetter({
+            existing,
+            queue,
+            stamp,
+            attemptCount,
+            failureReason,
+            nackQueueName: input.queueName ?? null,
+            permanentFailure: false,
+            retryExhausted: true,
+            retryId: decided.record?.retryId,
+          });
         }
 
-        const deadLettered: CanonicalQueueMessage = {
-          ...existing,
-          status: "dead-lettered",
-          updatedAt: stamp,
-          realQueueBackend: this.operational,
-          persistenceImplemented: this.operational,
-          identity: {
-            kind: "canonical-queue-identity",
-            ...(existing.identity ?? {}),
-            queueId: existing.queueId,
-            queueName: queue?.queueName ?? ENTERPRISE_DEAD_LETTER_QUEUE_NAME,
-            messageId: existing.messageId,
-            correlationId: existing.identity?.correlationId ?? null,
-          },
-          metadata: {
-            kind: "canonical-queue-metadata",
-            ...(existing.metadata ?? {}),
-            source: "dead-letter-runtime",
-            channel: "dead-letter",
-            customAttributes: {
-              ...(existing.metadata?.customAttributes ?? {}),
-              deadLetterId: parked.record.deadLetterId,
-              failureReason: parked.record.failureReason,
-              attemptCount: parked.record.attemptCount,
-              permanentFailure: true,
-            },
-          },
-        };
+        if (decided.decision === "retry-scheduled" && decided.record) {
+          // Remove da fila principal — próxima tentativa já foi transportada via enqueue.
+          this.store.removeMessage(existing.messageId);
+          await this.backend?.removeMessage(existing.messageId);
+          if (queue) {
+            await this.detachMessage(queue, existing.messageId, stamp);
+          }
 
-        const result = this.buildResult({
-          operation: "nack",
-          status: "dead-lettered",
-          message: deadLettered,
-          stamp,
-          code: "QUEUE_RUNTIME_DEAD_LETTERED",
-          messageText:
-            "Canonical Queue Runtime operational dead-letter (OPER-INF-D — via DeadLetterRuntimePort).",
-          messagesPublished: this.operational,
-          messagesConsumed: false,
-        });
-        return {
-          ok: true,
-          result,
-          queueMessage: deadLettered,
-          code: "QUEUE_RUNTIME_DEAD_LETTERED",
-          message: result.messageText,
-        };
+          const retried: CanonicalQueueMessage = {
+            ...existing,
+            status: "nacked",
+            updatedAt: stamp,
+            realQueueBackend: this.operational,
+            persistenceImplemented: this.operational,
+            metadata: {
+              kind: "canonical-queue-metadata",
+              ...(existing.metadata ?? {}),
+              source: "retry-infrastructure",
+              channel: "retry",
+              customAttributes: {
+                ...(existing.metadata?.customAttributes ?? {}),
+                retryId: decided.record.retryId,
+                attemptCount: decided.record.attemptCount,
+                maxAttempts: decided.record.maxAttempts,
+                delayMs: decided.record.delayMs,
+                nextAttemptAt: decided.record.nextAttemptAt,
+                requeuedMessageId: decided.record.requeuedMessageId ?? null,
+                scheduleId: decided.record.scheduleId ?? null,
+                retryStatus: decided.record.status,
+                failureReason: decided.record.failureReason,
+              },
+            },
+          };
+
+          const result = this.buildResult({
+            operation: "nack",
+            status: "nacked",
+            message: retried,
+            stamp,
+            code: "QUEUE_RUNTIME_RETRY_SCHEDULED",
+            messageText:
+              "Canonical Queue Runtime operational retry scheduled (OPER-INF-R — via Scheduler/Worker/Queue Ports).",
+            messagesPublished: this.operational,
+            messagesConsumed: false,
+          });
+          return {
+            ok: true,
+            result,
+            queueMessage: retried,
+            code: "QUEUE_RUNTIME_RETRY_SCHEDULED",
+            message: result.messageText,
+          };
+        }
       }
 
       const message: CanonicalQueueMessage = {
@@ -875,6 +969,117 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     this.store.setQueue(created);
     await this.backend?.persistQueue(created);
     return created;
+  }
+
+  /**
+   * OPER-INF-D — park definitivo via DeadLetterRuntimePort + isolamento da fila principal.
+   * Usado por falha permanente explícita e por Retry exhausted (OPER-INF-R).
+   */
+  private async parkToDeadLetter(args: {
+    existing: CanonicalQueueMessage;
+    queue: CanonicalQueue | undefined;
+    stamp: string;
+    attemptCount: number;
+    failureReason: string;
+    nackQueueName: string | null;
+    permanentFailure: boolean;
+    retryExhausted?: boolean;
+    retryId?: string;
+  }): Promise<{
+    ok: boolean;
+    result?: CanonicalQueueResult;
+    queueMessage?: CanonicalQueueMessage;
+    code?: string;
+    message?: string;
+  }> {
+    if (!this.deadLetter) {
+      return {
+        ok: false,
+        code: "QUEUE_RUNTIME_DEAD_LETTER_UNAVAILABLE",
+        message: "DeadLetterRuntimePort is unavailable.",
+      };
+    }
+
+    const parked = await this.deadLetter.park({
+      sourceMessageId: args.existing.messageId,
+      sourceQueueId: args.existing.queueId,
+      sourceQueueName: args.queue?.queueName,
+      failureReason: args.failureReason,
+      attemptCount: args.attemptCount,
+      payloadRef: args.existing.payloadRef,
+      correlationId: args.existing.identity?.correlationId ?? null,
+      metadata: {
+        ...(args.existing.metadata?.customAttributes ?? {}),
+        nackQueueName: args.nackQueueName,
+        retryExhausted: args.retryExhausted === true,
+        retryId: args.retryId ?? null,
+      },
+    });
+
+    if (!parked.ok || !parked.record) {
+      return {
+        ok: false,
+        code: parked.code ?? "QUEUE_RUNTIME_DEAD_LETTER_FAILED",
+        message: parked.message ?? "Failed to park message in DeadLetterRuntimePort.",
+      };
+    }
+
+    this.store.removeMessage(args.existing.messageId);
+    await this.backend?.removeMessage(args.existing.messageId);
+    if (args.queue) {
+      await this.detachMessage(args.queue, args.existing.messageId, args.stamp);
+    }
+
+    const deadLettered: CanonicalQueueMessage = {
+      ...args.existing,
+      status: "dead-lettered",
+      updatedAt: args.stamp,
+      realQueueBackend: this.operational,
+      persistenceImplemented: this.operational,
+      identity: {
+        kind: "canonical-queue-identity",
+        ...(args.existing.identity ?? {}),
+        queueId: args.existing.queueId,
+        queueName: args.queue?.queueName ?? ENTERPRISE_DEAD_LETTER_QUEUE_NAME,
+        messageId: args.existing.messageId,
+        correlationId: args.existing.identity?.correlationId ?? null,
+      },
+      metadata: {
+        kind: "canonical-queue-metadata",
+        ...(args.existing.metadata ?? {}),
+        source: args.retryExhausted ? "retry-infrastructure" : "dead-letter-runtime",
+        channel: "dead-letter",
+        customAttributes: {
+          ...(args.existing.metadata?.customAttributes ?? {}),
+          deadLetterId: parked.record.deadLetterId,
+          failureReason: parked.record.failureReason,
+          attemptCount: parked.record.attemptCount,
+          permanentFailure: args.permanentFailure,
+          retryExhausted: args.retryExhausted === true,
+          retryId: args.retryId ?? null,
+        },
+      },
+    };
+
+    const result = this.buildResult({
+      operation: "nack",
+      status: "dead-lettered",
+      message: deadLettered,
+      stamp: args.stamp,
+      code: "QUEUE_RUNTIME_DEAD_LETTERED",
+      messageText: args.retryExhausted
+        ? "Canonical Queue Runtime operational dead-letter after retry exhaustion (OPER-INF-R → OPER-INF-D)."
+        : "Canonical Queue Runtime operational dead-letter (OPER-INF-D — via DeadLetterRuntimePort).",
+      messagesPublished: this.operational,
+      messagesConsumed: false,
+    });
+    return {
+      ok: true,
+      result,
+      queueMessage: deadLettered,
+      code: "QUEUE_RUNTIME_DEAD_LETTERED",
+      message: result.messageText,
+    };
   }
 
   private resolveQueue(

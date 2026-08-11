@@ -1,9 +1,11 @@
 /**
- * OPER-INF-D — motor operacional interno do Dead Letter Runtime.
+ * OPER-INF-D / OPER-INF-R — motores operacionais internos do Queue Runtime.
  *
  * DeadLetterRuntimePort é contrato INTERNO — não é Port Enterprise novo.
- * Consome exclusivamente QueueRuntimePort para isolamento da fila principal.
- * Sem retry. Sem reprocessamento. Sem scheduler. Sem worker.
+ * DefaultRetryInfrastructure NÃO é Port — reutiliza Scheduler/Worker/Queue Ports.
+ *
+ * Dead Letter: armazenamento definitivo via QueueRuntimePort.
+ * Retry: decisão de reenvio + agendamento (nunca executa processamento).
  */
 export type {
   DeadLetterGetByIdInput,
@@ -32,3 +34,31 @@ export {
   resetDeadLetterIdSequences,
   type DefaultDeadLetterRuntimeOptions,
 } from "./default-dead-letter-runtime";
+
+export type {
+  RetryDecideInput,
+  RetryDecideResult,
+  RetryDecision,
+  RetryGetByIdInput,
+  RetryGetByIdResult,
+  RetryMetadata,
+  RetryPolicy,
+  RetryRecord,
+  RetryStatsResult,
+  RetryStatus,
+} from "./retry-types";
+
+export {
+  DEFAULT_RETRY_POLICY,
+  computeExponentialBackoffDelayMs,
+  resolveRetryPolicy,
+} from "./retry-types";
+
+export { IN_MEMORY_RETRY_STORE_ID, InMemoryRetryStore } from "./in-memory-retry-store";
+
+export {
+  DefaultRetryInfrastructure,
+  createRetryId,
+  resetRetryIdSequences,
+  type DefaultRetryInfrastructureOptions,
+} from "./default-retry-infrastructure";

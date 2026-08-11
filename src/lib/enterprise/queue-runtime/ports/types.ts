@@ -121,7 +121,8 @@ export type QueueRuntimePortCapabilities = {
   implementsScheduler: false;
   /** OPER-INF-D — true quando Dead Letter operacional está ativo. */
   implementsDeadLetter: boolean;
-  implementsRetryReal: false;
+  /** OPER-INF-R — true quando Retry operacional está ativo. */
+  implementsRetryReal: boolean;
   implementsHttp: false;
   implementsWebsocket: false;
   knowsOperatorOrCooperative: false;
@@ -251,15 +252,15 @@ export type StatsResult = QueueRuntimeOperationEnvelope & {
 };
 
 /**
- * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07 / INF-08 / INF-09).
- * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada.
- * Scheduler Runtime é dependência preparada (opcional no Port shape) — NÃO agendada/executada.
+ * Dependências Enterprise injetadas no Queue Runtime (INF-06 / INF-07 / INF-08 / INF-09 / OPER-INF-R).
+ * Worker Runtime é dependência obrigatória preparada — NÃO alocada/executada pelo Queue.
+ * Scheduler Runtime é consumido pela Retry Infrastructure (OPER-INF-R) para agendar tentativas.
  * Persistent Queue Runtime é dependência preparada (opcional no Port shape) — NÃO persistida/consumida.
  * Observability Runtime é dependência preparada (opcional no Port shape) — NÃO observada/emitida.
  */
 export type QueueRuntimeEnterpriseDeps = {
   getWorkerRuntimePort(): WorkerRuntimePort;
-  /** INF-07 — Scheduler Runtime preparado (sem consumo funcional). */
+  /** INF-07 / OPER-INF-R — Scheduler Runtime (agendamento temporal de retry). */
   getSchedulerRuntimePort?: () => SchedulerRuntimePort;
   /** INF-08 — Persistent Queue Runtime preparado (sem consumo funcional). */
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;

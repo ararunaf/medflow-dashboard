@@ -104,6 +104,7 @@
     "enterprise:namespace-runtime:test": "npx tsx --test scripts/enterprise/tests/namespace-runtime-engine.test.ts",
     "enterprise:queue-runtime:test": "npx tsx --test scripts/enterprise/tests/queue-runtime-engine.test.ts",
     "enterprise:dead-letter-runtime:test": "npx tsx --test scripts/enterprise/tests/dead-letter-runtime-engine.test.ts",
+    "enterprise:retry-infrastructure:test": "npx tsx --test scripts/enterprise/tests/retry-infrastructure-engine.test.ts",
     "enterprise:worker-runtime:test": "npx tsx --test scripts/enterprise/tests/worker-runtime-engine.test.ts",
     "enterprise:scheduler-runtime:test": "npx tsx --test scripts/enterprise/tests/scheduler-runtime-engine.test.ts",
     "enterprise:persistent-queue-runtime:test": "npx tsx --test scripts/enterprise/tests/persistent-queue-runtime-engine.test.ts",

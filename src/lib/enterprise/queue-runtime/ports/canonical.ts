@@ -229,7 +229,8 @@ export type CanonicalQueueCapabilities = {
   implementsScheduler: false;
   /** OPER-INF-D — true quando Dead Letter operacional está ativo. */
   implementsDeadLetter: boolean;
-  implementsRetryReal: false;
+  /** OPER-INF-R — true quando Retry operacional está ativo. */
+  implementsRetryReal: boolean;
   implementsHttp: false;
   implementsWebsocket: false;
   knowsOperatorOrCooperative: false;

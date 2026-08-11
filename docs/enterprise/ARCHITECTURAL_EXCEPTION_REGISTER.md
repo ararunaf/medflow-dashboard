@@ -1143,7 +1143,17 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 4. **Proibido:** dashboards / Grafana / Prometheus / OpenTelemetry / alertas / tracing / logs externos / novos Ports / Gateways / Runtimes.
 5. **Runtime:** `getEnterpriseRuntime()` / pipeline oficial **inalterados**.
 6. **Cobertura:** `enterprise:observability-runtime:test`.
-7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-O ✅**; **OPER-INF-R ⏳ / TISS-RUNTIME-01 ⏳**.
+7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-O ✅**; **OPER-INF-R ✅ / TISS-RUNTIME-01 ⏳**.
+
+### Atualização OPER-INF-R — Retry Infrastructure operacional (11/08/2026)
+
+1. **Natureza:** ativação operacional da Retry Infrastructure reutilizando exclusivamente `SchedulerRuntimePort` + `WorkerRuntimePort` + `QueueRuntimePort`.  
+2. **Implementado:** retry policy, counter, delay, exponential backoff, max attempts, status, metadata, scheduling.  
+3. **Refinamento:** Retry **nunca executa** processamento — apenas agenda; Worker executa; Scheduler controla o tempo; Queue transporta; Dead Letter é destino definitivo após `maxAttempts`.  
+4. **Proibido:** novos Ports / Gateways / Runtime / alteração do Enterprise Runtime / Foundations / pipeline oficial / DB direto / lógica TISS.  
+5. **Runtime:** `getEnterpriseRuntime()` / pipeline oficial **inalterados** (sem `getRetryRuntimePort`).  
+6. **Cobertura:** `enterprise:retry-infrastructure:test`.  
+7. **Roadmap oficial:** [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md) — **OPER-INF-R ✅**; **TISS-RUNTIME-01 ⏳**.
 
 #### AER-WR-B1
 - **Título:** Escape hatch `getWorkerRuntimePort()`  
@@ -1338,3 +1348,4 @@ Conforme regra “não criar novas ressalvas / não inventar”:
 | 11/08/2026 | OPER-INF-S | Ativação operacional SchedulerRuntimePort via WorkerRuntimePort (poll temporal/schedule/cancel/heartbeat/shutdown/concorrência/recover); sem novos Ports/Gateways; Runtime inalterado; OPER-INF-S ✅; OPER-INF-D ⏳ |
 | 11/08/2026 | OPER-INF-D | Ativação operacional DeadLetterRuntimePort (contrato interno) via QueueRuntimePort (park/getById/purge/isolamento); sem Port Enterprise novo / Gateway / retry; OPER-INF-D ✅; OPER-INF-R ⏳ |
 | 11/08/2026 | OPER-INF-O | Ativação operacional ObservabilityRuntimePort via Ports existentes (somente leitura: stats/diagnostics); sem dashboards/OTel/Prometheus; sem novos Ports/Gateways; OPER-INF-O ✅; OPER-INF-R ⏳ |
+| 11/08/2026 | OPER-INF-R | Ativação operacional Retry Infrastructure via SchedulerRuntimePort + WorkerRuntimePort + QueueRuntimePort (policy/backoff/maxAttempts/schedule); sem Port/Gateway/Runtime novos; Dead Letter destino final; OPER-INF-R ✅; TISS-RUNTIME-01 ⏳ |

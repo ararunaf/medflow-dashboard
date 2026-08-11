@@ -1,19 +1,21 @@
 /**
- * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q / OPER-INF-D).
+ * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q / OPER-INF-D / OPER-INF-R).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → QueueRuntimePort
  *     → DefaultQueueRuntimeAdapter / EnterpriseQueueRuntimeAdapter / MockQueueRuntimeAdapter
  *     → InMemoryQueueRuntimeStore + Persistence Backend (Supabase | memory durable)
  *     → DeadLetterRuntimePort (OPER-INF-D — contrato interno, sem Port Enterprise novo)
+ *     → DefaultRetryInfrastructure (OPER-INF-R — NÃO é Port; Scheduler + Worker + Queue)
  *     → Canonical Queue Result
  *
  * OPER-INF-Q: backend persistente ativado no adapter — mesma interface pública.
  * OPER-INF-D: Dead Letter operacional via DeadLetterRuntimePort → QueueRuntimePort.
+ * OPER-INF-R: Retry operacional (decide + agenda; nunca processa) via Ports existentes.
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
- * Sem workers. Sem scheduler. Sem retry/reprocessamento (OPER-INF-R).
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
- * Toda comunicação exclusivamente via QueueRuntimePort.
+ * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
+ * SchedulerRuntimePort + WorkerRuntimePort + QueueRuntimePort (retry interno).
  */
 export type {
   AckInput,
@@ -133,6 +135,14 @@ export {
   InMemoryDeadLetterStore,
   createDeadLetterId,
   resetDeadLetterIdSequences,
+  DefaultRetryInfrastructure,
+  DEFAULT_RETRY_POLICY,
+  IN_MEMORY_RETRY_STORE_ID,
+  InMemoryRetryStore,
+  computeExponentialBackoffDelayMs,
+  createRetryId,
+  resetRetryIdSequences,
+  resolveRetryPolicy,
   type DeadLetterGetByIdInput,
   type DeadLetterGetByIdResult,
   type DeadLetterMetadata,
@@ -144,4 +154,15 @@ export {
   type DeadLetterRuntimePort,
   type DeadLetterStatsResult,
   type DefaultDeadLetterRuntimeOptions,
+  type DefaultRetryInfrastructureOptions,
+  type RetryDecideInput,
+  type RetryDecideResult,
+  type RetryDecision,
+  type RetryGetByIdInput,
+  type RetryGetByIdResult,
+  type RetryMetadata,
+  type RetryPolicy,
+  type RetryRecord,
+  type RetryStatsResult,
+  type RetryStatus,
 } from "./operational";

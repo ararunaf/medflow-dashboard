@@ -143,7 +143,7 @@ getEnterpriseRuntime()
 
 | Sprint | Status |
 |--------|--------|
-| **OPER-INF-R** | ⏳ Retry operacional (decisão de reenvio) |
+| **OPER-INF-R** | ✓ Homologado — Retry operacional (decisão de reenvio via Ports existentes) |
 | **TISS-RUNTIME-01** | ⏳ Ativação operacional TISS Runtime |
 
 ---

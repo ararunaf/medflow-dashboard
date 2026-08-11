@@ -47,7 +47,8 @@ export type QueueRuntimeCapabilities = {
   implementsScheduler?: false;
   /** OPER-INF-D — Dead Letter operacional atrás do QueueRuntimePort. */
   implementsDeadLetter?: boolean;
-  implementsRetryReal?: false;
+  /** OPER-INF-R — Retry operacional (decisão + agendamento via Ports existentes). */
+  implementsRetryReal?: boolean;
   implementsHttp?: false;
   implementsWebsocket?: false;
   knowsOperatorOrCooperative?: false;
@@ -102,7 +103,7 @@ export const DEFAULT_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities = {
   implementsWorkers: false,
   implementsScheduler: false,
   implementsDeadLetter: true,
-  implementsRetryReal: false,
+  implementsRetryReal: true,
   implementsHttp: false,
   implementsWebsocket: false,
   knowsOperatorOrCooperative: false,
@@ -121,6 +122,7 @@ export const DEFAULT_MOCK_QUEUE_RUNTIME_CAPABILITIES: QueueRuntimeCapabilities =
   processingPerformed: false,
   persistenceImplemented: false,
   implementsDeadLetter: false,
+  implementsRetryReal: false,
 };
 
 export function toCanonicalQueueCapabilities(
@@ -153,7 +155,7 @@ export function toCanonicalQueueCapabilities(
     implementsWorkers: false,
     implementsScheduler: false,
     implementsDeadLetter: capabilities.implementsDeadLetter === true,
-    implementsRetryReal: false,
+    implementsRetryReal: capabilities.implementsRetryReal === true,
     implementsHttp: false,
     implementsWebsocket: false,
     knowsOperatorOrCooperative: false,
