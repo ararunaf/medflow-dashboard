@@ -32,25 +32,28 @@ import {
 import { getCaptureOcrResult, runCaptureOcr } from "../ocr/services/ocr-service";
 import { getOcrResultSignedUrl } from "../ocr/infrastructure/ocr-storage";
 import { getStructuredGuideSignedUrl } from "../parser/infrastructure/parser-storage";
-import { getCaptureAuditReport, runCaptureAudit } from "../audit/services/preventive-audit-service";
 import {
-  getCaptureContractIntelligenceReport,
-  runCaptureContractIntelligence,
-} from "../contract/services/contract-intelligence-service";
+  getCaptureAuditReportViaEnterprise,
+  runCaptureAuditViaEnterprise,
+} from "../enterprise/process-audit-via-enterprise";
+import {
+  getCaptureContractIntelligenceReportViaEnterprise,
+  runCaptureContractViaEnterprise,
+} from "../enterprise/process-contract-via-enterprise";
 import { getContractIntelligenceSignedUrl } from "../contract/infrastructure/contract-intelligence-storage";
 import {
-  getCaptureRiskAssessmentReport,
-  getCaptureRiskDashboard,
-  runCaptureGlosaRisk,
-} from "../risk/services/glosa-risk-service";
+  getCaptureRiskAssessmentReportViaEnterprise,
+  getCaptureRiskDashboardViaEnterprise,
+  runCaptureRiskViaEnterprise,
+} from "../enterprise/process-risk-via-enterprise";
 import { getRiskAssessmentSignedUrl } from "../risk/infrastructure/risk-storage";
 import { getAuditReportSignedUrl } from "../audit/infrastructure/audit-storage";
 import {
-  getCaptureCorrectionProposals,
-  getCorrectionProposalsSignedUrl,
-  runCaptureCorrectionAssistant,
-  updateCaptureCorrectionProposal,
-} from "../correction";
+  getCaptureCorrectionProposalsViaEnterprise,
+  runCaptureCorrectionViaEnterprise,
+  updateCaptureCorrectionProposalViaEnterprise,
+} from "../enterprise/process-correction-via-enterprise";
+import { getCorrectionProposalsSignedUrl } from "../correction/infrastructure/correction-storage";
 import {
   getCaptureLearningDashboard,
   getCaptureLearningMetrics,
@@ -344,7 +347,7 @@ export const runCaptureAuditFn = createServerFn({ method: "POST" })
     ),
   }))
   .handler(async ({ data }) => {
-    return runMutation(async (ctx) => runCaptureAudit(ctx, data.sessionId));
+    return runMutation(async (ctx) => runCaptureAuditViaEnterprise(ctx, data.sessionId));
   });
 
 export const getCaptureAuditReportFn = createServerFn({ method: "GET" })
@@ -358,7 +361,7 @@ export const getCaptureAuditReportFn = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }) => {
     return runQuery(async (ctx) => {
-      const report = await getCaptureAuditReport(ctx, data.sessionId);
+      const report = await getCaptureAuditReportViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.audit as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
@@ -375,7 +378,7 @@ export const runCaptureContractIntelligenceFn = createServerFn({ method: "POST" 
     ),
   }))
   .handler(async ({ data }) => {
-    return runMutation(async (ctx) => runCaptureContractIntelligence(ctx, data.sessionId));
+    return runMutation(async (ctx) => runCaptureContractViaEnterprise(ctx, data.sessionId));
   });
 
 export const getCaptureContractIntelligenceReportFn = createServerFn({ method: "GET" })
@@ -389,7 +392,7 @@ export const getCaptureContractIntelligenceReportFn = createServerFn({ method: "
   }))
   .handler(async ({ data }) => {
     return runQuery(async (ctx) => {
-      const report = await getCaptureContractIntelligenceReport(ctx, data.sessionId);
+      const report = await getCaptureContractIntelligenceReportViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.contractIntelligence as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
@@ -419,7 +422,7 @@ export const runCaptureGlosaRiskFn = createServerFn({ method: "POST" })
     ),
   }))
   .handler(async ({ data }) => {
-    return runMutation(async (ctx) => runCaptureGlosaRisk(ctx, data.sessionId));
+    return runMutation(async (ctx) => runCaptureRiskViaEnterprise(ctx, data.sessionId));
   });
 
 export const getCaptureRiskAssessmentReportFn = createServerFn({ method: "GET" })
@@ -433,7 +436,7 @@ export const getCaptureRiskAssessmentReportFn = createServerFn({ method: "GET" }
   }))
   .handler(async ({ data }) => {
     return runQuery(async (ctx) => {
-      const report = await getCaptureRiskAssessmentReport(ctx, data.sessionId);
+      const report = await getCaptureRiskAssessmentReportViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.riskAssessment as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
@@ -454,7 +457,7 @@ export const getCaptureRiskAssessmentJsonDownloadFn = createServerFn({ method: "
   });
 
 export const getCaptureRiskDashboardFn = createServerFn({ method: "GET" }).handler(async () => {
-  return runQuery(async (ctx) => getCaptureRiskDashboard(ctx));
+  return runQuery(async (ctx) => getCaptureRiskDashboardViaEnterprise(ctx));
 });
 
 export const getCaptureAuditReportJsonDownloadFn = createServerFn({ method: "GET" })
@@ -480,7 +483,7 @@ export const runCaptureCorrectionAssistantFn = createServerFn({ method: "POST" }
     ),
   }))
   .handler(async ({ data }) => {
-    return runMutation(async (ctx) => runCaptureCorrectionAssistant(ctx, data.sessionId));
+    return runMutation(async (ctx) => runCaptureCorrectionViaEnterprise(ctx, data.sessionId));
   });
 
 export const getCaptureCorrectionProposalsFn = createServerFn({ method: "GET" })
@@ -494,7 +497,7 @@ export const getCaptureCorrectionProposalsFn = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }) => {
     return runQuery(async (ctx) => {
-      const store = await getCaptureCorrectionProposals(ctx, data.sessionId);
+      const store = await getCaptureCorrectionProposalsViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.correction as JsonObject | undefined) ?? null;
       return { store, summary, metadata: status.metadata };
@@ -515,7 +518,7 @@ export const updateCaptureCorrectionProposalFn = createServerFn({ method: "POST"
   .inputValidator(parseUpdateCorrectionInput)
   .handler(async ({ data }) => {
     return runMutation(async (ctx) => {
-      const store = await updateCaptureCorrectionProposal(ctx, data.sessionId, {
+      const store = await updateCaptureCorrectionProposalViaEnterprise(ctx, data.sessionId, {
         proposalId: data.proposalId,
         action: data.action,
         editedValue: data.editedValue,

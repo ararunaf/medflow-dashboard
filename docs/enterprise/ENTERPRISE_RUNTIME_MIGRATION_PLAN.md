@@ -29,7 +29,7 @@
 ARC-24     Descoberta + regra + plano          ← FEITO (docs only)
 EPC-24A    Orquestração canônica no caminho Capture  ← FEITO (binding; sem cutover)
 EPC-24B    Migrar Intake+Extraction (parse)    ← FEITO (sem cutover; OCR intocado)
-EPC-24C    Migrar Audit/Contract/Risk/Correction
+EPC-24C    Migrar Audit/Contract/Risk/Correction ← FEITO (sem cutover; fallback legado)
 EPC-24D    Migrar Review→TISS/XML/Bloco C
 EPC-24E    Cutover único + remoções + certificação
 ```
@@ -82,19 +82,23 @@ Cada sprint exige: build + `tsc --noEmit` + lint + smoke = PASS, paridade funcio
 
 ### EPC-24C — Decision Runtimes Convergence
 
+**Status:** ✅ Concluída (2026-08-10) — Audit/Contract/Risk/Correction via Runtime Ports; **sem cutover**; engines legado como fallback.
+
 **Objetivo:** Migrar auditoria preventiva, contrato, glosa e correção para Ports Enterprise.
 
 | Item | Detalhe |
 |------|---------|
-| PRESERVAR | Regras de negócio atuais (comportamento) |
-| MIGRAR | `capture/audit` → Audit Runtime / AI Auditor (determinístico primeiro) |
-| MIGRAR | `capture/contract` → Contract + Contract Rule Binding |
-| MIGRAR | `capture/risk` → TISS Rule Runtime / Quality Runtime |
-| MIGRAR | `capture/correction` → Auto-Fill / Quality |
-| REMOVER | Engines locais órfãs após cutover do estágio |
+| PRESERVAR | Regras de negócio atuais (comportamento); Foundations 4–7 |
+| MIGRAR | `capture/audit` → Audit Runtime (fallback legado) |
+| MIGRAR | `capture/contract` → RulePackEngine (hop wired; Binding não composto) + fallback legado |
+| MIGRAR | `capture/risk` → Quality Runtime + fallback legado |
+| MIGRAR | `capture/correction` → Auto-Fill Runtime + fallback legado |
+| REMOVER | Nada ainda (cutover = EPC-24E) |
 | Critério | Mesmos findings/scores/propostas; metadata compatível com Review UI |
 
-**Entregáveis:** Ports wired no Runtime; adapters que reutilizam lógica atual (copy behavior); testes de paridade.
+**Entregáveis:** gateways `process-*-via-enterprise`; binding/server atualizados; testes `epc-24c-*`; docs `EPC24C_*`.
+
+**Confirmação dual-path:** AER-GA03-A1 **continua reduzido, porém ainda não eliminado** (fallback 100% nas 4 engines; cutover só em EPC-24E).
 
 ---
 
