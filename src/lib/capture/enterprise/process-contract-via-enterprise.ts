@@ -1,20 +1,21 @@
 /**
- * EPC-24C — Capture Contract Intelligence → Rule Pack Engine (convergência).
+ * EPC-24C / EPC-24E — Capture Contract Intelligence → Rule Pack Engine.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *     → RulePackEnginePort (coordenação estrutural TISS-03;
  *       hop wired da cadeia Contract → Contract Rule Binding → Rule Pack)
- *     → fallback legado `runCaptureContractIntelligence` (comportamento idêntico)
+ *     → runCaptureContractIntelligence (implementação interna autorizada)
  *
  * ContractPort / ContractRuleBindingPort NÃO estão compostos em
- * getEnterpriseRuntime() (AER-GA03-M5; Foundations 4–7 congeladas nesta sprint).
+ * getEnterpriseRuntime() (AER-GA03-M5; Foundations 4–7 congeladas).
  * O Port wired que representa o caminho contratual no Runtime é RulePackEngine.
  *
- * Sem cutover. Sem alteração de regra de negócio / UI / OCR / Parser / XML /
- * banco / APIs. Foundations 4–7 preservadas.
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regra de negócio /
+ * UI / OCR / Parser / XML / banco / APIs. Foundations 4–7 preservadas.
  *
- * A engine legada permanece exclusivamente como fallback atrás deste gateway.
+ * A engine legada permanece exclusivamente como implementação interna
+ * atrás deste gateway — nunca como pipeline paralelo.
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import {
@@ -28,7 +29,6 @@ import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 export type RunCaptureContractViaEnterpriseResult = RunContractIntelligenceResult & {
   viaEnterpriseRuntime: true;
   rulePackCount: number | null;
-  contractFallback: "legacy-contract-intelligence";
 };
 
 export type CaptureContractViaEnterpriseProbe = {
@@ -60,7 +60,7 @@ export async function probeCaptureContractViaEnterprise(): Promise<CaptureContra
 
 /**
  * Coordena inteligência contratual via RulePackEnginePort e executa a
- * engine legada como fallback funcional (mesma saída observável).
+ * engine como implementação interna autorizada (mesma saída observável).
  */
 export async function runCaptureContractViaEnterprise(
   ctx: ServiceCtx,
@@ -77,15 +77,14 @@ export async function runCaptureContractViaEnterprise(
     });
     rulePackCount = listed.packs?.length ?? 0;
   } catch {
-    /* coordenação estrutural best-effort — fallback legado permanece */
+    /* coordenação estrutural do Port — implementação interna segue no pipeline único */
   }
 
-  const legacy = await runCaptureContractIntelligence(ctx, sessionId);
+  const internal = await runCaptureContractIntelligence(ctx, sessionId);
   return {
-    ...legacy,
+    ...internal,
     viaEnterpriseRuntime: true,
     rulePackCount,
-    contractFallback: "legacy-contract-intelligence",
   };
 }
 

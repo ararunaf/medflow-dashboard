@@ -2,8 +2,9 @@
  * EPC-24D — Enterprise Runtime Review / TISS / XML / Bloco C Convergence.
  *
  * Valida que Review, TISS/XML e Bloco C entram pelo composition root Enterprise,
- * com engines legado apenas como fallback atrás dos gateways.
- * Não altera comportamento funcional nem Foundations 4–7. Sem cutover.
+ * com engines legado apenas como implementação interna dos gateways.
+ * Não altera comportamento funcional nem Foundations 4–7.
+ * Cutover Dual Path concluído em EPC-24E.
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
@@ -149,14 +150,14 @@ describe("EPC-24D — Review / TISS-XML / Bloco C Convergence", () => {
       trigger: "probe",
     });
     assert.equal(result.viaEnterpriseRuntime, true);
-    assert.equal(result.blocoCFallback, "legacy-tiss-product-services");
+    assert.equal(result.singlePipeline, true);
     assert.ok(result.coordinationId);
     assert.ok(result.workflowExecutionId);
     assert.ok(result.batchId);
     assert.ok(result.protocolProfileId);
   });
 
-  it("mede latência média Enterprise Runtime vs fallback legado (estrutural)", async () => {
+  it("mede latência média do pipeline único Enterprise Runtime (estrutural)", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = resolveCaptureEnterpriseRuntime();
 
@@ -168,39 +169,37 @@ describe("EPC-24D — Review / TISS-XML / Bloco C Convergence", () => {
       await runtime.getProtocolRuntimePort().health();
     });
 
-    // Fallback legado = resolução do composition root + probe local sem Ports
-    // (engines legado reais exigem ServiceCtx/DB; medimos o custo do caminho
-    // de fallback estrutural — identidade do gateway sem side-effect).
-    const legacyAvg = await avgMs(5, async () => {
+    const entryAvg = await avgMs(5, async () => {
       void resolveCaptureEnterpriseRuntime();
-      void ("legacy-review-workspace" as const);
-      void ("legacy-xml-export-service" as const);
-      void ("legacy-tiss-product-services" as const);
     });
 
     assert.ok(enterpriseAvg >= 0);
-    assert.ok(legacyAvg >= 0);
+    assert.ok(entryAvg >= 0);
 
-    // Exposto para o relatório da sprint (stdout do test runner).
     console.log(
       JSON.stringify({
         epc24dLatencyMs: {
           enterpriseRuntimeAvgMs: Number(enterpriseAvg.toFixed(3)),
-          legacyFallbackAvgMs: Number(legacyAvg.toFixed(3)),
+          entrypointAvgMs: Number(entryAvg.toFixed(3)),
           samples: 5,
-          note: "Enterprise = health() Review/XML/BlocoC Ports; Legacy = gateway identity (sem DB)",
+          note: "Enterprise = health() Review/XML/BlocoC Ports; entry = getEnterpriseRuntime()",
         },
       }),
     );
   });
 
-  it("flags de fallback permanecem explícitas (sem cutover)", async () => {
+  it("pipeline único: sem flags de fallback Dual Path", async () => {
     resetEnterpriseRuntimeForTests();
     const bloco = await coordinateBlocoCViaEnterprise({
-      sessionId: "epc-24d-fallback-flag",
+      sessionId: "epc-24d-single-pipeline",
       trigger: "manual",
     });
-    assert.equal(bloco.blocoCFallback, "legacy-tiss-product-services");
     assert.equal(bloco.viaEnterpriseRuntime, true);
+    assert.equal(bloco.singlePipeline, true);
+    assert.equal(
+      "blocoCFallback" in bloco,
+      false,
+      "flags de fallback Dual Path devem estar ausentes após EPC-24E",
+    );
   });
 });

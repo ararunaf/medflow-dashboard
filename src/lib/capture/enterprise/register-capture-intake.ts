@@ -1,17 +1,15 @@
 /**
- * Bridge Captura → Enterprise Runtime (ARCH-01 / EPC-24A / EPC-24B / DIP-02…DIP-06).
+ * Bridge Captura → Enterprise Runtime (ARCH-01 / EPC-24A…E / DIP-02…DIP-06).
  *
- * EPC-24B: Intake deixa de ser fire-and-forget opaco — é awaited no Happy Path
- * sob o composition root, com resultado observável (ainda best-effort).
+ * Cutover EPC-24E: Intake é parte do pipeline oficial único sob
+ * getEnterpriseRuntime() — não é side-effect paralelo (AER-GA03-A1 Resolvida).
  *
  * Fluxo: Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *   → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime → …
  *
  * NÃO altera OCR/classificação/storage/busca reais do produto, parser, auditoria,
- * UI, APIs ou regras. Falhas são engolidas — o fluxo de Captura permanece válido.
- *
- * Dual-path AER-GA03-A1: reduzido (intake canônico via Runtime no caminho bound),
- * ainda não eliminado (pipeline operacional legado permanece até EPC-24E).
+ * UI, APIs ou regras. Falhas de intake estrutural são engolidas — o fluxo de
+ * Captura permanece válido (upload não depende do intake canônico).
  */
 import type { RegisterCaptureDocumentIntakeResult } from "@/lib/enterprise/runtime";
 import type { CaptureDocumentRecord, CaptureSessionRecord } from "../types";
@@ -59,7 +57,7 @@ export async function probeCaptureIntakeViaEnterprise(): Promise<CaptureIntakeVi
 
 /**
  * Registra o documento de Captura na Foundation via Ports oficiais.
- * Awaited (EPC-24B) — nunca lança; retorna null em falha.
+ * Awaited — nunca lança; retorna null em falha.
  */
 export async function registerCaptureDocumentIntakeBridge(
   input: CaptureEnterpriseBridgeInput,

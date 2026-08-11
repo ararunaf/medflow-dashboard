@@ -1,16 +1,18 @@
 /**
- * EPC-24D — Capture Review → Validation Runtime + Bloco C handoff (convergência).
+ * EPC-24D / EPC-24E — Capture Review → Validation Runtime + Bloco C handoff.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
- *     → ValidationRuntimePort (coordenação estrutural F3-CAP-08; aprovação humana)
+ *     → ValidationRuntimePort (coordenação estrutural F3-CAP-08)
  *     → (se aprovada) coordinateBlocoCViaEnterprise (Workflow/Batch/Protocol)
- *     → fallback legado `review-workspace-store` (comportamento funcional idêntico)
+ *     → setReviewApprovalDecision (implementação interna autorizada)
  *
- * Sem cutover. Sem alteração de regra de negócio / UI / OCR / Parser / Audit /
- * Contract / Risk / Correction / banco / APIs. Foundations 4–7 preservadas.
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regra de negócio /
+ * UI / OCR / Parser / Audit / Contract / Risk / Correction / banco / APIs.
+ * Foundations 4–7 preservadas.
  *
- * A engine legada permanece exclusivamente como fallback atrás deste gateway.
+ * A engine legada permanece exclusivamente como implementação interna
+ * atrás deste gateway — nunca como pipeline paralelo.
  * Nenhum módulo de produto deve importar `review-workspace-store` para execução —
  * apenas este módulo (e testes do próprio review).
  */
@@ -31,7 +33,6 @@ export type SetReviewApprovalViaEnterpriseResult = {
   viaEnterpriseRuntime: true;
   validationJobId: string | null;
   blocoCCoordinationId: string | null;
-  reviewFallback: "legacy-review-workspace";
 };
 
 export type CaptureReviewViaEnterpriseProbe = {
@@ -73,9 +74,9 @@ export async function getReviewWorkspaceSnapshotViaEnterprise(
 }
 
 /**
- * Coordena aprovação humana via ValidationRuntimePort e executa o store legado
- * como fallback funcional (mesma saída observável). Em `aprovada`, dispara
- * coordenação estrutural Bloco C (sem cutover / sem criar lote real).
+ * Coordena aprovação humana via ValidationRuntimePort e executa o store
+ * como implementação interna autorizada. Em `aprovada`, dispara coordenação
+ * estrutural Bloco C (sem criar lote real).
  */
 export async function setReviewApprovalViaEnterprise(
   ctx: ServiceCtx,
@@ -94,8 +95,8 @@ export async function setReviewApprovalViaEnterprise(
       metadata: {
         kind: "canonical-validation-metadata",
         correlationId: input.sessionId,
-        channel: "epc-24d-capture-review",
-        tags: ["epc-24d", "review", "capture"],
+        channel: "epc-24e-capture-review",
+        tags: ["epc-24e", "review", "capture"],
         customAttributes: {
           sessionId: input.sessionId,
           stage: "review",
@@ -112,7 +113,7 @@ export async function setReviewApprovalViaEnterprise(
         metadata: {
           kind: "canonical-validation-metadata",
           correlationId: input.sessionId,
-          channel: "epc-24d-capture-review",
+          channel: "epc-24e-capture-review",
           customAttributes: {
             sessionId: input.sessionId,
             stage: "review",
@@ -122,11 +123,11 @@ export async function setReviewApprovalViaEnterprise(
       });
     }
   } catch {
-    /* coordenação estrutural best-effort — fallback legado permanece */
+    /* coordenação estrutural do Port — implementação interna segue no pipeline único */
   }
 
   try {
-    const legacy = await setReviewApprovalDecision(ctx, input);
+    const internal = await setReviewApprovalDecision(ctx, input);
 
     if (input.status === "aprovada") {
       try {
@@ -136,16 +137,15 @@ export async function setReviewApprovalViaEnterprise(
         });
         blocoCCoordinationId = bloco.coordinationId;
       } catch {
-        /* handoff Bloco C estrutural best-effort — Review permanece válido */
+        /* handoff Bloco C estrutural — Review permanece válido no pipeline único */
       }
     }
 
     return {
-      ...legacy,
+      ...internal,
       viaEnterpriseRuntime: true,
       validationJobId,
       blocoCCoordinationId,
-      reviewFallback: "legacy-review-workspace",
     };
   } finally {
     if (validationJobId) {

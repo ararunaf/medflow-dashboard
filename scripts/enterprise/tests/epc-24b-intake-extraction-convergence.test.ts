@@ -2,7 +2,7 @@
  * EPC-24B — Enterprise Runtime Intake & Extraction Convergence.
  *
  * Valida que Intake e Parser entram pelo composition root Enterprise,
- * com Parser legado apenas como fallback atrás do gateway.
+ * com Parser legado apenas como implementação interna do gateway.
  * Não altera comportamento funcional nem Foundations.
  */
 import assert from "node:assert/strict";

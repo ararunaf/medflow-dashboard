@@ -157,11 +157,9 @@ setReviewApprovalViaEnterprise (status=aprovada) | probeCaptureBlocoCViaEnterpri
 
 ## 11. Confirmação explícita — Dual Path AER-GA03-A1
 
-O Dual Path **AER-GA03-A1 continua existente apenas como mecanismo de fallback**:
+> **Atualização EPC-24E (2026-08-11):** Dual Path **eliminado**. Ver [`EPC24E_ENTERPRISE_RUNTIME_FINAL_CUTOVER.md`](./EPC24E_ENTERPRISE_RUNTIME_FINAL_CUTOVER.md). AER-GA03-A1 **Resolvida**.
 
-- Intake/Parser/Audit/Contract/Risk/Correction/Review/XML/Bloco C entram pelo Runtime.
-- O **comportamento real** de Review/XML/Bloco C ainda é o legado (fallback 100%).
-- Cutover único permanece em **EPC-24E**.
+Histórico EPC-24D (pré-cutover): Dual Path existia apenas como mecanismo de fallback; cutover ficou para EPC-24E.
 
 ## 12. Percentual estimado de convergência (ARC-24)
 

@@ -1,15 +1,16 @@
 /**
- * EPC-24C — Capture Audit → Audit Runtime (convergência).
+ * EPC-24C / EPC-24E — Capture Audit → Audit Runtime.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *     → AuditRuntimePort (coordenação estrutural F3-CAP-10)
- *     → fallback legado `runCaptureAudit` (comportamento funcional idêntico)
+ *     → runCaptureAudit (implementação interna autorizada do Port)
  *
- * Sem cutover. Sem alteração de regra de negócio. Sem UI/OCR/Parser/XML/
- * banco/APIs. Foundations 4–7 preservadas.
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regra de negócio.
+ * Sem UI/OCR/Parser/XML/banco/APIs. Foundations 4–7 preservadas.
  *
- * A engine legada permanece exclusivamente como fallback atrás deste gateway.
+ * A engine legada permanece exclusivamente como implementação interna
+ * atrás deste gateway — nunca como pipeline paralelo.
  * Nenhum módulo de produto deve importar `preventive-audit-service` para
  * execução — apenas este módulo (e testes do próprio audit).
  */
@@ -25,7 +26,6 @@ import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 export type RunCaptureAuditViaEnterpriseResult = RunCaptureAuditResult & {
   viaEnterpriseRuntime: true;
   auditJobId: string | null;
-  auditFallback: "legacy-preventive-audit";
 };
 
 export type CaptureAuditViaEnterpriseProbe = {
@@ -56,8 +56,8 @@ export async function probeCaptureAuditViaEnterprise(): Promise<CaptureAuditViaE
 }
 
 /**
- * Coordena auditoria via AuditRuntimePort e executa a engine legada
- * como fallback funcional (mesma saída observável).
+ * Coordena auditoria via AuditRuntimePort e executa a engine
+ * como implementação interna autorizada (mesma saída observável).
  */
 export async function runCaptureAuditViaEnterprise(
   ctx: ServiceCtx,
@@ -75,8 +75,8 @@ export async function runCaptureAuditViaEnterprise(
       metadata: {
         kind: "canonical-audit-metadata",
         correlationId: sessionId,
-        channel: "epc-24c-capture-audit",
-        tags: ["epc-24c", "audit", "capture"],
+        channel: "epc-24e-capture-audit",
+        tags: ["epc-24e", "audit", "capture"],
         customAttributes: { sessionId, stage: "audit" },
       },
     });
@@ -89,22 +89,21 @@ export async function runCaptureAuditViaEnterprise(
         metadata: {
           kind: "canonical-audit-metadata",
           correlationId: sessionId,
-          channel: "epc-24c-capture-audit",
+          channel: "epc-24e-capture-audit",
           customAttributes: { sessionId, stage: "audit" },
         },
       });
     }
   } catch {
-    /* coordenação estrutural best-effort — fallback legado permanece */
+    /* coordenação estrutural do Port — implementação interna segue no pipeline único */
   }
 
   try {
-    const legacy = await runCaptureAudit(ctx, sessionId);
+    const internal = await runCaptureAudit(ctx, sessionId);
     return {
-      ...legacy,
+      ...internal,
       viaEnterpriseRuntime: true,
       auditJobId,
-      auditFallback: "legacy-preventive-audit",
     };
   } finally {
     if (auditJobId) {

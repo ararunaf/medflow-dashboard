@@ -1,15 +1,17 @@
 /**
- * EPC-24D — TISS/XML Export → XML Generation / XML-TISS Runtime (convergência).
+ * EPC-24D / EPC-24E — TISS/XML Export → XML Generation / XML-TISS Runtime.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *     → XMLGenerationRuntimePort (coordenação estrutural TISS-05)
  *     → XMLTISSRuntimePort (coordenação estrutural C-01)
- *     → fallback legado `xml-export-service` (comportamento funcional idêntico)
+ *     → xml-export-service (implementação interna autorizada)
  *
- * Sem cutover. Sem alteração de regra TISS / UI / banco / APIs.
- * Foundations 4–7 preservadas. Builder `medflowTissExport` permanece como
- * fallback até EPC-24E (paridade + remoção).
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regra TISS / UI /
+ * banco / APIs. Foundations 4–7 preservadas.
+ *
+ * O builder `medflowTissExport` permanece como implementação interna do
+ * gateway — não como pipeline paralelo.
  *
  * Nenhum módulo de produto deve importar `xml-export-service` para execução —
  * apenas este módulo (e testes do próprio TISS XML).
@@ -28,7 +30,6 @@ export type ExportTissBatchXmlViaEnterpriseResult = {
   viaEnterpriseRuntime: true;
   generationId: string | null;
   xmlTissDocumentId: string | null;
-  xmlFallback: "legacy-xml-export-service";
 };
 
 export type CaptureXmlViaEnterpriseProbe = {
@@ -69,8 +70,8 @@ export async function probeCaptureXmlViaEnterprise(): Promise<CaptureXmlViaEnter
 }
 
 /**
- * Coordena geração XML via Ports Enterprise e executa o export legado
- * como fallback funcional (mesmo XML / mesmos side-effects de persistência).
+ * Coordena geração XML via Ports Enterprise e executa o export
+ * como implementação interna autorizada (mesmo XML / side-effects).
  */
 export async function exportTissBatchXmlViaEnterprise(
   ctx: ServiceCtx,
@@ -93,19 +94,19 @@ export async function exportTissBatchXmlViaEnterprise(
         requestId: `tiss-xml-gen-${batchId}`,
         generationId: `tiss-xml-gen-${batchId}`,
         documentId: batchId,
-        structuralNotes: `epc-24d-tiss-xml-export:${batchId}`,
+        structuralNotes: `epc-24e-tiss-xml-export:${batchId}`,
         metadata: {
           kind: "canonical-xml-metadata",
           correlationId: batchId,
-          channel: "epc-24d-tiss-xml",
-          tags: ["epc-24d", "xml", "tiss"],
+          channel: "epc-24e-tiss-xml",
+          tags: ["epc-24e", "xml", "tiss"],
           customAttributes: { batchId, stage: "xml-export" },
         },
       },
     });
     generationId = generated.result?.generationId ?? generated.result?.resultId ?? null;
   } catch {
-    /* coordenação estrutural best-effort — fallback legado permanece */
+    /* coordenação estrutural do Port — implementação interna segue no pipeline único */
   }
 
   try {
@@ -115,21 +116,20 @@ export async function exportTissBatchXmlViaEnterprise(
     });
     xmlTissDocumentId = prepared.document?.documentId ?? null;
   } catch {
-    /* coordenação XML-TISS estrutural best-effort */
+    /* coordenação XML-TISS estrutural */
   }
 
-  const legacy = await exportTissBatchXml(ctx, batchId);
+  const internal = await exportTissBatchXml(ctx, batchId);
   return {
-    ...legacy,
+    ...internal,
     viaEnterpriseRuntime: true,
     generationId,
     xmlTissDocumentId,
-    xmlFallback: "legacy-xml-export-service",
   };
 }
 
 /**
- * Build XML (leitura) — facade Enterprise; legado permanece a fonte do documento.
+ * Build XML (leitura) — facade Enterprise; implementação interna autorizada.
  */
 export async function buildTissBatchXmlDocumentViaEnterprise(
   ctx: ServiceCtx,

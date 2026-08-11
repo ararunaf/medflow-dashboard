@@ -1,45 +1,28 @@
 /**
- * EPC-24A / EPC-24B / EPC-24C / EPC-24D — Enterprise Runtime Convergence Binding
+ * EPC-24A…E — Enterprise Runtime Convergence Binding (cutover EPC-24E)
  *
- * Liga o pipeline operacional de Captura ao Enterprise Runtime sem cutover.
- *
- * EPC-24B:
- *   - Intake canônico awaited via Runtime
- *   - Parser/Extraction via DocumentExtractionRuntime (+ fallback legado)
- *
- * EPC-24C:
- *   - Audit via AuditRuntimePort (+ fallback legado)
- *   - Contract via RulePackEnginePort (+ fallback legado)
- *   - Risk via QualityRuntimePort (+ fallback legado)
- *   - Correction via AutoFillRuntimePort (+ fallback legado)
- *
- * EPC-24D:
- *   - Review via ValidationRuntimePort (+ fallback legado)
- *   - TISS/XML via XMLGenerationRuntimePort / XMLTISSRuntimePort (+ fallback legado)
- *   - Bloco C via Workflow/Batch/Protocol Ports (+ fallback services TISS)
- *
- * PRESERVAR: comportamento funcional idêntico (OCR→…→correção; Review/XML).
- * REMOVER (futuro EPC-24E): dual-path AER-GA03-A1 após paridade certificada.
- *
- * Fluxo oficial deste binding:
+ * Pipeline operacional oficial único do Capture:
  *   Capture (upload/retry)
  *     → resolveCaptureEnterpriseRuntime()  [= getEnterpriseRuntime()]
- *     → Document Intake (EPC-24B)
+ *     → Document Intake (canônico)
  *     → CanonicalExecutionOrchestratorPort (coordenação estrutural)
- *     → OCR (inalterado) → Parser via Extraction → Audit → Contract → Risk → Correction
+ *     → OCR → Parser/Extraction → Audit → Contract → Risk → Correction
  *
  * Review / TISS/XML / Bloco C são coordenados via Runtime nos respectivos
- * Server Fns (review-server / tiss-server) — fora do bound OCR→Correction.
+ * Server Fns (review-server / tiss-server) — mesmo composition root.
  *
- * Dual-path AER-GA03-A1 permanece parcialmente (reduzido; cutover = EPC-24E).
+ * Engines de produto permanecem apenas como implementação interna dos
+ * gateways autorizados — nunca como Dual Path / pipeline paralelo.
+ *
+ * AER-GA03-A1: Resolvida (EPC-24E).
  */
 import type { ServiceCtx } from "@/lib/services/operations/types";
-import { runCaptureOcr } from "../ocr/services/ocr-service";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 import {
   registerCaptureDocumentIntakeBridge,
   type CaptureEnterpriseBridgeInput,
 } from "./register-capture-intake";
+import { runCaptureOcrViaEnterprise } from "./process-ocr-via-enterprise";
 import { runCaptureParserViaEnterprise } from "./process-parser-via-enterprise";
 import { runCaptureAuditViaEnterprise } from "./process-audit-via-enterprise";
 import { runCaptureContractViaEnterprise } from "./process-contract-via-enterprise";
@@ -65,6 +48,8 @@ export type CaptureRuntimeBindingProbe = {
   workflowRuntimeOk: boolean;
   batchRuntimeOk: boolean;
   protocolRuntimeOk: boolean;
+  ocrRuntimeOk: boolean;
+  singlePipeline: true;
 };
 
 export type RunCaptureOperationalPipelineBoundOptions = {
@@ -75,7 +60,7 @@ export type RunCaptureOperationalPipelineBoundOptions = {
 /**
  * Probe estrutural do binding: prova que Capture entra pelo composition root
  * e alcança Orchestrator + Capture Engine + Intake + Extraction + Decision +
- * Review/XML/Bloco C Ports.
+ * Review/XML/Bloco C Ports + OCR Runtime.
  * Best-effort.
  */
 export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRuntimeBindingProbe | null> {
@@ -96,6 +81,7 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
       workflowHealth,
       batchHealth,
       protocolHealth,
+      ocrHealth,
     ] = await Promise.all([
       runtime.getOrchestratorPort().health(),
       runtime.getCaptureEngineRuntimePort().health(),
@@ -111,6 +97,7 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
       runtime.getWorkflowRuntimePort().health(),
       runtime.getBatchRuntimePort().health(),
       runtime.getProtocolRuntimePort().health(),
+      runtime.getOCRRuntimePort().health(),
     ]);
     return {
       runtimeId: runtime.runtimeId,
@@ -129,6 +116,8 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
       workflowRuntimeOk: workflowHealth.ok,
       batchRuntimeOk: batchHealth.ok,
       protocolRuntimeOk: protocolHealth.ok,
+      ocrRuntimeOk: ocrHealth.ok,
+      singlePipeline: true,
     };
   } catch {
     return null;
@@ -138,11 +127,10 @@ export async function probeCaptureEnterpriseRuntimeBinding(): Promise<CaptureRun
 /**
  * Executa a cadeia operacional de Captura sob o binding Enterprise Runtime.
  *
- * Comportamento observável idêntico à orquestração imperativa anterior
+ * Comportamento observável idêntico à orquestração anterior
  * (mesmos estágios, mesmos catches aninhados, mesmas mensagens de falha engolida).
  *
- * EPC-24C/D: Decision + Review/XML/Bloco C coordenados via Runtime Ports
- * (Review/XML nos Server Fns dedicados). Não fecha AER-GA03-A1.
+ * Cutover EPC-24E: pipeline único via getEnterpriseRuntime(); AER-GA03-A1 Resolvida.
  * Não altera OCR / Parser engines / Foundations / UI / banco / APIs.
  */
 export async function runCaptureOperationalPipelineBound(
@@ -153,17 +141,17 @@ export async function runCaptureOperationalPipelineBound(
 ): Promise<void> {
   // Composition root oficial — Capture entra exclusivamente pelo Runtime.
   void resolveCaptureEnterpriseRuntime();
-  // Coordenação estrutural (Orchestrator / Capture Engine / Intake / Extraction / Decision / Review-XML-BlocoC).
+  // Coordenação estrutural (Orchestrator / Capture Engine / Intake / Extraction / Decision / Review-XML-BlocoC / OCR).
   void probeCaptureEnterpriseRuntimeBinding();
 
-  // EPC-24B — Intake canônico via Runtime (awaited; best-effort; sem alterar upload).
+  // Intake canônico via Runtime (awaited; parte do pipeline único).
   if (options?.intake) {
     await registerCaptureDocumentIntakeBridge(options.intake);
   }
 
   if (mode === "retry-upload") {
     try {
-      await runCaptureOcr(ctx, sessionId);
+      await runCaptureOcrViaEnterprise(ctx, sessionId);
       try {
         await runCaptureParserViaEnterprise(ctx, sessionId);
       } catch {
@@ -176,7 +164,7 @@ export async function runCaptureOperationalPipelineBound(
   }
 
   try {
-    await runCaptureOcr(ctx, sessionId);
+    await runCaptureOcrViaEnterprise(ctx, sessionId);
     try {
       await runCaptureParserViaEnterprise(ctx, sessionId);
       try {

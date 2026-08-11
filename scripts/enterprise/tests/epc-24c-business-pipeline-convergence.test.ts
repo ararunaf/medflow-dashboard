@@ -2,7 +2,7 @@
  * EPC-24C — Enterprise Runtime Business Pipeline Convergence.
  *
  * Valida que Audit / Contract / Risk / Correction entram pelo composition root
- * Enterprise, com engines legado apenas como fallback atrás dos gateways.
+ * Enterprise, com engines legado apenas como implementação interna dos gateways.
  * Não altera comportamento funcional nem Foundations 4–7.
  */
 import assert from "node:assert/strict";

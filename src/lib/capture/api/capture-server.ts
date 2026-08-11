@@ -29,7 +29,10 @@ import {
   getCaptureStructuredGuideViaEnterprise,
   runCaptureParserViaEnterprise,
 } from "../enterprise/process-parser-via-enterprise";
-import { getCaptureOcrResult, runCaptureOcr } from "../ocr/services/ocr-service";
+import {
+  getCaptureOcrResultViaEnterprise,
+  runCaptureOcrViaEnterprise,
+} from "../enterprise/process-ocr-via-enterprise";
 import { getOcrResultSignedUrl } from "../ocr/infrastructure/ocr-storage";
 import { getStructuredGuideSignedUrl } from "../parser/infrastructure/parser-storage";
 import {
@@ -110,9 +113,7 @@ export const uploadCaptureFileFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // EPC-24A/B — pipeline operacional sob binding getEnterpriseRuntime() (sem cutover).
-      // Intake canônico awaited no bound pipeline (EPC-24B); Parser via Extraction Runtime.
-      // Dual-path AER-GA03-A1 reduzido; cutover não executado.
+      // EPC-24E — pipeline operacional único sob getEnterpriseRuntime() (cutover).
       await runCaptureOperationalPipelineBound(ctx, data.sessionId, "full", {
         intake: {
           session: uploadResult.session,
@@ -199,7 +200,7 @@ export const retryCaptureUploadFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // EPC-24A/B — retry sob o mesmo binding (Intake + Parser via Runtime; sem cutover).
+      // EPC-24E — retry sob o mesmo pipeline único (getEnterpriseRuntime).
       await runCaptureOperationalPipelineBound(ctx, data.sessionId, "retry-upload", {
         intake: {
           session: uploadResult.session,
@@ -259,7 +260,7 @@ export const runCaptureOcrFn = createServerFn({ method: "POST" })
     ),
   }))
   .handler(async ({ data }) => {
-    return runMutation(async (ctx) => runCaptureOcr(ctx, data.sessionId));
+    return runMutation(async (ctx) => runCaptureOcrViaEnterprise(ctx, data.sessionId));
   });
 
 export const getCaptureOcrResultFn = createServerFn({ method: "GET" })
@@ -273,7 +274,7 @@ export const getCaptureOcrResultFn = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }) => {
     return runQuery(async (ctx) => {
-      const ocr = await getCaptureOcrResult(ctx, data.sessionId);
+      const ocr = await getCaptureOcrResultViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.ocr as JsonObject | undefined) ?? null;
       return { ocr, summary, metadata: status.metadata };

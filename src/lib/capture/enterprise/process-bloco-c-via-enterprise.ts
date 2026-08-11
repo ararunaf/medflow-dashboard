@@ -1,20 +1,20 @@
 /**
- * EPC-24D — Bloco C (Workflow / Batch / Protocol) via Enterprise Runtime.
+ * EPC-24D / EPC-24E — Bloco C (Workflow / Batch / Protocol) via Enterprise Runtime.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *     → WorkflowRuntimePort (C-10)
  *     → BatchRuntimePort (C-06)
  *     → ProtocolRuntimePort (C-07)
  *     → (probe) Authorization / Operator / SOAP / Return / Reconciliation / XML-TISS
  *
- * Sem cutover. Sem alteração de regras TISS / UI / banco / APIs.
- * Foundations 4–7 preservadas.
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regras TISS / UI /
+ * banco / APIs. Foundations 4–7 preservadas.
  *
- * Não há engine de produto Bloco C separada: o caminho funcional de lotes/guias
- * TISS permanece nos services legados (`services/tiss/*`) como fallback até
- * EPC-24E. Este gateway apenas coordena Ports estruturais e expõe o handoff
- * Review→Bloco C sem side-effects de negócio.
+ * Não há engine de produto Bloco C separada: services TISS (`services/tiss/*`)
+ * permanecem implementação interna autorizada de lotes/guias — nunca pipeline
+ * paralelo. Este gateway coordena Ports estruturais e o handoff Review→Bloco C
+ * sem side-effects de negócio adicionais.
  *
  * Nenhum módulo de produto deve importar runtimes Bloco C diretamente —
  * apenas este módulo (e o composition root `getEnterpriseRuntime`).
@@ -35,8 +35,8 @@ export type CoordinateBlocoCViaEnterpriseResult = {
   workflowExecutionId: string | null;
   batchId: string | null;
   protocolProfileId: string | null;
-  blocoCFallback: "legacy-tiss-product-services";
   trigger: BlocoCCoordinationTrigger;
+  singlePipeline: true;
 };
 
 export type CaptureBlocoCViaEnterpriseProbe = {
@@ -103,7 +103,7 @@ export async function probeCaptureBlocoCViaEnterprise(): Promise<CaptureBlocoCVi
 
 /**
  * Coordena handoff estrutural Bloco C (Workflow → Batch → Protocol).
- * Não cria lote/guia real; services TISS legados permanecem o fallback funcional.
+ * Não cria lote/guia real; services TISS permanecem implementação interna.
  */
 export async function coordinateBlocoCViaEnterprise(
   input: CoordinateBlocoCViaEnterpriseInput,
@@ -123,36 +123,36 @@ export async function coordinateBlocoCViaEnterprise(
       requestId: `bloco-c-wf-${input.sessionId}`,
       correlationId: input.sessionId,
       workflowId: coordinationId,
-      tags: ["epc-24d", "bloco-c", input.trigger],
-      owner: "epc-24d-capture-review-handoff",
+      tags: ["epc-24e", "bloco-c", input.trigger],
+      owner: "epc-24e-capture-review-handoff",
     });
     workflowExecutionId = wf.execution?.workflowExecutionId ?? null;
   } catch {
-    /* coordenação Workflow estrutural best-effort */
+    /* coordenação Workflow estrutural */
   }
 
   try {
     const preparedBatch = await batch.prepareBatch({
       requestId: `bloco-c-batch-${input.sessionId}`,
       batchName: input.batchRef ?? `review-handoff-${input.sessionId}`,
-      tags: ["epc-24d", "bloco-c", input.trigger],
-      owner: "epc-24d-capture-review-handoff",
+      tags: ["epc-24e", "bloco-c", input.trigger],
+      owner: "epc-24e-capture-review-handoff",
     });
     batchId = preparedBatch.manifest?.batchId ?? null;
   } catch {
-    /* coordenação Batch estrutural best-effort */
+    /* coordenação Batch estrutural */
   }
 
   try {
     const preparedProtocol = await protocol.prepareProfile({
       requestId: `bloco-c-protocol-${input.sessionId}`,
       profileName: `review-handoff-${input.sessionId}`,
-      tags: ["epc-24d", "bloco-c", input.trigger],
-      owner: "epc-24d-capture-review-handoff",
+      tags: ["epc-24e", "bloco-c", input.trigger],
+      owner: "epc-24e-capture-review-handoff",
     });
     protocolProfileId = preparedProtocol.profile?.profileId ?? null;
   } catch {
-    /* coordenação Protocol estrutural best-effort */
+    /* coordenação Protocol estrutural */
   }
 
   return {
@@ -161,7 +161,7 @@ export async function coordinateBlocoCViaEnterprise(
     workflowExecutionId,
     batchId,
     protocolProfileId,
-    blocoCFallback: "legacy-tiss-product-services",
     trigger: input.trigger,
+    singlePipeline: true,
   };
 }

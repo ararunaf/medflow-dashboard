@@ -7,7 +7,7 @@
 | Data | 2026-08-10 |
 | Tipo | Auditoria arquitetural (somente documentação) |
 | Escopo de código | **Nenhuma alteração em `src/`**, testes ou engines |
-| Status | ✅ Descoberta concluída |
+| Status | ✅ Descoberta concluída · trilha EPC-24A–E **cutover concluído** (EPC-24E, 2026-08-11) |
 
 ---
 
@@ -350,20 +350,23 @@ Toda regra de negócio documental passa a viver atrás de Ports Enterprise. O pr
 
 ## 13. Conclusões da descoberta
 
-1. Hoje o **pipeline oficial executado** é o **operacional Capture** em `uploadCaptureFileFn`.
-2. A Enterprise Foundation é **ampla (99 módulos)** e **parcialmente wired (~51)**; a maior parte **não executa** negócio.
-3. Convergência é **viável sem rebuild** via strangler fig estágio a estágio.
-4. Dual-path AER-GA03-A1 permanece a dívida central a fechar.
-5. Sprints EPC-24A→EPC-24E implementam a convergência (ver Migration Plan).
-6. Pós-convergência, o **único pipeline oficial** será o **Enterprise Canonical Runtime Pipeline** mediado por `getEnterpriseRuntime()`.
+1. Na descoberta ARC-24, o **pipeline oficial executado** era o **operacional Capture** em `uploadCaptureFileFn`.
+2. A Enterprise Foundation é **ampla (99 módulos)** e **parcialmente wired (~51)**.
+3. Convergência foi **viável sem rebuild** via strangler fig estágio a estágio (EPC-24A–E).
+4. Dual-path AER-GA03-A1 foi a dívida central — **Resolvida em EPC-24E**.
+5. Sprints EPC-24A→EPC-24E implementaram a convergência (ver Migration Plan).
+6. **Pós-cutover EPC-24E:** o **único pipeline oficial** é o **Enterprise Canonical Runtime Pipeline** mediado por `getEnterpriseRuntime()`.
+
+> **O MedicFlow-AI possui agora um único pipeline oficial coordenado pelo Enterprise Runtime.**
 
 ---
 
 ## 14. Referências
 
+- `EPC24E_ENTERPRISE_RUNTIME_FINAL_CUTOVER.md`
 - `ARCH-01_ENTERPRISE_RUNTIME_INTEGRATION.md`
 - `ARCH23_RUNTIME_FOUNDATION_DISCOVERY.md`
-- `ARCHITECTURAL_EXCEPTION_REGISTER.md` (AER-GA03-A1, A3, OCR-01, TISS-CONV-01)
+- `ARCHITECTURAL_EXCEPTION_REGISTER.md` (AER-GA03-A1 **Resolvida**, A3, OCR-01, TISS-CONV-01)
 - `TISS-CONV-01_CAPTURE_ENTERPRISE_CONVERGENCE.md`
 - `BLOCO_C_PERMANENT_ARCHITECTURE_RULE.md`
 - `canonical-execution-orchestrator/ports/pipeline.ts`

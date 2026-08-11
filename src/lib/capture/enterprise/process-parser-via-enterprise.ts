@@ -1,15 +1,17 @@
 /**
- * EPC-24B — Capture Parser → Document Extraction Runtime (convergência).
+ * EPC-24B / EPC-24E — Capture Parser → Document Extraction Runtime.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *     → DocumentExtractionRuntimePort (coordenação estrutural F3-CAP-07)
- *     → fallback legado `runCaptureParser` (comportamento funcional idêntico)
+ *     → runCaptureParser (implementação interna autorizada do Port)
  *
- * Sem cutover. Sem alteração de regra de negócio. Sem UI/OCR/Audit/Contract/
- * Risk/Correction/XML/banco/APIs. Foundations 4–7 preservadas.
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regra de negócio.
+ * Sem UI/OCR/Audit/Contract/Risk/Correction/XML/banco/APIs.
+ * Foundations 4–7 preservadas.
  *
- * O Parser legado permanece exclusivamente como fallback atrás deste gateway.
+ * O Parser legado permanece exclusivamente como implementação interna
+ * atrás deste gateway — nunca como pipeline paralelo.
  * Nenhum módulo de produto deve importar `tiss-parser-service` diretamente
  * para execução — apenas este módulo (e testes do próprio parser).
  */
@@ -25,7 +27,6 @@ import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 export type RunCaptureParserViaEnterpriseResult = RunCaptureParserResult & {
   viaEnterpriseRuntime: true;
   extractionJobId: string | null;
-  extractionFallback: "legacy-tiss-parser";
 };
 
 export type CaptureParserViaEnterpriseProbe = {
@@ -57,10 +58,7 @@ export async function probeCaptureParserViaEnterprise(): Promise<CaptureParserVi
 
 /**
  * Coordena extração via DocumentExtractionRuntimePort e executa o Parser
- * legado como fallback funcional (mesma saída observável).
- *
- * Se a coordenação estrutural falhar, o legado ainda executa (Strangler Fig /
- * dual-path reduzido — AER-GA03-A1 ainda não eliminado).
+ * como implementação interna autorizada (mesma saída observável).
  */
 export async function runCaptureParserViaEnterprise(
   ctx: ServiceCtx,
@@ -76,7 +74,7 @@ export async function runCaptureParserViaEnterprise(
       correlationId: sessionId,
       requestId: `capture-extraction-job-${sessionId}`,
       attributes: {
-        source: "epc-24b-capture-parser",
+        source: "epc-24e-capture-parser",
         sessionId,
         stage: "extraction",
       },
@@ -88,27 +86,25 @@ export async function runCaptureParserViaEnterprise(
         jobId: extractionJobId,
         documentId: sessionId,
         requestId: `capture-extraction-doc-${sessionId}`,
-        attributes: { sessionId, source: "epc-24b-capture-parser" },
+        attributes: { sessionId, source: "epc-24e-capture-parser" },
       });
       await extraction.submitRequest({
         jobId: extractionJobId,
         documentId: sessionId,
         requestId: `capture-extraction-req-${sessionId}`,
-        attributes: { sessionId, source: "epc-24b-capture-parser" },
+        attributes: { sessionId, source: "epc-24e-capture-parser" },
       });
     }
   } catch {
-    /* coordenação estrutural best-effort — fallback legado permanece */
+    /* coordenação estrutural do Port — implementação interna segue no pipeline único */
   }
 
   try {
-    // Fallback oficial: engine TISS Parser produto (comportamento inalterado).
-    const legacy = await runCaptureParser(ctx, sessionId);
+    const internal = await runCaptureParser(ctx, sessionId);
     return {
-      ...legacy,
+      ...internal,
       viaEnterpriseRuntime: true,
       extractionJobId,
-      extractionFallback: "legacy-tiss-parser",
     };
   } finally {
     if (extractionJobId) {

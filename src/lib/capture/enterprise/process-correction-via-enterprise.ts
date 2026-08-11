@@ -1,16 +1,16 @@
 /**
- * EPC-24C — Capture Correction Assistant → Auto-Fill Runtime (convergência).
+ * EPC-24C / EPC-24E — Capture Correction Assistant → Auto-Fill Runtime.
  *
- * Fluxo oficial:
+ * Fluxo oficial único (cutover EPC-24E):
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
- *     → AutoFillRuntimePort (coordenação estrutural F3-CAP-12;
- *       destino canônico ARC-24 para Correction sob Runtime)
- *     → fallback legado `runCaptureCorrectionAssistant` (comportamento idêntico)
+ *     → AutoFillRuntimePort (coordenação estrutural F3-CAP-12)
+ *     → runCaptureCorrectionAssistant (implementação interna autorizada)
  *
- * Sem cutover. Sem alteração de regra de negócio / UI / OCR / Parser / XML /
- * banco / APIs. Foundations 4–7 preservadas.
+ * Sem Dual Path. Sem flag de fallback. Sem alteração de regra de negócio /
+ * UI / OCR / Parser / XML / banco / APIs. Foundations 4–7 preservadas.
  *
- * A engine legada permanece exclusivamente como fallback atrás deste gateway.
+ * A engine legada permanece exclusivamente como implementação interna
+ * atrás deste gateway — nunca como pipeline paralelo.
  * Nenhum módulo de produto deve importar `correction` para execução de
  * geração — apenas este módulo (e testes do próprio correction).
  */
@@ -30,7 +30,6 @@ import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 export type RunCaptureCorrectionViaEnterpriseResult = GenerateCorrectionProposalsResult & {
   viaEnterpriseRuntime: true;
   autoFillId: string | null;
-  correctionFallback: "legacy-correction-assistant";
 };
 
 export type CaptureCorrectionViaEnterpriseProbe = {
@@ -62,7 +61,7 @@ export async function probeCaptureCorrectionViaEnterprise(): Promise<CaptureCorr
 
 /**
  * Coordena correção assistida via AutoFillRuntimePort e executa a engine
- * legada como fallback funcional (mesma saída observável).
+ * como implementação interna autorizada (mesma saída observável).
  */
 export async function runCaptureCorrectionViaEnterprise(
   ctx: ServiceCtx,
@@ -80,20 +79,19 @@ export async function runCaptureCorrectionViaEnterprise(
       autoFillContext: {
         kind: "canonical-auto-fill-context",
         autoFillId: `capture-correction-${sessionId}`,
-        structuralNotes: `epc-24c-capture-correction:${sessionId}`,
+        structuralNotes: `epc-24e-capture-correction:${sessionId}`,
       },
     });
     autoFillId = prepared.session?.autoFillId ?? prepared.result?.session?.autoFillId ?? null;
   } catch {
-    /* coordenação estrutural best-effort — fallback legado permanece */
+    /* coordenação estrutural do Port — implementação interna segue no pipeline único */
   }
 
-  const legacy = await runCaptureCorrectionAssistant(ctx, sessionId);
+  const internal = await runCaptureCorrectionAssistant(ctx, sessionId);
   return {
-    ...legacy,
+    ...internal,
     viaEnterpriseRuntime: true,
     autoFillId,
-    correctionFallback: "legacy-correction-assistant",
   };
 }
 

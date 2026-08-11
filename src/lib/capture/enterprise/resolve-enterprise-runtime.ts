@@ -1,11 +1,14 @@
 /**
- * EPC-24A — Composition root oficial do Capture para a Enterprise Foundation.
+ * EPC-24A / EPC-24E — Composition root oficial do Capture para a Enterprise Foundation.
  *
- * Único ponto de entrada autorizado:
+ * Único ponto de entrada operacional autorizado:
  *   Capture → getEnterpriseRuntime() → Ports / Runtimes Enterprise
  *
  * Produto NÃO instancia Adapters Enterprise concretos fora deste caminho.
- * Sem regras de negócio. Sem cutover de pipeline. Sem mudança de comportamento.
+ * Produto NÃO executa engines legado diretamente — apenas via gateways
+ * autorizados sob este composition root.
+ *
+ * Cutover EPC-24E: Dual Path AER-GA03-A1 eliminado.
  */
 import { getEnterpriseRuntime, type EnterpriseRuntime } from "@/lib/enterprise/runtime";
 

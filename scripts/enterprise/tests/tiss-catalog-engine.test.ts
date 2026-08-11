@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * TISS-02 — Enterprise TISS Canonical Catalog
+ * TISS-02 ï¿½ Enterprise TISS Canonical Catalog
  * Prova: Application ? TISSCatalogPort ? Adapter ? Factory ? Registry ? Store
  *         + TISS Runtime + Enterprise Runtime
- *         + Modelos Canônicos / Catálogo
+ *         + Modelos Canï¿½nicos / Catï¿½logo
  *         + timeout / retry / cancelamento / erros
- *         + ausência de bypass / lógica específica de operadora/versão
+ *         + ausï¿½ncia de bypass / lï¿½gica especï¿½fica de operadora/versï¿½o
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -89,7 +89,7 @@ describe("TISS-02 TISSCatalogPort contract", () => {
     assert.equal(caps.knowsOperatorOrCooperative, false);
   });
 
-  it("DefaultTISSCatalogAdapter é o adapter enterprise oficial", () => {
+  it("DefaultTISSCatalogAdapter ï¿½ o adapter enterprise oficial", () => {
     assert.equal(EnterpriseTISSCatalogAdapter, DefaultTISSCatalogAdapter);
     const port = new DefaultTISSCatalogAdapter({ provider: "enterprise" });
     assert.equal(port.providerId, "enterprise");
@@ -104,14 +104,14 @@ describe("TISS-02 TISSCatalogPort contract", () => {
     assert.equal(health.ok, true);
   });
 
-  it("test / default / mock são resolvidos pelo factory", async () => {
+  it("test / default / mock sï¿½o resolvidos pelo factory", async () => {
     assert.equal(createTISSCatalogPort({ provider: "test" }).providerId, "test");
     assert.equal(createTISSCatalogPort({ provider: "default" }).providerId, "default");
     assert.equal(createTISSCatalogPort({ provider: "mock" }).providerId, "mock");
     assert.equal((await createTISSCatalogPort({ provider: "mock" }).health()).ok, true);
   });
 
-  it("modelos canônicos e catálogo mínimo estão disponíveis via Port", async () => {
+  it("modelos canï¿½nicos e catï¿½logo mï¿½nimo estï¿½o disponï¿½veis via Port", async () => {
     const port = createTISSCatalogPort({ provider: "enterprise" });
     const catalog = await port.getCatalog();
 
@@ -146,7 +146,7 @@ describe("TISS-02 TISSCatalogPort contract", () => {
     assert.ok((stats.statistics?.totalEntries ?? 0) > 0);
   });
 
-  it("InMemoryTISSCatalog é o Catalog Store oficial", () => {
+  it("InMemoryTISSCatalog ï¿½ o Catalog Store oficial", () => {
     const store = new InMemoryTISSCatalog();
     assert.equal(store.storeId, IN_MEMORY_TISS_CATALOG_STORE_ID);
     assert.equal(store.catalogId, DEFAULT_TISS_CATALOG_ID);
@@ -154,7 +154,7 @@ describe("TISS-02 TISSCatalogPort contract", () => {
     assert.equal(store.health().ok, true);
   });
 
-  it("timeout é implementado e retorna TISS_CATALOG_TIMEOUT", async () => {
+  it("timeout ï¿½ implementado e retorna TISS_CATALOG_TIMEOUT", async () => {
     const port = new DefaultTISSCatalogAdapter({
       provider: "enterprise",
       defaultTimeoutMs: 20,
@@ -169,7 +169,7 @@ describe("TISS-02 TISSCatalogPort contract", () => {
     assert.equal(result.code, "TISS_CATALOG_TIMEOUT");
   });
 
-  it("retry recupera falha transitória", async () => {
+  it("retry recupera falha transitï¿½ria", async () => {
     const port = new DefaultTISSCatalogAdapter({
       provider: "enterprise",
       failAttempts: 1,
@@ -219,10 +219,10 @@ describe("TISS-02 TISSCatalogPort contract", () => {
     assert.throws(
       () =>
         factory.create({
-          // @ts-expect-error — provider inválido
+          // @ts-expect-error ï¿½ provider invï¿½lido
           provider: "unimed-catalog",
         }),
-      /não está registrado|desconhecido/,
+      /registrado|desconhecido/,
     );
 
     assert.equal(getTISSCatalogFactory().getRegistry().has("mock"), true);
@@ -240,7 +240,7 @@ describe("TISS-02 TISSCatalogPort contract", () => {
 });
 
 describe("TISS-02 cadeia Enterprise / TISS Runtime / Catalog", () => {
-  it("Enterprise Runtime expõe TISS Catalog + Runtime + Provider", async () => {
+  it("Enterprise Runtime expï¿½e TISS Catalog + Runtime + Provider", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
     assert.equal(runtime.getTISSCatalogPort().providerId, "enterprise");
@@ -391,8 +391,8 @@ describe("TISS-02 cadeia Enterprise / TISS Runtime / Catalog", () => {
   });
 });
 
-describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", () => {
-  it("módulo tiss-catalog não contém backends / operadoras / XML dispatch", () => {
+describe("TISS-02 auditoria ï¿½ sem bypass / sem lï¿½gica de operadora/versï¿½o", () => {
+  it("mï¿½dulo tiss-catalog nï¿½o contï¿½m backends / operadoras / XML dispatch", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/tiss-catalog");
     const files = collectTsFiles(moduleDir);
     assert.ok(files.length > 0);
@@ -423,13 +423,13 @@ describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", () =
         assert.equal(
           pattern.test(codeWithoutComments),
           false,
-          `Padrão proibido ${pattern} em ${file}`,
+          `Padrï¿½o proibido ${pattern} em ${file}`,
         );
       }
     }
   });
 
-  it("não existe if/switch por operadora/versão no tiss-catalog", () => {
+  it("nï¿½o existe if/switch por operadora/versï¿½o no tiss-catalog", () => {
     const moduleDir = join(repoRoot, "src/lib/enterprise/tiss-catalog");
     for (const file of collectTsFiles(moduleDir)) {
       const source = readFileSync(file, "utf8");
@@ -445,12 +445,12 @@ describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", () =
         `switch(operadora) em ${file}`,
       );
       assert.equal(
-        /if\s*\(\s*vers[aã]o/i.test(codeWithoutComments),
+        /if\s*\(\s*vers[aï¿½]o/i.test(codeWithoutComments),
         false,
         `if(versao) em ${file}`,
       );
       assert.equal(
-        /switch\s*\(\s*vers[aã]o/i.test(codeWithoutComments),
+        /switch\s*\(\s*vers[aï¿½]o/i.test(codeWithoutComments),
         false,
         `switch(versao) em ${file}`,
       );
@@ -476,7 +476,7 @@ describe("TISS-02 auditoria — sem bypass / sem lógica de operadora/versão", () =
     assert.match(enterpriseRuntime, /getTISSCatalogPort/);
   });
 
-  it("não existe catálogo paralelo TISSCatalog fora de tiss-catalog", () => {
+  it("nï¿½o existe catï¿½logo paralelo TISSCatalog fora de tiss-catalog", () => {
     const enterpriseRoot = join(repoRoot, "src/lib/enterprise");
     const offenders: string[] = [];
     for (const file of collectTsFiles(enterpriseRoot)) {

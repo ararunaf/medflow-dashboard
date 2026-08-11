@@ -8,16 +8,16 @@
 
 ---
 
-## 1. Estado atual (baseline ARC-24)
+## 1. Estado atual (pós EPC-24E cutover)
 
 | Item | Estado |
 |------|--------|
-| Pipeline oficial **executado** | Operacional Capture (`uploadCaptureFileFn`) |
-| Pipeline canônico Enterprise | Estrutural (11 passos); não dirige negócio |
-| Dual-path Capture (AER-GA03-A1) | **Aceita** — bridge intake best-effort |
+| Pipeline oficial **executado** | Enterprise Canonical Runtime via `getEnterpriseRuntime()` |
+| Pipeline canônico Enterprise | Oficial único (coordenação + gateways) |
+| Dual-path Capture (AER-GA03-A1) | **Resolvida** (EPC-24E) |
 | OCR dual-path | **Resolvida** (OCR-01) |
 | TISS knowledge dual-path | **Resolvida** (TISS-CONV-01) |
-| XML produto vs XML Enterprise | Divergente |
+| XML produto vs XML Enterprise | XML export via gateway Enterprise (implementação interna autorizada) |
 | Módulos Enterprise | 99 (≈51 wired) |
 | Rebuild do sistema | **Não necessário / proibido** |
 
@@ -31,7 +31,7 @@ EPC-24A    Orquestração canônica no caminho Capture  ← FEITO (binding; sem 
 EPC-24B    Migrar Intake+Extraction (parse)    ← FEITO (sem cutover; OCR intocado)
 EPC-24C    Migrar Audit/Contract/Risk/Correction ← FEITO (sem cutover; fallback legado)
 EPC-24D    Migrar Review→TISS/XML/Bloco C      ← FEITO (sem cutover; fallback legado)
-EPC-24E    Cutover único + remoções + certificação
+EPC-24E    Cutover único + remoções + certificação ← FEITO (AER-GA03-A1 Resolvida)
 ```
 
 Cada sprint exige: build + `tsc --noEmit` + lint + smoke = PASS, paridade funcional do estágio migrado, e atualização do AER quando fechar exceção.
@@ -125,17 +125,21 @@ Cada sprint exige: build + `tsc --noEmit` + lint + smoke = PASS, paridade funcio
 
 ### EPC-24E — Single Pipeline Cutover & Cleanup
 
+**Status:** ✅ Concluída (2026-08-11) — cutover arquitetural; Dual Path AER-GA03-A1 **Resolvida**.
+
 **Objetivo:** Declarar o Enterprise Canonical Runtime Pipeline como **único** oficial; limpar dual-paths e mortos.
 
 | Item | Detalhe |
 |------|---------|
-| PRESERVAR | Runtime root; Ports ativos; UI; RLS |
-| MIGRAR | Session events críticos → PersistencePort + Execution Trace |
-| REMOVER | Dual-path intake paralelo; orquestração legada; engines ilha sem plano; legado `storage` se supersedido |
-| Critério | AER-GA03-A1 **Resolvida**; HTTP `/capture` alinhado ao mesmo pipeline; inventário mortos fechado |
-| Certificação | ARC-24 audit trail + gate final “single pipeline” |
+| PRESERVAR | Runtime root; Ports ativos; UI; RLS; engines como implementação interna |
+| MIGRAR | OCR Server Fn → gateway Enterprise; flags Dual Path → `singlePipeline` |
+| REMOVER | Flags `*Fallback`; Dual Path AER-GA03-A1; orquestração legada como plano paralelo |
+| Critério | AER-GA03-A1 **Resolvida**; Server Fns só via gateways; `getEnterpriseRuntime()` único entrypoint |
+| Certificação | build / tsc / lint / smoke / enterprise suite PASS |
 
-**Entregáveis:** AER updates; lista final PRESERVAR/MIGRAR/REMOVER executada; relatório de cutover.
+**Entregáveis:** gateways sem flags Dual Path; `process-ocr-via-enterprise` (sessão); binding `singlePipeline`; docs `EPC24E_*`; AER-GA03-A1 Resolvida.
+
+**Confirmação dual-path:** AER-GA03-A1 **Resolvida**. Engines legado permanecem **somente** como implementação interna dos gateways autorizados — nunca como pipeline paralelo.
 
 ---
 
@@ -195,19 +199,19 @@ Para cada estágio migrado:
 
 ## 7. Critério de conclusão da trilha de convergência
 
-A trilha ARC-24 / EPC-24* só se considera concluída quando:
+A trilha ARC-24 / EPC-24* **está concluída** (EPC-24E, 2026-08-11):
 
-- Existe **um único** pipeline documental oficial: Enterprise Canonical Runtime via `getEnterpriseRuntime()`  
-- AER-GA03-A1 está **Resolvida**  
-- Capture não orquestra engines locais como plano de execução  
-- XML/lote TISS passam por Ports Enterprise  
-- Nenhum dual-path funcional permanece sem AER  
-- Gates de qualidade (build, tsc, lint, smoke, testes de paridade) PASS  
-
-ARC-24 **não** exige esses critérios finais — apenas a descoberta, a regra e este plano.
+- Existe **um único** pipeline documental oficial: Enterprise Canonical Runtime via `getEnterpriseRuntime()`
+- AER-GA03-A1 está **Resolvida**
+- Capture não orquestra engines locais como plano de execução paralelo
+- XML/lote TISS passam por Ports Enterprise (gateways)
+- Nenhum dual-path funcional permanece sem AER
+- Gates de qualidade (build, tsc, lint, smoke, testes de paridade) PASS
 
 ---
 
-## 8. Resposta final da trilha (alvo)
+## 8. Resposta final da trilha
 
-> Após a convergência, o único pipeline oficial do MedicFlow-AI será o **Enterprise Canonical Runtime Pipeline** (Canonical Execution Orchestrator + Ports Foundation), acessado somente por `getEnterpriseRuntime()`.
+> O único pipeline oficial do MedicFlow-AI é o **Enterprise Canonical Runtime Pipeline** (Canonical Execution Orchestrator + Ports Foundation), acessado somente por `getEnterpriseRuntime()`.
+>
+> **O MedicFlow-AI possui agora um único pipeline oficial coordenado pelo Enterprise Runtime.**
