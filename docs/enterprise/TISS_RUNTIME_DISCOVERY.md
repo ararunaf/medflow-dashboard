@@ -314,8 +314,8 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | Capacidade | Situação atual | Sprint futura (sequência oficial) |
 |------------|----------------|-------------------------------------|
 | Discovery documental | ✅ Este documento | **TISS-RUNTIME-01D** |
-| Entrada operacional do boletim na cadeia Q/W/S | Ports existem; enqueue TISS funcional pendente | **TISS-RUNTIME-01A** |
-| OCR no Worker (consumo de fila) | Gateway real; integração operacional TISS pendente | TISS-RUNTIME-01B |
+| Entrada operacional do boletim na cadeia Q/W/S | ✅ Job TISS RECEIVED via `QueueRuntimePort` | **TISS-RUNTIME-01A** |
+| OCR no Worker (consumo de fila) | Gateway real; integração operacional TISS pendente | **TISS-RUNTIME-01B** |
 | Parser operacional TISS | Gateway real; ativação incremental | TISS-RUNTIME-01C |
 | Validação operacional TISS (packs/XML) | Ports estruturais + packs base | pós-01C (Sprint dedicada) |
 | Enriquecimento operacional | Ports estruturais | Sprint dedicada |
@@ -350,8 +350,8 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | Ordem | Sprint | Escopo (uma capability) | Status |
 |-------|--------|-------------------------|--------|
 | 0 | **TISS-RUNTIME-01D** | Discovery da arquitetura funcional TISS | ✅ Concluída |
-| 1 | **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue via Ports existentes) | ⏳ Próxima |
-| 2 | TISS-RUNTIME-01B | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ⏳ Planejada |
+| 1 | **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue via Ports existentes) | ✅ Concluída |
+| 2 | **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ⏳ Próxima |
 | 3 | TISS-RUNTIME-01C | Ativar Parser / Extraction operacional no mesmo pipeline | ⏳ Planejada |
 | 4 | TISS-RUNTIME-02+ | Validação → Enriquecimento → XML TISS → Lote → Protocolo → Persistência → Auditoria (uma capability por Sprint) | ⏳ Planejada |
 

@@ -18,9 +18,10 @@
 | **ARC-25** | Documentar e congelar a arquitetura oficial do Enterprise Runtime | ✅ Concluída |
 | **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ✅ Concluída |
 | **TISS-RUNTIME-01D** | Discovery da arquitetura funcional do TISS Runtime | ✅ Concluída |
-| **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ⏳ Próxima |
+| **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ✅ Concluída |
+| **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ⏳ Próxima |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ⏳ TISS-RUNTIME-01A
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ⏳ TISS-RUNTIME-01B
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -119,6 +120,18 @@ getEnterpriseRuntime()
 
 ---
 
+## Escopo concluído (TISS-RUNTIME-01A)
+
+### TISS-RUNTIME-01A
+- Entrada operacional do boletim TISS: Documento → `getEnterpriseRuntime()` → `QueueRuntimePort.enqueue` → Job TISS com status **RECEIVED**
+- Campos do Job: `jobId`, `status`, `correlationId`, `createdAt`, `source`, `queueName`
+- Reutilização exclusiva de Queue / Worker / Scheduler / Retry / Dead Letter / Observability (Ports existentes)
+- Wiring no bridge de Intake Capture (`registerCaptureDocumentIntakeBridge`) — best-effort
+- Sem OCR / Parser / XML / Validação / Enriquecimento / Lote / Protocolo / Auditoria funcional
+- Sem novo Port / Gateway / Runtime / Pipeline
+
+---
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-01A** — ativar a entrada operacional do boletim TISS no pipeline oficial (Intake → Queue via Ports existentes), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-01B** — ativar OCR operacional no Worker (consumo via `QueueRuntimePort`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

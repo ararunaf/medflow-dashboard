@@ -1,5 +1,5 @@
 /**
- * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q / OPER-INF-D / OPER-INF-R).
+ * Enterprise Queue Runtime — Ports & Adapters (INF-05 / OPER-INF-Q / OPER-INF-D / OPER-INF-R / TISS-RUNTIME-01A).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → QueueRuntimePort
@@ -7,11 +7,13 @@
  *     → InMemoryQueueRuntimeStore + Persistence Backend (Supabase | memory durable)
  *     → DeadLetterRuntimePort (OPER-INF-D — contrato interno, sem Port Enterprise novo)
  *     → DefaultRetryInfrastructure (OPER-INF-R — NÃO é Port; Scheduler + Worker + Queue)
+ *     → enqueueTissReceivedJob (TISS-RUNTIME-01A — Job RECEIVED via QueueRuntimePort)
  *     → Canonical Queue Result
  *
  * OPER-INF-Q: backend persistente ativado no adapter — mesma interface pública.
  * OPER-INF-D: Dead Letter operacional via DeadLetterRuntimePort → QueueRuntimePort.
  * OPER-INF-R: Retry operacional (decide + agenda; nunca processa) via Ports existentes.
+ * TISS-RUNTIME-01A: entrada funcional TISS — Documento → Queue → Job RECEIVED (sem OCR/Parser/XML).
  * Sem RabbitMQ. Sem Azure Service Bus. Sem Kafka. Sem Redis.
  * Sem acesso direto ao Queue Runtime Store / Backend pelo produto.
  * Toda comunicação exclusivamente via QueueRuntimePort (produto) /
@@ -165,4 +167,11 @@ export {
   type RetryRecord,
   type RetryStatsResult,
   type RetryStatus,
+  ENTERPRISE_TISS_QUEUE_NAME,
+  TISS_JOB_STATUS_RECEIVED,
+  enqueueTissReceivedJob,
+  type EnqueueTissReceivedJobInput,
+  type EnqueueTissReceivedJobResult,
+  type TissJobLogicalStatus,
+  type TissReceivedJob,
 } from "./operational";

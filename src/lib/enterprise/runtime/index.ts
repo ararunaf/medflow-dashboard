@@ -37,3 +37,10 @@ export {
   resetEnterpriseRuntimeForTests,
   setEnterpriseRuntimeForTests,
 } from "./create-enterprise-runtime";
+
+export {
+  registerTissReceivedJob,
+  type RegisterTissReceivedJobInput,
+  type RegisterTissReceivedJobResult,
+  type TissReceivedJob,
+} from "./register-tiss-received-job";

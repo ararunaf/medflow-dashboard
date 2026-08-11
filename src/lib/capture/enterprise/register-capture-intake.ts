@@ -1,16 +1,19 @@
 /**
- * Bridge Captura → Enterprise Runtime (ARCH-01 / EPC-24A…E / DIP-02…DIP-06).
+ * Bridge Captura → Enterprise Runtime (ARCH-01 / EPC-24A…E / DIP-02…DIP-06 / TISS-RUNTIME-01A).
  *
  * Cutover EPC-24E: Intake é parte do pipeline oficial único sob
  * getEnterpriseRuntime() — não é side-effect paralelo (AER-GA03-A1 Resolvida).
  *
  * Fluxo: Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *   → CaptureEngineRuntimePort → Orchestrator → DocumentIntakeRuntime → …
+ *   → registerTissReceivedJob → QueueRuntimePort.enqueue → Job TISS RECEIVED
  *
+ * TISS-RUNTIME-01A: após Intake bem-sucedido, registra Job TISS com status RECEIVED.
  * NÃO altera OCR/classificação/storage/busca reais do produto, parser, auditoria,
- * UI, APIs ou regras. Falhas de intake estrutural são engolidas — o fluxo de
- * Captura permanece válido (upload não depende do intake canônico).
+ * UI, APIs ou regras. Falhas de intake estrutural / enqueue TISS são engolidas —
+ * o fluxo de Captura permanece válido (upload não depende do intake canônico).
  */
+import { registerTissReceivedJob } from "@/lib/enterprise/runtime";
 import type { RegisterCaptureDocumentIntakeResult } from "@/lib/enterprise/runtime";
 import type { CaptureDocumentRecord, CaptureSessionRecord } from "../types";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
@@ -24,6 +27,9 @@ export type CaptureEnterpriseBridgeInput = {
 export type CaptureIntakeViaEnterpriseResult = RegisterCaptureDocumentIntakeResult & {
   viaEnterpriseRuntime: true;
   entry: "getEnterpriseRuntime";
+  /** TISS-RUNTIME-01A — Job TISS RECEIVED (quando enqueue ok). */
+  tissJobId?: string;
+  tissJobStatus?: "RECEIVED";
 };
 
 export type CaptureIntakeViaEnterpriseProbe = {
@@ -57,7 +63,8 @@ export async function probeCaptureIntakeViaEnterprise(): Promise<CaptureIntakeVi
 
 /**
  * Registra o documento de Captura na Foundation via Ports oficiais.
- * Awaited — nunca lança; retorna null em falha.
+ * Em seguida (TISS-RUNTIME-01A) enfileira Job TISS RECEIVED via QueueRuntimePort.
+ * Awaited — nunca lança; retorna null em falha de intake.
  */
 export async function registerCaptureDocumentIntakeBridge(
   input: CaptureEnterpriseBridgeInput,
@@ -75,10 +82,35 @@ export async function registerCaptureDocumentIntakeBridge(
       channel: input.session.channel,
     });
 
+    let tissJobId: string | undefined;
+    let tissJobStatus: "RECEIVED" | undefined;
+
+    // TISS-RUNTIME-01A — Documento → Queue → Job RECEIVED (sem OCR/Parser/XML).
+    if (result.ok) {
+      try {
+        const tissJob = await registerTissReceivedJob({
+          source: "document-intake",
+          correlationId: input.session.correlationId,
+          sessionId: input.session.id,
+          documentId: input.document.id,
+          payloadRef: input.document.storagePathOriginal,
+          channel: input.session.channel ?? "capture-upload",
+        });
+        if (tissJob.ok && tissJob.job) {
+          tissJobId = tissJob.job.jobId;
+          tissJobStatus = tissJob.job.status;
+        }
+      } catch {
+        /* enqueue TISS best-effort — Captura permanece válida */
+      }
+    }
+
     return {
       ...result,
       viaEnterpriseRuntime: true,
       entry: "getEnterpriseRuntime",
+      tissJobId,
+      tissJobStatus,
     };
   } catch {
     return null;
