@@ -317,7 +317,7 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | Entrada operacional do boletim na cadeia Q/W/S | ✅ Job TISS RECEIVED via `QueueRuntimePort` | **TISS-RUNTIME-01A** |
 | OCR no Worker (consumo de fila) | ✅ Job RECEIVED → Worker → OCR → OCR_COMPLETED | **TISS-RUNTIME-01B** |
 | Parser operacional TISS | ✅ Job OCR_COMPLETED → Worker → Parser → PARSED | **TISS-RUNTIME-01C** |
-| Validação operacional TISS (packs/XML) | Ports estruturais + packs base | pós-01C (Sprint dedicada) |
+| Validação operacional TISS (packs/XML) | ✅ Job PARSED → Worker → Validation → VALIDATED | pós-01C (Sprint dedicada) |
 | Enriquecimento operacional | Ports estruturais | Sprint dedicada |
 | XML TISS ANS real via Ports | Cadeia TISS-04…10 estrutural | Sprint dedicada |
 | Lote operacional via `BatchRuntimePort` | Port estrutural | Sprint dedicada |
@@ -353,7 +353,8 @@ Em **`DeadLetterRuntimePort`** → `QueueRuntimePort` (isolamento `enterprise-de
 | 1 | **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue via Ports existentes) | ✅ Concluída |
 | 2 | **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ✅ Concluída |
 | 3 | **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ✅ Concluída |
-| 4 | **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ⏳ Próxima |
+| 4 | **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ✅ Concluída |
+| 5 | **TISS-RUNTIME-02B** | Ativar Enriquecimento operacional no Worker (consumo de `VALIDATED`) | ⏳ Próxima |
 | 5 | TISS-RUNTIME-02+ | Validação → Enriquecimento → XML TISS → Lote → Protocolo → Persistência → Auditoria (uma capability por Sprint) | ⏳ Planejada |
 
 Roadmap vivo: [`OPER_INF_ROADMAP.md`](./OPER_INF_ROADMAP.md).

@@ -21,8 +21,9 @@
 | **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ✅ Concluída |
 | **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ✅ Concluída |
 | **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ✅ Concluída |
+| **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ✅ Concluída |
 
-**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ⏳ TISS-RUNTIME-01C
+**Roadmap vigente:** ✓ OPER-INF-Q · ✓ OPER-INF-W · ✓ OPER-INF-S · ✓ OPER-INF-D · ✓ OPER-INF-O · ✓ ARC-25 · ✓ OPER-INF-R · ✓ TISS-RUNTIME-01D · ✓ TISS-RUNTIME-01A · ✓ TISS-RUNTIME-01B · ✓ TISS-RUNTIME-01C · ✓ TISS-RUNTIME-02A · ⏳ TISS-RUNTIME-02B
 
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
@@ -152,6 +153,14 @@ getEnterpriseRuntime()
 - Validação **não** executada (`validationExecuted: false`); demais capabilities fora de escopo
 - Sem novo Port / Gateway / Runtime / Pipeline
 
+## Escopo concluído (TISS-RUNTIME-02A)
+
+- Capability Validation operacional: Job **PARSED** → `WorkerRuntimePort` → `ValidationRuntimePort` (submitRequest / getResult) → Job **VALIDATED** → reenqueue via `QueueRuntimePort`
+- Hook `processMessage` no `WorkerQueueConsumer` (OPER-INF-W) — sem alterar contrato `WorkerRuntimePort`
+- Entrypoint `processTissParsedValidated` via `getEnterpriseRuntime()`
+- Enriquecimento **não** executado (`enrichmentExecuted: false`); demais capabilities fora de escopo
+- Sem novo Port / Gateway / Runtime / Pipeline
+
 ## Próxima Sprint
 
-**TISS-RUNTIME-02A** — ativar Validação operacional no Worker (consumo de `PARSED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+**TISS-RUNTIME-02B** — ativar Enriquecimento operacional no Worker (consumo de `VALIDATED`), conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).

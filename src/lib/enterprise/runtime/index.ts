@@ -61,3 +61,11 @@ export {
   type ProcessTissOcrParsedResult,
   type TissParserCompletedJob,
 } from "./process-tiss-ocr-parsed";
+
+export {
+  processTissParsedValidated,
+  TISS_JOB_STATUS_VALIDATED,
+  type ProcessTissParsedValidatedInput,
+  type ProcessTissParsedValidatedResult,
+  type TissValidationCompletedJob,
+} from "./process-tiss-parsed-validated";
