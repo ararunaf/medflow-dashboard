@@ -1,11 +1,15 @@
 /**
- * DefaultSchedulerRuntimeAdapter — INF-07.
+ * DefaultSchedulerRuntimeAdapter — INF-07 / OPER-INF-S.
  *
  * Adapter oficial do Enterprise Scheduler Runtime.
- * Responde exclusivamente de forma estrutural (sem Scheduler real / sem Cron / sem Timer).
- * Sem Retry Scheduling real. Sem Delay Jobs. Sem Job Dispatcher. Sem orquestração de Workers.
+ * OPER-INF-S: agendamento operacional exclusivo via WorkerRuntimePort
+ * (polling temporal, schedule, cancel, heartbeat, graceful shutdown,
+ * controle de concorrência, recuperação pós-restart).
+ * Sem Cron. Sem acesso a QueueRuntimePort. Sem regras de negócio.
+ * Sem acesso direto a banco — persistência de fila permanece no QueueRuntimePort (OPER-INF-Q).
  */
 import {
+  DEFAULT_MOCK_SCHEDULER_RUNTIME_CAPABILITIES,
   DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES,
   toCanonicalSchedulerCapabilities,
 } from "../ports/capabilities";
@@ -46,10 +50,17 @@ import type {
   UnregisterScheduleInput,
   UnregisterScheduleResult,
 } from "../ports/types";
+import {
+  DEFAULT_SCHEDULER_MAX_CONCURRENT,
+  DEFAULT_SCHEDULER_POLL_INTERVAL_MS,
+  SchedulerWorkerDispatcher,
+  type SchedulerDispatchedEvent,
+} from "../operational";
 import { InMemorySchedulerRuntimeStore, type SchedulerRuntimeStore } from "../store";
 
 export const DEFAULT_SCHEDULER_RUNTIME_ADAPTER_ID = "default-enterprise-scheduler";
 export const DEFAULT_SCHEDULER_RUNTIME_VERSION = "1.0.0";
+export const DEFAULT_SCHEDULER_WORKER_QUEUE_NAME = "enterprise-worker-queue";
 
 const DEFAULT_TIMEOUT_MS = 5_000;
 const DEFAULT_RETRY_COUNT = 1;
@@ -61,6 +72,13 @@ export type DefaultSchedulerRuntimeAdapterOptions = {
   message?: string;
   store?: SchedulerRuntimeStore;
   enterpriseDeps?: SchedulerRuntimeEnterpriseDeps;
+  /**
+   * OPER-INF-S — quando true (default), ativa dispatcher via WorkerRuntimePort.
+   * Mock força false.
+   */
+  operational?: boolean;
+  pollIntervalMs?: number;
+  maxConcurrent?: number;
   defaultTimeoutMs?: number;
   defaultRetryCount?: number;
   defaultRetryBackoffMs?: number;
@@ -87,26 +105,34 @@ function readPositiveInt(value: unknown, fallback: number): number {
   return fallback;
 }
 
+function readStringAttr(
+  input: SchedulerRuntimeOperationalControls & {
+    metadata?: { customAttributes?: Readonly<Record<string, string | number | boolean | null>> };
+  },
+  key: string,
+): string | undefined {
+  const fromAttributes = input.attributes?.[key];
+  if (typeof fromAttributes === "string" && fromAttributes.trim() !== "") {
+    return fromAttributes.trim();
+  }
+  const fromMeta = input.metadata?.customAttributes?.[key];
+  if (typeof fromMeta === "string" && fromMeta.trim() !== "") {
+    return fromMeta.trim();
+  }
+  return undefined;
+}
+
+function readBoolAttr(input: SchedulerRuntimeOperationalControls, key: string): boolean {
+  const value = input.attributes?.[key];
+  return value === true || value === "true";
+}
+
 async function defaultSleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const STRUCTURAL_FLAGS = {
-  realScheduler: false,
-  cronImplemented: false,
-  timerImplemented: false,
-  retrySchedulingImplemented: false,
-  delayJobsImplemented: false,
-  jobDispatcherImplemented: false,
-  timeWindowsImplemented: false,
-  workersOrchestrated: false,
-  queueConsumed: false,
-  parallelProcessing: false,
-  persistenceImplemented: false,
-} as const;
-
 /**
- * Adapter oficial INF-07 — Scheduler Runtime default / enterprise.
+ * Adapter oficial INF-07 / OPER-INF-S — Scheduler Runtime default / enterprise.
  */
 export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
   readonly providerId: Extract<SchedulerRuntimeProviderId, "enterprise" | "default">;
@@ -116,19 +142,28 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
   private readonly metadata: SchedulerRuntimeProviderMetadata;
   private readonly store: SchedulerRuntimeStore;
   private readonly enterpriseDeps?: SchedulerRuntimeEnterpriseDeps;
+  private readonly operational: boolean;
+  private readonly defaultPollIntervalMs: number;
+  private readonly defaultMaxConcurrent: number;
   private readonly defaultTimeoutMs: number;
   private readonly defaultRetryCount: number;
   private readonly defaultRetryBackoffMs: number;
   private readonly now: () => string;
   private readonly sleep: (ms: number) => Promise<void>;
   private failAttemptsRemaining: number;
+  private dispatcher: SchedulerWorkerDispatcher | null = null;
+  private workersOrchestratedCount = 0;
+  private jobDispatcherCount = 0;
 
   constructor(options: DefaultSchedulerRuntimeAdapterOptions = {}) {
     this.providerId = options.provider ?? "enterprise";
+    this.operational = options.operational ?? true;
     this.healthy = options.healthy ?? true;
     this.message =
       options.message ??
-      `${this.providerId} Scheduler Runtime ready (structural only — no real scheduler / no cron / no timer).`;
+      (this.operational
+        ? `${this.providerId} Scheduler Runtime ready (OPER-INF-S — WorkerRuntimePort dispatcher active).`
+        : `${this.providerId} Scheduler Runtime ready (structural only — no worker orchestration).`);
     this.metadata = {
       name:
         this.providerId === "default"
@@ -137,10 +172,12 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       version: DEFAULT_SCHEDULER_RUNTIME_VERSION,
       vendor: "medicflow-enterprise",
       description:
-        "Official INF-07 Enterprise Scheduler Runtime — canonical scheduler infrastructure only.",
+        "Official INF-07 Enterprise Scheduler Runtime — OPER-INF-S operational dispatcher via WorkerRuntimePort.",
     };
     this.store = options.store ?? new InMemorySchedulerRuntimeStore();
     this.enterpriseDeps = options.enterpriseDeps;
+    this.defaultPollIntervalMs = options.pollIntervalMs ?? DEFAULT_SCHEDULER_POLL_INTERVAL_MS;
+    this.defaultMaxConcurrent = options.maxConcurrent ?? DEFAULT_SCHEDULER_MAX_CONCURRENT;
     this.defaultTimeoutMs = options.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.defaultRetryCount = options.defaultRetryCount ?? DEFAULT_RETRY_COUNT;
     this.defaultRetryBackoffMs = options.defaultRetryBackoffMs ?? DEFAULT_RETRY_BACKOFF_MS;
@@ -160,6 +197,19 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         );
       }
     }
+
+    if (this.operational && this.enterpriseDeps) {
+      this.dispatcher = new SchedulerWorkerDispatcher({
+        getWorkerRuntimePort: () => this.enterpriseDeps!.getWorkerRuntimePort(),
+        pollIntervalMs: this.defaultPollIntervalMs,
+        maxConcurrent: this.defaultMaxConcurrent,
+        sleep: this.sleep,
+        now: this.now,
+        onDispatched: (event) => this.onDispatched(event),
+      });
+      // Recuperação pós-restart: reativa schedules ativos presentes no store.
+      this.recoverActiveSchedules();
+    }
   }
 
   /** Acesso estrutural ao store (testes / demo — não produto). */
@@ -167,12 +217,20 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
     return this.store;
   }
 
+  /** Dispatcher operacional ativo (OPER-INF-S) — null em modo estrutural. */
+  getDispatcher(): SchedulerWorkerDispatcher | null {
+    return this.dispatcher;
+  }
+
   capabilities(): SchedulerRuntimePortCapabilities {
+    const engine = this.operational
+      ? DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES
+      : DEFAULT_MOCK_SCHEDULER_RUNTIME_CAPABILITIES;
     return {
       provider: this.providerId,
       adapterId: DEFAULT_SCHEDULER_RUNTIME_ADAPTER_ID,
-      engine: { ...DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES },
-      canonical: toCanonicalSchedulerCapabilities(DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES),
+      engine: { ...engine },
+      canonical: toCanonicalSchedulerCapabilities(engine),
       supportsCanonicalSchedule: true,
       supportsTimeout: true,
       supportsRetry: true,
@@ -184,7 +242,17 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       usesObservabilityRuntimePort: true,
       usesScalabilityRuntimePort: true,
       runtimeReady: true,
-      ...STRUCTURAL_FLAGS,
+      realScheduler: this.operational,
+      cronImplemented: false,
+      timerImplemented: this.operational,
+      retrySchedulingImplemented: false,
+      delayJobsImplemented: false,
+      jobDispatcherImplemented: this.operational,
+      timeWindowsImplemented: false,
+      workersOrchestrated: this.operational,
+      queueConsumed: false,
+      parallelProcessing: false,
+      persistenceImplemented: false,
       implementsCron: false,
       implementsQuartz: false,
       implementsHangfire: false,
@@ -193,10 +261,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       implementsAzureScheduler: false,
       implementsAzureFunctionsTimer: false,
       implementsTaskScheduler: false,
-      implementsRealScheduler: false,
-      implementsTimer: false,
+      implementsRealScheduler: this.operational,
+      implementsTimer: this.operational,
       implementsClock: false,
-      implementsBackgroundService: false,
+      implementsBackgroundService: this.operational,
       implementsRetryReal: false,
       implementsDelayQueue: false,
       implementsThreadPool: false,
@@ -216,12 +284,15 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
   }
 
   providerInfo(): SchedulerRuntimeInfo {
+    const caps = this.operational
+      ? DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES
+      : DEFAULT_MOCK_SCHEDULER_RUNTIME_CAPABILITIES;
     return {
       providerId: this.providerId,
       metadata: this.metadata,
       status: this.healthy ? "ready" : "unhealthy",
       providerType: "SCHEDULER_RUNTIME",
-      capabilities: { ...DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES },
+      capabilities: { ...caps },
     };
   }
 
@@ -233,18 +304,27 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
     let observabilityRuntimeOk = true;
     let scalabilityRuntimeOk = true;
     if (this.enterpriseDeps) {
-      // INF-07 / INF-08 / INF-09: deps preparadas — valida Port shape sem chamar health()
-      // (evita ciclos Scheduler.health ↔ Queue/Worker/PersistentQueue/Observability.health).
+      // Queue: valida Port shape sem chamar health() (evita ciclos).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
-      const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
       queueRuntimeOk =
         !!queuePort &&
         typeof queuePort.health === "function" &&
         typeof queuePort.capabilities === "function";
-      workerRuntimeOk =
-        !!workerPort &&
-        typeof workerPort.health === "function" &&
-        typeof workerPort.capabilities === "function";
+      // Worker: health leve quando operacional; shape check caso contrário.
+      if (this.operational) {
+        try {
+          const workerHealth = await this.enterpriseDeps.getWorkerRuntimePort().health();
+          workerRuntimeOk = workerHealth.ok;
+        } catch {
+          workerRuntimeOk = false;
+        }
+      } else {
+        const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
+        workerRuntimeOk =
+          !!workerPort &&
+          typeof workerPort.health === "function" &&
+          typeof workerPort.capabilities === "function";
+      }
       if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort === "function") {
         const persistentQueuePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
         persistentQueueRuntimeOk =
@@ -290,7 +370,17 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       observabilityRuntimeOk,
       scalabilityRuntimeOk,
       runtimeReady: true,
-      ...STRUCTURAL_FLAGS,
+      realScheduler: this.operational,
+      cronImplemented: false,
+      timerImplemented: this.operational,
+      retrySchedulingImplemented: false,
+      delayJobsImplemented: false,
+      jobDispatcherImplemented: this.operational,
+      timeWindowsImplemented: false,
+      workersOrchestrated: this.operational,
+      queueConsumed: false,
+      parallelProcessing: false,
+      persistenceImplemented: false,
       message: this.healthy
         ? (storeHealth.message ?? this.message)
         : "Scheduler Runtime unhealthy.",
@@ -328,7 +418,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         active: false,
         createdAt: stamp,
         updatedAt: stamp,
-        ...STRUCTURAL_FLAGS,
+        ...this.operationalFlags(),
       };
       this.store.setSchedule(schedule);
       const result = this.buildResult({
@@ -336,9 +426,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         status: "registered",
         schedule,
         stamp,
-        code: "SCHEDULER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Scheduler Runtime structural register (INF-07 foundation — no real scheduler).",
+        code: this.operational ? "SCHEDULER_RUNTIME_OK" : "SCHEDULER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Scheduler Runtime operational register (OPER-INF-S)."
+          : "Canonical Scheduler Runtime structural register (INF-07 foundation — no real scheduler).",
       });
       return {
         ok: true,
@@ -360,6 +451,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
           message: "Canonical schedule not found.",
         };
       }
+      await this.dispatcher?.stop(input.scheduleId);
       const stamp = this.now();
       const schedule: CanonicalSchedule = {
         ...existing,
@@ -373,9 +465,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         status: "unregistered",
         schedule,
         stamp,
-        code: "SCHEDULER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Scheduler Runtime structural unregister (INF-07 foundation — no real teardown).",
+        code: this.operational ? "SCHEDULER_RUNTIME_OK" : "SCHEDULER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Scheduler Runtime operational unregister (OPER-INF-S — graceful shutdown)."
+          : "Canonical Scheduler Runtime structural unregister (INF-07 foundation — no real teardown).",
       });
       return {
         ok: true,
@@ -408,7 +501,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
           active: false,
           createdAt: stamp,
           updatedAt: stamp,
-          ...STRUCTURAL_FLAGS,
+          ...this.operationalFlags(),
         };
         this.store.setSchedule(schedule);
       }
@@ -427,10 +520,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         status: "scheduled",
         registeredAt: stamp,
         updatedAt: stamp,
-        realScheduler: false,
+        realScheduler: this.operational,
         cronImplemented: false,
-        timerImplemented: false,
-        workersOrchestrated: false,
+        timerImplemented: this.operational,
+        workersOrchestrated: this.operational,
         persistenceImplemented: false,
       };
       this.store.setJob(job);
@@ -448,10 +541,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         status: "scheduled",
         createdAt: stamp,
         updatedAt: stamp,
-        realScheduler: false,
+        realScheduler: this.operational,
         cronImplemented: false,
-        jobDispatcherImplemented: false,
-        workersOrchestrated: false,
+        jobDispatcherImplemented: this.operational,
+        workersOrchestrated: this.operational,
         persistenceImplemented: false,
       };
       this.store.setDispatch(dispatch);
@@ -460,9 +553,33 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         status: "scheduled",
         active: true,
         updatedAt: stamp,
-        ...STRUCTURAL_FLAGS,
+        ...this.operationalFlags(),
       };
       this.store.setSchedule(updated);
+
+      if (this.dispatcher) {
+        const pollIntervalMs = readPositiveInt(
+          input.attributes?.pollIntervalMs,
+          this.defaultPollIntervalMs,
+        );
+        const delayMs = readPositiveInt(input.attributes?.delayMs, 0);
+        const runAt = readStringAttr(input, "runAt");
+        const workerName = readStringAttr(input, "workerName");
+        const workerId = readStringAttr(input, "workerId");
+        const queueName = readStringAttr(input, "queueName") ?? DEFAULT_SCHEDULER_WORKER_QUEUE_NAME;
+        this.dispatcher.start({
+          scheduleId: updated.scheduleId,
+          jobId,
+          pollIntervalMs,
+          delayMs,
+          runAt,
+          workerName,
+          workerId,
+          queueName,
+          repeat: readBoolAttr(input, "repeat"),
+        });
+      }
+
       const result = this.buildResult({
         operation: "schedule",
         status: "scheduled",
@@ -470,9 +587,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         job,
         dispatch,
         stamp,
-        code: "SCHEDULER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Scheduler Runtime structural schedule (INF-07 foundation — no cron / no timer).",
+        code: this.operational ? "SCHEDULER_RUNTIME_OK" : "SCHEDULER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Scheduler Runtime operational schedule (OPER-INF-S — temporal poll started)."
+          : "Canonical Scheduler Runtime structural schedule (INF-07 foundation — no cron / no timer).",
       });
       return {
         ok: true,
@@ -496,6 +614,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
           message: "Canonical schedule not found.",
         };
       }
+      await this.dispatcher?.stop(input.scheduleId);
       const stamp = this.now();
       const schedule: CanonicalSchedule = {
         ...existing,
@@ -518,9 +637,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         schedule,
         job,
         stamp,
-        code: "SCHEDULER_RUNTIME_STRUCTURAL_OK",
-        messageText:
-          "Canonical Scheduler Runtime structural cancel (INF-07 foundation — no real cancel).",
+        code: this.operational ? "SCHEDULER_RUNTIME_OK" : "SCHEDULER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Scheduler Runtime operational cancel (OPER-INF-S — graceful shutdown)."
+          : "Canonical Scheduler Runtime structural cancel (INF-07 foundation — no real cancel).",
       });
       return {
         ok: true,
@@ -548,8 +668,10 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         operation: "list",
         status: "listed",
         stamp,
-        code: "SCHEDULER_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Scheduler Runtime structural list.",
+        code: this.operational ? "SCHEDULER_RUNTIME_OK" : "SCHEDULER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Scheduler Runtime operational list (OPER-INF-S)."
+          : "Canonical Scheduler Runtime structural list.",
       });
       return {
         ok: true,
@@ -564,14 +686,25 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
 
   async stats(input: SchedulerStatsInput = {}): Promise<SchedulerStatsResult> {
     return this.runOperation("stats", input, async () => {
-      const statistics = this.store.statistics();
+      const base = this.store.statistics();
+      const statistics = this.operational
+        ? {
+            ...base,
+            realSchedulerCount: base.activeSchedules > 0 || base.totalSchedules > 0 ? 1 : 0,
+            timerImplementedCount: base.activeSchedules > 0 || base.totalSchedules > 0 ? 1 : 0,
+            jobDispatcherImplementedCount: this.jobDispatcherCount,
+            workersOrchestratedCount: this.workersOrchestratedCount,
+          }
+        : base;
       const stamp = this.now();
       const result = this.buildResult({
         operation: "stats",
         status: "pending",
         stamp,
-        code: "SCHEDULER_RUNTIME_STRUCTURAL_OK",
-        messageText: "Canonical Scheduler Runtime structural statistics.",
+        code: this.operational ? "SCHEDULER_RUNTIME_OK" : "SCHEDULER_RUNTIME_STRUCTURAL_OK",
+        messageText: this.operational
+          ? "Canonical Scheduler Runtime operational statistics (OPER-INF-S)."
+          : "Canonical Scheduler Runtime structural statistics.",
       });
       return {
         ok: true,
@@ -581,6 +714,63 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         message: `Scheduler Runtime stats: ${statistics.totalSchedules} schedules, ${statistics.totalJobs} jobs.`,
       };
     });
+  }
+
+  private recoverActiveSchedules(): void {
+    if (!this.dispatcher) return;
+    const active = this.store.listSchedules().filter((s) => s.active && s.status === "scheduled");
+    if (active.length === 0) return;
+    this.dispatcher.recover(
+      active.map((schedule) => {
+        const jobs = this.store.listJobs(schedule.scheduleId);
+        const latestJob = jobs[jobs.length - 1];
+        return {
+          scheduleId: schedule.scheduleId,
+          jobId: latestJob?.jobId,
+          pollIntervalMs: this.defaultPollIntervalMs,
+          delayMs: 0,
+          workerName: `scheduler-recover-${schedule.scheduleId}`,
+          queueName: DEFAULT_SCHEDULER_WORKER_QUEUE_NAME,
+          repeat: false,
+        };
+      }),
+    );
+  }
+
+  private operationalFlags(): Pick<
+    CanonicalSchedule,
+    | "realScheduler"
+    | "cronImplemented"
+    | "timerImplemented"
+    | "retrySchedulingImplemented"
+    | "delayJobsImplemented"
+    | "jobDispatcherImplemented"
+    | "timeWindowsImplemented"
+    | "workersOrchestrated"
+    | "queueConsumed"
+    | "parallelProcessing"
+    | "persistenceImplemented"
+  > {
+    return {
+      realScheduler: this.operational,
+      cronImplemented: false,
+      timerImplemented: this.operational,
+      retrySchedulingImplemented: false,
+      delayJobsImplemented: false,
+      jobDispatcherImplemented: this.operational,
+      timeWindowsImplemented: false,
+      workersOrchestrated: this.operational,
+      queueConsumed: false,
+      parallelProcessing: false,
+      persistenceImplemented: false,
+    };
+  }
+
+  private onDispatched(event: SchedulerDispatchedEvent): void {
+    if (event.outcome === "triggered") {
+      this.jobDispatcherCount += 1;
+      this.workersOrchestratedCount += 1;
+    }
   }
 
   private resolveSchedule(
@@ -622,7 +812,7 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
         version: this.metadata.version,
         label: this.metadata.name,
       },
-      ...STRUCTURAL_FLAGS,
+      ...this.operationalFlags(),
       runtimeReady: true,
       status: args.status,
       messageText: args.messageText,
@@ -795,5 +985,5 @@ export class DefaultSchedulerRuntimeAdapter implements SchedulerRuntimePort {
   }
 }
 
-/** Alias oficial do adapter enterprise (INF-07). */
+/** Alias oficial do adapter enterprise (INF-07 / OPER-INF-S). */
 export const EnterpriseSchedulerRuntimeAdapter = DefaultSchedulerRuntimeAdapter;

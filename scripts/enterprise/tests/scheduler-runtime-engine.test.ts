@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
- * INF-07 — Enterprise Scheduler Runtime
- * Prova: Application → SchedulerRuntimePort → Adapter → Factory → Registry → Store
- *         + Enterprise Runtime + Queue / Worker / TISS Runtime (deps preparadas sem consumo)
+ * INF-07 / OPER-INF-S — Enterprise Scheduler Runtime
+ * Prova: Application → SchedulerRuntimePort → Adapter → WorkerRuntimePort → QueueRuntimePort
+ *         + Enterprise Runtime (deps DI existentes)
  *         + register / unregister / schedule / cancel / list / stats / health
- *         + ausência de Scheduler real / Cron / Timer / Workers / backends
+ *         + polling temporal / agendamento / cancelamento / heartbeat /
+ *           graceful shutdown / concorrência / recuperação pós-restart
+ *         + ausência de novos Ports / Gateways / Cron / Queue direto / DB direto
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
@@ -13,8 +15,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   BUILTIN_SCHEDULER_RUNTIME_PROVIDER_COUNT,
+  DEFAULT_MOCK_SCHEDULER_RUNTIME_CAPABILITIES,
   DEFAULT_SCHEDULER_RUNTIME_ADAPTER_ID,
   DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES,
+  DEFAULT_SCHEDULER_WORKER_QUEUE_NAME,
   DefaultSchedulerRuntimeAdapter,
   EnterpriseSchedulerRuntimeAdapter,
   IN_MEMORY_SCHEDULER_RUNTIME_STORE_ID,
@@ -32,6 +36,14 @@ import {
   resetSchedulerRuntimeIdSequences,
   type SchedulerRuntimePort,
 } from "../../../src/lib/enterprise/scheduler-runtime/index.ts";
+import {
+  createQueueRuntimePort,
+  DefaultQueueRuntimeAdapter,
+} from "../../../src/lib/enterprise/queue-runtime/index.ts";
+import {
+  createWorkerRuntimePort,
+  DefaultWorkerRuntimeAdapter,
+} from "../../../src/lib/enterprise/worker-runtime/index.ts";
 import {
   createEnterpriseRuntime,
   resetEnterpriseRuntimeForTests,
@@ -51,8 +63,35 @@ function collectTsFiles(dir: string): string[] {
   return out;
 }
 
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function createOperationalSchedulerTriplet(queueName = "oper-inf-s-queue") {
+  const queue = createQueueRuntimePort({ provider: "enterprise" });
+  const worker = new DefaultWorkerRuntimeAdapter({
+    provider: "enterprise",
+    operational: true,
+    pollIntervalMs: 10,
+    enterpriseDeps: {
+      getQueueRuntimePort: () => queue,
+    },
+  });
+  const scheduler = new DefaultSchedulerRuntimeAdapter({
+    provider: "enterprise",
+    operational: true,
+    pollIntervalMs: 10,
+    maxConcurrent: 1,
+    enterpriseDeps: {
+      getQueueRuntimePort: () => queue,
+      getWorkerRuntimePort: () => worker,
+    },
+  });
+  return { queue, worker, scheduler, queueName };
+}
+
 describe("INF-07 SchedulerRuntimePort contract", () => {
-  it("mock adapter satisfaz o Port e responde healthy", async () => {
+  it("mock adapter satisfaz o Port e responde healthy (estrutural)", async () => {
     const port: SchedulerRuntimePort = new MockSchedulerRuntimeAdapter({
       provider: "mock",
     });
@@ -87,6 +126,7 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     assert.equal(caps.canonical.kind, "canonical-scheduler-capabilities");
     assert.equal(caps.canonical.runtimeReady, true);
     assert.equal(caps.canonical.realScheduler, false);
+    assert.equal(DEFAULT_MOCK_SCHEDULER_RUNTIME_CAPABILITIES.realScheduler, false);
   });
 
   it("DefaultSchedulerRuntimeAdapter é o adapter enterprise oficial", () => {
@@ -96,6 +136,7 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     });
     assert.equal(port.providerId, "enterprise");
     assert.equal(port.capabilities().adapterId, DEFAULT_SCHEDULER_RUNTIME_ADAPTER_ID);
+    assert.equal(port.capabilities().realScheduler, true);
   });
 
   it("provider default resolve enterprise", () => {
@@ -116,7 +157,7 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     );
   });
 
-  it("register → schedule → list → cancel → unregister → stats com flags estruturais", async () => {
+  it("register → schedule → list → cancel → unregister → stats (enterprise operacional)", async () => {
     resetSchedulerRuntimeIdSequences();
     const port = createSchedulerRuntimePort({ provider: "enterprise" });
 
@@ -126,21 +167,22 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     });
     assert.equal(registered.ok, true);
     assert.ok(registered.result?.resultId);
-    assert.equal(registered.result?.realScheduler, false);
+    assert.equal(registered.result?.realScheduler, true);
     assert.equal(registered.result?.cronImplemented, false);
-    assert.equal(registered.result?.timerImplemented, false);
+    assert.equal(registered.result?.timerImplemented, true);
     assert.equal(registered.result?.runtimeReady, true);
     assert.equal(registered.schedule?.status, "registered");
     assert.equal(registered.schedule?.scheduleName, "foundation-schedule");
 
     const scheduled = await port.schedule({
       scheduleId: registered.schedule!.scheduleId,
+      attributes: { delayMs: 60_000, pollIntervalMs: 50 },
     });
     assert.equal(scheduled.ok, true);
     assert.equal(scheduled.schedule?.status, "scheduled");
     assert.equal(scheduled.schedule?.active, true);
     assert.equal(scheduled.result?.cronImplemented, false);
-    assert.equal(scheduled.result?.workersOrchestrated, false);
+    assert.equal(scheduled.result?.workersOrchestrated, true);
     assert.equal(scheduled.result?.queueConsumed, false);
     assert.ok(scheduled.job?.jobId);
     assert.ok(scheduled.dispatch?.dispatchId);
@@ -165,15 +207,12 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     const stats = await port.stats();
     assert.equal(stats.ok, true);
     assert.equal(stats.statistics?.kind, "canonical-scheduler-statistics");
-    assert.equal(stats.statistics?.realSchedulerCount, 0);
     assert.equal(stats.statistics?.cronImplementedCount, 0);
-    assert.equal(stats.statistics?.timerImplementedCount, 0);
-    assert.equal(stats.statistics?.workersOrchestratedCount, 0);
-    assert.equal(stats.statistics?.parallelProcessingCount, 0);
     assert.equal(stats.statistics?.queueConsumedCount, 0);
+    assert.equal(stats.statistics?.parallelProcessingCount, 0);
   });
 
-  it("InMemory store oficial e estatísticas zeradas para Scheduler real", () => {
+  it("InMemory store oficial e capabilities default operacionais", () => {
     const store = new InMemorySchedulerRuntimeStore();
     assert.equal(store.storeId, IN_MEMORY_SCHEDULER_RUNTIME_STORE_ID);
     const stats = store.statistics();
@@ -182,12 +221,14 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     assert.equal(stats.cronImplementedCount, 0);
     assert.equal(stats.timerImplementedCount, 0);
     assert.equal(DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES.runtimeReady, true);
-    assert.equal(DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES.realScheduler, false);
+    assert.equal(DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES.realScheduler, true);
+    assert.equal(DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES.workersOrchestrated, true);
   });
 
   it("retry estrutural recupera falha transitória", async () => {
     const port = new DefaultSchedulerRuntimeAdapter({
       provider: "enterprise",
+      operational: false,
       failAttempts: 1,
       defaultRetryCount: 1,
       defaultRetryBackoffMs: 1,
@@ -226,12 +267,162 @@ describe("INF-07 SchedulerRuntimePort contract", () => {
     assert.equal(summary.health.ok, true);
     assert.equal(summary.info.providerType, "SCHEDULER_RUNTIME");
     assert.equal(summary.capabilities.runtimeReady, true);
-    assert.equal(summary.capabilities.realScheduler, false);
+    assert.equal(summary.capabilities.realScheduler, true);
     assert.equal(summary.capabilities.implementsCron, false);
   });
 });
 
-describe("INF-07 cadeia Enterprise / Queue / Worker / TISS / Scheduler Runtime", () => {
+describe("OPER-INF-S acionamento exclusivo via WorkerRuntimePort", () => {
+  it("schedule dispara Worker.allocate quando due (delayMs=0)", async () => {
+    const { worker, scheduler, queueName } = createOperationalSchedulerTriplet();
+
+    const before = await worker.stats();
+    const beforeWorkers = before.statistics?.totalWorkers ?? 0;
+
+    const scheduled = await scheduler.schedule({
+      scheduleName: "oper-inf-s-trigger",
+      attributes: {
+        delayMs: 0,
+        pollIntervalMs: 10,
+        queueName,
+        workerName: "oper-inf-s-worker",
+      },
+    });
+    assert.equal(scheduled.ok, true);
+    assert.ok(scheduler.getDispatcher()?.isActive(scheduled.schedule!.scheduleId));
+
+    await sleep(80);
+
+    const after = await worker.stats();
+    assert.ok((after.statistics?.totalWorkers ?? 0) > beforeWorkers);
+
+    const stats = await scheduler.stats();
+    assert.ok((stats.statistics?.workersOrchestratedCount ?? 0) >= 1);
+    assert.ok((stats.statistics?.jobDispatcherImplementedCount ?? 0) >= 1);
+
+    await scheduler.cancel({ scheduleId: scheduled.schedule!.scheduleId });
+  });
+
+  it("cancel executa graceful shutdown do poll loop", async () => {
+    const { scheduler, queueName } = createOperationalSchedulerTriplet("oper-inf-s-shutdown");
+    const scheduled = await scheduler.schedule({
+      scheduleName: "shutdown-schedule",
+      attributes: { delayMs: 60_000, pollIntervalMs: 10, queueName },
+    });
+    assert.equal(scheduled.ok, true);
+    assert.equal(scheduler.getDispatcher()?.isActive(scheduled.schedule!.scheduleId), true);
+
+    const cancelled = await scheduler.cancel({ scheduleId: scheduled.schedule!.scheduleId });
+    assert.equal(cancelled.ok, true);
+    assert.equal(scheduler.getDispatcher()?.isActive(scheduled.schedule!.scheduleId), false);
+  });
+
+  it("heartbeat renova liveness da sessão (e do Worker alocado)", async () => {
+    const { scheduler, queueName } = createOperationalSchedulerTriplet("oper-inf-s-hb");
+    const scheduled = await scheduler.schedule({
+      scheduleName: "hb-schedule",
+      attributes: { delayMs: 0, pollIntervalMs: 20, queueName, workerName: "hb-worker" },
+    });
+    assert.equal(scheduled.ok, true);
+    await sleep(60);
+    const beat = await scheduler.getDispatcher()!.heartbeat(scheduled.schedule!.scheduleId);
+    assert.equal(beat.renewed, true);
+    assert.ok(beat.lastHeartbeatAt);
+    await scheduler.cancel({ scheduleId: scheduled.schedule!.scheduleId });
+  });
+
+  it("controle de concorrência respeita maxConcurrent=1", async () => {
+    const queue = createQueueRuntimePort({ provider: "enterprise" });
+    let allocateCount = 0;
+    const slowWorker = new DefaultWorkerRuntimeAdapter({
+      provider: "enterprise",
+      operational: true,
+      pollIntervalMs: 10,
+      enterpriseDeps: { getQueueRuntimePort: () => queue },
+    });
+    const originalAllocate = slowWorker.allocate.bind(slowWorker);
+    slowWorker.allocate = async (input) => {
+      allocateCount += 1;
+      await sleep(80);
+      return originalAllocate(input);
+    };
+
+    const scheduler = new DefaultSchedulerRuntimeAdapter({
+      provider: "enterprise",
+      operational: true,
+      pollIntervalMs: 10,
+      maxConcurrent: 1,
+      enterpriseDeps: {
+        getQueueRuntimePort: () => queue,
+        getWorkerRuntimePort: () => slowWorker,
+      },
+    });
+
+    const a = await scheduler.schedule({
+      scheduleName: "conc-a",
+      attributes: { delayMs: 0, pollIntervalMs: 10, queueName: "oper-inf-s-conc", repeat: true },
+    });
+    const b = await scheduler.schedule({
+      scheduleName: "conc-b",
+      attributes: { delayMs: 0, pollIntervalMs: 10, queueName: "oper-inf-s-conc", repeat: true },
+    });
+    assert.equal(a.ok, true);
+    assert.equal(b.ok, true);
+
+    await sleep(50);
+    assert.ok(scheduler.getDispatcher()!.getActiveDispatchCount() <= 1);
+
+    await scheduler.cancel({ scheduleId: a.schedule!.scheduleId });
+    await scheduler.cancel({ scheduleId: b.schedule!.scheduleId });
+    assert.ok(allocateCount >= 1);
+  });
+
+  it("recuperação pós-restart reativa schedules ativos do store", async () => {
+    const queue = createQueueRuntimePort({ provider: "enterprise" });
+    const worker = new DefaultWorkerRuntimeAdapter({
+      provider: "enterprise",
+      operational: true,
+      pollIntervalMs: 10,
+      enterpriseDeps: { getQueueRuntimePort: () => queue },
+    });
+    const store = new InMemorySchedulerRuntimeStore();
+    const first = new DefaultSchedulerRuntimeAdapter({
+      provider: "enterprise",
+      operational: true,
+      pollIntervalMs: 10,
+      store,
+      enterpriseDeps: {
+        getQueueRuntimePort: () => queue,
+        getWorkerRuntimePort: () => worker,
+      },
+    });
+    const scheduled = await first.schedule({
+      scheduleName: "recover-schedule",
+      attributes: { delayMs: 60_000, pollIntervalMs: 10, queueName: "oper-inf-s-recover" },
+    });
+    assert.equal(scheduled.ok, true);
+    await first.cancel({ scheduleId: scheduled.schedule!.scheduleId });
+
+    // Reativa manualmente no store (simula estado persistido ativo após restart).
+    const existing = store.getSchedule(scheduled.schedule!.scheduleId)!;
+    store.setSchedule({ ...existing, status: "scheduled", active: true });
+
+    const recovered = new DefaultSchedulerRuntimeAdapter({
+      provider: "enterprise",
+      operational: true,
+      pollIntervalMs: 10,
+      store,
+      enterpriseDeps: {
+        getQueueRuntimePort: () => queue,
+        getWorkerRuntimePort: () => worker,
+      },
+    });
+    assert.equal(recovered.getDispatcher()?.isActive(scheduled.schedule!.scheduleId), true);
+    await recovered.cancel({ scheduleId: scheduled.schedule!.scheduleId });
+  });
+});
+
+describe("INF-07 / OPER-INF-S cadeia Enterprise / Queue / Worker / TISS / Scheduler Runtime", () => {
   it("Enterprise Runtime expõe Scheduler Runtime + health schedulerRuntimeOk", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
@@ -253,34 +444,47 @@ describe("INF-07 cadeia Enterprise / Queue / Worker / TISS / Scheduler Runtime",
     assert.equal(health.tissRuntimeOk, true);
   });
 
-  it("Scheduler Runtime prepara deps Queue/Worker sem consumir/orquestrar", async () => {
+  it("Scheduler Runtime operacional aciona Worker exclusivamente via WorkerRuntimePort", async () => {
     resetEnterpriseRuntimeForTests();
     const runtime = createEnterpriseRuntime({ runtimeId: "test" });
-    const scheduler = runtime.getSchedulerRuntimePort();
-    const queue = runtime.getQueueRuntimePort();
+    const scheduler = runtime.getSchedulerRuntimePort() as DefaultSchedulerRuntimeAdapter;
     const worker = runtime.getWorkerRuntimePort();
+    const queue = runtime.getQueueRuntimePort();
 
     const schedulerHealth = await scheduler.health();
     assert.equal(schedulerHealth.ok, true);
-    assert.equal(schedulerHealth.queueRuntimeOk, true);
     assert.equal(schedulerHealth.workerRuntimeOk, true);
+    assert.equal(schedulerHealth.realScheduler, true);
+    assert.equal(schedulerHealth.workersOrchestrated, true);
 
-    const beforeQueue = await queue.stats();
-    const beforeQueueCount = beforeQueue.statistics?.totalMessages ?? 0;
     const beforeWorker = await worker.stats();
     const beforeWorkers = beforeWorker.statistics?.totalWorkers ?? 0;
+    const beforeQueue = await queue.stats();
+    const beforeQueueCount = beforeQueue.statistics?.totalMessages ?? 0;
 
-    const scheduled = await scheduler.schedule({ scheduleName: "inf-07-no-consume" });
+    const scheduled = await scheduler.schedule({
+      scheduleName: "oper-inf-s-enterprise",
+      attributes: {
+        delayMs: 0,
+        pollIntervalMs: 10,
+        queueName: DEFAULT_SCHEDULER_WORKER_QUEUE_NAME,
+        workerName: "oper-inf-s-enterprise-worker",
+      },
+    });
     assert.equal(scheduled.ok, true);
+    assert.equal(scheduled.result?.workersOrchestrated, true);
     assert.equal(scheduled.result?.queueConsumed, false);
-    assert.equal(scheduled.result?.workersOrchestrated, false);
-    assert.equal(scheduled.result?.cronImplemented, false);
 
+    await sleep(100);
+
+    const afterWorker = await worker.stats();
+    assert.ok((afterWorker.statistics?.totalWorkers ?? 0) > beforeWorkers);
+
+    // Scheduler NÃO consome a fila — Worker pode consumir se houver mensagens; count inalterado aqui.
     const afterQueue = await queue.stats();
     assert.equal(afterQueue.statistics?.totalMessages ?? 0, beforeQueueCount);
-    const afterWorker = await worker.stats();
-    assert.equal(afterWorker.statistics?.totalWorkers ?? 0, beforeWorkers);
-    assert.equal(afterWorker.statistics?.realWorkersCount, 0);
+
+    await scheduler.cancel({ scheduleId: scheduled.schedule!.scheduleId });
   });
 
   it("TISS Runtime prepara dependência Scheduler sem agendar/executar", async () => {
@@ -303,21 +507,19 @@ describe("INF-07 cadeia Enterprise / Queue / Worker / TISS / Scheduler Runtime",
       mode: "structural-process",
       metadata: {
         kind: "canonical-tiss-metadata",
-        sessionId: "sess-inf-07",
-        correlationId: "corr-inf-07",
+        sessionId: "sess-oper-inf-s",
+        correlationId: "corr-oper-inf-s",
       },
     });
     assert.equal(processed.ok, true);
 
     const after = await scheduler.stats();
     assert.equal(after.statistics?.totalSchedules ?? 0, beforeSchedules);
-    assert.equal(after.statistics?.realSchedulerCount, 0);
-    assert.equal(after.statistics?.cronImplementedCount, 0);
   });
 });
 
-describe("INF-07 ausência de Scheduler real / Cron / bypass", () => {
-  it("módulo scheduler-runtime não referencia backends reais nem cron/timer services", () => {
+describe("INF-07 / OPER-INF-S ausência de Cron / Queue direto / novos Ports / bypass", () => {
+  it("módulo scheduler-runtime não referencia backends reais nem cron services", () => {
     const root = join(repoRoot, "src/lib/enterprise/scheduler-runtime");
     const files = collectTsFiles(root);
     assert.ok(files.length > 0);
@@ -345,6 +547,8 @@ describe("INF-07 ausência de Scheduler real / Cron / bypass", () => {
       /implements\s+IHostedService/,
       /from ["']hangfire/i,
       /from ["']quartz/i,
+      /from ["']@supabase\/supabase-js["']/,
+      /\.from\(\s*["']enterprise_queue/,
     ];
 
     for (const file of files) {
@@ -416,7 +620,7 @@ describe("INF-07 ausência de Scheduler real / Cron / bypass", () => {
     );
   });
 
-  it("Scheduler Runtime não consome Queue nem orquestra Workers nas operações", () => {
+  it("OPER-INF-S — Scheduler aciona WorkerRuntimePort sem Queue direto", () => {
     const schedulerAdapter = readFileSync(
       join(
         repoRoot,
@@ -424,10 +628,9 @@ describe("INF-07 ausência de Scheduler real / Cron / bypass", () => {
       ),
       "utf8",
     );
-    assert.match(schedulerAdapter, /getQueueRuntimePort/);
     assert.match(schedulerAdapter, /getWorkerRuntimePort/);
-    assert.match(schedulerAdapter, /usesQueueRuntimePort/);
     assert.match(schedulerAdapter, /usesWorkerRuntimePort/);
+    assert.match(schedulerAdapter, /OPER-INF-S/);
     assert.equal(
       /getQueueRuntimePort\(\)\.(enqueue|dequeue|peek|ack|nack|purge)\s*\(/.test(schedulerAdapter),
       false,
@@ -438,19 +641,49 @@ describe("INF-07 ausência de Scheduler real / Cron / bypass", () => {
       ),
       false,
     );
+
+    const dispatcher = readFileSync(
+      join(
+        repoRoot,
+        "src/lib/enterprise/scheduler-runtime/operational/scheduler-worker-dispatcher.ts",
+      ),
+      "utf8",
+    );
+    assert.match(dispatcher, /worker\.allocate/);
+    assert.match(dispatcher, /\.heartbeat\(\{\s*workerId/);
+    assert.match(dispatcher, /\.release\(\{\s*workerId/);
+    assert.equal(/from ["'].*queue-runtime/.test(dispatcher), false);
+    assert.equal(/import\s+type\s+\{\s*QueueRuntimePort/.test(dispatcher), false);
+    assert.equal(/\.enqueue\(|\.dequeue\(|\.ack\(|\.nack\(/.test(dispatcher), false);
+    assert.equal(/from ["']@supabase/.test(dispatcher), false);
   });
 
-  it("sem Provider/Adapter/Factory/Registry paralelo", () => {
+  it("sem Provider/Adapter/Factory/Registry/Port/Gateway paralelo", () => {
     const root = join(repoRoot, "src/lib/enterprise/scheduler-runtime");
     const files = collectTsFiles(root).map((f) => f.replace(/\\/g, "/"));
     assert.ok(files.some((f) => f.endsWith("/providers/create-scheduler-runtime-port.ts")));
     assert.ok(files.some((f) => f.endsWith("/factory/scheduler-runtime-factory.ts")));
     assert.ok(files.some((f) => f.endsWith("/registry/scheduler-runtime-registry.ts")));
+    assert.ok(files.some((f) => f.endsWith("/operational/scheduler-worker-dispatcher.ts")));
     assert.equal(files.filter((f) => f.includes("/factory/")).length, 2);
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
     assert.equal(
       files.filter((f) => /adapters\/.*scheduler-runtime-adapter\.ts$/.test(f)).length,
       2,
     );
+    assert.equal(files.filter((f) => /\/ports\/.*-port\.ts$/.test(f)).length, 1);
+    assert.equal(files.filter((f) => /gateway/i.test(f)).length, 0);
+  });
+
+  it("OPER-INF-S — Runtime permanece com createSchedulerRuntimePort (sem novo Runtime)", () => {
+    const enterpriseRuntime = readFileSync(
+      join(repoRoot, "src/lib/enterprise/runtime/enterprise-runtime.ts"),
+      "utf8",
+    );
+    assert.match(enterpriseRuntime, /createSchedulerRuntimePort/);
+    assert.equal(/createSchedulerWorkerDispatcher/.test(enterpriseRuntime), false);
+    assert.equal(/SchedulerWorkerDispatcher/.test(enterpriseRuntime), false);
+    assert.ok(DefaultQueueRuntimeAdapter);
+    assert.ok(createWorkerRuntimePort);
   });
 });

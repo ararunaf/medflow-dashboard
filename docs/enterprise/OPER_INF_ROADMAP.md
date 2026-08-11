@@ -12,7 +12,8 @@
 |--------|-----------|--------|
 | **OPER-INF-Q** | Ativar backend persistente do `QueueRuntimePort` | ✅ Concluída |
 | **OPER-INF-W** | Ativar Worker operacional via `QueueRuntimePort` | ✅ Concluída |
-| **OPER-INF-S** | Ativar Scheduler operacional | ⏳ Próxima Sprint |
+| **OPER-INF-S** | Ativar Scheduler operacional via `WorkerRuntimePort` | ✅ Concluída |
+| **OPER-INF-D** | Próxima ativação operacional INF | ⏳ Próxima Sprint |
 
 ---
 
@@ -24,16 +25,18 @@
 - Proibido criar novo Runtime / Port / Gateway / pipeline paralelo
 - Proibido reintroduzir execução paralela
 - Consumidores não acessam filas diretamente — apenas via `QueueRuntimePort`
+- Scheduler aciona Worker apenas via `WorkerRuntimePort` (nunca Queue direto)
 
 ---
 
-## Fluxo operacional atual (pós OPER-INF-W)
+## Fluxo operacional atual (pós OPER-INF-S)
 
 ```
 getEnterpriseRuntime()
-  → WorkerRuntimePort
-    → QueueRuntimePort
-      → Backend Persistente (OPER-INF-Q)
+  → SchedulerRuntimePort
+    → WorkerRuntimePort
+      → QueueRuntimePort
+        → Backend Persistente (OPER-INF-Q)
 ```
 
 ---
@@ -49,8 +52,13 @@ getEnterpriseRuntime()
 - Consumo exclusivo via `QueueRuntimePort`
 - Sem Scheduler / Retry Engine / Dead Letter / Batch / XML / SOAP / IA
 
+### OPER-INF-S
+- Scheduler operacional: polling temporal, agendamento, cancelamento, heartbeat, graceful shutdown, concorrência, recuperação pós-restart
+- Acionamento exclusivo via `WorkerRuntimePort` (decide QUANDO acionar o Worker)
+- Sem Cron / Queue direto / novos Ports / Gateways / regras de negócio
+
 ---
 
 ## Próxima Sprint
 
-**OPER-INF-S** — Scheduler operacional (sem alterar fases futuras além desta marcação).
+**OPER-INF-D** — próxima ativação operacional INF (sem alterar fases futuras além desta marcação).

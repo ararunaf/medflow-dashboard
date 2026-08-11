@@ -1,20 +1,16 @@
 /**
- * Enterprise Scheduler Runtime — Ports & Adapters (INF-07).
+ * Enterprise Scheduler Runtime — Ports & Adapters (INF-07 / OPER-INF-S).
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → SchedulerRuntimePort
  *     → DefaultSchedulerRuntimeAdapter / EnterpriseSchedulerRuntimeAdapter / MockSchedulerRuntimeAdapter
- *     → InMemorySchedulerRuntimeStore
- *     → Canonical Scheduler Result
+ *     → SchedulerWorkerDispatcher → WorkerRuntimePort
+ *       → QueueRuntimePort → Backend Persistente
  *
- * INF-07: infraestrutura canônica de gerenciamento estrutural de Schedulers futuros.
- * Sem Scheduler real. Sem Cron. Sem Quartz/Hangfire/Celery/BullMQ.
- * Sem Timer real. Sem Clock real. Sem Background Services.
- * Sem Retry Scheduling real. Sem Delay Jobs. Sem Job Dispatcher.
- * Sem Time Windows reais. Sem orquestração real de Workers.
- * Sem Workers reais. Sem filas reais. Sem processamento paralelo.
- * Sem RabbitMQ/Kafka/Azure/Redis. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture/IA.
- * Dependências Queue Runtime + Worker Runtime preparadas — sem consumo/execução.
+ * OPER-INF-S: scheduler operacional via WorkerRuntimePort (sem novos Ports / Gateways).
+ * Sem Cron. Sem Quartz/Hangfire/Celery/BullMQ. Sem acesso direto a Queue/DB.
+ * Sem paralelismo. Sem RabbitMQ/Kafka/Azure/Redis. Sem HTTP.
+ * Sem operadoras/ANS/XML/OCR/Capture/IA. Sem regras de negócio.
  * Toda comunicação exclusivamente via SchedulerRuntimePort.
  */
 export type {
@@ -76,6 +72,7 @@ export {
 export {
   DEFAULT_SCHEDULER_RUNTIME_ADAPTER_ID,
   DEFAULT_SCHEDULER_RUNTIME_VERSION,
+  DEFAULT_SCHEDULER_WORKER_QUEUE_NAME,
   DEFAULT_MOCK_SCHEDULER_RUNTIME_VERSION,
   DefaultSchedulerRuntimeAdapter,
   EnterpriseSchedulerRuntimeAdapter,
@@ -84,6 +81,16 @@ export {
   type DefaultSchedulerRuntimeAdapterOptions,
   type MockSchedulerRuntimeAdapterOptions,
 } from "./adapters";
+
+export {
+  DEFAULT_SCHEDULER_MAX_CONCURRENT,
+  DEFAULT_SCHEDULER_POLL_INTERVAL_MS,
+  SchedulerWorkerDispatcher,
+  type SchedulerDispatchOutcome,
+  type SchedulerDispatchedEvent,
+  type SchedulerSessionStartInput,
+  type SchedulerWorkerDispatcherOptions,
+} from "./operational";
 
 export {
   SchedulerRuntimeFactory,

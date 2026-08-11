@@ -1,11 +1,12 @@
 /**
- * Tipos vendor-agnósticos do Enterprise Scheduler Runtime — INF-07.
+ * Tipos vendor-agnósticos do Enterprise Scheduler Runtime — INF-07 / OPER-INF-S.
  *
  * Fluxo oficial:
  *   Produto → Enterprise Runtime → SchedulerRuntimePort
- *     → Adapter → Scheduler Runtime Store → Canonical Scheduler Result
+ *     → Adapter → SchedulerWorkerDispatcher → WorkerRuntimePort
+ *       → QueueRuntimePort → Backend Persistente
  *
- * Sem Scheduler real. Sem Cron. Sem Timer. Sem Workers reais. Sem filas reais.
+ * OPER-INF-S: acionamento operacional exclusivo via WorkerRuntimePort (sem novos Ports).
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
 import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
@@ -91,14 +92,14 @@ export type SchedulerRuntimePortCapabilities = {
   /** INF-10 — dependência Scalability Runtime preparada (sem consumo). */
   usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  timerImplemented: false;
+  timerImplemented: boolean;
   retrySchedulingImplemented: false;
   delayJobsImplemented: false;
-  jobDispatcherImplemented: false;
+  jobDispatcherImplemented: boolean;
   timeWindowsImplemented: false;
-  workersOrchestrated: false;
+  workersOrchestrated: boolean;
   queueConsumed: false;
   parallelProcessing: false;
   persistenceImplemented: false;
@@ -110,10 +111,10 @@ export type SchedulerRuntimePortCapabilities = {
   implementsAzureScheduler: false;
   implementsAzureFunctionsTimer: false;
   implementsTaskScheduler: false;
-  implementsRealScheduler: false;
-  implementsTimer: false;
+  implementsRealScheduler: boolean;
+  implementsTimer: boolean;
   implementsClock: false;
-  implementsBackgroundService: false;
+  implementsBackgroundService: boolean;
   implementsRetryReal: false;
   implementsDelayQueue: false;
   implementsThreadPool: false;
@@ -237,9 +238,9 @@ export type SchedulerStatsResult = SchedulerRuntimeOperationEnvelope & {
 
 /**
  * Dependências Enterprise injetadas no adapter default/enterprise.
- * Queue + Worker Runtime são dependências obrigatórias preparadas — NÃO consumidas nesta sprint.
- * Persistent Queue Runtime é dependência preparada (opcional no Port shape) — NÃO persistida/consumida.
- * Observability Runtime é dependência preparada (opcional no Port shape) — NÃO observada/emitida.
+ * OPER-INF-S: WorkerRuntimePort é consumido exclusivamente pelo dispatcher operacional.
+ * QueueRuntimePort permanece preparado (health/wiring) — NÃO consumido pelo Scheduler.
+ * Persistent Queue / Observability / Scalability — deps preparadas (sem consumo funcional).
  */
 export type SchedulerRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;

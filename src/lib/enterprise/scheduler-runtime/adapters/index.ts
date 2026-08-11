@@ -1,6 +1,7 @@
 export {
   DEFAULT_SCHEDULER_RUNTIME_ADAPTER_ID,
   DEFAULT_SCHEDULER_RUNTIME_VERSION,
+  DEFAULT_SCHEDULER_WORKER_QUEUE_NAME,
   DefaultSchedulerRuntimeAdapter,
   EnterpriseSchedulerRuntimeAdapter,
   type DefaultSchedulerRuntimeAdapterOptions,

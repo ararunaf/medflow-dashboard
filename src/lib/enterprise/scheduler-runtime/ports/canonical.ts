@@ -1,13 +1,11 @@
 /**
- * Modelos canônicos do Enterprise Scheduler Runtime — INF-07.
+ * Modelos canônicos do Enterprise Scheduler Runtime — INF-07 / OPER-INF-S.
  *
- * Infraestrutura canônica estrutural de Schedulers futuros.
- * Sem Scheduler real. Sem Cron. Sem Quartz/Hangfire/Celery/BullMQ.
- * Sem Timer real. Sem Clock real. Sem Background Services.
- * Sem Retry Scheduling real. Sem Delay Jobs reais. Sem Job Dispatcher real.
- * Sem Time Windows reais. Sem orquestração real de Workers.
- * Sem Workers reais. Sem filas reais. Sem processamento paralelo.
- * Sem RabbitMQ/Kafka/Azure/Redis. Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture/IA.
+ * OPER-INF-S: flags operacionais (realScheduler / timerImplemented /
+ * jobDispatcherImplemented / workersOrchestrated) quando o adapter aciona
+ * WorkerRuntimePort. Sem Cron. Sem Quartz/Hangfire/Celery/BullMQ.
+ * Sem acesso a QueueRuntimePort. Sem paralelismo. Sem RabbitMQ/Kafka/Azure/Redis.
+ * Sem HTTP. Sem operadoras/ANS/XML/OCR/Capture/IA.
  */
 
 /** Status estrutural de Schedule / Job / operação de Scheduler Runtime. */
@@ -71,8 +69,8 @@ export type CanonicalSchedulerOperation =
   | (string & {});
 
 /**
- * Schedule canônico estrutural.
- * Representa a infraestrutura de Schedule — sem timer real, sem cron.
+ * Schedule canônico.
+ * OPER-INF-S: flags operacionais quando o adapter aciona WorkerRuntimePort.
  */
 export type CanonicalSchedule = {
   kind: "canonical-schedule";
@@ -84,22 +82,21 @@ export type CanonicalSchedule = {
   active: boolean;
   createdAt: string;
   updatedAt: string;
-  /** Sempre false — nenhum Scheduler real nesta fundação. */
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  timerImplemented: false;
+  timerImplemented: boolean;
   retrySchedulingImplemented: false;
   delayJobsImplemented: false;
-  jobDispatcherImplemented: false;
+  jobDispatcherImplemented: boolean;
   timeWindowsImplemented: false;
-  workersOrchestrated: false;
+  workersOrchestrated: boolean;
   queueConsumed: false;
   parallelProcessing: false;
   persistenceImplemented: false;
 };
 
 /**
- * Job canônico estrutural (referência apenas — nunca agendado/executado de fato).
+ * Job canônico (OPER-INF-S: agendado temporalmente via dispatcher interno).
  */
 export type CanonicalSchedulerJob = {
   kind: "canonical-scheduler-job";
@@ -110,15 +107,15 @@ export type CanonicalSchedulerJob = {
   status: CanonicalSchedulerStatus;
   registeredAt: string;
   updatedAt: string;
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  timerImplemented: false;
-  workersOrchestrated: false;
+  timerImplemented: boolean;
+  workersOrchestrated: boolean;
   persistenceImplemented: false;
 };
 
 /**
- * Dispatch canônico estrutural (registro apenas — nunca despachado).
+ * Dispatch canônico (OPER-INF-S: despacho via WorkerRuntimePort.allocate).
  */
 export type CanonicalSchedulerDispatch = {
   kind: "canonical-scheduler-dispatch";
@@ -130,16 +127,15 @@ export type CanonicalSchedulerDispatch = {
   status: CanonicalSchedulerStatus;
   createdAt: string;
   updatedAt: string;
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  jobDispatcherImplemented: false;
-  workersOrchestrated: false;
+  jobDispatcherImplemented: boolean;
+  workersOrchestrated: boolean;
   persistenceImplemented: false;
 };
 
 /**
- * Resultado canônico de operação de Scheduler Runtime (INF-07).
- * Contém apenas referência/estrutura canônica — nunca agendamento real.
+ * Resultado canônico de operação de Scheduler Runtime (INF-07 / OPER-INF-S).
  */
 export type CanonicalSchedulerResult = {
   kind: "canonical-scheduler-result";
@@ -152,19 +148,17 @@ export type CanonicalSchedulerResult = {
   identity?: CanonicalSchedulerIdentity;
   metadata?: CanonicalSchedulerMetadata;
   provider?: CanonicalSchedulerProvider;
-  /** Sempre false — nenhum Scheduler real. */
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  timerImplemented: false;
+  timerImplemented: boolean;
   retrySchedulingImplemented: false;
   delayJobsImplemented: false;
-  jobDispatcherImplemented: false;
+  jobDispatcherImplemented: boolean;
   timeWindowsImplemented: false;
-  workersOrchestrated: false;
+  workersOrchestrated: boolean;
   queueConsumed: false;
   parallelProcessing: false;
   persistenceImplemented: false;
-  /** Sempre true — runtime estrutural pronto (sem Scheduler real). */
   runtimeReady: true;
   status: CanonicalSchedulerStatus;
   messageText?: string;
@@ -174,7 +168,7 @@ export type CanonicalSchedulerResult = {
 };
 
 /**
- * Estatísticas estruturais do Scheduler Runtime (in-process).
+ * Estatísticas do Scheduler Runtime (in-process + contadores operacionais).
  */
 export type CanonicalSchedulerStatistics = {
   kind: "canonical-scheduler-statistics";
@@ -184,14 +178,14 @@ export type CanonicalSchedulerStatistics = {
   cancelledSchedules: number;
   totalJobs: number;
   totalDispatches: number;
-  realSchedulerCount: 0;
+  realSchedulerCount: number;
   cronImplementedCount: 0;
-  timerImplementedCount: 0;
+  timerImplementedCount: number;
   retrySchedulingImplementedCount: 0;
   delayJobsImplementedCount: 0;
-  jobDispatcherImplementedCount: 0;
+  jobDispatcherImplementedCount: number;
   timeWindowsImplementedCount: 0;
-  workersOrchestratedCount: 0;
+  workersOrchestratedCount: number;
   queueConsumedCount: 0;
   parallelProcessingCount: 0;
   persistenceImplementedCount: 0;
@@ -218,14 +212,14 @@ export type CanonicalSchedulerHealth = {
   observabilityRuntimeOk?: boolean;
   scalabilityRuntimeOk?: boolean;
   runtimeReady: true;
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  timerImplemented: false;
+  timerImplemented: boolean;
   retrySchedulingImplemented: false;
   delayJobsImplemented: false;
-  jobDispatcherImplemented: false;
+  jobDispatcherImplemented: boolean;
   timeWindowsImplemented: false;
-  workersOrchestrated: false;
+  workersOrchestrated: boolean;
   queueConsumed: false;
   parallelProcessing: false;
   persistenceImplemented: false;
@@ -245,14 +239,14 @@ export type CanonicalSchedulerCapabilities = {
   supportsHealth: boolean;
   supportsCanonicalSchedule: boolean;
   runtimeReady: true;
-  realScheduler: false;
+  realScheduler: boolean;
   cronImplemented: false;
-  timerImplemented: false;
+  timerImplemented: boolean;
   retrySchedulingImplemented: false;
   delayJobsImplemented: false;
-  jobDispatcherImplemented: false;
+  jobDispatcherImplemented: boolean;
   timeWindowsImplemented: false;
-  workersOrchestrated: false;
+  workersOrchestrated: boolean;
   queueConsumed: false;
   parallelProcessing: false;
   persistenceImplemented: false;
@@ -264,10 +258,10 @@ export type CanonicalSchedulerCapabilities = {
   implementsAzureScheduler: false;
   implementsAzureFunctionsTimer: false;
   implementsTaskScheduler: false;
-  implementsRealScheduler: false;
-  implementsTimer: false;
+  implementsRealScheduler: boolean;
+  implementsTimer: boolean;
   implementsClock: false;
-  implementsBackgroundService: false;
+  implementsBackgroundService: boolean;
   implementsRetryReal: false;
   implementsDelayQueue: false;
   implementsThreadPool: false;

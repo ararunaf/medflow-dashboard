@@ -90,6 +90,7 @@ export class MockSchedulerRuntimeAdapter implements SchedulerRuntimePort {
       message: this.message,
       store: options.store,
       enterpriseDeps,
+      operational: false,
     });
   }
 

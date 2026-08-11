@@ -1,7 +1,9 @@
 /**
- * SchedulerRuntimeCapabilities — capacidades declarativas (INF-07).
+ * SchedulerRuntimeCapabilities — capacidades declarativas (INF-07 / OPER-INF-S).
  *
- * Apenas declaração estrutural. Sem Scheduler real. Sem Cron. Sem Timer.
+ * Flags operacionais (realScheduler / timerImplemented / jobDispatcherImplemented /
+ * workersOrchestrated) ativadas pelo adapter default que aciona WorkerRuntimePort.
+ * Sem Cron. Sem Quartz/Hangfire/Celery/BullMQ. Sem consumo direto de Queue.
  */
 
 import type { CanonicalSchedulerCapabilities } from "./canonical";
@@ -27,14 +29,14 @@ export type SchedulerRuntimeCapabilities = {
   usesObservabilityRuntimePort?: boolean;
   usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
-  realScheduler?: false;
+  realScheduler?: boolean;
   cronImplemented?: false;
-  timerImplemented?: false;
+  timerImplemented?: boolean;
   retrySchedulingImplemented?: false;
   delayJobsImplemented?: false;
-  jobDispatcherImplemented?: false;
+  jobDispatcherImplemented?: boolean;
   timeWindowsImplemented?: false;
-  workersOrchestrated?: false;
+  workersOrchestrated?: boolean;
   queueConsumed?: false;
   parallelProcessing?: false;
   persistenceImplemented?: false;
@@ -46,10 +48,10 @@ export type SchedulerRuntimeCapabilities = {
   implementsAzureScheduler?: false;
   implementsAzureFunctionsTimer?: false;
   implementsTaskScheduler?: false;
-  implementsRealScheduler?: false;
-  implementsTimer?: false;
+  implementsRealScheduler?: boolean;
+  implementsTimer?: boolean;
   implementsClock?: false;
-  implementsBackgroundService?: false;
+  implementsBackgroundService?: boolean;
   implementsRetryReal?: false;
   implementsDelayQueue?: false;
   implementsThreadPool?: false;
@@ -77,6 +79,7 @@ export function defineSchedulerRuntimeCapabilities(
   return { ...capabilities };
 }
 
+/** Capacidades operacionais do adapter default/enterprise (OPER-INF-S). */
 export const DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilities = {
   supportsRegister: true,
   supportsUnregister: true,
@@ -96,14 +99,14 @@ export const DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilitie
   usesObservabilityRuntimePort: true,
   usesScalabilityRuntimePort: true,
   runtimeReady: true,
-  realScheduler: false,
+  realScheduler: true,
   cronImplemented: false,
-  timerImplemented: false,
+  timerImplemented: true,
   retrySchedulingImplemented: false,
   delayJobsImplemented: false,
-  jobDispatcherImplemented: false,
+  jobDispatcherImplemented: true,
   timeWindowsImplemented: false,
-  workersOrchestrated: false,
+  workersOrchestrated: true,
   queueConsumed: false,
   parallelProcessing: false,
   persistenceImplemented: false,
@@ -115,10 +118,10 @@ export const DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilitie
   implementsAzureScheduler: false,
   implementsAzureFunctionsTimer: false,
   implementsTaskScheduler: false,
-  implementsRealScheduler: false,
-  implementsTimer: false,
+  implementsRealScheduler: true,
+  implementsTimer: true,
   implementsClock: false,
-  implementsBackgroundService: false,
+  implementsBackgroundService: true,
   implementsRetryReal: false,
   implementsDelayQueue: false,
   implementsThreadPool: false,
@@ -136,8 +139,16 @@ export const DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilitie
   knowsTissPattern: false,
 };
 
+/** Capacidades estruturais do mock/test (sem acionamento operacional de Worker). */
 export const DEFAULT_MOCK_SCHEDULER_RUNTIME_CAPABILITIES: SchedulerRuntimeCapabilities = {
   ...DEFAULT_SCHEDULER_RUNTIME_CAPABILITIES,
+  realScheduler: false,
+  timerImplemented: false,
+  jobDispatcherImplemented: false,
+  workersOrchestrated: false,
+  implementsRealScheduler: false,
+  implementsTimer: false,
+  implementsBackgroundService: false,
 };
 
 export function toCanonicalSchedulerCapabilities(
@@ -154,14 +165,14 @@ export function toCanonicalSchedulerCapabilities(
     supportsHealth: capabilities.supportsHealth === true,
     supportsCanonicalSchedule: capabilities.supportsCanonicalSchedule === true,
     runtimeReady: true,
-    realScheduler: false,
+    realScheduler: capabilities.realScheduler === true,
     cronImplemented: false,
-    timerImplemented: false,
+    timerImplemented: capabilities.timerImplemented === true,
     retrySchedulingImplemented: false,
     delayJobsImplemented: false,
-    jobDispatcherImplemented: false,
+    jobDispatcherImplemented: capabilities.jobDispatcherImplemented === true,
     timeWindowsImplemented: false,
-    workersOrchestrated: false,
+    workersOrchestrated: capabilities.workersOrchestrated === true,
     queueConsumed: false,
     parallelProcessing: false,
     persistenceImplemented: false,
@@ -173,10 +184,10 @@ export function toCanonicalSchedulerCapabilities(
     implementsAzureScheduler: false,
     implementsAzureFunctionsTimer: false,
     implementsTaskScheduler: false,
-    implementsRealScheduler: false,
-    implementsTimer: false,
+    implementsRealScheduler: capabilities.implementsRealScheduler === true,
+    implementsTimer: capabilities.implementsTimer === true,
     implementsClock: false,
-    implementsBackgroundService: false,
+    implementsBackgroundService: capabilities.implementsBackgroundService === true,
     implementsRetryReal: false,
     implementsDelayQueue: false,
     implementsThreadPool: false,

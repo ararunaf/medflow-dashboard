@@ -1,14 +1,15 @@
 /**
- * SchedulerRuntimePort — contrato único do Enterprise Scheduler Runtime (INF-07).
+ * SchedulerRuntimePort — contrato único do Enterprise Scheduler Runtime (INF-07 / OPER-INF-S).
  *
  * Application / Enterprise Runtime / Queue Runtime / Worker Runtime / TISS Runtime
- * dependem exclusivamente desta interface para gerenciar Schedules canônicos estruturais.
+ * dependem exclusivamente desta interface para gerenciar Schedules canônicos.
  *
  * Fluxo obrigatório:
  *   Produto → Enterprise Runtime → SchedulerRuntimePort
- *     → Adapter → Scheduler Runtime Store → Canonical Scheduler Result
+ *     → Adapter → SchedulerWorkerDispatcher → WorkerRuntimePort
+ *       → QueueRuntimePort → Backend Persistente
  *
- * INF-07: infraestrutura canônica apenas — sem Scheduler real / Cron / Timer / Workers.
+ * OPER-INF-S: implementação operacional via WorkerRuntimePort — interface pública inalterada.
  */
 import type {
   CancelScheduleInput,
@@ -34,36 +35,36 @@ export interface SchedulerRuntimePort {
   readonly providerId: SchedulerRuntimeProviderId;
 
   /**
-   * Registra estruturalmente um Schedule no store in-memory.
-   * NÃO cria timers. NÃO agenda Cron. NÃO despacha Jobs.
+   * Registra um Schedule no store.
+   * OPER-INF-S: não inicia poll — schedule ativa o dispatcher temporal.
    */
   register(input: RegisterScheduleInput): Promise<RegisterScheduleResult>;
 
   /**
-   * Remove estruturalmente um Schedule do store.
-   * NÃO cancela timers reais (não há timers).
+   * Remove um Schedule do store.
+   * OPER-INF-S: encerra graceful shutdown do poll se ativo.
    */
   unregister(input: UnregisterScheduleInput): Promise<UnregisterScheduleResult>;
 
   /**
-   * Agenda estruturalmente um Job (marca estado canônico).
-   * NÃO usa Cron. NÃO usa Timer. NÃO orquestra Workers. NÃO consome Queue.
+   * Agenda um Job.
+   * OPER-INF-S: inicia polling temporal e aciona WorkerRuntimePort quando due.
    */
   schedule(input: ScheduleJobInput): Promise<ScheduleJobResult>;
 
   /**
-   * Cancela estruturalmente um Schedule / Job.
-   * NÃO afeta backends reais / cron / timers.
+   * Cancela um Schedule / Job.
+   * OPER-INF-S: graceful shutdown do dispatcher e release do Worker alocado.
    */
   cancel(input: CancelScheduleInput): Promise<CancelScheduleResult>;
 
   /**
-   * Lista estruturalmente Schedules / Jobs do store in-memory.
+   * Lista Schedules / Jobs do store.
    */
   list(input?: ListSchedulesInput): Promise<ListSchedulesResult>;
 
   /**
-   * Estatísticas estruturais do store in-memory.
+   * Estatísticas do Scheduler Runtime (store + contadores operacionais).
    */
   stats(input?: SchedulerStatsInput): Promise<SchedulerStatsResult>;
 

@@ -1,8 +1,8 @@
 /**
- * InMemorySchedulerRuntimeStore — store in-process (INF-07).
+ * InMemorySchedulerRuntimeStore — store in-process (INF-07 / OPER-INF-S).
  *
  * Implementação oficial do Scheduler Runtime Store.
- * Sem banco. Sem Redis. Sem Cron. Sem Timer. Sem Scheduler real.
+ * Sem banco. Sem Redis. Sem Cron. Contadores operacionais permanecem no adapter.
  */
 import type { CanonicalSchedulerStatistics } from "../ports/canonical";
 import type {
