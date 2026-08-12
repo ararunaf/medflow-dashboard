@@ -5,7 +5,11 @@
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → ProtocolRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultProtocolRuntimeAdapter, MockProtocolRuntimeAdapter } from "../adapters";
+import {
+  DefaultProtocolRuntimeAdapter,
+  MockProtocolRuntimeAdapter,
+  RealTissProtocolRuntimeAdapter,
+} from "../adapters";
 import type { ProtocolRuntimePort } from "../ports/protocol-runtime-port";
 import type {
   ProtocolRuntimeEnterpriseDeps,
@@ -77,6 +81,11 @@ export class ProtocolRuntimeFactory {
       case "enterprise":
         return new DefaultProtocolRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissProtocolRuntimeAdapter({
           store: this.store,
           enterpriseDeps,
         });

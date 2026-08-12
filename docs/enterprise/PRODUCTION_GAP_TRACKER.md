@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A6-03                |
+| Atualizado| Sprint A7-02                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -14,7 +14,7 @@
 | Capability      | Provider ID | Adapter proposto                  | Status      | Bloqueio |
 | --------------- | ----------- | --------------------------------- | ----------- | -------- |
 | XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
-| Protocol        | —           | `RealTissProtocolRuntimeAdapter`      | Discovery   | Aguarda certificação Batch. |
+| Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Activation  | Aguarda certificação.       |
 | Persistence     | —           | `RealTissPersistenceRuntimeAdapter`   | Discovery   | Aguarda Protocol. |
 | Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
 | Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
@@ -26,7 +26,7 @@
 - `OperatorRuntimePort`: negociação de credenciais e endpoints por operadora.
 - `AuthorizationRuntimePort`: controle de autorização e tokens de envio.
 - `BatchRuntimePort`: ativado e certificado na Sprint A6-03; envio real para operadora depende de `SOAPRuntimePort`/`ProtocolRuntimePort`.
-- `ProtocolRuntimePort`: protocolização de respostas das operadoras.
+- `ProtocolRuntimePort`: ativado na Sprint A7-02 com `RealTissProtocolRuntimeAdapter`; resolução de protocolo concreto (SOAP/REST/gRPC/mensageria) ainda estrutural.
 - `ReturnRuntimePort`: processamento de retornos (glosas, pagamentos).
 
 ## 3. Limitações atuais
@@ -35,6 +35,7 @@
 - Não há consumo funcional de HTTP/SOAP/SFTP/DB por nenhum adapter real.
 - `RealTissXMLTISSRuntimeAdapter` gera XML TISS sintaticamente válido, mas sem validação XSD funcional.
 - `RealTissBatchRuntimeAdapter` prepara o manifesto de lote, mas não envia para operadora.
+- `RealTissProtocolRuntimeAdapter` prepara `ProtocolProfile` e `ProtocolResolver` para TISS, mas não seleciona nem envia via SOAP/REST/gRPC/mensageria.
 - Os estados da `BatchStateMachine` são declarativos; transições ainda não implementadas.
 
 ## 4. Melhorias futuras
@@ -72,6 +73,7 @@
 | 3  | Credenciais e certificados digitais não estão disponíveis | Alto | Iniciar negociação com operadoras e provisionar ambiente de homologação | Média | DevSecOps | Em aberto |
 | 4  | Documentos de certificação dependem de execução manual | Médio | Criar pipeline de testes automatizados para certificações | Média | QA/Platform | Em aberto |
 | 5  | Artefatos temporários (`cert-output.txt`, `parser-cert-output.txt`) no working tree | Baixo | Sprint de cleanup após conclusão das certificações de A6 | Baixa | Devin/Automação | Em aberto |
+| 6  | `RealTissProtocolRuntimeAdapter` não executa resolução/transporte concreto | Alto | Manter `ProtocolResolver`/`ProtocolProfile` como contratos; adicionar `SOAPRuntimePort`/`OperatorRuntimePort` antes de A8-A9 | Alta | Enterprise Runtime Team | Em aberto |
 
 ## 8. Dependências externas futuras
 
@@ -89,7 +91,7 @@ Validation   ✓
 Enrichment   ✓
 XML          ✓
 Batch        ✓ (A6-03)
-Protocol     Discovery
+Protocol     ✓ (A7-02)
 Persistence  Discovery
 Audit        Discovery
 Completed    Discovery

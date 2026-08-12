@@ -31,6 +31,9 @@ import {
   ProtocolRuntimeFactory,
   ProtocolRuntimeProvider,
   ProtocolRuntimeRegistry,
+  REAL_TISS_PROTOCOL_RUNTIME_ADAPTER_ID,
+  REAL_TISS_PROTOCOL_RUNTIME_VERSION,
+  RealTissProtocolRuntimeAdapter,
   createDefaultProtocolRuntimeRegistry,
   createEmptyProtocolCapabilities,
   createEmptyProtocolProfile,
@@ -173,28 +176,36 @@ describe("C-07 ProtocolRuntimePort contract", () => {
     assert.ok(ProtocolRuntimeProvider.getFactory() instanceof ProtocolRuntimeFactory);
   });
 
-  it("factory resolve mock / test / default / enterprise", () => {
+  it("factory resolve mock / test / default / enterprise / real-tiss", () => {
     const factory = createProtocolRuntimeFactory();
     assert.equal(factory.create({ provider: "mock" }).providerId, "mock");
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
+    assert.equal(factory.create({ provider: "real-tiss" }).providerId, "real-tiss");
+    assert.ok(factory.create({ provider: "real-tiss" }) instanceof RealTissProtocolRuntimeAdapter);
     assert.equal(
       getProtocolRuntimeFactory().getRegistry().list().length,
       BUILTIN_PROTOCOL_RUNTIME_PROVIDER_COUNT,
     );
   });
 
-  it("registry registra mock / test / default / enterprise", () => {
+  it("registry registra mock / test / default / enterprise / real-tiss", () => {
     const registry = createDefaultProtocolRuntimeRegistry();
     assert.ok(registry instanceof ProtocolRuntimeRegistry);
     assert.equal(registry.has("mock"), true);
     assert.equal(registry.has("test"), true);
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.has("real-tiss"), true);
+    assert.equal(registry.snapshot().count, BUILTIN_PROTOCOL_RUNTIME_PROVIDER_COUNT);
     assert.equal(registry.get("enterprise")?.capabilities.soapImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.protocolResolutionImplemented, false);
+    const realTiss = registry.get("real-tiss");
+    assert.equal(realTiss?.providerId, "real-tiss");
+    assert.equal(realTiss?.version, REAL_TISS_PROTOCOL_RUNTIME_VERSION);
+    assert.equal(realTiss?.adapterId, REAL_TISS_PROTOCOL_RUNTIME_ADAPTER_ID);
+    assert.equal(realTiss?.capabilities.soapImplemented, false);
   });
 
   it("prepareProfile → getProfile → listProfiles → stats (sem protocolos concretos)", async () => {

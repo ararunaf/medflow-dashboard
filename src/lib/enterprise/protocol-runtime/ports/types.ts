@@ -54,7 +54,7 @@ export type { ProtocolRuntimeEngineCapabilities };
 export { PROTOCOL_CANONICAL_STATES } from "./canonical";
 
 /** Provedores / mecanismos do Protocol Runtime (adapters do Port). */
-export type ProtocolRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type ProtocolRuntimeProviderId = "mock" | "test" | "default" | "enterprise" | "real-tiss";
 
 /** Status operacional declarado no registry (C-07). */
 export type ProtocolRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";

@@ -13,6 +13,10 @@ import {
   MOCK_PROTOCOL_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-protocol-runtime-adapter";
 import {
+  REAL_TISS_PROTOCOL_RUNTIME_ADAPTER_ID,
+  REAL_TISS_PROTOCOL_RUNTIME_VERSION,
+} from "../adapters/real-tiss-protocol-runtime-adapter";
+import {
   DEFAULT_MOCK_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -69,6 +73,17 @@ const BUILTIN_REGISTRATIONS: readonly ProtocolRuntimeRegistration[] = [
     capabilities: DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official C-07 Enterprise Protocol Runtime — structural ProtocolProfile / ProtocolResolver foundation (no concrete protocols).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS Protocol Runtime",
+    version: REAL_TISS_PROTOCOL_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_TISS_PROTOCOL_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-enterprise",
+    capabilities: DEFAULT_PROTOCOL_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "Real TISS Protocol Runtime — structural ProtocolProfile for future ANS SOAP resolution.",
   },
 ];
 

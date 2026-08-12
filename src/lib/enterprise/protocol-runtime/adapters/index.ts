@@ -12,3 +12,10 @@ export {
   MockProtocolRuntimeAdapter,
   type MockProtocolRuntimeAdapterOptions,
 } from "./mock-protocol-runtime-adapter";
+
+export {
+  REAL_TISS_PROTOCOL_RUNTIME_ADAPTER_ID,
+  REAL_TISS_PROTOCOL_RUNTIME_VERSION,
+  RealTissProtocolRuntimeAdapter,
+  type RealTissProtocolRuntimeAdapterOptions,
+} from "./real-tiss-protocol-runtime-adapter";

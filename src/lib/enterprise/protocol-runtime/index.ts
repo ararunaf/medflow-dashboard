@@ -105,8 +105,12 @@ export {
   EnterpriseProtocolRuntimeAdapter,
   MOCK_PROTOCOL_RUNTIME_ADAPTER_ID,
   MockProtocolRuntimeAdapter,
+  REAL_TISS_PROTOCOL_RUNTIME_ADAPTER_ID,
+  REAL_TISS_PROTOCOL_RUNTIME_VERSION,
+  RealTissProtocolRuntimeAdapter,
   type DefaultProtocolRuntimeAdapterOptions,
   type MockProtocolRuntimeAdapterOptions,
+  type RealTissProtocolRuntimeAdapterOptions,
 } from "./adapters";
 
 export {
