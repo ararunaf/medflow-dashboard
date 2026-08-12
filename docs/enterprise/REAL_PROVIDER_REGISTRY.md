@@ -4,16 +4,16 @@ Catálogo oficial de providers reais ativados no Enterprise Runtime.
 
 ## Status de Ativação
 
-| Capability          | Provider ID | Adapter                                  | Versão    | Status    |
-| ------------------- | ----------- | ---------------------------------------- | --------- | --------- |
-| OCR                 | `azure`     | Azure Document Intelligence              | 1.0.0     | Ativo     |
-| Document Extraction | `real-tiss` | RealTissDocumentExtractionRuntimeAdapter | 1.0.0     | Ativo     |
-| **Validation**      | `real-tiss` | **RealTissValidationRuntimeAdapter**     | **1.0.0** | **Ativo** |
-| XML Validation      | —           | —                                        | —         | Discovery |
-| Enrichment          | —           | —                                        | —         | Discovery |
-| XML Generation      | —           | —                                        | —         | Discovery |
-| Batch               | —           | —                                        | —         | Discovery |
-| Protocol            | —           | —                                        | —         | Discovery |
+| Capability          | Provider ID | Adapter                                  | Versão    | Status          |
+| ------------------- | ----------- | ---------------------------------------- | --------- | --------------- |
+| OCR                 | `azure`     | Azure Document Intelligence              | 1.0.0     | Ativo           |
+| Document Extraction | `real-tiss` | RealTissDocumentExtractionRuntimeAdapter | 1.0.0     | Ativo           |
+| **Validation**      | `real-tiss` | **RealTissValidationRuntimeAdapter**     | **1.0.0** | **Certificado** |
+| XML Validation      | —           | —                                        | —         | Discovery       |
+| Enrichment          | —           | —                                        | —         | Discovery       |
+| XML Generation      | —           | —                                        | —         | Discovery       |
+| Batch               | —           | —                                        | —         | Discovery       |
+| Protocol            | —           | —                                        | —         | Discovery       |
 
 ## Validation Provider
 
