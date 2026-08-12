@@ -59,7 +59,7 @@ export type {
 export type { ValidationRuntimeEngineCapabilities };
 
 /** Provedores / mecanismos do Validation Runtime (adapters do Port). */
-export type ValidationRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type ValidationRuntimeProviderId = "mock" | "test" | "default" | "enterprise" | "real-tiss";
 
 /** Status operacional declarado no registry (F3-CAP-08). */
 export type ValidationRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";

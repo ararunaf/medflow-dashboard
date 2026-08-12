@@ -216,6 +216,7 @@ describe("F3-CAP-08 ValidationRuntimePort contract", () => {
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
+    assert.equal(factory.create({ provider: "real-tiss" }).providerId, "real-tiss");
     assert.equal(
       getValidationRuntimeFactory().getRegistry().list().length,
       BUILTIN_VALIDATION_RUNTIME_PROVIDER_COUNT,
@@ -229,7 +230,8 @@ describe("F3-CAP-08 ValidationRuntimePort contract", () => {
     assert.equal(registry.has("test"), true);
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.has("real-tiss"), true);
+    assert.equal(registry.snapshot().count, 5);
     assert.equal(registry.get("enterprise")?.capabilities.fieldValidationImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.tissValidationImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.automaticApprovalImplemented, false);

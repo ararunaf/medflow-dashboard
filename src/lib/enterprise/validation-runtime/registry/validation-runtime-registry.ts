@@ -13,6 +13,10 @@ import {
   MOCK_VALIDATION_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-validation-runtime-adapter";
 import {
+  REAL_TISS_VALIDATION_RUNTIME_ADAPTER_ID,
+  REAL_TISS_VALIDATION_RUNTIME_VERSION,
+} from "../adapters/real-tiss-validation-runtime-adapter";
+import {
   DEFAULT_MOCK_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -69,6 +73,17 @@ const BUILTIN_REGISTRATIONS: readonly ValidationRuntimeRegistration[] = [
     capabilities: DEFAULT_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official F3-CAP-08 Enterprise Validation Runtime — structural job/request/document orchestration foundation (no real validation).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS Validation Runtime",
+    version: REAL_TISS_VALIDATION_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_TISS_VALIDATION_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-enterprise",
+    capabilities: DEFAULT_VALIDATION_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "Real TISS Validation Runtime — valida DocumentExtractionResult reais e produz ValidationResult canônico.",
   },
 ];
 

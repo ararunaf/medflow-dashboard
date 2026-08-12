@@ -97,8 +97,11 @@ export {
   EnterpriseValidationRuntimeAdapter,
   MOCK_VALIDATION_RUNTIME_ADAPTER_ID,
   MockValidationRuntimeAdapter,
+  REAL_TISS_VALIDATION_RUNTIME_ADAPTER_ID,
+  RealTissValidationRuntimeAdapter,
   type DefaultValidationRuntimeAdapterOptions,
   type MockValidationRuntimeAdapterOptions,
+  type RealTissValidationRuntimeAdapterOptions,
 } from "./adapters";
 
 export {

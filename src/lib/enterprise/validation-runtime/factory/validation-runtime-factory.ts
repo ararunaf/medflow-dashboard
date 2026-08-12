@@ -5,7 +5,11 @@
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → ValidationRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultValidationRuntimeAdapter, MockValidationRuntimeAdapter } from "../adapters";
+import {
+  DefaultValidationRuntimeAdapter,
+  MockValidationRuntimeAdapter,
+  RealTissValidationRuntimeAdapter,
+} from "../adapters";
 import type { ValidationRuntimePort } from "../ports/validation-runtime-port";
 import type {
   ValidationRuntimeEnterpriseDeps,
@@ -86,6 +90,11 @@ export class ValidationRuntimeFactory {
       case "enterprise":
         return new DefaultValidationRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissValidationRuntimeAdapter({
           store: this.store,
           enterpriseDeps,
         });
