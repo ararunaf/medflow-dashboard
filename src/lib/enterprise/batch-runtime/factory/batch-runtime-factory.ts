@@ -5,7 +5,11 @@
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → BatchRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultBatchRuntimeAdapter, MockBatchRuntimeAdapter } from "../adapters";
+import {
+  DefaultBatchRuntimeAdapter,
+  MockBatchRuntimeAdapter,
+  RealTissBatchRuntimeAdapter,
+} from "../adapters";
 import type { BatchRuntimePort } from "../ports/batch-runtime-port";
 import type {
   BatchRuntimeEnterpriseDeps,
@@ -77,6 +81,12 @@ export class BatchRuntimeFactory {
       case "enterprise":
         return new DefaultBatchRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissBatchRuntimeAdapter({
+          provider: "real-tiss",
           store: this.store,
           enterpriseDeps,
         });

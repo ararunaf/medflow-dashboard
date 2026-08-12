@@ -211,3 +211,39 @@ getEnterpriseRuntime()
 ## Próxima Sprint
 
 Convergência final do pipeline funcional TISS: encerramento de todos os estágios, conforme [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md).
+
+---
+
+## Certificação End-to-End do Pipeline Enterprise
+
+Após **A9-03**, deverá ocorrer obrigatoriamente a certificação:
+
+**ENTERPRISE END-TO-END PIPELINE CERTIFICATION**
+
+Fluxo oficial completo a ser certificado:
+
+```
+OCR
+  ↓
+Parser
+  ↓
+Validation
+  ↓
+Enrichment
+  ↓
+XML
+  ↓
+Batch
+  ↓
+Protocol
+  ↓
+Persistence
+  ↓
+Audit
+  ↓
+Completed
+```
+
+Essa certificação deverá ser concluída **ANTES** do início do:
+
+**BLOCO S — Enterprise Security Certification**

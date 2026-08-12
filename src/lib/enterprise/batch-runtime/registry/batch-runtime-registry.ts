@@ -13,6 +13,10 @@ import {
   MOCK_BATCH_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-batch-runtime-adapter";
 import {
+  REAL_TISS_BATCH_RUNTIME_ADAPTER_ID,
+  REAL_TISS_BATCH_RUNTIME_VERSION,
+} from "../adapters/real-tiss-batch-runtime-adapter";
+import {
   DEFAULT_MOCK_BATCH_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -68,6 +72,17 @@ const BUILTIN_REGISTRATIONS: readonly BatchRuntimeRegistration[] = [
     capabilities: DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official C-06 Enterprise Batch Runtime — structural BatchManifest / BatchStateMachine foundation (no batch processing).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS Batch Runtime",
+    version: REAL_TISS_BATCH_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_TISS_BATCH_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-enterprise",
+    capabilities: DEFAULT_BATCH_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "Real TISS batch creation adapter — produces ANS TISS batch manifests from XML_GENERATED jobs.",
   },
 ];
 

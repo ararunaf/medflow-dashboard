@@ -1,0 +1,98 @@
+# Production Gap Tracker
+
+| Campo     | Valor                       |
+| --------- | --------------------------- |
+| Projeto   | MedicFlow-AI                |
+| Baseline  | Enterprise Runtime v1.0     |
+| Atualizado| Sprint A6-02                |
+| Status    | Acompanhamento de pendências|
+
+---
+
+## 1. Providers ainda não implementados
+
+| Capability      | Provider ID | Adapter proposto                  | Status      | Bloqueio |
+| --------------- | ----------- | --------------------------------- | ----------- | -------- |
+| XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
+| Protocol        | —           | `RealTissProtocolRuntimeAdapter`      | Discovery   | Aguarda certificação Batch. |
+| Persistence     | —           | `RealTissPersistenceRuntimeAdapter`   | Discovery   | Aguarda Protocol. |
+| Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
+| Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
+
+## 2. Funcionalidades estruturais remanescentes
+
+- `XMLValidationRuntimePort`: validação real contra XSDs oficiais da ANS.
+- `SOAPRuntimePort`: envio real para webservices das operadoras.
+- `OperatorRuntimePort`: negociação de credenciais e endpoints por operadora.
+- `AuthorizationRuntimePort`: controle de autorização e tokens de envio.
+- `BatchRuntimePort`: execução real de lote (hoje ativado estruturalmente; próximo passo é envio).
+- `ProtocolRuntimePort`: protocolização de respostas das operadoras.
+- `ReturnRuntimePort`: processamento de retornos (glosas, pagamentos).
+
+## 3. Limitações atuais
+
+- Todos os adapters reais até A6-02 geram artefatos estruturais sem I/O externo.
+- Não há consumo funcional de HTTP/SOAP/SFTP/DB por nenhum adapter real.
+- `RealTissXMLTISSRuntimeAdapter` gera XML TISS sintaticamente válido, mas sem validação XSD funcional.
+- `RealTissBatchRuntimeAdapter` prepara o manifesto de lote, mas não envia para operadora.
+- Os estados da `BatchStateMachine` são declarativos; transições ainda não implementadas.
+
+## 4. Melhorias futuras
+
+- Integrar `XMLValidationRuntimePort` com XSDs oficiais da ANS via `XSDRuntimePort`.
+- Popular `OperatorRuntimePort` com profiles reais de operadoras (Amil, SulAmérica, Bradesco, etc.).
+- Adicionar cache de tokens no `AuthorizationRuntimePort`.
+- Implementar retry real com backoff exponencial no envio SOAP.
+- Tornar o `BatchRuntimePort` capaz de agrupar múltiplas guias por operadora/carteira.
+- Adicionar métricas de throughput e latência no envio real para operadoras.
+
+## 5. Integrações planejadas
+
+| Integração            | Port responsável           | Sprint alvo |
+| --------------------- | -------------------------- | ----------- |
+| XSD ANS               | `XSDRuntimePort`           | A7-A8       |
+| Envio SOAP operadoras | `SOAPRuntimePort`          | A8-A9       |
+| Protocolo de resposta | `ProtocolRuntimePort`      | A9          |
+| Persistência de lote  | `PersistenceRuntimePort`   | A9-S1       |
+| Auditoria             | `AuditRuntimePort`         | S1          |
+| Finalização           | `CompletedRuntimePort`     | S1          |
+
+## 6. Débitos técnicos aprovados
+
+- `cert-output.txt` e `parser-cert-output.txt` permanecem no working tree como artefatos de teste; remoção agendada para sprint de cleanup.
+- `docs/enterprise/ENTERPRISE_PRODUCTION_READINESS_AUDIT.md` não está rastreado; decisão de arquivamento/revisão pendente.
+- Documentos de certificação (XML, Batch, etc.) ainda dependem de execução manual de testes; não há pipeline CI automatizado.
+
+## 7. Dependências externas futuras
+
+- XSDs oficiais da ANS (TISS 3.05.00 e superiores).
+- Documentação de webservices das operadoras (contratos WSDL/SOAP).
+- Credenciais e certificados digitais para envio TISS.
+- Ambiente de homologação das operadoras para testes End-to-End.
+
+## 8. Roadmap de certificações
+
+```
+OCR          ✓
+Parser       ✓
+Validation   ✓
+Enrichment   ✓
+XML          ✓
+Batch        A6-03 (futura certificação)
+Protocol     Discovery
+Persistence  Discovery
+Audit        Discovery
+Completed    Discovery
+```
+
+Após A9-03, executar obrigatoriamente:
+
+**ENTERPRISE END-TO-END PIPELINE CERTIFICATION**
+
+Fluxo oficial:
+
+```
+OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence → Audit → Completed
+```
+
+Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterprise Security Certification**.

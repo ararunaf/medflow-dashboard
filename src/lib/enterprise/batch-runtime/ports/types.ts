@@ -62,7 +62,7 @@ export type { BatchRuntimeEngineCapabilities };
 export { BATCH_CANONICAL_STATES } from "./canonical";
 
 /** Provedores / mecanismos do Batch Runtime (adapters do Port). */
-export type BatchRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type BatchRuntimeProviderId = "mock" | "test" | "default" | "enterprise" | "real-tiss";
 
 /** Status operacional declarado no registry (C-06). */
 export type BatchRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";

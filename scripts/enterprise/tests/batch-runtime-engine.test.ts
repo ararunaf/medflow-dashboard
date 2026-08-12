@@ -28,6 +28,8 @@ import {
   InMemoryBatchRuntimeStore,
   MOCK_BATCH_RUNTIME_ADAPTER_ID,
   MockBatchRuntimeAdapter,
+  REAL_TISS_BATCH_RUNTIME_ADAPTER_ID,
+  RealTissBatchRuntimeAdapter,
   BatchRuntimeFactory,
   BatchRuntimeProvider,
   BatchRuntimeRegistry,
@@ -170,28 +172,33 @@ describe("C-06 BatchRuntimePort contract", () => {
     assert.ok(BatchRuntimeProvider.getFactory() instanceof BatchRuntimeFactory);
   });
 
-  it("factory resolve mock / test / default / enterprise", () => {
+  it("factory resolve mock / test / default / enterprise / real-tiss", () => {
     const factory = createBatchRuntimeFactory();
     assert.equal(factory.create({ provider: "mock" }).providerId, "mock");
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
+    assert.equal(factory.create({ provider: "real-tiss" }).providerId, "real-tiss");
+    assert.ok(factory.create({ provider: "real-tiss" }) instanceof RealTissBatchRuntimeAdapter);
     assert.equal(
       getBatchRuntimeFactory().getRegistry().list().length,
       BUILTIN_BATCH_RUNTIME_PROVIDER_COUNT,
     );
   });
 
-  it("registry registra mock / test / default / enterprise", () => {
+  it("registry registra mock / test / default / enterprise / real-tiss", () => {
     const registry = createDefaultBatchRuntimeRegistry();
     assert.ok(registry instanceof BatchRuntimeRegistry);
     assert.equal(registry.has("mock"), true);
     assert.equal(registry.has("test"), true);
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.has("real-tiss"), true);
+    assert.equal(registry.snapshot().count, BUILTIN_BATCH_RUNTIME_PROVIDER_COUNT);
     assert.equal(registry.get("enterprise")?.capabilities.batchProcessingImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.queueImplemented, false);
+    assert.equal(registry.get("real-tiss")?.status, "ready");
+    assert.equal(registry.get("real-tiss")?.adapterId, REAL_TISS_BATCH_RUNTIME_ADAPTER_ID);
   });
 
   it("prepareBatch → getBatch → listBatches → stats (sem processamento em lote)", async () => {

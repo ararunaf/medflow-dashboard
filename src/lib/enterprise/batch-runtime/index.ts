@@ -104,8 +104,12 @@ export {
   EnterpriseBatchRuntimeAdapter,
   MOCK_BATCH_RUNTIME_ADAPTER_ID,
   MockBatchRuntimeAdapter,
+  REAL_TISS_BATCH_RUNTIME_ADAPTER_ID,
+  REAL_TISS_BATCH_RUNTIME_VERSION,
+  RealTissBatchRuntimeAdapter,
   type DefaultBatchRuntimeAdapterOptions,
   type MockBatchRuntimeAdapterOptions,
+  type RealTissBatchRuntimeAdapterOptions,
 } from "./adapters";
 
 export {

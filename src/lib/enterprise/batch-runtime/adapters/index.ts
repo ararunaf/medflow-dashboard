@@ -12,3 +12,10 @@ export {
   MockBatchRuntimeAdapter,
   type MockBatchRuntimeAdapterOptions,
 } from "./mock-batch-runtime-adapter";
+
+export {
+  REAL_TISS_BATCH_RUNTIME_ADAPTER_ID,
+  REAL_TISS_BATCH_RUNTIME_VERSION,
+  RealTissBatchRuntimeAdapter,
+  type RealTissBatchRuntimeAdapterOptions,
+} from "./real-tiss-batch-runtime-adapter";
