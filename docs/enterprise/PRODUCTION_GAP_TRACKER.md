@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A6-02                |
+| Atualizado| Sprint A6-03                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -25,7 +25,7 @@
 - `SOAPRuntimePort`: envio real para webservices das operadoras.
 - `OperatorRuntimePort`: negociação de credenciais e endpoints por operadora.
 - `AuthorizationRuntimePort`: controle de autorização e tokens de envio.
-- `BatchRuntimePort`: execução real de lote (hoje ativado estruturalmente; próximo passo é envio).
+- `BatchRuntimePort`: ativado e certificado na Sprint A6-03; envio real para operadora depende de `SOAPRuntimePort`/`ProtocolRuntimePort`.
 - `ProtocolRuntimePort`: protocolização de respostas das operadoras.
 - `ReturnRuntimePort`: processamento de retornos (glosas, pagamentos).
 
@@ -63,7 +63,17 @@
 - `docs/enterprise/ENTERPRISE_PRODUCTION_READINESS_AUDIT.md` não está rastreado; decisão de arquivamento/revisão pendente.
 - Documentos de certificação (XML, Batch, etc.) ainda dependem de execução manual de testes; não há pipeline CI automatizado.
 
-## 7. Dependências externas futuras
+## 7. Riscos, mitigações e prioridades
+
+| #  | Risco | Impacto | Mitigação | Prioridade | Responsável | Status |
+| -- | ----- | ------- | --------- | ---------- | ----------- | ------ |
+| 1  | `RealTissBatchRuntimeAdapter` ainda não executa envio real para operadoras | Alto | Manter state machine declarativa; integrar com `SOAPRuntimePort`/`ProtocolRuntimePort` nas próximas sprints | Alta | Enterprise Runtime Team | Em aberto |
+| 2  | Falta validação XSD ANS antes do envio | Alto | Ativar `XMLValidationRuntimePort` e `XSDRuntimePort` em A7-A8 | Alta | XML/XSD Team | Em aberto |
+| 3  | Credenciais e certificados digitais não estão disponíveis | Alto | Iniciar negociação com operadoras e provisionar ambiente de homologação | Média | DevSecOps | Em aberto |
+| 4  | Documentos de certificação dependem de execução manual | Médio | Criar pipeline de testes automatizados para certificações | Média | QA/Platform | Em aberto |
+| 5  | Artefatos temporários (`cert-output.txt`, `parser-cert-output.txt`) no working tree | Baixo | Sprint de cleanup após conclusão das certificações de A6 | Baixa | Devin/Automação | Em aberto |
+
+## 8. Dependências externas futuras
 
 - XSDs oficiais da ANS (TISS 3.05.00 e superiores).
 - Documentação de webservices das operadoras (contratos WSDL/SOAP).
@@ -78,7 +88,7 @@ Parser       ✓
 Validation   ✓
 Enrichment   ✓
 XML          ✓
-Batch        A6-03 (futura certificação)
+Batch        ✓ (A6-03)
 Protocol     Discovery
 Persistence  Discovery
 Audit        Discovery
