@@ -8,7 +8,10 @@
 import {
   DefaultDocumentExtractionRuntimeAdapter,
   MockDocumentExtractionRuntimeAdapter,
+  RealTissDocumentExtractionRuntimeAdapter,
+  type RealTissDocumentExtractionRuntimeAdapterOptions,
 } from "../adapters";
+import type { RawOcrResult } from "@/lib/capture/ocr/types/raw-ocr-result";
 import type { DocumentExtractionRuntimePort } from "../ports/document-extraction-runtime-port";
 import type {
   DocumentExtractionRuntimeEnterpriseDeps,
@@ -60,13 +63,14 @@ export class DocumentExtractionRuntimeFactory {
       );
     }
 
-    return this.instantiate(provider, options.enterpriseDeps ?? this.enterpriseDeps);
+    return this.instantiate(provider, options);
   }
 
   private instantiate(
     provider: DocumentExtractionRuntimeProviderId,
-    enterpriseDeps?: DocumentExtractionRuntimeEnterpriseDeps,
+    options: DocumentExtractionRuntimeOptions,
   ): DocumentExtractionRuntimePort {
+    const enterpriseDeps = options.enterpriseDeps ?? this.enterpriseDeps;
     switch (provider) {
       case "mock":
         return new MockDocumentExtractionRuntimeAdapter({
@@ -89,6 +93,15 @@ export class DocumentExtractionRuntimeFactory {
       case "enterprise":
         return new DefaultDocumentExtractionRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissDocumentExtractionRuntimeAdapter({
+          rawOcrResult:
+            options.rawOcrResult as RealTissDocumentExtractionRuntimeAdapterOptions["rawOcrResult"],
+          tissParser:
+            options.tissParser as RealTissDocumentExtractionRuntimeAdapterOptions["tissParser"],
           store: this.store,
           enterpriseDeps,
         });

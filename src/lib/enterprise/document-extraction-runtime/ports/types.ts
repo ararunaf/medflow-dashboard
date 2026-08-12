@@ -53,7 +53,12 @@ export type {
 export type { DocumentExtractionRuntimeEngineCapabilities };
 
 /** Provedores / mecanismos do Document Extraction Runtime (adapters do Port). */
-export type DocumentExtractionRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type DocumentExtractionRuntimeProviderId =
+  | "mock"
+  | "test"
+  | "default"
+  | "enterprise"
+  | "real-tiss";
 
 /** Status operacional declarado no registry (F3-CAP-07). */
 export type DocumentExtractionRuntimeStatus =
@@ -229,6 +234,10 @@ export type DocumentExtractionRuntimeEnterpriseDeps = {
 export type DocumentExtractionRuntimeProviderOptions = {
   provider?: DocumentExtractionRuntimeProviderId;
   enterpriseDeps?: DocumentExtractionRuntimeEnterpriseDeps;
+  /** RawOcrResult de teste/ativação para o adapter real-tiss (A2-02). */
+  rawOcrResult?: unknown;
+  /** TissParser customizado para o adapter real-tiss (A2-02). */
+  tissParser?: unknown;
 };
 
 /** Alias F3-CAP-07 — resolução do DocumentExtractionRuntimePort (default: `enterprise`). */

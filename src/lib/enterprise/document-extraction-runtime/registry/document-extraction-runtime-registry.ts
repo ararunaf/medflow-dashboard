@@ -13,6 +13,10 @@ import {
   MOCK_DOCUMENT_EXTRACTION_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-document-extraction-runtime-adapter";
 import {
+  REAL_TISS_DOCUMENT_EXTRACTION_RUNTIME_ADAPTER_ID,
+  REAL_TISS_DOCUMENT_EXTRACTION_RUNTIME_VERSION,
+} from "../adapters/real-tiss-document-extraction-runtime-adapter";
+import {
   DEFAULT_MOCK_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -69,6 +73,17 @@ const BUILTIN_REGISTRATIONS: readonly DocumentExtractionRuntimeRegistration[] = 
     capabilities: DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official F3-CAP-07 Enterprise Document Extraction Runtime — structural job/request/document orchestration foundation (no real extraction).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS Document Extraction Runtime",
+    version: REAL_TISS_DOCUMENT_EXTRACTION_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_TISS_DOCUMENT_EXTRACTION_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-enterprise",
+    capabilities: DEFAULT_DOCUMENT_EXTRACTION_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "Real TISS Document Extraction Runtime — invokes TissParser over RawOcrResult and produces canonical StructuredGuide.",
   },
 ];
 

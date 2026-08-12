@@ -91,8 +91,12 @@ export {
   EnterpriseDocumentExtractionRuntimeAdapter,
   MOCK_DOCUMENT_EXTRACTION_RUNTIME_ADAPTER_ID,
   MockDocumentExtractionRuntimeAdapter,
+  REAL_TISS_DOCUMENT_EXTRACTION_RUNTIME_ADAPTER_ID,
+  REAL_TISS_DOCUMENT_EXTRACTION_RUNTIME_VERSION,
+  RealTissDocumentExtractionRuntimeAdapter,
   type DefaultDocumentExtractionRuntimeAdapterOptions,
   type MockDocumentExtractionRuntimeAdapterOptions,
+  type RealTissDocumentExtractionRuntimeAdapterOptions,
 } from "./adapters";
 
 export {
