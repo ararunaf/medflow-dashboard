@@ -79,7 +79,7 @@ export type {
 export type { AutoFillRuntimeEngineCapabilities };
 
 /** Provedores / mecanismos do Auto-Fill Runtime (adapters do Port). */
-export type AutoFillRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type AutoFillRuntimeProviderId = "mock" | "test" | "default" | "enterprise" | "real-tiss";
 
 /** Status operacional declarado no registry (F3-CAP-12). */
 export type AutoFillRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";

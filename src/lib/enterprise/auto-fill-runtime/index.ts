@@ -112,8 +112,13 @@ export {
   EnterpriseAutoFillRuntimeAdapter,
   MOCK_AUTO_FILL_RUNTIME_ADAPTER_ID,
   MockAutoFillRuntimeAdapter,
+  RealTissAutoFillRuntimeAdapter,
+  REAL_TISS_AUTO_FILL_RUNTIME_ADAPTER_ID,
+  REAL_TISS_AUTO_FILL_RUNTIME_VERSION,
   type DefaultAutoFillRuntimeAdapterOptions,
   type MockAutoFillRuntimeAdapterOptions,
+  type RealTissAutoFillRuntimeAdapterOptions,
+  type TissAutoFillEngine,
 } from "./adapters";
 
 export {

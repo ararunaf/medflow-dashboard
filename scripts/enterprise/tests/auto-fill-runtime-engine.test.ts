@@ -276,14 +276,15 @@ describe("F3-CAP-12 AutoFillRuntimePort contract", () => {
     );
   });
 
-  it("registry registra mock / test / default / enterprise", () => {
+  it("registry registra mock / test / default / enterprise / real-tiss", () => {
     const registry = createDefaultAutoFillRuntimeRegistry();
     assert.ok(registry instanceof AutoFillRuntimeRegistry);
     assert.equal(registry.has("mock"), true);
     assert.equal(registry.has("test"), true);
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.has("real-tiss"), true);
+    assert.equal(registry.snapshot().count, 5);
     assert.equal(registry.get("enterprise")?.capabilities.autoFillEngineImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.guideGenerationImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.xmlPopulationImplemented, false);

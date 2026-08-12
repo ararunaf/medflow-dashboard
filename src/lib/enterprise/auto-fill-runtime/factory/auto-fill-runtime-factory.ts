@@ -5,7 +5,11 @@
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → AutoFillRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultAutoFillRuntimeAdapter, MockAutoFillRuntimeAdapter } from "../adapters";
+import {
+  DefaultAutoFillRuntimeAdapter,
+  MockAutoFillRuntimeAdapter,
+  RealTissAutoFillRuntimeAdapter,
+} from "../adapters";
 import type { AutoFillRuntimePort } from "../ports/auto-fill-runtime-port";
 import type {
   AutoFillRuntimeEnterpriseDeps,
@@ -86,6 +90,11 @@ export class AutoFillRuntimeFactory {
       case "enterprise":
         return new DefaultAutoFillRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissAutoFillRuntimeAdapter({
           store: this.store,
           enterpriseDeps,
         });

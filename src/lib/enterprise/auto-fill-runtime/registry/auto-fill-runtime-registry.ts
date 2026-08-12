@@ -13,6 +13,10 @@ import {
   MOCK_AUTO_FILL_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-auto-fill-runtime-adapter";
 import {
+  REAL_TISS_AUTO_FILL_RUNTIME_ADAPTER_ID,
+  REAL_TISS_AUTO_FILL_RUNTIME_VERSION,
+} from "../adapters/real-tiss-auto-fill-runtime-adapter";
+import {
   DEFAULT_MOCK_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -69,6 +73,16 @@ const BUILTIN_REGISTRATIONS: readonly AutoFillRuntimeRegistration[] = [
     capabilities: DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official F3-CAP-12 Enterprise Auto-Fill Runtime — structural canonical auto-fill foundation (no functional auto-fill).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS Auto-Fill Runtime",
+    version: REAL_TISS_AUTO_FILL_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_TISS_AUTO_FILL_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-tiss",
+    capabilities: DEFAULT_AUTO_FILL_RUNTIME_ENGINE_CAPABILITIES,
+    description: "Real TISS auto-fill enrichment (consulta fields).",
   },
 ];
 
