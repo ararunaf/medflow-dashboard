@@ -319,14 +319,15 @@ describe("C-01 XMLTISSRuntimePort contract", () => {
     );
   });
 
-  it("registry registra mock / test / default / enterprise", () => {
+  it("registry registra mock / test / default / enterprise / real-tiss", () => {
     const registry = createDefaultXMLTISSRuntimeRegistry();
     assert.ok(registry instanceof XMLTISSRuntimeRegistry);
     assert.equal(registry.has("mock"), true);
     assert.equal(registry.has("test"), true);
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.has("real-tiss"), true);
+    assert.equal(registry.snapshot().count, BUILTIN_XML_TISS_RUNTIME_PROVIDER_COUNT);
     assert.equal(registry.get("enterprise")?.capabilities.xmlGenerationImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.xmlSerializationImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.soapIntegrationImplemented, false);

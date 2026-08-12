@@ -11,7 +11,7 @@ Catálogo oficial de providers reais ativados no Enterprise Runtime.
 | **Validation**      | `real-tiss` | **RealTissValidationRuntimeAdapter**     | **1.0.0** | **Certificado**          |
 | XML Validation      | —           | —                                        | —         | Discovery                |
 | Enrichment          | `real-tiss` | **RealTissAutoFillRuntimeAdapter**       | **1.0.0** | **Production Certified** |
-| XML Generation      | —           | —                                        | —         | Discovery                |
+| **XML Generation**  | `real-tiss` | **RealTissXMLTISSRuntimeAdapter**        | **1.0.0** | **Ativo**                |
 | Batch               | —           | —                                        | —         | Discovery                |
 | Protocol            | —           | —                                        | —         | Discovery                |
 

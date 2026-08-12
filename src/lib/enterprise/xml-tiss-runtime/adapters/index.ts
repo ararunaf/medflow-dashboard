@@ -12,3 +12,10 @@ export {
   MockXMLTISSRuntimeAdapter,
   type MockXMLTISSRuntimeAdapterOptions,
 } from "./mock-xml-tiss-runtime-adapter";
+
+export {
+  REAL_XML_TISS_RUNTIME_ADAPTER_ID,
+  REAL_XML_TISS_RUNTIME_VERSION,
+  RealTissXMLTISSRuntimeAdapter,
+  type RealTissXMLTISSRuntimeAdapterOptions,
+} from "./real-tiss-xml-tiss-runtime-adapter";

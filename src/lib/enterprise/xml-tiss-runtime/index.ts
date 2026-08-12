@@ -114,8 +114,12 @@ export {
   EnterpriseXMLTISSRuntimeAdapter,
   MOCK_XML_TISS_RUNTIME_ADAPTER_ID,
   MockXMLTISSRuntimeAdapter,
+  REAL_XML_TISS_RUNTIME_ADAPTER_ID,
+  REAL_XML_TISS_RUNTIME_VERSION,
+  RealTissXMLTISSRuntimeAdapter,
   type DefaultXMLTISSRuntimeAdapterOptions,
   type MockXMLTISSRuntimeAdapterOptions,
+  type RealTissXMLTISSRuntimeAdapterOptions,
 } from "./adapters";
 
 export {

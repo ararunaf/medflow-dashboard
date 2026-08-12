@@ -5,7 +5,11 @@
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → XMLTISSRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultXMLTISSRuntimeAdapter, MockXMLTISSRuntimeAdapter } from "../adapters";
+import {
+  DefaultXMLTISSRuntimeAdapter,
+  MockXMLTISSRuntimeAdapter,
+  RealTissXMLTISSRuntimeAdapter,
+} from "../adapters";
 import type { XMLTISSRuntimePort } from "../ports/xml-tiss-runtime-port";
 import type {
   XMLTISSRuntimeEnterpriseDeps,
@@ -86,6 +90,12 @@ export class XMLTISSRuntimeFactory {
       case "enterprise":
         return new DefaultXMLTISSRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissXMLTISSRuntimeAdapter({
+          provider: "real-tiss",
           store: this.store,
           enterpriseDeps,
         });

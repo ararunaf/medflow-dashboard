@@ -13,6 +13,10 @@ import {
   MOCK_XML_TISS_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-xml-tiss-runtime-adapter";
 import {
+  REAL_XML_TISS_RUNTIME_ADAPTER_ID,
+  REAL_XML_TISS_RUNTIME_VERSION,
+} from "../adapters/real-tiss-xml-tiss-runtime-adapter";
+import {
   DEFAULT_MOCK_XML_TISS_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_XML_TISS_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -69,6 +73,17 @@ const BUILTIN_REGISTRATIONS: readonly XMLTISSRuntimeRegistration[] = [
     capabilities: DEFAULT_XML_TISS_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official C-01 Enterprise XML TISS Runtime — structural canonical XML TISS foundation (no functional XML generation).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS XML TISS Runtime",
+    version: REAL_XML_TISS_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_XML_TISS_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-enterprise",
+    capabilities: DEFAULT_XML_TISS_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "Real TISS XML generation adapter — produces ANS TISS XML from enriched canonical guides.",
   },
 ];
 

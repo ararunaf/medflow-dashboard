@@ -83,7 +83,7 @@ export type {
 export type { XMLTISSRuntimeEngineCapabilities };
 
 /** Provedores / mecanismos do XML TISS Runtime (adapters do Port). */
-export type XMLTISSRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type XMLTISSRuntimeProviderId = "mock" | "test" | "default" | "enterprise" | "real-tiss";
 
 /** Status operacional declarado no registry (C-01). */
 export type XMLTISSRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";
