@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A7-03                |
+| Atualizado| Sprint A8-01                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -15,7 +15,7 @@
 | --------------- | ----------- | --------------------------------- | ----------- | -------- |
 | XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
 | Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Certificado | Próxima: A8 SOAP.           |
-| Persistence     | —           | `RealTissPersistenceRuntimeAdapter`   | Discovery   | Aguarda Protocol. |
+| Persistence     | `real-tiss` | `RealTissPersistenceRuntimeAdapter`   | Discovery concluído (A8-01) | Próxima: A8-02 ativação. |
 | Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
 | Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
 
@@ -139,3 +139,36 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 ```
 
 Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterprise Security Certification**.
+
+## 12. A8-01 — Persistence Real Discovery
+
+### Situação atual
+
+- O `PersistentQueueRuntimePort` (INF-08) foi auditado; `real-tiss` ainda não ativado.
+- Nenhum arquivo `src/` alterado.
+- Audit e Completed permanecem não executados.
+
+### Riscos
+
+- `RealTissPersistenceRuntimeAdapter` ainda não existe.
+- Backend persistente real (PostgreSQL/Supabase/S3) ainda não está ativo.
+- Requisitos de segurança (criptografia, RLS, LGPD) ainda não implementados.
+
+### Dependências
+
+- Contratos WSDL/SOAP das operadoras (para A8/A9).
+- Credenciais e certificados digitais.
+- Ambiente de homologação com banco de dados real.
+
+### Gaps
+
+- `realPersistentBackend` ainda `false`.
+- `implementsMessagePersistence` ainda `false`.
+- Nenhum mecanismo PostgreSQL/S3 conectado ao `PersistentQueueRuntimePort`.
+
+### Roadmap
+
+- A8-02/A9: ativar `RealTissPersistenceRuntimeAdapter`.
+- A9: integrar com `Audit` (não executar nesta Sprint).
+- S1: integrar com `Completed` (não executar nesta Sprint).
+
