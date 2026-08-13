@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A10-DOC-02                 |
+| Atualizado| Sprint S1-01                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -346,6 +346,16 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 ## 23. Nota — Encerramento do Bloco A
 
 O **Bloco A** está oficialmente encerrado a partir da Sprint **A10-DOC-02**. Todas as 10 capabilities (`OCR`, `Parser`, `Validation`, `Enrichment`, `XML TISS`, `Batch`, `Protocol`, `Persistence`, `Audit` e `Completed`) estão **Production Certified** e o pipeline `RECEIVED → ... → COMPLETED` foi certificado sem alterações em `src/`.
+
+## 24. S1-01 — Enterprise Security Discovery
+
+### Situação atual
+
+- Discovery da arquitetura de seguranca existente concluído em `docs/enterprise/ENTERPRISE_SECURITY_DISCOVERY.md`.
+- Nenhum arquivo em `src/` alterado.
+- Componentes de autenticacao, autorizacao, sessao, rate limit, brute-force, auditoria, CSP, sanitizacao e monitoramento mapeados.
+- Hash, assinatura digital, cadeia de custódia, HSM, Azure Key Vault e OpenTelemetry identificados como gaps futuros do Bloco S.
+- `Enterprise Runtime Baseline v1.1` preservada.
 
 Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports ainda em Discovery: `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort`.
 

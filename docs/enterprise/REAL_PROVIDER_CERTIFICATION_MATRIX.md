@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A10-DOC-02               |
+| Atualizado| Sprint S1-01               |
 
 ---
 
@@ -112,3 +112,9 @@ Todas as capabilities do Bloco A estão certificadas para produção:
 | Completed | `real-tiss` | Production |
 
 Bloco A oficialmente encerrado.
+
+## S1-01 — Enterprise Security Discovery
+
+- `Enterprise Security` mapeada como capability em Discovery.
+- Nenhum provider real ativado.
+- Documento `docs/enterprise/ENTERPRISE_SECURITY_DISCOVERY.md` criado.
