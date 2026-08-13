@@ -31,6 +31,7 @@
 | **A8-ADL-01** | Criar Architectural Decision Log da Baseline v1.1 | ✅ Concluída |
 | **A9-01** | Audit Real Discovery — mapear arquitetura Audit sem implementação | ✅ Concluída |
 | **A9-02** | Audit Real Activation — ativar provider real-tiss do AuditRuntimePort | ✅ Concluída |
+| **A9-03** | Audit Real Production Certification — certificar provider real-tiss | ✅ Concluída |
 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏸️ Pendente |
 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏸️ Pendente |
 
@@ -298,3 +299,12 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - Testes `audit-runtime-engine.test.ts` e `tiss-runtime-05a-audit-real-activation.test.ts` validam `PERSISTED → AUDITED`.
 - `Completed` continua desativado.
 - Documento: `docs/enterprise/AUDIT_REAL_ACTIVATION.md`.
+
+## A9-03 — Audit Real Production Certification
+
+- Provider `real-tiss` do `AuditRuntimePort` certificado para produção.
+- Teste `tiss-runtime-05b-audit-real-production-certification.test.ts` aprovado.
+- Nenhum arquivo em `src/` alterado.
+- Documentos `AUDIT_PRODUCTION_CERTIFICATION.md` e matrizes publicados.
+- `Completed` continua fora do escopo.
+- `Enterprise Runtime Baseline v1.1` preservada.
