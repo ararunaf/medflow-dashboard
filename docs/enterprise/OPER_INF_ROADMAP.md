@@ -29,6 +29,7 @@
 | **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
 | **A8-FREEZE-01** | Congelar oficialmente a Enterprise Runtime Baseline v1.1 | ✅ Concluída |
 | **A8-ADL-01** | Criar Architectural Decision Log da Baseline v1.1 | ✅ Concluída |
+| **A9-01** | Audit Real Discovery — mapear arquitetura Audit sem implementação | ✅ Concluída |
 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏸️ Pendente |
 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏸️ Pendente |
 
@@ -279,3 +280,11 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - Documento oficial criado: `docs/enterprise/ARCHITECTURAL_DECISION_LOG.md`.
 - Registra ADL-001 a ADL-009, princípios arquiteturais, matriz de dependências, exemplos de violação e regras de evolução futura.
 - Nenhuma decisão arquitetônica pode ser alterada sem aprovação formal de uma nova baseline.
+
+## A9-01 — Audit Real Discovery
+
+- Documento oficial criado: `docs/enterprise/AUDIT_REAL_DISCOVERY.md`.
+- Mapeamento integral do `AuditRuntimePort`, providers, factory, registry, workers, queue, scheduler, retry, dead letter, observability, pipeline e state machine.
+- Confirmada inexistência do provider `real-tiss`.
+- `Completed` NÃO executado.
+- Zero alterações em `src/`.

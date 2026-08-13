@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A8-ADL-01              |
+| Atualizado| Sprint A9-01                  |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -276,4 +276,21 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 
 - Nenhum gap novo introduzido.
 - `Audit` e `Completed` continuam pendentes e desacoplados do pipeline congelado.
+
+## 19. A9-01 — Audit Real Discovery
+
+### Situação atual
+
+- Documento `docs/enterprise/AUDIT_REAL_DISCOVERY.md` criado e sincronizado com a baseline.
+- `AuditRuntimePort`, providers, factory, registry, workers, queue, scheduler, retry, dead letter, observability, pipeline e state machine auditados.
+- Provider `real-tiss` confirmado inexistente; estratégia de ativação documentada.
+- `Completed` NÃO executado; mapeado apenas como próximo estado futuro.
+- `Security Hooks` documentados como pontos de extensão, sem implementação.
+- `git diff` confirma **0 alterações em `src/`**.
+
+### Gaps remanescentes
+
+- `real-tiss` ainda não implementado (pending activation Sprint futura).
+- `Completed` ainda pendente (TISS-RUNTIME-05B).
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 

@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A8-FREEZE-01         |
+| Atualizado| Sprint A9-01                |
 
 ---
 
@@ -63,3 +63,12 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 - A certificação `real-tiss` do **Batch** foi concluída na Sprint **A6-03** sem alterar a arquitetura congelada.
 - A certificação `real-tiss` do **Protocol** foi concluída na Sprint **A7-03** sem alterar `EnterpriseRuntime`, Ports, Queue, Worker, Scheduler, Retry, Dead Letter, Observability, Pipeline, Foundations ou Composition Root.
 - A ativação `real-tiss` do **Persistence** foi concluída na Sprint **A8-02** sem alterar `EnterpriseRuntime`, `PersistentQueueRuntimePort`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Pipeline`, `Foundations` ou `Composition Root`.
+
+## A9-01 — Audit Real Discovery
+
+- `Audit` mapeado no documento `docs/enterprise/AUDIT_REAL_DISCOVERY.md`.
+- Provider `real-tiss` para Audit ainda não existe; estratégia de ativação documentada.
+- `Audit` permanece em `Discovery`.
+- `Completed` permanece em `Discovery`.
+- Nenhum provider novo certificado nesta Sprint.
+- `Enterprise Runtime Baseline v1.1` preservada.
