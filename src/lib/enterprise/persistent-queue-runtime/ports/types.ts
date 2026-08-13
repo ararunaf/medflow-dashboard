@@ -41,7 +41,12 @@ export type {
 export type { PersistentQueueRuntimeCapabilities };
 
 /** Provedores / mecanismos do Persistent Queue Runtime. */
-export type PersistentQueueRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type PersistentQueueRuntimeProviderId =
+  | "mock"
+  | "test"
+  | "default"
+  | "enterprise"
+  | "real-tiss";
 
 /** Status operacional declarado no registry. */
 export type PersistentQueueRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";

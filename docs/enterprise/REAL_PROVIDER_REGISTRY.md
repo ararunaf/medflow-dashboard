@@ -14,6 +14,7 @@ Catálogo oficial de providers reais ativados no Enterprise Runtime.
 | **XML Generation**  | `real-tiss` | **RealTissXMLTISSRuntimeAdapter**        | **1.0.0** | **Production Certified** |
 | **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **Production Certified** |
 | **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **Production Certified** |
+| **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **Activated (A8-02)**    |
 
 ## Validation Provider
 
@@ -32,4 +33,21 @@ Catálogo oficial de providers reais ativados no Enterprise Runtime.
 - `getEnterpriseRuntime()` continua sendo o único entrypoint.
 - Nenhum novo `Port`, `Gateway`, `Runtime`, `Pipeline` ou `Composition Root` foi criado.
 - `processTissValidationJob` e `processTissParsedValidated` não foram alterados.
+- Retry, Dead Letter, Worker, Queue, Scheduler e Observability foram reutilizados.
+
+## Persistence Provider
+
+**Provider:** `real-tiss`  
+**Adapter:** `src/lib/enterprise/persistent-queue-runtime/adapters/real-tiss-persistent-queue-runtime-adapter.ts`  
+**Factory:** `PersistentQueueRuntimeFactory` — `case "real-tiss"`  
+**Registry:** `PersistentQueueRuntimeRegistry` — 5 providers (mock, test, default, enterprise, real-tiss)  
+**Port:** `PersistentQueueRuntimePort` (sem alteração)  
+**Entrypoint:** `getEnterpriseRuntime().getPersistentQueueRuntimePort()`  
+**Composition Root:** `DefaultEnterpriseRuntime`  
+**Regras TISS ativadas:** `processTissProtocolSentPersisted` consome `real-tiss` e reenfileira `PERSISTED`.
+
+- `PersistentQueueRuntimePort` não foi alterado.
+- `getEnterpriseRuntime()` continua sendo o único entrypoint.
+- Nenhum novo `Port`, `Gateway`, `Runtime`, `Pipeline` ou `Composition Root` foi criado.
+- `processTissProtocolSentPersisted` e `processTissPersistenceJob` não foram alterados.
 - Retry, Dead Letter, Worker, Queue, Scheduler e Observability foram reutilizados.

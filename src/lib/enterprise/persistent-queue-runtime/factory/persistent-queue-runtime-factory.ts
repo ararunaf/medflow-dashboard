@@ -8,6 +8,7 @@
 import {
   DefaultPersistentQueueRuntimeAdapter,
   MockPersistentQueueRuntimeAdapter,
+  RealTissPersistenceRuntimeAdapter,
 } from "../adapters";
 import type { PersistentQueueRuntimePort } from "../ports/persistent-queue-runtime-port";
 import type {
@@ -87,6 +88,11 @@ export class PersistentQueueRuntimeFactory {
       case "enterprise":
         return new DefaultPersistentQueueRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissPersistenceRuntimeAdapter({
           store: this.store,
           enterpriseDeps,
         });

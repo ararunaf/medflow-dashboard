@@ -416,6 +416,79 @@ adapters reais anteriores. A ativação futura deverá reutilizar
 
 ---
 
+## 22. Refinamento 1 — Persistence State Machine
+
+Estados válidos no ciclo TISS:
+
+- `PROTOCOL_SENT` — protocolo selecionado/enviado, aguardando persistência.
+- `PERSISTED` — confirmação estrutural de persistência concluída.
+- `AUDITED` — trilha de auditoria concluída.
+- `COMPLETED` — estado terminal, sem reenfileiramento.
+
+Transições válidas:
+
+```
+PROTOCOL_SENT → PERSISTED
+PERSISTED → AUDITED
+AUDITED → COMPLETED
+PERSISTED → PERSISTED (idempotência por correlationId)
+```
+
+Transições proibidas:
+
+- `PROTOCOL_SENT` → `AUDITED` sem passar por `PERSISTED`.
+- `PERSISTED` → `COMPLETED` sem `AUDITED`.
+- Qualquer estado → `PROTOCOL_SENT` (não há rollback para trás).
+
+Rollback permitido:
+
+- `PERSISTED → released` (liberação estrutural do `PersistentQueueRuntimePort`) — **não** desfaz a fila TISS; é uma operação interna de infraestrutura.
+
+Estado terminal: `COMPLETED`.
+
+## 23. Refinamento 2 — Storage Abstraction Matrix
+
+A troca de backend futura ocorrerá via `createPersistentQueueRuntimePort({ provider: "<mechanismo>" })`, sem alterar `PersistentQueueRuntimePort`.
+
+| Mecanismo | Adapter futuro | Tabela/Coleção/Prefixo |
+|| --------- | -------------- | ---------------------- |
+| PostgreSQL | `PostgresPersistenceRuntimeAdapter` | `tiss_persistence_queue` / `tiss_persistence_message` |
+| Supabase | `SupabasePersistenceRuntimeAdapter` | reutiliza `PersistencePort` Supabase | `tiss_persistence_queue` |
+| SQL Server | `SqlServerPersistenceRuntimeAdapter` | `TissPersistence.Queue` / `TissPersistence.Message` |
+| Oracle | `OraclePersistenceRuntimeAdapter` | `TissPersistenceQueue` / `TissPersistenceMessage` |
+| MySQL | `MySqlPersistenceRuntimeAdapter` | `tiss_persistence_queue` / `tiss_persistence_message` |
+| MongoDB | `MongoPersistenceRuntimeAdapter` | `tiss_persistence_queue` / `tiss_persistence_message` |
+| Azure Blob Storage | `AzureBlobPersistenceRuntimeAdapter` | container `tiss-persistence/{tenant}/{correlationId}/` |
+| AWS S3 | `S3PersistenceRuntimeAdapter` | prefixo `tiss/{tenant}/{correlationId}/{messageId}` |
+| Google Cloud Storage | `GcsPersistenceRuntimeAdapter` | prefixo `tiss/{tenant}/{correlationId}/{messageId}` |
+| MinIO | `MinioPersistenceRuntimeAdapter` | bucket `tiss-persistence`, prefixo `tiss/...` |
+
+## 24. Refinamento 3 — Data Integrity Strategy
+
+Futura estratégia de integridade (não implementada):
+
+- **SHA-256** do payload canônico armazenado junto à mensagem.
+- **Hash do XML** TISS gerado, registrado em `CanonicalPersistentMessage.customAttributes.xmlSha256`.
+- **Hash do Batch** (conteúdo do manifesto) em `CanonicalPersistentMessage.customAttributes.batchSha256`.
+- **Hash do Protocol** (perfil e contexto) em `CanonicalPersistentMessage.customAttributes.protocolSha256`.
+- **Checksum** de envelope para detecção de corrupção em trânsito.
+- **Verificação pós-recuperação**: após `persist`, recalcular o SHA-256 e comparar com o valor armazenado.
+- **Detecção de corrupção**: diferença de checksum gera evento `PERSISTENT_QUEUE_INTEGRITY_FAILURE` para `ObservabilityRuntimePort`.
+
+## 25. Refinamento 4 — Persistence Recovery Strategy
+
+Futura estratégia de recuperação (não implementada):
+
+- **Restart do Worker**: após `release`, reutilizar `previousJobId`/`correlationId` para recomeçar do estado `PROTOCOL_SENT`.
+- **Queda do servidor**: store real (PostgreSQL/S3) garante durabilidade; ao subir, `health()` valida consistência.
+- **Interrupção da rede**: retry com backoff exponencial via `DefaultPersistentQueueRuntimeAdapter`; DLQ após esgotar.
+- **Timeout da operadora**: operação `persist` é idempotente por `messageId`/`correlationId`; reprocessamento seguro.
+- **Retomada automática**: Worker consome `PROTOCOL_SENT` ainda não `PERSISTED` e reexecuta `processTissPersistenceJob`.
+- **Recuperação do último estado persistido**: `list({ activeOnly: true })` permite identificar mensagens em voo.
+- **Idempotência da recuperação**: `messageId` único evita duplicidade; `persisted` flag no atributo canônico.
+
+---
+
 **Conclusão obrigatória:** O Persistence Real Discovery foi concluído sem alterar
 qualquer arquivo em `src/`, preservando o Baseline Enterprise congelado. Audit e
 Completed permanecem não executados. O Enterprise Runtime Baseline v1.0 permanece

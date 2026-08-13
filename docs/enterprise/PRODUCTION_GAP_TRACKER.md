@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-01                |
+| Atualizado| Sprint A8-02                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -15,7 +15,7 @@
 | --------------- | ----------- | --------------------------------- | ----------- | -------- |
 | XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
 | Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Certificado | Próxima: A8 SOAP.           |
-| Persistence     | `real-tiss` | `RealTissPersistenceRuntimeAdapter`   | Discovery concluído (A8-01) | Próxima: A8-02 ativação. |
+| Persistence     | `real-tiss` | `RealTissPersistenceRuntimeAdapter`   | Ativado (A8-02) | Próxima: A8-03 certificação. |
 | Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
 | Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
 
@@ -123,7 +123,7 @@ Enrichment   ✓
 XML          ✓
 Batch        ✓ (A6-03)
 Protocol     ✓ (A7-03)
-Persistence  Discovery
+Persistence  Ativado (A8-02) / Certificação (A8-03)
 Audit        Discovery
 Completed    Discovery
 ```
@@ -171,4 +171,36 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 - A8-02/A9: ativar `RealTissPersistenceRuntimeAdapter`.
 - A9: integrar com `Audit` (não executar nesta Sprint).
 - S1: integrar com `Completed` (não executar nesta Sprint).
+
+## 13. A8-02 — Persistence Real Activation
+
+### Situação atual
+
+- `RealTissPersistenceRuntimeAdapter` ativado via provider `real-tiss`.
+- `PersistentQueueRuntimePort` não foi alterado.
+- `processTissProtocolSentPersisted` e `processTissPersistenceJob` não foram alterados.
+- Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Composition Root`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability` ou `Foundation` foi modificado.
+- `Audit` e `Completed` permanecem não executados.
+
+### Riscos
+
+- Certificação A8-03 ainda pendente.
+- Backend persistente real (PostgreSQL/Supabase/S3) ainda não conectado — previsto para A9.
+- Requisitos de segurança (criptografia, RLS, LGPD) ainda não implementados.
+
+### Dependências
+
+- A8-03 para certificação do `real-tiss` Persistence.
+- `AuditRuntimePort` (S1) e `CompletedRuntimePort` (S1).
+
+### Gaps
+
+- `realPersistentBackend` ainda `false` (backend real A9).
+- `implementsMessagePersistence` ainda `false` (backend real A9).
+
+### Roadmap
+
+- A8-03: certificar `RealTissPersistenceRuntimeAdapter`.
+- A9: ativar `Audit` (não executar nesta Sprint).
+- S1: ativar `Completed` (não executar nesta Sprint).
 

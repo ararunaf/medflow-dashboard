@@ -13,6 +13,10 @@ import {
   MOCK_PERSISTENT_QUEUE_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-persistent-queue-runtime-adapter";
 import {
+  REAL_TISS_PERSISTENCE_RUNTIME_ADAPTER_ID,
+  REAL_TISS_PERSISTENCE_RUNTIME_VERSION,
+} from "../adapters/real-tiss-persistent-queue-runtime-adapter";
+import {
   DEFAULT_MOCK_PERSISTENT_QUEUE_RUNTIME_CAPABILITIES,
   DEFAULT_PERSISTENT_QUEUE_RUNTIME_CAPABILITIES,
   type PersistentQueueRuntimeCapabilities,
@@ -70,6 +74,17 @@ const BUILTIN_REGISTRATIONS: readonly PersistentQueueRuntimeRegistration[] = [
     capabilities: DEFAULT_PERSISTENT_QUEUE_RUNTIME_CAPABILITIES,
     description:
       "Official INF-08 Enterprise Persistent Queue Runtime — canonical persistent queue infrastructure only.",
+  },
+  {
+    providerId: "real-tiss",
+    name: "Real TISS Persistence Runtime",
+    version: REAL_TISS_PERSISTENCE_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REAL_TISS_PERSISTENCE_RUNTIME_ADAPTER_ID,
+    vendor: "medicflow-enterprise",
+    capabilities: DEFAULT_PERSISTENT_QUEUE_RUNTIME_CAPABILITIES,
+    description:
+      "Real TISS persistence adapter — canonical persistent queue for future real backend.",
   },
 ];
 

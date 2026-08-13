@@ -79,8 +79,12 @@ export {
   EnterprisePersistentQueueRuntimeAdapter,
   MOCK_PERSISTENT_QUEUE_RUNTIME_ADAPTER_ID,
   MockPersistentQueueRuntimeAdapter,
+  REAL_TISS_PERSISTENCE_RUNTIME_ADAPTER_ID,
+  REAL_TISS_PERSISTENCE_RUNTIME_VERSION,
+  RealTissPersistenceRuntimeAdapter,
   type DefaultPersistentQueueRuntimeAdapterOptions,
   type MockPersistentQueueRuntimeAdapterOptions,
+  type RealTissPersistenceRuntimeAdapterOptions,
 } from "./adapters";
 
 export {
