@@ -2,7 +2,7 @@
 
 | Campo      | Valor             |
 | ---------- | ----------------- |
-| Atualizado | Sprint S1-02 |
+| Atualizado | Sprint S1-03 |
 
 **Natureza:** ativação operacional dos Runtimes INF já congelados (sem nova arquitetura).  
 **Pipeline oficial:** Enterprise Runtime → Ports existentes  
@@ -41,8 +41,9 @@
 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ✅ Concluída |
 | **A10-FINAL-01** | Encerramento do Bloco A | ✅ Concluída |
 | **A10-DOC-02** | Sincronização da documentação do Bloco A | ✅ Concluída |
-| **S1-01** | Enterprise Security Discovery — mapear arquitetura de seguranca sem implementação | 🔮 Discovery |
-| **S1-02** | Enterprise Security Activation — infraestrutura canônica do `SecurityRuntimePort` | ⚡ Activation |
+| **S1-01** | Enterprise Security Discovery — mapear arquitetura de seguranca sem implementação | ✅ Concluída |
+| **S1-02** | Enterprise Security Activation — infraestrutura canônica do `SecurityRuntimePort` | ✅ Concluída |
+| **S1-03** | Enterprise Security Production Certification — certificação de produção do `real-tiss` e scaffolding | ✅ Concluída |
 
 ## Legenda
 
@@ -54,7 +55,7 @@
 | 🔮 | Future Capability — previsto no roadmap, mas não iniciado. |
 | — | Não aplicável / não iniciado. |
 
-**Roadmap vigente:** ✅ OPER-INF-Q · ✅ OPER-INF-W · ✅ OPER-INF-S · ✅ OPER-INF-D · ✅ OPER-INF-O · ✅ ARC-25 · ✅ OPER-INF-R · ✅ TISS-RUNTIME-01D · ✅ TISS-RUNTIME-01A · ✅ TISS-RUNTIME-01B · ✅ TISS-RUNTIME-01C · ✅ TISS-RUNTIME-02A · ✅ TISS-RUNTIME-02B · ✅ TISS-RUNTIME-03A · ✅ TISS-RUNTIME-03B · ✅ TISS-RUNTIME-04A · ✅ TISS-RUNTIME-04B · ✅ A8-FREEZE-01 · ✅ TISS-RUNTIME-05A · ✅ TISS-RUNTIME-05B · ✅ A10-FINAL-01 · ✅ A10-DOC-02 · 🔮 S1-01 · ⚡ S1-02
+**Roadmap vigente:** ✅ OPER-INF-Q · ✅ OPER-INF-W · ✅ OPER-INF-S · ✅ OPER-INF-D · ✅ OPER-INF-O · ✅ ARC-25 · ✅ OPER-INF-R · ✅ TISS-RUNTIME-01D · ✅ TISS-RUNTIME-01A · ✅ TISS-RUNTIME-01B · ✅ TISS-RUNTIME-01C · ✅ TISS-RUNTIME-02A · ✅ TISS-RUNTIME-02B · ✅ TISS-RUNTIME-03A · ✅ TISS-RUNTIME-03B · ✅ TISS-RUNTIME-04A · ✅ TISS-RUNTIME-04B · ✅ A8-FREEZE-01 · ✅ TISS-RUNTIME-05A · ✅ TISS-RUNTIME-05B · ✅ A10-FINAL-01 · ✅ A10-DOC-02 · ✅ S1-01 · ✅ S1-02 · ✅ S1-03
 
 **Baseline Oficial v1.1:** [`ENTERPRISE_BASELINE_V1_1.md`](./ENTERPRISE_BASELINE_V1_1.md)
 **Architectural Decision Log:** [`ARCHITECTURAL_DECISION_LOG.md`](./ARCHITECTURAL_DECISION_LOG.md)
