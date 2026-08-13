@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-DOC-01            |
+| Atualizado| Sprint A8-03                |
 
 ---
 
@@ -20,7 +20,7 @@
 | XML Generation      | `real-tiss` | RealTissXMLTISSRuntimeAdapter            | 1.0.0  | ✅        | ✅         | ✅         | Production    |
 | **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
 | **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
-| **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **✅** | **✅**     | **—**      | **Activation**|
+| **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
 | Audit               | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
 | Completed           | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
 

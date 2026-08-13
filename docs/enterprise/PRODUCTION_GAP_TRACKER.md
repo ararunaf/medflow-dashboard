@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-DOC-01            |
+| Atualizado| Sprint A8-03                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -15,7 +15,7 @@
 | --------------- | ----------- | --------------------------------- | ----------- | -------- |
 | XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
 | Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Certificado | Próxima: A8 SOAP.           |
-| Persistence     | `real-tiss` | `RealTissPersistenceRuntimeAdapter`   | Ativado (A8-02) | Próxima: A8-03 certificação. |
+| Persistence     | `real-tiss` | `RealTissPersistenceRuntimeAdapter`   | Certificado (A8-03) | — |
 | Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
 | Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
 
@@ -123,7 +123,7 @@ Enrichment   ✓
 XML          ✓
 Batch        ✓ (A6-03)
 Protocol     ✓ (A7-03)
-Persistence  Ativado (A8-02) / Certificação (A8-03)
+Persistence  ✓ (A8-03)
 Audit        Discovery
 Completed    Discovery
 ```
@@ -204,7 +204,23 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 - A9: ativar `Audit` (não executar nesta Sprint).
 - S1: ativar `Completed` (não executar nesta Sprint).
 
-## 14. Roadmap Alignment
+## 14. A8-03 — Persistence Real Production Certification
+
+### Situação atual
+
+- `RealTissPersistenceRuntimeAdapter` certificado para produção na Sprint **A8-03**.
+- Testes end-to-end comprovam: persistência válida/inválida, retry, dead letter, observability, integridade, idempotência, recovery, consistência Queue↔PersistentQueue e performance.
+- `PersistentQueueRuntimePort` não foi alterado.
+- `EnterpriseRuntime`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Pipeline`, `Foundations` e `Composition Root` permanecem inalterados.
+- Backend real (PostgreSQL/Supabase/S3) continua previsto para **A9**, sem bloquear a certificação estrutural A8-03.
+
+### Gaps remanescentes
+
+- `realPersistentBackend` ainda `false` (backend real A9).
+- `implementsMessagePersistence` ainda `false` (backend real A9).
+- `Audit` e `Completed` continuam em Discovery.
+
+## 15. Roadmap Alignment
 
 Este documento é sincronizado obrigatoriamente com:
 
