@@ -32,7 +32,13 @@ Existe também o `PersistencePort` genérico (EPC-01) para aplicação, mas ele 
 - Audit e Completed **não** foram executados; permanecem apenas documentalmente
   registrados.
 
-## 3. PersistentQueueRuntimePort auditado
+## 3. Distinção oficial dos Ports
+
+**`PersistentQueueRuntimePort` é o Port oficial consumido pelo pipeline TISS** para a capability de Persistence (TISS-RUNTIME-04B). Todo o fluxo `processTissProtocolSentPersisted` → `processTissPersistenceJob` → reenqueue `PERSISTED` ocorre exclusivamente via esse contrato.
+
+**`PersistencePort` é o Port genérico da infraestrutura Enterprise** (`src/lib/enterprise/persistence`), destinado a aplicação. Ele **não** é utilizado diretamente pelo pipeline TISS. Futuramente, o `RealTissPersistenceRuntimeAdapter` pode consumir mecanismos do `PersistencePort` (Supabase/PostgreSQL/etc.) como backend interno, sem expor esse detalhe para fora do `PersistentQueueRuntimePort`.
+
+## 4. PersistentQueueRuntimePort auditado
 
 ### 3.1 Localização
 

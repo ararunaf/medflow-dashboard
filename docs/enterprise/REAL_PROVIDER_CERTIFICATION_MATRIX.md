@@ -4,25 +4,25 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-02                |
+| Atualizado| Sprint A8-DOC-01            |
 
 ---
 
 ## Matriz de certificação dos providers reais
 
-| Capability          | Provider ID | Adapter                                  | Versão | Discovery | Activation | Production |
-| ------------------- | ----------- | ---------------------------------------- | ------ | --------- | ---------- | ---------- |
-| OCR                 | `azure`     | Azure Document Intelligence              | 1.0.0  | ✅        | ✅         | ✅         |
-| Document Extraction | `real-tiss` | RealTissDocumentExtractionRuntimeAdapter | 1.0.0  | ✅        | ✅         | ✅         |
-| Validation          | `real-tiss` | RealTissValidationRuntimeAdapter         | 1.0.0  | ✅        | ✅         | ✅         |
-| XML Validation      | —           | —                                        | —      | ✅        | —          | —          |
-| Enrichment          | `real-tiss` | RealTissAutoFillRuntimeAdapter           | 1.0.0  | ✅        | ✅         | ✅         |
-| XML Generation      | `real-tiss` | RealTissXMLTISSRuntimeAdapter            | 1.0.0  | ✅        | ✅         | ✅         |
-| **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **✅** | **✅**     | **✅**     |
-| **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **✅**     |
-| **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **✅** | **✅**     | **—**      |
-| Audit               | —           | —                                        | —      | ✅        | —          | —          |
-| Completed           | —           | —                                        | —      | ✅        | —          | —          |
+| Capability          | Provider ID | Adapter                                  | Versão | Discovery | Activation | Production | Current Stage |
+| ------------------- | ----------- | ---------------------------------------- | ------ | --------- | ---------- | ---------- | ------------- |
+| OCR                 | `azure`     | Azure Document Intelligence              | 1.0.0  | ✅        | ✅         | ✅         | Production    |
+| Document Extraction | `real-tiss` | RealTissDocumentExtractionRuntimeAdapter | 1.0.0  | ✅        | ✅         | ✅         | Production    |
+| Validation          | `real-tiss` | RealTissValidationRuntimeAdapter         | 1.0.0  | ✅        | ✅         | ✅         | Production    |
+| XML Validation      | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
+| Enrichment          | `real-tiss` | RealTissAutoFillRuntimeAdapter           | 1.0.0  | ✅        | ✅         | ✅         | Production    |
+| XML Generation      | `real-tiss` | RealTissXMLTISSRuntimeAdapter            | 1.0.0  | ✅        | ✅         | ✅         | Production    |
+| **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
+| **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
+| **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **✅** | **✅**     | **—**      | **Activation**|
+| Audit               | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
+| Completed           | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
 
 ---
 
@@ -30,6 +30,12 @@
 
 - **✅** — Etapa concluída e aprovada.
 - **—** — Etapa ainda não iniciada / não aplicável no momento.
+
+## Current Stage
+
+- **Discovery** — capability mapeada, sem provider real ativado.
+- **Activation** — provider real ativo, mas ainda sem Production Certification.
+- **Production** — provider real certificado em produção.
 
 ## Notas
 

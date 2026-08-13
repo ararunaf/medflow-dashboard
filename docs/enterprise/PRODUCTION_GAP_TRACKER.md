@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-02                |
+| Atualizado| Sprint A8-DOC-01            |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -54,7 +54,7 @@
 | XSD ANS               | `XSDRuntimePort`           | A7-A8       |
 | Envio SOAP operadoras | `SOAPRuntimePort`          | A8-A9       |
 | Protocolo de resposta | `ProtocolRuntimePort`      | A9          |
-| Persistência de lote  | `PersistenceRuntimePort`   | A9-S1       |
+| Persistência de lote  | `PersistentQueueRuntimePort`   | A9-S1       |
 | Auditoria             | `AuditRuntimePort`         | S1          |
 | Finalização           | `CompletedRuntimePort`     | S1          |
 
@@ -203,4 +203,14 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 - A8-03: certificar `RealTissPersistenceRuntimeAdapter`.
 - A9: ativar `Audit` (não executar nesta Sprint).
 - S1: ativar `Completed` (não executar nesta Sprint).
+
+## 14. Roadmap Alignment
+
+Este documento é sincronizado obrigatoriamente com:
+
+- `docs/enterprise/OPER_INF_ROADMAP.md`
+- `docs/enterprise/REAL_PROVIDER_REGISTRY.md`
+- `docs/enterprise/REAL_PROVIDER_CERTIFICATION_MATRIX.md`
+
+Toda divergência futura entre o estado real do projeto e os documentos acima deverá ser registrada neste `PRODUCTION_GAP_TRACKER.md`.
 
