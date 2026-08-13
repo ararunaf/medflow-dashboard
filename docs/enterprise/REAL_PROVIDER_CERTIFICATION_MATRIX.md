@@ -3,8 +3,8 @@
 | Campo     | Valor                       |
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
-| Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-03                |
+| Baseline  | Enterprise Runtime v1.1     |
+| Atualizado| Sprint A8-FREEZE-01         |
 
 ---
 
@@ -48,6 +48,13 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 - Nenhum provider novo adicionado.
 - Todos os providers listados na matriz acima foram reutilizados.
 - Nenhum Runtime, Port, Gateway, Pipeline ou Composition Root foi criado.
+
+## A8-FREEZE-01 — Enterprise Baseline v1.1 Freeze
+
+- Baseline oficial congelada para `Enterprise Runtime v1.1`.
+- Todos os providers listados na matriz fazem parte do `Baseline Freeze Matrix`.
+- `Audit` e `Completed` permanecem pendentes.
+- Documento oficial: `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md`.
 
 ## Notas
 

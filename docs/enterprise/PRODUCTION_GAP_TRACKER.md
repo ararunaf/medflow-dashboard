@@ -3,8 +3,8 @@
 | Campo     | Valor                       |
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
-| Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-E2E-01                |
+| Baseline  | Enterprise Runtime v1.1     |
+| Atualizado| Sprint A8-FREEZE-01           |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -247,4 +247,19 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 - `telemetry` permanece em adapters, não no `CanonicalQueueMessage`.
 - `Audit` e `Completed` continuam pendentes para Sprints futuras.
 - Backend real (PostgreSQL/Supabase/S3) continua previsto para A9.
+
+## 17. A8-FREEZE-01 — Enterprise Baseline v1.1 Freeze
+
+### Situação atual
+
+- Baseline `Enterprise Runtime v1.1` oficialmente congelada.
+- Documento `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md` criado com State Machine, Pipeline, Freeze Matrix, Known Canonical Gaps e Enterprise Freeze Rules.
+- `git diff` confirma **0 alterações em `src/`**.
+- `Audit` e `Completed` permanecem pendentes.
+
+### Gaps remanescentes
+
+- `Audit` e `Completed` ainda em Discovery.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` ainda em Discovery.
+- Backend real continua previsto para fase futura.
 

@@ -3,12 +3,12 @@
 | Campo      | Valor                       |
 | ---------- | --------------------------- |
 | Projeto    | MedicFlow-AI                |
-| Baseline   | Enterprise Runtime v1.0     |
+| Baseline   | Enterprise Runtime v1.1     |
 | Sprint     | A8-E2E-01                   |
 | Objetivo   | Certificar o pipeline funcional completo OCR → Persistence |
 | Audit      | NÃO executado               |
 | Completed  | NÃO executado               |
-| Atualizado | Sprint A8-E2E-01            |
+| Atualizado | Sprint A8-FREEZE-01         |
 
 ## 1. Arquivos alterados
 
@@ -194,4 +194,10 @@ Nenhuma alteração em:
 
 ## 11. Conclusão
 
-O pipeline Enterprise completo `OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence` foi certificado via `getEnterpriseRuntime()` na Sprint **A8-E2E-01**. Não houve criação de capabilities novas, Runtimes, Ports, Gateways, Pipelines ou Composition Roots. O **Enterprise Runtime Baseline v1.0 permanece integralmente preservado**.
+O pipeline Enterprise completo `OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence` foi certificado via `getEnterpriseRuntime()` na Sprint **A8-E2E-01**. Não houve criação de capabilities novas, Runtimes, Ports, Gateways, Pipelines ou Composition Roots. O **Enterprise Runtime Baseline v1.1 permanece integralmente preservado**.
+
+## 12. A8-FREEZE-01 — Enterprise Baseline v1.1 Freeze
+
+- Este documento faz parte da `Enterprise Runtime Baseline v1.1` congelada.
+- Consulte `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md` para o State Machine, Pipeline, Freeze Matrix, Known Canonical Gaps e Enterprise Freeze Rules.
+- `Audit` e `Completed` permanecem pendentes.
