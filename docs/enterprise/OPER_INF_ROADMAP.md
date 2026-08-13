@@ -28,6 +28,7 @@
 | **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ✅ Concluída |
 | **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
 | **A8-FREEZE-01** | Congelar oficialmente a Enterprise Runtime Baseline v1.1 | ✅ Concluída |
+| **A8-ADL-01** | Criar Architectural Decision Log da Baseline v1.1 | ✅ Concluída |
 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏸️ Pendente |
 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏸️ Pendente |
 
@@ -44,6 +45,7 @@
 **Roadmap vigente:** ✅ OPER-INF-Q · ✅ OPER-INF-W · ✅ OPER-INF-S · ✅ OPER-INF-D · ✅ OPER-INF-O · ✅ ARC-25 · ✅ OPER-INF-R · ✅ TISS-RUNTIME-01D · ✅ TISS-RUNTIME-01A · ✅ TISS-RUNTIME-01B · ✅ TISS-RUNTIME-01C · ✅ TISS-RUNTIME-02A · ✅ TISS-RUNTIME-02B · ✅ TISS-RUNTIME-03A · ✅ TISS-RUNTIME-03B · ✅ TISS-RUNTIME-04A · ✅ TISS-RUNTIME-04B · ✅ A8-FREEZE-01 · ⏸️ TISS-RUNTIME-05A · ⏸️ TISS-RUNTIME-05B
 
 **Baseline Oficial v1.1:** [`ENTERPRISE_BASELINE_V1_1.md`](./ENTERPRISE_BASELINE_V1_1.md)
+**Architectural Decision Log:** [`ARCHITECTURAL_DECISION_LOG.md`](./ARCHITECTURAL_DECISION_LOG.md)
 **Referência obrigatória:** [`ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md`](./ENTERPRISE_RUNTIME_OFFICIAL_ARCHITECTURE.md)  
 **Discovery TISS:** [`TISS_RUNTIME_DISCOVERY.md`](./TISS_RUNTIME_DISCOVERY.md)
 
@@ -271,3 +273,9 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - Pipeline congelado: `RECEIVED → OCR_COMPLETED → PARSED → VALIDATED → ENRICHED → XML_GENERATED → BATCH_CREATED → PROTOCOL_SENT → PERSISTED`.
 - `Audit` (TISS-RUNTIME-05A) e `Completed` (TISS-RUNTIME-05B) permanecem pendentes.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` permanecem em Discovery.
+
+## A8-ADL-01 — Architectural Decision Log
+
+- Documento oficial criado: `docs/enterprise/ARCHITECTURAL_DECISION_LOG.md`.
+- Registra ADL-001 a ADL-009, princípios arquiteturais, matriz de dependências, exemplos de violação e regras de evolução futura.
+- Nenhuma decisão arquitetônica pode ser alterada sem aprovação formal de uma nova baseline.

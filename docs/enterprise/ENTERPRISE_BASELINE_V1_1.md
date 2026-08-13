@@ -6,7 +6,7 @@
 | Baseline   | Enterprise Runtime v1.1     |
 | Sprint     | A8-FREEZE-01                |
 | Status     | Congelada                   |
-| Atualizado | Sprint A8-FREEZE-01         |
+| Atualizado | Sprint A8-ADL-01            |
 
 ---
 
@@ -176,3 +176,9 @@ Estes gaps serão tratados nas futuras fases de `Audit` e `Enterprise Security`.
 - ✅ `Completed` permanece pendente.
 - ✅ `Enterprise Runtime Baseline v1.1` oficialmente congelada.
 - ✅ Toda evolução futura deverá partir desta baseline.
+
+## 14. Architectural Decision Log
+
+- As decisões arquitetônicas oficiais da `Enterprise Runtime Baseline v1.1` estão registradas em `docs/enterprise/ARCHITECTURAL_DECISION_LOG.md`.
+- O ADL estabelece ADL-001 a ADL-009, Architectural Principles, Decision Dependency Matrix, Violation Examples e Future Evolution Rules.
+- Nenhuma decisão do ADL pode ser alterada sem aprovação formal de uma nova baseline.

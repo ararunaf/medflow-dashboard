@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A8-FREEZE-01           |
+| Atualizado| Sprint A8-ADL-01              |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -262,4 +262,18 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 - `Audit` e `Completed` ainda em Discovery.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` ainda em Discovery.
 - Backend real continua previsto para fase futura.
+
+## 18. A8-ADL-01 — Architectural Decision Log
+
+### Situação atual
+
+- Documento `docs/enterprise/ARCHITECTURAL_DECISION_LOG.md` criado e sincronizado com a `Enterprise Runtime Baseline v1.1`.
+- ADL-001 a ADL-009 registram decisões arquitetônicas irreversíveis sem aprovação de nova baseline.
+- `Architectural Principles`, `Decision Dependency Matrix`, `Violation Examples` e `Future Evolution Rules` documentados.
+- `git diff` confirma **0 alterações em `src/`**.
+
+### Gaps remanescentes
+
+- Nenhum gap novo introduzido.
+- `Audit` e `Completed` continuam pendentes e desacoplados do pipeline congelado.
 
