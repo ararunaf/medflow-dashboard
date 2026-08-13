@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A9-01                  |
+| Atualizado| Sprint A9-02                  |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -292,5 +292,22 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 
 - `real-tiss` ainda não implementado (pending activation Sprint futura).
 - `Completed` ainda pendente (TISS-RUNTIME-05B).
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 20. A9-02 — Audit Real Activation
+
+### Situação atual
+
+- Provider `real-tiss` do `AuditRuntimePort` ativado.
+- `RealTissAuditRuntimeAdapter` criado e registrado na Factory/Registry.
+- Pipeline `PERSISTED → AUDITED` validado por testes.
+- `Completed` continua desacoplado e NÃO executado.
+- `Audit Integrity Matrix`, `Canonical Audit Metadata`, `Audit Future Integrations` e `Evidence Package` documentados.
+- Nenhum `Runtime`, `Port`, `Gateway`, `Pipeline` ou `Composition Root` novo.
+
+### Gaps remanescentes
+
+- `Completed` (TISS-RUNTIME-05B) permanece pendente.
+- Hash, assinatura digital, cadeia de custódia e integrações de segurança planejadas para BLOCO S.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 

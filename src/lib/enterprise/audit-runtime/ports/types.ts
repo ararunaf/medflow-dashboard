@@ -75,7 +75,7 @@ export type {
 export type { AuditRuntimeEngineCapabilities };
 
 /** Provedores / mecanismos do Audit Runtime (adapters do Port). */
-export type AuditRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type AuditRuntimeProviderId = "mock" | "test" | "default" | "enterprise" | "real-tiss";
 
 /** Status operacional declarado no registry (F3-CAP-10). */
 export type AuditRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";

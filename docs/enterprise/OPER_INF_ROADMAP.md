@@ -30,6 +30,7 @@
 | **A8-FREEZE-01** | Congelar oficialmente a Enterprise Runtime Baseline v1.1 | ✅ Concluída |
 | **A8-ADL-01** | Criar Architectural Decision Log da Baseline v1.1 | ✅ Concluída |
 | **A9-01** | Audit Real Discovery — mapear arquitetura Audit sem implementação | ✅ Concluída |
+| **A9-02** | Audit Real Activation — ativar provider real-tiss do AuditRuntimePort | ✅ Concluída |
 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏸️ Pendente |
 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏸️ Pendente |
 
@@ -288,3 +289,12 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - Confirmada inexistência do provider `real-tiss`.
 - `Completed` NÃO executado.
 - Zero alterações em `src/`.
+
+## A9-02 — Audit Real Activation
+
+- Provider `real-tiss` ativado em `src/lib/enterprise/audit-runtime/adapters/real-tiss-audit-runtime-adapter.ts`.
+- `AuditRuntimeProviderId`, `AuditRuntimeFactory`, `AuditRuntimeRegistry` e `adapters/index.ts` atualizados.
+- `RealTissAuditRuntimeAdapter` reutiliza `DefaultAuditRuntimeAdapter` para lifecycle, retry, observability, telemetry, statistics, health, capabilities, providerInfo, `AbortSignal` e `AuditRuntimeStore`.
+- Testes `audit-runtime-engine.test.ts` e `tiss-runtime-05a-audit-real-activation.test.ts` validam `PERSISTED → AUDITED`.
+- `Completed` continua desativado.
+- Documento: `docs/enterprise/AUDIT_REAL_ACTIVATION.md`.

@@ -5,7 +5,11 @@
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → AuditRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultAuditRuntimeAdapter, MockAuditRuntimeAdapter } from "../adapters";
+import {
+  DefaultAuditRuntimeAdapter,
+  MockAuditRuntimeAdapter,
+  RealTissAuditRuntimeAdapter,
+} from "../adapters";
 import type { AuditRuntimePort } from "../ports/audit-runtime-port";
 import type {
   AuditRuntimeEnterpriseDeps,
@@ -86,6 +90,12 @@ export class AuditRuntimeFactory {
       case "enterprise":
         return new DefaultAuditRuntimeAdapter({
           provider: "enterprise",
+          store: this.store,
+          enterpriseDeps,
+        });
+      case "real-tiss":
+        return new RealTissAuditRuntimeAdapter({
+          provider: "real-tiss",
           store: this.store,
           enterpriseDeps,
         });

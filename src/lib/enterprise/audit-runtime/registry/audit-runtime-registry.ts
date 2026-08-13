@@ -13,6 +13,10 @@ import {
   MOCK_AUDIT_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-audit-runtime-adapter";
 import {
+  REALTISS_AUDIT_RUNTIME_ADAPTER_ID,
+  REALTISS_AUDIT_RUNTIME_VERSION,
+} from "../adapters/real-tiss-audit-runtime-adapter";
+import {
   DEFAULT_AUDIT_RUNTIME_ENGINE_CAPABILITIES,
   DEFAULT_MOCK_AUDIT_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
@@ -68,6 +72,17 @@ const BUILTIN_REGISTRATIONS: readonly AuditRuntimeRegistration[] = [
     capabilities: DEFAULT_AUDIT_RUNTIME_ENGINE_CAPABILITIES,
     description:
       "Official F3-CAP-10 Enterprise Audit Runtime — structural job/request/finding audit foundation (no real audit).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "RealTiss Audit Runtime",
+    version: REALTISS_AUDIT_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REALTISS_AUDIT_RUNTIME_ADAPTER_ID,
+    vendor: "real-tiss",
+    capabilities: DEFAULT_AUDIT_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "RealTiss production Audit Runtime provider — structural foundation, reuses DefaultAuditRuntimeAdapter lifecycle.",
   },
 ];
 

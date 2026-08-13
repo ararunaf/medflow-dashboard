@@ -117,8 +117,12 @@ export {
   EnterpriseAuditRuntimeAdapter,
   MOCK_AUDIT_RUNTIME_ADAPTER_ID,
   MockAuditRuntimeAdapter,
+  REALTISS_AUDIT_RUNTIME_ADAPTER_ID,
+  REALTISS_AUDIT_RUNTIME_VERSION,
+  RealTissAuditRuntimeAdapter,
   type DefaultAuditRuntimeAdapterOptions,
   type MockAuditRuntimeAdapterOptions,
+  type RealTissAuditRuntimeAdapterOptions,
 } from "./adapters";
 
 export {

@@ -12,3 +12,10 @@ export {
   MockAuditRuntimeAdapter,
   type MockAuditRuntimeAdapterOptions,
 } from "./mock-audit-runtime-adapter";
+
+export {
+  REALTISS_AUDIT_RUNTIME_ADAPTER_ID,
+  REALTISS_AUDIT_RUNTIME_VERSION,
+  RealTissAuditRuntimeAdapter,
+  type RealTissAuditRuntimeAdapterOptions,
+} from "./real-tiss-audit-runtime-adapter";

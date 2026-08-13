@@ -31,6 +31,9 @@ import {
   InMemoryAuditRuntimeStore,
   MOCK_AUDIT_RUNTIME_ADAPTER_ID,
   MockAuditRuntimeAdapter,
+  REALTISS_AUDIT_RUNTIME_ADAPTER_ID,
+  REALTISS_AUDIT_RUNTIME_VERSION,
+  RealTissAuditRuntimeAdapter,
   createDefaultAuditRuntimeRegistry,
   createDisabledAuditTypeContract,
   createAuditRuntimeFactory,
@@ -232,6 +235,26 @@ describe("F3-CAP-10 AuditRuntimePort contract", () => {
     assert.equal(port.capabilities().adapterId, DEFAULT_AUDIT_RUNTIME_ADAPTER_ID);
   });
 
+  it("RealTissAuditRuntimeAdapter respeita o Port, providerId real-tiss e delega ao Default", async () => {
+    const port: AuditRuntimePort = new RealTissAuditRuntimeAdapter({ provider: "real-tiss" });
+    assert.equal(port.providerId, "real-tiss");
+    assert.equal(port.capabilities().adapterId, REALTISS_AUDIT_RUNTIME_ADAPTER_ID);
+    assert.equal(port.capabilities().provider, "real-tiss");
+    assert.equal(port.providerInfo().providerId, "real-tiss");
+    assert.equal(port.providerInfo().metadata.vendor, "real-tiss");
+    assert.equal(port.providerInfo().metadata.version, REALTISS_AUDIT_RUNTIME_VERSION);
+
+    const health = await port.health();
+    assert.equal(health.ok, true);
+    assert.equal(health.provider, "real-tiss");
+    assert.equal(health.runtimeReady, true);
+    assertStructuralFlagsFalse(health as unknown as Record<string, unknown>);
+
+    const opened = await port.openJob({});
+    assert.equal(opened.ok, true);
+    assert.equal(opened.job?.status, "job-open");
+  });
+
   it("identity declara Enterprise Audit Runtime Foundation vendor-agnostic", () => {
     assert.equal(AUDIT_RUNTIME_IDENTITY.name, "Enterprise Audit Runtime");
     assert.equal(AUDIT_RUNTIME_IDENTITY.layer, "Foundation");
@@ -252,29 +275,34 @@ describe("F3-CAP-10 AuditRuntimePort contract", () => {
     assert.ok(AuditRuntimeProvider.getFactory() instanceof AuditRuntimeFactory);
   });
 
-  it("factory resolve mock / test / default / enterprise", () => {
+  it("factory resolve mock / test / default / enterprise / real-tiss", () => {
     const factory = createAuditRuntimeFactory();
     assert.equal(factory.create({ provider: "mock" }).providerId, "mock");
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
+    assert.equal(factory.create({ provider: "real-tiss" }).providerId, "real-tiss");
     assert.equal(
       getAuditRuntimeFactory().getRegistry().list().length,
       BUILTIN_AUDIT_RUNTIME_PROVIDER_COUNT,
     );
   });
 
-  it("registry registra mock / test / default / enterprise", () => {
+  it("registry registra mock / test / default / enterprise / real-tiss", () => {
     const registry = createDefaultAuditRuntimeRegistry();
     assert.ok(registry instanceof AuditRuntimeRegistry);
     assert.equal(registry.has("mock"), true);
     assert.equal(registry.has("test"), true);
     assert.equal(registry.has("default"), true);
     assert.equal(registry.has("enterprise"), true);
-    assert.equal(registry.snapshot().count, 4);
+    assert.equal(registry.has("real-tiss"), true);
+    assert.equal(registry.snapshot().count, BUILTIN_AUDIT_RUNTIME_PROVIDER_COUNT);
     assert.equal(registry.get("enterprise")?.capabilities.auditEngineImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.tissAuditImplemented, false);
     assert.equal(registry.get("enterprise")?.capabilities.automaticCorrectionImplemented, false);
+    assert.equal(registry.get("real-tiss")?.vendor, "real-tiss");
+    assert.equal(registry.get("real-tiss")?.adapterId, REALTISS_AUDIT_RUNTIME_ADAPTER_ID);
+    assert.equal(registry.get("real-tiss")?.version, REALTISS_AUDIT_RUNTIME_VERSION);
   });
 
   it("openJob → submitRequest → registerFinding → getResult → closeJob → stats (sem auditoria real)", async () => {

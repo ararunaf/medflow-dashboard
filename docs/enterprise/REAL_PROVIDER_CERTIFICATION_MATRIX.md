@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A9-01                |
+| Atualizado| Sprint A9-02                |
 
 ---
 
@@ -21,7 +21,7 @@
 | **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
 | **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
 | **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
-| Audit               | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
+| **Audit**           | `real-tiss` | **RealTissAuditRuntimeAdapter**          | **1.0.0** | **✅**    | **✅**     | **—**      | **Activation**|
 | Completed           | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
 
 ---
@@ -71,4 +71,11 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 - `Audit` permanece em `Discovery`.
 - `Completed` permanece em `Discovery`.
 - Nenhum provider novo certificado nesta Sprint.
+- `Enterprise Runtime Baseline v1.1` preservada.
+
+## A9-02 — Audit Real Activation
+
+- `Audit` avançou de `Discovery` para `Activation` com provider `real-tiss`.
+- `RealTissAuditRuntimeAdapter` ativado, reutilizando `AuditRuntimePort`, `DefaultAuditRuntimeAdapter`, `AuditRuntimeFactory`, `AuditRuntimeRegistry` e `getEnterpriseRuntime()`.
+- `Completed` permanece em `Discovery`.
 - `Enterprise Runtime Baseline v1.1` preservada.
