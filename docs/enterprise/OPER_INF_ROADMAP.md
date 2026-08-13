@@ -32,6 +32,7 @@
 | **A9-01** | Audit Real Discovery — mapear arquitetura Audit sem implementação | ✅ Concluída |
 | **A9-02** | Audit Real Activation — ativar provider real-tiss do AuditRuntimePort | ✅ Concluída |
 | **A9-03** | Audit Real Production Certification — certificar provider real-tiss | ✅ Concluída |
+| **A10-01** | Completed Real Discovery — auditar arquitetura do Completed Runtime | ✅ Concluída |
 | **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏸️ Pendente |
 | **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏸️ Pendente |
 
@@ -308,3 +309,12 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - Documentos `AUDIT_PRODUCTION_CERTIFICATION.md` e matrizes publicados.
 - `Completed` continua fora do escopo.
 - `Enterprise Runtime Baseline v1.1` preservada.
+
+## A10-01 — Completed Real Discovery
+
+- Auditoria completa do `Completed Runtime` concluída.
+- Confirmada a inexistência de `CompletedRuntimePort`, `CompletedRuntimeFactory`, `CompletedRuntimeRegistry`, `CompletedRuntimeAdapters` e `CompletedRuntimeProviderId`.
+- Documentado o placeholder `processTissCompletedJob` em `src/lib/enterprise/queue-runtime/operational/process-tiss-completed-job.ts`.
+- Mapeados State Machine, Dependency Matrix, Extension Points, Security Hooks, Completed Finalization Matrix, Final Artifact Matrix, Operational Closure Checklist e Future Security Integration.
+- `Completed` permanece em `Discovery`.
+- Documento: `docs/enterprise/COMPLETED_REAL_DISCOVERY.md`.

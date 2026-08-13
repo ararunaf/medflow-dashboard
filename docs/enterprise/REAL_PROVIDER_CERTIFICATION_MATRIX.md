@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A9-03                |
+| Atualizado| Sprint A10-01               |
 
 ---
 
@@ -85,4 +85,11 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 - `Audit` certificado para `Production` com provider `real-tiss`.
 - `RealTissAuditRuntimeAdapter` certificado sem qualquer alteração em `src/`.
 - `Completed` permanece em `Discovery`.
+- `Enterprise Runtime Baseline v1.1` preservada.
+
+## A10-01 — Completed Real Discovery
+
+- `Completed` permanece em `Discovery`.
+- `RealTissCompletedRuntimeAdapter` e provider `real-tiss` para `Completed` planejados, não implementados.
+- `CompletedRuntimePort`, `CompletedRuntimeFactory`, `CompletedRuntimeRegistry` e `CompletedRuntimeProviderId` ainda inexistentes.
 - `Enterprise Runtime Baseline v1.1` preservada.
