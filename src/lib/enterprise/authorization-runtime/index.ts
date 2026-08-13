@@ -1,51 +1,55 @@
 /**
- * Enterprise Authorization Runtime — C-05 / ECS-01.
+ * Enterprise Authorization Runtime — S3-02.
  *
- * Fluxo estrutural oficial (C-05):
+ * Fluxo estrutural oficial (S3-02):
  *   Produto → Enterprise Runtime → AuthorizationRuntimePort
  *     → DefaultAuthorizationRuntimeAdapter / EnterpriseAuthorizationRuntimeAdapter /
  *       MockAuthorizationRuntimeAdapter
- *     → InMemoryAuthorizationRuntimeStore → AuthorizationStrategy / AuthorizationPolicy
+ *     → InMemoryAuthorizationRuntimeStore → AuthorizationResult
  *
- * C-05: infraestrutura canônica de Authorization Strategy Pattern.
- * Sem autorização funcional. Sem elegibilidade. Sem integração com operadoras.
- * Sem SOAP funcional. Sem XML funcional. Sem REST. Sem autenticação.
- * Sem banco. Sem persistência. Sem APIs. Sem HTTP. Sem TLS. Sem certificados.
- *
- * Contrato oficial AuthorizationContext:
- *   AuthorizationStrategy + AuthorizationPolicy + OperatorCapabilityProfile
- *   + peers estruturais + envelope RULE_04
- *   (metadados estruturais apenas — sem processamento).
- *
- * Dependências OperatorRuntime/SOAPRuntime/XMLRuntime/XMLValidationRuntime/
- * QualityRuntime/AutoFillRuntime/AuditRuntime/ValidationRuntime preparadas —
- * sem consumo funcional (shape-check apenas em health()).
- *
- * AUTHORIZATION STRATEGY PATTERN (Regra Permanente nº 9): nenhuma autorização
- * é implementada no Runtime; especialização futura ocorre apenas por Strategies.
- * POLICY-DRIVEN AUTHORIZATION: decisões futuras via OperatorCapabilityProfile
- * + AuthorizationPolicy (sem if/switch por operadora/versão/guia).
+ * S3-02: infraestrutura canônica de orquestração estrutural de jobs /
+ * requests / findings de identidade futura (openJob/closeJob/submitRequest/
+ * registerFinding/getResult/stats). Sem identidade real. Sem criptografia.
+ * Sem assinatura digital. Sem cadeia de custódia. Sem Key Vault. Sem HSM.
+ * Sem SIEM. Sem OpenTelemetry. Sem LGPD. Sem autenticação. Sem autorização.
+ * Sem persistência. Sem banco. Sem APIs.
  */
 export type {
-  AuditResult,
-  AuthorizationCapabilities,
+  BusinessAuthorization,
+  CanonicalAuthorizationOperation,
+  ClinicalAuthorization,
+  CloseAuthorizationJobInput,
+  CloseAuthorizationJobResult,
+  ComplianceAuthorization,
+  FinancialAuthorization,
+  FutureAuthorizationTypeContract,
+  GetAuthorizationResultInput,
+  GetAuthorizationResultResult,
+  OpenAuthorizationJobInput,
+  OpenAuthorizationJobResult,
+  OperatorAuthorization,
+  QualityAuthorization,
+  RegisterAuthorizationFindingInput,
+  RegisterAuthorizationFindingResult,
   AuthorizationContext,
+  AuthorizationFinding,
   AuthorizationHealth,
+  AuthorizationIssue,
+  AuthorizationJob,
+  AuthorizationJustification,
   AuthorizationMetadata,
-  AuthorizationPolicy,
+  AuthorizationRecommendation,
   AuthorizationRequest,
-  AuthorizationResponse,
+  AuthorizationResult,
   AuthorizationRuntimeCapabilities,
   AuthorizationRuntimeEngineCapabilities,
   AuthorizationRuntimeEnterpriseDeps,
   AuthorizationRuntimeHealth,
   AuthorizationRuntimeInfo,
-  AuthorizationRuntimeObservabilityEnvelope,
   AuthorizationRuntimeOperationalControls,
   AuthorizationRuntimeOperationEnvelope,
   AuthorizationRuntimeOptions,
   AuthorizationRuntimePort,
-  AuthorizationRuntimePortCapabilities,
   AuthorizationRuntimeProviderId,
   AuthorizationRuntimeProviderMetadata,
   AuthorizationRuntimeProviderOptions,
@@ -53,86 +57,84 @@ export type {
   AuthorizationRuntimeStatus,
   AuthorizationRuntimeStructuredLog,
   AuthorizationRuntimeTelemetry,
+  AuthorizationScore,
   AuthorizationStatistics,
   AuthorizationStatsInput,
   AuthorizationStatsResult,
   AuthorizationStatus,
-  AuthorizationStrategy,
-  AuthorizationStrategyKind,
-  CanonicalGuide,
-  GetAuthorizationInput,
-  GetAuthorizationResult,
-  ListAuthorizationsInput,
-  ListAuthorizationsResult,
-  OperatorCapabilityProfile,
-  PrepareAuthorizationInput,
-  PrepareAuthorizationResult,
-  QualityAssessment,
-  ValidationResult,
-  XMLDocument,
-  XMLValidationResult,
+  AuthorizationSummary,
+  AuthorizationTypeContract,
+  AuthorizationTypeKind,
+  SubmitAuthorizationRequestInput,
+  SubmitAuthorizationRequestResult,
+  TechnicalAuthorization,
+  TISSAuthorization,
 } from "./ports";
 
 export {
   AUTHORIZATION_RUNTIME_IDENTITY,
-  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_CAPABILITIES,
-  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
-  DEFAULT_AUTHORIZATION_RUNTIME_CAPABILITIES,
   DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
-  createAuthorizationContextId,
-  createAuthorizationPolicyId,
+  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
+  createAuthorizationFindingId,
+  createAuthorizationIssueId,
+  createAuthorizationJobId,
+  createAuthorizationJustificationId,
+  createAuthorizationRecommendationId,
   createAuthorizationRequestId,
-  createAuthorizationResponseId,
+  createAuthorizationResultId,
   createAuthorizationRuntimeRequestId,
-  createAuthorizationStrategyId,
-  createEmptyAuthorizationPolicy,
-  createEmptyAuthorizationStrategy,
-  defineAuthorizationRuntimeCapabilities,
+  createAuthorizationScoreId,
+  createAuthorizationSummaryId,
+  createDisabledAuthorizationTypeContract,
   defineAuthorizationRuntimeEngineCapabilities,
-  emptyAuthorizationRuntimeCapabilities,
   emptyAuthorizationRuntimeEngineCapabilities,
   resetAllAuthorizationRuntimeIdSequences,
-  resetAuthorizationRuntimeIdSequences,
-  toAuthorizationCapabilities,
   toCanonicalAuthorizationCapabilities,
 } from "./ports";
 
 export {
-  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_VERSION,
   DEFAULT_AUTHORIZATION_RUNTIME_ADAPTER_ID,
   DEFAULT_AUTHORIZATION_RUNTIME_VERSION,
+  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_VERSION,
   DefaultAuthorizationRuntimeAdapter,
   EnterpriseAuthorizationRuntimeAdapter,
   MOCK_AUTHORIZATION_RUNTIME_ADAPTER_ID,
   MockAuthorizationRuntimeAdapter,
+  REALTISS_AUTHORIZATION_RUNTIME_ADAPTER_ID,
+  REALTISS_AUTHORIZATION_RUNTIME_VERSION,
+  RealTissAuthorizationRuntimeAdapter,
+  TEST_AUTHORIZATION_RUNTIME_ADAPTER_ID,
+  TEST_AUTHORIZATION_RUNTIME_VERSION,
+  TestAuthorizationRuntimeAdapter,
   type DefaultAuthorizationRuntimeAdapterOptions,
   type MockAuthorizationRuntimeAdapterOptions,
+  type RealTissAuthorizationRuntimeAdapterOptions,
+  type TestAuthorizationRuntimeAdapterOptions,
 } from "./adapters";
 
 export {
   IN_MEMORY_AUTHORIZATION_RUNTIME_STORE_ID,
   InMemoryAuthorizationRuntimeStore,
-  type InMemoryAuthorizationRuntimeStoreOptions,
-  type StoredAuthorizationContext,
-  type StoredAuthorizationPolicy,
-  type StoredAuthorizationRequest,
-  type StoredAuthorizationResponse,
-  type StoredAuthorizationStrategy,
   type AuthorizationRuntimeStore,
+  type InMemoryAuthorizationRuntimeStoreOptions,
+  type StoredAuthorizationRuntimeFinding,
+  type StoredAuthorizationRuntimeJob,
+  type StoredAuthorizationRuntimeRequest,
+  type StoredAuthorizationRuntimeResult,
 } from "./store";
 
 export {
   AuthorizationRuntimeFactory,
   createAuthorizationRuntimeFactory,
   type AuthorizationRuntimeFactoryOptions,
-} from "./factory/authorization-runtime-factory";
+} from "./factory";
 
 export {
-  BUILTIN_AUTHORIZATION_RUNTIME_PROVIDER_COUNT,
   AuthorizationRuntimeRegistry,
+  BUILTIN_AUTHORIZATION_RUNTIME_PROVIDER_COUNT,
   createDefaultAuthorizationRuntimeRegistry,
   type AuthorizationRuntimeRegistrySnapshot,
-} from "./registry/authorization-runtime-registry";
+} from "./registry";
 
 export {
   AuthorizationRuntimeProvider,
@@ -140,8 +142,3 @@ export {
   getAuthorizationRuntimeFactory,
   getAuthorizationRuntimePort,
 } from "./providers";
-
-export {
-  getAuthorizationRuntimeHealthSummary,
-  type AuthorizationRuntimeHealthSummary,
-} from "./demo";

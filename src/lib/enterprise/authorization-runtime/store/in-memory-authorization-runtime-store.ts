@@ -1,184 +1,151 @@
 /**
- * InMemoryAuthorizationRuntimeStore — store in-process oficial (C-05).
+ * InMemoryAuthorizationRuntimeStore — store in-process oficial (S3-02).
  *
  * Utiliza mecanismo em memória do processo (sem novo banco, sem migrations,
- * sem autorização funcional, sem integração com operadoras).
+ * sem identidade real).
  */
 import type { AuthorizationStatistics } from "../ports/canonical";
 import type {
   AuthorizationRuntimeStore,
-  StoredAuthorizationContext,
-  StoredAuthorizationPolicy,
-  StoredAuthorizationRequest,
-  StoredAuthorizationResponse,
-  StoredAuthorizationStrategy,
+  StoredAuthorizationRuntimeFinding,
+  StoredAuthorizationRuntimeJob,
+  StoredAuthorizationRuntimeRequest,
+  StoredAuthorizationRuntimeResult,
 } from "./authorization-runtime-store";
 
 export const IN_MEMORY_AUTHORIZATION_RUNTIME_STORE_ID = "in-memory-authorization-runtime";
 
 export type InMemoryAuthorizationRuntimeStoreOptions = {
-  responses?: readonly StoredAuthorizationResponse[];
-  strategies?: readonly StoredAuthorizationStrategy[];
-  policies?: readonly StoredAuthorizationPolicy[];
-  requests?: readonly StoredAuthorizationRequest[];
-  contexts?: readonly StoredAuthorizationContext[];
+  jobs?: readonly StoredAuthorizationRuntimeJob[];
+  requests?: readonly StoredAuthorizationRuntimeRequest[];
+  findings?: readonly StoredAuthorizationRuntimeFinding[];
+  results?: readonly StoredAuthorizationRuntimeResult[];
 };
 
 export class InMemoryAuthorizationRuntimeStore implements AuthorizationRuntimeStore {
   readonly storeId = IN_MEMORY_AUTHORIZATION_RUNTIME_STORE_ID;
 
-  private readonly responses = new Map<string, StoredAuthorizationResponse>();
-  private readonly strategies = new Map<string, StoredAuthorizationStrategy>();
-  private readonly policies = new Map<string, StoredAuthorizationPolicy>();
-  private readonly requests = new Map<string, StoredAuthorizationRequest>();
-  private readonly contexts = new Map<string, StoredAuthorizationContext>();
+  private readonly jobs = new Map<string, StoredAuthorizationRuntimeJob>();
+  private readonly requests = new Map<string, StoredAuthorizationRuntimeRequest>();
+  private readonly findings = new Map<string, StoredAuthorizationRuntimeFinding>();
+  private readonly results = new Map<string, StoredAuthorizationRuntimeResult>();
 
   constructor(options: InMemoryAuthorizationRuntimeStoreOptions = {}) {
-    for (const response of options.responses ?? []) this.setResponse(response);
-    for (const strategy of options.strategies ?? []) this.setStrategy(strategy);
-    for (const policy of options.policies ?? []) this.setPolicy(policy);
+    for (const job of options.jobs ?? []) this.setJob(job);
     for (const request of options.requests ?? []) this.setRequest(request);
-    for (const context of options.contexts ?? []) this.setContext(context);
+    for (const finding of options.findings ?? []) this.setFinding(finding);
+    for (const result of options.results ?? []) this.setResult(result);
   }
 
-  getResponse(responseId: string): StoredAuthorizationResponse | undefined {
-    const response = this.responses.get(responseId);
-    return response ? { ...response } : undefined;
+  getJob(jobId: string): StoredAuthorizationRuntimeJob | undefined {
+    const job = this.jobs.get(jobId);
+    return job ? { ...job } : undefined;
   }
 
-  setResponse(response: StoredAuthorizationResponse): void {
-    this.responses.set(response.responseId, { ...response });
+  setJob(job: StoredAuthorizationRuntimeJob): void {
+    this.jobs.set(job.jobId, { ...job });
   }
 
-  listResponses(): readonly StoredAuthorizationResponse[] {
-    return Array.from(this.responses.values()).map((response) => ({ ...response }));
+  removeJob(jobId: string): void {
+    this.jobs.delete(jobId);
   }
 
-  responseCount(): number {
-    return this.responses.size;
+  listJobs(): readonly StoredAuthorizationRuntimeJob[] {
+    return Array.from(this.jobs.values()).map((job) => ({ ...job }));
   }
 
-  getStrategy(strategyId: string): StoredAuthorizationStrategy | undefined {
-    const strategy = this.strategies.get(strategyId);
-    return strategy ? { ...strategy } : undefined;
+  jobCount(): number {
+    return this.jobs.size;
   }
 
-  setStrategy(strategy: StoredAuthorizationStrategy): void {
-    const key = strategy.strategyId ?? `strategy-${this.strategies.size + 1}`;
-    this.strategies.set(key, { ...strategy });
-  }
-
-  listStrategies(): readonly StoredAuthorizationStrategy[] {
-    return Array.from(this.strategies.values()).map((strategy) => ({ ...strategy }));
-  }
-
-  strategyCount(): number {
-    return this.strategies.size;
-  }
-
-  getPolicy(policyId: string): StoredAuthorizationPolicy | undefined {
-    const policy = this.policies.get(policyId);
-    return policy ? { ...policy } : undefined;
-  }
-
-  setPolicy(policy: StoredAuthorizationPolicy): void {
-    const key = policy.policyId ?? `policy-${this.policies.size + 1}`;
-    this.policies.set(key, { ...policy });
-  }
-
-  listPolicies(): readonly StoredAuthorizationPolicy[] {
-    return Array.from(this.policies.values()).map((policy) => ({ ...policy }));
-  }
-
-  policyCount(): number {
-    return this.policies.size;
-  }
-
-  getRequest(requestId: string): StoredAuthorizationRequest | undefined {
+  getRequest(requestId: string): StoredAuthorizationRuntimeRequest | undefined {
     const request = this.requests.get(requestId);
     return request ? { ...request } : undefined;
   }
 
-  setRequest(request: StoredAuthorizationRequest): void {
-    const key = request.requestId ?? `req-${this.requests.size + 1}`;
-    this.requests.set(key, { ...request });
+  setRequest(request: StoredAuthorizationRuntimeRequest): void {
+    this.requests.set(request.requestId, { ...request });
   }
 
-  listRequests(): readonly StoredAuthorizationRequest[] {
-    return Array.from(this.requests.values()).map((request) => ({ ...request }));
+  listRequests(jobId?: string): readonly StoredAuthorizationRuntimeRequest[] {
+    const all = Array.from(this.requests.values()).map((request) => ({ ...request }));
+    if (!jobId) return all;
+    return all.filter((request) => request.jobId === jobId);
   }
 
   requestCount(): number {
     return this.requests.size;
   }
 
-  getContext(contextId: string): StoredAuthorizationContext | undefined {
-    const context = this.contexts.get(contextId);
-    return context ? { ...context } : undefined;
+  getFinding(findingId: string): StoredAuthorizationRuntimeFinding | undefined {
+    const finding = this.findings.get(findingId);
+    return finding ? { ...finding } : undefined;
   }
 
-  setContext(context: StoredAuthorizationContext): void {
-    const key =
-      context.contextId ??
-      context.requestId ??
-      context.responseId ??
-      context.strategyId ??
-      context.policyId ??
-      `ctx-${this.contexts.size + 1}`;
-    this.contexts.set(key, { ...context });
+  setFinding(finding: StoredAuthorizationRuntimeFinding): void {
+    this.findings.set(finding.findingId, { ...finding });
   }
 
-  listContexts(): readonly StoredAuthorizationContext[] {
-    return Array.from(this.contexts.values()).map((context) => ({ ...context }));
+  listFindings(jobId?: string): readonly StoredAuthorizationRuntimeFinding[] {
+    const all = Array.from(this.findings.values()).map((finding) => ({ ...finding }));
+    if (!jobId) return all;
+    return all.filter((finding) => finding.jobId === jobId);
   }
 
-  contextCount(): number {
-    return this.contexts.size;
+  findingCount(): number {
+    return this.findings.size;
+  }
+
+  getResult(resultId: string): StoredAuthorizationRuntimeResult | undefined {
+    const result = this.results.get(resultId);
+    return result ? { ...result } : undefined;
+  }
+
+  setResult(result: StoredAuthorizationRuntimeResult): void {
+    this.results.set(result.resultId, { ...result });
+  }
+
+  listResults(): readonly StoredAuthorizationRuntimeResult[] {
+    return Array.from(this.results.values()).map((result) => ({ ...result }));
+  }
+
+  resultCount(): number {
+    return this.results.size;
   }
 
   statistics(): AuthorizationStatistics {
-    const all = this.listResponses();
-    let completed = 0;
-    let failed = 0;
-    let cancelled = 0;
-    let prepared = 0;
-    for (const response of all) {
-      if (response.status === "completed" || response.status === "prepared") completed += 1;
-      if (response.status === "prepared") prepared += 1;
-      if (response.status === "failed") failed += 1;
-      if (response.status === "cancelled") cancelled += 1;
+    const jobs = this.listJobs();
+    let openJobs = 0;
+    let closedJobs = 0;
+    for (const job of jobs) {
+      if (job.status === "job-open") openJobs += 1;
+      if (job.status === "job-closed") closedJobs += 1;
     }
     return {
       kind: "canonical-authorization-statistics",
-      totalStrategies: this.strategyCount(),
-      totalPolicies: this.policyCount(),
-      totalResponses: all.length,
-      completedResponses: completed,
-      failedResponses: failed,
-      cancelledResponses: cancelled,
-      preparedResponses: prepared,
+      totalJobs: jobs.length,
+      openJobs,
+      closedJobs,
       totalRequests: this.requestCount(),
-      totalContexts: this.contextCount(),
-      authorizationExecutedCount: 0,
-      eligibilityExecutedCount: 0,
-      communicationExecutedCount: 0,
-      authorizationImplementedCount: 0,
-      eligibilityImplementedCount: 0,
-      attachmentAuthorizationImplementedCount: 0,
-      batchAuthorizationImplementedCount: 0,
-      statusPollingImplementedCount: 0,
-      preAuthorizationImplementedCount: 0,
-      soapFunctionalImplementedCount: 0,
-      xmlFunctionalImplementedCount: 0,
-      restImplementedCount: 0,
-      operatorCommunicationImplementedCount: 0,
+      totalFindings: this.findingCount(),
+      totalResults: this.resultCount(),
+      authorizationEngineImplementedCount: 0,
+      businessRulesImplementedCount: 0,
+      tissAuthorizationImplementedCount: 0,
+      operatorAuthorizationImplementedCount: 0,
+      automaticAuthorizationImplementedCount: 0,
+      authorizationSuggestionsImplementedCount: 0,
+      authorizationJustificationImplementedCount: 0,
+      authorizationScoreImplementedCount: 0,
+      complianceImplementedCount: 0,
+      automaticCorrectionImplementedCount: 0,
     };
   }
 
   health(): { ok: boolean; message?: string } {
     return {
       ok: true,
-      message: `Authorization Runtime store ready (${this.strategyCount()} strategies, ${this.policyCount()} policies, ${this.responseCount()} responses, ${this.requestCount()} requests, ${this.contextCount()} contexts).`,
+      message: `Authorization Runtime store ready (${this.jobCount()} jobs, ${this.requestCount()} requests, ${this.findingCount()} findings, ${this.resultCount()} results).`,
     };
   }
 }

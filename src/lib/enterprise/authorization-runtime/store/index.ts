@@ -1,10 +1,9 @@
 export type {
   AuthorizationRuntimeStore,
-  StoredAuthorizationContext,
-  StoredAuthorizationPolicy,
-  StoredAuthorizationRequest,
-  StoredAuthorizationResponse,
-  StoredAuthorizationStrategy,
+  StoredAuthorizationRuntimeFinding,
+  StoredAuthorizationRuntimeJob,
+  StoredAuthorizationRuntimeRequest,
+  StoredAuthorizationRuntimeResult,
 } from "./authorization-runtime-store";
 
 export {

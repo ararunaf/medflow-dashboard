@@ -1,8 +1,8 @@
 /**
- * AuthorizationRuntimeRegistry — catálogo de mecanismos (C-05).
+ * AuthorizationRuntimeRegistry — catálogo de mecanismos (S3-02).
  *
- * Registra: mock, test, default, enterprise.
- * Sem lógica de negócio. Sem autorização funcional.
+ * Registra: mock, test, default, enterprise, real-tiss.
+ * Sem lógica de negócio. Sem identidade real. Sem criptografia.
  */
 import {
   DEFAULT_AUTHORIZATION_RUNTIME_ADAPTER_ID,
@@ -13,8 +13,12 @@ import {
   MOCK_AUTHORIZATION_RUNTIME_ADAPTER_ID,
 } from "../adapters/mock-authorization-runtime-adapter";
 import {
-  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
+  REALTISS_AUTHORIZATION_RUNTIME_ADAPTER_ID,
+  REALTISS_AUTHORIZATION_RUNTIME_VERSION,
+} from "../adapters/real-tiss-authorization-runtime-adapter";
+import {
   DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
+  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
 } from "../ports/capabilities";
 import type {
   AuthorizationRuntimeProviderId,
@@ -37,7 +41,7 @@ const BUILTIN_REGISTRATIONS: readonly AuthorizationRuntimeRegistration[] = [
     vendor: "medicflow-enterprise",
     capabilities: DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
     description:
-      "Deterministic in-process Authorization Runtime mock — no functional authorization, no network.",
+      "Deterministic in-process Authorization Runtime mock — no real authorization, no network.",
   },
   {
     providerId: "test",
@@ -57,7 +61,7 @@ const BUILTIN_REGISTRATIONS: readonly AuthorizationRuntimeRegistration[] = [
     adapterId: DEFAULT_AUTHORIZATION_RUNTIME_ADAPTER_ID,
     vendor: "medicflow-enterprise",
     capabilities: DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
-    description: "Default resolution alias — maps to enterprise (C-05).",
+    description: "Default resolution alias — maps to enterprise (S3-02).",
   },
   {
     providerId: "enterprise",
@@ -68,7 +72,18 @@ const BUILTIN_REGISTRATIONS: readonly AuthorizationRuntimeRegistration[] = [
     vendor: "medicflow-enterprise",
     capabilities: DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
     description:
-      "Official C-05 Enterprise Authorization Runtime — structural AuthorizationStrategy / AuthorizationPolicy foundation (no functional authorization).",
+      "Official S3-02 Enterprise Authorization Runtime — structural job/request/finding authorization foundation (no real authorization).",
+  },
+  {
+    providerId: "real-tiss",
+    name: "RealTiss Authorization Runtime",
+    version: REALTISS_AUTHORIZATION_RUNTIME_VERSION,
+    status: "ready",
+    adapterId: REALTISS_AUTHORIZATION_RUNTIME_ADAPTER_ID,
+    vendor: "real-tiss",
+    capabilities: DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
+    description:
+      "RealTiss production Authorization Runtime provider — structural foundation, reuses DefaultAuthorizationRuntimeAdapter lifecycle.",
   },
 ];
 
@@ -117,8 +132,10 @@ export class AuthorizationRuntimeRegistry {
   }
 }
 
+/** Registry default com os providers da fundação. */
 export function createDefaultAuthorizationRuntimeRegistry(): AuthorizationRuntimeRegistry {
   return new AuthorizationRuntimeRegistry();
 }
 
+/** Contagem canônica de providers registrados na fundação. */
 export const BUILTIN_AUTHORIZATION_RUNTIME_PROVIDER_COUNT = BUILTIN_REGISTRATIONS.length;

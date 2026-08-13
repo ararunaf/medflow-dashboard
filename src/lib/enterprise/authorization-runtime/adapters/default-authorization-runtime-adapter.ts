@@ -1,40 +1,32 @@
 /**
- * DefaultAuthorizationRuntimeAdapter — C-05 / ECS-01.
+ * DefaultAuthorizationRuntimeAdapter — S3-02.
  *
  * Adapter oficial do Enterprise Authorization Runtime.
- * Responde estruturalmente (prepareAuthorization/getAuthorization/
- * listAuthorizations/stats) sem depender de Ports Enterprise.
+ * Responde estruturalmente (openJob/closeJob/submitRequest/registerFinding/
+ * getResult/stats) sem depender de Ports Enterprise.
  *
- * Sem autorização funcional. Sem elegibilidade. Sem integração com operadoras.
- * Sem SOAP/XML/REST funcional. Sem autenticação. Sem banco.
- *
- * AUTHORIZATION STRATEGY PATTERN (Regra Permanente nº 9).
- * POLICY-DRIVEN AUTHORIZATION — sem if/switch por operadora/versão/guia.
+ * Sem identidade real. Sem criptografia. Sem assinatura digital.
+ * Sem cadeia de custódia. Sem Key Vault. Sem HSM. Sem SIEM.
+ * Sem OpenTelemetry. Sem LGPD. Sem autenticação. Sem autorização.
  */
 import {
   DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
-  toAuthorizationCapabilities,
+  toCanonicalAuthorizationCapabilities,
 } from "../ports/capabilities";
 import {
   AUTHORIZATION_RUNTIME_IDENTITY,
-  createAuthorizationContextId,
-  createAuthorizationPolicyId,
+  createAuthorizationFindingId,
+  createAuthorizationJobId,
   createAuthorizationRequestId,
-  createAuthorizationResponseId,
+  createAuthorizationResultId,
   createAuthorizationRuntimeRequestId,
-  createAuthorizationStrategyId,
-} from "../ports/identity";
+} from "../ports/authorization";
 import type { AuthorizationRuntimePort } from "../ports/authorization-runtime-port";
 import type {
-  AuthorizationContext,
-  AuthorizationPolicy,
+  AuthorizationFinding,
+  AuthorizationJob,
   AuthorizationRequest,
-  AuthorizationResponse,
-  AuthorizationStrategy,
-} from "../ports/canonical";
-import {
-  createEmptyAuthorizationPolicy,
-  createEmptyAuthorizationStrategy,
+  AuthorizationResult,
 } from "../ports/canonical";
 import type {
   AuthorizationRuntimeCapabilities,
@@ -48,12 +40,16 @@ import type {
   AuthorizationRuntimeStructuredLog,
   AuthorizationStatsInput,
   AuthorizationStatsResult,
-  GetAuthorizationInput,
-  GetAuthorizationResult,
-  ListAuthorizationsInput,
-  ListAuthorizationsResult,
-  PrepareAuthorizationInput,
-  PrepareAuthorizationResult,
+  CloseAuthorizationJobInput,
+  CloseAuthorizationJobResult,
+  GetAuthorizationResultInput,
+  GetAuthorizationResultResult,
+  OpenAuthorizationJobInput,
+  OpenAuthorizationJobResult,
+  RegisterAuthorizationFindingInput,
+  RegisterAuthorizationFindingResult,
+  SubmitAuthorizationRequestInput,
+  SubmitAuthorizationRequestResult,
 } from "../ports/types";
 import { InMemoryAuthorizationRuntimeStore, type AuthorizationRuntimeStore } from "../store";
 
@@ -75,6 +71,7 @@ export type DefaultAuthorizationRuntimeAdapterOptions = {
   defaultRetryBackoffMs?: number;
   now?: () => string;
   sleep?: (ms: number) => Promise<void>;
+  /** Força falha transitória nas N primeiras tentativas (testes de retry). */
   failAttempts?: number;
 };
 
@@ -103,127 +100,23 @@ async function defaultSleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function portShapeOk(port: unknown): boolean {
-  return (
-    !!port &&
-    typeof (port as { health?: unknown }).health === "function" &&
-    typeof (port as { capabilities?: unknown }).capabilities === "function"
-  );
-}
-
 function structuralFlags() {
   return {
-    authorizationImplemented: false,
-    eligibilityImplemented: false,
-    attachmentAuthorizationImplemented: false,
-    batchAuthorizationImplemented: false,
-    statusPollingImplemented: false,
-    preAuthorizationImplemented: false,
-    soapFunctionalImplemented: false,
-    xmlFunctionalImplemented: false,
-    restImplemented: false,
-    operatorCommunicationImplemented: false,
+    authorizationEngineImplemented: false,
+    businessRulesImplemented: false,
+    tissAuthorizationImplemented: false,
+    operatorAuthorizationImplemented: false,
+    automaticAuthorizationImplemented: false,
+    authorizationSuggestionsImplemented: false,
+    authorizationJustificationImplemented: false,
+    authorizationScoreImplemented: false,
+    complianceImplemented: false,
+    automaticCorrectionImplemented: false,
   } as const;
 }
 
-function resolveStrategy(input: PrepareAuthorizationInput): AuthorizationStrategy {
-  const base =
-    input.strategy ??
-    input.policy?.strategy ??
-    input.authorizationContext?.strategy ??
-    input.request?.strategy;
-  return createEmptyAuthorizationStrategy({
-    ...base,
-    strategyId: base?.strategyId ?? createAuthorizationStrategyId(),
-    strategyKind: base?.strategyKind ?? input.policy?.preferredStrategyKind ?? "synchronous",
-  });
-}
-
-function resolvePolicy(
-  input: PrepareAuthorizationInput,
-  strategy: AuthorizationStrategy,
-): AuthorizationPolicy {
-  const base = input.policy ?? input.authorizationContext?.policy ?? input.request?.policy;
-  return createEmptyAuthorizationPolicy({
-    ...base,
-    policyId: base?.policyId ?? createAuthorizationPolicyId(),
-    preferredStrategyKind: base?.preferredStrategyKind ?? strategy.strategyKind,
-    capabilityProfile:
-      base?.capabilityProfile ??
-      input.capabilityProfile ??
-      input.authorizationContext?.capabilityProfile ??
-      input.request?.capabilityProfile,
-    strategy,
-  });
-}
-
-function resolveContext(
-  input: PrepareAuthorizationInput,
-  strategy: AuthorizationStrategy,
-  policy: AuthorizationPolicy,
-): AuthorizationContext {
-  return (
-    input.authorizationContext ?? {
-      kind: "canonical-authorization-context" as const,
-      contextId: createAuthorizationContextId(),
-      strategyId: strategy.strategyId,
-      policyId: policy.policyId,
-      strategy,
-      policy,
-      capabilityProfile: policy.capabilityProfile ?? input.capabilityProfile,
-      xmlDocument: input.xmlDocument,
-      xmlValidationResult: input.xmlValidationResult,
-      canonicalGuide: input.canonicalGuide,
-      qualityAssessment: input.qualityAssessment,
-      validationResult: input.validationResult,
-      auditResult: input.auditResult,
-      structuralNotes: input.request?.structuralNotes,
-      executionStatus: "prepared",
-      warnings: [],
-      errors: [],
-    }
-  );
-}
-
-function resolveRequest(
-  input: PrepareAuthorizationInput,
-  strategy: AuthorizationStrategy,
-  policy: AuthorizationPolicy,
-): AuthorizationRequest {
-  const base = input.request ?? {
-    kind: "canonical-authorization-request" as const,
-    ...structuralFlags(),
-  };
-  const authorizationContext = {
-    ...resolveContext(input, strategy, policy),
-    strategy,
-    policy,
-    capabilityProfile: policy.capabilityProfile,
-  };
-  return {
-    ...base,
-    kind: "canonical-authorization-request",
-    requestId: base.requestId ?? input.requestId ?? createAuthorizationRequestId(),
-    name: base.name ?? input.name,
-    operation: base.operation ?? input.operation ?? "prepareAuthorization",
-    authorizationContext,
-    strategy,
-    policy,
-    capabilityProfile: policy.capabilityProfile ?? input.capabilityProfile,
-    xmlDocument: base.xmlDocument ?? input.xmlDocument,
-    xmlValidationResult: base.xmlValidationResult ?? input.xmlValidationResult,
-    canonicalGuide: base.canonicalGuide ?? input.canonicalGuide,
-    qualityAssessment: base.qualityAssessment ?? input.qualityAssessment,
-    validationResult: base.validationResult ?? input.validationResult,
-    auditResult: base.auditResult ?? input.auditResult,
-    ...structuralFlags(),
-  };
-}
-
 /**
- * Adapter oficial C-05 — Authorization Runtime default / enterprise.
- * Nunca ramifica por operadora/versão/guia (POLICY-DRIVEN AUTHORIZATION).
- * Nunca implementa autorização inline (Regra Permanente nº 9).
+ * Adapter oficial S3-02 — Authorization Runtime default / enterprise.
  */
 export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimePort {
   readonly providerId: Extract<AuthorizationRuntimeProviderId, "enterprise" | "default">;
@@ -245,7 +138,7 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
     this.healthy = options.healthy ?? true;
     this.message =
       options.message ??
-      `${this.providerId} Authorization Runtime ready (structural only — no functional authorization).`;
+      `${this.providerId} Authorization Runtime ready (structural only — no real authorization).`;
     this.metadata = {
       name:
         this.providerId === "default"
@@ -267,6 +160,7 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
     this.failAttemptsRemaining = options.failAttempts ?? 0;
   }
 
+  /** Acesso estrutural ao store (testes / demo — não produto). */
   getStore(): AuthorizationRuntimeStore {
     return this.store;
   }
@@ -277,32 +171,37 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
       adapterId: DEFAULT_AUTHORIZATION_RUNTIME_ADAPTER_ID,
       supportsHealth: true,
       supportsCapabilities: true,
-      supportsPrepareAuthorization: true,
-      supportsGetAuthorization: true,
-      supportsListAuthorizations: true,
+      supportsOpenJob: true,
+      supportsCloseJob: true,
+      supportsSubmitRequest: true,
+      supportsRegisterFinding: true,
+      supportsGetResult: true,
       supportsStats: true,
       supportsCanonicalAuthorization: true,
-      supportsStrategySelection: true,
-      supportsPolicyDrivenAuthorization: true,
       supportsTimeout: true,
       supportsRetry: true,
       supportsCancellation: true,
       supportsTelemetry: true,
-      usesOperatorRuntimePort: true,
-      usesSOAPRuntimePort: true,
-      usesXMLRuntimePort: true,
-      usesXMLValidationRuntimePort: true,
-      usesQualityRuntimePort: true,
-      usesAutoFillRuntimePort: true,
-      usesAuditRuntimePort: true,
-      usesValidationRuntimePort: true,
+      usesAIOrchestrationRuntimePort: false,
+      usesValidationRuntimePort: false,
+      usesDocumentExtractionRuntimePort: false,
+      usesDocumentClassificationRuntimePort: false,
+      usesOCRRuntimePort: false,
+      usesIntelligentCaptureRuntimePort: false,
+      usesScannerRuntimePort: false,
+      usesWatchFolderRuntimePort: false,
+      usesUploadRuntimePort: false,
+      usesPersistentQueueRuntimePort: false,
+      usesWorkerRuntimePort: false,
+      usesSchedulerRuntimePort: false,
+      usesObservabilityRuntimePort: false,
+      usesScalabilityRuntimePort: false,
       runtimeReady: true,
       ...structuralFlags(),
-      knowsOperatorOrCooperative: false,
-      knowsContract: false,
-      knowsTenant: false,
       engine: { ...DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES },
-      canonical: toAuthorizationCapabilities(DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES),
+      canonical: toCanonicalAuthorizationCapabilities(
+        DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
+      ),
     };
   }
 
@@ -319,227 +218,268 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
   async health(): Promise<AuthorizationRuntimeHealth> {
     const start = typeof performance !== "undefined" ? performance.now() : Date.now();
     const storeHealth = this.store.health();
-
-    let operatorRuntimeOk = true;
-    let soapRuntimeOk = true;
-    let xmlRuntimeOk = true;
-    let xmlValidationRuntimeOk = true;
-    let qualityRuntimeOk = true;
-    let autoFillRuntimeOk = true;
-    let auditRuntimeOk = true;
-    let validationRuntimeOk = true;
-
-    if (typeof this.enterpriseDeps.getOperatorRuntimePort === "function") {
-      operatorRuntimeOk = portShapeOk(this.enterpriseDeps.getOperatorRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getSOAPRuntimePort === "function") {
-      soapRuntimeOk = portShapeOk(this.enterpriseDeps.getSOAPRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
-      xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getQualityRuntimePort === "function") {
-      qualityRuntimeOk = portShapeOk(this.enterpriseDeps.getQualityRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getAutoFillRuntimePort === "function") {
-      autoFillRuntimeOk = portShapeOk(this.enterpriseDeps.getAutoFillRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getAuditRuntimePort === "function") {
-      auditRuntimeOk = portShapeOk(this.enterpriseDeps.getAuditRuntimePort());
-    }
-    if (typeof this.enterpriseDeps.getValidationRuntimePort === "function") {
-      validationRuntimeOk = portShapeOk(this.enterpriseDeps.getValidationRuntimePort());
-    }
-
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
-    const ok =
-      this.healthy &&
-      storeHealth.ok &&
-      operatorRuntimeOk &&
-      soapRuntimeOk &&
-      xmlRuntimeOk &&
-      xmlValidationRuntimeOk &&
-      qualityRuntimeOk &&
-      autoFillRuntimeOk &&
-      auditRuntimeOk &&
-      validationRuntimeOk;
+    const ok = this.healthy && storeHealth.ok;
 
     return {
-      kind: "canonical-authorization-health",
       ok,
       provider: this.providerId,
       latencyMs: Math.max(0, Math.round(end - start)),
       status: ok ? "ready" : "unhealthy",
-      operatorRuntimeOk,
-      soapRuntimeOk,
-      xmlRuntimeOk,
-      xmlValidationRuntimeOk,
-      qualityRuntimeOk,
-      autoFillRuntimeOk,
-      auditRuntimeOk,
-      validationRuntimeOk,
-      storedStrategyCount: this.store.strategyCount(),
-      storedPolicyCount: this.store.policyCount(),
-      storedResponseCount: this.store.responseCount(),
+      storedJobCount: this.store.jobCount(),
       storedRequestCount: this.store.requestCount(),
-      storedContextCount: this.store.contextCount(),
+      storedFindingCount: this.store.findingCount(),
+      storedResultCount: this.store.resultCount(),
       runtimeReady: true,
       ...structuralFlags(),
       message: this.healthy
         ? ok
-          ? "Authorization Runtime pronto (estrutural C-05 — sem autorização funcional)."
-          : "Authorization Runtime degradado — ver Ports Enterprise."
+          ? "Authorization Runtime pronto (estrutural S3-02 — sem identidade real)."
+          : "Authorization Runtime degradado — ver store."
         : "Authorization Runtime unhealthy.",
     };
   }
 
-  async prepareAuthorization(
-    input: PrepareAuthorizationInput,
-  ): Promise<PrepareAuthorizationResult> {
-    return this.runOperation("prepareAuthorization", input, async () => {
-      const strategy = resolveStrategy(input);
-      const policy = resolvePolicy(input, strategy);
-      const request = resolveRequest(input, strategy, policy);
+  async openJob(input: OpenAuthorizationJobInput): Promise<OpenAuthorizationJobResult> {
+    return this.runOperation("openJob", input, async () => {
       const stamp = nowIso(this.now);
-      const responseId = createAuthorizationResponseId();
-      this.store.setRequest(request);
-      this.store.setStrategy(strategy);
-      this.store.setPolicy(policy);
-
-      const authorizationContext: AuthorizationContext = {
-        ...request.authorizationContext!,
-        requestId: request.requestId,
-        responseId,
-        strategyId: strategy.strategyId,
-        policyId: policy.policyId,
-        strategy,
-        policy,
-        capabilityProfile: policy.capabilityProfile,
-        startedAt: stamp,
-        finishedAt: stamp,
-        executionStatus: "prepared",
-        executionDuration: 0,
-        processedItems: 0,
-        warnings: request.authorizationContext?.warnings ?? [],
-        errors: request.authorizationContext?.errors ?? [],
+      const jobId = input.jobId ?? createAuthorizationJobId();
+      const existing = this.store.getJob(jobId);
+      if (existing) {
+        return {
+          ok: false,
+          code: "AUTHORIZATION_RUNTIME_JOB_ALREADY_OPEN",
+          message: "Canonical AuthorizationJob already open.",
+          job: existing,
+        };
+      }
+      const authorizationContext = input.authorizationContext ?? {
+        kind: "canonical-authorization-context" as const,
+        jobId,
       };
-
-      const response: AuthorizationResponse = {
-        kind: "canonical-authorization-response",
-        ok: true,
-        responseId,
-        request,
-        strategy,
-        policy,
+      const job: AuthorizationJob = {
+        kind: "canonical-authorization-job",
+        jobId,
+        status: "job-open",
+        identity: {
+          kind: "canonical-authorization-identity",
+          jobId,
+          correlationId: input.correlationId,
+        },
+        metadata: input.metadata,
         authorizationContext,
-        capabilityProfile: policy.capabilityProfile,
-        xmlDocument: request.xmlDocument,
-        xmlValidationResult: request.xmlValidationResult,
-        canonicalGuide: request.canonicalGuide,
-        qualityAssessment: request.qualityAssessment,
-        validationResult: request.validationResult,
-        auditResult: request.auditResult,
-        authorizationExecuted: false,
-        eligibilityExecuted: false,
-        communicationExecuted: false,
-        runtimeReady: true,
-        ...structuralFlags(),
-        status: "prepared",
-        message:
-          "Canonical Authorization structural envelope (C-05 foundation — no functional authorization / eligibility / SOAP / XML / operator integration).",
-        code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
         createdAt: stamp,
         updatedAt: stamp,
+        ...structuralFlags(),
       };
-      this.store.setResponse(response);
-      this.store.setContext(authorizationContext);
-
+      this.store.setJob(job);
+      const result = this.buildResult({
+        operation: "openJob",
+        status: "job-open",
+        job,
+        stamp,
+        code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
+        messageText:
+          "Canonical Authorization Runtime structural openJob (S3-02 foundation — no real authorization).",
+        authorizationContext,
+      });
       return {
         ok: true,
-        response,
+        result,
+        job,
         code: "AUTHORIZATION_RUNTIME_OK",
-        message: response.message,
+        message: result.messageText,
       };
     });
   }
 
-  async getAuthorization(input: GetAuthorizationInput): Promise<GetAuthorizationResult> {
-    return this.runOperation("getAuthorization", input, async () => {
-      if (input.responseId) {
-        const response = this.store.getResponse(input.responseId);
-        if (!response) {
-          return {
-            ok: false,
-            code: "AUTHORIZATION_RUNTIME_NOT_FOUND",
-            message: "Canonical Authorization response not found.",
-          };
-        }
+  async closeJob(input: CloseAuthorizationJobInput): Promise<CloseAuthorizationJobResult> {
+    return this.runOperation("closeJob", input, async () => {
+      const existing = this.store.getJob(input.jobId);
+      if (!existing) {
         return {
-          ok: true,
-          response,
-          strategy: response.strategy,
-          policy: response.policy,
-          code: "AUTHORIZATION_RUNTIME_OK",
-          message: "Canonical Authorization response loaded.",
+          ok: false,
+          code: "AUTHORIZATION_RUNTIME_JOB_NOT_FOUND",
+          message: "Canonical AuthorizationJob not found.",
         };
       }
-      if (input.strategyId) {
-        const strategy = this.store.getStrategy(input.strategyId);
-        if (!strategy) {
-          return {
-            ok: false,
-            code: "AUTHORIZATION_RUNTIME_NOT_FOUND",
-            message: "Canonical Authorization strategy not found.",
-          };
-        }
-        return {
-          ok: true,
-          strategy,
-          code: "AUTHORIZATION_RUNTIME_OK",
-          message: "Canonical Authorization strategy loaded.",
-        };
-      }
-      if (input.policyId) {
-        const policy = this.store.getPolicy(input.policyId);
-        if (!policy) {
-          return {
-            ok: false,
-            code: "AUTHORIZATION_RUNTIME_NOT_FOUND",
-            message: "Canonical Authorization policy not found.",
-          };
-        }
-        return {
-          ok: true,
-          policy,
-          code: "AUTHORIZATION_RUNTIME_OK",
-          message: "Canonical Authorization policy loaded.",
-        };
-      }
+      const stamp = nowIso(this.now);
+      const job: AuthorizationJob = {
+        ...existing,
+        status: "job-closed",
+        closedAt: stamp,
+        updatedAt: stamp,
+      };
+      this.store.setJob(job);
+      const result = this.buildResult({
+        operation: "closeJob",
+        status: "job-closed",
+        job,
+        stamp,
+        code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
+        messageText:
+          "Canonical Authorization Runtime structural closeJob (S3-02 foundation — no real teardown).",
+        authorizationContext: job.authorizationContext,
+      });
       return {
-        ok: false,
-        code: "AUTHORIZATION_RUNTIME_INVALID_INPUT",
-        message: "responseId, strategyId or policyId is required.",
+        ok: true,
+        result,
+        job,
+        code: "AUTHORIZATION_RUNTIME_OK",
+        message: result.messageText,
       };
     });
   }
 
-  async listAuthorizations(input: ListAuthorizationsInput = {}): Promise<ListAuthorizationsResult> {
-    return this.runOperation("listAuthorizations", input, async () => {
-      let responses = this.store.listResponses();
-      if (input.status != null) {
-        responses = responses.filter((r) => r.status === input.status);
+  async submitRequest(
+    input: SubmitAuthorizationRequestInput,
+  ): Promise<SubmitAuthorizationRequestResult> {
+    return this.runOperation("submitRequest", input, async () => {
+      const stamp = nowIso(this.now);
+      let job = input.jobId ? this.store.getJob(input.jobId) : undefined;
+      if (!job) {
+        const jobId = input.jobId ?? createAuthorizationJobId();
+        job = {
+          kind: "canonical-authorization-job",
+          jobId,
+          status: "job-open",
+          authorizationContext: input.authorizationContext,
+          createdAt: stamp,
+          updatedAt: stamp,
+          ...structuralFlags(),
+        };
+        this.store.setJob(job);
       }
+      const requestId = input.requestId ?? createAuthorizationRequestId();
+      const authorizationContext = input.authorizationContext ??
+        job.authorizationContext ?? {
+          kind: "canonical-authorization-context" as const,
+          jobId: job.jobId,
+          requestId,
+          findingId: input.findingId,
+        };
+      const request: AuthorizationRequest = {
+        kind: "canonical-authorization-request",
+        requestId,
+        jobId: job.jobId,
+        findingId: input.findingId,
+        status: "submitted",
+        metadata: input.metadata,
+        authorizationContext,
+        createdAt: stamp,
+        updatedAt: stamp,
+        ...structuralFlags(),
+      };
+      this.store.setRequest(request);
+      const result = this.buildResult({
+        operation: "submitRequest",
+        status: "submitted",
+        job,
+        request,
+        stamp,
+        code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
+        messageText:
+          "Canonical Authorization Runtime structural submitRequest (S3-02 foundation — no authorization dispatch).",
+        authorizationContext,
+      });
       return {
         ok: true,
-        responses,
-        strategies: this.store.listStrategies(),
-        policies: this.store.listPolicies(),
-        statistics: this.store.statistics(),
+        result,
+        job,
+        request,
         code: "AUTHORIZATION_RUNTIME_OK",
-        message: `Listed ${responses.length} canonical Authorization responses / ${this.store.strategyCount()} strategies / ${this.store.policyCount()} policies.`,
+        message: result.messageText,
+      };
+    });
+  }
+
+  async registerFinding(
+    input: RegisterAuthorizationFindingInput,
+  ): Promise<RegisterAuthorizationFindingResult> {
+    return this.runOperation("registerFinding", input, async () => {
+      const stamp = nowIso(this.now);
+      const findingId = input.findingId ?? createAuthorizationFindingId();
+      const authorizationContext = input.authorizationContext ?? {
+        kind: "canonical-authorization-context" as const,
+        jobId: input.jobId,
+        requestId: input.requestId,
+        findingId,
+      };
+      const finding: AuthorizationFinding = {
+        kind: "canonical-authorization-finding",
+        findingId,
+        jobId: input.jobId,
+        requestId: input.requestId,
+        status: "registered",
+        authorizationType: input.authorizationType,
+        issues: [],
+        metadata: input.metadata,
+        authorizationContext,
+        createdAt: stamp,
+        updatedAt: stamp,
+        authorizationEngineImplemented: false,
+        automaticAuthorizationImplemented: false,
+        authorizationSuggestionsImplemented: false,
+        tissAuthorizationImplemented: false,
+        operatorAuthorizationImplemented: false,
+      };
+      this.store.setFinding(finding);
+      const result = this.buildResult({
+        operation: "registerFinding",
+        status: "registered",
+        finding,
+        stamp,
+        code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
+        messageText:
+          "Canonical Authorization Runtime structural registerFinding (S3-02 foundation — no authorization engine).",
+        authorizationContext,
+      });
+      return {
+        ok: true,
+        result,
+        finding,
+        code: "AUTHORIZATION_RUNTIME_OK",
+        message: result.messageText,
+      };
+    });
+  }
+
+  async getResult(input: GetAuthorizationResultInput): Promise<GetAuthorizationResultResult> {
+    return this.runOperation("getResult", input, async () => {
+      const job = input.jobId ? this.store.getJob(input.jobId) : undefined;
+      const request = input.requestId ? this.store.getRequest(input.requestId) : undefined;
+      const finding = input.findingId ? this.store.getFinding(input.findingId) : undefined;
+      if (!job && !request && !finding) {
+        return {
+          ok: false,
+          code: "AUTHORIZATION_RUNTIME_RESULT_NOT_FOUND",
+          message: "Canonical Authorization job/request/finding not found.",
+        };
+      }
+      const stamp = nowIso(this.now);
+      const authorizationContext =
+        request?.authorizationContext ?? job?.authorizationContext ?? finding?.authorizationContext;
+      const result = this.buildResult({
+        operation: "getResult",
+        status: request?.status ?? job?.status ?? finding?.status ?? "processed",
+        job,
+        request,
+        finding,
+        stamp,
+        code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
+        messageText:
+          "Canonical Authorization Runtime structural getResult (S3-02 foundation — no real authorization).",
+        authorizationContext,
+      });
+      this.store.setResult(result);
+      return {
+        ok: true,
+        result,
+        job,
+        request,
+        finding,
+        code: "AUTHORIZATION_RUNTIME_OK",
+        message: result.messageText,
       };
     });
   }
@@ -548,34 +488,51 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
     return this.runOperation("stats", input, async () => {
       const statistics = this.store.statistics();
       const stamp = nowIso(this.now);
-      const response: AuthorizationResponse = {
-        kind: "canonical-authorization-response",
-        ok: true,
-        responseId: createAuthorizationResponseId(),
-        request: {
-          kind: "canonical-authorization-request",
-          operation: "stats",
-          ...structuralFlags(),
-        },
-        authorizationExecuted: false,
-        eligibilityExecuted: false,
-        communicationExecuted: false,
-        runtimeReady: true,
-        ...structuralFlags(),
+      const result = this.buildResult({
+        operation: "stats",
         status: "pending",
-        message: "Canonical Authorization Runtime structural statistics.",
+        stamp,
         code: "AUTHORIZATION_RUNTIME_STRUCTURAL_OK",
-        createdAt: stamp,
-        updatedAt: stamp,
-      };
+        messageText: "Canonical Authorization Runtime structural statistics.",
+      });
       return {
         ok: true,
         statistics,
-        response,
+        result,
         code: "AUTHORIZATION_RUNTIME_OK",
-        message: `Authorization Runtime stats: ${statistics.totalStrategies} strategies / ${statistics.totalPolicies} policies.`,
+        message: `Authorization Runtime stats: ${statistics.totalJobs} jobs, ${statistics.totalRequests} requests, ${statistics.totalFindings} findings.`,
       };
     });
+  }
+
+  private buildResult(args: {
+    operation: AuthorizationResult["operation"];
+    status: AuthorizationResult["status"];
+    stamp: string;
+    code: string;
+    messageText: string;
+    job?: AuthorizationJob;
+    request?: AuthorizationRequest;
+    finding?: AuthorizationFinding;
+    authorizationContext?: AuthorizationResult["authorizationContext"];
+  }): AuthorizationResult {
+    return {
+      kind: "canonical-authorization-result",
+      ok: true,
+      resultId: createAuthorizationResultId(),
+      operation: args.operation,
+      job: args.job,
+      request: args.request,
+      finding: args.finding,
+      authorizationContext: args.authorizationContext,
+      ...structuralFlags(),
+      runtimeReady: true,
+      status: args.status,
+      messageText: args.messageText,
+      code: args.code,
+      createdAt: args.stamp,
+      updatedAt: args.stamp,
+    };
   }
 
   private async runOperation<T extends Record<string, unknown>>(
@@ -681,22 +638,16 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
       const end = typeof performance !== "undefined" ? performance.now() : Date.now();
       const message =
         error instanceof Error ? error.message : "Authorization Runtime operation failed.";
-      const isTimeout = /timed out/i.test(message);
-      const cancelled = signal?.aborted === true;
       return {
         ok: false,
         requestId,
         provider: this.providerId,
-        code: cancelled
-          ? "AUTHORIZATION_RUNTIME_CANCELLED"
-          : isTimeout
-            ? "AUTHORIZATION_RUNTIME_TIMEOUT"
-            : "AUTHORIZATION_RUNTIME_ERROR",
+        code: "AUTHORIZATION_RUNTIME_ERROR",
         message,
         telemetry: {
           latencyMs: Math.max(0, Math.round(end - started)),
           attempts,
-          cancelled,
+          cancelled: false,
           operation,
         },
         logs,
@@ -705,5 +656,5 @@ export class DefaultAuthorizationRuntimeAdapter implements AuthorizationRuntimeP
   }
 }
 
-/** Alias oficial enterprise = default adapter (C-05). */
+/** Alias oficial enterprise = default adapter (S3-02). */
 export const EnterpriseAuthorizationRuntimeAdapter = DefaultAuthorizationRuntimeAdapter;

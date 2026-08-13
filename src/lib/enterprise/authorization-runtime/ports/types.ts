@@ -1,71 +1,64 @@
 /**
- * Tipos vendor-agnósticos do Enterprise Authorization Runtime — C-05 / ECS-01.
+ * Tipos vendor-agnósticos do Enterprise Authorization Runtime — S3-02.
  *
- * Fluxo estrutural (C-05):
- *   Produto → Enterprise Runtime → AuthorizationRuntimePort
- *     → Adapter → Authorization Runtime Store → AuthorizationStrategy / AuthorizationPolicy
- *
- * C-05: infraestrutura canônica estrutural apenas — sem autorização funcional /
- * sem elegibilidade / sem integração com operadoras / sem SOAP/XML/REST
- * funcional / sem autenticação / sem banco / sem persistência / sem APIs.
- *
- * AUTHORIZATION STRATEGY PATTERN (Regra Permanente nº 9).
- * POLICY-DRIVEN AUTHORIZATION — OperatorCapabilityProfile + AuthorizationPolicy.
+ * S3-02: infraestrutura canônica estrutural apenas — sem identidade real /
+ * sem criptografia / sem assinatura digital / sem cadeia de custódia /
+ * sem Key Vault / sem HSM / sem SIEM / sem OpenTelemetry / sem LGPD /
+ * sem autenticação / sem autorização.
  */
-import type { AuditRuntimePort } from "../../audit-runtime/ports/audit-runtime-port";
-import type { AutoFillRuntimePort } from "../../auto-fill-runtime/ports/auto-fill-runtime-port";
-import type { OperatorRuntimePort } from "../../operator-runtime/ports/operator-runtime-port";
-import type { QualityRuntimePort } from "../../quality-runtime/ports/quality-runtime-port";
-import type { SOAPRuntimePort } from "../../soap-runtime/ports/soap-runtime-port";
-import type { ValidationRuntimePort } from "../../validation-runtime/ports/validation-runtime-port";
-import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
-  AuditResult,
   AuthorizationContext,
-  AuthorizationPolicy,
+  AuthorizationFinding,
+  AuthorizationJob,
+  AuthorizationMetadata,
   AuthorizationRequest,
+  AuthorizationResult,
   AuthorizationStatistics,
-  AuthorizationStrategy,
-  CanonicalGuide,
-  OperatorCapabilityProfile,
-  QualityAssessment,
-  ValidationResult,
-  XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 import type { AuthorizationRuntimeEngineCapabilities } from "./capabilities";
 
 export type {
-  AuditResult,
-  AuthorizationCapabilities,
   AuthorizationContext,
+  AuthorizationFinding,
   AuthorizationHealth,
+  AuthorizationIssue,
+  AuthorizationJob,
+  AuthorizationJustification,
   AuthorizationMetadata,
-  AuthorizationPolicy,
+  AuthorizationRecommendation,
   AuthorizationRequest,
-  AuthorizationResponse,
-  AuthorizationRuntimeObservabilityEnvelope,
+  AuthorizationResult,
+  AuthorizationScore,
   AuthorizationStatistics,
   AuthorizationStatus,
-  AuthorizationStrategy,
-  AuthorizationStrategyKind,
-  CanonicalGuide,
-  OperatorCapabilityProfile,
-  QualityAssessment,
-  ValidationResult,
-  XMLDocument,
-  XMLValidationResult,
+  AuthorizationSummary,
+  AuthorizationTypeContract,
+  AuthorizationTypeKind,
+  BusinessAuthorization,
+  CanonicalAuthorizationOperation,
+  ClinicalAuthorization,
+  ComplianceAuthorization,
+  FinancialAuthorization,
+  FutureAuthorizationTypeContract,
+  OperatorAuthorization,
+  QualityAuthorization,
+  TechnicalAuthorization,
+  TISSAuthorization,
 } from "./canonical";
 export type { AuthorizationRuntimeEngineCapabilities };
 
 /** Provedores / mecanismos do Authorization Runtime (adapters do Port). */
-export type AuthorizationRuntimeProviderId = "mock" | "test" | "default" | "enterprise";
+export type AuthorizationRuntimeProviderId =
+  | "mock"
+  | "test"
+  | "default"
+  | "enterprise"
+  | "real-tiss";
 
-/** Status operacional declarado no registry (C-05). */
+/** Status operacional declarado no registry (S3-02). */
 export type AuthorizationRuntimeStatus = "ready" | "stub" | "disabled" | "unhealthy" | "unknown";
 
-/** Telemetria estrutural embutida no resultado (C-05). */
+/** Telemetria estrutural embutida no resultado (S3-02). */
 export type AuthorizationRuntimeTelemetry = {
   latencyMs: number;
   attempts: number;
@@ -73,7 +66,7 @@ export type AuthorizationRuntimeTelemetry = {
   operation?: string;
 };
 
-/** Logging estrutural embutido (C-05). */
+/** Logging estrutural embutido (S3-02). */
 export type AuthorizationRuntimeStructuredLog = {
   level: "info" | "warn" | "error";
   code: string;
@@ -94,35 +87,25 @@ export type AuthorizationRuntimeHealth = {
   latencyMs?: number;
   message?: string;
   status?: AuthorizationRuntimeStatus;
-  kind?: "canonical-authorization-health";
-  operatorRuntimeOk?: boolean;
-  soapRuntimeOk?: boolean;
-  xmlRuntimeOk?: boolean;
-  xmlValidationRuntimeOk?: boolean;
-  qualityRuntimeOk?: boolean;
-  autoFillRuntimeOk?: boolean;
-  auditRuntimeOk?: boolean;
-  validationRuntimeOk?: boolean;
-  storedStrategyCount?: number;
-  storedPolicyCount?: number;
-  storedResponseCount?: number;
+  storedJobCount?: number;
   storedRequestCount?: number;
-  storedContextCount?: number;
+  storedFindingCount?: number;
+  storedResultCount?: number;
   runtimeReady: true;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-  soapFunctionalImplemented: false;
-  xmlFunctionalImplemented: false;
-  restImplemented: false;
-  operatorCommunicationImplemented: false;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
 };
 
 /**
- * Capacidades declaradas pelo adapter (Port level).
+ * Capacidades declaradas pelo adapter ativo.
  * Todas as flags `*Implemented` permanecem literalmente `false`.
  */
 export type AuthorizationRuntimeCapabilities = {
@@ -130,46 +113,48 @@ export type AuthorizationRuntimeCapabilities = {
   adapterId: string;
   supportsHealth: boolean;
   supportsCapabilities: boolean;
-  supportsPrepareAuthorization: boolean;
-  supportsGetAuthorization: boolean;
-  supportsListAuthorizations: boolean;
+  supportsOpenJob: boolean;
+  supportsCloseJob: boolean;
+  supportsSubmitRequest: boolean;
+  supportsRegisterFinding: boolean;
+  supportsGetResult: boolean;
   supportsStats: boolean;
   supportsCanonicalAuthorization: boolean;
-  supportsStrategySelection: boolean;
-  supportsPolicyDrivenAuthorization: boolean;
   supportsTimeout: boolean;
   supportsRetry: boolean;
   supportsCancellation: boolean;
   supportsTelemetry: boolean;
-  usesOperatorRuntimePort: boolean;
-  usesSOAPRuntimePort: boolean;
-  usesXMLRuntimePort: boolean;
-  usesXMLValidationRuntimePort: boolean;
-  usesQualityRuntimePort: boolean;
-  usesAutoFillRuntimePort: boolean;
-  usesAuditRuntimePort: boolean;
+  usesAIOrchestrationRuntimePort: boolean;
   usesValidationRuntimePort: boolean;
+  usesDocumentExtractionRuntimePort: boolean;
+  usesDocumentClassificationRuntimePort: boolean;
+  usesOCRRuntimePort: boolean;
+  usesIntelligentCaptureRuntimePort: boolean;
+  usesScannerRuntimePort: boolean;
+  usesWatchFolderRuntimePort: boolean;
+  usesUploadRuntimePort: boolean;
+  usesPersistentQueueRuntimePort: boolean;
+  usesWorkerRuntimePort: boolean;
+  usesSchedulerRuntimePort: boolean;
+  usesObservabilityRuntimePort: boolean;
+  usesScalabilityRuntimePort: boolean;
   runtimeReady: true;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-  soapFunctionalImplemented: false;
-  xmlFunctionalImplemented: false;
-  restImplemented: false;
-  operatorCommunicationImplemented: false;
-  knowsOperatorOrCooperative: false;
-  knowsContract: false;
-  knowsTenant: false;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
+  /** Espelho declarativo (engine) e canônico (S3-02) — informativo. */
   engine?: AuthorizationRuntimeEngineCapabilities;
   canonical?: import("./canonical").AuthorizationCapabilities;
 };
 
-export type AuthorizationRuntimePortCapabilities = AuthorizationRuntimeCapabilities;
-
-/** Metadados estáveis do provedor (C-05). */
+/** Metadados estáveis do provedor (S3-02). */
 export type AuthorizationRuntimeProviderMetadata = {
   name: string;
   version: string;
@@ -179,7 +164,7 @@ export type AuthorizationRuntimeProviderMetadata = {
   vendorAgnostic?: boolean;
 };
 
-/** Info agregada retornada por providerInfo() (C-05). */
+/** Info agregada retornada por providerInfo() (S3-02). */
 export type AuthorizationRuntimeInfo = {
   providerId: AuthorizationRuntimeProviderId;
   metadata: AuthorizationRuntimeProviderMetadata;
@@ -188,7 +173,7 @@ export type AuthorizationRuntimeInfo = {
   capabilities: AuthorizationRuntimeEngineCapabilities;
 };
 
-/** Controles operacionais comuns (timeout / retry / cancel) — C-05. */
+/** Controles operacionais comuns (timeout / retry / cancel) — S3-02. */
 export type AuthorizationRuntimeOperationalControls = {
   requestId?: string;
   signal?: AbortSignal;
@@ -197,7 +182,7 @@ export type AuthorizationRuntimeOperationalControls = {
   attributes?: Readonly<Record<string, unknown>>;
 };
 
-/** Envelope comum de resultado operacional — C-05. */
+/** Envelope comum de resultado operacional — S3-02. */
 export type AuthorizationRuntimeOperationEnvelope = {
   ok: boolean;
   requestId?: string;
@@ -211,18 +196,9 @@ export type AuthorizationRuntimeOperationEnvelope = {
 
 /**
  * Dependências Enterprise injetadas no adapter default/enterprise.
- * C-05: peers estruturais (shape-check apenas em health() — sem consumo funcional).
+ * S3-02: sem peers estruturais (scaffolding puro).
  */
-export type AuthorizationRuntimeEnterpriseDeps = {
-  getOperatorRuntimePort?: () => OperatorRuntimePort;
-  getSOAPRuntimePort?: () => SOAPRuntimePort;
-  getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
-  getQualityRuntimePort?: () => QualityRuntimePort;
-  getAutoFillRuntimePort?: () => AutoFillRuntimePort;
-  getAuditRuntimePort?: () => AuditRuntimePort;
-  getValidationRuntimePort?: () => ValidationRuntimePort;
-};
+export type AuthorizationRuntimeEnterpriseDeps = Record<string, unknown>;
 
 /** Opções de resolução do AuthorizationRuntimePort. */
 export type AuthorizationRuntimeProviderOptions = {
@@ -230,10 +206,10 @@ export type AuthorizationRuntimeProviderOptions = {
   enterpriseDeps?: AuthorizationRuntimeEnterpriseDeps;
 };
 
-/** Alias C-05 — resolução do AuthorizationRuntimePort (default: `enterprise`). */
+/** Alias S3-02 — resolução do AuthorizationRuntimePort (default: `enterprise`). */
 export type AuthorizationRuntimeOptions = AuthorizationRuntimeProviderOptions;
 
-/** Entrada de registro no AuthorizationRuntimeRegistry (C-05). */
+/** Entrada de registro no AuthorizationRuntimeRegistry (S3-02). */
 export type AuthorizationRuntimeRegistration = {
   providerId: AuthorizationRuntimeProviderId;
   name: string;
@@ -246,59 +222,77 @@ export type AuthorizationRuntimeRegistration = {
 };
 
 // ---------------------------------------------------------------------------
-// C-05 — operações estruturais (prepareAuthorization / getAuthorization /
-// listAuthorizations / stats). Nunca autorizam / nunca elegibilidade /
-// nunca comunicam com operadoras / nunca SOAP/XML funcional.
+// S3-02 — operações estruturais (openJob / closeJob / submitRequest /
+// registerFinding / getResult / stats). Nunca executam identidade real.
 // ---------------------------------------------------------------------------
 
-export type PrepareAuthorizationInput = AuthorizationRuntimeOperationalControls & {
-  request?: AuthorizationRequest;
-  name?: string;
-  operation?: string;
+export type OpenAuthorizationJobInput = AuthorizationRuntimeOperationalControls & {
+  jobId?: string;
+  correlationId?: string | null;
+  metadata?: AuthorizationMetadata;
   authorizationContext?: AuthorizationContext;
-  strategy?: AuthorizationStrategy;
-  policy?: AuthorizationPolicy;
-  capabilityProfile?: OperatorCapabilityProfile;
-  xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
-  canonicalGuide?: CanonicalGuide;
-  qualityAssessment?: QualityAssessment;
-  validationResult?: ValidationResult;
-  auditResult?: AuditResult;
 };
 
-export type PrepareAuthorizationResult = AuthorizationRuntimeOperationEnvelope & {
-  response?: import("./canonical").AuthorizationResponse;
+export type OpenAuthorizationJobResult = AuthorizationRuntimeOperationEnvelope & {
+  result?: AuthorizationResult;
+  job?: AuthorizationJob;
 };
 
-export type GetAuthorizationInput = AuthorizationRuntimeOperationalControls & {
-  responseId?: string;
-  strategyId?: string;
-  policyId?: string;
+export type CloseAuthorizationJobInput = AuthorizationRuntimeOperationalControls & {
+  jobId: string;
 };
 
-export type GetAuthorizationResult = AuthorizationRuntimeOperationEnvelope & {
-  response?: import("./canonical").AuthorizationResponse;
-  strategy?: AuthorizationStrategy;
-  policy?: AuthorizationPolicy;
+export type CloseAuthorizationJobResult = AuthorizationRuntimeOperationEnvelope & {
+  result?: AuthorizationResult;
+  job?: AuthorizationJob;
 };
 
-export type ListAuthorizationsInput = AuthorizationRuntimeOperationalControls & {
-  status?: string;
+export type SubmitAuthorizationRequestInput = AuthorizationRuntimeOperationalControls & {
+  jobId?: string;
+  requestId?: string;
+  findingId?: string;
+  metadata?: AuthorizationMetadata;
+  authorizationContext?: AuthorizationContext;
 };
 
-export type ListAuthorizationsResult = AuthorizationRuntimeOperationEnvelope & {
-  responses: readonly import("./canonical").AuthorizationResponse[];
-  strategies: readonly AuthorizationStrategy[];
-  policies: readonly AuthorizationPolicy[];
-  statistics?: AuthorizationStatistics;
+export type SubmitAuthorizationRequestResult = AuthorizationRuntimeOperationEnvelope & {
+  result?: AuthorizationResult;
+  job?: AuthorizationJob;
+  request?: AuthorizationRequest;
+};
+
+export type RegisterAuthorizationFindingInput = AuthorizationRuntimeOperationalControls & {
+  findingId?: string;
+  jobId?: string;
+  requestId?: string;
+  authorizationType?: import("./canonical").AuthorizationTypeKind;
+  metadata?: AuthorizationMetadata;
+  authorizationContext?: AuthorizationContext;
+};
+
+export type RegisterAuthorizationFindingResult = AuthorizationRuntimeOperationEnvelope & {
+  result?: AuthorizationResult;
+  finding?: AuthorizationFinding;
+};
+
+export type GetAuthorizationResultInput = AuthorizationRuntimeOperationalControls & {
+  requestId?: string;
+  jobId?: string;
+  findingId?: string;
+};
+
+export type GetAuthorizationResultResult = AuthorizationRuntimeOperationEnvelope & {
+  result?: AuthorizationResult;
+  job?: AuthorizationJob;
+  request?: AuthorizationRequest;
+  finding?: AuthorizationFinding;
 };
 
 export type AuthorizationStatsInput = AuthorizationRuntimeOperationalControls & {
-  contextId?: string;
+  jobId?: string;
 };
 
 export type AuthorizationStatsResult = AuthorizationRuntimeOperationEnvelope & {
   statistics?: AuthorizationStatistics;
-  response?: import("./canonical").AuthorizationResponse;
+  result?: AuthorizationResult;
 };

@@ -1,14 +1,14 @@
 /**
- * MockAuthorizationRuntimeAdapter — C-05 / ECS-01.
+ * MockAuthorizationRuntimeAdapter — S3-02.
  *
  * Implementação totalmente determinística in-process.
- * Sem autorização funcional. Sem elegibilidade. Sem SOAP/XML/REST funcional.
+ * Sem HTTP. Sem identidade real. Sem criptografia. Sem regras TISS/operadoras.
  *
  * Delega sempre ao Default (mesmo sem enterpriseDeps).
  */
 import {
   DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
-  toAuthorizationCapabilities,
+  toCanonicalAuthorizationCapabilities,
 } from "../ports/capabilities";
 import type { AuthorizationRuntimePort } from "../ports/authorization-runtime-port";
 import type {
@@ -20,12 +20,16 @@ import type {
   AuthorizationRuntimeProviderMetadata,
   AuthorizationStatsInput,
   AuthorizationStatsResult,
-  GetAuthorizationInput,
-  GetAuthorizationResult,
-  ListAuthorizationsInput,
-  ListAuthorizationsResult,
-  PrepareAuthorizationInput,
-  PrepareAuthorizationResult,
+  CloseAuthorizationJobInput,
+  CloseAuthorizationJobResult,
+  GetAuthorizationResultInput,
+  GetAuthorizationResultResult,
+  OpenAuthorizationJobInput,
+  OpenAuthorizationJobResult,
+  RegisterAuthorizationFindingInput,
+  RegisterAuthorizationFindingResult,
+  SubmitAuthorizationRequestInput,
+  SubmitAuthorizationRequestResult,
 } from "../ports/types";
 import type { AuthorizationRuntimeStore } from "../store";
 import { InMemoryAuthorizationRuntimeStore } from "../store";
@@ -53,10 +57,13 @@ function mockMetadata(
     layer: "Foundation",
     vendorAgnostic: true,
     description:
-      "Deterministic in-process Authorization Runtime mock — no functional authorization, no network.",
+      "Deterministic in-process Authorization Runtime mock — no network, no real authorization, no cryptography.",
   };
 }
 
+/**
+ * Mock adapter — delega ao Default em modo canônico (simulated:true).
+ */
 export class MockAuthorizationRuntimeAdapter implements AuthorizationRuntimePort {
   readonly providerId: Extract<AuthorizationRuntimeProviderId, "mock" | "test">;
 
@@ -92,41 +99,44 @@ export class MockAuthorizationRuntimeAdapter implements AuthorizationRuntimePort
       adapterId: MOCK_AUTHORIZATION_RUNTIME_ADAPTER_ID,
       supportsHealth: true,
       supportsCapabilities: true,
-      supportsPrepareAuthorization: true,
-      supportsGetAuthorization: true,
-      supportsListAuthorizations: true,
+      supportsOpenJob: true,
+      supportsCloseJob: true,
+      supportsSubmitRequest: true,
+      supportsRegisterFinding: true,
+      supportsGetResult: true,
       supportsStats: true,
       supportsCanonicalAuthorization: true,
-      supportsStrategySelection: true,
-      supportsPolicyDrivenAuthorization: true,
       supportsTimeout: true,
       supportsRetry: true,
       supportsCancellation: true,
       supportsTelemetry: true,
-      usesOperatorRuntimePort: true,
-      usesSOAPRuntimePort: true,
-      usesXMLRuntimePort: true,
-      usesXMLValidationRuntimePort: true,
-      usesQualityRuntimePort: true,
-      usesAutoFillRuntimePort: true,
-      usesAuditRuntimePort: true,
-      usesValidationRuntimePort: true,
+      usesAIOrchestrationRuntimePort: false,
+      usesValidationRuntimePort: false,
+      usesDocumentExtractionRuntimePort: false,
+      usesDocumentClassificationRuntimePort: false,
+      usesOCRRuntimePort: false,
+      usesIntelligentCaptureRuntimePort: false,
+      usesScannerRuntimePort: false,
+      usesWatchFolderRuntimePort: false,
+      usesUploadRuntimePort: false,
+      usesPersistentQueueRuntimePort: false,
+      usesWorkerRuntimePort: false,
+      usesSchedulerRuntimePort: false,
+      usesObservabilityRuntimePort: false,
+      usesScalabilityRuntimePort: false,
       runtimeReady: true,
-      authorizationImplemented: false,
-      eligibilityImplemented: false,
-      attachmentAuthorizationImplemented: false,
-      batchAuthorizationImplemented: false,
-      statusPollingImplemented: false,
-      preAuthorizationImplemented: false,
-      soapFunctionalImplemented: false,
-      xmlFunctionalImplemented: false,
-      restImplemented: false,
-      operatorCommunicationImplemented: false,
-      knowsOperatorOrCooperative: false,
-      knowsContract: false,
-      knowsTenant: false,
+      authorizationEngineImplemented: false,
+      businessRulesImplemented: false,
+      tissAuthorizationImplemented: false,
+      operatorAuthorizationImplemented: false,
+      automaticAuthorizationImplemented: false,
+      authorizationSuggestionsImplemented: false,
+      authorizationJustificationImplemented: false,
+      authorizationScoreImplemented: false,
+      complianceImplemented: false,
+      automaticCorrectionImplemented: false,
       engine: { ...DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES },
-      canonical: toAuthorizationCapabilities(
+      canonical: toCanonicalAuthorizationCapabilities(
         DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
       ),
     };
@@ -152,20 +162,32 @@ export class MockAuthorizationRuntimeAdapter implements AuthorizationRuntimePort
     };
   }
 
-  async prepareAuthorization(
-    input: PrepareAuthorizationInput,
-  ): Promise<PrepareAuthorizationResult> {
-    const result = await this.delegate.prepareAuthorization(input);
+  async openJob(input: OpenAuthorizationJobInput): Promise<OpenAuthorizationJobResult> {
+    const result = await this.delegate.openJob(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 
-  async getAuthorization(input: GetAuthorizationInput): Promise<GetAuthorizationResult> {
-    const result = await this.delegate.getAuthorization(input);
+  async closeJob(input: CloseAuthorizationJobInput): Promise<CloseAuthorizationJobResult> {
+    const result = await this.delegate.closeJob(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 
-  async listAuthorizations(input?: ListAuthorizationsInput): Promise<ListAuthorizationsResult> {
-    const result = await this.delegate.listAuthorizations(input);
+  async submitRequest(
+    input: SubmitAuthorizationRequestInput,
+  ): Promise<SubmitAuthorizationRequestResult> {
+    const result = await this.delegate.submitRequest(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async registerFinding(
+    input: RegisterAuthorizationFindingInput,
+  ): Promise<RegisterAuthorizationFindingResult> {
+    const result = await this.delegate.registerFinding(input);
+    return { ...result, provider: this.providerId, simulated: true };
+  }
+
+  async getResult(input: GetAuthorizationResultInput): Promise<GetAuthorizationResultResult> {
+    const result = await this.delegate.getResult(input);
     return { ...result, provider: this.providerId, simulated: true };
   }
 

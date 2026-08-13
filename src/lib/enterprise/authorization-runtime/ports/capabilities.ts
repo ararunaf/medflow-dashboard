@@ -1,58 +1,58 @@
 /**
- * AuthorizationRuntimeEngineCapabilities — capacidades declarativas (C-05 / ECS-01).
+ * AuthorizationRuntimeEngineCapabilities — capacidades declarativas (S3-02).
  *
- * Apenas declaração estrutural. Sem autorização funcional. Sem elegibilidade.
- * Sem SOAP/XML/REST funcional. Integrações estruturais declaradas como
- * preparadas — sem consumo funcional.
+ * Apenas declaração estrutural. Sem identidade real. Sem criptografia.
+ * Sem assinatura digital. Sem cadeia de custódia. Sem Key Vault. Sem HSM.
+ * Sem SIEM. Sem OpenTelemetry. Sem LGPD. Sem autenticação. Sem autorização.
  *
- * AUTHORIZATION STRATEGY PATTERN (Regra Permanente nº 9).
+ * Todas as flags `*Implemented` são literalmente `false`.
+ * Integrações estruturais de outros Ports declaradas como `false` — sem consumo funcional.
  */
 
 import type { AuthorizationCapabilities } from "./canonical";
 
 export type AuthorizationRuntimeEngineCapabilities = {
-  supportsPrepareAuthorization?: boolean;
-  supportsGetAuthorization?: boolean;
-  supportsListAuthorizations?: boolean;
+  supportsOpenJob?: boolean;
+  supportsCloseJob?: boolean;
+  supportsSubmitRequest?: boolean;
+  supportsRegisterFinding?: boolean;
+  supportsGetResult?: boolean;
   supportsStats?: boolean;
   supportsHealth?: boolean;
   supportsCanonicalAuthorization?: boolean;
-  supportsStrategySelection?: boolean;
-  supportsPolicyDrivenAuthorization?: boolean;
   supportsTimeout?: boolean;
   supportsRetry?: boolean;
   supportsCancellation?: boolean;
   supportsTelemetry?: boolean;
-  usesOperatorRuntimePort?: boolean;
-  usesSOAPRuntimePort?: boolean;
-  usesXMLRuntimePort?: boolean;
-  usesXMLValidationRuntimePort?: boolean;
-  usesQualityRuntimePort?: boolean;
-  usesAutoFillRuntimePort?: boolean;
-  usesAuditRuntimePort?: boolean;
+  usesAIOrchestrationRuntimePort?: boolean;
   usesValidationRuntimePort?: boolean;
+  usesDocumentExtractionRuntimePort?: boolean;
+  usesDocumentClassificationRuntimePort?: boolean;
+  usesOCRRuntimePort?: boolean;
+  usesIntelligentCaptureRuntimePort?: boolean;
+  usesScannerRuntimePort?: boolean;
+  usesWatchFolderRuntimePort?: boolean;
+  usesUploadRuntimePort?: boolean;
+  usesPersistentQueueRuntimePort?: boolean;
+  usesWorkerRuntimePort?: boolean;
+  usesSchedulerRuntimePort?: boolean;
+  usesObservabilityRuntimePort?: boolean;
+  usesScalabilityRuntimePort?: boolean;
   runtimeReady?: true;
-  authorizationImplemented?: false;
-  eligibilityImplemented?: false;
-  attachmentAuthorizationImplemented?: false;
-  batchAuthorizationImplemented?: false;
-  statusPollingImplemented?: false;
-  preAuthorizationImplemented?: false;
-  soapFunctionalImplemented?: false;
-  xmlFunctionalImplemented?: false;
-  restImplemented?: false;
-  operatorCommunicationImplemented?: false;
-  knowsOperatorOrCooperative?: false;
-  knowsContract?: false;
-  knowsTenant?: false;
+  authorizationEngineImplemented?: false;
+  businessRulesImplemented?: false;
+  tissAuthorizationImplemented?: false;
+  operatorAuthorizationImplemented?: false;
+  automaticAuthorizationImplemented?: false;
+  authorizationSuggestionsImplemented?: false;
+  authorizationJustificationImplemented?: false;
+  authorizationScoreImplemented?: false;
+  complianceImplemented?: false;
+  automaticCorrectionImplemented?: false;
 };
 
 export function emptyAuthorizationRuntimeEngineCapabilities(): AuthorizationRuntimeEngineCapabilities {
   return {};
-}
-
-export function emptyAuthorizationRuntimeCapabilities(): AuthorizationRuntimeEngineCapabilities {
-  return emptyAuthorizationRuntimeEngineCapabilities();
 }
 
 export function defineAuthorizationRuntimeEngineCapabilities(
@@ -61,93 +61,75 @@ export function defineAuthorizationRuntimeEngineCapabilities(
   return { ...capabilities };
 }
 
-export function defineAuthorizationRuntimeCapabilities(
-  capabilities: AuthorizationRuntimeEngineCapabilities = {},
-): AuthorizationRuntimeEngineCapabilities {
-  return defineAuthorizationRuntimeEngineCapabilities(capabilities);
-}
-
 export const DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES: AuthorizationRuntimeEngineCapabilities =
   {
-    supportsPrepareAuthorization: true,
-    supportsGetAuthorization: true,
-    supportsListAuthorizations: true,
+    supportsOpenJob: true,
+    supportsCloseJob: true,
+    supportsSubmitRequest: true,
+    supportsRegisterFinding: true,
+    supportsGetResult: true,
     supportsStats: true,
     supportsHealth: true,
     supportsCanonicalAuthorization: true,
-    supportsStrategySelection: true,
-    supportsPolicyDrivenAuthorization: true,
     supportsTimeout: true,
     supportsRetry: true,
     supportsCancellation: true,
     supportsTelemetry: true,
-    usesOperatorRuntimePort: true,
-    usesSOAPRuntimePort: true,
-    usesXMLRuntimePort: true,
-    usesXMLValidationRuntimePort: true,
-    usesQualityRuntimePort: true,
-    usesAutoFillRuntimePort: true,
-    usesAuditRuntimePort: true,
-    usesValidationRuntimePort: true,
+    usesAIOrchestrationRuntimePort: false,
+    usesValidationRuntimePort: false,
+    usesDocumentExtractionRuntimePort: false,
+    usesDocumentClassificationRuntimePort: false,
+    usesOCRRuntimePort: false,
+    usesIntelligentCaptureRuntimePort: false,
+    usesScannerRuntimePort: false,
+    usesWatchFolderRuntimePort: false,
+    usesUploadRuntimePort: false,
+    usesPersistentQueueRuntimePort: false,
+    usesWorkerRuntimePort: false,
+    usesSchedulerRuntimePort: false,
+    usesObservabilityRuntimePort: false,
+    usesScalabilityRuntimePort: false,
     runtimeReady: true,
-    authorizationImplemented: false,
-    eligibilityImplemented: false,
-    attachmentAuthorizationImplemented: false,
-    batchAuthorizationImplemented: false,
-    statusPollingImplemented: false,
-    preAuthorizationImplemented: false,
-    soapFunctionalImplemented: false,
-    xmlFunctionalImplemented: false,
-    restImplemented: false,
-    operatorCommunicationImplemented: false,
-    knowsOperatorOrCooperative: false,
-    knowsContract: false,
-    knowsTenant: false,
+    authorizationEngineImplemented: false,
+    businessRulesImplemented: false,
+    tissAuthorizationImplemented: false,
+    operatorAuthorizationImplemented: false,
+    automaticAuthorizationImplemented: false,
+    authorizationSuggestionsImplemented: false,
+    authorizationJustificationImplemented: false,
+    authorizationScoreImplemented: false,
+    complianceImplemented: false,
+    automaticCorrectionImplemented: false,
   };
-
-export const DEFAULT_AUTHORIZATION_RUNTIME_CAPABILITIES =
-  DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES;
 
 export const DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES: AuthorizationRuntimeEngineCapabilities =
   {
     ...DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
   };
 
-export const DEFAULT_MOCK_AUTHORIZATION_RUNTIME_CAPABILITIES =
-  DEFAULT_MOCK_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES;
-
-export function toAuthorizationCapabilities(
+export function toCanonicalAuthorizationCapabilities(
   capabilities: AuthorizationRuntimeEngineCapabilities = DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
 ): AuthorizationCapabilities {
   return {
     kind: "canonical-authorization-capabilities",
-    supportsPrepareAuthorization: capabilities.supportsPrepareAuthorization === true,
-    supportsGetAuthorization: capabilities.supportsGetAuthorization === true,
-    supportsListAuthorizations: capabilities.supportsListAuthorizations === true,
+    supportsOpenJob: capabilities.supportsOpenJob === true,
+    supportsCloseJob: capabilities.supportsCloseJob === true,
+    supportsSubmitRequest: capabilities.supportsSubmitRequest === true,
+    supportsRegisterFinding: capabilities.supportsRegisterFinding === true,
+    supportsGetResult: capabilities.supportsGetResult === true,
     supportsStats: capabilities.supportsStats === true,
     supportsHealth: capabilities.supportsHealth === true,
     supportsCanonicalAuthorization: capabilities.supportsCanonicalAuthorization === true,
-    supportsStrategySelection: capabilities.supportsStrategySelection === true,
-    supportsPolicyDrivenAuthorization: capabilities.supportsPolicyDrivenAuthorization === true,
     runtimeReady: true,
-    authorizationImplemented: false,
-    eligibilityImplemented: false,
-    attachmentAuthorizationImplemented: false,
-    batchAuthorizationImplemented: false,
-    statusPollingImplemented: false,
-    preAuthorizationImplemented: false,
-    soapFunctionalImplemented: false,
-    xmlFunctionalImplemented: false,
-    restImplemented: false,
-    operatorCommunicationImplemented: false,
-    knowsOperatorOrCooperative: false,
-    knowsContract: false,
-    knowsTenant: false,
+    authorizationEngineImplemented: false,
+    businessRulesImplemented: false,
+    tissAuthorizationImplemented: false,
+    operatorAuthorizationImplemented: false,
+    automaticAuthorizationImplemented: false,
+    authorizationSuggestionsImplemented: false,
+    authorizationJustificationImplemented: false,
+    authorizationScoreImplemented: false,
+    complianceImplemented: false,
+    automaticCorrectionImplemented: false,
   };
-}
-
-export function toCanonicalAuthorizationCapabilities(
-  capabilities: AuthorizationRuntimeEngineCapabilities = DEFAULT_AUTHORIZATION_RUNTIME_ENGINE_CAPABILITIES,
-): AuthorizationCapabilities {
-  return toAuthorizationCapabilities(capabilities);
 }

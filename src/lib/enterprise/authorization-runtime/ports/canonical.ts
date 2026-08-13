@@ -1,212 +1,323 @@
 /**
- * Modelos canônicos estruturais do Enterprise Authorization Runtime — C-05 / ECS-01.
+ * Modelos canônicos estruturais do Enterprise Authorization Runtime — S3-02.
  *
- * Foundation estrutural vendor-agnostic para autorização futura exclusivamente
- * via AuthorizationStrategy + AuthorizationPolicy + OperatorCapabilityProfile.
+ * Foundation estrutural vendor-agnostic para identidade futura de documentos
+ * médicos, guias TISS e dados extraídos.
  *
- * Sem autorização funcional. Sem elegibilidade. Sem integração com operadoras.
- * Sem SOAP funcional. Sem XML funcional. Sem REST. Sem autenticação.
- * Sem banco. Sem persistência. Sem APIs. Sem HTTP. Sem TLS. Sem certificados.
+ * S3-02: infraestrutura canônica estrutural apenas. Sem identidade real.
+ * Sem criptografia. Sem assinatura digital. Sem cadeia de custódia.
+ * Sem Key Vault. Sem HSM. Sem SIEM. Sem OpenTelemetry. Sem LGPD.
+ * Sem autenticação. Sem autorização. Sem persistência. Sem banco. Sem APIs.
  *
- * AUTHORIZATION STRATEGY PATTERN (Regra Permanente nº 9).
- * POLICY-DRIVEN AUTHORIZATION — decisões futuras via OperatorCapabilityProfile
- * + AuthorizationPolicy (sem if/switch por operadora/versão/guia).
+ * Todos os contratos abaixo são exclusivamente estruturais.
  */
 
-import type { OperatorCapabilityProfile } from "../../operator-runtime/ports/canonical";
-import type { XMLDocument } from "../../xml-tiss-runtime/ports/canonical";
-import type { XMLValidationResult } from "../../xml-validation-runtime/ports/canonical";
-import type { CanonicalGuide } from "../../tiss-mapping-runtime/ports/canonical";
-import type { QualityAssessment } from "../../quality-runtime/ports/canonical";
-import type { ValidationResult } from "../../validation-runtime/ports/canonical";
-import type { AuditResult } from "../../audit-runtime/ports/canonical";
-
-export type {
-  OperatorCapabilityProfile,
-  XMLDocument,
-  XMLValidationResult,
-  CanonicalGuide,
-  QualityAssessment,
-  ValidationResult,
-  AuditResult,
-};
-
-/** Status estrutural Authorization (C-05). */
+/** Status estrutural de identidade (S3-02). */
 export type AuthorizationStatus =
   | "pending"
-  | "running"
-  | "completed"
+  | "job-open"
+  | "job-closed"
+  | "submitted"
+  | "registered"
+  | "secured"
+  | "processed"
   | "failed"
-  | "cancelled"
-  | "prepared"
   | "disabled"
   | "unknown"
   | (string & {});
 
-/**
- * Envelope operacional estrutural (Regra Permanente nº 4 — Observability by Design).
- * Somente contrato — sem telemetria / tracing / logging funcional.
- */
-export type AuthorizationRuntimeObservabilityEnvelope = {
-  operationId?: string;
-  correlationId?: string | null;
-  startedAt?: string;
-  finishedAt?: string;
-  executionStatus?: AuthorizationStatus | (string & {});
-  executionDuration?: number;
-  processedItems?: number;
-  warnings?: readonly string[];
-  errors?: readonly string[];
-  traceMetadata?: Readonly<Record<string, unknown>>;
+/** Tipos estruturais de identidade futura — somente contratos. */
+export type AuthorizationTypeKind =
+  | "technical"
+  | "business"
+  | "tiss"
+  | "operator"
+  | "quality"
+  | "clinical"
+  | "financial"
+  | "compliance"
+  | (string & {});
+
+/** Contrato base estrutural de tipo de identidade (sem execução). */
+export type AuthorizationTypeContract = {
+  kind: "canonical-authorization-type-contract";
+  authorizationType: AuthorizationTypeKind;
+  status: AuthorizationStatus;
+  label?: string;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
 };
 
+/** TechnicalAuthorization — contrato estrutural apenas. */
+export type TechnicalAuthorization = AuthorizationTypeContract & {
+  authorizationType: "technical";
+  structuralRole: "technical-authorization";
+};
+
+/** BusinessAuthorization — contrato estrutural apenas. */
+export type BusinessAuthorization = AuthorizationTypeContract & {
+  authorizationType: "business";
+  structuralRole: "business-authorization";
+};
+
+/** TISSAuthorization — contrato estrutural apenas. */
+export type TISSAuthorization = AuthorizationTypeContract & {
+  authorizationType: "tiss";
+  structuralRole: "tiss-authorization";
+};
+
+/** OperatorAuthorization — contrato estrutural apenas. */
+export type OperatorAuthorization = AuthorizationTypeContract & {
+  authorizationType: "operator";
+  structuralRole: "operator-authorization";
+};
+
+/** QualityAuthorization — contrato estrutural apenas. */
+export type QualityAuthorization = AuthorizationTypeContract & {
+  authorizationType: "quality";
+  structuralRole: "quality-authorization";
+};
+
+/** ClinicalAuthorization — contrato estrutural apenas. */
+export type ClinicalAuthorization = AuthorizationTypeContract & {
+  authorizationType: "clinical";
+  structuralRole: "clinical-authorization";
+};
+
+/** FinancialAuthorization — contrato estrutural apenas. */
+export type FinancialAuthorization = AuthorizationTypeContract & {
+  authorizationType: "financial";
+  structuralRole: "financial-authorization";
+};
+
+/** ComplianceAuthorization — contrato estrutural apenas. */
+export type ComplianceAuthorization = AuthorizationTypeContract & {
+  authorizationType: "compliance";
+  structuralRole: "compliance-authorization";
+};
+
+/** União estrutural dos contratos de tipos de identidade. */
+export type FutureAuthorizationTypeContract =
+  | TechnicalAuthorization
+  | BusinessAuthorization
+  | TISSAuthorization
+  | OperatorAuthorization
+  | QualityAuthorization
+  | ClinicalAuthorization
+  | FinancialAuthorization
+  | ComplianceAuthorization;
+
 /**
- * Estratégias previstas (somente contrato — Regra Permanente nº 9).
- * O Runtime futuro seleciona estratégias; nunca implementa autorização inline.
+ * AuthorizationContext canônico (S3-02).
+ *
+ * Capaz de receber futuramente metadados estruturais — sem qualquer processamento.
  */
-export type AuthorizationStrategyKind =
-  | "synchronous"
-  | "asynchronous"
-  | "batch"
-  | "eligibility"
-  | "attachment"
-  | "pre-authorization"
-  | "hybrid"
+export type AuthorizationContext = {
+  kind: "canonical-authorization-context";
+  jobId?: string;
+  requestId?: string;
+  findingId?: string;
+  authorizationTypes?: readonly FutureAuthorizationTypeContract[];
+  structuralNotes?: string;
+};
+
+/** Metadata canônica estrutural (S3-02). */
+export type AuthorizationMetadata = {
+  kind: "canonical-authorization-metadata";
+  jobId?: string;
+  requestId?: string;
+  findingId?: string;
+  correlationId?: string | null;
+  channel?: string;
+  tags?: readonly string[];
+  customAttributes?: Readonly<Record<string, string | number | boolean | null>>;
+  authorizationContext?: AuthorizationContext;
+};
+
+/** Issue canônica estrutural — nunca produzida por motor real. */
+export type AuthorizationIssue = {
+  kind: "canonical-authorization-issue";
+  issueId: string;
+  code?: string;
+  severity?: "info" | "warning" | "error" | "critical" | (string & {});
+  message?: string;
+  fieldPath?: string;
+  authorizationType?: AuthorizationTypeKind;
+  status: AuthorizationStatus;
+  automaticAuthorizationImplemented: false;
+  automaticCorrectionImplemented: false;
+};
+
+/** Finding canônica estrutural — nunca produzida por motor real. */
+export type AuthorizationFinding = {
+  kind: "canonical-authorization-finding";
+  findingId: string;
+  jobId?: string;
+  requestId?: string;
+  status: AuthorizationStatus;
+  authorizationType?: AuthorizationTypeKind;
+  issues?: readonly AuthorizationIssue[];
+  metadata?: AuthorizationMetadata;
+  authorizationContext?: AuthorizationContext;
+  createdAt: string;
+  updatedAt: string;
+  authorizationEngineImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+};
+
+/** Recommendation canônica estrutural — nunca gerada automaticamente. */
+export type AuthorizationRecommendation = {
+  kind: "canonical-authorization-recommendation";
+  recommendationId: string;
+  findingId?: string;
+  code?: string;
+  message?: string;
+  status: AuthorizationStatus;
+  authorizationSuggestionsImplemented: false;
+  automaticCorrectionImplemented: false;
+};
+
+/** Justification canônica estrutural — nunca gerada automaticamente. */
+export type AuthorizationJustification = {
+  kind: "canonical-authorization-justification";
+  justificationId: string;
+  findingId?: string;
+  code?: string;
+  message?: string;
+  status: AuthorizationStatus;
+  authorizationJustificationImplemented: false;
+};
+
+/** Score canônico estrutural — nunca calculado. */
+export type AuthorizationScore = {
+  kind: "canonical-authorization-score";
+  scoreId: string;
+  value?: number | null;
+  band?: "unknown" | "low" | "medium" | "high" | (string & {});
+  status: AuthorizationStatus;
+  authorizationScoreImplemented: false;
+};
+
+/** Summary canônico estrutural. */
+export type AuthorizationSummary = {
+  kind: "canonical-authorization-summary";
+  summaryId: string;
+  totalFindings?: number;
+  totalIssues?: number;
+  totalRecommendations?: number;
+  status: AuthorizationStatus;
+  message?: string;
+  authorizationEngineImplemented: false;
+  automaticAuthorizationImplemented: false;
+};
+
+/** Request canônico estrutural de identidade (AuthorizationRequest). Nunca dispara identidade real. */
+export type AuthorizationRequest = {
+  kind: "canonical-authorization-request";
+  requestId: string;
+  jobId?: string;
+  findingId?: string;
+  status: AuthorizationStatus;
+  metadata?: AuthorizationMetadata;
+  authorizationContext?: AuthorizationContext;
+  createdAt: string;
+  updatedAt: string;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
+};
+
+/** Job canônico estrutural de identidade. */
+export type AuthorizationJob = {
+  kind: "canonical-authorization-job";
+  jobId: string;
+  status: AuthorizationStatus;
+  identity?: {
+    kind: "canonical-authorization-identity";
+    jobId?: string;
+    correlationId?: string | null;
+  };
+  metadata?: AuthorizationMetadata;
+  authorizationContext?: AuthorizationContext;
+  createdAt: string;
+  updatedAt: string;
+  closedAt?: string;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
+};
+
+/** Operação canônica do Authorization Runtime (S3-02). */
+export type CanonicalAuthorizationOperation =
+  | "openJob"
+  | "closeJob"
+  | "submitRequest"
+  | "registerFinding"
+  | "getResult"
+  | "stats"
+  | "health"
+  | "capabilities"
+  | "providerInfo"
   | (string & {});
 
 /**
- * AuthorizationStrategy canônica (C-05 / Regra Permanente nº 9).
- * Somente contrato — sem implementação funcional.
+ * Resultado canônico de execução do Authorization Runtime (S3-02).
+ * Contém apenas referência/estrutura canônica — nunca identidade real.
  */
-export type AuthorizationStrategy = {
-  kind: "canonical-authorization-strategy";
-  strategyId?: string;
-  strategyKind?: AuthorizationStrategyKind;
-  displayName?: string;
-  notes?: string;
-  strategyImplemented: false;
-  authorizationImplemented: false;
-};
-
-/**
- * AuthorizationPolicy canônica (C-05 / POLICY-DRIVEN AUTHORIZATION).
- * Consulta futura: OperatorCapabilityProfile + AuthorizationPolicy.
- * Sem if/switch por operadora/versão/guia. Sem implementação funcional.
- */
-export type AuthorizationPolicy = {
-  kind: "canonical-authorization-policy";
-  policyId?: string;
-  name?: string;
-  preferredStrategyKind?: AuthorizationStrategyKind;
-  capabilityProfile?: OperatorCapabilityProfile;
-  strategy?: AuthorizationStrategy;
-  notes?: string;
-  authorizationPolicyImplemented: false;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-};
-
-/** Metadados estruturais (somente contrato). */
-export type AuthorizationMetadata = {
-  kind: "canonical-authorization-metadata";
-  notes?: string;
-  authorizationMetadataImplemented: false;
-};
-
-/**
- * AuthorizationContext canônico (C-05).
- * Aceita peers estruturais por contrato — sem qualquer processamento.
- * Prevê envelope de observabilidade (RULE_04) — sem implementação.
- */
-export type AuthorizationContext = AuthorizationRuntimeObservabilityEnvelope & {
-  kind: "canonical-authorization-context";
-  contextId?: string;
-  requestId?: string;
-  responseId?: string;
-  strategyId?: string;
-  policyId?: string;
-  strategy?: AuthorizationStrategy;
-  policy?: AuthorizationPolicy;
-  capabilityProfile?: OperatorCapabilityProfile;
-  xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
-  canonicalGuide?: CanonicalGuide;
-  qualityAssessment?: QualityAssessment;
-  validationResult?: ValidationResult;
-  auditResult?: AuditResult;
-  metadata?: AuthorizationMetadata;
-  structuralNotes?: string;
-};
-
-/** Pedido canônico Authorization (C-05). */
-export type AuthorizationRequest = {
-  kind: "canonical-authorization-request";
-  requestId?: string;
-  name?: string;
-  operation?: string;
-  authorizationContext?: AuthorizationContext;
-  strategy?: AuthorizationStrategy;
-  policy?: AuthorizationPolicy;
-  capabilityProfile?: OperatorCapabilityProfile;
-  xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
-  canonicalGuide?: CanonicalGuide;
-  qualityAssessment?: QualityAssessment;
-  validationResult?: ValidationResult;
-  auditResult?: AuditResult;
-  structuralNotes?: string;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-  soapFunctionalImplemented: false;
-  xmlFunctionalImplemented: false;
-  restImplemented: false;
-  operatorCommunicationImplemented: false;
-};
-
-/** Resposta canônica Authorization (C-05). */
-export type AuthorizationResponse = {
-  kind: "canonical-authorization-response";
+export type AuthorizationResult = {
+  kind: "canonical-authorization-result";
   ok: boolean;
-  responseId: string;
-  request: AuthorizationRequest;
-  strategy?: AuthorizationStrategy;
-  policy?: AuthorizationPolicy;
+  resultId: string;
+  operation: CanonicalAuthorizationOperation;
+  job?: AuthorizationJob;
+  request?: AuthorizationRequest;
+  finding?: AuthorizationFinding;
+  issues?: readonly AuthorizationIssue[];
+  recommendations?: readonly AuthorizationRecommendation[];
+  justification?: AuthorizationJustification;
+  score?: AuthorizationScore;
+  summary?: AuthorizationSummary;
+  metadata?: AuthorizationMetadata;
   authorizationContext?: AuthorizationContext;
-  capabilityProfile?: OperatorCapabilityProfile;
-  xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
-  canonicalGuide?: CanonicalGuide;
-  qualityAssessment?: QualityAssessment;
-  validationResult?: ValidationResult;
-  auditResult?: AuditResult;
-  /** Sempre false — nenhuma autorização real executada. */
-  authorizationExecuted: false;
-  /** Sempre false — nenhuma elegibilidade real executada. */
-  eligibilityExecuted: false;
-  /** Sempre false — nenhuma comunicação com operadora executada. */
-  communicationExecuted: false;
-  /** Sempre true — runtime estrutural pronto (C-05). */
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
+  /** Sempre true — runtime estrutural pronto (sem identidade real). */
   runtimeReady: true;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-  soapFunctionalImplemented: false;
-  xmlFunctionalImplemented: false;
-  restImplemented: false;
-  operatorCommunicationImplemented: false;
   status: AuthorizationStatus;
-  message?: string;
+  messageText?: string;
   code?: string;
   createdAt: string;
   updatedAt: string;
@@ -215,28 +326,22 @@ export type AuthorizationResponse = {
 /** Estatísticas estruturais do Authorization Runtime (in-process). */
 export type AuthorizationStatistics = {
   kind: "canonical-authorization-statistics";
-  totalStrategies: number;
-  totalPolicies: number;
-  totalResponses: number;
-  completedResponses: number;
-  failedResponses: number;
-  cancelledResponses: number;
-  preparedResponses: number;
+  totalJobs: number;
+  openJobs: number;
+  closedJobs: number;
   totalRequests: number;
-  totalContexts: number;
-  authorizationExecutedCount: 0;
-  eligibilityExecutedCount: 0;
-  communicationExecutedCount: 0;
-  authorizationImplementedCount: 0;
-  eligibilityImplementedCount: 0;
-  attachmentAuthorizationImplementedCount: 0;
-  batchAuthorizationImplementedCount: 0;
-  statusPollingImplementedCount: 0;
-  preAuthorizationImplementedCount: 0;
-  soapFunctionalImplementedCount: 0;
-  xmlFunctionalImplementedCount: 0;
-  restImplementedCount: 0;
-  operatorCommunicationImplementedCount: 0;
+  totalFindings: number;
+  totalResults: number;
+  authorizationEngineImplementedCount: 0;
+  businessRulesImplementedCount: 0;
+  tissAuthorizationImplementedCount: 0;
+  operatorAuthorizationImplementedCount: 0;
+  automaticAuthorizationImplementedCount: 0;
+  authorizationSuggestionsImplementedCount: 0;
+  authorizationJustificationImplementedCount: 0;
+  authorizationScoreImplementedCount: 0;
+  complianceImplementedCount: 0;
+  automaticCorrectionImplementedCount: 0;
 };
 
 /** Saúde canônica estrutural do provedor Authorization Runtime. */
@@ -247,30 +352,21 @@ export type AuthorizationHealth = {
   latencyMs?: number;
   message?: string;
   status?: string;
-  storedStrategyCount?: number;
-  storedPolicyCount?: number;
-  storedResponseCount?: number;
+  storedJobCount?: number;
   storedRequestCount?: number;
-  storedContextCount?: number;
-  operatorRuntimeOk?: boolean;
-  soapRuntimeOk?: boolean;
-  xmlRuntimeOk?: boolean;
-  xmlValidationRuntimeOk?: boolean;
-  qualityRuntimeOk?: boolean;
-  autoFillRuntimeOk?: boolean;
-  auditRuntimeOk?: boolean;
-  validationRuntimeOk?: boolean;
+  storedFindingCount?: number;
+  storedResultCount?: number;
   runtimeReady: true;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-  soapFunctionalImplemented: false;
-  xmlFunctionalImplemented: false;
-  restImplemented: false;
-  operatorCommunicationImplemented: false;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
 };
 
 /**
@@ -279,66 +375,64 @@ export type AuthorizationHealth = {
  */
 export type AuthorizationCapabilities = {
   kind: "canonical-authorization-capabilities";
-  supportsPrepareAuthorization: boolean;
-  supportsGetAuthorization: boolean;
-  supportsListAuthorizations: boolean;
+  supportsOpenJob: boolean;
+  supportsCloseJob: boolean;
+  supportsSubmitRequest: boolean;
+  supportsRegisterFinding: boolean;
+  supportsGetResult: boolean;
   supportsStats: boolean;
   supportsHealth: boolean;
   supportsCanonicalAuthorization: boolean;
-  supportsStrategySelection: boolean;
-  supportsPolicyDrivenAuthorization: boolean;
   runtimeReady: true;
-  authorizationImplemented: false;
-  eligibilityImplemented: false;
-  attachmentAuthorizationImplemented: false;
-  batchAuthorizationImplemented: false;
-  statusPollingImplemented: false;
-  preAuthorizationImplemented: false;
-  soapFunctionalImplemented: false;
-  xmlFunctionalImplemented: false;
-  restImplemented: false;
-  operatorCommunicationImplemented: false;
-  knowsOperatorOrCooperative: false;
-  knowsContract: false;
-  knowsTenant: false;
+  authorizationEngineImplemented: false;
+  businessRulesImplemented: false;
+  tissAuthorizationImplemented: false;
+  operatorAuthorizationImplemented: false;
+  automaticAuthorizationImplemented: false;
+  authorizationSuggestionsImplemented: false;
+  authorizationJustificationImplemented: false;
+  authorizationScoreImplemented: false;
+  complianceImplemented: false;
+  automaticCorrectionImplemented: false;
 };
 
-/** Helper estrutural — cria estratégia vazia/desabilitada. */
-export function createEmptyAuthorizationStrategy(
-  overrides: Partial<AuthorizationStrategy> = {},
-): AuthorizationStrategy {
-  return {
-    kind: "canonical-authorization-strategy",
-    strategyId: overrides.strategyId,
-    strategyKind: overrides.strategyKind ?? "synchronous",
-    displayName: overrides.displayName,
-    notes:
-      overrides.notes ?? "Structural authorization strategy contract (no functional authorization)",
-    strategyImplemented: false,
-    authorizationImplemented: false,
-  };
-}
+/** AuthorizationStrategy — contrato estrutural de estratégia de autorização (S3-02). */
+export type AuthorizationStrategy = {
+  kind: "canonical-authorization-strategy";
+  strategyId: string;
+  label?: string;
+  status?: AuthorizationStatus;
+  authorizationEngineImplemented: false;
+};
 
-/** Helper estrutural — cria política vazia/desabilitada. */
-export function createEmptyAuthorizationPolicy(
-  overrides: Partial<AuthorizationPolicy> = {},
-): AuthorizationPolicy {
+/** AuthorizationPolicy — contrato estrutural de política de autorização (S3-02). */
+export type AuthorizationPolicy = {
+  kind: "canonical-authorization-policy";
+  policyId: string;
+  label?: string;
+  status?: AuthorizationStatus;
+  authorizationEngineImplemented: false;
+};
+
+/** Helper estrutural — cria contrato de tipo de identidade desabilitado. */
+export function createDisabledAuthorizationTypeContract(
+  authorizationType: AuthorizationTypeKind,
+  label: string,
+): AuthorizationTypeContract {
   return {
-    kind: "canonical-authorization-policy",
-    policyId: overrides.policyId,
-    name: overrides.name,
-    preferredStrategyKind: overrides.preferredStrategyKind ?? "synchronous",
-    capabilityProfile: overrides.capabilityProfile,
-    strategy: overrides.strategy ?? createEmptyAuthorizationStrategy(),
-    notes:
-      overrides.notes ??
-      "Structural authorization policy contract (policy-driven — no functional authorization)",
-    authorizationPolicyImplemented: false,
-    authorizationImplemented: false,
-    eligibilityImplemented: false,
-    attachmentAuthorizationImplemented: false,
-    batchAuthorizationImplemented: false,
-    statusPollingImplemented: false,
-    preAuthorizationImplemented: false,
+    kind: "canonical-authorization-type-contract",
+    authorizationType,
+    status: "disabled",
+    label,
+    authorizationEngineImplemented: false,
+    businessRulesImplemented: false,
+    tissAuthorizationImplemented: false,
+    operatorAuthorizationImplemented: false,
+    automaticAuthorizationImplemented: false,
+    authorizationSuggestionsImplemented: false,
+    authorizationJustificationImplemented: false,
+    authorizationScoreImplemented: false,
+    complianceImplemented: false,
+    automaticCorrectionImplemented: false,
   };
 }

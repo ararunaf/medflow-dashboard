@@ -1,11 +1,16 @@
 /**
- * AuthorizationRuntimeFactory — instancia o adapter correto (C-05).
+ * AuthorizationRuntimeFactory — instancia o adapter correto (S3-02).
  *
- * Sem lógica de negócio. Sem autorização funcional. Sem banco. Sem HTTP.
+ * Sem lógica de negócio. Sem identidade real. Sem banco. Sem HTTP.
  * Posição na arquitetura:
  *   Application → Enterprise Runtime → AuthorizationRuntimePort → Adapter ← Factory ← Registry
  */
-import { DefaultAuthorizationRuntimeAdapter, MockAuthorizationRuntimeAdapter } from "../adapters";
+import {
+  DefaultAuthorizationRuntimeAdapter,
+  MockAuthorizationRuntimeAdapter,
+  RealTissAuthorizationRuntimeAdapter,
+  TestAuthorizationRuntimeAdapter,
+} from "../adapters";
 import type { AuthorizationRuntimePort } from "../ports/authorization-runtime-port";
 import type {
   AuthorizationRuntimeEnterpriseDeps,
@@ -20,10 +25,15 @@ import type { AuthorizationRuntimeStore } from "../store";
 
 export type AuthorizationRuntimeFactoryOptions = {
   registry?: AuthorizationRuntimeRegistry;
+  /** Store compartilhado opcional. */
   store?: AuthorizationRuntimeStore;
+  /** Ports Enterprise default para os providers default/enterprise. */
   enterpriseDeps?: AuthorizationRuntimeEnterpriseDeps;
 };
 
+/**
+ * Factory responsável por materializar o AuthorizationRuntimePort pedido.
+ */
 export class AuthorizationRuntimeFactory {
   private readonly registry: AuthorizationRuntimeRegistry;
   private readonly store?: AuthorizationRuntimeStore;
@@ -39,6 +49,10 @@ export class AuthorizationRuntimeFactory {
     return this.registry;
   }
 
+  /**
+   * Instancia o provider correto pelo id.
+   * Providers desconhecidos falham explicitamente (sem fallback silencioso).
+   */
   create(options: AuthorizationRuntimeOptions = {}): AuthorizationRuntimePort {
     const provider = options.provider ?? "enterprise";
 
@@ -63,8 +77,7 @@ export class AuthorizationRuntimeFactory {
           enterpriseDeps,
         });
       case "test":
-        return new MockAuthorizationRuntimeAdapter({
-          provider: "test",
+        return new TestAuthorizationRuntimeAdapter({
           store: this.store,
           enterpriseDeps,
         });
@@ -80,6 +93,12 @@ export class AuthorizationRuntimeFactory {
           store: this.store,
           enterpriseDeps,
         });
+      case "real-tiss":
+        return new RealTissAuthorizationRuntimeAdapter({
+          provider: "real-tiss",
+          store: this.store,
+          enterpriseDeps,
+        });
       default: {
         const _exhaustive: never = provider;
         throw new Error(`Authorization Runtime provider desconhecido: ${String(_exhaustive)}`);
@@ -88,6 +107,7 @@ export class AuthorizationRuntimeFactory {
   }
 }
 
+/** Factory default da fundação. */
 export function createAuthorizationRuntimeFactory(
   options: AuthorizationRuntimeFactoryOptions = {},
 ): AuthorizationRuntimeFactory {

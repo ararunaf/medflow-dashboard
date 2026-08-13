@@ -1,5 +1,5 @@
 /**
- * AuthorizationRuntimeProvider — factory pública do AuthorizationRuntimePort (C-05).
+ * AuthorizationRuntimeProvider — factory pública do AuthorizationRuntimePort (S3-02).
  *
  * Application / Enterprise Runtime resolvem o Port via este factory;
  * nunca instanciam adapters de vendor diretamente no Domain.
@@ -23,7 +23,7 @@ function getSharedFactory(): AuthorizationRuntimeFactory {
 /**
  * Cria o AuthorizationRuntimePort para o provedor solicitado.
  *
- * Default da factory: `enterprise` (C-05 oficial).
+ * Default da factory: `enterprise` (S3-02 oficial).
  */
 export function createAuthorizationRuntimePort(
   options: AuthorizationRuntimeOptions = {},
@@ -46,7 +46,7 @@ export function getAuthorizationRuntimePort(
   return createAuthorizationRuntimePort(options);
 }
 
-/** Alias explícito do Provider (C-05). */
+/** Alias explícito do Provider (S3-02). */
 export const AuthorizationRuntimeProvider = {
   create: createAuthorizationRuntimePort,
   get: getAuthorizationRuntimePort,

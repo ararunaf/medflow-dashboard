@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S3-01                 |
+| Atualizado| Sprint S3-02                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -471,3 +471,19 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 - Capabilities futuras do Bloco S ainda em Discovery/Activation: motor de políticas, ABAC, autorização por recurso, feature flags de autorização, delegação, versionamento de políticas, audit trail de autorização, integração com `AuthorizationRuntimePort`.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 
+
+## 31. S3-02 — Authorization & Access Control Activation
+
+### Situação atual
+
+|- Infraestrutura canônica do `AuthorizationRuntimePort` recriada em `src/lib/enterprise/authorization-runtime/`.
+|- `AuthorizationRuntimeFactory`, `AuthorizationRuntimeRegistry`, `DefaultAuthorizationRuntimeAdapter`, `RealTissAuthorizationRuntimeAdapter`, `MockAuthorizationRuntimeAdapter` e `TestAuthorizationRuntimeAdapter` ativados.
+|- Provider `real-tiss` registrado, mas sem Production Certification.
+|- Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Foundation` ou `Composition Root` foi modificado.
+|- Nenhuma autorização, controle de acesso, motor de políticas, ABAC, OAuth, JWT, SAML, MFA, papéis por tenant, delegação, overrides de capability, feature flags ou audit trail de autorização real foi implementado.
+|- `RBAC`, `can()`, `assertCan()`, `requireOperationalAuth()`, `getAuthContext()`, `evaluateRouteGuard()`, `Supabase Auth`, `RLS`, `SecurityRuntimePort`, `IdentityRuntimePort`, `AuditRuntimePort` e `CompletedRuntimePort` permanecem inalterados e **não** foram integrados ao `AuthorizationRuntimePort`.
+
+### Gaps remanescentes
+
+|- Capabilities futuras do Bloco S ainda em Discovery/Activation: motor de políticas, ABAC, autorização por recurso, feature flags de autorização, delegação, versionamento de políticas, audit trail de autorização, integração com `AuthorizationRuntimePort`.
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.

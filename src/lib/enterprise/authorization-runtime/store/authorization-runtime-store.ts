@@ -1,52 +1,46 @@
 /**
- * AuthorizationRuntimeStore — contrato interno do store (C-05).
+ * AuthorizationRuntimeStore — contrato interno do store (S3-02).
  *
  * Camada entre Adapter e estado in-process.
- * NÃO é banco; NÃO cria migrations; NÃO autoriza; NÃO comunica com operadoras.
+ * NÃO é banco; NÃO cria migrations; NÃO executa identidade real.
  * Acesso exclusivo via Adapter — nunca diretamente pelo produto.
  */
 import type {
-  AuthorizationContext,
-  AuthorizationPolicy,
+  AuthorizationFinding,
+  AuthorizationJob,
   AuthorizationRequest,
-  AuthorizationResponse,
+  AuthorizationResult,
   AuthorizationStatistics,
-  AuthorizationStrategy,
 } from "../ports/canonical";
 
-export type StoredAuthorizationResponse = AuthorizationResponse;
-export type StoredAuthorizationRequest = AuthorizationRequest;
-export type StoredAuthorizationContext = AuthorizationContext;
-export type StoredAuthorizationStrategy = AuthorizationStrategy;
-export type StoredAuthorizationPolicy = AuthorizationPolicy;
+export type StoredAuthorizationRuntimeJob = AuthorizationJob;
+export type StoredAuthorizationRuntimeRequest = AuthorizationRequest;
+export type StoredAuthorizationRuntimeFinding = AuthorizationFinding;
+export type StoredAuthorizationRuntimeResult = AuthorizationResult;
 
 export interface AuthorizationRuntimeStore {
   readonly storeId: string;
 
-  getResponse(responseId: string): StoredAuthorizationResponse | undefined;
-  setResponse(response: StoredAuthorizationResponse): void;
-  listResponses(): readonly StoredAuthorizationResponse[];
-  responseCount(): number;
+  getJob(jobId: string): StoredAuthorizationRuntimeJob | undefined;
+  setJob(job: StoredAuthorizationRuntimeJob): void;
+  removeJob(jobId: string): void;
+  listJobs(): readonly StoredAuthorizationRuntimeJob[];
+  jobCount(): number;
 
-  getStrategy(strategyId: string): StoredAuthorizationStrategy | undefined;
-  setStrategy(strategy: StoredAuthorizationStrategy): void;
-  listStrategies(): readonly StoredAuthorizationStrategy[];
-  strategyCount(): number;
-
-  getPolicy(policyId: string): StoredAuthorizationPolicy | undefined;
-  setPolicy(policy: StoredAuthorizationPolicy): void;
-  listPolicies(): readonly StoredAuthorizationPolicy[];
-  policyCount(): number;
-
-  getRequest(requestId: string): StoredAuthorizationRequest | undefined;
-  setRequest(request: StoredAuthorizationRequest): void;
-  listRequests(): readonly StoredAuthorizationRequest[];
+  getRequest(requestId: string): StoredAuthorizationRuntimeRequest | undefined;
+  setRequest(request: StoredAuthorizationRuntimeRequest): void;
+  listRequests(jobId?: string): readonly StoredAuthorizationRuntimeRequest[];
   requestCount(): number;
 
-  getContext(contextId: string): StoredAuthorizationContext | undefined;
-  setContext(context: StoredAuthorizationContext): void;
-  listContexts(): readonly StoredAuthorizationContext[];
-  contextCount(): number;
+  getFinding(findingId: string): StoredAuthorizationRuntimeFinding | undefined;
+  setFinding(finding: StoredAuthorizationRuntimeFinding): void;
+  listFindings(jobId?: string): readonly StoredAuthorizationRuntimeFinding[];
+  findingCount(): number;
+
+  getResult(resultId: string): StoredAuthorizationRuntimeResult | undefined;
+  setResult(result: StoredAuthorizationRuntimeResult): void;
+  listResults(): readonly StoredAuthorizationRuntimeResult[];
+  resultCount(): number;
 
   statistics(): AuthorizationStatistics;
 
