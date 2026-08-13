@@ -24,6 +24,8 @@ import {
   PersistentQueueRuntimeFactory,
   PersistentQueueRuntimeProvider,
   PersistentQueueRuntimeRegistry,
+  REAL_TISS_PERSISTENCE_RUNTIME_ADAPTER_ID,
+  RealTissPersistenceRuntimeAdapter,
   createDefaultPersistentQueueRuntimeRegistry,
   createPersistentQueueRuntimeFactory,
   createPersistentQueueRuntimePort,
@@ -98,18 +100,42 @@ describe("INF-08 PersistentQueueRuntimePort contract", () => {
     assert.equal(port.capabilities().adapterId, DEFAULT_PERSISTENT_QUEUE_RUNTIME_ADAPTER_ID);
   });
 
+  it("RealTissPersistenceRuntimeAdapter atende PersistentQueueRuntimePort", () => {
+    const port: PersistentQueueRuntimePort = new RealTissPersistenceRuntimeAdapter({
+      provider: "real-tiss",
+    });
+    assert.equal(port.providerId, "real-tiss");
+
+    const caps = port.capabilities();
+    assert.equal(caps.provider, "real-tiss");
+    assert.equal(caps.adapterId, REAL_TISS_PERSISTENCE_RUNTIME_ADAPTER_ID);
+    assert.equal(caps.supportsCanonicalPersistentQueue, true);
+    assert.equal(caps.usesQueueRuntimePort, true);
+    assert.equal(caps.usesWorkerRuntimePort, true);
+    assert.equal(caps.usesSchedulerRuntimePort, true);
+    assert.equal(caps.runtimeReady, true);
+    assert.equal(caps.realPersistentBackend, false);
+    assert.equal(caps.implementsRealPersistentBackend, false);
+
+    const info = port.providerInfo();
+    assert.equal(info.providerId, "real-tiss");
+    assert.equal(info.providerType, "PERSISTENT_QUEUE_RUNTIME");
+    assert.equal(info.status, "ready");
+  });
+
   it("provider default resolve enterprise", () => {
     const port = createPersistentQueueRuntimePort();
     assert.equal(port.providerId, "enterprise");
     assert.equal(PersistentQueueRuntimeProvider.create().providerId, "enterprise");
   });
 
-  it("factory resolve mock / test / default / enterprise", () => {
+  it("factory resolve mock / test / default / enterprise / real-tiss", () => {
     const factory = createPersistentQueueRuntimeFactory();
     assert.equal(factory.create({ provider: "mock" }).providerId, "mock");
     assert.equal(factory.create({ provider: "test" }).providerId, "test");
     assert.equal(factory.create({ provider: "default" }).providerId, "default");
     assert.equal(factory.create({ provider: "enterprise" }).providerId, "enterprise");
+    assert.equal(factory.create({ provider: "real-tiss" }).providerId, "real-tiss");
     assert.equal(
       getPersistentQueueRuntimeFactory().getRegistry().list().length,
       BUILTIN_PERSISTENT_QUEUE_RUNTIME_PROVIDER_COUNT,
@@ -498,7 +524,7 @@ describe("INF-08 ausência de backends persistentes / bypass", () => {
     assert.equal(files.filter((f) => f.includes("/registry/")).length, 2);
     assert.equal(
       files.filter((f) => /adapters\/.*persistent-queue-runtime-adapter\.ts$/.test(f)).length,
-      2,
+      3,
     );
   });
 });
