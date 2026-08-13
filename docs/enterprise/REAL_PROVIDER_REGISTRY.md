@@ -13,7 +13,7 @@ Catálogo oficial de providers reais ativados no Enterprise Runtime.
 | Enrichment          | `real-tiss` | **RealTissAutoFillRuntimeAdapter**       | **1.0.0** | **Production Certified** |
 | **XML Generation**  | `real-tiss` | **RealTissXMLTISSRuntimeAdapter**        | **1.0.0** | **Production Certified** |
 | **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **Production Certified** |
-| **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **Production Activated** |
+| **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **Production Certified** |
 
 ## Validation Provider
 

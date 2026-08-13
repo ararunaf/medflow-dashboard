@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A7-02                |
+| Atualizado| Sprint A7-03                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -14,7 +14,7 @@
 | Capability      | Provider ID | Adapter proposto                  | Status      | Bloqueio |
 | --------------- | ----------- | --------------------------------- | ----------- | -------- |
 | XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
-| Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Activation  | Aguarda certificação.       |
+| Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Certificado | Próxima: A8 SOAP.           |
 | Persistence     | —           | `RealTissPersistenceRuntimeAdapter`   | Discovery   | Aguarda Protocol. |
 | Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
 | Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
@@ -26,7 +26,7 @@
 - `OperatorRuntimePort`: negociação de credenciais e endpoints por operadora.
 - `AuthorizationRuntimePort`: controle de autorização e tokens de envio.
 - `BatchRuntimePort`: ativado e certificado na Sprint A6-03; envio real para operadora depende de `SOAPRuntimePort`/`ProtocolRuntimePort`.
-- `ProtocolRuntimePort`: ativado na Sprint A7-02 com `RealTissProtocolRuntimeAdapter`; resolução de protocolo concreto (SOAP/REST/gRPC/mensageria) ainda estrutural.
+- `ProtocolRuntimePort`: ativado e certificado na Sprint A7-03 com `RealTissProtocolRuntimeAdapter`; resolução de protocolo concreto (SOAP/REST/gRPC/mensageria) ainda estrutural.
 - `ReturnRuntimePort`: processamento de retornos (glosas, pagamentos).
 
 ## 3. Limitações atuais
@@ -82,7 +82,38 @@
 - Credenciais e certificados digitais para envio TISS.
 - Ambiente de homologação das operadoras para testes End-to-End.
 
-## 8. Roadmap de certificações
+## 9. Gaps Estruturais
+
+### GAPS ESTRUTURAIS
+
+Capabilities ainda não implementadas no `ProtocolRuntimePort` (C-07 / Regra Permanente nº 12):
+
+- `soapImplemented`: resolução/transporte SOAP real ainda não ativado.
+- `restImplemented`: resolução/transporte REST ainda não ativado.
+- `grpcImplemented`: resolução/transporte gRPC ainda não ativado.
+- `messagingImplemented`: resolução/transporte por mensageria ainda não ativado.
+- `protocolResolutionImplemented`: seleção funcional de protocolo por operadora ainda não ativada.
+- `httpImplemented`: camada HTTP real ainda não ativada.
+- `tlsImplemented`: TLS mútuo ainda não ativado.
+- `authenticationImplemented`: OAuth2/JWT/API Key/certificados ainda não ativados.
+- `XSDRuntimePort`: validação real contra XSDs oficiais da ANS ainda não integrada.
+- `SOAPRuntimePort`: envio real para webservices das operadoras ainda não implementado.
+- `OperatorRuntimePort`: negociação de credenciais e endpoints por operadora ainda não implementada.
+- `AuthorizationRuntimePort`: controle de autorização e tokens de envio ainda não implementado.
+
+## 10. Dependências Externas
+
+### DEPENDÊNCIAS EXTERNAS
+
+- **ANS (Agência Nacional de Saúde Suplementar)**: XSDs oficiais do padrão TISS 3.05.00 e superiores.
+- **Operadoras de saúde**: contratos WSDL/SOAP, endpoints, ambientes de homologação/produção.
+- **Certificados digitais**: certificados para assinatura e TLS mútuo no envio TISS.
+- **OAuth2 / JWT / API Key**: provedores de identidade das operadoras para autorização.
+- **Azure / Infraestrutura**: hospedagem de ambientes de homologação e produção, secrets, key vaults.
+- **SOAP 1.1/1.2**: stack de comunicação e parsing de envelopes SOAP.
+- **Ambiente de homologação das operadoras**: validação end-to-end antes da produção.
+
+## 11. Roadmap de certificações
 
 ```
 OCR          ✓
@@ -91,7 +122,7 @@ Validation   ✓
 Enrichment   ✓
 XML          ✓
 Batch        ✓ (A6-03)
-Protocol     ✓ (A7-02)
+Protocol     ✓ (A7-03)
 Persistence  Discovery
 Audit        Discovery
 Completed    Discovery

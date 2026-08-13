@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A7-02                |
+| Atualizado| Sprint A7-03                |
 
 ---
 
@@ -19,7 +19,7 @@
 | Enrichment          | `real-tiss` | RealTissAutoFillRuntimeAdapter           | 1.0.0  | ✅        | ✅         | ✅         |
 | XML Generation      | `real-tiss` | RealTissXMLTISSRuntimeAdapter            | 1.0.0  | ✅        | ✅         | ✅         |
 | **Batch**           | `real-tiss` | **RealTissBatchRuntimeAdapter**          | **1.0.0** | **✅** | **✅**     | **✅**     |
-| **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **⏳**     |
+| **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **✅**     |
 | Persistence         | —           | —                                        | —      | ✅        | —          | —          |
 | Audit               | —           | —                                        | —      | ✅        | —          | —          |
 | Completed           | —           | —                                        | —      | ✅        | —          | —          |
@@ -36,4 +36,4 @@
 - Nenhuma etapa de Activation/Production pode ocorrer sem a respectiva etapa de Discovery.
 - Todas as certificações atuais reutilizam exclusivamente a arquitetura Enterprise congelada (Baseline v1.0).
 - A certificação `real-tiss` do **Batch** foi concluída na Sprint **A6-03** sem alterar a arquitetura congelada.
-- A ativação `real-tiss` do **Protocol** foi concluída na Sprint **A7-02** sem alterar `EnterpriseRuntime`, Ports, Queue, Worker, Scheduler, Retry, Dead Letter, Observability, Pipeline, Foundations ou Composition Root.
+- A certificação `real-tiss` do **Protocol** foi concluída na Sprint **A7-03** sem alterar `EnterpriseRuntime`, Ports, Queue, Worker, Scheduler, Retry, Dead Letter, Observability, Pipeline, Foundations ou Composition Root.
