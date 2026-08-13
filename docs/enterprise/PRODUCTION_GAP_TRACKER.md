@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S2-03                 |
+| Atualizado| Sprint S3-01                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -441,5 +441,33 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 ### Gaps remanescentes
 
 - Capabilities futuras do Bloco S ainda em Discovery/Activation: login, logout, OAuth, SAML, MFA, JWT, sessão, refresh token, cookies, Supabase Auth, criptografia, cadeia de custódia, HSM, Key Vault, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 30. S3-01 — Authorization & Access Control Discovery
+
+### Situação atual
+
+- Auditoria read-only da arquitetura de Authorization & Access Control concluída em `docs/enterprise/AUTHORIZATION_DISCOVERY.md`.
+- Mapeados: RBAC, `Capability`, `roleCapabilities`, `can()`, `assertCan()`, `isOperationalManager()`, `isTenantAdmin()`, `AuthContext`, `ServiceCtx`, `requireOperationalAuth()`, `validateSessionState()`, `evaluateRouteGuard()`, RLS/Policies, `current_user_role()`, `current_tenant_ids()`, `current_professional_id()`, feature flags e componentes reutilizáveis.
+- `AuthorizationRuntimePort` mantido como scaffolding estrutural em `src/lib/enterprise/authorization-runtime/`; **não** integrado ao RBAC operacional.
+- Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Foundation` ou `Composition Root` foi modificado.
+- Nenhuma capability de autorização foi implementada.
+- Nenhum arquivo em `src/` foi alterado.
+- Enterprise Runtime Baseline v1.1 preservada.
+
+### Gaps identificados
+
+- Motor de políticas (policy engine) ausente.
+- ABAC não implementado.
+- Autorização por recurso não implementada.
+- Papéis específicos por tenant não implementados.
+- Overrides de capability por tenant não implementados.
+- Sistema geral de feature flags vinculado a RBAC ausente.
+- Integração funcional com `AuthorizationRuntimePort` não implementada.
+- Delegação de permissões, versionamento de políticas e audit trail de decisões de autorização ausentes.
+
+### Gaps remanescentes
+
+- Capabilities futuras do Bloco S ainda em Discovery/Activation: motor de políticas, ABAC, autorização por recurso, feature flags de autorização, delegação, versionamento de políticas, audit trail de autorização, integração com `AuthorizationRuntimePort`.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 

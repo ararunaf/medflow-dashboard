@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S2-03               |
+| Atualizado| Sprint S3-01               |
 
 ---
 
@@ -142,3 +142,11 @@ Bloco A oficialmente encerrado.
 - Testes `identity-runtime-engine.test.ts`, `tiss-runtime-identity-activation.test.ts` e `tiss-runtime-identity-production-certification.test.ts` aprovados.
 - Nenhum componente arquitetural existente alterado; `EnterpriseRuntime Baseline v1.1` preservada.
 - Documento `docs/enterprise/IDENTITY_RUNTIME_PRODUCTION_CERTIFICATION.md` criado.
+
+## S3-01 — Authorization & Access Control Discovery
+
+- `Authorization & Access Control` mapeada como capability em Discovery.
+- Nenhum provider real ativado.
+- `AuthorizationRuntimePort` mantido como scaffolding estrutural; não integrado ao RBAC operacional.
+- Nenhum arquivo em `src/` alterado.
+- Documento `docs/enterprise/AUTHORIZATION_DISCOVERY.md` criado.
