@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S1-03                 |
+| Atualizado| Sprint S2-01                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -388,4 +388,27 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 
 - Capabilities futuras do Bloco S ainda em Discovery/Activation: criptografia, assinatura digital, cadeia de custódia, HSM, Key Vault, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 27. S2-01 — Identity & Authentication Discovery
+
+### Situação atual
+
+- Discovery da arquitetura de identidade e autenticação concluído em `docs/enterprise/IDENTITY_AUTH_DISCOVERY.md`.
+- Nenhum arquivo em `src/` alterado.
+- Autenticação baseada em Supabase Auth (email/senha, recuperação de senha) mapeada.
+- Sessão, JWT, claims, `AuthContext`, perfil, tenant, RBAC, RLS, route guards, auditoria de segurança, rate limiting e brute force mapeados.
+- `SecurityRuntimePort`, `AuthorizationRuntimePort` e `TenantPort` mantidos como scaffolding estrutural; **não** integrados à autenticação de usuários.
+- Nenhum Runtime, Port, Factory, Registry, Adapter, Pipeline, Composition Root, Middleware ou Interceptor foi criado ou modificado.
+- Enterprise Runtime Baseline v1.1 preservada.
+
+### Gaps identificados
+
+- MFA (não implementado).
+- OAuth/SSO/SAML (não implementado).
+- Magic Link (não implementado).
+- Rate limiting e brute force persistentes (in-memory).
+- Session Management UI (listar/revogar sessões).
+- `useAuth` hook e `LoginForm` / `AuthGuard` componentes reutilizáveis.
+- Integração dos RuntimePorts `SecurityRuntimePort`, `AuthorizationRuntimePort` e `TenantPort` com a camada de auth.
+- Provider de Identity & Authentication para futura certificação.
 

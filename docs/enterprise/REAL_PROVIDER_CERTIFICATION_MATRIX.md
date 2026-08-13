@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S1-03               |
+| Atualizado| Sprint S2-01               |
 
 ---
 
@@ -24,6 +24,7 @@
 | **Audit**           | `real-tiss` | **RealTissAuditRuntimeAdapter**          | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
 | **Completed**       | `real-tiss` | **RealTissCompletedRuntimeAdapter**      | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
 | **Enterprise Security** | `real-tiss` | **RealTissSecurityRuntimeAdapter**       | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production (S1-03)**|
+| **Identity & Authentication** | `supabase`  | **Supabase Auth**                        | **—**  | **✅**    | **—**      | **—**      | **Discovery (S2-01)** |
 
 ---
 
@@ -119,3 +120,10 @@ Bloco A oficialmente encerrado.
 - `Enterprise Security` mapeada como capability em Discovery.
 - Nenhum provider real ativado.
 - Documento `docs/enterprise/ENTERPRISE_SECURITY_DISCOVERY.md` criado.
+
+## S2-01 — Identity & Authentication Discovery
+
+- `Identity & Authentication` mapeada como capability em Discovery.
+- Provider `supabase` identificado como IdP atual (email/senha, recuperação de senha, sessão JWT).
+- Nenhum provider real ativado para produção.
+- Documento `docs/enterprise/IDENTITY_AUTH_DISCOVERY.md` criado.
