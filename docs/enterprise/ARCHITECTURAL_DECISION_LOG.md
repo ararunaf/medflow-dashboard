@@ -17,7 +17,7 @@
 3. **Factory + Registry Resolution**: `Providers` e `Adapters` só podem ser materializados pelas factories e registries oficiais.
 4. **No Parallel Infrastructure**: `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability` são infraestrutura compartilhada única.
 5. **Frozen Pipeline**: o pipeline congelado `OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence` é o único caminho TISS certificado.
-6. **Audit/Completed Decoupled**: `Audit` e `Completed` são capabilities futuras, desacopladas de `Persistence` e de todo o pipeline congelado.
+6. **Audit/Completed Decoupled**: `Audit` e `Completed` eram inicialmente capabilities futuras; foram subsequentemente certificados em A9/A10 como addendum à `Baseline v1.1` (ver ADL-A10-01), sem modificar o pipeline congelado.
 7. **Security as Cross-Cutting**: `Enterprise Security` atuará como camada transversal, sem modificar a arquitetura congelada.
 8. **Explicit Baseline Changes**: nenhuma decisão deste log pode ser alterada sem aprovação formal de uma nova baseline.
 
@@ -250,6 +250,32 @@ Qualquer nova capability deve ser implementada dentro dos limites da `Enterprise
 - Acoplamento de regras de segurança à orquestração.
 - Dificuldade de evoluir segurança sem impactar funcionalidades.
 - Violação do princípio de responsabilidade única.
+
+---
+
+### ADL-A10-01 — Certificação de `Audit` e `Completed` como addendum à Baseline v1.1
+
+**Decisão:**
+
+`Audit` (Sprint A9-03) e `Completed` (Sprint A10-03) foram certificados como **addendum** à `Enterprise Runtime Baseline v1.1`. A certificação reutiliza os Ports, factories, registries, workers, queues, schedulers, retry, dead letter, observability e o ponto único `getEnterpriseRuntime()` já congelados; nenhum componente arquitetural da v1.1 foi modificado.
+
+**Justificativa:**
+
+- A arquitetura congelada da v1.1 já previa a extensão dos estágios `PERSISTED → AUDITED → COMPLETED` sem alterar o pipeline até `PERSISTED`.
+- Certificar `Audit` e `Completed` como addendum preserva a governança e o congelamento da baseline, evitando a necessidade de uma nova baseline formal para um estado meramente documental/certificatório.
+- Mantém a separação de concerns: `Audit` revisa/audita; `Completed` encerra; nenhuma responsabilidade invade o pipeline funcional já certificado.
+
+**Consequências:**
+
+- O pipeline oficial congelado passa a incluir `PERSISTED → AUDITED → COMPLETED` como addendum certificado.
+- Os RuntimePorts `AuditRuntimePort` e `CompletedRuntimePort`, com providers/adapters `real-tiss`, passam ao status `Production Certified` sem criar Ports, Runtimes, Pipelines ou Composition Roots paralelos.
+- O `ENTERPRISE_BASELINE_V1_1.md` recebe um `A10 Supplement` claramente delimitado; a seção original do congelamento A8-FREEZE-01 permanece inalterada.
+- Uma futura `Baseline v1.2` continua exigindo aprovação formal no ADL.
+
+**Riscos caso seja violado:**
+
+- Confundir o addendum com uma mudança de baseline poderia permitir alterações indiscriminadas na arquitetura congelada.
+- Bypass de `getEnterpriseRuntime()` ou criação de novos Ports/Runtimes quebrouria ADL-001 a ADL-004.
 
 ---
 

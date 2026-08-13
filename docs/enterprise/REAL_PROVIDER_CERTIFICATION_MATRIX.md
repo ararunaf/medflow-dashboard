@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A10-03               |
+| Atualizado| Sprint A10-DOC-02               |
 
 ---
 
@@ -42,18 +42,19 @@
 Pipeline completo certificado via `getEnterpriseRuntime()`:
 
 ```
-OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence
+OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence → Audit → Completed
 ```
 
 - Nenhum provider novo adicionado.
 - Todos os providers listados na matriz acima foram reutilizados.
 - Nenhum Runtime, Port, Gateway, Pipeline ou Composition Root foi criado.
+- `Parser` é implementado pelo `DocumentExtractionRuntimePort`.
 
 ## A8-FREEZE-01 — Enterprise Baseline v1.1 Freeze
 
 - Baseline oficial congelada para `Enterprise Runtime v1.1`.
 - Todos os providers listados na matriz fazem parte do `Baseline Freeze Matrix`.
-- `Audit` e `Completed` permanecem pendentes.
+- `Audit` (A9-03) e `Completed` (A10-03) foram certificados como addendum à `Baseline v1.1`, sem modificar a arquitetura congelada.
 - Documento oficial: `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md`.
 
 ## Notas
@@ -67,9 +68,9 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 ## A9-01 — Audit Real Discovery
 
 - `Audit` mapeado no documento `docs/enterprise/AUDIT_REAL_DISCOVERY.md`.
-- Provider `real-tiss` para Audit ainda não existe; estratégia de ativação documentada.
-- `Audit` permanece em `Discovery`.
-- `Completed` permanece em `Discovery`.
+- Provider `real-tiss` para Audit certificado na A9-03.
+- `Audit` está Production Certified.
+- `Completed` certificado na A10-03.
 - Nenhum provider novo certificado nesta Sprint.
 - `Enterprise Runtime Baseline v1.1` preservada.
 
@@ -77,14 +78,14 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 
 - `Audit` avançou de `Discovery` para `Activation` com provider `real-tiss`.
 - `RealTissAuditRuntimeAdapter` ativado, reutilizando `AuditRuntimePort`, `DefaultAuditRuntimeAdapter`, `AuditRuntimeFactory`, `AuditRuntimeRegistry` e `getEnterpriseRuntime()`.
-- `Completed` permanece em `Discovery`.
+- `Completed` certificado na A10-03.
 - `Enterprise Runtime Baseline v1.1` preservada.
 
 ## A9-03 — Audit Real Production Certification
 
 - `Audit` certificado para `Production` com provider `real-tiss`.
 - `RealTissAuditRuntimeAdapter` certificado sem qualquer alteração em `src/`.
-- `Completed` permanece em `Discovery`.
+- `Completed` certificado na A10-03.
 - `Enterprise Runtime Baseline v1.1` preservada.
 
 ## A10-01 — Completed Real Discovery

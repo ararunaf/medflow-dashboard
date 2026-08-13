@@ -182,3 +182,51 @@ Estes gaps serão tratados nas futuras fases de `Audit` e `Enterprise Security`.
 - As decisões arquitetônicas oficiais da `Enterprise Runtime Baseline v1.1` estão registradas em `docs/enterprise/ARCHITECTURAL_DECISION_LOG.md`.
 - O ADL estabelece ADL-001 a ADL-009, Architectural Principles, Decision Dependency Matrix, Violation Examples e Future Evolution Rules.
 - Nenhuma decisão do ADL pode ser alterada sem aprovação formal de uma nova baseline.
+
+---
+
+## A10 Supplement — Certified Capabilities Addendum to Baseline v1.1
+
+Este suplemento registra que as capabilities `Audit` (Sprint A9-03) e `Completed` (Sprint A10-03) foram certificadas como **addendum** à `Enterprise Runtime Baseline v1.1`, sem alterar as seções congeladas, State Machine, Freeze Rules ou componentes arquiteturais originais.
+
+### Pipeline completo certificado
+
+```
+RECEIVED
+  → OCR_COMPLETED
+  → PARSED
+  → VALIDATED
+  → ENRICHED
+  → XML_GENERATED
+  → BATCH_CREATED
+  → PROTOCOL_SENT
+  → PERSISTED
+  → AUDITED
+  → COMPLETED
+```
+
+### RuntimePorts certificados (Baseline v1.1 + addendum)
+
+| RuntimePort | Capability | Provider | Adapter | Status |
+| --- | --- | --- | --- | --- |
+| `OCRRuntimePort` | OCR | `mock` / `azure` | `DefaultOCRRuntimeAdapter` / Azure | Production Certified |
+| `DocumentExtractionRuntimePort` | Parser | `real-tiss` | `RealTissDocumentExtractionRuntimeAdapter` | Production Certified |
+| `ValidationRuntimePort` | Validation | `real-tiss` | `RealTissValidationRuntimeAdapter` | Production Certified |
+| `AutoFillRuntimePort` | Enrichment | `real-tiss` | `RealTissAutoFillRuntimeAdapter` | Production Certified |
+| `XMLTISSRuntimePort` | XML | `real-tiss` | `RealTissXMLTISSRuntimeAdapter` | Production Certified |
+| `BatchRuntimePort` | Batch | `real-tiss` | `RealTissBatchRuntimeAdapter` | Production Certified |
+| `ProtocolRuntimePort` | Protocol | `real-tiss` | `RealTissProtocolRuntimeAdapter` | Production Certified |
+| `PersistentQueueRuntimePort` | Persistence | `real-tiss` | `RealTissPersistenceRuntimeAdapter` | Production Certified |
+| `AuditRuntimePort` | Audit | `real-tiss` | `RealTissAuditRuntimeAdapter` | Production Certified |
+| `CompletedRuntimePort` | Completed | `real-tiss` | `RealTissCompletedRuntimeAdapter` | Production Certified |
+
+### Confirmação de congelamento
+
+- Nenhum `Runtime`, `Port`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Pipeline`, `Composition Root` ou `Foundation` foi modificado.
+- Nenhum adapter concreto é chamado fora das factories/registries oficiais.
+- `getEnterpriseRuntime()` permanece o único ponto de entrada.
+- Toda a certificação de `Audit` e `Completed` ocorreu reutilizando exclusivamente a arquitetura, ports e infraestrutura congelados da `Baseline v1.1`.
+
+### Nova baseline
+
+Uma futura `Enterprise Runtime Baseline v1.2` requer aprovação formal no `Architectural Decision Log` e novo registro de baseline, conforme regras de evolução congeladas.

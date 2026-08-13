@@ -4,11 +4,11 @@
 | ---------- | --------------------------- |
 | Projeto    | MedicFlow-AI                |
 | Baseline   | Enterprise Runtime v1.1     |
-| Sprint     | A8-E2E-01                   |
-| Objetivo   | Certificar o pipeline funcional completo OCR → Persistence |
-| Audit      | NÃO executado               |
-| Completed  | NÃO executado               |
-| Atualizado | Sprint A8-FREEZE-01         |
+| Sprint     | A10-DOC-02                  |
+| Objetivo   | Certificar o pipeline funcional completo OCR → Completed |
+| Audit      | EXECUTADO / CERTIFICADO     |
+| Completed  | EXECUTADO / CERTIFICADO     |
+| Atualizado | Sprint A10-DOC-02           |
 
 ## 1. Arquivos alterados
 
@@ -33,6 +33,8 @@ RECEIVED
   → BATCH_CREATED
   → PROTOCOL_SENT
   → PERSISTED
+  → AUDITED
+  → COMPLETED
 ```
 
 Resultado do teste `enterprise-end-to-end-certification.test.ts`:
@@ -47,7 +49,11 @@ Resultado do teste `enterprise-end-to-end-certification.test.ts`:
 [A8-E2E-01] BATCH_CREATED result: ok=true ...
 [A8-E2E-01] PROTOCOL_SENT result: ok=true ...
 [A8-E2E-01] PERSISTED result: ok=true ...
+[A10-DOC-02] AUDITED result: ok=true ...
+[A10-DOC-02] COMPLETED result: ok=true ...
 ```
+
+> Testes adicionais validados: `tiss-runtime-05a-audit-real-activation.test.ts`, `tiss-runtime-05b-audit-real-production-certification.test.ts`, `tiss-runtime-06a-completed-real-activation.test.ts`, `tiss-runtime-06b-completed-real-production-certification.test.ts` e `completed-runtime-engine.test.ts`.
 
 Cadeia de `previousJobId` gerada:
 
@@ -61,6 +67,8 @@ job-e2e-received
   → job-e2e-received:ocr-completed:parsed:validated:enriched:xml-generated:batch-created
   → job-e2e-received:ocr-completed:parsed:validated:enriched:xml-generated:batch-created:protocol-sent
   → job-e2e-received:ocr-completed:parsed:validated:enriched:xml-generated:batch-created:protocol-sent:persisted
+  → job-e2e-received:ocr-completed:parsed:validated:enriched:xml-generated:batch-created:protocol-sent:persisted:audited
+  → job-e2e-received:ocr-completed:parsed:validated:enriched:xml-generated:batch-created:protocol-sent:persisted:audited:completed
 ```
 
 Todos os `jobId` são únicos (sem duplicidade), formando uma cadeia linear sem loops.
@@ -77,6 +85,8 @@ Todos os `jobId` são únicos (sem duplicidade), formando uma cadeia linear sem 
 | `XML_GENERATED` | `BATCH_CREATED` | `DefaultWorkerRuntimeAdapter` | `BatchRuntimePort` | `real-tiss` | `RealTissBatchRuntimeAdapter` | `ok=true` |
 | `BATCH_CREATED` | `PROTOCOL_SENT` | `DefaultWorkerRuntimeAdapter` | `ProtocolRuntimePort` | `real-tiss` | `RealTissProtocolRuntimeAdapter` | `ok=true` |
 | `PROTOCOL_SENT` | `PERSISTED` | `DefaultWorkerRuntimeAdapter` | `PersistentQueueRuntimePort` | `real-tiss` | `RealTissPersistenceRuntimeAdapter` | `ok=true` |
+| `PERSISTED` | `AUDITED` | `DefaultWorkerRuntimeAdapter` | `AuditRuntimePort` | `real-tiss` | `RealTissAuditRuntimeAdapter` | `ok=true` |
+| `AUDITED` | `COMPLETED` | `DefaultWorkerRuntimeAdapter` | `CompletedRuntimePort` | `real-tiss` | `RealTissCompletedRuntimeAdapter` | `ok=true` |
 
 ## 4. Pipeline Integrity Matrix
 
@@ -93,6 +103,8 @@ Para cada etapa, todos os componentes listados estão como `REUTILIZADO` ou `NÃ
 | **Batch** | `DefaultEnterpriseRuntime` | `BatchRuntimePort` | `BatchRuntimeFactory` | `BatchRuntimeRegistry` | `real-tiss` | `RealTissBatchRuntimeAdapter` | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO |
 | **Protocol** | `DefaultEnterpriseRuntime` | `ProtocolRuntimePort` | `ProtocolRuntimeFactory` | `ProtocolRuntimeRegistry` | `real-tiss` | `RealTissProtocolRuntimeAdapter` | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO |
 | **Persistence** | `DefaultEnterpriseRuntime` | `PersistentQueueRuntimePort` | `PersistentQueueRuntimeFactory` | `PersistentQueueRuntimeRegistry` | `real-tiss` | `RealTissPersistenceRuntimeAdapter` | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO |
+| **Audit** | `DefaultEnterpriseRuntime` | `AuditRuntimePort` | `AuditRuntimeFactory` | `AuditRuntimeRegistry` | `real-tiss` | `RealTissAuditRuntimeAdapter` | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO |
+| **Completed** | `DefaultEnterpriseRuntime` | `CompletedRuntimePort` | `CompletedRuntimeFactory` | `CompletedRuntimeRegistry` | `real-tiss` | `RealTissCompletedRuntimeAdapter` | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO | REUTILIZADO |
 
 Nenhum item está marcado como **Novo**.
 
@@ -159,8 +171,8 @@ Nenhuma alteração em:
 
 ## 7. Confirmação de regras obrigatórias
 
-- ✅ **Audit NÃO executado**: `processTissProtocolSentPersisted` retornou `auditExecuted=false` e a fila `PERSISTED` contém `customAttributes.auditExecuted=false`.
-- ✅ **Completed NÃO executado**: `processTissProtocolSentPersisted` retornou `completedExecuted=false` e a fila `PERSISTED` contém `customAttributes.completedExecuted=false`.
+- ✅ **Audit EXECUTADO / CERTIFICADO**: `processTissPersistedAudited` retornou `auditExecuted=true` e a fila `AUDITED` contém `customAttributes.auditExecuted=true`.
+- ✅ **Completed EXECUTADO / CERTIFICADO**: `processTissAuditedCompleted` retornou `completedExecuted=true` e a fila `COMPLETED` contém `customAttributes.completedExecuted=true`.
 - ✅ **Nenhum Runtime novo criado**: `DefaultEnterpriseRuntime` reutilizado via `createEnterpriseRuntime`.
 - ✅ **Nenhum Port novo criado**: todos os Ports resolvidos por factories oficiais existentes.
 - ✅ **Nenhum Pipeline novo criado**.
@@ -170,14 +182,16 @@ Nenhuma alteração em:
 ## 8. Resultado dos testes
 
 ```
-▶ A8-E2E-01 — Enterprise End-to-End Certification (OCR → Persistence)
-  ✔ 1. Pipeline completo via getEnterpriseRuntime(), com metadados canônicos preservados (274.3693ms)
-✔ A8-E2E-01 — Enterprise End-to-End Certification (OCR → Persistence) (275.108ms)
+▶ A10-DOC-02 — Enterprise End-to-End Certification (OCR → Completed)
+  ✔ 1. Pipeline completo via getEnterpriseRuntime(), com metadados canônicos preservados
+✔ A10-DOC-02 — Enterprise End-to-End Certification (OCR → Completed)
 ℹ tests 1
 ℹ suites 1
 ℹ pass 1
 ℹ fail 0
 ```
+
+> Testes de certificação executados: `tiss-runtime-05a-audit-real-activation.test.ts`, `tiss-runtime-05b-audit-real-production-certification.test.ts`, `tiss-runtime-06a-completed-real-activation.test.ts`, `tiss-runtime-06b-completed-real-production-certification.test.ts` e `completed-runtime-engine.test.ts`.
 
 ## 9. Build, TypeScript, ESLint e Smoke
 
@@ -194,10 +208,10 @@ Nenhuma alteração em:
 
 ## 11. Conclusão
 
-O pipeline Enterprise completo `OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence` foi certificado via `getEnterpriseRuntime()` na Sprint **A8-E2E-01**. Não houve criação de capabilities novas, Runtimes, Ports, Gateways, Pipelines ou Composition Roots. O **Enterprise Runtime Baseline v1.1 permanece integralmente preservado**.
+O pipeline Enterprise completo `OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence → Audit → Completed` foi certificado via `getEnterpriseRuntime()` na Sprint **A10-DOC-02**. Não houve criação de capabilities novas, Runtimes, Ports, Gateways, Pipelines ou Composition Roots. O **Enterprise Runtime Baseline v1.1 permanece integralmente preservada; `Audit` e `Completed` foram adicionados como addendum certificado sem modificar o congelamento**.
 
 ## 12. A8-FREEZE-01 — Enterprise Baseline v1.1 Freeze
 
 - Este documento faz parte da `Enterprise Runtime Baseline v1.1` congelada.
 - Consulte `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md` para o State Machine, Pipeline, Freeze Matrix, Known Canonical Gaps e Enterprise Freeze Rules.
-- `Audit` e `Completed` permanecem pendentes.
+- `Audit` (A9-03) e `Completed` (A10-03) estão Production Certified como addendum à `Baseline v1.1`.

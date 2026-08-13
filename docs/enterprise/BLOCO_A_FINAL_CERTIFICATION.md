@@ -6,7 +6,7 @@
 | Baseline   | Enterprise Runtime v1.1     |
 | Sprint     | A10-FINAL-01                |
 | Natureza   | Documental / Encerramento   |
-| Atualizado | Sprint A10-FINAL-01         |
+| Atualizado | Sprint A10-DOC-02         |
 
 ---
 
@@ -88,7 +88,7 @@ COMPLETED   (estado terminal)
 | Capability | Provider | Discovery | Activation | Production | Status Final |
 |---|---|---|---|---|---|
 | OCR | `azure` | ✅ | ✅ | ✅ | Production |
-| Document Extraction | `real-tiss` | ✅ | ✅ | ✅ | Production |
+| Parser (Document Extraction Runtime) | `real-tiss` | ✅ | ✅ | ✅ | Production |
 | Validation | `real-tiss` | ✅ | ✅ | ✅ | Production |
 | Enrichment | `real-tiss` | ✅ | ✅ | ✅ | Production |
 | XML Generation | `real-tiss` | ✅ | ✅ | ✅ | Production |
@@ -285,3 +285,17 @@ Bloco A pronto para encerramento. Bloco S ainda **não** implementado nesta Spri
 - ✅ Bloco A oficialmente encerrado.
 - ✅ Enterprise Runtime Baseline v1.1 oficialmente preservada.
 - ✅ Projeto documentalmente preparado para iniciar o Bloco S sem implementá-lo.
+
+## Final Documentation Matrix
+
+| Documento | Última Sprint | Baseline | Pipeline | Status | Sincronizado |
+|---|---|---|---|---|---|
+| `ENTERPRISE_BASELINE_V1_1.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Congelado + A10 Supplement | SIM |
+| `ARCHITECTURAL_DECISION_LOG.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Atualizado (ADL-A10-01) | SIM |
+| `OPER_INF_ROADMAP.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Concluído | SIM |
+| `PRODUCTION_GAP_TRACKER.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Atualizado | SIM |
+| `REAL_PROVIDER_CERTIFICATION_MATRIX.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Atualizado | SIM |
+| `REAL_PROVIDER_REGISTRY.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Atualizado | SIM |
+| `END_TO_END_ENTERPRISE_CERTIFICATION.md` | A10-DOC-02 | v1.1 | `RECEIVED → ... → COMPLETED` | Atualizado | SIM |
+
+Todos os documentos-base do Bloco A estão sincronizados com o estado certificado.

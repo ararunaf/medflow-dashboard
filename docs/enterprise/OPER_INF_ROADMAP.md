@@ -1,5 +1,9 @@
 # OPER-INF — Roadmap Oficial de Ativação Operacional INF
 
+| Campo      | Valor             |
+| ---------- | ----------------- |
+| Atualizado | Sprint A10-DOC-02 |
+
 **Natureza:** ativação operacional dos Runtimes INF já congelados (sem nova arquitetura).  
 **Pipeline oficial:** Enterprise Runtime → Ports existentes  
 **Entrypoint único:** `getEnterpriseRuntime()`
@@ -33,8 +37,10 @@
 | **A9-02** | Audit Real Activation — ativar provider real-tiss do AuditRuntimePort | ✅ Concluída |
 | **A9-03** | Audit Real Production Certification — certificar provider real-tiss | ✅ Concluída |
 | **A10-01** | Completed Real Discovery — auditar arquitetura do Completed Runtime | ✅ Concluída |
-| **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⏸️ Pendente |
-| **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⏸️ Pendente |
+| **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ✅ Concluída |
+| **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ✅ Concluída |
+| **A10-FINAL-01** | Encerramento do Bloco A | ✅ Concluída |
+| **A10-DOC-02** | Sincronização da documentação do Bloco A | ✅ Concluída |
 
 ## Legenda
 
@@ -46,7 +52,7 @@
 | 🔮 | Future Capability — previsto no roadmap, mas não iniciado. |
 | — | Não aplicável / não iniciado. |
 
-**Roadmap vigente:** ✅ OPER-INF-Q · ✅ OPER-INF-W · ✅ OPER-INF-S · ✅ OPER-INF-D · ✅ OPER-INF-O · ✅ ARC-25 · ✅ OPER-INF-R · ✅ TISS-RUNTIME-01D · ✅ TISS-RUNTIME-01A · ✅ TISS-RUNTIME-01B · ✅ TISS-RUNTIME-01C · ✅ TISS-RUNTIME-02A · ✅ TISS-RUNTIME-02B · ✅ TISS-RUNTIME-03A · ✅ TISS-RUNTIME-03B · ✅ TISS-RUNTIME-04A · ✅ TISS-RUNTIME-04B · ✅ A8-FREEZE-01 · ⏸️ TISS-RUNTIME-05A · ⏸️ TISS-RUNTIME-05B
+**Roadmap vigente:** ✅ OPER-INF-Q · ✅ OPER-INF-W · ✅ OPER-INF-S · ✅ OPER-INF-D · ✅ OPER-INF-O · ✅ ARC-25 · ✅ OPER-INF-R · ✅ TISS-RUNTIME-01D · ✅ TISS-RUNTIME-01A · ✅ TISS-RUNTIME-01B · ✅ TISS-RUNTIME-01C · ✅ TISS-RUNTIME-02A · ✅ TISS-RUNTIME-02B · ✅ TISS-RUNTIME-03A · ✅ TISS-RUNTIME-03B · ✅ TISS-RUNTIME-04A · ✅ TISS-RUNTIME-04B · ✅ A8-FREEZE-01 · ✅ TISS-RUNTIME-05A · ✅ TISS-RUNTIME-05B · ✅ A10-FINAL-01 · ✅ A10-DOC-02
 
 **Baseline Oficial v1.1:** [`ENTERPRISE_BASELINE_V1_1.md`](./ENTERPRISE_BASELINE_V1_1.md)
 **Architectural Decision Log:** [`ARCHITECTURAL_DECISION_LOG.md`](./ARCHITECTURAL_DECISION_LOG.md)
@@ -218,16 +224,16 @@ getEnterpriseRuntime()
 - Persistência / Auditoria **não** executados (`persistenceExecuted: false`, `auditExecuted: false`); demais capabilities fora de escopo
 - Sem novo Port / Gateway / Runtime / Pipeline
 
-## Escopo futuro (TISS-RUNTIME-05A)
+## Escopo concluído (TISS-RUNTIME-05A)
 
 - Capability Audit operacional: Job **PERSISTED** → `WorkerRuntimePort` → `AuditRuntimePort` → Job **AUDITED** → reenqueue via `QueueRuntimePort`
-- Ainda **sem provider real**, **sem Production Certification** e **pendente** para implementação futura.
+- Provider `real-tiss` certificado na A9-03.
 - Sem novo Port / Gateway / Runtime / Pipeline
 
-## Escopo futuro (TISS-RUNTIME-05B)
+## Escopo concluído (TISS-RUNTIME-05B)
 
 - Capability Completed operacional: Job **AUDITED** → `WorkerRuntimePort` → encerramento → Job **COMPLETED** (estado terminal) → ACK definitivo via `QueueRuntimePort`
-- Ainda **sem provider real**, **sem Production Certification** e **pendente** para implementação futura.
+- Provider `real-tiss` certificado na A10-03.
 - Sem novo Port / Gateway / Runtime / Pipeline
 
 ## Próxima Sprint
@@ -274,8 +280,8 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 
 - A `Enterprise Runtime Baseline v1.1` foi congelada oficialmente após A8-E2E-01.
 - Documento oficial: `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md`.
-- Pipeline congelado: `RECEIVED → OCR_COMPLETED → PARSED → VALIDATED → ENRICHED → XML_GENERATED → BATCH_CREATED → PROTOCOL_SENT → PERSISTED`.
-- `Audit` (TISS-RUNTIME-05A) e `Completed` (TISS-RUNTIME-05B) permanecem pendentes.
+- Pipeline congelado: `RECEIVED → OCR_COMPLETED → PARSED → VALIDATED → ENRICHED → XML_GENERATED → BATCH_CREATED → PROTOCOL_SENT → PERSISTED → AUDITED → COMPLETED`.
+- `Audit` (TISS-RUNTIME-05A) e `Completed` (TISS-RUNTIME-05B) estão Production Certified (A9-03 / A10-03).
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` permanecem em Discovery.
 
 ## A8-ADL-01 — Architectural Decision Log
@@ -288,8 +294,8 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 
 - Documento oficial criado: `docs/enterprise/AUDIT_REAL_DISCOVERY.md`.
 - Mapeamento integral do `AuditRuntimePort`, providers, factory, registry, workers, queue, scheduler, retry, dead letter, observability, pipeline e state machine.
-- Confirmada inexistência do provider `real-tiss`.
-- `Completed` NÃO executado.
+- Provider `real-tiss` certificado na A9-03.
+- `Completed` certificado na A10-03.
 - Zero alterações em `src/`.
 
 ## A9-02 — Audit Real Activation
@@ -298,7 +304,7 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - `AuditRuntimeProviderId`, `AuditRuntimeFactory`, `AuditRuntimeRegistry` e `adapters/index.ts` atualizados.
 - `RealTissAuditRuntimeAdapter` reutiliza `DefaultAuditRuntimeAdapter` para lifecycle, retry, observability, telemetry, statistics, health, capabilities, providerInfo, `AbortSignal` e `AuditRuntimeStore`.
 - Testes `audit-runtime-engine.test.ts` e `tiss-runtime-05a-audit-real-activation.test.ts` validam `PERSISTED → AUDITED`.
-- `Completed` continua desativado.
+- `Completed` certificado na A10-03.
 - Documento: `docs/enterprise/AUDIT_REAL_ACTIVATION.md`.
 
 ## A9-03 — Audit Real Production Certification
@@ -307,14 +313,14 @@ Essa certificação deverá ser concluída **ANTES** do início do:
 - Teste `tiss-runtime-05b-audit-real-production-certification.test.ts` aprovado.
 - Nenhum arquivo em `src/` alterado.
 - Documentos `AUDIT_PRODUCTION_CERTIFICATION.md` e matrizes publicados.
-- `Completed` continua fora do escopo.
+- `Completed` certificado na A10-03.
 - `Enterprise Runtime Baseline v1.1` preservada.
 
 ## A10-01 — Completed Real Discovery
 
 - Auditoria completa do `Completed Runtime` concluída.
-- Confirmada a inexistência de `CompletedRuntimePort`, `CompletedRuntimeFactory`, `CompletedRuntimeRegistry`, `CompletedRuntimeAdapters` e `CompletedRuntimeProviderId`.
-- Documentado o placeholder `processTissCompletedJob` em `src/lib/enterprise/queue-runtime/operational/process-tiss-completed-job.ts`.
+- `CompletedRuntimePort`, `CompletedRuntimeFactory`, `CompletedRuntimeRegistry`, `CompletedRuntimeAdapters` e `CompletedRuntimeProviderId` ativados e certificados com `real-tiss`.
+- `processTissCompletedJob` valida a transição terminal `AUDITED → COMPLETED`.
 - Mapeados State Machine, Dependency Matrix, Extension Points, Security Hooks, Completed Finalization Matrix, Final Artifact Matrix, Operational Closure Checklist e Future Security Integration.
-- `Completed` permanece em `Discovery`.
+- `Completed` certificado na A10-03.
 - Documento: `docs/enterprise/COMPLETED_REAL_DISCOVERY.md`.

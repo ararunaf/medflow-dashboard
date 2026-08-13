@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A10-01                 |
+| Atualizado| Sprint A10-DOC-02                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -16,8 +16,8 @@
 | XML Validation  | —           | `RealTissXMLValidationRuntimeAdapter` | Discovery   | XSDs oficiais da ANS ainda não integrados. |
 | Protocol        | `real-tiss` | `RealTissProtocolRuntimeAdapter`      | Certificado | Próxima: A8 SOAP.           |
 | Persistence     | `real-tiss` | `RealTissPersistenceRuntimeAdapter`   | Certificado (A8-03) | — |
-| Audit           | —           | `RealTissAuditRuntimeAdapter`         | Discovery   | Aguarda Persistence. |
-| Completed       | —           | `RealTissCompletedRuntimeAdapter`     | Discovery   | Aguarda Audit. |
+| Audit           | `real-tiss` | `RealTissAuditRuntimeAdapter`         | Production Certified | — |
+| Completed       | `real-tiss` | `RealTissCompletedRuntimeAdapter`     | Production Certified | — |
 
 ## 2. Funcionalidades estruturais remanescentes
 
@@ -55,8 +55,8 @@
 | Envio SOAP operadoras | `SOAPRuntimePort`          | A8-A9       |
 | Protocolo de resposta | `ProtocolRuntimePort`      | A9          |
 | Persistência de lote  | `PersistentQueueRuntimePort`   | A9-S1       |
-| Auditoria             | `AuditRuntimePort`         | S1          |
-| Finalização           | `CompletedRuntimePort`     | S1          |
+| Auditoria             | `AuditRuntimePort`         | Concluída (A9-03) |
+| Finalização           | `CompletedRuntimePort`     | Concluída (A10-03) |
 
 ## 6. Débitos técnicos aprovados
 
@@ -124,8 +124,8 @@ XML          ✓
 Batch        ✓ (A6-03)
 Protocol     ✓ (A7-03)
 Persistence  ✓ (A8-03)
-Audit        Discovery
-Completed    Discovery
+Audit        ✓ (A9-03)
+Completed    ✓ (A10-03)
 ```
 
 Após A9-03, executar obrigatoriamente:
@@ -146,7 +146,7 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 
 - O `PersistentQueueRuntimePort` (INF-08) foi auditado; `real-tiss` ainda não ativado.
 - Nenhum arquivo `src/` alterado.
-- Audit e Completed permanecem não executados.
+- Audit e Completed estão Production Certified (A9-03 / A10-03).
 
 ### Riscos
 
@@ -169,8 +169,8 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 ### Roadmap
 
 - A8-02/A9: ativar `RealTissPersistenceRuntimeAdapter`.
-- A9: integrar com `Audit` (não executar nesta Sprint).
-- S1: integrar com `Completed` (não executar nesta Sprint).
+- A9-03: certificar `RealTissAuditRuntimeAdapter`.
+- A10-03: certificar `RealTissCompletedRuntimeAdapter`.
 
 ## 13. A8-02 — Persistence Real Activation
 
@@ -180,7 +180,7 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 - `PersistentQueueRuntimePort` não foi alterado.
 - `processTissProtocolSentPersisted` e `processTissPersistenceJob` não foram alterados.
 - Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Composition Root`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability` ou `Foundation` foi modificado.
-- `Audit` e `Completed` permanecem não executados.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03).
 
 ### Riscos
 
@@ -191,7 +191,7 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 ### Dependências
 
 - A8-03 para certificação do `real-tiss` Persistence.
-- `AuditRuntimePort` (S1) e `CompletedRuntimePort` (S1).
+- `AuditRuntimePort` (A9-03) e `CompletedRuntimePort` (A10-03) — Production Certified.
 
 ### Gaps
 
@@ -201,8 +201,8 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 ### Roadmap
 
 - A8-03: certificar `RealTissPersistenceRuntimeAdapter`.
-- A9: ativar `Audit` (não executar nesta Sprint).
-- S1: ativar `Completed` (não executar nesta Sprint).
+- A9-03: certificar `RealTissAuditRuntimeAdapter`.
+- A10-03: certificar `RealTissCompletedRuntimeAdapter`.
 
 ## 14. A8-03 — Persistence Real Production Certification
 
@@ -218,7 +218,7 @@ Esta certificação deverá ocorrer **ANTES** do início do **BLOCO S — Enterp
 
 - `realPersistentBackend` ainda `false` (backend real A9).
 - `implementsMessagePersistence` ainda `false` (backend real A9).
-- `Audit` e `Completed` continuam em Discovery.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03).
 
 ## 15. Roadmap Alignment
 
@@ -238,14 +238,14 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 - Teste end-to-end criado em `scripts/enterprise/tests/enterprise-end-to-end-certification.test.ts` e executado com sucesso.
 - Documento `docs/enterprise/END_TO_END_ENTERPRISE_CERTIFICATION.md` gerado com State Transition Matrix, Pipeline Integrity Matrix e Canonical Metadata Certification.
 - Nenhuma implementação nova; nenhum Runtime, Port, Gateway, Pipeline ou Composition Root adicionado.
-- `Audit` e `Completed` continuam em Discovery.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03).
 
 ### Gaps remanescentes
 
 - `tenantId`, `runtimeId` e `traceId` ainda não fazem parte do `customAttributes` canônico TISS (não são propagados pelas funções `processTiss*`).
 - `payload` binário ainda é representado apenas por `payloadRef`.
 - `telemetry` permanece em adapters, não no `CanonicalQueueMessage`.
-- `Audit` e `Completed` continuam pendentes para Sprints futuras.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03).
 - Backend real (PostgreSQL/Supabase/S3) continua previsto para A9.
 
 ## 17. A8-FREEZE-01 — Enterprise Baseline v1.1 Freeze
@@ -255,11 +255,11 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 - Baseline `Enterprise Runtime v1.1` oficialmente congelada.
 - Documento `docs/enterprise/ENTERPRISE_BASELINE_V1_1.md` criado com State Machine, Pipeline, Freeze Matrix, Known Canonical Gaps e Enterprise Freeze Rules.
 - `git diff` confirma **0 alterações em `src/`**.
-- `Audit` e `Completed` permanecem pendentes.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03).
 
 ### Gaps remanescentes
 
-- `Audit` e `Completed` ainda em Discovery.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03).
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` ainda em Discovery.
 - Backend real continua previsto para fase futura.
 
@@ -275,7 +275,7 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 ### Gaps remanescentes
 
 - Nenhum gap novo introduzido.
-- `Audit` e `Completed` continuam pendentes e desacoplados do pipeline congelado.
+- `Audit` e `Completed` estão Production Certified (A9-03 / A10-03) e integrados ao pipeline congelado.
 
 ## 19. A9-01 — Audit Real Discovery
 
@@ -283,15 +283,15 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 
 - Documento `docs/enterprise/AUDIT_REAL_DISCOVERY.md` criado e sincronizado com a baseline.
 - `AuditRuntimePort`, providers, factory, registry, workers, queue, scheduler, retry, dead letter, observability, pipeline e state machine auditados.
-- Provider `real-tiss` confirmado inexistente; estratégia de ativação documentada.
-- `Completed` NÃO executado; mapeado apenas como próximo estado futuro.
+- Provider `real-tiss` ativado e certificado na A9-03.
+- `Completed` certificado na A10-03.
 - `Security Hooks` documentados como pontos de extensão, sem implementação.
 - `git diff` confirma **0 alterações em `src/`**.
 
 ### Gaps remanescentes
 
-- `real-tiss` ainda não implementado (pending activation Sprint futura).
-- `Completed` ainda pendente (TISS-RUNTIME-05B).
+- `real-tiss` certificado na A9-03.
+- `Completed` certificado na A10-03 (TISS-RUNTIME-05B).
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 
 ## 20. A9-02 — Audit Real Activation
@@ -301,13 +301,13 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 - Provider `real-tiss` do `AuditRuntimePort` ativado.
 - `RealTissAuditRuntimeAdapter` criado e registrado na Factory/Registry.
 - Pipeline `PERSISTED → AUDITED` validado por testes.
-- `Completed` continua desacoplado e NÃO executado.
+- `Completed` certificado na A10-03.
 - `Audit Integrity Matrix`, `Canonical Audit Metadata`, `Audit Future Integrations` e `Evidence Package` documentados.
 - Nenhum `Runtime`, `Port`, `Gateway`, `Pipeline` ou `Composition Root` novo.
 
 ### Gaps remanescentes
 
-- `Completed` (TISS-RUNTIME-05B) permanece pendente.
+- `Completed` (TISS-RUNTIME-05B) certificado na A10-03.
 - Hash, assinatura digital, cadeia de custódia e integrações de segurança planejadas para BLOCO S.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 
@@ -315,15 +315,15 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 
 ### Situação atual
 
-- `Completed Runtime` auditado; nenhuma implementação realizada.
-- `CompletedRuntimePort`, `Factory`, `Registry`, `Adapters` e `ProviderId` confirmados inexistentes.
-- `processTissCompletedJob` identificado como placeholder terminal `AUDITED → COMPLETED`.
+- `Completed Runtime` certificado na A10-03.
+- `CompletedRuntimePort`, `Factory`, `Registry`, `Adapters` e `ProviderId` ativados e certificados com `real-tiss`.
+- `processTissCompletedJob` valida a transição terminal `AUDITED → COMPLETED`.
 - `Completed Finalization Matrix`, `Final Artifact Matrix`, `Operational Closure Checklist` e `Future Security Integration` documentados.
 - Nenhum arquivo em `src/` alterado.
 
 ### Gaps remanescentes
 
-- `Completed` (TISS-RUNTIME-05B) permanece em `Discovery`.
+- `Completed` (TISS-RUNTIME-05B) certificado na A10-03.
 - Hash, assinatura digital, cadeia de custódia e integrações de segurança continuam planejadas para BLOCO S.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 
@@ -334,12 +334,18 @@ Toda divergência futura entre o estado real do projeto e os documentos acima de
 - `Audit` certificado para `Production` com provider `real-tiss`.
 - `tiss-runtime-05b-audit-real-production-certification.test.ts` aprovado.
 - Nenhum arquivo em `src/` alterado nesta Sprint.
-- `Completed` continua fora do escopo.
+- `Completed` certificado na A10-03.
 - `Audit Consistency Matrix`, `Audit Evidence Matrix`, `Audit Performance Matrix` e `Regression Matrix` documentados.
 
 ### Gaps remanescentes
 
-- `Completed` (TISS-RUNTIME-05B) permanece pendente.
+- `Completed` (TISS-RUNTIME-05B) certificado na A10-03.
 - Hash, assinatura digital, cadeia de custódia e integrações de segurança continuam planejadas para BLOCO S.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 23. Nota — Encerramento do Bloco A
+
+O **Bloco A** está oficialmente encerrado a partir da Sprint **A10-DOC-02**. Todas as 10 capabilities (`OCR`, `Parser`, `Validation`, `Enrichment`, `XML TISS`, `Batch`, `Protocol`, `Persistence`, `Audit` e `Completed`) estão **Production Certified** e o pipeline `RECEIVED → ... → COMPLETED` foi certificado sem alterações em `src/`.
+
+Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports ainda em Discovery: `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort`.
 
