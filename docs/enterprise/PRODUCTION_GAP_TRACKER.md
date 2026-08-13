@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S2-02                 |
+| Atualizado| Sprint S2-03                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -421,6 +421,22 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 - Provider `real-tiss` registrado, mas sem Production Certification.
 - Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Foundation` ou `Composition Root` foi modificado.
 - Nenhuma identidade ou autenticação real implementada: sem login, logout, OAuth, SAML, MFA, JWT, sessão, refresh token, cookies, Supabase Auth, criptografia, cadeia de custódia, Key Vault, HSM, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
+
+### Gaps remanescentes
+
+- Capabilities futuras do Bloco S ainda em Discovery/Activation: login, logout, OAuth, SAML, MFA, JWT, sessão, refresh token, cookies, Supabase Auth, criptografia, cadeia de custódia, HSM, Key Vault, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 29. S2-03 — Identity Runtime Production Certification
+
+### Situação atual
+
+- `IdentityRuntimePort` certificado para produção com provider `real-tiss`.
+- `RealTissIdentityRuntimeAdapter`, `DefaultIdentityRuntimeAdapter`, `MockIdentityRuntimeAdapter`, `TestIdentityRuntimeAdapter`, `IdentityRuntimeFactory`, `IdentityRuntimeRegistry` e `InMemoryIdentityRuntimeStore` certificados e estáveis.
+- Testes de produção `identity-runtime-engine.test.ts`, `tiss-runtime-identity-activation.test.ts` e `tiss-runtime-identity-production-certification.test.ts` aprovados.
+- Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Foundation` ou `Composition Root` foi modificado.
+- Nenhuma identidade ou autenticação real implementada: sem login, logout, OAuth, SAML, MFA, JWT, sessão, refresh token, cookies, Supabase Auth, criptografia, cadeia de custódia, Key Vault, HSM, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
+- Documento `docs/enterprise/IDENTITY_RUNTIME_PRODUCTION_CERTIFICATION.md` criado.
 
 ### Gaps remanescentes
 

@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S2-02               |
+| Atualizado| Sprint S2-03               |
 
 ---
 
@@ -24,7 +24,7 @@
 | **Audit**           | `real-tiss` | **RealTissAuditRuntimeAdapter**          | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
 | **Completed**       | `real-tiss` | **RealTissCompletedRuntimeAdapter**      | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
 | **Enterprise Security** | `real-tiss` | **RealTissSecurityRuntimeAdapter**       | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production (S1-03)**|
-|| **Identity & Authentication** | `real-tiss`  | **RealTissIdentityRuntimeAdapter**        | **1.0.0**  | **✅**    | **⚡**      | **—**      | **Activation (S2-02)** |
+|| **Identity & Authentication** | `real-tiss`  | **RealTissIdentityRuntimeAdapter**        | **1.0.0**  | **✅**    | **✅**      | **✅**      | **Production (S2-03)** |
 
 ---
 
@@ -127,3 +127,18 @@ Bloco A oficialmente encerrado.
 - Provider `supabase` identificado como IdP atual (email/senha, recuperação de senha, sessão JWT).
 - Nenhum provider real ativado para produção.
 - Documento `docs/enterprise/IDENTITY_AUTH_DISCOVERY.md` criado.
+
+## S2-02 — Identity & Authentication Activation
+
+- `Identity & Authentication` avançou para `Activation` com provider `real-tiss`.
+- `RealTissIdentityRuntimeAdapter` ativado, delegando integralmente ao `DefaultIdentityRuntimeAdapter`.
+- Nenhuma funcionalidade real de autenticação implementada.
+- Documento `docs/enterprise/IDENTITY_RUNTIME_ACTIVATION.md` criado.
+
+## S2-03 — Identity & Authentication Production Certification
+
+- `Identity & Authentication` certificada para produção com provider `real-tiss`.
+- `RealTissIdentityRuntimeAdapter` oficialmente certificado para produção.
+- Testes `identity-runtime-engine.test.ts`, `tiss-runtime-identity-activation.test.ts` e `tiss-runtime-identity-production-certification.test.ts` aprovados.
+- Nenhum componente arquitetural existente alterado; `EnterpriseRuntime Baseline v1.1` preservada.
+- Documento `docs/enterprise/IDENTITY_RUNTIME_PRODUCTION_CERTIFICATION.md` criado.
