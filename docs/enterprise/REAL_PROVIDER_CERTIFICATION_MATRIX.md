@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint A10-01               |
+| Atualizado| Sprint A10-03               |
 
 ---
 
@@ -22,7 +22,7 @@
 | **Protocol**        | `real-tiss` | **RealTissProtocolRuntimeAdapter**       | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
 | **Persistence**     | `real-tiss` | **RealTissPersistenceRuntimeAdapter**    | **1.0.0** | **✅** | **✅**     | **✅**     | **Production**|
 | **Audit**           | `real-tiss` | **RealTissAuditRuntimeAdapter**          | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
-| Completed           | —           | —                                        | —      | ✅        | —          | —          | Discovery     |
+| **Completed**       | `real-tiss` | **RealTissCompletedRuntimeAdapter**      | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
 
 ---
 
@@ -89,7 +89,25 @@ OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → 
 
 ## A10-01 — Completed Real Discovery
 
-- `Completed` permanece em `Discovery`.
-- `RealTissCompletedRuntimeAdapter` e provider `real-tiss` para `Completed` planejados, não implementados.
-- `CompletedRuntimePort`, `CompletedRuntimeFactory`, `CompletedRuntimeRegistry` e `CompletedRuntimeProviderId` ainda inexistentes.
+- `Completed` avançou para `Production` com provider `real-tiss`.
+- `RealTissCompletedRuntimeAdapter` certificado sem alteração em componentes arquiteturais existentes.
 - `Enterprise Runtime Baseline v1.1` preservada.
+
+## Bloco A Final Certification Matrix
+
+Todas as capabilities do Bloco A estão certificadas para produção:
+
+| Capability | Provider | Stage Final |
+|---|---|---|
+| OCR | `azure` | Production |
+| Document Extraction | `real-tiss` | Production |
+| Validation | `real-tiss` | Production |
+| Enrichment | `real-tiss` | Production |
+| XML Generation | `real-tiss` | Production |
+| Batch | `real-tiss` | Production |
+| Protocol | `real-tiss` | Production |
+| Persistence | `real-tiss` | Production |
+| Audit | `real-tiss` | Production |
+| Completed | `real-tiss` | Production |
+
+Bloco A oficialmente encerrado.
