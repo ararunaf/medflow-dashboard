@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.0     |
-| Atualizado| Sprint A8-03                |
+| Atualizado| Sprint A8-E2E-01                |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -229,4 +229,22 @@ Este documento é sincronizado obrigatoriamente com:
 - `docs/enterprise/REAL_PROVIDER_CERTIFICATION_MATRIX.md`
 
 Toda divergência futura entre o estado real do projeto e os documentos acima deverá ser registrada neste `PRODUCTION_GAP_TRACKER.md`.
+
+## 16. A8-E2E-01 — Enterprise End-to-End Certification
+
+### Situação atual
+
+- Pipeline completo `OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence` certificado via `getEnterpriseRuntime()` na Sprint A8-E2E-01.
+- Teste end-to-end criado em `scripts/enterprise/tests/enterprise-end-to-end-certification.test.ts` e executado com sucesso.
+- Documento `docs/enterprise/END_TO_END_ENTERPRISE_CERTIFICATION.md` gerado com State Transition Matrix, Pipeline Integrity Matrix e Canonical Metadata Certification.
+- Nenhuma implementação nova; nenhum Runtime, Port, Gateway, Pipeline ou Composition Root adicionado.
+- `Audit` e `Completed` continuam em Discovery.
+
+### Gaps remanescentes
+
+- `tenantId`, `runtimeId` e `traceId` ainda não fazem parte do `customAttributes` canônico TISS (não são propagados pelas funções `processTiss*`).
+- `payload` binário ainda é representado apenas por `payloadRef`.
+- `telemetry` permanece em adapters, não no `CanonicalQueueMessage`.
+- `Audit` e `Completed` continuam pendentes para Sprints futuras.
+- Backend real (PostgreSQL/Supabase/S3) continua previsto para A9.
 

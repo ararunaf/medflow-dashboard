@@ -37,6 +37,18 @@
 - **Activation** — provider real ativo, mas ainda sem Production Certification.
 - **Production** — provider real certificado em produção.
 
+## Enterprise End-to-End Certification (A8-E2E-01)
+
+Pipeline completo certificado via `getEnterpriseRuntime()`:
+
+```
+OCR → Parser → Validation → Enrichment → XML → Batch → Protocol → Persistence
+```
+
+- Nenhum provider novo adicionado.
+- Todos os providers listados na matriz acima foram reutilizados.
+- Nenhum Runtime, Port, Gateway, Pipeline ou Composition Root foi criado.
+
 ## Notas
 
 - Nenhuma etapa de Activation/Production pode ocorrer sem a respectiva etapa de Discovery.
