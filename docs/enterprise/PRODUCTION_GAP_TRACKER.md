@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S2-01                 |
+| Atualizado| Sprint S2-02                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -411,4 +411,19 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 - `useAuth` hook e `LoginForm` / `AuthGuard` componentes reutilizáveis.
 - Integração dos RuntimePorts `SecurityRuntimePort`, `AuthorizationRuntimePort` e `TenantPort` com a camada de auth.
 - Provider de Identity & Authentication para futura certificação.
+
+## 28. S2-02 — Identity & Authentication Activation
+
+### Situação atual
+
+- Infraestrutura canônica do `IdentityRuntimePort` criada em `src/lib/enterprise/identity-runtime/`.
+- `IdentityRuntimeFactory`, `IdentityRuntimeRegistry`, `DefaultIdentityRuntimeAdapter`, `RealTissIdentityRuntimeAdapter`, `MockIdentityRuntimeAdapter` e `TestIdentityRuntimeAdapter` ativados.
+- Provider `real-tiss` registrado, mas sem Production Certification.
+- Nenhum `EnterpriseRuntime`, `Port`, `Gateway`, `Runtime`, `Pipeline`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Foundation` ou `Composition Root` foi modificado.
+- Nenhuma identidade ou autenticação real implementada: sem login, logout, OAuth, SAML, MFA, JWT, sessão, refresh token, cookies, Supabase Auth, criptografia, cadeia de custódia, Key Vault, HSM, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
+
+### Gaps remanescentes
+
+- Capabilities futuras do Bloco S ainda em Discovery/Activation: login, logout, OAuth, SAML, MFA, JWT, sessão, refresh token, cookies, Supabase Auth, criptografia, cadeia de custódia, HSM, Key Vault, SIEM, OpenTelemetry, LGPD, autenticação e autorização.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 
