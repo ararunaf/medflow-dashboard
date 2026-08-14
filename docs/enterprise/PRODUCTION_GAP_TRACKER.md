@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S5-03                        |
+| Atualizado| Sprint S5-FINAL-01                   |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -616,3 +616,18 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 |- Capabilities futuras de compliance e governança (LGPD, consentimento, privacidade, classificação de dados, retenção, cadeia de custódia, assinatura digital, criptografia, HSM, Key Vault, SIEM, OpenTelemetry) continuam planejadas para sprints futuras.
+
+## 40. S5-FINAL-01
+
+### Situação atual
+
+|- O **Enterprise Compliance Foundation** foi oficialmente certificado na Sprint **S5-FINAL-01**.
+|- Todos os gaps das Sprints **S5-01..S5-03** estão fechados: o `ComplianceRuntimePort` está **Production Certified**.
+|- Documento `docs/enterprise/ENTERPRISE_COMPLIANCE_FOUNDATION_FINAL_CERTIFICATION.md` publicado.
+|- Nenhum `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `Pipeline`, `Composition Root`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `TenantRuntime`, `AuditRuntime`, `CompletedRuntime` ou `ComplianceRuntime` foi modificado.
+|- A **Enterprise Runtime Baseline v1.1** e o **Architectural Decision Log** permanecem preservados.
+
+### Gaps remanescentes
+
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+|- Capabilities reais de compliance/governança permanecem planejadas para sprints futuras, fora do escopo do S5-FINAL-01.
