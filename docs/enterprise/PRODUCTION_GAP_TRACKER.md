@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S4-03                 |
+| Atualizado| Sprint S4-FINAL-01                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -551,4 +551,20 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 ### Gaps remanescentes
 
 - Capabilities operacionais de tenant (provisioning, routing, lifecycle, branding, settings, onboarding, hierarchy, ownership, cache, middleware, validation, resolution, assignment, isolation, business rules) permanecem planejadas para sprints futuras.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 36. S4-FINAL-01 — Enterprise Security Foundation Final Certification
+
+### Situação atual
+
+- O **Enterprise Security Foundation** foi oficialmente certificado na Sprint **S4-FINAL-01**.
+- Todos os gaps das Sprints **S1-01..S4-03** estão fechados: `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `TenantRuntime`, `AuditRuntime` e `CompletedRuntime` estão **Production Certified**.
+- O provider `real-tiss` é o único real certificado para todos os Runtimes de segurança.
+- Nenhum `EnterpriseRuntime`, `Queue`, `Worker`, `Scheduler`, `Retry`, `DeadLetter`, `Observability`, `Pipeline`, `Composition Root`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `AuditRuntime`, `CompletedRuntime`, `TenantPort`, `TenantAssignmentPort`, `AuthContext`, `getAuthContext`, `requireOperationalAuth`, `ServiceCtx`, `Supabase`, `RLS` ou `migrations` foi modificado.
+- Nenhuma implementação real de segurança, identidade, autorização ou gerenciamento de tenants foi introduzida; todos os Runtimes permanecem como scaffolding canônico.
+- A **Enterprise Runtime Baseline v1.1** e o **Architectural Decision Log** permanecem preservados.
+
+### Gaps remanescentes
+
+- Todas as capacidades operacionais reais (autenticação, autorização, criptografia, assinatura digital, HSM, Key Vault, SIEM, OpenTelemetry, LGPD, tenant management) permanecem planejadas para sprints futuras, fora do escopo do Bloco S.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
