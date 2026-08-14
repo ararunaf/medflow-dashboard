@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S4-02                 |
+| Atualizado| Sprint S4-03                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -534,6 +534,21 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 
 ### Gaps remanescentes
 
-- Production Certification S4-03 ainda pendente.
+- Production Certification S4-03 concluída; provider `real-tiss` oficialmente certificado e este gap foi fechado.
 - Capabilities operacionais de tenant (provisioning, routing, lifecycle, branding, settings, onboarding, hierarchy, ownership, cache, middleware, validation, resolution, assignment, isolation, business rules) continuam planejadas para sprints futuras.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 35. S4-03 — Enterprise Tenant Runtime Production Certification
+
+### Situação atual
+
+- `TenantRuntimePort` certificado para produção com provider `real-tiss`.
+- `RealTissTenantRuntimeAdapter`, `DefaultTenantRuntimeAdapter`, `MockTenantRuntimeAdapter`, `TestTenantRuntimeAdapter`, `TenantRuntimeFactory`, `TenantRuntimeRegistry` e `InMemoryTenantRuntimeStore` certificados e estáveis.
+- Testes `tenant-runtime-engine.test.ts`, `tiss-runtime-tenant-activation.test.ts` e `tiss-runtime-tenant-production-certification.test.ts` aprovados.
+- Nenhum `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `Pipeline`, `Composition Root`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `AuditRuntime`, `CompletedRuntime`, `TenantPort`, `TenantAssignmentPort`, `AuthContext`, `getAuthContext`, `requireOperationalAuth`, `ServiceCtx`, `tenant-settings-service`, `tenant-branding-service`, `Supabase`, `RLS` ou `migrations` foi modificado.
+- Nenhuma implementação real de tenant management foi introduzida: sem provisioning, routing, lifecycle, branding, settings, onboarding, hierarchy, ownership, cache, middleware, validation, resolution, assignment, isolation ou business rules.
+
+### Gaps remanescentes
+
+- Capabilities operacionais de tenant (provisioning, routing, lifecycle, branding, settings, onboarding, hierarchy, ownership, cache, middleware, validation, resolution, assignment, isolation, business rules) permanecem planejadas para sprints futuras.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
