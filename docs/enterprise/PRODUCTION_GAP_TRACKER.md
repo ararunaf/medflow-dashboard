@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S6-01                   |
+| Atualizado| Sprint S6-02                   |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -650,3 +650,23 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 |- `BusinessAuditTrail`, `Workflow`, `Decision Table` e `Business Rule Execution` sem persistência real e sem provider `real-tiss` certificado.
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 
+
+## 42. S6-02 — Enterprise Governance Runtime Activation
+
+### Situação atual
+
+|- Criada a infraestrutura canônica do `GovernanceRuntimePort` em `src/lib/enterprise/governance-runtime/`.
+|- Foram implementados: Port (9 métodos), 5 providers (mock/test/default/enterprise/real-tiss), Factory, Registry, InMemory Store e adapters.
+|- O `RealTissGovernanceRuntimeAdapter` delega integralmente ao `DefaultGovernanceRuntimeAdapter` sem lógica real.
+|- Todas as flags `*Implemented` permanecem `false`.
+|- Testes publicados: `governance-runtime-engine.test.ts` (≥21 passando) e `tiss-runtime-governance-activation.test.ts`.
+|- Nenhum arquivo fora de `src/lib/enterprise/governance-runtime/` foi alterado.
+|- Nenhum `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `TenantRuntime`, `ComplianceRuntime`, `AuditRuntime` ou `CompletedRuntime` foi modificado.
+|- Não houve integração com `BusinessEnginePort`, `ExecutionPolicyRegistryPort`, `EnterpriseGovernanceEngine`, `EnterprisePolicyEngine`, `WorkflowRuntime`, Supabase, HTTP, banco ou Composition Root.
+|- `Enterprise Runtime Baseline v1.1` e o `Architectural Decision Log` permanecem preservados.
+
+### Gaps remanescentes
+
+|- S6-03: Production Certification do provider `real-tiss` para o `GovernanceRuntimePort`.
+|- Capabilities reais de governança (policy engine, rule engine, workflow, approval, data governance, versioning, lineage, consentimento, LGPD) continuam planejadas para sprints futuras.
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
