@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S5-02                        |
+| Atualizado| Sprint S5-03                        |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -596,7 +596,23 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 
 ### Gaps remanescentes
 
-|- Production Certification S5-03 pendente.
+|- Production Certification S5-03 realizado e gap fechado.
 |- Capabilities futuras de compliance e governança (LGPD, consentimento, privacidade, classificação de dados, retenção, cadeia de custódia, assinatura digital, criptografia, HSM, Key Vault, SIEM, OpenTelemetry) continuam planejadas para sprints futuras.
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 39. S5-03 — Compliance & Governance Runtime Production Certification
+
+### Situação atual
+
+|- `ComplianceRuntimePort` certificado para produção na Sprint **S5-03**.
+|- `RealTissComplianceRuntimeAdapter`, `ComplianceRuntimeFactory`, `ComplianceRuntimeRegistry`, `DefaultComplianceRuntimeAdapter`, `MockComplianceRuntimeAdapter`, `TestComplianceRuntimeAdapter` e `InMemoryComplianceRuntimeStore` certificados e estáveis.
+|- Teste `tiss-runtime-compliance-production-certification.test.ts` aprovado: Port, Factory, Registry, Health, Capabilities, ProviderInfo, Retry, Store, cenários negativos, boundary e regression.
+|- Documento `docs/enterprise/COMPLIANCE_RUNTIME_PRODUCTION_CERTIFICATION.md` publicado.
+|- Nenhum `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `Pipeline`, `Composition Root`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `TenantRuntime`, `AuditRuntime`, `CompletedRuntime`, `Supabase`, `RLS`, `LGPD`, `HSM`, `Key Vault`, `SIEM`, `OpenTelemetry`, criptografia, assinatura digital, `jsonwebtoken`, `oauth`, `axios`, `@azure` ou `@opentelemetry` foi modificado ou introduzido.
+|- Nenhuma implementação real de compliance, governança, privacidade, consentimento, retenção, LGPD, classificação de dados, cadeia de custódia, HSM, Key Vault, SIEM ou OpenTelemetry.
+
+### Gaps remanescentes
+
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+|- Capabilities futuras de compliance e governança (LGPD, consentimento, privacidade, classificação de dados, retenção, cadeia de custódia, assinatura digital, criptografia, HSM, Key Vault, SIEM, OpenTelemetry) continuam planejadas para sprints futuras.
