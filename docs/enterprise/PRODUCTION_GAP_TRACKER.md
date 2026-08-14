@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S3-02                 |
+| Atualizado| Sprint S3-03                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -486,4 +486,19 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 ### Gaps remanescentes
 
 |- Capabilities futuras do Bloco S ainda em Discovery/Activation: motor de políticas, ABAC, autorização por recurso, feature flags de autorização, delegação, versionamento de políticas, audit trail de autorização, integração com `AuthorizationRuntimePort`.
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+|- A Production Certification S3-03 foi concluída; o provider `real-tiss` está oficialmente certificado e este gap foi fechado.
+
+## 32. S3-03 — Authorization Runtime Production Certification
+
+### Situação atual
+
+|- `AuthorizationRuntimePort` certificado para produção com provider `real-tiss`.
+|- Testes `authorization-runtime-engine.test.ts`, `tiss-runtime-authorization-activation.test.ts` e `tiss-runtime-authorization-production-certification.test.ts` aprovados.
+|- Nenhuma capability funcional de autorização, RBAC, ABAC, OAuth, JWT, SAML, MFA, criptografia, banco, HTTP, Supabase Auth, RLS, route guards ou motor de políticas foi implementada.
+|- `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `ObservabilityRuntimePort`, `SecurityRuntimePort`, `IdentityRuntimePort`, `AuditRuntimePort` e `CompletedRuntimePort` permanecem inalterados.
+
+### Gaps remanescentes
+
+|- Capabilities futuras do Bloco S (motor de políticas, ABAC, RBAC operacional, audit trail de autorização) permanecem em Discovery/Activation para sprints futuras.
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.

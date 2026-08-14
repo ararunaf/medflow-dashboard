@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S3-02               |
+| Atualizado| Sprint S3-03               |
 
 ---
 
@@ -25,7 +25,7 @@
 | **Completed**       | `real-tiss` | **RealTissCompletedRuntimeAdapter**      | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production**|
 | **Enterprise Security** | `real-tiss` | **RealTissSecurityRuntimeAdapter**       | **1.0.0** | **✅**    | **✅**     | **✅**     | **Production (S1-03)**|
 || **Identity & Authentication** | `real-tiss`  | **RealTissIdentityRuntimeAdapter**        | **1.0.0**  | **✅**    | **✅**      | **✅**      | **Production (S2-03)** |
-||| **Authorization & Access Control** | `real-tiss`  | **RealTissAuthorizationRuntimeAdapter**        | **1.0.0**  | **✅**    | **⚡**      | **—**      | **Activation (S3-02)** |
+||| **Authorization & Access Control** | `real-tiss`  | **RealTissAuthorizationRuntimeAdapter**        | **1.0.0**  | **✅**    | **✅**      | **✅**      | **Production (S3-03)** |
 
 ---
 
