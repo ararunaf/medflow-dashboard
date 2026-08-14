@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S4-FINAL-01                 |
+| Atualizado| Sprint S5-01                        |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -567,4 +567,19 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 ### Gaps remanescentes
 
 - Todas as capacidades operacionais reais (autenticação, autorização, criptografia, assinatura digital, HSM, Key Vault, SIEM, OpenTelemetry, LGPD, tenant management) permanecem planejadas para sprints futuras, fora do escopo do Bloco S.
+- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 37. S5-01 — Compliance & Governance Discovery
+
+### Situação atual
+
+- Discovery read-only da arquitetura de Compliance & Governance concluído em `docs/enterprise/COMPLIANCE_GOVERNANCE_DISCOVERY.md`.
+- Nenhum arquivo em `src/` alterado.
+- Componentes de auditoria, RBAC, RLS, tenant isolation, segurança, políticas, governança, backup readiness, retenção, histórico e versionamento mapeados.
+- Capabilities de LGPD, consentimento, criptografia, assinatura digital, cadeia de custódia, HSM, Key Vault, SIEM, OpenTelemetry, classificação de dados e lifecycle de dados identificados como gaps futuros.
+- `Enterprise Runtime Baseline v1.1` preservada.
+
+### Gaps remanescentes
+
+- Discovery concluído; nenhuma implementação de Compliance/Governance Runtime realizada.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
