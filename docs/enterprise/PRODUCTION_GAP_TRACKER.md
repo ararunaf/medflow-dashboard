@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S6-02                   |
+| Atualizado| Sprint S6-03                   |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -670,3 +670,21 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 |- S6-03: Production Certification do provider `real-tiss` para o `GovernanceRuntimePort`.
 |- Capabilities reais de governança (policy engine, rule engine, workflow, approval, data governance, versioning, lineage, consentimento, LGPD) continuam planejadas para sprints futuras.
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 43. S6-03 — Governance Runtime Production Certification
+
+### Situação atual
+
+|- O `GovernanceRuntimePort` foi oficialmente certificado para produção na Sprint **S6-03**.
+|- Documento `docs/enterprise/GOVERNANCE_RUNTIME_PRODUCTION_CERTIFICATION.md` publicado.
+|- Teste `tiss-runtime-governance-production-certification.test.ts` aprovado (16 passando).
+|- Todas as flags `*Implemented` permanecem `false`.
+|- O `RealTissGovernanceRuntimeAdapter` continua delegando integralmente ao `DefaultGovernanceRuntimeAdapter`.
+|- Nenhum `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `TenantRuntime`, `ComplianceRuntime`, `AuditRuntime` ou `CompletedRuntime` foi modificado.
+|- Não houve integração com `BusinessEnginePort`, `ExecutionPolicyRegistryPort`, `EnterpriseGovernanceEngine`, `EnterprisePolicyEngine`, `WorkflowRuntime`, Supabase, HTTP, banco ou Composition Root.
+|- `Enterprise Runtime Baseline v1.1` e o `Architectural Decision Log` permanecem preservados.
+
+### Gaps remanescentes
+
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+|- Capabilities reais de governança (policy engine, rule engine, workflow, approval, data governance, versioning, lineage, consentimento, LGPD) continuam planejadas para sprints futuras.

@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S6-02                |
+| Atualizado| Sprint S6-03                |
 
 ---
 
@@ -31,7 +31,7 @@
 
 ||||| **Enterprise Tenant** | `real-tiss`  | **RealTissTenantRuntimeAdapter**        | **1.0.0**  | **✅**    | **✅**      | **✅**      | **Production (S4-03)** |
 |||||| **Compliance & Governance** | `real-tiss`  | **RealTissComplianceRuntimeAdapter**        | **1.0.0**  | **✅**    | **✅**      | **✅**      | **Production (S5-03)** |
-||||||| **Enterprise Governance** | `real-tiss`  | **RealTissGovernanceRuntimeAdapter**        | **1.0.0**  | **✅**    | **⚡**      | **—**      | **Activation (S6-02)** |
+||||||| **Enterprise Governance** | `real-tiss`  | **RealTissGovernanceRuntimeAdapter**        | **1.0.0**  | **✅**    | **✅**      | **✅**      | **Production (S6-03)** |
 
 ## Legenda
 
