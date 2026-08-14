@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S5-01                        |
+| Atualizado| Sprint S5-02                        |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -582,4 +582,21 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 ### Gaps remanescentes
 
 - Discovery concluído; nenhuma implementação de Compliance/Governance Runtime realizada.
+
+## 38. S5-02 — Compliance & Governance Runtime Activation
+
+### Situação atual
+
+|- Infraestrutura canônica do `ComplianceRuntimePort` criada em `src/lib/enterprise/compliance-runtime/`.
+|- `ComplianceRuntimeFactory`, `ComplianceRuntimeRegistry`, `DefaultComplianceRuntimeAdapter`, `RealTissComplianceRuntimeAdapter`, `MockComplianceRuntimeAdapter` e `TestComplianceRuntimeAdapter` ativados.
+|- `InMemoryComplianceRuntimeStore` persiste jobs, requests, findings e results em memória.
+|- Provider `real-tiss` registrado com `RealTissComplianceRuntimeAdapter` delegando 100% dos 9 métodos canônicos ao `DefaultComplianceRuntimeAdapter`.
+|- Nenhum `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `Pipeline`, `Composition Root`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `AuditRuntime`, `CompletedRuntime`, `TenantRuntime`, `Supabase`, `RLS`, `LGPD`, `HSM`, `Key Vault`, `SIEM`, `OpenTelemetry`, criptografia, assinatura digital ou chain of custody foi modificado ou introduzido.
+|- Nenhuma implementação real de compliance, governança, privacidade, consentimento, retenção, LGPD, classificação de dados, cadeia de custódia, HSM, Key Vault, SIEM ou OpenTelemetry.
+
+### Gaps remanescentes
+
+|- Production Certification S5-03 pendente.
+|- Capabilities futuras de compliance e governança (LGPD, consentimento, privacidade, classificação de dados, retenção, cadeia de custódia, assinatura digital, criptografia, HSM, Key Vault, SIEM, OpenTelemetry) continuam planejadas para sprints futuras.
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 - `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
