@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S3-03                 |
+| Atualizado| Sprint S4-01                 |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -502,3 +502,21 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 
 |- Capabilities futuras do Bloco S (motor de políticas, ABAC, RBAC operacional, audit trail de autorização) permanecem em Discovery/Activation para sprints futuras.
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
+## 33. S4-01 — Enterprise Tenant Runtime Discovery
+
+### Situação atual
+
+|- Arquitetura de tenants mapeada: `src/lib/enterprise/tenant/`, `src/lib/enterprise/tenant-assignment/`, `src/lib/auth/get-auth-context.ts`, `src/lib/server/operational-auth.ts`, `src/lib/services/tenant-settings/`, `src/lib/services/tenant-branding/`, `src/components/tenant-branding-provider.tsx`, `supabase/migrations/*` e RLS.
+|- `TenantPort` (EPC-10A) e `TenantAssignmentPort` (EPC-10B) já existem como scaffolding, mas sem provider `real-tiss` e sem certificação de produção.
+|- Resolução de `tenantId` funcional via `profiles.tenant_id` → `AuthContext` / `OperationalAuthContext` / `ServiceCtx`.
+|- Isolamento de dados ativo via `tenant_id` + Postgres RLS.
+|- Configuração e branding de tenant ativos via `tenant_settings`.
+|- Nenhum `Runtime`, `Port`, `Gateway`, `Pipeline`, `Queue`, `Worker`, `Scheduler`, `Retry`, `Dead Letter`, `Observability`, `Composition Root` ou `EnterpriseRuntime` foi modificado.
+
+### Gaps remanescentes
+
+|- `TenantPort` ainda não segue os 9 métodos canônicos dos runtimes certificados (Security, Identity, Authorization).
+|- Ausência de `TenantRuntimeFactory`, `TenantRuntimeRegistry`, `InMemoryTenantRuntimeStore` e `RealTissTenantRuntimeAdapter`.
+|- Tenant routing, middleware, cache, hierarchy e provisioning ainda não estão normalizados como Ports.
+|- Ativação e Production Certification de `TenantRuntime` previstas para sprints futuras.
