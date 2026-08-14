@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S6-03                |
+| Atualizado| Sprint S6-FINAL-01          |
 
 ---
 
