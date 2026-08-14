@@ -4,7 +4,7 @@
 | --------- | --------------------------- |
 | Projeto   | MedicFlow-AI                |
 | Baseline  | Enterprise Runtime v1.1     |
-| Atualizado| Sprint S5-FINAL-01                   |
+| Atualizado| Sprint S6-01                   |
 | Status    | Acompanhamento de pendências|
 
 ---
@@ -631,3 +631,22 @@ Os únicos gaps remanescentes são as capabilities futuras do Bloco S e os Ports
 
 |- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
 |- Capabilities reais de compliance/governança permanecem planejadas para sprints futuras, fora do escopo do S5-FINAL-01.
+
+## 41. S6-01 — Enterprise Governance Discovery
+
+### Situação atual
+
+|- Discovery read-only dos componentes de governança Enterprise concluído em `docs/enterprise/ENTERPRISE_GOVERNANCE_DISCOVERY.md`.
+|- Foram mapeados: `BusinessEnginePort`, `ExecutionPolicyRegistryPort`, `WorkflowRuntimePort`, `EnterpriseGovernanceEngine`, `EnterprisePolicyEngine`, `GenericBusinessEngine`, motores de regras, decision table, workflow, audit trail, operational policy intelligence e tabelas de governança no Supabase.
+|- Nenhum arquivo em `src/` foi alterado.
+|- Nenhum `Runtime`, `Port`, `Adapter`, `Factory`, `Registry`, `Store`, `Provider`, `Pipeline` ou `Composition Root` novo foi criado.
+|- `EnterpriseRuntime`, `QueueRuntime`, `WorkerRuntime`, `SchedulerRuntime`, `Retry`, `DeadLetter`, `Observability`, `SecurityRuntime`, `IdentityRuntime`, `AuthorizationRuntime`, `TenantRuntime`, `ComplianceRuntime`, `AuditRuntime` e `CompletedRuntime` permanecem inalterados.
+|- `Enterprise Runtime Baseline v1.1` e o `Architectural Decision Log` permanecem preservados.
+
+### Gaps remanescentes
+
+|- `Governance Engine`, `Policy Engine`, `Execution Policy Registry`, `Workflow Engine`, `Decision Engine` e `Business Rules` existem apenas como scaffolding estrutural/in-memory.
+|- `Approval Engine`, `Operator Governance` e `Data Governance` ainda ausentes.
+|- `BusinessAuditTrail`, `Workflow`, `Decision Table` e `Business Rule Execution` sem persistência real e sem provider `real-tiss` certificado.
+|- `XMLValidationRuntimePort`, `SOAPRuntimePort`, `OperatorRuntimePort` e `ReturnRuntimePort` continuam em Discovery.
+
