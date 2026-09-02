@@ -43,7 +43,6 @@ export type {
   PrepareBatchResult,
   QualityAssessment,
   XMLDocument,
-  XMLValidationResult,
 } from "./types";
 
 export { BATCH_CANONICAL_STATES } from "./types";

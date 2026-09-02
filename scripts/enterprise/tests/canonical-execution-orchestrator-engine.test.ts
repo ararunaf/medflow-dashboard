@@ -33,13 +33,10 @@ import { createDocumentIntakePort } from "../../../src/lib/enterprise/document-i
 import { createDocumentProcessorPort } from "../../../src/lib/enterprise/document-processor/index.ts";
 import { createProcessingProviderPort } from "../../../src/lib/enterprise/processing-provider/index.ts";
 import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/index.ts";
-import { createTISSMappingPort } from "../../../src/lib/enterprise/tiss-mapping/index.ts";
-import { createTISSVocabularyPort } from "../../../src/lib/enterprise/tiss-vocabulary/index.ts";
 import { createTISSProfilePort } from "../../../src/lib/enterprise/tiss-profile/index.ts";
 import { createHealthcareModelPort } from "../../../src/lib/enterprise/healthcare-model/index.ts";
 import { createContractRuleBindingPort } from "../../../src/lib/enterprise/contract-rule-binding/index.ts";
 import { createTISSRuleRuntimePort } from "../../../src/lib/enterprise/tiss-rule-runtime/index.ts";
-import { createAIAuditorPort } from "../../../src/lib/enterprise/ai-auditor/index.ts";
 
 describe("EPC-24 CanonicalExecutionOrchestratorPort contract", () => {
   it("mock adapter satisfaz o Port e responde healthy", async () => {
@@ -54,7 +51,7 @@ describe("EPC-24 CanonicalExecutionOrchestratorPort contract", () => {
     assert.equal(health.storedContextCount, 0);
     assert.equal(health.storedResultCount, 0);
     assert.equal(health.storedTraceCount, 0);
-    assert.equal(health.foundationPortRefCount, 11);
+    assert.equal(health.foundationPortRefCount, 8);
 
     const caps = port.capabilities();
     assert.equal(caps.adapterId, "mock-in-memory");
@@ -65,7 +62,7 @@ describe("EPC-24 CanonicalExecutionOrchestratorPort contract", () => {
     assert.equal(caps.supportsCapabilities, true);
     assert.equal(caps.supportsTracing, true);
     assert.equal(caps.orchestratesViaFoundationPortsOnly, true);
-    assert.equal(caps.foundationPortCount, 11);
+    assert.equal(caps.foundationPortCount, 8);
     assert.equal(caps.supportsFuturePortInvocation, true);
     assert.equal(caps.dependsOnPipelineResolver, true);
     assert.equal(caps.resolvesPipelineDynamically, true);
@@ -162,7 +159,7 @@ describe("EPC-24 Sprint 02 — Orchestrator depende exclusivamente do Pipeline R
     assert.equal(resolved.result?.stagesExecuted, false);
     assert.equal(resolved.result?.enginesInvoked, false);
     assert.equal(resolved.result?.resolvedViaOfficialPortsOnly, true);
-    assert.equal(resolved.result?.orderedNodes.length, 11);
+    assert.equal(resolved.result?.orderedNodes.length, 8);
 
     const caps = mock.capabilities();
     assert.equal(caps.dependsOnPipelineResolver, true);
@@ -185,9 +182,9 @@ describe("EPC-24 Sprint 02 — Orchestrator depende exclusivamente do Pipeline R
 
     const started = await port.startExecution({ intakeRef: "intake-via-resolver" });
     assert.equal(started.ok, true);
-    assert.equal(started.context?.steps.length, 11);
+    assert.equal(started.context?.steps.length, 8);
     assert.equal(started.context?.steps[0]?.name, "document-intake");
-    assert.equal(started.context?.steps[10]?.name, "ai-auditor");
+    assert.equal(started.context?.steps[7]?.name, "tiss-rule-runtime");
     assert.ok(
       started.context?.steps.every((step) =>
         step.notes?.includes("resolved via PipelineResolverPort"),
@@ -234,7 +231,7 @@ describe("EPC-24 Sprint 03 — Orchestrator cria e utiliza exclusivamente o Exec
     assert.equal(started.executionContext?.identity.executionId, "canonical-exec-sprint03-1");
     assert.equal(started.executionContext?.state.phase, "finalized");
     assert.equal(started.executionContext?.state.status, "completed");
-    assert.equal(started.executionContext?.stages.length, 11);
+    assert.equal(started.executionContext?.stages.length, 8);
     assert.equal(started.executionContext?.pipeline?.stagesExecuted, false);
     assert.equal(started.executionContext?.capability.structuralTransportOnly, true);
     assert.equal(started.executionContext?.state.processingPerformed, false);
@@ -248,7 +245,7 @@ describe("EPC-24 Sprint 03 — Orchestrator cria e utiliza exclusivamente o Exec
 });
 
 describe("EPC-24 structural pipeline orchestration (sem Engines)", () => {
-  it("pipeline canônico contém exatamente os 11 steps da Foundation", () => {
+  it("pipeline canônico contém exatamente os 8 steps da Foundation", () => {
     assert.deepEqual(
       [...CANONICAL_EXECUTION_STEPS],
       [
@@ -256,18 +253,15 @@ describe("EPC-24 structural pipeline orchestration (sem Engines)", () => {
         "document-processing",
         "processing-provider",
         "ocr-provider",
-        "tiss-mapping",
-        "tiss-vocabulary",
         "tiss-profile",
         "healthcare-model",
         "contract-rule-binding",
         "tiss-rule-runtime",
-        "ai-auditor",
       ],
     );
 
     const steps = createCanonicalExecutionSteps(() => "step-fixed");
-    assert.equal(steps.length, 11);
+    assert.equal(steps.length, 8);
     assert.ok(steps.every((step) => step.status === "pending"));
   });
 
@@ -295,7 +289,7 @@ describe("EPC-24 structural pipeline orchestration (sem Engines)", () => {
     assert.equal(started.ok, true);
     assert.equal(started.context?.executionId, "canonical-exec-fixed-1");
     assert.equal(started.context?.status, "completed");
-    assert.equal(started.context?.steps.length, 11);
+    assert.equal(started.context?.steps.length, 8);
     assert.equal(started.context?.intakeRef, "intake-ref-001");
     assert.equal(started.context?.documentRef, "document-ref-001");
     assert.equal(started.result?.enginesInvoked, false);
@@ -305,8 +299,8 @@ describe("EPC-24 structural pipeline orchestration (sem Engines)", () => {
     assert.ok(started.context?.steps.every((step) => step.status === "completed"));
     assert.equal(started.context?.steps[0]?.name, "document-intake");
     assert.equal(started.context?.steps[0]?.portContract, "DocumentIntakePort");
-    assert.equal(started.context?.steps[10]?.name, "ai-auditor");
-    assert.equal(started.context?.steps[10]?.portContract, "AIAuditorPort");
+    assert.equal(started.context?.steps[7]?.name, "tiss-rule-runtime");
+    assert.equal(started.context?.steps[7]?.portContract, "TISSRuleRuntimePort");
 
     const health = await port.health();
     assert.equal(health.storedContextCount, 1);
@@ -326,7 +320,7 @@ describe("EPC-24 structural pipeline orchestration (sem Engines)", () => {
     assert.equal(started.ok, true);
     assert.equal(started.result?.enginesInvoked, false);
     assert.equal(started.result?.orchestrationViaPortsOnly, true);
-    assert.equal(started.context?.steps.length, 11);
+    assert.equal(started.context?.steps.length, 8);
 
     const caps = port.capabilities();
     assert.equal(caps.implementsOcr, false);
@@ -377,9 +371,9 @@ describe("EPC-24 structural pipeline orchestration (sem Engines)", () => {
 
 describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => {
   it("cada step referencia exclusivamente o Port Foundation correspondente", () => {
-    assert.equal(FOUNDATION_PORT_CHAIN.length, 11);
-    assert.equal(ORCHESTRATED_FOUNDATION_PORTS.length, 11);
-    assert.equal(ORCHESTRATED_FOUNDATION_PORT_CONTRACTS.length, 11);
+    assert.equal(FOUNDATION_PORT_CHAIN.length, 8);
+    assert.equal(ORCHESTRATED_FOUNDATION_PORTS.length, 8);
+    assert.equal(ORCHESTRATED_FOUNDATION_PORT_CONTRACTS.length, 8);
 
     assert.deepEqual(
       [...ORCHESTRATED_FOUNDATION_PORT_CONTRACTS],
@@ -388,13 +382,10 @@ describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => 
         "DocumentProcessorPort",
         "ProcessingProviderPort",
         "OCRProviderPort",
-        "TISSMappingPort",
-        "TISSVocabularyPort",
         "TISSProfilePort",
         "HealthcareModelPort",
         "ContractRuleBindingPort",
         "TISSRuleRuntimePort",
-        "AIAuditorPort",
       ],
     );
 
@@ -412,13 +403,10 @@ describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => 
       documentProcessor: createDocumentProcessorPort({ provider: "mock" }),
       processingProvider: createProcessingProviderPort({ provider: "mock" }),
       ocrProvider: createOCRProviderPort({ provider: "mock" }),
-      tissMapping: createTISSMappingPort({ provider: "mock" }),
-      tissVocabulary: createTISSVocabularyPort({ provider: "mock" }),
       tissProfile: createTISSProfilePort({ provider: "mock" }),
       healthcareModel: createHealthcareModelPort({ provider: "mock" }),
       contractRuleBinding: createContractRuleBindingPort({ provider: "mock" }),
       tissRuleRuntime: createTISSRuleRuntimePort({ provider: "mock" }),
-      aiAuditor: createAIAuditorPort({ provider: "mock" }),
     };
 
     const port = new DefaultCanonicalExecutionOrchestratorAdapter({
@@ -430,9 +418,7 @@ describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => 
     assert.ok(registry);
     assert.equal(registry?.documentIntake?.providerId, "mock");
     assert.equal(registry?.ocrProvider?.providerId, "mock");
-    assert.equal(registry?.tissMapping?.providerId, "mock");
     assert.equal(registry?.tissRuleRuntime?.providerId, "mock");
-    assert.equal(registry?.aiAuditor?.providerId, "mock");
 
     // Orquestração estrutural — Ports injetados NÃO são invocados para negócio.
     const started = await port.startExecution({ intakeRef: "intake-ports-ref" });
@@ -445,11 +431,7 @@ describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => 
 
     // Ports Foundation injetados expõem capabilities; Orquestrador não executa OCR/IA/regras.
     const ocrCaps = foundationPorts.ocrProvider?.capabilities();
-    const auditorCaps = foundationPorts.aiAuditor?.capabilities();
     assert.ok(ocrCaps);
-    assert.ok(auditorCaps);
-    assert.equal(auditorCaps?.executesRules, false);
-    assert.equal(auditorCaps?.decidesApproval, false);
     assert.equal(port.capabilities().implementsOcr, false);
     assert.equal(port.capabilities().implementsAi, false);
   });
@@ -458,7 +440,6 @@ describe("EPC-24 Foundation Port references (sem acoplamento a Engines)", () => 
     const factory = createCanonicalExecutionOrchestratorFactory({
       foundationPorts: {
         documentIntake: createDocumentIntakePort({ provider: "mock" }),
-        aiAuditor: createAIAuditorPort({ provider: "mock" }),
       },
     });
     const port = factory.create({ provider: "mock" });
@@ -473,7 +454,6 @@ describe("EPC-24 structural constants and future integration", () => {
     assert.ok(CANONICAL_ORCHESTRATED_COMPONENTS.includes("document-intake"));
     assert.ok(CANONICAL_ORCHESTRATED_COMPONENTS.includes("ocr-provider"));
     assert.ok(CANONICAL_ORCHESTRATED_COMPONENTS.includes("tiss-rule-runtime"));
-    assert.ok(CANONICAL_ORCHESTRATED_COMPONENTS.includes("ai-auditor"));
 
     assert.deepEqual(
       [...CANONICAL_STRUCTURAL_CHAIN],
@@ -492,13 +472,10 @@ describe("EPC-24 structural constants and future integration", () => {
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.documentProcessor.length > 0);
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.processingProvider.length > 0);
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.ocrProvider.length > 0);
-    assert.ok(FUTURE_PORT_INTEGRATION_NOTES.tissMapping.length > 0);
-    assert.ok(FUTURE_PORT_INTEGRATION_NOTES.tissVocabulary.length > 0);
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.tissProfile.length > 0);
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.healthcareModel.length > 0);
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.contractRuleBinding.length > 0);
     assert.ok(FUTURE_PORT_INTEGRATION_NOTES.tissRuleRuntime.length > 0);
-    assert.ok(FUTURE_PORT_INTEGRATION_NOTES.aiAuditor.length > 0);
   });
 
   it("modelos canônicos obrigatórios estão tipados no barrel", () => {

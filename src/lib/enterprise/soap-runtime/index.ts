@@ -69,7 +69,6 @@ export type {
   SOAPStatus,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./ports";
 
 export {

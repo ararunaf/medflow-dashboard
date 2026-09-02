@@ -259,9 +259,6 @@ export class DefaultProtocolRuntimeAdapter implements ProtocolRuntimePort {
     if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
       xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
     }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
 
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
     const ok =
@@ -323,7 +320,6 @@ export class DefaultProtocolRuntimeAdapter implements ProtocolRuntimePort {
         authorizationPolicy: input.authorizationPolicy,
         batchManifest: input.batchManifest,
         xmlDocument: input.xmlDocument,
-        xmlValidationResult: input.xmlValidationResult,
         metadata: profile.metadata,
         startedAt: stamp,
         finishedAt: stamp,

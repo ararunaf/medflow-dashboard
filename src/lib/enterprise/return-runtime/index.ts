@@ -78,7 +78,6 @@ export type {
   ReturnStatsInput,
   ReturnStatsResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./ports";
 
 export {

@@ -48,7 +48,6 @@ export type {
   ReturnStatsInput,
   ReturnStatsResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./types";
 
 export { RETURN_CANONICAL_STATES } from "./types";

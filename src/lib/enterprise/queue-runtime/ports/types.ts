@@ -10,10 +10,7 @@
  * INF-06: dependência Worker Runtime preparada — sem alocação/execução de Workers.
  */
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
   CanonicalQueue,
   CanonicalQueueBatch,
@@ -259,13 +256,10 @@ export type StatsResult = QueueRuntimeOperationEnvelope & {
  * Observability Runtime é dependência preparada (opcional no Port shape) — NÃO observada/emitida.
  */
 export type QueueRuntimeEnterpriseDeps = {
-  getWorkerRuntimePort(): WorkerRuntimePort;
   /** INF-07 / OPER-INF-R — Scheduler Runtime (agendamento temporal de retry). */
-  getSchedulerRuntimePort?: () => SchedulerRuntimePort;
   /** INF-08 — Persistent Queue Runtime preparado (sem consumo funcional). */
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
   /** INF-09 — Observability Runtime preparado (sem consumo funcional). */
-  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
   /** INF-10 — Scalability Runtime preparado (sem consumo funcional). */
   getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };

@@ -28,13 +28,10 @@ export type CanonicalExecutionStepName =
   | "document-processing"
   | "processing-provider"
   | "ocr-provider"
-  | "tiss-mapping"
-  | "tiss-vocabulary"
   | "tiss-profile"
   | "healthcare-model"
   | "contract-rule-binding"
-  | "tiss-rule-runtime"
-  | "ai-auditor";
+  | "tiss-rule-runtime";
 
 /** Kinds de registros canônicos do Orquestrador. */
 export type CanonicalExecutionRecordKind =

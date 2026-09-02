@@ -15,8 +15,6 @@
  * (decisão exhausted — park fica a cargo do Queue adapter via DeadLetterRuntimePort).
  */
 import type { QueueRuntimePort } from "../ports/queue-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import { InMemoryRetryStore } from "./in-memory-retry-store";
 import {
   computeExponentialBackoffDelayMs,
@@ -32,8 +30,6 @@ import {
 
 export type DefaultRetryInfrastructureOptions = {
   getQueueRuntimePort: () => QueueRuntimePort;
-  getWorkerRuntimePort: () => WorkerRuntimePort;
-  getSchedulerRuntimePort: () => SchedulerRuntimePort;
   store?: InMemoryRetryStore;
   defaultPolicy?: Partial<RetryPolicy>;
   now?: () => string;
@@ -61,16 +57,12 @@ function portShapeOk(port: unknown): boolean {
  */
 export class DefaultRetryInfrastructure {
   private readonly getQueueRuntimePort: () => QueueRuntimePort;
-  private readonly getWorkerRuntimePort: () => WorkerRuntimePort;
-  private readonly getSchedulerRuntimePort: () => SchedulerRuntimePort;
   private readonly store: InMemoryRetryStore;
   private readonly defaultPolicy: RetryPolicy;
   private readonly now: () => string;
 
   constructor(options: DefaultRetryInfrastructureOptions) {
     this.getQueueRuntimePort = options.getQueueRuntimePort;
-    this.getWorkerRuntimePort = options.getWorkerRuntimePort;
-    this.getSchedulerRuntimePort = options.getSchedulerRuntimePort;
     this.store = options.store ?? new InMemoryRetryStore();
     this.defaultPolicy = resolveRetryPolicy(options.defaultPolicy);
     this.now = options.now ?? (() => new Date().toISOString());
@@ -101,27 +93,13 @@ export class DefaultRetryInfrastructure {
     }
 
     const queuePort = this.getQueueRuntimePort();
-    const workerPort = this.getWorkerRuntimePort();
-    const schedulerPort = this.getSchedulerRuntimePort();
 
-    if (!portShapeOk(queuePort) || !portShapeOk(workerPort) || !portShapeOk(schedulerPort)) {
+    if (!portShapeOk(queuePort)) {
       return {
         ok: false,
         decision: "rejected",
         code: "RETRY_INFRASTRUCTURE_PORTS_UNAVAILABLE",
-        message:
-          "Retry requires QueueRuntimePort + WorkerRuntimePort + SchedulerRuntimePort (shape).",
-      };
-    }
-
-    // Worker nunca é alocado aqui — somente shape/capabilities (sem execução).
-    const workerCaps = workerPort.capabilities();
-    if (!workerCaps?.runtimeReady) {
-      return {
-        ok: false,
-        decision: "rejected",
-        code: "RETRY_INFRASTRUCTURE_WORKER_NOT_READY",
-        message: "WorkerRuntimePort is not ready for scheduled retry execution.",
+        message: "Retry requires QueueRuntimePort (shape).",
       };
     }
 
@@ -178,119 +156,15 @@ export class DefaultRetryInfrastructure {
       };
     }
 
-    const delayMs = computeExponentialBackoffDelayMs(attemptCount, policy);
-    const nextAttemptAt = new Date(Date.parse(stamp) + delayMs).toISOString();
-    const queueName = input.sourceQueueName ?? "enterprise-retry-queue";
-
-    // Transporte exclusivo via QueueRuntimePort — requeue da próxima tentativa.
-    const enqueued = await queuePort.enqueue({
-      queueName,
-      payloadRef: input.payloadRef,
-      correlationId: input.correlationId,
-      metadata: {
-        kind: "canonical-queue-metadata",
-        source: "retry-infrastructure",
-        channel: "retry",
-        customAttributes: {
-          retryId,
-          attemptCount,
-          maxAttempts: policy.maxAttempts,
-          delayMs,
-          failureReason,
-          sourceMessageId: input.sourceMessageId,
-          nextAttemptAt,
-          ...(input.metadata ?? {}),
-        },
-      },
-      attributes: {
-        retryScheduled: true,
-        attemptCount,
-        maxAttempts: policy.maxAttempts,
-      },
-    });
-
-    if (!enqueued.ok || !enqueued.queueMessage) {
-      return {
-        ok: false,
-        decision: "rejected",
-        code: enqueued.code ?? "RETRY_INFRASTRUCTURE_ENQUEUE_FAILED",
-        message: enqueued.message ?? "Failed to requeue via QueueRuntimePort.",
-      };
-    }
-
-    const requeuedMessageId = enqueued.queueMessage.messageId;
-    const scheduleName = input.scheduleName ?? `retry-${retryId}`;
-    const workerName = input.workerName ?? `retry-worker-${retryId}`;
-
-    // Tempo exclusivo via SchedulerRuntimePort — Worker é acionado só quando due.
-    const scheduled = await schedulerPort.schedule({
-      scheduleName,
-      metadata: {
-        kind: "canonical-scheduler-metadata",
-        source: "retry-infrastructure",
-        channel: "retry",
-        customAttributes: {
-          retryId,
-          attemptCount,
-          maxAttempts: policy.maxAttempts,
-          delayMs,
-          sourceMessageId: input.sourceMessageId,
-          requeuedMessageId,
-          queueName,
-        },
-      },
-      attributes: {
-        delayMs,
-        queueName,
-        workerName,
-        pollIntervalMs: 20,
-        repeat: false,
-      },
-    });
-
-    if (!scheduled.ok) {
-      return {
-        ok: false,
-        decision: "rejected",
-        code: scheduled.code ?? "RETRY_INFRASTRUCTURE_SCHEDULE_FAILED",
-        message: scheduled.message ?? "Failed to schedule retry via SchedulerRuntimePort.",
-      };
-    }
-
-    const record: RetryRecord = {
-      kind: "canonical-retry-record",
-      retryId,
-      sourceMessageId: input.sourceMessageId,
-      requeuedMessageId,
-      sourceQueueId: input.sourceQueueId,
-      sourceQueueName: queueName,
-      attemptCount,
-      maxAttempts: policy.maxAttempts,
-      delayMs,
-      status: "scheduled",
-      failureReason,
-      scheduledAt: stamp,
-      nextAttemptAt,
-      scheduleId: scheduled.schedule?.scheduleId,
-      jobId: scheduled.job?.jobId,
-      metadata: {
-        ...(input.metadata ?? {}),
-        workerName,
-        scheduleName,
-        exponentialBackoff: true,
-      },
-      payloadRef: input.payloadRef,
-      correlationId: input.correlationId ?? null,
-    };
-    this.store.set(record);
-
+    // Agendamento de retry (não-exhausted) requer SchedulerRuntimePort + WorkerRuntimePort
+    // para tempo/execução — removidos do Enterprise Runtime (F1-S1). Reintroduzido na
+    // fila assíncrona real do F1-S4; até lá, apenas o destino Dead Letter acima funciona.
     return {
-      ok: true,
-      decision: "retry-scheduled",
-      record,
-      code: "RETRY_INFRASTRUCTURE_SCHEDULED",
+      ok: false,
+      decision: "rejected",
+      code: "RETRY_INFRASTRUCTURE_SCHEDULER_UNAVAILABLE",
       message:
-        "Retry scheduled (OPER-INF-R) — Scheduler owns time; Worker executes later; Queue transports.",
+        "Retry scheduling requires SchedulerRuntimePort + WorkerRuntimePort, not available until F1-S4 real queue.",
     };
   }
 

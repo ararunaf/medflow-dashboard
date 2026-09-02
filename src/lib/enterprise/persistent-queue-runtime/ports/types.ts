@@ -7,11 +7,8 @@
  *
  * Sem backends persistentes reais. Sem RabbitMQ/Kafka/Azure/Redis/BullMQ. Sem Workers reais.
  */
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type {
   CanonicalPersistentQueue,
   CanonicalPersistentQueueCapabilities,
@@ -244,10 +241,7 @@ export type PersistentQueueStatsResult = PersistentQueueRuntimeOperationEnvelope
  */
 export type PersistentQueueRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;
-  getWorkerRuntimePort(): WorkerRuntimePort;
-  getSchedulerRuntimePort(): SchedulerRuntimePort;
   /** INF-09 — Observability Runtime preparado (sem consumo funcional). */
-  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
   /** INF-10 — Scalability Runtime preparado (sem consumo funcional). */
   getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };

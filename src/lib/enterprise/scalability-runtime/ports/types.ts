@@ -9,10 +9,7 @@
  * Sem scaling/cluster/failover/sharding reais.
  */
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { TISSRuntimePort } from "../../tiss-runtime/ports/tiss-runtime-port";
 import type {
   CanonicalScalabilityScope,
@@ -252,10 +249,7 @@ export type ScalabilityStatsResult = ScalabilityRuntimeOperationEnvelope & {
  */
 export type ScalabilityRuntimeEnterpriseDeps = {
   getQueueRuntimePort(): QueueRuntimePort;
-  getWorkerRuntimePort(): WorkerRuntimePort;
-  getSchedulerRuntimePort(): SchedulerRuntimePort;
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort;
-  getObservabilityRuntimePort(): ObservabilityRuntimePort;
   getTISSRuntimePort(): TISSRuntimePort;
 };
 

@@ -16,7 +16,6 @@ import type { BatchRuntimePort } from "../../batch-runtime/ports/batch-runtime-p
 import type { OperatorRuntimePort } from "../../operator-runtime/ports/operator-runtime-port";
 import type { SOAPRuntimePort } from "../../soap-runtime/ports/soap-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
   AuthorizationPolicy,
   AuthorizationStrategy,
@@ -29,7 +28,6 @@ import type {
   ProtocolState,
   ProtocolStatistics,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 import type { ProtocolRuntimeEngineCapabilities } from "./capabilities";
 
@@ -48,7 +46,6 @@ export type {
   ProtocolState,
   ProtocolStatistics,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 export type { ProtocolRuntimeEngineCapabilities };
 export { PROTOCOL_CANONICAL_STATES } from "./canonical";
@@ -203,7 +200,6 @@ export type ProtocolRuntimeEnterpriseDeps = {
   getOperatorRuntimePort?: () => OperatorRuntimePort;
   getSOAPRuntimePort?: () => SOAPRuntimePort;
   getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
 };
 
 /** Opções de resolução do ProtocolRuntimePort. */
@@ -248,7 +244,6 @@ export type PrepareProtocolProfileInput = ProtocolRuntimeOperationalControls & {
   authorizationPolicy?: AuthorizationPolicy;
   batchManifest?: BatchManifest;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
 };
 
 export type PrepareProtocolProfileResult = ProtocolRuntimeOperationEnvelope & {

@@ -292,9 +292,6 @@ export class DefaultWorkflowRuntimeAdapter implements WorkflowRuntimePort {
     if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
       xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
     }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
     if (typeof this.enterpriseDeps.getAuditRuntimePort === "function") {
       auditRuntimeOk = portShapeOk(this.enterpriseDeps.getAuditRuntimePort());
     }

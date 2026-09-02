@@ -30,13 +30,10 @@ export type OfficialPortRef =
   | "document-processor"
   | "processing-provider"
   | "ocr-provider"
-  | "tiss-mapping"
-  | "tiss-vocabulary"
   | "tiss-profile"
   | "healthcare-model"
   | "contract-rule-binding"
-  | "tiss-rule-runtime"
-  | "ai-auditor";
+  | "tiss-rule-runtime";
 
 /** Nome do contrato Port oficial correspondente. */
 export type OfficialPortContract =
@@ -44,13 +41,10 @@ export type OfficialPortContract =
   | "DocumentProcessorPort"
   | "ProcessingProviderPort"
   | "OCRProviderPort"
-  | "TISSMappingPort"
-  | "TISSVocabularyPort"
   | "TISSProfilePort"
   | "HealthcareModelPort"
   | "ContractRuleBindingPort"
-  | "TISSRuleRuntimePort"
-  | "AIAuditorPort";
+  | "TISSRuleRuntimePort";
 
 /** Nome canônico de estágio do pipeline. */
 export type PipelineStageName =
@@ -58,13 +52,10 @@ export type PipelineStageName =
   | "document-processing"
   | "processing-provider"
   | "ocr-provider"
-  | "tiss-mapping"
-  | "tiss-vocabulary"
   | "tiss-profile"
   | "healthcare-model"
   | "contract-rule-binding"
-  | "tiss-rule-runtime"
-  | "ai-auditor";
+  | "tiss-rule-runtime";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * PipelineDependency

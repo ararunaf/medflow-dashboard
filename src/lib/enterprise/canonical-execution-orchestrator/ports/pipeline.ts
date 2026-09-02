@@ -14,21 +14,17 @@ import { createStepId } from "./identity";
  * Pipeline arquitetural obrigatório (documentação estrutural).
  *
  * Document Intake → Document Processing → Processing Provider → OCR Provider
- * → TISS Mapping → TISS Vocabulary → TISS Profile → Healthcare Model
- * → Contract Rule Binding → TISS Rule Runtime → AI Auditor
+ * → TISS Profile → Healthcare Model → Contract Rule Binding → TISS Rule Runtime
  */
 export const CANONICAL_ORCHESTRATION_PIPELINE = [
   "document-intake",
   "document-processing",
   "processing-provider",
   "ocr-provider",
-  "tiss-mapping",
-  "tiss-vocabulary",
   "tiss-profile",
   "healthcare-model",
   "contract-rule-binding",
   "tiss-rule-runtime",
-  "ai-auditor",
 ] as const satisfies readonly CanonicalExecutionStepName[];
 
 /**
@@ -57,13 +53,10 @@ export const CANONICAL_ORCHESTRATED_COMPONENTS = [
   "document-processor",
   "processing-provider",
   "ocr-provider",
-  "tiss-mapping",
-  "tiss-vocabulary",
   "tiss-profile",
   "healthcare-model",
   "contract-rule-binding",
   "tiss-rule-runtime",
-  "ai-auditor",
 ] as const;
 
 /**
@@ -102,11 +95,6 @@ export const FUTURE_PORT_INTEGRATION_NOTES = {
   ocrProvider:
     "Step ocr-provider registra ocrRef estrutural. " +
     "OCRProviderPort NÃO é invocado para OCR real nesta fundação.",
-  tissMapping:
-    "Step tiss-mapping registra mappingRef estrutural. " +
-    "TISSMappingPort NÃO executa mapping real nesta fundação.",
-  tissVocabulary:
-    "Step tiss-vocabulary registra vocabularyRef estrutural. " + "Sem lookup real de vocabulário.",
   tissProfile: "Step tiss-profile registra profileRef estrutural. " + "Sem validação de profile.",
   healthcareModel:
     "Step healthcare-model registra healthcareModelRef estrutural. " +
@@ -116,7 +104,4 @@ export const FUTURE_PORT_INTEGRATION_NOTES = {
   tissRuleRuntime:
     "Step tiss-rule-runtime registra runtimeRef estrutural. " +
     "TISSRuleRuntimePort NÃO executa regras nesta fundação.",
-  aiAuditor:
-    "Step ai-auditor registra auditorRef estrutural. " +
-    "AIAuditorPort NÃO invoca IA nesta fundação.",
 } as const;

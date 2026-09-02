@@ -18,15 +18,13 @@ import type { AuthorizationStrategy } from "../../authorization-runtime/ports/ca
 import type { AuthorizationPolicy } from "../../authorization-runtime/ports/canonical";
 import type { BatchManifest } from "../../batch-runtime/ports/canonical";
 import type { XMLDocument } from "../../xml-tiss-runtime/ports/canonical";
-import type { XMLValidationResult } from "../../xml-validation-runtime/ports/canonical";
 
 export type {
   OperatorCapabilityProfile,
   AuthorizationStrategy,
   AuthorizationPolicy,
   BatchManifest,
-  XMLDocument,
-  XMLValidationResult,
+  XMLDocument,
 };
 
 /**
@@ -227,7 +225,6 @@ export type ProtocolContext = ProtocolRuntimeObservabilityEnvelope & {
   authorizationPolicy?: AuthorizationPolicy;
   batchManifest?: BatchManifest;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   metadata?: ProtocolMetadata;
   structuralNotes?: string;
 };

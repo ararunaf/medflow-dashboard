@@ -68,7 +68,6 @@ export type {
   PrepareBatchResult,
   QualityAssessment,
   XMLDocument,
-  XMLValidationResult,
 } from "./ports";
 
 export {

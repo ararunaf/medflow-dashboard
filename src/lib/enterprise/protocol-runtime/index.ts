@@ -70,7 +70,6 @@ export type {
   ResolveProtocolInput,
   ResolveProtocolResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./ports";
 
 export {

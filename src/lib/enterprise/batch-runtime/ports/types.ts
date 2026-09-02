@@ -17,7 +17,6 @@ import type { OperatorRuntimePort } from "../../operator-runtime/ports/operator-
 import type { QualityRuntimePort } from "../../quality-runtime/ports/quality-runtime-port";
 import type { SOAPRuntimePort } from "../../soap-runtime/ports/soap-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
   AuditResult,
   AuthorizationPolicy,
@@ -33,7 +32,6 @@ import type {
   OperatorCapabilityProfile,
   QualityAssessment,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 import type { BatchRuntimeEngineCapabilities } from "./capabilities";
 
@@ -56,7 +54,6 @@ export type {
   OperatorCapabilityProfile,
   QualityAssessment,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 export type { BatchRuntimeEngineCapabilities };
 export { BATCH_CANONICAL_STATES } from "./canonical";
@@ -213,7 +210,6 @@ export type BatchRuntimeEnterpriseDeps = {
   getOperatorRuntimePort?: () => OperatorRuntimePort;
   getSOAPRuntimePort?: () => SOAPRuntimePort;
   getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
   getQualityRuntimePort?: () => QualityRuntimePort;
   getAuditRuntimePort?: () => AuditRuntimePort;
 };
@@ -262,7 +258,6 @@ export type PrepareBatchInput = BatchRuntimeOperationalControls & {
   authorizationStrategy?: AuthorizationStrategy;
   authorizationPolicy?: AuthorizationPolicy;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   qualityAssessment?: QualityAssessment;
   auditResult?: AuditResult;
 };

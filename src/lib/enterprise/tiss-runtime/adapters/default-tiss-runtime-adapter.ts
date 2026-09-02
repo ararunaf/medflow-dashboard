@@ -112,21 +112,6 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXMLGenerationRuntimePort (TISS-05).",
       );
     }
-    if (typeof options.enterpriseDeps.getXMLSerializerRuntimePort !== "function") {
-      throw new Error(
-        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXMLSerializerRuntimePort (TISS-06).",
-      );
-    }
-    if (typeof options.enterpriseDeps.getXMLSchemaRuntimePort !== "function") {
-      throw new Error(
-        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXMLSchemaRuntimePort (TISS-07).",
-      );
-    }
-    if (typeof options.enterpriseDeps.getXMLValidationRuntimePort !== "function") {
-      throw new Error(
-        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXMLValidationRuntimePort (TISS-08).",
-      );
-    }
     if (typeof options.enterpriseDeps.getXSDRuntimePort !== "function") {
       throw new Error(
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getXSDRuntimePort (TISS-09).",
@@ -142,24 +127,9 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getQueueRuntimePort (INF-05).",
       );
     }
-    if (typeof options.enterpriseDeps.getWorkerRuntimePort !== "function") {
-      throw new Error(
-        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getWorkerRuntimePort (INF-06).",
-      );
-    }
-    if (typeof options.enterpriseDeps.getSchedulerRuntimePort !== "function") {
-      throw new Error(
-        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getSchedulerRuntimePort (INF-07).",
-      );
-    }
     if (typeof options.enterpriseDeps.getPersistentQueueRuntimePort !== "function") {
       throw new Error(
         "DefaultTISSRuntimeAdapter exige enterpriseDeps.getPersistentQueueRuntimePort (INF-08).",
-      );
-    }
-    if (typeof options.enterpriseDeps.getObservabilityRuntimePort !== "function") {
-      throw new Error(
-        "DefaultTISSRuntimeAdapter exige enterpriseDeps.getObservabilityRuntimePort (INF-09).",
       );
     }
     if (typeof options.enterpriseDeps.getScalabilityRuntimePort !== "function") {
@@ -197,16 +167,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     const rulePackEnginePort = this.enterpriseDeps.getRulePackEnginePort();
     const xmlRuntimePort = this.enterpriseDeps.getXMLRuntimePort();
     const xmlGenerationRuntimePort = this.enterpriseDeps.getXMLGenerationRuntimePort();
-    const xmlSerializerRuntimePort = this.enterpriseDeps.getXMLSerializerRuntimePort();
-    const xmlSchemaRuntimePort = this.enterpriseDeps.getXMLSchemaRuntimePort();
-    const xmlValidationRuntimePort = this.enterpriseDeps.getXMLValidationRuntimePort();
     const xsdRuntimePort = this.enterpriseDeps.getXSDRuntimePort();
     const namespaceRuntimePort = this.enterpriseDeps.getNamespaceRuntimePort();
     const queueRuntimePort = this.enterpriseDeps.getQueueRuntimePort();
-    const workerRuntimePort = this.enterpriseDeps.getWorkerRuntimePort();
-    const schedulerRuntimePort = this.enterpriseDeps.getSchedulerRuntimePort();
     const persistentQueueRuntimePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
-    const observabilityRuntimePort = this.enterpriseDeps.getObservabilityRuntimePort();
     const scalabilityRuntimePort = this.enterpriseDeps.getScalabilityRuntimePort();
     const [
       orchestratorHealth,
@@ -215,16 +179,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEngineHealth,
       xmlRuntimeHealth,
       xmlGenerationRuntimeHealth,
-      xmlSerializerRuntimeHealth,
-      xmlSchemaRuntimeHealth,
-      xmlValidationRuntimeHealth,
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
       queueRuntimeHealth,
-      workerRuntimeHealth,
-      schedulerRuntimeHealth,
       persistentQueueRuntimeHealth,
-      observabilityRuntimeHealth,
       scalabilityRuntimeHealth,
     ] = await Promise.all([
       this.enterpriseDeps.getOrchestratorPort().health(),
@@ -233,16 +191,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEnginePort.health(),
       xmlRuntimePort.health(),
       xmlGenerationRuntimePort.health(),
-      xmlSerializerRuntimePort.health(),
-      xmlSchemaRuntimePort.health(),
-      xmlValidationRuntimePort.health(),
       xsdRuntimePort.health(),
       namespaceRuntimePort.health(),
       queueRuntimePort.health(),
-      workerRuntimePort.health(),
-      schedulerRuntimePort.health(),
       persistentQueueRuntimePort.health(),
-      observabilityRuntimePort.health(),
       scalabilityRuntimePort.health(),
     ]);
     const end = typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -254,16 +206,10 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEngineHealth.ok &&
       xmlRuntimeHealth.ok &&
       xmlGenerationRuntimeHealth.ok &&
-      xmlSerializerRuntimeHealth.ok &&
-      xmlSchemaRuntimeHealth.ok &&
-      xmlValidationRuntimeHealth.ok &&
       xsdRuntimeHealth.ok &&
       namespaceRuntimeHealth.ok &&
       queueRuntimeHealth.ok &&
-      workerRuntimeHealth.ok &&
-      schedulerRuntimeHealth.ok &&
       persistentQueueRuntimeHealth.ok &&
-      observabilityRuntimeHealth.ok &&
       scalabilityRuntimeHealth.ok;
 
     return {
@@ -276,19 +222,13 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
       rulePackEngineOk: rulePackEngineHealth.ok,
       xmlRuntimeOk: xmlRuntimeHealth.ok,
       xmlGenerationRuntimeOk: xmlGenerationRuntimeHealth.ok,
-      xmlSerializerRuntimeOk: xmlSerializerRuntimeHealth.ok,
-      xmlSchemaRuntimeOk: xmlSchemaRuntimeHealth.ok,
-      xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
       queueRuntimeOk: queueRuntimeHealth.ok,
-      workerRuntimeOk: workerRuntimeHealth.ok,
-      schedulerRuntimeOk: schedulerRuntimeHealth.ok,
       persistentQueueRuntimeOk: persistentQueueRuntimeHealth.ok,
-      observabilityRuntimeOk: observabilityRuntimeHealth.ok,
       scalabilityRuntimeOk: scalabilityRuntimeHealth.ok,
       message: ok
-        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + QueueRuntimePort + WorkerRuntimePort + SchedulerRuntimePort + PersistentQueueRuntimePort + ObservabilityRuntimePort + ScalabilityRuntimePort + TISSProviderPort — sem bypass; Queue/Worker/Scheduler/PersistentQueue/Observability/Scalability Runtime dependências preparadas sem consumo)."
+        ? "TISS Runtime pronto (Orchestrator + TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + QueueRuntimePort + PersistentQueueRuntimePort + ScalabilityRuntimePort + TISSProviderPort — sem bypass; Queue/PersistentQueue/Scalability Runtime dependências preparadas sem consumo)."
         : "TISS Runtime degradado — ver Ports Enterprise.",
     };
   }
@@ -302,9 +242,6 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
     const rulePackEnginePort = this.enterpriseDeps.getRulePackEnginePort();
     const xmlRuntimePort = this.enterpriseDeps.getXMLRuntimePort();
     const xmlGenerationRuntimePort = this.enterpriseDeps.getXMLGenerationRuntimePort();
-    const xmlSerializerRuntimePort = this.enterpriseDeps.getXMLSerializerRuntimePort();
-    const xmlSchemaRuntimePort = this.enterpriseDeps.getXMLSchemaRuntimePort();
-    const xmlValidationRuntimePort = this.enterpriseDeps.getXMLValidationRuntimePort();
     const xsdRuntimePort = this.enterpriseDeps.getXSDRuntimePort();
     const namespaceRuntimePort = this.enterpriseDeps.getNamespaceRuntimePort();
 
@@ -430,194 +367,6 @@ export class DefaultTISSRuntimeAdapter implements TISSRuntimePort {
           }
         }
 
-        try {
-          const serialized = await xmlSerializerRuntimePort.serialize({
-            requestId: input.requestId,
-            signal: input.signal,
-            timeoutMs: input.timeoutMs,
-            retryCount: input.retryCount,
-            attributes: input.attributes,
-            generationId: xmlGenerationId,
-            generationResultId: xmlGenerationResultId,
-            documentId: input.documentId,
-            structure,
-            request: {
-              kind: "canonical-xml-serialize-request",
-              generationId: xmlGenerationId,
-              generationResultId: xmlGenerationResultId,
-              documentId: input.documentId,
-              structure,
-              metadata: {
-                kind: "canonical-xml-serializer-metadata",
-                sessionId: input.metadata.sessionId,
-                correlationId: input.metadata.correlationId,
-                channel: input.metadata.channel ?? "tiss-runtime",
-                source: "tiss-runtime",
-                tags: ["tiss-06", "tiss-runtime", ...(input.metadata.tags ?? [])],
-              },
-              structuralNotes:
-                "TISS Runtime → XMLGenerationRuntimePort → XMLSerializerRuntimePort (canonical XML string only).",
-            },
-          });
-          if (serialized.ok && serialized.result) {
-            xmlSerializeResultId = serialized.result.resultId;
-            processedViaXMLSerializerRuntimePort = true;
-
-            try {
-              const schemaRegistered = await xmlSchemaRuntimePort.register({
-                requestId: input.requestId,
-                signal: input.signal,
-                timeoutMs: input.timeoutMs,
-                retryCount: input.retryCount,
-                attributes: input.attributes,
-                serializeResultId: xmlSerializeResultId,
-                generationResultId: xmlGenerationResultId,
-                documentId: input.documentId,
-                request: {
-                  kind: "canonical-xml-schema-request",
-                  serializeResultId: xmlSerializeResultId,
-                  generationResultId: xmlGenerationResultId,
-                  documentId: input.documentId,
-                  metadata: {
-                    kind: "canonical-xml-schema-metadata",
-                    sessionId: input.metadata.sessionId,
-                    correlationId: input.metadata.correlationId,
-                    channel: input.metadata.channel ?? "tiss-runtime",
-                    source: "tiss-runtime",
-                    tags: ["tiss-07", "tiss-runtime", ...(input.metadata.tags ?? [])],
-                  },
-                  structuralNotes:
-                    "TISS Runtime → XMLSerializerRuntimePort → XMLSchemaRuntimePort (canonical schema only — no official XSD / no validation).",
-                },
-              });
-              if (schemaRegistered.ok && schemaRegistered.result) {
-                xmlSchemaResultId = schemaRegistered.result.resultId;
-                processedViaXMLSchemaRuntimePort = true;
-
-                try {
-                  const validated = await xmlValidationRuntimePort.validate({
-                    requestId: input.requestId,
-                    signal: input.signal,
-                    timeoutMs: input.timeoutMs,
-                    retryCount: input.retryCount,
-                    attributes: input.attributes,
-                    schemaResultId: xmlSchemaResultId,
-                    serializeResultId: xmlSerializeResultId,
-                    generationResultId: xmlGenerationResultId,
-                    documentId: input.documentId,
-                    request: {
-                      kind: "canonical-xml-validation-request",
-                      schemaResultId: xmlSchemaResultId,
-                      serializeResultId: xmlSerializeResultId,
-                      generationResultId: xmlGenerationResultId,
-                      documentId: input.documentId,
-                      metadata: {
-                        kind: "canonical-xml-validation-metadata",
-                        sessionId: input.metadata.sessionId,
-                        correlationId: input.metadata.correlationId,
-                        channel: input.metadata.channel ?? "tiss-runtime",
-                        source: "tiss-runtime",
-                        tags: ["tiss-08", "tiss-runtime", ...(input.metadata.tags ?? [])],
-                      },
-                      structuralNotes:
-                        "TISS Runtime → XMLSchemaRuntimePort → XMLValidationRuntimePort (structural only — no official XSD / no real validation).",
-                    },
-                  });
-                  if (validated.ok && validated.result) {
-                    xmlValidationResultId = validated.result.resultId;
-                    processedViaXMLValidationRuntimePort = true;
-
-                    try {
-                      const prepared = await xsdRuntimePort.prepare({
-                        requestId: input.requestId,
-                        signal: input.signal,
-                        timeoutMs: input.timeoutMs,
-                        retryCount: input.retryCount,
-                        attributes: input.attributes,
-                        validationResultId: xmlValidationResultId,
-                        schemaResultId: xmlSchemaResultId,
-                        serializeResultId: xmlSerializeResultId,
-                        generationResultId: xmlGenerationResultId,
-                        documentId: input.documentId,
-                        request: {
-                          kind: "canonical-xsd-runtime-request",
-                          validationResultId: xmlValidationResultId,
-                          schemaResultId: xmlSchemaResultId,
-                          serializeResultId: xmlSerializeResultId,
-                          generationResultId: xmlGenerationResultId,
-                          documentId: input.documentId,
-                          metadata: {
-                            kind: "canonical-xsd-metadata",
-                            sessionId: input.metadata.sessionId,
-                            correlationId: input.metadata.correlationId,
-                            channel: input.metadata.channel ?? "tiss-runtime",
-                            source: "tiss-runtime",
-                            tags: ["tiss-09", "tiss-runtime", ...(input.metadata.tags ?? [])],
-                          },
-                          structuralNotes:
-                            "TISS Runtime → XMLValidationRuntimePort → XSDRuntimePort (structural only — no official XSD / no real validation).",
-                        },
-                      });
-                      if (prepared.ok && prepared.result) {
-                        xsdResultId = prepared.result.resultId;
-                        processedViaXSDRuntimePort = true;
-
-                        try {
-                          const namespacePrepared = await namespaceRuntimePort.prepare({
-                            requestId: input.requestId,
-                            signal: input.signal,
-                            timeoutMs: input.timeoutMs,
-                            retryCount: input.retryCount,
-                            attributes: input.attributes,
-                            xsdResultId,
-                            validationResultId: xmlValidationResultId,
-                            schemaResultId: xmlSchemaResultId,
-                            serializeResultId: xmlSerializeResultId,
-                            generationResultId: xmlGenerationResultId,
-                            documentId: input.documentId,
-                            request: {
-                              kind: "canonical-namespace-runtime-request",
-                              xsdResultId,
-                              validationResultId: xmlValidationResultId,
-                              schemaResultId: xmlSchemaResultId,
-                              serializeResultId: xmlSerializeResultId,
-                              generationResultId: xmlGenerationResultId,
-                              documentId: input.documentId,
-                              metadata: {
-                                kind: "canonical-namespace-metadata",
-                                sessionId: input.metadata.sessionId,
-                                correlationId: input.metadata.correlationId,
-                                channel: input.metadata.channel ?? "tiss-runtime",
-                                source: "tiss-runtime",
-                                tags: ["tiss-10", "tiss-runtime", ...(input.metadata.tags ?? [])],
-                              },
-                              structuralNotes:
-                                "TISS Runtime → XSDRuntimePort → NamespaceRuntimePort (structural only — no official namespace / no real resolution).",
-                            },
-                          });
-                          if (namespacePrepared.ok && namespacePrepared.result) {
-                            namespaceResultId = namespacePrepared.result.resultId;
-                            processedViaNamespaceRuntimePort = true;
-                          }
-                        } catch {
-                          // Best-effort Namespace Runtime — não bloqueia process via Port.
-                        }
-                      }
-                    } catch {
-                      // Best-effort XSD Runtime — não bloqueia process via Port.
-                    }
-                  }
-                } catch {
-                  // Best-effort XML Validation Runtime — não bloqueia process via Port.
-                }
-              }
-            } catch {
-              // Best-effort XML Schema Runtime — não bloqueia process via Port.
-            }
-          }
-        } catch {
-          // Best-effort XML Serializer Runtime — não bloqueia process via Port.
-        }
       }
     } catch {
       // Best-effort XML Runtime — não bloqueia process via Port.

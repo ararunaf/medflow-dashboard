@@ -243,15 +243,6 @@ export class DefaultIntelligentCaptureRuntimeAdapter implements IntelligentCaptu
       if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort === "function") {
         persistentQueueRuntimeOk = portShapeOk(this.enterpriseDeps.getPersistentQueueRuntimePort());
       }
-      if (typeof this.enterpriseDeps.getSchedulerRuntimePort === "function") {
-        schedulerRuntimeOk = portShapeOk(this.enterpriseDeps.getSchedulerRuntimePort());
-      }
-      if (typeof this.enterpriseDeps.getWorkerRuntimePort === "function") {
-        workerRuntimeOk = portShapeOk(this.enterpriseDeps.getWorkerRuntimePort());
-      }
-      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
-        observabilityRuntimeOk = portShapeOk(this.enterpriseDeps.getObservabilityRuntimePort());
-      }
     }
 
     const ok =

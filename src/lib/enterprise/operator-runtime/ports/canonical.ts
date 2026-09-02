@@ -13,15 +13,13 @@
  */
 
 import type { XMLDocument } from "../../xml-tiss-runtime/ports/canonical";
-import type { XMLValidationResult } from "../../xml-validation-runtime/ports/canonical";
 import type { CanonicalGuide } from "../../tiss-mapping-runtime/ports/canonical";
 import type { QualityAssessment } from "../../quality-runtime/ports/canonical";
 import type { ValidationResult } from "../../validation-runtime/ports/canonical";
 import type { AuditResult } from "../../audit-runtime/ports/canonical";
 
 export type {
-  XMLDocument,
-  XMLValidationResult,
+  XMLDocument,
   CanonicalGuide,
   QualityAssessment,
   ValidationResult,
@@ -141,7 +139,6 @@ export type OperatorContext = OperatorRuntimeObservabilityEnvelope & {
   responseId?: string;
   capabilityProfile?: OperatorCapabilityProfile;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;
@@ -158,7 +155,6 @@ export type OperatorRequest = {
   operatorContext?: OperatorContext;
   capabilityProfile?: OperatorCapabilityProfile;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;
@@ -183,7 +179,6 @@ export type OperatorResponse = {
   profile?: OperatorCapabilityProfile;
   operatorContext?: OperatorContext;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;

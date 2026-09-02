@@ -33,13 +33,10 @@ import { createDocumentIntakePort } from "../../../src/lib/enterprise/document-i
 import { createDocumentProcessorPort } from "../../../src/lib/enterprise/document-processor/index.ts";
 import { createProcessingProviderPort } from "../../../src/lib/enterprise/processing-provider/index.ts";
 import { createOCRProviderPort } from "../../../src/lib/enterprise/ocr-provider/index.ts";
-import { createTISSMappingPort } from "../../../src/lib/enterprise/tiss-mapping/index.ts";
-import { createTISSVocabularyPort } from "../../../src/lib/enterprise/tiss-vocabulary/index.ts";
 import { createTISSProfilePort } from "../../../src/lib/enterprise/tiss-profile/index.ts";
 import { createHealthcareModelPort } from "../../../src/lib/enterprise/healthcare-model/index.ts";
 import { createContractRuleBindingPort } from "../../../src/lib/enterprise/contract-rule-binding/index.ts";
 import { createTISSRuleRuntimePort } from "../../../src/lib/enterprise/tiss-rule-runtime/index.ts";
-import { createAIAuditorPort } from "../../../src/lib/enterprise/ai-auditor/index.ts";
 
 describe("EPC-24 PipelineResolverPort contract", () => {
   it("mock adapter satisfaz o Port e responde healthy", async () => {
@@ -51,7 +48,7 @@ describe("EPC-24 PipelineResolverPort contract", () => {
     assert.equal(health.provider, "mock");
     assert.equal(health.storedPipelineCount, 1);
     assert.equal(health.storedResolutionCount, 0);
-    assert.equal(health.officialPortRefCount, 11);
+    assert.equal(health.officialPortRefCount, 8);
 
     const caps = port.capabilities();
     assert.equal(caps.adapterId, "mock-in-memory");
@@ -61,7 +58,7 @@ describe("EPC-24 PipelineResolverPort contract", () => {
     assert.equal(caps.supportsHealth, true);
     assert.equal(caps.supportsCapabilities, true);
     assert.equal(caps.resolvesViaOfficialPortsOnly, true);
-    assert.equal(caps.officialPortCount, 11);
+    assert.equal(caps.officialPortCount, 8);
     assert.equal(caps.structuralResolutionOnly, true);
     assert.equal(caps.stagesExecuted, false);
     assert.equal(caps.implementsOcr, false);
@@ -165,9 +162,9 @@ describe("EPC-24 Pipeline Resolution", () => {
     assert.equal(resolved.result?.stagesExecuted, false);
     assert.equal(resolved.result?.enginesInvoked, false);
     assert.equal(resolved.result?.resolvedViaOfficialPortsOnly, true);
-    assert.equal(resolved.result?.stageCount, 11);
-    assert.equal(resolved.result?.nodeCount, 11);
-    assert.equal(resolved.result?.dependencyCount, 10);
+    assert.equal(resolved.result?.stageCount, 8);
+    assert.equal(resolved.result?.nodeCount, 8);
+    assert.equal(resolved.result?.dependencyCount, 7);
 
     const health = await port.health();
     assert.equal(health.storedResolutionCount, 1);
@@ -206,10 +203,10 @@ describe("EPC-24 Pipeline Resolution", () => {
 });
 
 describe("EPC-24 Pipeline Composition / Ordering / Metadata / Dependencies", () => {
-  it("composição canônica contém exatamente os 11 Ports oficiais", () => {
-    assert.equal(OFFICIAL_PORT_CHAIN.length, 11);
-    assert.equal(OFFICIAL_PORT_REFS.length, 11);
-    assert.equal(OFFICIAL_PORT_CONTRACTS.length, 11);
+  it("composição canônica contém exatamente os 8 Ports oficiais", () => {
+    assert.equal(OFFICIAL_PORT_CHAIN.length, 8);
+    assert.equal(OFFICIAL_PORT_REFS.length, 8);
+    assert.equal(OFFICIAL_PORT_CONTRACTS.length, 8);
 
     assert.deepEqual(
       [...OFFICIAL_PORT_CONTRACTS],
@@ -218,13 +215,10 @@ describe("EPC-24 Pipeline Composition / Ordering / Metadata / Dependencies", () 
         "DocumentProcessorPort",
         "ProcessingProviderPort",
         "OCRProviderPort",
-        "TISSMappingPort",
-        "TISSVocabularyPort",
         "TISSProfilePort",
         "HealthcareModelPort",
         "ContractRuleBindingPort",
         "TISSRuleRuntimePort",
-        "AIAuditorPort",
       ],
     );
   });
@@ -240,13 +234,10 @@ describe("EPC-24 Pipeline Composition / Ordering / Metadata / Dependencies", () 
       "document-processing",
       "processing-provider",
       "ocr-provider",
-      "tiss-mapping",
-      "tiss-vocabulary",
       "tiss-profile",
       "healthcare-model",
       "contract-rule-binding",
       "tiss-rule-runtime",
-      "ai-auditor",
     ]);
 
     for (let i = 0; i < (resolved.result?.orderedNodes.length ?? 0); i++) {
@@ -258,10 +249,10 @@ describe("EPC-24 Pipeline Composition / Ordering / Metadata / Dependencies", () 
   it("metadados do pipeline são estruturais", () => {
     const definition = createStableCanonicalPipelineDefinition();
     assert.equal(definition.kind, "pipeline-definition");
-    assert.equal(definition.metadata?.stageCount, 11);
-    assert.equal(definition.metadata?.nodeCount, 11);
-    assert.equal(definition.metadata?.dependencyCount, 10);
-    assert.equal(definition.metadata?.officialPortCount, 11);
+    assert.equal(definition.metadata?.stageCount, 8);
+    assert.equal(definition.metadata?.nodeCount, 8);
+    assert.equal(definition.metadata?.dependencyCount, 7);
+    assert.equal(definition.metadata?.officialPortCount, 8);
     assert.ok(definition.tags?.includes("canonical"));
     assert.ok(definition.tags?.includes("epc-24"));
   });
@@ -284,7 +275,7 @@ describe("EPC-24 Pipeline Composition / Ordering / Metadata / Dependencies", () 
       now: () => "2026-08-01T00:00:00.000Z",
     });
 
-    assert.equal(definition.dependencies.length, 10);
+    assert.equal(definition.dependencies.length, 7);
     assert.equal(definition.nodes[0]?.dependencyIds?.length, 0);
     for (let i = 1; i < definition.nodes.length; i++) {
       assert.equal(definition.nodes[i]?.dependencyIds?.length, 1);
@@ -299,7 +290,6 @@ describe("EPC-24 Resolver Factory / Provider / Adapter / Port / Health / Capabil
     const factory = createPipelineResolverFactory({
       officialPorts: {
         documentIntake: createDocumentIntakePort({ provider: "mock" }),
-        aiAuditor: createAIAuditorPort({ provider: "mock" }),
       },
     });
     const port = factory.create({ provider: "mock" });
@@ -320,13 +310,10 @@ describe("EPC-24 Resolver Factory / Provider / Adapter / Port / Health / Capabil
       documentProcessor: createDocumentProcessorPort({ provider: "mock" }),
       processingProvider: createProcessingProviderPort({ provider: "mock" }),
       ocrProvider: createOCRProviderPort({ provider: "mock" }),
-      tissMapping: createTISSMappingPort({ provider: "mock" }),
-      tissVocabulary: createTISSVocabularyPort({ provider: "mock" }),
       tissProfile: createTISSProfilePort({ provider: "mock" }),
       healthcareModel: createHealthcareModelPort({ provider: "mock" }),
       contractRuleBinding: createContractRuleBindingPort({ provider: "mock" }),
       tissRuleRuntime: createTISSRuleRuntimePort({ provider: "mock" }),
-      aiAuditor: createAIAuditorPort({ provider: "mock" }),
     };
 
     const adapter = new DefaultPipelineResolverAdapter({
@@ -338,9 +325,7 @@ describe("EPC-24 Resolver Factory / Provider / Adapter / Port / Health / Capabil
     assert.ok(registry);
     assert.equal(registry?.documentProcessor?.providerId, "mock");
     assert.equal(registry?.ocrProvider?.providerId, "mock");
-    assert.equal(registry?.tissMapping?.providerId, "mock");
     assert.equal(registry?.tissRuleRuntime?.providerId, "mock");
-    assert.equal(registry?.aiAuditor?.providerId, "mock");
 
     const resolved = await adapter.resolvePipeline({ channel: "official-ports-ref" });
     assert.equal(resolved.ok, true);
@@ -348,9 +333,7 @@ describe("EPC-24 Resolver Factory / Provider / Adapter / Port / Health / Capabil
     assert.equal(resolved.result?.stagesExecuted, false);
 
     const ocrCaps = officialPorts.ocrProvider?.capabilities();
-    const auditorCaps = officialPorts.aiAuditor?.capabilities();
     assert.ok(ocrCaps);
-    assert.ok(auditorCaps);
     assert.equal(adapter.capabilities().implementsOcr, false);
     assert.equal(adapter.capabilities().implementsAi, false);
   });
@@ -361,9 +344,9 @@ describe("EPC-24 Resolver Factory / Provider / Adapter / Port / Health / Capabil
     const caps = port.capabilities();
 
     assert.equal(health.ok, true);
-    assert.equal(health.officialPortRefCount, 11);
-    assert.equal(caps.officialPortRefs.length, 11);
-    assert.equal(caps.officialPortContracts.length, 11);
+    assert.equal(health.officialPortRefCount, 8);
+    assert.equal(caps.officialPortRefs.length, 8);
+    assert.equal(caps.officialPortContracts.length, 8);
     assert.deepEqual([...caps.officialPortRefs], [...OFFICIAL_PORT_REFS]);
   });
 
@@ -372,13 +355,10 @@ describe("EPC-24 Resolver Factory / Provider / Adapter / Port / Health / Capabil
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.documentProcessor.length > 0);
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.processingProvider.length > 0);
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.ocrProvider.length > 0);
-    assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.tissMapping.length > 0);
-    assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.tissVocabulary.length > 0);
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.tissProfile.length > 0);
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.healthcareModel.length > 0);
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.contractRuleBinding.length > 0);
     assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.tissRuleRuntime.length > 0);
-    assert.ok(OFFICIAL_PORT_RESOLUTION_NOTES.aiAuditor.length > 0);
   });
 
   it("store seeda pipeline canônico e permanece saudável", () => {

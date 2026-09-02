@@ -148,7 +148,6 @@ function resolveManifest(input: PrepareReturnInput, stamp: string): ReturnManife
     batchManifest: input.batchManifest ?? input.manifest?.batchManifest,
     protocolProfile: input.protocolProfile ?? input.manifest?.protocolProfile,
     xmlDocument: input.xmlDocument ?? input.manifest?.xmlDocument,
-    xmlValidationResult: input.xmlValidationResult ?? input.manifest?.xmlValidationResult,
     auditResult: input.auditResult ?? input.manifest?.auditResult,
     tags: input.tags ?? input.manifest?.tags ?? [],
     owner: input.owner ?? input.manifest?.owner,
@@ -284,9 +283,6 @@ export class DefaultReturnRuntimeAdapter implements ReturnRuntimePort {
     if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
       xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
     }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
     if (typeof this.enterpriseDeps.getAuditRuntimePort === "function") {
       auditRuntimeOk = portShapeOk(this.enterpriseDeps.getAuditRuntimePort());
     }
@@ -361,7 +357,6 @@ export class DefaultReturnRuntimeAdapter implements ReturnRuntimePort {
         batchManifest: manifest.batchManifest,
         protocolProfile: manifest.protocolProfile,
         xmlDocument: manifest.xmlDocument,
-        xmlValidationResult: manifest.xmlValidationResult,
         auditResult: manifest.auditResult,
         metadata: manifest.metadata,
         envelope: manifest.envelope,

@@ -26,17 +26,11 @@ import type {
 } from "../../tiss-provider/ports/types";
 import type { XMLGenerationRuntimePort } from "../../xml-generation-runtime/ports/xml-generation-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLSchemaRuntimePort } from "../../xml-schema-runtime/ports/xml-schema-runtime-port";
-import type { XMLSerializerRuntimePort } from "../../xml-serializer-runtime/ports/xml-serializer-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type { XSDRuntimePort } from "../../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../../namespace-runtime/ports/namespace-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus } from "./models";
 
 export type { CanonicalTISSRuntimeSession, TISSRuntimeSessionStatus };
@@ -124,11 +118,8 @@ export type TISSRuntimeEnterpriseDeps = {
   /** XMLGenerationRuntimePort oficial — materialização canônica (TISS-05). */
   getXMLGenerationRuntimePort(): XMLGenerationRuntimePort;
   /** XMLSerializerRuntimePort oficial — serialização canônica em texto (TISS-06). */
-  getXMLSerializerRuntimePort(): XMLSerializerRuntimePort;
   /** XMLSchemaRuntimePort oficial — infraestrutura canônica de XML Schemas (TISS-07). */
-  getXMLSchemaRuntimePort(): XMLSchemaRuntimePort;
   /** XMLValidationRuntimePort oficial — infraestrutura canônica de validação XML (TISS-08). */
-  getXMLValidationRuntimePort(): XMLValidationRuntimePort;
   /** XSDRuntimePort oficial — infraestrutura canônica de gerenciamento de XSDs (TISS-09). */
   getXSDRuntimePort(): XSDRuntimePort;
   /** NamespaceRuntimePort oficial — infraestrutura canônica de namespaces XML (TISS-10). */
@@ -142,12 +133,10 @@ export type TISSRuntimeEnterpriseDeps = {
    * WorkerRuntimePort oficial — infraestrutura canônica de Workers (INF-06).
    * Dependência obrigatória preparada; TISS Runtime NÃO aloca/executa Workers nesta sprint.
    */
-  getWorkerRuntimePort(): WorkerRuntimePort;
   /**
    * SchedulerRuntimePort oficial — infraestrutura canônica de Schedulers (INF-07).
    * Dependência obrigatória preparada; TISS Runtime NÃO agenda/executa Cron/Timers nesta sprint.
    */
-  getSchedulerRuntimePort(): SchedulerRuntimePort;
   /**
    * PersistentQueueRuntimePort oficial — infraestrutura canônica de filas persistentes (INF-08).
    * Dependência obrigatória preparada; TISS Runtime NÃO persiste/consome filas nesta sprint.
@@ -157,7 +146,6 @@ export type TISSRuntimeEnterpriseDeps = {
    * ObservabilityRuntimePort oficial — infraestrutura canônica de observabilidade (INF-09).
    * Dependência obrigatória preparada; TISS Runtime NÃO emite/observa sinais reais nesta sprint.
    */
-  getObservabilityRuntimePort(): ObservabilityRuntimePort;
   /**
    * ScalabilityRuntimePort oficial — infraestrutura canônica de escalabilidade (INF-10).
    * Dependência obrigatória preparada; TISS Runtime NÃO escala/balanceia nesta sprint.

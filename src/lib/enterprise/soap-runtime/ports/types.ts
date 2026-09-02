@@ -17,7 +17,6 @@ import type { QualityRuntimePort } from "../../quality-runtime/ports/quality-run
 import type { TISSMappingRuntimePort } from "../../tiss-mapping-runtime/ports/tiss-mapping-runtime-port";
 import type { ValidationRuntimePort } from "../../validation-runtime/ports/validation-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
   AuditResult,
   CanonicalGuide,
@@ -27,7 +26,6 @@ import type {
   SOAPStatistics,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 import type { SOAPRuntimeEngineCapabilities } from "./capabilities";
 
@@ -49,7 +47,6 @@ export type {
   SOAPStatus,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 export type { SOAPRuntimeEngineCapabilities };
 
@@ -205,7 +202,6 @@ export type SOAPRuntimeOperationEnvelope = {
  */
 export type SOAPRuntimeEnterpriseDeps = {
   getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
   getQualityRuntimePort?: () => QualityRuntimePort;
   getAutoFillRuntimePort?: () => AutoFillRuntimePort;
   getTISSMappingRuntimePort?: () => TISSMappingRuntimePort;
@@ -245,7 +241,6 @@ export type PrepareSOAPInput = SOAPRuntimeOperationalControls & {
   operation?: string;
   soapContext?: SOAPContext;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;

@@ -41,7 +41,6 @@ export type {
   ResolveProtocolInput,
   ResolveProtocolResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./types";
 
 export { PROTOCOL_CANONICAL_STATES } from "./types";

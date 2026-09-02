@@ -119,7 +119,6 @@ function buildRealTissBatchManifest(
     stateMachine,
     statistics: baseManifest.statistics,
     xmlDocument: input.manifest?.xmlDocument ?? baseManifest.xmlDocument,
-    xmlValidationResult: input.manifest?.xmlValidationResult ?? baseManifest.xmlValidationResult,
     qualityAssessment: input.manifest?.qualityAssessment ?? baseManifest.qualityAssessment,
     auditResult: input.manifest?.auditResult ?? baseManifest.auditResult,
     structuralNotes: `Real TISS batch ready for ANS SOAP submission from ${contextId}.`,

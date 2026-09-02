@@ -10,12 +10,9 @@
 import type { CaptureEngineRuntimePort } from "../../capture-engine-runtime/ports/capture-engine-runtime-port";
 import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { QueueRuntimePort } from "../../queue-runtime/ports/queue-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
 import type { TISSRuntimePort } from "../../tiss-runtime/ports/tiss-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type {
   CanonicalScanner,
   CanonicalScannerAcquisition,
@@ -241,10 +238,7 @@ export type ScannerRuntimeEnterpriseDeps = {
   getCaptureEngineRuntimePort?: () => CaptureEngineRuntimePort;
   getOCRRuntimePort?: () => OCRRuntimePort;
   getQueueRuntimePort?: () => QueueRuntimePort;
-  getWorkerRuntimePort?: () => WorkerRuntimePort;
-  getSchedulerRuntimePort?: () => SchedulerRuntimePort;
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
-  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
   getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
   getTISSRuntimePort?: () => TISSRuntimePort;
 };

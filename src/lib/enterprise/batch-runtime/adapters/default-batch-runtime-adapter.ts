@@ -143,7 +143,6 @@ function resolveManifest(input: PrepareBatchInput, stamp: string): BatchManifest
     authorizationStrategy: input.authorizationStrategy ?? input.manifest?.authorizationStrategy,
     authorizationPolicy: input.authorizationPolicy ?? input.manifest?.authorizationPolicy,
     xmlDocument: input.xmlDocument ?? input.manifest?.xmlDocument,
-    xmlValidationResult: input.xmlValidationResult ?? input.manifest?.xmlValidationResult,
     qualityAssessment: input.qualityAssessment ?? input.manifest?.qualityAssessment,
     auditResult: input.auditResult ?? input.manifest?.auditResult,
     ...structuralFlags(),
@@ -269,9 +268,6 @@ export class DefaultBatchRuntimeAdapter implements BatchRuntimePort {
     if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
       xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
     }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
     if (typeof this.enterpriseDeps.getQualityRuntimePort === "function") {
       qualityRuntimeOk = portShapeOk(this.enterpriseDeps.getQualityRuntimePort());
     }
@@ -344,7 +340,6 @@ export class DefaultBatchRuntimeAdapter implements BatchRuntimePort {
         authorizationStrategy: manifest.authorizationStrategy,
         authorizationPolicy: manifest.authorizationPolicy,
         xmlDocument: manifest.xmlDocument,
-        xmlValidationResult: manifest.xmlValidationResult,
         qualityAssessment: manifest.qualityAssessment,
         auditResult: manifest.auditResult,
         metadata: manifest.metadata,

@@ -42,7 +42,6 @@ export type {
   SOAPStatus,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./types";
 
 export {

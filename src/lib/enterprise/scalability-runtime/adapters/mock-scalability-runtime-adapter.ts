@@ -6,10 +6,7 @@
  * Sem Cluster / Load Balancer / Failover / Sharding reais.
  */
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
-import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
-import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
 import { createPersistentQueueRuntimePort } from "../../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { TISSRuntimePort } from "../../tiss-runtime/ports/tiss-runtime-port";
 import {
   DEFAULT_MOCK_SCALABILITY_RUNTIME_CAPABILITIES,
@@ -60,67 +57,6 @@ function mockMetadata(
     description:
       "Deterministic in-process Scalability Runtime mock — no network, no real scalability backend, no Kubernetes/HPA.",
   };
-}
-
-/**
- * Stub mínimo de Observability — evita ciclo MockScal ↔ MockObs.
- */
-function createMinimalObservabilityRuntimeStub(): ObservabilityRuntimePort {
-  return {
-    providerId: "mock",
-    health: async () => ({ ok: true, provider: "mock" }),
-    capabilities: () =>
-      ({
-        provider: "mock",
-        adapterId: "stub-observability-for-mock-scalability",
-        supportsRegister: true,
-        supportsHealth: true,
-        usesScalabilityRuntimePort: true,
-      }) as unknown as ReturnType<ObservabilityRuntimePort["capabilities"]>,
-    providerInfo: () =>
-      ({
-        providerId: "mock",
-        metadata: {
-          name: "Stub Observability",
-          version: "0.0.0",
-          vendor: "medicflow-enterprise",
-        },
-        status: "ready",
-        providerType: "OBSERVABILITY_RUNTIME",
-        capabilities: {},
-      }) as ReturnType<ObservabilityRuntimePort["providerInfo"]>,
-    register: async () => ({
-      ok: true,
-      provider: "mock",
-      telemetry: { latencyMs: 0, attempts: 1, cancelled: false },
-    }),
-    unregister: async () => ({
-      ok: true,
-      provider: "mock",
-      telemetry: { latencyMs: 0, attempts: 1, cancelled: false },
-    }),
-    observe: async () => ({
-      ok: true,
-      provider: "mock",
-      telemetry: { latencyMs: 0, attempts: 1, cancelled: false },
-    }),
-    release: async () => ({
-      ok: true,
-      provider: "mock",
-      telemetry: { latencyMs: 0, attempts: 1, cancelled: false },
-    }),
-    list: async () => ({
-      ok: true,
-      provider: "mock",
-      telemetry: { latencyMs: 0, attempts: 1, cancelled: false },
-      scopes: [],
-    }),
-    stats: async () => ({
-      ok: true,
-      provider: "mock",
-      telemetry: { latencyMs: 0, attempts: 1, cancelled: false },
-    }),
-  } as unknown as ObservabilityRuntimePort;
 }
 
 /**
@@ -185,34 +121,17 @@ export class MockScalabilityRuntimeAdapter implements ScalabilityRuntimePort {
     this.providerMetadata = mockMetadata(this.providerId);
 
     const queueRuntimePort = createQueueRuntimePort({ provider: "mock" });
-    const workerRuntimePort = createWorkerRuntimePort({
-      provider: "mock",
-      enterpriseDeps: { getQueueRuntimePort: () => queueRuntimePort },
-    });
-    const schedulerRuntimePort = createSchedulerRuntimePort({
-      provider: "mock",
-      enterpriseDeps: {
-        getQueueRuntimePort: () => queueRuntimePort,
-        getWorkerRuntimePort: () => workerRuntimePort,
-      },
-    });
     const persistentQueueRuntimePort = createPersistentQueueRuntimePort({
       provider: "mock",
       enterpriseDeps: {
         getQueueRuntimePort: () => queueRuntimePort,
-        getWorkerRuntimePort: () => workerRuntimePort,
-        getSchedulerRuntimePort: () => schedulerRuntimePort,
       },
     });
-    // Stubs mínimos — evitam ciclos MockScal ↔ MockObs / MockScal ↔ MockTISS.
-    const observabilityRuntimePort = createMinimalObservabilityRuntimeStub();
+    // Stub mínimo — evita ciclo MockScal ↔ MockTISS.
     const tissRuntimePort = createMinimalTISSRuntimeStub();
     const enterpriseDeps: ScalabilityRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getQueueRuntimePort: () => queueRuntimePort,
-      getWorkerRuntimePort: () => workerRuntimePort,
-      getSchedulerRuntimePort: () => schedulerRuntimePort,
       getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
-      getObservabilityRuntimePort: () => observabilityRuntimePort,
       getTISSRuntimePort: () => tissRuntimePort,
     };
 

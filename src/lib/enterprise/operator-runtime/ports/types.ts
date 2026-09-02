@@ -18,7 +18,6 @@ import type { SOAPRuntimePort } from "../../soap-runtime/ports/soap-runtime-port
 import type { TISSMappingRuntimePort } from "../../tiss-mapping-runtime/ports/tiss-mapping-runtime-port";
 import type { ValidationRuntimePort } from "../../validation-runtime/ports/validation-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
   AuditResult,
   CanonicalGuide,
@@ -29,7 +28,6 @@ import type {
   QualityAssessment,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 import type { OperatorRuntimeEngineCapabilities } from "./capabilities";
 
@@ -51,7 +49,6 @@ export type {
   QualityAssessment,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 export type { OperatorRuntimeEngineCapabilities };
 
@@ -205,7 +202,6 @@ export type OperatorRuntimeOperationEnvelope = {
 export type OperatorRuntimeEnterpriseDeps = {
   getSOAPRuntimePort?: () => SOAPRuntimePort;
   getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
   getQualityRuntimePort?: () => QualityRuntimePort;
   getAutoFillRuntimePort?: () => AutoFillRuntimePort;
   getTISSMappingRuntimePort?: () => TISSMappingRuntimePort;
@@ -246,7 +242,6 @@ export type PrepareOperatorProfileInput = OperatorRuntimeOperationalControls & {
   operatorContext?: OperatorContext;
   capabilityProfile?: OperatorCapabilityProfile;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;

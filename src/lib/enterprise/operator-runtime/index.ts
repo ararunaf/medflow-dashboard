@@ -66,7 +66,6 @@ export type {
   QualityAssessment,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./ports";
 
 export {

@@ -200,13 +200,10 @@ export function runStructuralPipeline(
     "document-processing": documentRef,
     "processing-provider": processingRef,
     "ocr-provider": ocrRef,
-    "tiss-mapping": mappingRef,
-    "tiss-vocabulary": vocabularyRef,
     "tiss-profile": profileRef,
     "healthcare-model": healthcareModelRef,
     "contract-rule-binding": bindingRef,
     "tiss-rule-runtime": runtimeRef,
-    "ai-auditor": auditorRef,
   };
 
   const noteByStep: Record<CanonicalExecutionStepName, string> = {
@@ -215,14 +212,11 @@ export function runStructuralPipeline(
     "processing-provider":
       "ProcessingProviderPort referenced structurally — no provider dispatched",
     "ocr-provider": "OCRProviderPort referenced structurally — no OCR executed",
-    "tiss-mapping": "TISSMappingPort referenced structurally — no mapping executed",
-    "tiss-vocabulary": "TISSVocabularyPort referenced structurally — no vocabulary lookup",
     "tiss-profile": "TISSProfilePort referenced structurally — no profile validation",
     "healthcare-model": "HealthcareModelPort referenced structurally — no model assembled",
     "contract-rule-binding":
       "ContractRuleBindingPort referenced structurally — no contract interpretation",
     "tiss-rule-runtime": "TISSRuleRuntimePort referenced structurally — no rules executed",
-    "ai-auditor": "AIAuditorPort referenced structurally — no AI invoked",
   };
 
   const steps = pendingSteps.map((step) => ({

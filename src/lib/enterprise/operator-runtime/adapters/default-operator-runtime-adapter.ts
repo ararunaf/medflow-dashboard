@@ -125,7 +125,6 @@ function resolveContext(input: PrepareOperatorProfileInput): OperatorContext {
       contextId: createOperatorContextId(),
       capabilityProfile: input.capabilityProfile,
       xmlDocument: input.xmlDocument,
-      xmlValidationResult: input.xmlValidationResult,
       canonicalGuide: input.canonicalGuide,
       qualityAssessment: input.qualityAssessment,
       validationResult: input.validationResult,
@@ -165,7 +164,6 @@ function resolveRequest(input: PrepareOperatorProfileInput): OperatorRequest {
     operatorContext: { ...operatorContext, capabilityProfile },
     capabilityProfile,
     xmlDocument: base.xmlDocument ?? input.xmlDocument,
-    xmlValidationResult: base.xmlValidationResult ?? input.xmlValidationResult,
     canonicalGuide: base.canonicalGuide ?? input.canonicalGuide,
     qualityAssessment: base.qualityAssessment ?? input.qualityAssessment,
     validationResult: base.validationResult ?? input.validationResult,
@@ -284,9 +282,6 @@ export class DefaultOperatorRuntimeAdapter implements OperatorRuntimePort {
     if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
       xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
     }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
     if (typeof this.enterpriseDeps.getQualityRuntimePort === "function") {
       qualityRuntimeOk = portShapeOk(this.enterpriseDeps.getQualityRuntimePort());
     }
@@ -376,7 +371,6 @@ export class DefaultOperatorRuntimeAdapter implements OperatorRuntimePort {
         profile,
         operatorContext,
         xmlDocument: request.xmlDocument,
-        xmlValidationResult: request.xmlValidationResult,
         canonicalGuide: request.canonicalGuide,
         qualityAssessment: request.qualityAssessment,
         validationResult: request.validationResult,

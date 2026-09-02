@@ -42,7 +42,6 @@ export type {
   QualityAssessment,
   ValidationResult,
   XMLDocument,
-  XMLValidationResult,
 } from "./types";
 
 export {

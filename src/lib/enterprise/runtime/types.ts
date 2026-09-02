@@ -24,7 +24,7 @@
  * F3-CAP-13: Quality Runtime estrutural — sem avaliação automática / sem score funcional / sem decisão automática / sem IA / sem OCR / sem auditoria automática / sem banco / sem persistência / sem APIs.
  * C-01: XML TISS Runtime estrutural — sem geração de XML / sem serialização / sem parser / sem XSD / sem SOAP / sem operadoras / sem banco / sem persistência / sem APIs.
  * Search: acesso exclusivo via Document Search Runtime → SearchProviderPort (SEARCH-01).
- * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XMLSerializerRuntimePort + XMLSchemaRuntimePort + XMLValidationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…10).
+ * TISS: acesso exclusivo via TISS Runtime → TISSCatalogPort + RulePackEnginePort + XMLRuntimePort + XMLGenerationRuntimePort + XSDRuntimePort + NamespaceRuntimePort + TISSProviderPort (TISS-01…05, 09-10).
  * IA: acesso exclusivo via AI Provider Runtime → AIProviderPort (ARCH-02).
  */
 import type { CanonicalExecutionOrchestratorPort } from "../canonical-execution-orchestrator/ports/canonical-execution-orchestrator-port";
@@ -57,9 +57,6 @@ import type { TISSProviderPort } from "../tiss-provider/ports/tiss-provider-port
 import type { TISSRuntimePort } from "../tiss-runtime/ports/tiss-runtime-port";
 import type { XMLGenerationRuntimePort } from "../xml-generation-runtime/ports/xml-generation-runtime-port";
 import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
-import type { XMLSchemaRuntimePort } from "../xml-schema-runtime/ports/xml-schema-runtime-port";
-import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
-import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type { SOAPRuntimePort } from "../soap-runtime/ports/soap-runtime-port";
 import type { OperatorRuntimePort } from "../operator-runtime/ports/operator-runtime-port";
 import type { AuthorizationRuntimePort } from "../authorization-runtime/ports/authorization-runtime-port";
@@ -72,10 +69,7 @@ import type { XSDRuntimePort } from "../xsd-runtime/ports/xsd-runtime-port";
 import type { NamespaceRuntimePort } from "../namespace-runtime/ports/namespace-runtime-port";
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
 import type { PersistentQueueRuntimePort } from "../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../observability-runtime/ports/observability-runtime-port";
 import type { ScalabilityRuntimePort } from "../scalability-runtime/ports/scalability-runtime-port";
-import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
-import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 import type { WatchFolderRuntimePort } from "../watch-folder-runtime/ports/watch-folder-runtime-port";
 import type { UploadRuntimePort } from "../upload-runtime/ports/upload-runtime-port";
@@ -216,9 +210,6 @@ export type EnterpriseRuntimeOptions = {
   rulePackEnginePort?: RulePackEnginePort;
   xmlRuntimePort?: XMLRuntimePort;
   xmlGenerationRuntimePort?: XMLGenerationRuntimePort;
-  xmlSerializerRuntimePort?: XMLSerializerRuntimePort;
-  xmlSchemaRuntimePort?: XMLSchemaRuntimePort;
-  xmlValidationRuntimePort?: XMLValidationRuntimePort;
   soapRuntimePort?: SOAPRuntimePort;
   operatorRuntimePort?: OperatorRuntimePort;
   authorizationRuntimePort?: AuthorizationRuntimePort;
@@ -230,10 +221,7 @@ export type EnterpriseRuntimeOptions = {
   xsdRuntimePort?: XSDRuntimePort;
   namespaceRuntimePort?: NamespaceRuntimePort;
   queueRuntimePort?: QueueRuntimePort;
-  workerRuntimePort?: WorkerRuntimePort;
-  schedulerRuntimePort?: SchedulerRuntimePort;
   persistentQueueRuntimePort?: PersistentQueueRuntimePort;
-  observabilityRuntimePort?: ObservabilityRuntimePort;
   scalabilityRuntimePort?: ScalabilityRuntimePort;
   scannerRuntimePort?: ScannerRuntimePort;
   watchFolderRuntimePort?: WatchFolderRuntimePort;
@@ -344,15 +332,6 @@ export interface EnterpriseRuntime {
   /** Resolve XMLGenerationRuntimePort (TISS-05) — Enterprise XML Generation Runtime. */
   getXMLGenerationRuntimePort(): XMLGenerationRuntimePort;
 
-  /** Resolve XMLSerializerRuntimePort (TISS-06) — Enterprise XML Serializer Runtime. */
-  getXMLSerializerRuntimePort(): XMLSerializerRuntimePort;
-
-  /** Resolve XMLSchemaRuntimePort (TISS-07) — Enterprise XML Schema Runtime. */
-  getXMLSchemaRuntimePort(): XMLSchemaRuntimePort;
-
-  /** Resolve XMLValidationRuntimePort (C-02) — Enterprise XML Validation Runtime. */
-  getXMLValidationRuntimePort(): XMLValidationRuntimePort;
-
   /** Resolve SOAPRuntimePort (C-03) — Enterprise SOAP Runtime Foundation. */
   getSOAPRuntimePort(): SOAPRuntimePort;
 
@@ -386,17 +365,8 @@ export interface EnterpriseRuntime {
   /** Resolve QueueRuntimePort (INF-05) — Enterprise Queue Runtime. */
   getQueueRuntimePort(): QueueRuntimePort;
 
-  /** Resolve WorkerRuntimePort (INF-06) — Enterprise Worker Runtime. */
-  getWorkerRuntimePort(): WorkerRuntimePort;
-
-  /** Resolve SchedulerRuntimePort (INF-07) — Enterprise Scheduler Runtime. */
-  getSchedulerRuntimePort(): SchedulerRuntimePort;
-
   /** Resolve PersistentQueueRuntimePort (INF-08) — Enterprise Persistent Queue Runtime. */
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort;
-
-  /** Resolve ObservabilityRuntimePort (INF-09) — Enterprise Observability Runtime. */
-  getObservabilityRuntimePort(): ObservabilityRuntimePort;
 
   /** Resolve ScalabilityRuntimePort (INF-10) — Enterprise Scalability Runtime. */
   getScalabilityRuntimePort(): ScalabilityRuntimePort;

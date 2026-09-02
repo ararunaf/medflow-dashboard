@@ -11,9 +11,6 @@
 import type { CaptureEngineRuntimePort } from "../../capture-engine-runtime/ports/capture-engine-runtime-port";
 import type { OCRRuntimePort } from "../../ocr-runtime/ports/ocr-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
 import type { ScannerRuntimePort } from "../../scanner-runtime/ports/scanner-runtime-port";
 import type { WatchFolderRuntimePort } from "../../watch-folder-runtime/ports/watch-folder-runtime-port";
 import type {
@@ -242,9 +239,6 @@ export type UploadRuntimeEnterpriseDeps = {
   getCaptureEngineRuntimePort?: () => CaptureEngineRuntimePort;
   getOCRRuntimePort?: () => OCRRuntimePort;
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
-  getSchedulerRuntimePort?: () => SchedulerRuntimePort;
-  getWorkerRuntimePort?: () => WorkerRuntimePort;
-  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
 };
 
 /** Opções de resolução do UploadRuntimePort. */

@@ -163,24 +163,9 @@ export class DefaultScalabilityRuntimeAdapter implements ScalabilityRuntimePort 
           "DefaultScalabilityRuntimeAdapter exige enterpriseDeps.getQueueRuntimePort (INF-10) quando deps são fornecidas.",
         );
       }
-      if (typeof this.enterpriseDeps.getWorkerRuntimePort !== "function") {
-        throw new Error(
-          "DefaultScalabilityRuntimeAdapter exige enterpriseDeps.getWorkerRuntimePort (INF-10) quando deps são fornecidas.",
-        );
-      }
-      if (typeof this.enterpriseDeps.getSchedulerRuntimePort !== "function") {
-        throw new Error(
-          "DefaultScalabilityRuntimeAdapter exige enterpriseDeps.getSchedulerRuntimePort (INF-10) quando deps são fornecidas.",
-        );
-      }
       if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort !== "function") {
         throw new Error(
           "DefaultScalabilityRuntimeAdapter exige enterpriseDeps.getPersistentQueueRuntimePort (INF-10) quando deps são fornecidas.",
-        );
-      }
-      if (typeof this.enterpriseDeps.getObservabilityRuntimePort !== "function") {
-        throw new Error(
-          "DefaultScalabilityRuntimeAdapter exige enterpriseDeps.getObservabilityRuntimePort (INF-10) quando deps são fornecidas.",
         );
       }
       if (typeof this.enterpriseDeps.getTISSRuntimePort !== "function") {
@@ -266,31 +251,16 @@ export class DefaultScalabilityRuntimeAdapter implements ScalabilityRuntimePort 
       // INF-10: deps preparadas — valida Port shape sem chamar health()
       // (evita ciclos Scalability.health ↔ Queue/Worker/Scheduler/PQR/Obs/TISS.health).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
-      const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
-      const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
       const persistentQueuePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
-      const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
       const tissPort = this.enterpriseDeps.getTISSRuntimePort();
       queueRuntimeOk =
         !!queuePort &&
         typeof queuePort.health === "function" &&
         typeof queuePort.capabilities === "function";
-      workerRuntimeOk =
-        !!workerPort &&
-        typeof workerPort.health === "function" &&
-        typeof workerPort.capabilities === "function";
-      schedulerRuntimeOk =
-        !!schedulerPort &&
-        typeof schedulerPort.health === "function" &&
-        typeof schedulerPort.capabilities === "function";
       persistentQueueRuntimeOk =
         !!persistentQueuePort &&
         typeof persistentQueuePort.health === "function" &&
         typeof persistentQueuePort.capabilities === "function";
-      observabilityRuntimeOk =
-        !!observabilityPort &&
-        typeof observabilityPort.health === "function" &&
-        typeof observabilityPort.capabilities === "function";
       tissRuntimeOk =
         !!tissPort &&
         typeof tissPort.health === "function" &&

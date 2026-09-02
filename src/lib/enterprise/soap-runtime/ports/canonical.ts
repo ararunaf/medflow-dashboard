@@ -15,15 +15,13 @@
  */
 
 import type { XMLDocument } from "../../xml-tiss-runtime/ports/canonical";
-import type { XMLValidationResult } from "../../xml-validation-runtime/ports/canonical";
 import type { CanonicalGuide } from "../../tiss-mapping-runtime/ports/canonical";
 import type { QualityAssessment } from "../../quality-runtime/ports/canonical";
 import type { ValidationResult } from "../../validation-runtime/ports/canonical";
 import type { AuditResult } from "../../audit-runtime/ports/canonical";
 
 export type {
-  XMLDocument,
-  XMLValidationResult,
+  XMLDocument,
   CanonicalGuide,
   QualityAssessment,
   ValidationResult,
@@ -75,7 +73,6 @@ export type SOAPContext = SOAPRuntimeObservabilityEnvelope & {
   requestId?: string;
   responseId?: string;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;
@@ -140,7 +137,6 @@ export type SOAPRequest = {
   envelope?: SOAPEnvelope;
   soapContext?: SOAPContext;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;
@@ -170,7 +166,6 @@ export type SOAPResponse = {
   envelope?: SOAPEnvelope;
   soapContext?: SOAPContext;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   canonicalGuide?: CanonicalGuide;
   qualityAssessment?: QualityAssessment;
   validationResult?: ValidationResult;

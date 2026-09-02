@@ -19,7 +19,6 @@ import type { OperatorRuntimePort } from "../../operator-runtime/ports/operator-
 import type { ProtocolRuntimePort } from "../../protocol-runtime/ports/protocol-runtime-port";
 import type { SOAPRuntimePort } from "../../soap-runtime/ports/soap-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
   AuditResult,
   AuthorizationPolicy,
@@ -39,7 +38,6 @@ import type {
   ReturnStatistics,
   ReturnStatus,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 import type { ReturnRuntimeEngineCapabilities } from "./capabilities";
 
@@ -65,7 +63,6 @@ export type {
   ReturnStatistics,
   ReturnStatus,
   XMLDocument,
-  XMLValidationResult,
 } from "./canonical";
 export type { ReturnRuntimeEngineCapabilities };
 export { RETURN_CANONICAL_STATES } from "./canonical";
@@ -226,7 +223,6 @@ export type ReturnRuntimeEnterpriseDeps = {
   getOperatorRuntimePort?: () => OperatorRuntimePort;
   getSOAPRuntimePort?: () => SOAPRuntimePort;
   getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
   getAuditRuntimePort?: () => AuditRuntimePort;
 };
 
@@ -281,7 +277,6 @@ export type PrepareReturnInput = ReturnRuntimeOperationalControls & {
   batchManifest?: BatchManifest;
   protocolProfile?: ProtocolProfile;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   auditResult?: AuditResult;
   tags?: readonly string[];
   owner?: string;

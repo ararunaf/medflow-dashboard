@@ -54,11 +54,6 @@ export async function registerTissReceivedJob(
   const runtime = getEnterpriseRuntime();
   const queuePort = runtime.getQueueRuntimePort();
 
-  // Shape check — cadeia operacional oficial permanece acessível (sem consumo nesta Sprint).
-  void runtime.getWorkerRuntimePort();
-  void runtime.getSchedulerRuntimePort();
-  void runtime.getObservabilityRuntimePort();
-
   const queueAdapter = queuePort as {
     getRetryInfrastructure?: () => unknown;
     getDeadLetterRuntimePort?: () => unknown;

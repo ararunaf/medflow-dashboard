@@ -121,7 +121,6 @@ function resolveContext(input: PrepareSOAPInput): SOAPContext {
       kind: "canonical-soap-context" as const,
       contextId: createSOAPContextId(),
       xmlDocument: input.xmlDocument,
-      xmlValidationResult: input.xmlValidationResult,
       canonicalGuide: input.canonicalGuide,
       qualityAssessment: input.qualityAssessment,
       validationResult: input.validationResult,
@@ -148,7 +147,6 @@ function resolveRequest(input: PrepareSOAPInput): SOAPRequest {
     operation: base.operation ?? input.operation ?? "prepare",
     soapContext,
     xmlDocument: base.xmlDocument ?? input.xmlDocument,
-    xmlValidationResult: base.xmlValidationResult ?? input.xmlValidationResult,
     canonicalGuide: base.canonicalGuide ?? input.canonicalGuide,
     qualityAssessment: base.qualityAssessment ?? input.qualityAssessment,
     validationResult: base.validationResult ?? input.validationResult,
@@ -265,9 +263,6 @@ export class DefaultSOAPRuntimeAdapter implements SOAPRuntimePort {
     if (typeof this.enterpriseDeps.getXMLRuntimePort === "function") {
       xmlRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLRuntimePort());
     }
-    if (typeof this.enterpriseDeps.getXMLValidationRuntimePort === "function") {
-      xmlValidationRuntimeOk = portShapeOk(this.enterpriseDeps.getXMLValidationRuntimePort());
-    }
     if (typeof this.enterpriseDeps.getQualityRuntimePort === "function") {
       qualityRuntimeOk = portShapeOk(this.enterpriseDeps.getQualityRuntimePort());
     }
@@ -350,7 +345,6 @@ export class DefaultSOAPRuntimeAdapter implements SOAPRuntimePort {
         envelope: request.envelope ?? createDisabledSOAPEnvelope(),
         soapContext,
         xmlDocument: request.xmlDocument,
-        xmlValidationResult: request.xmlValidationResult,
         canonicalGuide: request.canonicalGuide,
         qualityAssessment: request.qualityAssessment,
         validationResult: request.validationResult,

@@ -212,12 +212,6 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     this.sleep = options.sleep ?? defaultSleep;
     this.failAttemptsRemaining = options.failAttempts ?? 0;
 
-    if (this.enterpriseDeps && typeof this.enterpriseDeps.getWorkerRuntimePort !== "function") {
-      throw new Error(
-        "DefaultQueueRuntimeAdapter exige enterpriseDeps.getWorkerRuntimePort (INF-06) quando deps são fornecidas.",
-      );
-    }
-
     // OPER-INF-D — DeadLetterRuntimePort interno (não é Port Enterprise novo).
     this.deadLetter =
       options.deadLetter === null
@@ -235,16 +229,9 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
       this.retry = null;
     } else if (options.retry) {
       this.retry = options.retry;
-    } else if (
-      this.operational &&
-      this.enterpriseDeps &&
-      typeof this.enterpriseDeps.getWorkerRuntimePort === "function" &&
-      typeof this.enterpriseDeps.getSchedulerRuntimePort === "function"
-    ) {
+    } else if (this.operational && this.enterpriseDeps) {
       this.retry = new DefaultRetryInfrastructure({
         getQueueRuntimePort: () => this,
-        getWorkerRuntimePort: () => this.enterpriseDeps!.getWorkerRuntimePort(),
-        getSchedulerRuntimePort: () => this.enterpriseDeps!.getSchedulerRuntimePort!(),
         now: this.now,
       });
     } else {
@@ -358,31 +345,12 @@ export class DefaultQueueRuntimeAdapter implements QueueRuntimePort {
     if (this.enterpriseDeps) {
       // INF-06 / INF-07 / INF-08 / INF-09 / INF-10: deps preparadas — valida Port sem chamar health()
       // (evita ciclo Queue.health ↔ Worker/Scheduler/PersistentQueue/Observability/Scalability.health).
-      const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
-      workerRuntimeOk =
-        !!workerPort &&
-        typeof workerPort.health === "function" &&
-        typeof workerPort.capabilities === "function";
-      if (typeof this.enterpriseDeps.getSchedulerRuntimePort === "function") {
-        const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
-        schedulerRuntimeOk =
-          !!schedulerPort &&
-          typeof schedulerPort.health === "function" &&
-          typeof schedulerPort.capabilities === "function";
-      }
       if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort === "function") {
         const persistentQueuePort = this.enterpriseDeps.getPersistentQueueRuntimePort();
         persistentQueueRuntimeOk =
           !!persistentQueuePort &&
           typeof persistentQueuePort.health === "function" &&
           typeof persistentQueuePort.capabilities === "function";
-      }
-      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
-        const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
-        observabilityRuntimeOk =
-          !!observabilityPort &&
-          typeof observabilityPort.health === "function" &&
-          typeof observabilityPort.capabilities === "function";
       }
       if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
         const scalabilityPort = this.enterpriseDeps.getScalabilityRuntimePort();

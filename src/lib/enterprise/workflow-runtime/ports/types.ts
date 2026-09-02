@@ -24,7 +24,6 @@ import type { ReconciliationRuntimePort } from "../../reconciliation-runtime/por
 import type { ReturnRuntimePort } from "../../return-runtime/ports/return-runtime-port";
 import type { SOAPRuntimePort } from "../../soap-runtime/ports/soap-runtime-port";
 import type { XMLRuntimePort } from "../../xml-runtime/ports/xml-runtime-port";
-import type { XMLValidationRuntimePort } from "../../xml-validation-runtime/ports/xml-validation-runtime-port";
 import type {
   AuditResult,
   AuthorizationPolicy,
@@ -233,7 +232,6 @@ export type WorkflowRuntimeEnterpriseDeps = {
   getBatchRuntimePort?: () => BatchRuntimePort;
   getSOAPRuntimePort?: () => SOAPRuntimePort;
   getXMLRuntimePort?: () => XMLRuntimePort;
-  getXMLValidationRuntimePort?: () => XMLValidationRuntimePort;
   getAuditRuntimePort?: () => AuditRuntimePort;
 };
 

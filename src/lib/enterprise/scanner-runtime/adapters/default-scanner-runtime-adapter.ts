@@ -227,17 +227,8 @@ export class DefaultScannerRuntimeAdapter implements ScannerRuntimePort {
       if (typeof this.enterpriseDeps.getQueueRuntimePort === "function") {
         queueRuntimeOk = portShapeOk(this.enterpriseDeps.getQueueRuntimePort());
       }
-      if (typeof this.enterpriseDeps.getWorkerRuntimePort === "function") {
-        workerRuntimeOk = portShapeOk(this.enterpriseDeps.getWorkerRuntimePort());
-      }
-      if (typeof this.enterpriseDeps.getSchedulerRuntimePort === "function") {
-        schedulerRuntimeOk = portShapeOk(this.enterpriseDeps.getSchedulerRuntimePort());
-      }
       if (typeof this.enterpriseDeps.getPersistentQueueRuntimePort === "function") {
         persistentQueueRuntimeOk = portShapeOk(this.enterpriseDeps.getPersistentQueueRuntimePort());
-      }
-      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
-        observabilityRuntimeOk = portShapeOk(this.enterpriseDeps.getObservabilityRuntimePort());
       }
       if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
         scalabilityRuntimeOk = portShapeOk(this.enterpriseDeps.getScalabilityRuntimePort());

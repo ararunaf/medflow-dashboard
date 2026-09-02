@@ -18,9 +18,6 @@ import type { ScannerRuntimePort } from "../../scanner-runtime/ports/scanner-run
 import type { WatchFolderRuntimePort } from "../../watch-folder-runtime/ports/watch-folder-runtime-port";
 import type { UploadRuntimePort } from "../../upload-runtime/ports/upload-runtime-port";
 import type { PersistentQueueRuntimePort } from "../../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import type { WorkerRuntimePort } from "../../worker-runtime/ports/worker-runtime-port";
-import type { SchedulerRuntimePort } from "../../scheduler-runtime/ports/scheduler-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import type { ValidationRuntimePort } from "../../validation-runtime/ports/validation-runtime-port";
 import type {
@@ -245,9 +242,6 @@ export type AIOrchestrationRuntimeEnterpriseDeps = {
   getWatchFolderRuntimePort?: () => WatchFolderRuntimePort;
   getUploadRuntimePort?: () => UploadRuntimePort;
   getPersistentQueueRuntimePort?: () => PersistentQueueRuntimePort;
-  getWorkerRuntimePort?: () => WorkerRuntimePort;
-  getSchedulerRuntimePort?: () => SchedulerRuntimePort;
-  getObservabilityRuntimePort?: () => ObservabilityRuntimePort;
   getScalabilityRuntimePort?: () => ScalabilityRuntimePort;
 };
 

@@ -17,7 +17,6 @@ import type { AuthorizationPolicy } from "../../authorization-runtime/ports/cano
 import type { BatchManifest } from "../../batch-runtime/ports/canonical";
 import type { ProtocolProfile } from "../../protocol-runtime/ports/canonical";
 import type { XMLDocument } from "../../xml-tiss-runtime/ports/canonical";
-import type { XMLValidationResult } from "../../xml-validation-runtime/ports/canonical";
 import type { AuditResult } from "../../audit-runtime/ports/canonical";
 
 export type {
@@ -27,7 +26,6 @@ export type {
   BatchManifest,
   ProtocolProfile,
   XMLDocument,
-  XMLValidationResult,
   AuditResult,
 };
 
@@ -295,7 +293,6 @@ export type ReturnManifest = {
   batchManifest?: BatchManifest;
   protocolProfile?: ProtocolProfile;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   auditResult?: AuditResult;
   tags?: readonly string[];
   owner?: string;
@@ -329,7 +326,6 @@ export type ReturnContext = ReturnRuntimeObservabilityEnvelope & {
   batchManifest?: BatchManifest;
   protocolProfile?: ProtocolProfile;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   auditResult?: AuditResult;
   metadata?: ReturnMetadata;
   envelope?: ReturnEnvelope;
@@ -467,7 +463,6 @@ export function createEmptyReturnManifest(overrides: Partial<ReturnManifest> = {
     batchManifest: overrides.batchManifest,
     protocolProfile: overrides.protocolProfile,
     xmlDocument: overrides.xmlDocument,
-    xmlValidationResult: overrides.xmlValidationResult,
     auditResult: overrides.auditResult,
     tags: overrides.tags ?? [],
     owner: overrides.owner,

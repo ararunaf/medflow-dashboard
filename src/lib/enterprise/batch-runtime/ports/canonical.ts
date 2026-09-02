@@ -15,7 +15,6 @@ import type { OperatorCapabilityProfile } from "../../operator-runtime/ports/can
 import type { AuthorizationStrategy } from "../../authorization-runtime/ports/canonical";
 import type { AuthorizationPolicy } from "../../authorization-runtime/ports/canonical";
 import type { XMLDocument } from "../../xml-tiss-runtime/ports/canonical";
-import type { XMLValidationResult } from "../../xml-validation-runtime/ports/canonical";
 import type { QualityAssessment } from "../../quality-runtime/ports/canonical";
 import type { AuditResult } from "../../audit-runtime/ports/canonical";
 
@@ -24,7 +23,6 @@ export type {
   AuthorizationStrategy,
   AuthorizationPolicy,
   XMLDocument,
-  XMLValidationResult,
   QualityAssessment,
   AuditResult,
 };
@@ -247,7 +245,6 @@ export type BatchManifest = {
   authorizationStrategy?: AuthorizationStrategy;
   authorizationPolicy?: AuthorizationPolicy;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   qualityAssessment?: QualityAssessment;
   auditResult?: AuditResult;
   structuralNotes?: string;
@@ -275,7 +272,6 @@ export type BatchContext = BatchRuntimeObservabilityEnvelope & {
   authorizationStrategy?: AuthorizationStrategy;
   authorizationPolicy?: AuthorizationPolicy;
   xmlDocument?: XMLDocument;
-  xmlValidationResult?: XMLValidationResult;
   qualityAssessment?: QualityAssessment;
   auditResult?: AuditResult;
   metadata?: BatchMetadata;
@@ -337,7 +333,6 @@ export function createEmptyBatchManifest(overrides: Partial<BatchManifest> = {})
     authorizationStrategy: overrides.authorizationStrategy,
     authorizationPolicy: overrides.authorizationPolicy,
     xmlDocument: overrides.xmlDocument,
-    xmlValidationResult: overrides.xmlValidationResult,
     qualityAssessment: overrides.qualityAssessment,
     auditResult: overrides.auditResult,
     structuralNotes:

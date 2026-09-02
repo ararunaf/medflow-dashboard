@@ -5,8 +5,6 @@
  * Sem HTTP. Sem Scheduler real. Sem Cron. Sem Timer. Sem banco.
  */
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
-import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
-import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
 import {
   DEFAULT_MOCK_PERSISTENT_QUEUE_RUNTIME_CAPABILITIES,
   toCanonicalPersistentQueueCapabilities,
@@ -77,21 +75,8 @@ export class MockPersistentQueueRuntimeAdapter implements PersistentQueueRuntime
     this.providerMetadata = mockMetadata(this.providerId);
 
     const queueRuntimePort = createQueueRuntimePort({ provider: "mock" });
-    const workerRuntimePort = createWorkerRuntimePort({
-      provider: "mock",
-      enterpriseDeps: { getQueueRuntimePort: () => queueRuntimePort },
-    });
-    const schedulerRuntimePort = createSchedulerRuntimePort({
-      provider: "mock",
-      enterpriseDeps: {
-        getQueueRuntimePort: () => queueRuntimePort,
-        getWorkerRuntimePort: () => workerRuntimePort,
-      },
-    });
     const enterpriseDeps: PersistentQueueRuntimeEnterpriseDeps = options.enterpriseDeps ?? {
       getQueueRuntimePort: () => queueRuntimePort,
-      getWorkerRuntimePort: () => workerRuntimePort,
-      getSchedulerRuntimePort: () => schedulerRuntimePort,
     };
 
     this.delegate = new DefaultPersistentQueueRuntimeAdapter({

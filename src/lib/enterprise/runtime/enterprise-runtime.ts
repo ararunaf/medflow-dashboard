@@ -97,12 +97,6 @@ import { createXMLGenerationRuntimePort } from "../xml-generation-runtime/provid
 import type { XMLGenerationRuntimePort } from "../xml-generation-runtime/ports/xml-generation-runtime-port";
 import { createXMLRuntimePort } from "../xml-runtime/providers/create-xml-runtime-port";
 import type { XMLRuntimePort } from "../xml-runtime/ports/xml-runtime-port";
-import { createXMLSchemaRuntimePort } from "../xml-schema-runtime/providers/create-xml-schema-runtime-port";
-import type { XMLSchemaRuntimePort } from "../xml-schema-runtime/ports/xml-schema-runtime-port";
-import { createXMLSerializerRuntimePort } from "../xml-serializer-runtime/providers/create-xml-serializer-runtime-port";
-import type { XMLSerializerRuntimePort } from "../xml-serializer-runtime/ports/xml-serializer-runtime-port";
-import { createXMLValidationRuntimePort } from "../xml-validation-runtime/providers/create-xml-validation-runtime-port";
-import type { XMLValidationRuntimePort } from "../xml-validation-runtime/ports/xml-validation-runtime-port";
 import { createSOAPRuntimePort } from "../soap-runtime/providers/create-soap-runtime-port";
 import type { SOAPRuntimePort } from "../soap-runtime/ports/soap-runtime-port";
 import { createOperatorRuntimePort } from "../operator-runtime/providers/create-operator-runtime-port";
@@ -127,14 +121,8 @@ import { createQueueRuntimePort } from "../queue-runtime/providers/create-queue-
 import type { QueueRuntimePort } from "../queue-runtime/ports/queue-runtime-port";
 import { createPersistentQueueRuntimePort } from "../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
 import type { PersistentQueueRuntimePort } from "../persistent-queue-runtime/ports/persistent-queue-runtime-port";
-import { createObservabilityRuntimePort } from "../observability-runtime/providers/create-observability-runtime-port";
-import type { ObservabilityRuntimePort } from "../observability-runtime/ports/observability-runtime-port";
 import { createScalabilityRuntimePort } from "../scalability-runtime/providers/create-scalability-runtime-port";
 import type { ScalabilityRuntimePort } from "../scalability-runtime/ports/scalability-runtime-port";
-import { createSchedulerRuntimePort } from "../scheduler-runtime/providers/create-scheduler-runtime-port";
-import type { SchedulerRuntimePort } from "../scheduler-runtime/ports/scheduler-runtime-port";
-import { createWorkerRuntimePort } from "../worker-runtime/providers/create-worker-runtime-port";
-import type { WorkerRuntimePort } from "../worker-runtime/ports/worker-runtime-port";
 import { createScannerRuntimePort } from "../scanner-runtime/providers/create-scanner-runtime-port";
 import type { ScannerRuntimePort } from "../scanner-runtime/ports/scanner-runtime-port";
 import { createWatchFolderRuntimePort } from "../watch-folder-runtime/providers/create-watch-folder-runtime-port";
@@ -181,9 +169,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly rulePackEnginePort: RulePackEnginePort;
   private readonly xmlGenerationRuntimePort: XMLGenerationRuntimePort;
   private readonly xmlRuntimePort: XMLRuntimePort;
-  private readonly xmlSerializerRuntimePort: XMLSerializerRuntimePort;
-  private readonly xmlSchemaRuntimePort: XMLSchemaRuntimePort;
-  private readonly xmlValidationRuntimePort: XMLValidationRuntimePort;
   private readonly soapRuntimePort: SOAPRuntimePort;
   private readonly operatorRuntimePort: OperatorRuntimePort;
   private readonly authorizationRuntimePort: AuthorizationRuntimePort;
@@ -196,15 +181,9 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
   private readonly xsdRuntimePort: XSDRuntimePort;
   private readonly namespaceRuntimePort: NamespaceRuntimePort;
   private readonly queueRuntimePort: QueueRuntimePort;
-  /** Atribuído após Queue; lazy getter do Queue pode referenciar antes da atribuição. */
-  private readonly workerRuntimePort!: WorkerRuntimePort;
-  /** Atribuído após Queue/Worker; lazy getters podem referenciar antes da atribuição. */
-  private readonly schedulerRuntimePort!: SchedulerRuntimePort;
-  /** Atribuído após Queue/Worker/Scheduler; lazy getters podem referenciar antes da atribuição. */
+  /** Atribuído após Queue; lazy getters podem referenciar antes da atribuição. */
   private readonly persistentQueueRuntimePort!: PersistentQueueRuntimePort;
-  /** Atribuído após PQR; lazy getters de Q/W/S/PQR/TISS podem referenciar antes da atribuição. */
-  private readonly observabilityRuntimePort!: ObservabilityRuntimePort;
-  /** Atribuído após Observability; lazy getters de Q/W/S/PQR/Obs/TISS podem referenciar antes da atribuição. */
+  /** Atribuído após PQR; lazy getters de PQR/TISS podem referenciar antes da atribuição. */
   private readonly scalabilityRuntimePort!: ScalabilityRuntimePort;
   /** Atribuído após Scalability; lazy getters de Obs/Scal podem referenciar antes da atribuição. */
   private readonly tissRuntimePort!: TISSRuntimePort;
@@ -256,9 +235,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -286,9 +262,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -310,9 +283,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -336,9 +306,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -363,9 +330,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -392,9 +356,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getWatchFolderRuntimePort: () => this.watchFolderRuntimePort,
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -570,35 +531,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getXMLGenerationRuntimePort: () => this.xmlGenerationRuntimePort,
         },
       });
-    this.xmlSerializerRuntimePort =
-      options.xmlSerializerRuntimePort ??
-      createXMLSerializerRuntimePort({ provider: "enterprise" });
-    this.xmlSchemaRuntimePort =
-      options.xmlSchemaRuntimePort ?? createXMLSchemaRuntimePort({ provider: "enterprise" });
-    // C-02: Enterprise XML Validation Runtime Foundation — orquestração
-    // estrutural de validação futura de documentos XML.
-    // Sem validação XML real / XSD / parser / correção automática / SOAP /
-    // operadoras / banco / persistência / APIs / IA.
-    // Peers estruturais (XMLTISS/Quality/AutoFill/TISSMapping/Audit/Validation/
-    // DocumentExtraction/DocumentClassification/OCR/AIOrchestration) via lazy
-    // getters — shape-check apenas em health().
-    this.xmlValidationRuntimePort =
-      options.xmlValidationRuntimePort ??
-      createXMLValidationRuntimePort({
-        provider: "enterprise",
-        enterpriseDeps: {
-          getXMLTISSRuntimePort: () => this.xmlTissRuntimePort,
-          getQualityRuntimePort: () => this.qualityRuntimePort,
-          getAutoFillRuntimePort: () => this.autoFillRuntimePort,
-          getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
-          getAuditRuntimePort: () => this.auditRuntimePort,
-          getValidationRuntimePort: () => this.validationRuntimePort,
-          getDocumentExtractionRuntimePort: () => this.documentExtractionRuntimePort,
-          getDocumentClassificationRuntimePort: () => this.documentClassificationRuntimePort,
-          getOCRRuntimePort: () => this.ocrRuntimePort,
-          getAIOrchestrationRuntimePort: () => this.aiOrchestrationRuntimePort,
-        },
-      });
     // C-03: Enterprise SOAP Runtime Foundation — encapsulador estrutural
     // de transporte SOAP futuro.
     // Sem comunicação SOAP / HTTP / WSDL / TLS / certificado / autenticação /
@@ -612,7 +544,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         provider: "enterprise",
         enterpriseDeps: {
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getQualityRuntimePort: () => this.qualityRuntimePort,
           getAutoFillRuntimePort: () => this.autoFillRuntimePort,
           getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
@@ -633,7 +564,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         enterpriseDeps: {
           getSOAPRuntimePort: () => this.soapRuntimePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getQualityRuntimePort: () => this.qualityRuntimePort,
           getAutoFillRuntimePort: () => this.autoFillRuntimePort,
           getTISSMappingRuntimePort: () => this.tissMappingRuntimePort,
@@ -656,7 +586,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOperatorRuntimePort: () => this.operatorRuntimePort,
           getSOAPRuntimePort: () => this.soapRuntimePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getQualityRuntimePort: () => this.qualityRuntimePort,
           getAutoFillRuntimePort: () => this.autoFillRuntimePort,
           getAuditRuntimePort: () => this.auditRuntimePort,
@@ -678,7 +607,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOperatorRuntimePort: () => this.operatorRuntimePort,
           getSOAPRuntimePort: () => this.soapRuntimePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getQualityRuntimePort: () => this.qualityRuntimePort,
           getAuditRuntimePort: () => this.auditRuntimePort,
         },
@@ -699,7 +627,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOperatorRuntimePort: () => this.operatorRuntimePort,
           getSOAPRuntimePort: () => this.soapRuntimePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
         },
       });
     // C-08: Enterprise Return Runtime Foundation — ReturnManifest / ReturnCorrelation /
@@ -719,7 +646,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getOperatorRuntimePort: () => this.operatorRuntimePort,
           getSOAPRuntimePort: () => this.soapRuntimePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getAuditRuntimePort: () => this.auditRuntimePort,
         },
       });
@@ -766,7 +692,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getBatchRuntimePort: () => this.batchRuntimePort,
           getSOAPRuntimePort: () => this.soapRuntimePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getAuditRuntimePort: () => this.auditRuntimePort,
         },
       });
@@ -774,40 +699,13 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       options.xsdRuntimePort ?? createXSDRuntimePort({ provider: "enterprise" });
     this.namespaceRuntimePort =
       options.namespaceRuntimePort ?? createNamespaceRuntimePort({ provider: "enterprise" });
-    // INF-05…INF-10: Queue + Worker + Scheduler + PersistentQueue + Observability + Scalability — deps cruzadas preparadas (lazy getters).
+    // INF-05 / INF-08 / INF-10: Queue + PersistentQueue + Scalability — deps cruzadas preparadas (lazy getters).
     this.queueRuntimePort =
       options.queueRuntimePort ??
       createQueueRuntimePort({
         provider: "enterprise",
         enterpriseDeps: {
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
-          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
-        },
-      });
-    this.workerRuntimePort =
-      options.workerRuntimePort ??
-      createWorkerRuntimePort({
-        provider: "enterprise",
-        enterpriseDeps: {
-          getQueueRuntimePort: () => this.queueRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
-          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
-        },
-      });
-    this.schedulerRuntimePort =
-      options.schedulerRuntimePort ??
-      createSchedulerRuntimePort({
-        provider: "enterprise",
-        enterpriseDeps: {
-          getQueueRuntimePort: () => this.queueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -817,22 +715,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         provider: "enterprise",
         enterpriseDeps: {
           getQueueRuntimePort: () => this.queueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
-          getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
-        },
-      });
-    this.observabilityRuntimePort =
-      options.observabilityRuntimePort ??
-      createObservabilityRuntimePort({
-        provider: "enterprise",
-        enterpriseDeps: {
-          getQueueRuntimePort: () => this.queueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getTISSRuntimePort: () => this.tissRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -842,10 +724,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
         provider: "enterprise",
         enterpriseDeps: {
           getQueueRuntimePort: () => this.queueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getTISSRuntimePort: () => this.tissRuntimePort,
         },
       });
@@ -860,16 +739,10 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getRulePackEnginePort: () => this.rulePackEnginePort,
           getXMLRuntimePort: () => this.xmlRuntimePort,
           getXMLGenerationRuntimePort: () => this.xmlGenerationRuntimePort,
-          getXMLSerializerRuntimePort: () => this.xmlSerializerRuntimePort,
-          getXMLSchemaRuntimePort: () => this.xmlSchemaRuntimePort,
-          getXMLValidationRuntimePort: () => this.xmlValidationRuntimePort,
           getXSDRuntimePort: () => this.xsdRuntimePort,
           getNamespaceRuntimePort: () => this.namespaceRuntimePort,
           getQueueRuntimePort: () => this.queueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
         },
       });
@@ -882,10 +755,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getCaptureEngineRuntimePort: () => this.captureEngineRuntimePort,
           getOCRRuntimePort: () => this.ocrRuntimePort,
           getQueueRuntimePort: () => this.queueRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
           getScalabilityRuntimePort: () => this.scalabilityRuntimePort,
           getTISSRuntimePort: () => this.tissRuntimePort,
         },
@@ -900,9 +770,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getCaptureEngineRuntimePort: () => this.captureEngineRuntimePort,
           getOCRRuntimePort: () => this.ocrRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     // F3-CAP-03: Upload Runtime Foundation — deps estruturais apenas (sem Upload real / storage providers).
@@ -916,9 +783,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getCaptureEngineRuntimePort: () => this.captureEngineRuntimePort,
           getOCRRuntimePort: () => this.ocrRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     // F3-CAP-04: Intelligent Capture Runtime Foundation — orquestração estrutural Scanner/WatchFolder/Upload.
@@ -932,9 +796,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
           getUploadRuntimePort: () => this.uploadRuntimePort,
           getOCRRuntimePort: () => this.ocrRuntimePort,
           getPersistentQueueRuntimePort: () => this.persistentQueueRuntimePort,
-          getSchedulerRuntimePort: () => this.schedulerRuntimePort,
-          getWorkerRuntimePort: () => this.workerRuntimePort,
-          getObservabilityRuntimePort: () => this.observabilityRuntimePort,
         },
       });
     // ARCH-02: OpenAI oficial atrás do AIProviderPort — sem bypass no produto.
@@ -1050,18 +911,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.xmlGenerationRuntimePort;
   }
 
-  getXMLSerializerRuntimePort(): XMLSerializerRuntimePort {
-    return this.xmlSerializerRuntimePort;
-  }
-
-  getXMLSchemaRuntimePort(): XMLSchemaRuntimePort {
-    return this.xmlSchemaRuntimePort;
-  }
-
-  getXMLValidationRuntimePort(): XMLValidationRuntimePort {
-    return this.xmlValidationRuntimePort;
-  }
-
   getSOAPRuntimePort(): SOAPRuntimePort {
     return this.soapRuntimePort;
   }
@@ -1106,20 +955,8 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
     return this.queueRuntimePort;
   }
 
-  getWorkerRuntimePort(): WorkerRuntimePort {
-    return this.workerRuntimePort;
-  }
-
-  getSchedulerRuntimePort(): SchedulerRuntimePort {
-    return this.schedulerRuntimePort;
-  }
-
   getPersistentQueueRuntimePort(): PersistentQueueRuntimePort {
     return this.persistentQueueRuntimePort;
-  }
-
-  getObservabilityRuntimePort(): ObservabilityRuntimePort {
-    return this.observabilityRuntimePort;
   }
 
   getScalabilityRuntimePort(): ScalabilityRuntimePort {
@@ -1182,9 +1019,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       rulePackEngineHealth,
       xmlGenerationRuntimeHealth,
       xmlRuntimeHealth,
-      xmlSerializerRuntimeHealth,
-      xmlSchemaRuntimeHealth,
-      xmlValidationRuntimeHealth,
       soapRuntimeHealth,
       operatorRuntimeHealth,
       authorizationRuntimeHealth,
@@ -1196,10 +1030,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xsdRuntimeHealth,
       namespaceRuntimeHealth,
       queueRuntimeHealth,
-      workerRuntimeHealth,
-      schedulerRuntimeHealth,
       persistentQueueRuntimeHealth,
-      observabilityRuntimeHealth,
       scalabilityRuntimeHealth,
       scannerRuntimeHealth,
       watchFolderRuntimeHealth,
@@ -1234,9 +1065,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.rulePackEnginePort.health(),
       this.xmlGenerationRuntimePort.health(),
       this.xmlRuntimePort.health(),
-      this.xmlSerializerRuntimePort.health(),
-      this.xmlSchemaRuntimePort.health(),
-      this.xmlValidationRuntimePort.health(),
       this.soapRuntimePort.health(),
       this.operatorRuntimePort.health(),
       this.authorizationRuntimePort.health(),
@@ -1248,10 +1076,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       this.xsdRuntimePort.health(),
       this.namespaceRuntimePort.health(),
       this.queueRuntimePort.health(),
-      this.workerRuntimePort.health(),
-      this.schedulerRuntimePort.health(),
       this.persistentQueueRuntimePort.health(),
-      this.observabilityRuntimePort.health(),
       this.scalabilityRuntimePort.health(),
       this.scannerRuntimePort.health(),
       this.watchFolderRuntimePort.health(),
@@ -1288,9 +1113,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       rulePackEngineHealth.ok &&
       xmlGenerationRuntimeHealth.ok &&
       xmlRuntimeHealth.ok &&
-      xmlSerializerRuntimeHealth.ok &&
-      xmlSchemaRuntimeHealth.ok &&
-      xmlValidationRuntimeHealth.ok &&
       soapRuntimeHealth.ok &&
       operatorRuntimeHealth.ok &&
       authorizationRuntimeHealth.ok &&
@@ -1302,10 +1124,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xsdRuntimeHealth.ok &&
       namespaceRuntimeHealth.ok &&
       queueRuntimeHealth.ok &&
-      workerRuntimeHealth.ok &&
-      schedulerRuntimeHealth.ok &&
       persistentQueueRuntimeHealth.ok &&
-      observabilityRuntimeHealth.ok &&
       scalabilityRuntimeHealth.ok &&
       scannerRuntimeHealth.ok &&
       watchFolderRuntimeHealth.ok &&
@@ -1344,10 +1163,6 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xmlGenerationRuntimeOk: xmlGenerationRuntimeHealth.ok,
       xmlRuntimeOk: xmlRuntimeHealth.ok,
       xmlParserOk: xmlRuntimeHealth.xmlParserOk === true,
-      xmlSerializerRuntimeOk: xmlSerializerRuntimeHealth.ok,
-      xmlSchemaRuntimeOk: xmlSchemaRuntimeHealth.ok,
-      xmlValidationRuntimeOk: xmlValidationRuntimeHealth.ok,
-      xsdValidationOk: xmlValidationRuntimeHealth.xsdValidationOk === true,
       soapRuntimeOk: soapRuntimeHealth.ok,
       operatorRuntimeOk: operatorRuntimeHealth.ok,
       authorizationRuntimeOk: authorizationRuntimeHealth.ok,
@@ -1359,10 +1174,7 @@ export class DefaultEnterpriseRuntime implements EnterpriseRuntime {
       xsdRuntimeOk: xsdRuntimeHealth.ok,
       namespaceRuntimeOk: namespaceRuntimeHealth.ok,
       queueRuntimeOk: queueRuntimeHealth.ok,
-      workerRuntimeOk: workerRuntimeHealth.ok,
-      schedulerRuntimeOk: schedulerRuntimeHealth.ok,
       persistentQueueRuntimeOk: persistentQueueRuntimeHealth.ok,
-      observabilityRuntimeOk: observabilityRuntimeHealth.ok,
       scalabilityRuntimeOk: scalabilityRuntimeHealth.ok,
       scannerRuntimeOk: scannerRuntimeHealth.ok,
       watchFolderRuntimeOk: watchFolderRuntimeHealth.ok,

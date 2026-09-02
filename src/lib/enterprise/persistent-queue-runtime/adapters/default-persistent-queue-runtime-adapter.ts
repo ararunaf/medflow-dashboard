@@ -154,16 +154,6 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
           "DefaultPersistentQueueRuntimeAdapter exige enterpriseDeps.getQueueRuntimePort (INF-08) quando deps são fornecidas.",
         );
       }
-      if (typeof this.enterpriseDeps.getWorkerRuntimePort !== "function") {
-        throw new Error(
-          "DefaultPersistentQueueRuntimeAdapter exige enterpriseDeps.getWorkerRuntimePort (INF-08) quando deps são fornecidas.",
-        );
-      }
-      if (typeof this.enterpriseDeps.getSchedulerRuntimePort !== "function") {
-        throw new Error(
-          "DefaultPersistentQueueRuntimeAdapter exige enterpriseDeps.getSchedulerRuntimePort (INF-08) quando deps são fornecidas.",
-        );
-      }
     }
   }
 
@@ -239,27 +229,10 @@ export class DefaultPersistentQueueRuntimeAdapter implements PersistentQueueRunt
       // INF-08 / INF-09: deps preparadas — valida Port shape sem chamar health()
       // (evita ciclos PersistentQueue.health ↔ Queue/Worker/Scheduler/Observability.health).
       const queuePort = this.enterpriseDeps.getQueueRuntimePort();
-      const workerPort = this.enterpriseDeps.getWorkerRuntimePort();
-      const schedulerPort = this.enterpriseDeps.getSchedulerRuntimePort();
       queueRuntimeOk =
         !!queuePort &&
         typeof queuePort.health === "function" &&
         typeof queuePort.capabilities === "function";
-      workerRuntimeOk =
-        !!workerPort &&
-        typeof workerPort.health === "function" &&
-        typeof workerPort.capabilities === "function";
-      schedulerRuntimeOk =
-        !!schedulerPort &&
-        typeof schedulerPort.health === "function" &&
-        typeof schedulerPort.capabilities === "function";
-      if (typeof this.enterpriseDeps.getObservabilityRuntimePort === "function") {
-        const observabilityPort = this.enterpriseDeps.getObservabilityRuntimePort();
-        observabilityRuntimeOk =
-          !!observabilityPort &&
-          typeof observabilityPort.health === "function" &&
-          typeof observabilityPort.capabilities === "function";
-      }
       if (typeof this.enterpriseDeps.getScalabilityRuntimePort === "function") {
         const scalabilityPort = this.enterpriseDeps.getScalabilityRuntimePort();
         scalabilityRuntimeOk =

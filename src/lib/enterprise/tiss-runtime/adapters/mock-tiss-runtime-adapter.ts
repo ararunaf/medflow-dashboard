@@ -9,19 +9,12 @@ import { createTISSCatalogPort } from "../../tiss-catalog/providers/create-tiss-
 import { createTISSProviderPort } from "../../tiss-provider/providers/create-tiss-provider-port";
 import { createXMLGenerationRuntimePort } from "../../xml-generation-runtime/providers/create-xml-generation-runtime-port";
 import { createXMLRuntimePort } from "../../xml-runtime/providers/create-xml-runtime-port";
-import { createXMLSchemaRuntimePort } from "../../xml-schema-runtime/providers/create-xml-schema-runtime-port";
-import { createXMLSerializerRuntimePort } from "../../xml-serializer-runtime/providers/create-xml-serializer-runtime-port";
-import { createXMLValidationRuntimePort } from "../../xml-validation-runtime/providers/create-xml-validation-runtime-port";
 import { createXSDRuntimePort } from "../../xsd-runtime/providers/create-xsd-runtime-port";
 import { createNamespaceRuntimePort } from "../../namespace-runtime/providers/create-namespace-runtime-port";
 import { createPersistentQueueRuntimePort } from "../../persistent-queue-runtime/providers/create-persistent-queue-runtime-port";
-import { createObservabilityRuntimePort } from "../../observability-runtime/providers/create-observability-runtime-port";
-import type { ObservabilityRuntimePort } from "../../observability-runtime/ports/observability-runtime-port";
 import { createScalabilityRuntimePort } from "../../scalability-runtime/providers/create-scalability-runtime-port";
 import type { ScalabilityRuntimePort } from "../../scalability-runtime/ports/scalability-runtime-port";
 import { createQueueRuntimePort } from "../../queue-runtime/providers/create-queue-runtime-port";
-import { createSchedulerRuntimePort } from "../../scheduler-runtime/providers/create-scheduler-runtime-port";
-import { createWorkerRuntimePort } from "../../worker-runtime/providers/create-worker-runtime-port";
 import type { TISSRuntimePort } from "../ports/tiss-runtime-port";
 import type {
   GetTISSRuntimeSessionInput,
@@ -63,36 +56,17 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       enterpriseDeps: { getTISSCatalogPort: () => catalogPort },
     });
     const xmlGenerationRuntimePort = createXMLGenerationRuntimePort({ provider: "mock" });
-    const xmlSerializerRuntimePort = createXMLSerializerRuntimePort({ provider: "mock" });
-    const xmlSchemaRuntimePort = createXMLSchemaRuntimePort({ provider: "mock" });
-    const xmlValidationRuntimePort = createXMLValidationRuntimePort({ provider: "mock" });
     const xsdRuntimePort = createXSDRuntimePort({ provider: "mock" });
     const namespaceRuntimePort = createNamespaceRuntimePort({ provider: "mock" });
     const queueRuntimePort = createQueueRuntimePort({ provider: "mock" });
-    const workerRuntimePort = createWorkerRuntimePort({
-      provider: "mock",
-      enterpriseDeps: {
-        getQueueRuntimePort: () => queueRuntimePort,
-      },
-    });
-    const schedulerRuntimePort = createSchedulerRuntimePort({
-      provider: "mock",
-      enterpriseDeps: {
-        getQueueRuntimePort: () => queueRuntimePort,
-        getWorkerRuntimePort: () => workerRuntimePort,
-      },
-    });
     const persistentQueueRuntimePort = createPersistentQueueRuntimePort({
       provider: "mock",
       enterpriseDeps: {
         getQueueRuntimePort: () => queueRuntimePort,
-        getWorkerRuntimePort: () => workerRuntimePort,
-        getSchedulerRuntimePort: () => schedulerRuntimePort,
       },
     });
 
-    // Observability/Scalability com lazy TISS back-ref — evita ciclos MockTISS ↔ MockObs/MockScal.
-    let observabilityRuntimePort: ObservabilityRuntimePort | undefined;
+    // Scalability com lazy TISS back-ref — evita ciclo MockTISS ↔ MockScal.
     let scalabilityRuntimePort: ScalabilityRuntimePort | undefined;
     const tissRef: { current?: DefaultTISSRuntimeAdapter } = {};
 
@@ -103,33 +77,13 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       return tissRef.current;
     };
 
-    const getLazyObservability = () => {
-      if (!observabilityRuntimePort) {
-        observabilityRuntimePort = createObservabilityRuntimePort({
-          provider: "mock",
-          enterpriseDeps: {
-            getQueueRuntimePort: () => queueRuntimePort,
-            getWorkerRuntimePort: () => workerRuntimePort,
-            getSchedulerRuntimePort: () => schedulerRuntimePort,
-            getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
-            getTISSRuntimePort: getLazyTISS,
-            getScalabilityRuntimePort: getLazyScalability,
-          },
-        });
-      }
-      return observabilityRuntimePort;
-    };
-
     const getLazyScalability = () => {
       if (!scalabilityRuntimePort) {
         scalabilityRuntimePort = createScalabilityRuntimePort({
           provider: "mock",
           enterpriseDeps: {
             getQueueRuntimePort: () => queueRuntimePort,
-            getWorkerRuntimePort: () => workerRuntimePort,
-            getSchedulerRuntimePort: () => schedulerRuntimePort,
             getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
-            getObservabilityRuntimePort: getLazyObservability,
             getTISSRuntimePort: getLazyTISS,
           },
         });
@@ -143,16 +97,10 @@ export class MockTISSRuntimeAdapter implements TISSRuntimePort {
       getTISSCatalogPort: () => catalogPort,
       getRulePackEnginePort: () => rulePackEnginePort,
       getXMLGenerationRuntimePort: () => xmlGenerationRuntimePort,
-      getXMLSerializerRuntimePort: () => xmlSerializerRuntimePort,
-      getXMLSchemaRuntimePort: () => xmlSchemaRuntimePort,
-      getXMLValidationRuntimePort: () => xmlValidationRuntimePort,
       getXSDRuntimePort: () => xsdRuntimePort,
       getNamespaceRuntimePort: () => namespaceRuntimePort,
       getQueueRuntimePort: () => queueRuntimePort,
-      getWorkerRuntimePort: () => workerRuntimePort,
-      getSchedulerRuntimePort: () => schedulerRuntimePort,
       getPersistentQueueRuntimePort: () => persistentQueueRuntimePort,
-      getObservabilityRuntimePort: getLazyObservability,
       getScalabilityRuntimePort: getLazyScalability,
       getXMLRuntimePort: () =>
         createXMLRuntimePort({

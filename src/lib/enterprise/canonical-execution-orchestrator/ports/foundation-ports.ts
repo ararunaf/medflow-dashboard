@@ -6,17 +6,14 @@
  *
  * Imports são type-only — sem execução de OCR, IA, Mapping, regras ou parsers.
  */
-import type { AIAuditorPort } from "../../ai-auditor/ports/ai-auditor-port";
 import type { ContractRuleBindingPort } from "../../contract-rule-binding/ports/contract-rule-binding-port";
 import type { DocumentIntakePort } from "../../document-intake/ports/document-intake-port";
 import type { DocumentProcessorPort } from "../../document-processor/ports/document-processor-port";
 import type { HealthcareModelPort } from "../../healthcare-model/ports/healthcare-model-port";
 import type { OCRProviderPort } from "../../ocr-provider/ports/ocr-provider-port";
 import type { ProcessingProviderPort } from "../../processing-provider/ports/processing-provider-port";
-import type { TISSMappingPort } from "../../tiss-mapping/ports/tiss-mapping-port";
 import type { TISSProfilePort } from "../../tiss-profile/ports/tiss-profile-port";
 import type { TISSRuleRuntimePort } from "../../tiss-rule-runtime/ports/tiss-rule-runtime-port";
-import type { TISSVocabularyPort } from "../../tiss-vocabulary/ports/tiss-vocabulary-port";
 import type { CanonicalExecutionStepName } from "./models";
 
 /** Identificadores estáveis dos Ports Foundation orquestrados. */
@@ -25,13 +22,10 @@ export type FoundationPortRef =
   | "document-processor"
   | "processing-provider"
   | "ocr-provider"
-  | "tiss-mapping"
-  | "tiss-vocabulary"
   | "tiss-profile"
   | "healthcare-model"
   | "contract-rule-binding"
-  | "tiss-rule-runtime"
-  | "ai-auditor";
+  | "tiss-rule-runtime";
 
 /** Nome do contrato Port correspondente. */
 export type FoundationPortContract =
@@ -39,13 +33,10 @@ export type FoundationPortContract =
   | "DocumentProcessorPort"
   | "ProcessingProviderPort"
   | "OCRProviderPort"
-  | "TISSMappingPort"
-  | "TISSVocabularyPort"
   | "TISSProfilePort"
   | "HealthcareModelPort"
   | "ContractRuleBindingPort"
-  | "TISSRuleRuntimePort"
-  | "AIAuditorPort";
+  | "TISSRuleRuntimePort";
 
 /**
  * União tipada dos Ports Foundation orquestrados.
@@ -56,13 +47,10 @@ export type FoundationOrchestratedPort =
   | DocumentProcessorPort
   | ProcessingProviderPort
   | OCRProviderPort
-  | TISSMappingPort
-  | TISSVocabularyPort
   | TISSProfilePort
   | HealthcareModelPort
   | ContractRuleBindingPort
-  | TISSRuleRuntimePort
-  | AIAuditorPort;
+  | TISSRuleRuntimePort;
 
 /**
  * Registry opcional de Ports injetáveis (DI estrutural).
@@ -74,13 +62,10 @@ export type FoundationPortRegistry = {
   documentProcessor?: DocumentProcessorPort;
   processingProvider?: ProcessingProviderPort;
   ocrProvider?: OCRProviderPort;
-  tissMapping?: TISSMappingPort;
-  tissVocabulary?: TISSVocabularyPort;
   tissProfile?: TISSProfilePort;
   healthcareModel?: HealthcareModelPort;
   contractRuleBinding?: ContractRuleBindingPort;
   tissRuleRuntime?: TISSRuleRuntimePort;
-  aiAuditor?: AIAuditorPort;
 };
 
 /** Descritor estrutural de um elo do pipeline → Port. */
@@ -92,7 +77,7 @@ export type FoundationPortStepDescriptor = {
 };
 
 /**
- * Cadeia canônica Document Intake → … → AI Auditor.
+ * Cadeia canônica Document Intake → … → TISS Rule Runtime.
  * Ordem fixa — exclusivamente orquestração estrutural via Ports.
  */
 export const FOUNDATION_PORT_CHAIN = [
@@ -121,46 +106,28 @@ export const FOUNDATION_PORT_CHAIN = [
     order: 3,
   },
   {
-    stepName: "tiss-mapping",
-    portRef: "tiss-mapping",
-    portContract: "TISSMappingPort",
-    order: 4,
-  },
-  {
-    stepName: "tiss-vocabulary",
-    portRef: "tiss-vocabulary",
-    portContract: "TISSVocabularyPort",
-    order: 5,
-  },
-  {
     stepName: "tiss-profile",
     portRef: "tiss-profile",
     portContract: "TISSProfilePort",
-    order: 6,
+    order: 4,
   },
   {
     stepName: "healthcare-model",
     portRef: "healthcare-model",
     portContract: "HealthcareModelPort",
-    order: 7,
+    order: 5,
   },
   {
     stepName: "contract-rule-binding",
     portRef: "contract-rule-binding",
     portContract: "ContractRuleBindingPort",
-    order: 8,
+    order: 6,
   },
   {
     stepName: "tiss-rule-runtime",
     portRef: "tiss-rule-runtime",
     portContract: "TISSRuleRuntimePort",
-    order: 9,
-  },
-  {
-    stepName: "ai-auditor",
-    portRef: "ai-auditor",
-    portContract: "AIAuditorPort",
-    order: 10,
+    order: 7,
   },
 ] as const satisfies readonly FoundationPortStepDescriptor[];
 
