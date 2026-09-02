@@ -137,3 +137,41 @@ export const listPendingSwapsFn = createServerFn({ method: "GET" }).handler(
     });
   },
 );
+
+export type SwapTargetProfessional = {
+  professionalId: string;
+  name: string;
+  specialty: string | null;
+};
+
+type RawSwapTargetRow = Pick<ProfessionalRow, "id" | "specialty"> & {
+  profile: Pick<ProfileRow, "full_name"> | null;
+};
+
+/**
+ * Colegas do mesmo tenant elegíveis como alvo de `requestSwapFn` — a
+ * validação final (tenant, distinto do solicitante) continua no service;
+ * esta lista só existe para popular o seletor da UI de "Solicitar troca".
+ */
+export const listSwapTargetProfessionalsFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<QueryResult<SwapTargetProfessional[]>> => {
+    return runQuery(async (ctx) => {
+      if (!ctx.professionalId) return [];
+      const { data, error } = await ctx.client
+        .from("professionals")
+        .select("id, specialty, profile:profiles!professionals_profile_id_fkey ( full_name )")
+        .eq("tenant_id", ctx.tenantId)
+        .neq("id", ctx.professionalId)
+        .limit(200)
+        .returns<RawSwapTargetRow[]>();
+      if (error) throw mapPostgresError(error);
+      return (data ?? [])
+        .map((r) => ({
+          professionalId: r.id,
+          name: r.profile?.full_name ?? "Profissional",
+          specialty: r.specialty || null,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    });
+  },
+);

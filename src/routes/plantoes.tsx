@@ -1,4 +1,5 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
@@ -10,12 +11,14 @@ import {
   useMyAssignmentsQuery,
   useOpenShiftsQuery,
   usePendingSwapsQuery,
+  useSwapTargetProfessionalsQuery,
 } from "@/hooks/use-operations";
 import {
   useAcceptAssignment,
   useApproveSwap,
   useDenySwap,
   useRejectAssignment,
+  useRequestSwap,
 } from "@/hooks/use-operational-mutations";
 import {
   assignmentStatusToBadge,
@@ -286,11 +289,11 @@ function AssignmentCard({
   assignment: AssignmentListItem;
   onError: (err: unknown) => void;
 }) {
-  void onError;
   const accept = useAcceptAssignment();
   const reject = useRejectAssignment();
   const isBusy = accept.isPending || reject.isPending;
   const isFinal = assignment.status !== "pending";
+  const [swapOpen, setSwapOpen] = useState(false);
 
   return (
     <div className="rounded-xl bg-card border border-border ring-soft p-4">
@@ -311,15 +314,25 @@ function AssignmentCard({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         {assignment.status === "confirmed" ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="col-span-2 gap-1.5"
-            disabled
-            title="Use o coordenador para solicitar uma troca."
-          >
-            <ArrowLeftRight className="h-4 w-4" /> Solicitar troca
-          </Button>
+          swapOpen ? (
+            <div className="col-span-2">
+              <SwapRequestForm
+                shiftId={assignment.shiftId}
+                onCancel={() => setSwapOpen(false)}
+                onDone={() => setSwapOpen(false)}
+                onError={onError}
+              />
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="col-span-2 gap-1.5"
+              onClick={() => setSwapOpen(true)}
+            >
+              <ArrowLeftRight className="h-4 w-4" /> Solicitar troca
+            </Button>
+          )
         ) : (
           <>
             <Button
@@ -343,6 +356,87 @@ function AssignmentCard({
             </Button>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+function SwapRequestForm({
+  shiftId,
+  onCancel,
+  onDone,
+  onError,
+}: {
+  shiftId: string;
+  onCancel: () => void;
+  onDone: () => void;
+  onError: (err: unknown) => void;
+}) {
+  const colleagues = useSwapTargetProfessionalsQuery();
+  const requestSwap = useRequestSwap({ onSuccess: onDone, onError });
+  const [targetId, setTargetId] = useState("");
+
+  if (colleagues.isLoading) {
+    return <p className="text-xs text-muted-foreground py-2">Carregando colegas…</p>;
+  }
+  if (colleagues.isError) {
+    return (
+      <ErrorState
+        message={describeError(colleagues.error).message}
+        onRetry={() => colleagues.refetch()}
+      />
+    );
+  }
+  const options = colleagues.data ?? [];
+  if (options.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground py-2">
+        Nenhum outro profissional cadastrado neste tenant para solicitar troca.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <label
+        className="block text-xs font-medium text-muted-foreground"
+        htmlFor={`swap-target-${shiftId}`}
+      >
+        Solicitar troca com
+      </label>
+      <select
+        id={`swap-target-${shiftId}`}
+        className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm"
+        value={targetId}
+        onChange={(e) => setTargetId(e.target.value)}
+      >
+        <option value="">Selecione um colega…</option>
+        {options.map((p) => (
+          <option key={p.professionalId} value={p.professionalId}>
+            {p.name}
+            {p.specialty ? ` — ${p.specialty}` : ""}
+          </option>
+        ))}
+      </select>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          disabled={requestSwap.isPending}
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
+        <Button
+          size="sm"
+          className="flex-1 gap-1.5"
+          disabled={!targetId || requestSwap.isPending}
+          onClick={() => requestSwap.mutate({ shiftId, targetProfessionalId: targetId })}
+        >
+          <ArrowLeftRight className="h-4 w-4" />
+          {requestSwap.isPending ? "Enviando…" : "Confirmar solicitação"}
+        </Button>
       </div>
     </div>
   );

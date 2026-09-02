@@ -25,12 +25,14 @@ import {
   listOpenShiftsFn,
   listPendingSwapsFn,
   listShiftsRangeFn,
+  listSwapTargetProfessionalsFn,
   type AssignmentListItem,
   type AvailabilityWindowItem,
   type DashboardSummary,
   type MyContext,
   type ShiftListItem,
   type SwapListItem,
+  type SwapTargetProfessional,
 } from "@/lib/operations/api";
 
 const DEFAULT_STALE_MS = 10_000;
@@ -129,6 +131,17 @@ export const pendingSwapsQueryOptions = () =>
 
 export function usePendingSwapsQuery(opts: ReadOpts = {}) {
   return useQuery({ ...pendingSwapsQueryOptions(), ...opts });
+}
+
+export const swapTargetProfessionalsQueryOptions = () =>
+  queryOptions<SwapTargetProfessional[]>({
+    queryKey: opsKeys.swapTargets(),
+    queryFn: async () => unwrap(await listSwapTargetProfessionalsFn()),
+    staleTime: 60_000,
+  });
+
+export function useSwapTargetProfessionalsQuery(opts: ReadOpts = {}) {
+  return useQuery({ ...swapTargetProfessionalsQueryOptions(), ...opts });
 }
 
 // -------------------------------------------------------------------------

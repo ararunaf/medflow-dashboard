@@ -39,6 +39,7 @@ export const opsKeys = {
   swaps: () => [...opsKeys.all, "swaps"] as const,
   swapsMine: () => [...opsKeys.swaps(), "mine"] as const,
   swapsPending: () => [...opsKeys.swaps(), "pending"] as const,
+  swapTargets: () => [...opsKeys.swaps(), "targets"] as const,
 
   // availability
   availability: () => [...opsKeys.all, "availability"] as const,

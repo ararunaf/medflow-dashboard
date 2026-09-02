@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Filter, Rows3 } from "lucide-react";
 import { shiftsRangeQueryOptions, useShiftsRangeQuery } from "@/hooks/use-operations";
 import type { ShiftListItem } from "@/lib/operations/api";
 import type { EscalasOpsSearch } from "@/lib/operations/actions";
@@ -58,6 +58,39 @@ function buildDays(): { iso: string; day: number; monthShort: string; isToday: b
   return out;
 }
 
+const WEEKDAY_HEADERS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+type MonthCell = { iso: string; day: number; inMonth: boolean; isToday: boolean };
+
+function buildMonthGrid(monthDate: Date): MonthCell[][] {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const startOffset = new Date(year, month, 1).getDay();
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const cursor = new Date(year, month, 1 - startOffset);
+  const weeks: MonthCell[][] = [];
+  for (let w = 0; w < 6; w++) {
+    const week: MonthCell[] = [];
+    for (let d = 0; d < 7; d++) {
+      const iso = cursor.toISOString().slice(0, 10);
+      week.push({
+        iso,
+        day: cursor.getDate(),
+        inMonth: cursor.getMonth() === month,
+        isToday: iso === todayISO,
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+function formatMonthYear(d: Date): string {
+  const label = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(d);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 function filterShiftsForOpsFocus(
   list: ShiftListItem[],
   opsFocus: EscalasOpsSearch["opsFocus"],
@@ -72,16 +105,43 @@ function filterShiftsForOpsFocus(
 function EscalasPage() {
   const days = useMemo(buildDays, []);
   const [selectedISO, setSelectedISO] = useState<string>(days[0]!.iso);
+  const [viewMode, setViewMode] = useState<"dias" | "mes">("dias");
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
   const { opsFocus } = Route.useSearch();
   const navigate = useNavigate({ from: "/escalas" });
 
-  const shiftsQuery = useShiftsRangeQuery();
+  const shiftsQuery = useShiftsRangeQuery(undefined, undefined, { enabled: viewMode === "dias" });
+
+  const monthGrid = useMemo(() => buildMonthGrid(visibleMonth), [visibleMonth]);
+  const monthStartISO = monthGrid[0]![0]!.iso;
+  const monthEndISO = monthGrid[monthGrid.length - 1]![6]!.iso;
+  const monthShiftsQuery = useShiftsRangeQuery(monthStartISO, monthEndISO, {
+    enabled: viewMode === "mes",
+  });
+
+  const monthDayInfo = useMemo(() => {
+    const map = new Map<string, { total: number; open: number; conflict: boolean }>();
+    for (const s of monthShiftsQuery.data ?? []) {
+      const iso = s.startsAt.slice(0, 10);
+      const entry = map.get(iso) ?? { total: 0, open: 0, conflict: false };
+      entry.total += 1;
+      if (s.status === "open") entry.open += 1;
+      if (s.operationalConflictHint) entry.conflict = true;
+      map.set(iso, entry);
+    }
+    return map;
+  }, [monthShiftsQuery.data]);
+
+  const activeQuery = viewMode === "mes" ? monthShiftsQuery : shiftsQuery;
 
   const filtered = useMemo(() => {
-    const list = shiftsQuery.data ?? [];
+    const list = activeQuery.data ?? [];
     const byDay = list.filter((s) => s.startsAt.slice(0, 10) === selectedISO);
     return filterShiftsForOpsFocus(byDay, opsFocus);
-  }, [shiftsQuery.data, selectedISO, opsFocus]);
+  }, [activeQuery.data, selectedISO, opsFocus]);
 
   const filterLabel =
     opsFocus === "conflicts"
@@ -96,11 +156,37 @@ function EscalasPage() {
     <AppShell>
       <PageHeader
         title="Escalas"
-        subtitle="Próximos 14 dias"
+        subtitle={viewMode === "dias" ? "Próximos 14 dias" : formatMonthYear(visibleMonth)}
         actions={
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="h-4 w-4" /> Filtros
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex p-1 bg-muted rounded-lg gap-1">
+              <button
+                type="button"
+                onClick={() => setViewMode("dias")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  viewMode === "dias"
+                    ? "bg-surface text-foreground shadow-sm"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Rows3 className="h-3.5 w-3.5" /> Dias
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("mes")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  viewMode === "mes"
+                    ? "bg-surface text-foreground shadow-sm"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <CalendarDays className="h-3.5 w-3.5" /> Mês
+              </button>
+            </div>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="h-4 w-4" /> Filtros
+            </Button>
+          </div>
         }
       />
 
@@ -117,40 +203,120 @@ function EscalasPage() {
         </div>
       ) : null}
 
-      <div className="rounded-xl bg-card border border-border ring-soft p-3 overflow-x-auto">
-        <div className="flex gap-2 min-w-max">
-          {days.map((d) => {
-            const active = d.iso === selectedISO;
-            return (
-              <button
-                key={d.iso}
-                type="button"
-                onClick={() => setSelectedISO(d.iso)}
-                className={`flex flex-col items-center justify-center w-12 h-16 rounded-lg text-xs transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground hover:bg-accent/30"
-                }`}
-              >
-                <span className="opacity-70">{d.isToday ? "Hoje" : d.monthShort}</span>
-                <span className="text-base font-semibold">{d.day}</span>
-              </button>
-            );
-          })}
+      {viewMode === "dias" ? (
+        <div className="rounded-xl bg-card border border-border ring-soft p-3 overflow-x-auto">
+          <div className="flex gap-2 min-w-max">
+            {days.map((d) => {
+              const active = d.iso === selectedISO;
+              return (
+                <button
+                  key={d.iso}
+                  type="button"
+                  onClick={() => setSelectedISO(d.iso)}
+                  className={`flex flex-col items-center justify-center w-12 h-16 rounded-lg text-xs transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground hover:bg-accent/30"
+                  }`}
+                >
+                  <span className="opacity-70">{d.isToday ? "Hoje" : d.monthShort}</span>
+                  <span className="text-base font-semibold">{d.day}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-xl bg-card border border-border ring-soft p-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Mês anterior"
+              onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">{formatMonthYear(visibleMonth)}</span>
+              <button
+                type="button"
+                className="text-xs font-medium text-primary hover:underline"
+                onClick={() => {
+                  const now = new Date();
+                  setVisibleMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+                  setSelectedISO(now.toISOString().slice(0, 10));
+                }}
+              >
+                Hoje
+              </button>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Mês seguinte"
+              onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-muted-foreground mb-1">
+            {WEEKDAY_HEADERS.map((w) => (
+              <div key={w}>{w}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {monthGrid.flat().map((cell) => {
+              const info = monthDayInfo.get(cell.iso);
+              const active = cell.iso === selectedISO;
+              return (
+                <button
+                  key={cell.iso}
+                  type="button"
+                  onClick={() => setSelectedISO(cell.iso)}
+                  className={`flex flex-col items-center justify-start gap-0.5 rounded-lg py-1.5 text-xs transition-colors min-h-[52px] ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : cell.inMonth
+                        ? "bg-muted hover:bg-accent/30 text-foreground"
+                        : "text-muted-foreground/40"
+                  } ${cell.isToday && !active ? "ring-1 ring-primary/50" : ""}`}
+                >
+                  <span className="font-semibold">{cell.day}</span>
+                  {info ? (
+                    <span
+                      className={`inline-flex items-center rounded-full px-1.5 text-[9px] font-semibold ${
+                        active
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : info.conflict
+                            ? "bg-[color:var(--warning)]/20 text-[color:var(--warning)]"
+                            : info.open > 0
+                              ? "bg-primary/15 text-primary"
+                              : "bg-foreground/10 text-muted-foreground"
+                      }`}
+                    >
+                      {info.total}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 space-y-3">
-        {shiftsQuery.isLoading ? (
+        {activeQuery.isLoading ? (
           <>
             <SkeletonRow />
             <SkeletonRow />
             <SkeletonRow />
           </>
-        ) : shiftsQuery.isError ? (
+        ) : activeQuery.isError ? (
           <ErrorState
-            message={describeError(shiftsQuery.error).message}
-            onRetry={() => shiftsQuery.refetch()}
+            message={describeError(activeQuery.error).message}
+            onRetry={() => activeQuery.refetch()}
           />
         ) : filtered.length === 0 ? (
           <EmptyState
