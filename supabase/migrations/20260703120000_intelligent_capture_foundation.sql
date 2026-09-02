@@ -186,6 +186,12 @@ CREATE TABLE IF NOT EXISTS public.capture_pages (
 CREATE INDEX IF NOT EXISTS capture_pages_session_idx
   ON public.capture_pages (tenant_id, session_id);
 
+-- Padrão do projeto: (tenant_id, id) único como alvo de FK composta
+-- tenant-scoped (mesmo padrão de capture_sessions/capture_documents acima).
+-- capture_fields.capture_fields_page_fk depende deste índice existir.
+CREATE UNIQUE INDEX IF NOT EXISTS capture_pages_tenant_id_id_uidx
+  ON public.capture_pages (tenant_id, id);
+
 -- ---------------------------------------------------------------------------
 -- capture_fields — campos extraídos (estrutura para OCR futuro)
 -- ---------------------------------------------------------------------------
@@ -225,6 +231,10 @@ CREATE INDEX IF NOT EXISTS capture_fields_session_idx
 CREATE INDEX IF NOT EXISTS capture_fields_key_idx
   ON public.capture_fields (tenant_id, session_id, field_key)
   WHERE deleted_at IS NULL;
+
+-- capture_corrections.capture_corrections_field_fk depende deste índice existir.
+CREATE UNIQUE INDEX IF NOT EXISTS capture_fields_tenant_id_id_uidx
+  ON public.capture_fields (tenant_id, id);
 
 -- ---------------------------------------------------------------------------
 -- capture_findings — achados de auditoria preventiva
