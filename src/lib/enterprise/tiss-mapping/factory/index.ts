@@ -1,1 +1,0 @@
-/** * Factory — TISS Mapping Foundation (EPC-21). */export {  TISSMappingFactory,  createTISSMappingFactory,  type TISSMappingFactoryOptions,} from "./tiss-mapping-factory";
