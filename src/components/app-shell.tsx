@@ -191,8 +191,17 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-background flex">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Pular para o conteúdo
+      </a>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-colors duration-200">
+      <aside
+        aria-label="Barra lateral de navegação"
+        className="hidden lg:flex w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-colors duration-200"
+      >
         <div className="px-6 py-6 bg-surface border-b border-sidebar-border flex flex-col items-center justify-center gap-3">
           <img
             src={logoSrc}
@@ -259,7 +268,11 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="flex-1 pb-24 lg:pb-8 px-4 lg:px-8 py-4 lg:py-8 max-w-7xl w-full mx-auto motion-safe:transition-opacity motion-safe:duration-200">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 pb-24 lg:pb-8 px-4 lg:px-8 py-4 lg:py-8 max-w-7xl w-full mx-auto motion-safe:transition-opacity motion-safe:duration-200 focus:outline-none"
+        >
           {showBreadcrumbs ? <Breadcrumbs crumbs={crumbs} /> : null}
           {children}
         </main>
