@@ -50,6 +50,10 @@ import {
   runCaptureRiskViaEnterprise,
 } from "../enterprise/process-risk-via-enterprise";
 import { getRiskAssessmentSignedUrl } from "../risk/infrastructure/risk-storage";
+import {
+  getCaptureFieldAuditReportViaEnterprise,
+  runCaptureFieldAuditViaEnterprise,
+} from "../enterprise/process-field-audit-via-enterprise";
 import { getAuditReportSignedUrl } from "../audit/infrastructure/audit-storage";
 import {
   getCaptureCorrectionProposalsViaEnterprise,
@@ -384,6 +388,37 @@ export const getCaptureContractIntelligenceReportFn = createServerFn({ method: "
       const report = await getCaptureContractIntelligenceReportViaEnterprise(ctx, data.sessionId);
       const status = await getCaptureSessionStatus(ctx, data.sessionId);
       const summary = (status.metadata?.contractIntelligence as JsonObject | undefined) ?? null;
+      return { report, summary, metadata: status.metadata };
+    });
+  });
+
+export const runCaptureFieldAuditFn = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => ({
+    sessionId: requireString(
+      typeof raw === "object" && raw && "sessionId" in raw
+        ? (raw as Record<string, unknown>).sessionId
+        : raw,
+      "sessionId",
+    ),
+  }))
+  .handler(async ({ data }) => {
+    return runMutation(async (ctx) => runCaptureFieldAuditViaEnterprise(ctx, data.sessionId));
+  });
+
+export const getCaptureFieldAuditReportFn = createServerFn({ method: "GET" })
+  .inputValidator((raw: unknown) => ({
+    sessionId: requireString(
+      typeof raw === "object" && raw && "sessionId" in raw
+        ? (raw as Record<string, unknown>).sessionId
+        : raw,
+      "sessionId",
+    ),
+  }))
+  .handler(async ({ data }) => {
+    return runQuery(async (ctx) => {
+      const report = await getCaptureFieldAuditReportViaEnterprise(ctx, data.sessionId);
+      const status = await getCaptureSessionStatus(ctx, data.sessionId);
+      const summary = (status.metadata?.fieldAudit as JsonObject | undefined) ?? null;
       return { report, summary, metadata: status.metadata };
     });
   });

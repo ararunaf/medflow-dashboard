@@ -6,7 +6,7 @@
  *     → resolveCaptureEnterpriseRuntime()  [= getEnterpriseRuntime()]
  *     → Document Intake (canônico)
  *     → CanonicalExecutionOrchestratorPort (coordenação estrutural)
- *     → OCR → Parser/Extraction → Audit → Contract → Risk → Correction
+ *     → OCR → Parser/Extraction → Audit → Contract → Risk → Field Audit → Correction
  *
  * Review / TISS/XML / Bloco C são coordenados via Runtime nos respectivos
  * Server Fns (review-server / tiss-server) — mesmo composition root.
@@ -27,6 +27,7 @@ import { runCaptureParserViaEnterprise } from "./process-parser-via-enterprise";
 import { runCaptureAuditViaEnterprise } from "./process-audit-via-enterprise";
 import { runCaptureContractViaEnterprise } from "./process-contract-via-enterprise";
 import { runCaptureRiskViaEnterprise } from "./process-risk-via-enterprise";
+import { runCaptureFieldAuditViaEnterprise } from "./process-field-audit-via-enterprise";
 import { runCaptureCorrectionViaEnterprise } from "./process-correction-via-enterprise";
 
 export type CaptureOperationalPipelineMode = "full" | "retry-upload";
@@ -173,6 +174,11 @@ export async function runCaptureOperationalPipelineBound(
           await runCaptureContractViaEnterprise(ctx, sessionId);
           try {
             await runCaptureRiskViaEnterprise(ctx, sessionId);
+            try {
+              await runCaptureFieldAuditViaEnterprise(ctx, sessionId);
+            } catch {
+              /* falha do Field Audit Agent registrada em metadata — avaliação de risco permanece válida */
+            }
             try {
               await runCaptureCorrectionViaEnterprise(ctx, sessionId);
             } catch {

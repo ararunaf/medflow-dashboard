@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { buildReviewHeaderMetrics } from "@/lib/capture/review/review-workspace-service";
 import type { ReviewPanelId, ReviewApprovalStatus } from "@/lib/capture/review";
 import type { ReviewWorkspaceSnapshot } from "@/lib/capture/review/review-workspace-store";
-import type { AuditReport, AuditReportSummaryMeta } from "@/lib/capture/audit";
+import type {
+  AuditReport,
+  AuditReportSummaryMeta,
+  FieldAuditReport,
+  FieldAuditSummaryMeta,
+} from "@/lib/capture/audit";
 import type {
   ContractIntelligenceReport,
   ContractIntelligenceSummaryMeta,
@@ -70,6 +75,8 @@ export function useReviewWorkspace(sessionId: string) {
   const correctionSummary =
     (snapshot?.correctionSummary as CorrectionProposalSummaryMeta | null) ?? null;
   const correctionStore = snapshot?.correctionStore ?? null;
+  const fieldAuditSummary = (snapshot?.fieldAuditSummary as FieldAuditSummaryMeta | null) ?? null;
+  const fieldAuditReport = snapshot?.fieldAuditReport ?? null;
   const statusHistory = snapshot?.statusHistory ?? [];
 
   const headerMetrics = useMemo(() => {
@@ -139,6 +146,8 @@ export function useReviewWorkspace(sessionId: string) {
     riskAssessmentReport: riskAssessmentReport as RiskAssessmentReport | null,
     correctionSummary,
     correctionStore: correctionStore as CorrectionProposalStore | null,
+    fieldAuditSummary,
+    fieldAuditReport: fieldAuditReport as FieldAuditReport | null,
     statusHistory,
     ocr: ocrResult as RawOcrResult | null,
     refresh,

@@ -55,6 +55,34 @@ export {
   type RunCaptureAuditResult,
 } from "./services/preventive-audit-service";
 
+export type { FieldAuditOpinion, FieldAuditVerdict } from "./types/field-audit-opinion";
+export { FIELD_AUDIT_VERDICTS } from "./types/field-audit-opinion";
+export type { FieldAuditReport, FieldAuditSummaryMeta } from "./types/field-audit-report";
+
+export {
+  groupFindingsByField,
+  buildFieldAuditMessages,
+  parseFieldAuditResponse,
+  generateFieldAuditOpinions,
+  type FieldSignalBundle,
+} from "./engine/field-audit-agent";
+
+export {
+  FIELD_AUDIT_FILENAME,
+  buildFieldAuditStoragePath,
+  persistFieldAuditReport,
+  loadFieldAuditReport,
+  buildFieldAuditSummaryFromReport,
+} from "./infrastructure/field-audit-storage";
+
+export {
+  FieldAuditService,
+  getDefaultFieldAuditService,
+  runCaptureFieldAudit,
+  getCaptureFieldAuditReport,
+  type RunFieldAuditResult,
+} from "./services/field-audit-service";
+
 export {
   TUSS_CATALOG,
   getTussCatalogCodes,

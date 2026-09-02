@@ -9,6 +9,7 @@ import { getCaptureAuditReportViaEnterprise } from "../enterprise/process-audit-
 import { getCaptureContractIntelligenceReportViaEnterprise } from "../enterprise/process-contract-via-enterprise";
 import { getCaptureRiskAssessmentReportViaEnterprise } from "../enterprise/process-risk-via-enterprise";
 import { getCaptureCorrectionProposalsViaEnterprise } from "../enterprise/process-correction-via-enterprise";
+import { getCaptureFieldAuditReportViaEnterprise } from "../enterprise/process-field-audit-via-enterprise";
 import {
   getCaptureSession,
   getCaptureSessionStatus,
@@ -119,6 +120,8 @@ export type ReviewWorkspaceSnapshot = {
   riskAssessmentSummary: JsonObject | null;
   correctionStore: Awaited<ReturnType<typeof getCaptureCorrectionProposalsViaEnterprise>> | null;
   correctionSummary: JsonObject | null;
+  fieldAuditReport: Awaited<ReturnType<typeof getCaptureFieldAuditReportViaEnterprise>> | null;
+  fieldAuditSummary: JsonObject | null;
 };
 
 export async function getReviewWorkspaceSnapshot(
@@ -143,6 +146,7 @@ export async function getReviewWorkspaceSnapshot(
   let contractIntelligenceReport: ReviewWorkspaceSnapshot["contractIntelligenceReport"] = null;
   let riskAssessmentReport: ReviewWorkspaceSnapshot["riskAssessmentReport"] = null;
   let correctionStore: ReviewWorkspaceSnapshot["correctionStore"] = null;
+  let fieldAuditReport: ReviewWorkspaceSnapshot["fieldAuditReport"] = null;
 
   try {
     ocr = await getCaptureOcrResult(ctx, sessionId);
@@ -183,6 +187,12 @@ export async function getReviewWorkspaceSnapshot(
     /* Correções ainda indisponíveis */
   }
 
+  try {
+    fieldAuditReport = await getCaptureFieldAuditReportViaEnterprise(ctx, sessionId);
+  } catch {
+    /* Field Audit Agent ainda indisponível */
+  }
+
   return {
     sessionId,
     sessionStatus: status.status,
@@ -210,6 +220,8 @@ export async function getReviewWorkspaceSnapshot(
     riskAssessmentSummary: (status.metadata.riskAssessment as JsonObject | undefined) ?? null,
     correctionStore,
     correctionSummary: (status.metadata.correction as JsonObject | undefined) ?? null,
+    fieldAuditReport,
+    fieldAuditSummary: (status.metadata.fieldAudit as JsonObject | undefined) ?? null,
   };
 }
 

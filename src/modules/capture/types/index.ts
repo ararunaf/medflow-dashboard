@@ -83,6 +83,9 @@ export const CAPTURE_PIPELINE_EVENT_TYPES = [
   "risk_assessment_started",
   "risk_assessment_finished",
   "risk_assessment_failed",
+  "field_audit_started",
+  "field_audit_finished",
+  "field_audit_failed",
 ] as const;
 
 export type CapturePipelineEventType = (typeof CAPTURE_PIPELINE_EVENT_TYPES)[number];
