@@ -865,19 +865,37 @@ export type Database = {
           id: string;
           tenant_id: string;
           name: string;
+          code: string;
+          cnpj: string | null;
+          address: string | null;
+          phone: string | null;
+          active: boolean;
           created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           tenant_id: string;
           name: string;
+          code?: string;
+          cnpj?: string | null;
+          address?: string | null;
+          phone?: string | null;
+          active?: boolean;
           created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
           tenant_id?: string;
           name?: string;
+          code?: string;
+          cnpj?: string | null;
+          address?: string | null;
+          phone?: string | null;
+          active?: boolean;
           created_at?: string;
+          updated_at?: string;
         };
         Relationships: [
           {
@@ -886,6 +904,48 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tenants";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      professional_hospitals: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          professional_id: string;
+          hospital_id: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          professional_id: string;
+          hospital_id: string;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          professional_id?: string;
+          hospital_id?: string;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "professional_hospitals_tenant_professional_fk";
+            columns: ["tenant_id", "professional_id"];
+            isOneToOne: false;
+            referencedRelation: "professionals";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "professional_hospitals_tenant_hospital_fk";
+            columns: ["tenant_id", "hospital_id"];
+            isOneToOne: false;
+            referencedRelation: "hospitals";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -2892,6 +2952,7 @@ export type Database = {
           attendance_date: string;
           status: TissGuideStatus;
           batch_id: string | null;
+          hospital_id: string | null;
           total_value: number;
           created_at: string;
           updated_at: string;
@@ -2907,6 +2968,7 @@ export type Database = {
           attendance_date: string;
           status?: TissGuideStatus;
           batch_id?: string | null;
+          hospital_id?: string | null;
           total_value?: number;
           created_at?: string;
           updated_at?: string;
@@ -2922,6 +2984,7 @@ export type Database = {
           attendance_date?: string;
           status?: TissGuideStatus;
           batch_id?: string | null;
+          hospital_id?: string | null;
           total_value?: number;
           created_at?: string;
           updated_at?: string;
@@ -2960,6 +3023,13 @@ export type Database = {
             columns: ["tenant_id", "batch_id"];
             isOneToOne: false;
             referencedRelation: "tiss_batches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "tiss_guides_tenant_hospital_fk";
+            columns: ["tenant_id", "hospital_id"];
+            isOneToOne: false;
+            referencedRelation: "hospitals";
             referencedColumns: ["tenant_id", "id"];
           },
         ];

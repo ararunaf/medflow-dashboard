@@ -47,18 +47,71 @@ function parseArgs(argv: readonly string[]): { tuss?: string; cid10?: string } {
   return out;
 }
 
-/** Parser CSV minimalista: sem aspas com vírgula embutida, cabeçalho obrigatório. */
-function parseCsv(content: string): Record<string, string>[] {
-  const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
+/**
+ * Parser CSV com suporte a aspas (campo com vírgula/quebra de linha embutida,
+ * aspas escapadas como "") — necessário porque descrições de procedimento
+ * TUSS/CID reais frequentemente contêm vírgula. Detecta automaticamente o
+ * delimitador (`,` ou `;`) pela primeira linha, já que exports do DATASUS
+ * costumam usar `;` (locale pt-BR usa `,` como separador decimal).
+ */
+function splitCsvLine(line: string, delimiter: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === delimiter) {
+      cells.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
+function detectDelimiter(headerLine: string): string {
+  const commaCount = (headerLine.match(/,/g) ?? []).length;
+  const semicolonCount = (headerLine.match(/;/g) ?? []).length;
+  return semicolonCount > commaCount ? ";" : ",";
+}
+
+export function parseCsv(content: string): Record<string, string>[] {
+  // Remove BOM (comum em exports do Excel/DATASUS) e normaliza quebras de linha.
+  const normalized = content.replace(/^﻿/, "");
+  const lines = normalized.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length === 0) return [];
-  const headers = lines[0].split(",").map((h) => h.trim());
+  const delimiter = detectDelimiter(lines[0]);
+  const headers = splitCsvLine(lines[0], delimiter).map((h) => h.trim());
   return lines.slice(1).map((line) => {
-    const cells = line.split(",").map((c) => c.trim());
+    const cells = splitCsvLine(line, delimiter);
     const row: Record<string, string> = {};
-    headers.forEach((h, i) => (row[h] = cells[i] ?? ""));
+    headers.forEach((h, i) => (row[h] = (cells[i] ?? "").trim()));
     return row;
   });
 }
+
+function chunk<T>(items: readonly T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
+
+const UPSERT_BATCH_SIZE = 500;
 
 async function main() {
   const env = { ...loadEnv(), ...process.env };
@@ -78,33 +131,51 @@ async function main() {
   const client = createClient(url, serviceKey, { auth: { persistSession: false } });
 
   if (existsSync(tussPath)) {
-    const rows = parseCsv(readFileSync(tussPath, "utf8")).map((r) => ({
-      tuss_code: r.tuss_code,
-      name: r.name,
-      group_code: r.group_code || null,
-      category: r.category || null,
-      requires_authorization: r.requires_authorization === "true",
-    }));
-    const { error } = await client.from("tiss_tuss_procedures").upsert(rows, {
-      onConflict: "tuss_code",
-    });
-    if (error) throw new Error(`Falha ao gravar tiss_tuss_procedures: ${error.message}`);
-    console.log(`TUSS: ${rows.length} procedimentos importados de ${tussPath}`);
+    const parsed = parseCsv(readFileSync(tussPath, "utf8"));
+    const rows = parsed
+      .filter((r) => r.tuss_code && r.name)
+      .map((r) => ({
+        tuss_code: r.tuss_code,
+        name: r.name,
+        group_code: r.group_code || null,
+        category: r.category || null,
+        requires_authorization: r.requires_authorization === "true",
+      }));
+    const skipped = parsed.length - rows.length;
+    if (skipped > 0) {
+      console.warn(`TUSS: ${skipped} linha(s) ignorada(s) por faltar tuss_code ou name.`);
+    }
+    for (const batch of chunk(rows, UPSERT_BATCH_SIZE)) {
+      const { error } = await client.from("tiss_tuss_procedures").upsert(batch, {
+        onConflict: "tuss_code",
+      });
+      if (error) throw new Error(`Falha ao gravar tiss_tuss_procedures: ${error.message}`);
+    }
+    console.log(`TUSS: ${rows.length} procedimentos importados de ${tussPath} (lotes de ${UPSERT_BATCH_SIZE}).`);
   } else {
     console.warn(`TUSS: arquivo não encontrado (${tussPath}) — nada importado.`);
   }
 
   if (existsSync(cid10Path)) {
-    const rows = parseCsv(readFileSync(cid10Path, "utf8")).map((r) => ({
-      cid_code: r.cid_code,
-      description: r.description,
-      chapter: r.chapter || null,
-    }));
-    const { error } = await client.from("tiss_cid10_codes").upsert(rows, {
-      onConflict: "cid_code",
-    });
-    if (error) throw new Error(`Falha ao gravar tiss_cid10_codes: ${error.message}`);
-    console.log(`CID-10: ${rows.length} códigos importados de ${cid10Path}`);
+    const parsed = parseCsv(readFileSync(cid10Path, "utf8"));
+    const rows = parsed
+      .filter((r) => r.cid_code && r.description)
+      .map((r) => ({
+        cid_code: r.cid_code,
+        description: r.description,
+        chapter: r.chapter || null,
+      }));
+    const skipped = parsed.length - rows.length;
+    if (skipped > 0) {
+      console.warn(`CID-10: ${skipped} linha(s) ignorada(s) por faltar cid_code ou description.`);
+    }
+    for (const batch of chunk(rows, UPSERT_BATCH_SIZE)) {
+      const { error } = await client.from("tiss_cid10_codes").upsert(batch, {
+        onConflict: "cid_code",
+      });
+      if (error) throw new Error(`Falha ao gravar tiss_cid10_codes: ${error.message}`);
+    }
+    console.log(`CID-10: ${rows.length} códigos importados de ${cid10Path} (lotes de ${UPSERT_BATCH_SIZE}).`);
   } else {
     console.warn(`CID-10: arquivo não encontrado (${cid10Path}) — nada importado.`);
   }
@@ -114,7 +185,10 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+// Só executa como CLI — permite importar parseCsv() em testes sem disparar main().
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

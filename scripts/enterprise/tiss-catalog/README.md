@@ -26,6 +26,12 @@ como fonte de verdade em produção.
 4. O upsert é idempotente (chave = `tuss_code` / `cid_code`) — pode rodar de
    novo a cada atualização periódica da tabela ANS/DATASUS.
 
+O parser aceita `,` ou `;` como delimitador (detecção automática pelo
+cabeçalho — exports do DATASUS costumam usar `;`), campos entre aspas com
+vírgula/aspas escapadas embutidas, e remove BOM UTF-8. O upsert roda em
+lotes de 500 linhas — não falha com a tabela oficial completa (milhares de
+códigos) como falharia com um único request.
+
 ## CBHPM
 
 Fora de escopo por ora — é tabela proprietária da AMB, não pública. Assim que
