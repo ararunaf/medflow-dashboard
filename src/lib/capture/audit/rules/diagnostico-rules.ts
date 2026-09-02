@@ -2,8 +2,9 @@
  * Regras — Diagnóstico / CID
  */
 import { normalizeCid } from "../../parser/normalizers";
+import { isCidInCatalog } from "../data/cid-catalog";
 import type { AuditRule } from "../types/audit-rule";
-import { missingFieldFinding, invalidFormatFinding } from "./rule-helpers";
+import { missingFieldFinding, invalidFormatFinding, makeFinding } from "./rule-helpers";
 
 export const DIA_001: AuditRule = {
   id: "DIA-001",
@@ -41,4 +42,38 @@ export const DIA_002: AuditRule = {
   },
 };
 
-export const DIAGNOSTICO_RULES: AuditRule[] = [DIA_001, DIA_002];
+/**
+ * Não bloqueante por padrão (blocking: false) — o catálogo real de CID-10 está
+ * em rollout gradual (TISS-02-DATA, modo sombra). Promover para blocking:true
+ * só depois de confirmar taxa de falso-positivo baixa com o catálogo completo.
+ */
+export const DIA_003: AuditRule = {
+  id: "DIA-003",
+  name: "CID fora do catálogo",
+  description: "Código CID-10 deve existir na tabela CID-10 ativa.",
+  category: "diagnostico",
+  severity: "alto",
+  blocking: false,
+  field: "cid_code",
+  message: (ctx) => {
+    const raw = ctx.getField("cid_code")?.rawValue ?? ctx.getValue("cid_code");
+    return `CID-10 "${raw ?? ""}" não encontrado no catálogo.`;
+  },
+  suggestedCorrection: "Selecione um CID-10 válido da tabela ativa.",
+  evaluate: (ctx) => {
+    if (ctx.isGuideType("guia_honorario")) return null;
+    if (ctx.isMissing("cid_code")) return null;
+    const raw = ctx.getField("cid_code")?.rawValue ?? ctx.getValue("cid_code");
+    if (!raw) return null;
+    const normalized = normalizeCid(raw);
+    if (normalized == null) return null; // formato inválido já é DIA-002
+    if (isCidInCatalog(normalized)) return null;
+    return makeFinding(DIA_003, ctx, {
+      detectedValue: normalized,
+      expectedValue: "CID-10 ativo no catálogo",
+      field: "cid_code",
+    });
+  },
+};
+
+export const DIAGNOSTICO_RULES: AuditRule[] = [DIA_001, DIA_002, DIA_003];

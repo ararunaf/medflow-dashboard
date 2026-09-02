@@ -88,6 +88,24 @@ export class ContractKnowledgeRegistryStore {
       versions: [...this.registry.versions, version],
     };
   }
+
+  /**
+   * Substitui (upsert por operator+contract+version) as versões carregadas de
+   * uma fonte externa (ex.: Supabase, ver src/lib/server/contract-rules-backend.ts).
+   * Idempotente — chamar de novo com os mesmos dados não duplica versões.
+   * Versões registradas via registerTenantVersion() (override de tenant) não
+   * são afetadas — só as que colidem na chave (operator, contract, version).
+   */
+  loadVersions(versions: readonly ContractRegistryVersion[]): void {
+    const key = (v: ContractRegistryVersion) => `${v.operator}::${v.contract}::${v.version}`;
+    const incoming = new Map(versions.map((v) => [key(v), v]));
+    const kept = this.registry.versions.filter((v) => !incoming.has(key(v)));
+    this.registry = {
+      ...this.registry,
+      updatedAt: new Date().toISOString(),
+      versions: [...kept, ...versions],
+    };
+  }
 }
 
 let defaultStore: ContractKnowledgeRegistryStore | null = null;

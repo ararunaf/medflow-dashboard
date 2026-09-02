@@ -12,10 +12,22 @@ import { logStartupDiagnostics } from "./lib/env/startup-diagnostics";
 import { isHealthPath, resolveHealthResponse } from "./lib/server/health-checks";
 import { handleCaptureHttpRequest } from "./lib/capture/api/capture-http-router";
 import { bindServerQueueRuntimeBackend } from "./lib/server/queue-runtime-backend";
+import { bindServerTissCatalogStore } from "./lib/server/tiss-catalog-backend";
+import { bindServerContractRulesStore } from "./lib/server/contract-rules-backend";
 
 initServerErrorMonitoring();
 // OPER-INF-Q — ativa backend persistente do QueueRuntimePort (Supabase quando disponível).
 bindServerQueueRuntimeBackend();
+// TISS-02-DATA — hidrata o catálogo TUSS/CID-10 real (Supabase quando disponível);
+// não bloqueia o boot — enquanto não conclui, o catálogo segue no seed mínimo.
+void bindServerTissCatalogStore().catch((error) => {
+  console.error("TISS-02-DATA: falha ao hidratar catálogo TUSS/CID-10.", error);
+});
+// CONTRACT-DATA — hidrata regras contratuais por operadora (Supabase quando
+// disponível); não bloqueia o boot — enquanto não conclui, segue no seed hardcoded.
+void bindServerContractRulesStore().catch((error) => {
+  console.error("CONTRACT-DATA: falha ao hidratar regras contratuais.", error);
+});
 
 let startupLogged = false;
 function logStartupOnce() {

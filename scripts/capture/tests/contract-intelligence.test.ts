@@ -321,7 +321,7 @@ describe("Contract Intelligence — persistência", () => {
 
 describe("Contract Intelligence — workspace", () => {
   it("expõe painel Conhecimento Contratual", () => {
-    assert.equal(REVIEW_PANEL_IDS.length, 9);
+    assert.equal(REVIEW_PANEL_IDS.length, 10);
     assert.ok(REVIEW_PANEL_IDS.includes("contrato"));
     assert.equal(REVIEW_PANEL_LABELS.contrato, "Conhecimento Contratual");
     assert.equal(isReviewPanelId("contrato"), true);

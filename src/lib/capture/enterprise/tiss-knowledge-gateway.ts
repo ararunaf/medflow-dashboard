@@ -15,6 +15,7 @@ export type CaptureTissKnowledgeSnapshot = {
   procedureCodes: ReadonlySet<string>;
   authorizationRequiredCodes: ReadonlySet<string>;
   guideTypeCodes: ReadonlySet<string>;
+  diagnosisCodes: ReadonlySet<string>;
   versionCode: string;
   versionLabel: string;
   hydratedAt: string;
@@ -69,12 +70,14 @@ async function hydrateFromEnterprise(): Promise<CaptureTissKnowledgeSnapshot> {
     );
   }
 
-  const [proceduresResult, guideTypesResult, versionResult, authPackResult] = await Promise.all([
-    catalog.listProcedureTypes({ tag: "tuss-procedure", status: "active" }),
-    catalog.listGuideTypes({ status: "active" }),
-    catalog.getVersion({ code: DEFAULT_VERSION_CODE }),
-    rulePackEngine.executePack({ code: BASE_PROCEDURE_AUTHORIZATION_PACK_CODE }),
-  ]);
+  const [proceduresResult, guideTypesResult, versionResult, authPackResult, diagnosisResult] =
+    await Promise.all([
+      catalog.listProcedureTypes({ tag: "tuss-procedure", status: "active" }),
+      catalog.listGuideTypes({ status: "active" }),
+      catalog.getVersion({ code: DEFAULT_VERSION_CODE }),
+      rulePackEngine.executePack({ code: BASE_PROCEDURE_AUTHORIZATION_PACK_CODE }),
+      catalog.listVocabulary({ category: "diagnostico", status: "active" }),
+    ]);
 
   if (!proceduresResult.ok) {
     throw new Error(
@@ -91,6 +94,11 @@ async function hydrateFromEnterprise(): Promise<CaptureTissKnowledgeSnapshot> {
       `TISS-CONV-01: RulePackEnginePort.executePack falhou (${authPackResult.message ?? authPackResult.code}).`,
     );
   }
+  if (!diagnosisResult.ok) {
+    throw new Error(
+      `TISS-02-DATA: TISSCatalogPort.listVocabulary(diagnostico) falhou (${diagnosisResult.message ?? diagnosisResult.code}).`,
+    );
+  }
 
   const procedureCodes = new Set<string>();
   for (const entry of proceduresResult.entries ?? []) {
@@ -102,6 +110,11 @@ async function hydrateFromEnterprise(): Promise<CaptureTissKnowledgeSnapshot> {
   const guideTypeCodes = new Set<string>();
   for (const entry of guideTypesResult.entries ?? []) {
     guideTypeCodes.add(entry.code);
+  }
+
+  const diagnosisCodes = new Set<string>();
+  for (const entry of diagnosisResult.entries ?? []) {
+    diagnosisCodes.add(entry.code.toUpperCase());
   }
 
   const versionCode = versionResult.entry?.code ?? DEFAULT_VERSION_CODE;
@@ -127,6 +140,7 @@ async function hydrateFromEnterprise(): Promise<CaptureTissKnowledgeSnapshot> {
     procedureCodes,
     authorizationRequiredCodes,
     guideTypeCodes,
+    diagnosisCodes,
     versionCode,
     versionLabel: versionLabel.startsWith("TISS") ? versionLabel : `TISS ${versionLabel}`,
     hydratedAt: new Date().toISOString(),
@@ -189,6 +203,20 @@ export function isTussInCatalogFromEnterprise(code: string): boolean {
 export function tussRequiresAuthorizationFromEnterprise(code: string): boolean {
   const normalized = normalizeTussCode(code);
   return getCaptureTissKnowledgeSnapshot().authorizationRequiredCodes.has(normalized);
+}
+
+/**
+ * `code` já normalizado no formato normalizeCid (ex.: "J06.9").
+ *
+ * Se a tabela CID-10 ainda não foi hidratada (Supabase não configurado, ou
+ * boot ainda em andamento — ver bindServerTissCatalogStore), retorna `true`
+ * (não afirma "fora do catálogo" sem ter a tabela de referência carregada).
+ * Evita transformar ausência de dado em falso positivo em massa.
+ */
+export function isCidInCatalogFromEnterprise(code: string): boolean {
+  const snapshot = getCaptureTissKnowledgeSnapshot();
+  if (snapshot.diagnosisCodes.size === 0) return true;
+  return snapshot.diagnosisCodes.has(code.toUpperCase());
 }
 
 export function getEnterpriseTissVersionLabel(): string {

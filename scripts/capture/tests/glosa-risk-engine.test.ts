@@ -425,7 +425,7 @@ describe("Glosa Risk Engine — dashboard", () => {
 
 describe("Glosa Risk Engine — workspace", () => {
   it("expõe painel Risco de Glosa", () => {
-    assert.equal(REVIEW_PANEL_IDS.length, 9);
+    assert.equal(REVIEW_PANEL_IDS.length, 10);
     assert.ok(REVIEW_PANEL_IDS.includes("risco"));
     assert.equal(REVIEW_PANEL_LABELS.risco, "Risco de Glosa");
     assert.equal(isReviewPanelId("risco"), true);

@@ -18,6 +18,18 @@ export {
 } from "./in-memory-tiss-catalog";
 
 export {
+  applyRealCid10Codes,
+  applyRealTissProcedures,
+  getEnterpriseTissCatalogHydrationSummary,
+  getSharedEnterpriseTISSCatalogStore,
+  markEnterpriseTissCatalogHydrated,
+  resetSharedEnterpriseTISSCatalogStoreForTests,
+  type EnterpriseTissCatalogHydrationSummary,
+  type RealCid10Row,
+  type RealTissProcedureRow,
+} from "./enterprise-tiss-catalog-store";
+
+export {
   DEFAULT_TISS_CATALOG_ID,
   MINIMAL_TISS_CATALOG_DOMAINS,
   MINIMAL_TISS_CATALOG_GUIDE_TYPES,

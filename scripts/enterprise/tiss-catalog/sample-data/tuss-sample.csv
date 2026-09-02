@@ -1,0 +1,13 @@
+tuss_code,name,group_code,category,requires_authorization
+10101012,Consulta em consultório,group-consulta,consulta,false
+10101020,Consulta em domicílio,group-consulta,consulta,false
+10101039,Consulta em pronto socorro,group-consulta,consulta,false
+20101015,Eletrocardiograma,group-consulta,diagnostico,false
+40101010,Ecocardiograma transtorácico,group-consulta,diagnostico,true
+40101028,Ecocardiograma transesofágico,group-consulta,diagnostico,true
+40301010,Hemograma completo,group-consulta,diagnostico,false
+31001016,Anestesia geral,group-consulta,anestesia,true
+31001024,Anestesia regional,group-consulta,anestesia,true
+40801063,Ressonância magnética,group-consulta,diagnostico,true
+40901017,Tomografia computadorizada,group-consulta,diagnostico,true
+30101018,Cirurgia ambulatorial,group-consulta,cirurgia,true

@@ -13,6 +13,7 @@ import {
   TISSCatalogRegistry,
   createDefaultTISSCatalogRegistry,
 } from "../registry/tiss-catalog-registry";
+import { getSharedEnterpriseTISSCatalogStore } from "../store";
 import type { TISSCatalogStore } from "../store";
 
 export type TISSCatalogFactoryOptions = {
@@ -59,9 +60,15 @@ export class TISSCatalogFactory {
       case "test":
         return new MockTISSCatalogAdapter({ provider: "test", store: this.store });
       case "default":
-        return new DefaultTISSCatalogAdapter({ provider: "default", store: this.store });
+        return new DefaultTISSCatalogAdapter({
+          provider: "default",
+          store: this.store ?? getSharedEnterpriseTISSCatalogStore(),
+        });
       case "enterprise":
-        return new DefaultTISSCatalogAdapter({ provider: "enterprise", store: this.store });
+        return new DefaultTISSCatalogAdapter({
+          provider: "enterprise",
+          store: this.store ?? getSharedEnterpriseTISSCatalogStore(),
+        });
       default: {
         const _exhaustive: never = provider;
         throw new Error(`TISS catalog provider desconhecido: ${String(_exhaustive)}`);
