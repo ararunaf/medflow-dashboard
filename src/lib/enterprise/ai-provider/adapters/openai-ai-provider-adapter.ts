@@ -22,6 +22,7 @@ import type {
 export const OPENAI_AI_PROVIDER_ADAPTER_ID = "openai-chat-completions";
 
 const OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 
 const CAPABILITIES: readonly AICapabilityId[] = [
   "text-generation",
@@ -57,6 +58,17 @@ type OpenAiChatInput = {
   tool_choice?: unknown;
 };
 
+type OpenAiEmbeddingsInput = {
+  input?: string | readonly string[];
+};
+
+type OpenAiEmbeddingsResponse = {
+  model?: string;
+  data?: Array<{ embedding?: number[]; index?: number }>;
+  usage?: { prompt_tokens?: number; total_tokens?: number };
+  error?: { message?: string };
+};
+
 function resolveOpenAiApiKey(): string | null {
   const fromEnv =
     (typeof process !== "undefined" && process.env && process.env.MEDFLOW_OPENAI_API_KEY) ||
@@ -69,6 +81,15 @@ function resolveDefaultModel(): string {
     (typeof process !== "undefined" && process.env && process.env.MEDFLOW_OPENAI_MODEL) ||
     "gpt-4o-mini";
   return typeof m === "string" && m.length > 0 ? m : "gpt-4o-mini";
+}
+
+function resolveEmbeddingModel(): string {
+  const m =
+    (typeof process !== "undefined" &&
+      process.env &&
+      process.env.MEDFLOW_OPENAI_EMBEDDING_MODEL) ||
+    "text-embedding-3-small";
+  return typeof m === "string" && m.length > 0 ? m : "text-embedding-3-small";
 }
 
 function buildMessages(request: AIRequest, opaque: OpenAiChatInput | undefined): unknown[] {
@@ -176,6 +197,10 @@ export class OpenAIAIProviderAdapter implements AIProviderPort {
       };
     }
 
+    if (request.capability === "embeddings") {
+      return this.invokeEmbeddings(request, apiKey);
+    }
+
     const opaque =
       request.input && typeof request.input === "object"
         ? (request.input as OpenAiChatInput)
@@ -264,6 +289,90 @@ export class OpenAIAIProviderAdapter implements AIProviderPort {
           assistantContent: assistantMessage?.content ?? null,
           rawMessage: assistantMessage,
         },
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return {
+        ok: false,
+        requestId: request.requestId,
+        provider: "openai",
+        model,
+        simulated: false,
+        metadata: this.providerInfo().metadata,
+        message: `Falha ao chamar o modelo: ${message}`,
+      };
+    }
+  }
+
+  private async invokeEmbeddings(request: AIRequest, apiKey: string): Promise<AIResponse> {
+    const opaque =
+      request.input && typeof request.input === "object"
+        ? (request.input as OpenAiEmbeddingsInput)
+        : undefined;
+    const input = opaque?.input ?? request.prompt;
+    const model = request.model ?? resolveEmbeddingModel();
+
+    if (
+      input === undefined ||
+      (typeof input === "string" && input.length === 0) ||
+      (Array.isArray(input) && input.length === 0)
+    ) {
+      return {
+        ok: false,
+        requestId: request.requestId,
+        provider: "openai",
+        model,
+        simulated: false,
+        metadata: this.providerInfo().metadata,
+        message: "AIRequest sem input/prompt para embeddings.",
+      };
+    }
+
+    try {
+      const res = await fetch(OPENAI_EMBEDDINGS_URL, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${apiKey}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ model, input }),
+      });
+
+      const raw = (await res.json()) as OpenAiEmbeddingsResponse;
+      if (!res.ok) {
+        const msg = raw.error?.message ?? `OpenAI HTTP ${res.status}`;
+        return {
+          ok: false,
+          requestId: request.requestId,
+          provider: "openai",
+          model,
+          simulated: false,
+          metadata: this.providerInfo().metadata,
+          message: `Falha ao chamar o modelo: ${msg}`,
+        };
+      }
+
+      const rows = [...(raw.data ?? [])].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+      const vectors = rows.map((row) => row.embedding ?? []);
+      const dimensions = vectors[0]?.length ?? 0;
+      const isBatch = Array.isArray(input);
+
+      return {
+        ok: true,
+        requestId: request.requestId,
+        provider: "openai",
+        model: raw.model ?? model,
+        simulated: false,
+        usage: raw.usage
+          ? {
+              promptTokens: raw.usage.prompt_tokens,
+              totalTokens: raw.usage.total_tokens,
+            }
+          : undefined,
+        metadata: this.providerInfo().metadata,
+        data: isBatch
+          ? { vectors, dimensions }
+          : { vector: vectors[0] ?? [], dimensions },
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
