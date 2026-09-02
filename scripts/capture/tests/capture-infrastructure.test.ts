@@ -177,6 +177,7 @@ describe("Capture pipeline — storage paths & validation", () => {
         mimeType: "text/plain",
         byteLength: 100,
         filename: "x.txt",
+        fileBytes: new Uint8Array(100),
       }),
     );
     assert.throws(() =>
@@ -184,16 +185,31 @@ describe("Capture pipeline — storage paths & validation", () => {
         mimeType: "image/jpeg",
         byteLength: 0,
         filename: "x.jpg",
+        fileBytes: new Uint8Array(0),
+      }),
+    );
+  });
+
+  it("rejects Content-Type mentiroso (magic bytes não batem)", () => {
+    assert.throws(() =>
+      validateCaptureUpload({
+        mimeType: "image/jpeg",
+        byteLength: 4,
+        filename: "x.jpg",
+        fileBytes: new Uint8Array([0x00, 0x01, 0x02, 0x03]),
       }),
     );
   });
 
   it("accepts valid clinical mime types", () => {
+    const jpegBytes = new Uint8Array(64);
+    jpegBytes.set([0xff, 0xd8, 0xff], 0);
     assert.doesNotThrow(() =>
       validateCaptureUpload({
         mimeType: "image/jpeg",
-        byteLength: 1024,
+        byteLength: jpegBytes.length,
         filename: "guia.jpg",
+        fileBytes: jpegBytes,
       }),
     );
   });

@@ -105,6 +105,34 @@ function assertBillingAccess(ctx: ServiceCtx): void {
   }
 }
 
+/**
+ * Deduplicação por conteúdo — antes de gravar no datalake e disparar OCR,
+ * verifica se o mesmo checksum SHA-256 já existe no tenant, em outra sessão.
+ * Não bloqueia reenvio da mesma sessão (retry legítimo após falha de
+ * processamento usa o mesmo arquivo de propósito).
+ */
+async function rejectDuplicateCaptureUpload(
+  ctx: ServiceCtx,
+  input: { sessionId: string; checksumSha256: string },
+): Promise<void> {
+  const { data, error } = await ctx.client
+    .from("capture_documents")
+    .select("id, session_id, original_filename, created_at")
+    .eq("tenant_id", ctx.tenantId)
+    .eq("checksum_sha256", input.checksumSha256)
+    .neq("session_id", input.sessionId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  if (data) {
+    throw new ValidationError(
+      `Este arquivo já foi enviado anteriormente (sessão ${data.session_id}, "${data.original_filename}"). Reenvio com conteúdo idêntico foi bloqueado para evitar processamento duplicado.`,
+      { duplicateOfSessionId: data.session_id, duplicateOfDocumentId: data.id },
+    );
+  }
+}
+
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
@@ -427,6 +455,11 @@ export async function uploadCaptureDocument(
     mimeType: input.mimeType,
     byteLength: input.byteLength,
     filename: input.filename,
+    fileBytes: input.fileBytes,
+  });
+  await rejectDuplicateCaptureUpload(ctx, {
+    sessionId: input.sessionId,
+    checksumSha256: input.checksumSha256,
   });
 
   const session = await getCaptureSession(ctx, input.sessionId);
@@ -457,6 +490,11 @@ export async function retryCaptureDocumentUpload(
     mimeType: input.mimeType,
     byteLength: input.byteLength,
     filename: input.filename,
+    fileBytes: input.fileBytes,
+  });
+  await rejectDuplicateCaptureUpload(ctx, {
+    sessionId: input.sessionId,
+    checksumSha256: input.checksumSha256,
   });
 
   const session = await getCaptureSession(ctx, input.sessionId);
