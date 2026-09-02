@@ -4112,6 +4112,271 @@ export type Database = {
           },
         ];
       };
+      operator_contracts: {
+        Row: {
+          byte_length: number;
+          checksum_sha256: string;
+          chunk_count: number;
+          contract_label: string;
+          created_at: string;
+          created_by: string;
+          embedding_model: string | null;
+          error_message: string | null;
+          id: string;
+          indexed_at: string | null;
+          metadata: Json;
+          mime_type: string;
+          operator_code: string;
+          operator_name: string | null;
+          page_count: number | null;
+          status: string;
+          storage_bucket: string;
+          storage_path: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          byte_length: number;
+          checksum_sha256: string;
+          chunk_count?: number;
+          contract_label: string;
+          created_at?: string;
+          created_by: string;
+          embedding_model?: string | null;
+          error_message?: string | null;
+          id?: string;
+          indexed_at?: string | null;
+          metadata?: Json;
+          mime_type?: string;
+          operator_code: string;
+          operator_name?: string | null;
+          page_count?: number | null;
+          status?: string;
+          storage_bucket?: string;
+          storage_path: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          byte_length?: number;
+          checksum_sha256?: string;
+          chunk_count?: number;
+          contract_label?: string;
+          created_at?: string;
+          created_by?: string;
+          embedding_model?: string | null;
+          error_message?: string | null;
+          id?: string;
+          indexed_at?: string | null;
+          metadata?: Json;
+          mime_type?: string;
+          operator_code?: string;
+          operator_name?: string | null;
+          page_count?: number | null;
+          status?: string;
+          storage_bucket?: string;
+          storage_path?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "operator_contracts_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "operator_contracts_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contract_rule_proposals: {
+        Row: {
+          category: string;
+          citation_excerpt: string;
+          citation_heading: string | null;
+          confidence: number;
+          created_at: string;
+          description: string;
+          edited_description: string | null;
+          edited_justification: string | null;
+          extraction_model: string;
+          id: string;
+          justification: string;
+          metadata: Json;
+          operator_contract_id: string;
+          review_notes: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          source_chunk_ids: string[];
+          status: string;
+          suggested_guide_type: string | null;
+          suggested_procedure_type: string | null;
+          suggested_severity: string | null;
+          tenant_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          category: string;
+          citation_excerpt: string;
+          citation_heading?: string | null;
+          confidence: number;
+          created_at?: string;
+          description: string;
+          edited_description?: string | null;
+          edited_justification?: string | null;
+          extraction_model: string;
+          id?: string;
+          justification: string;
+          metadata?: Json;
+          operator_contract_id: string;
+          review_notes?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          source_chunk_ids?: string[];
+          status?: string;
+          suggested_guide_type?: string | null;
+          suggested_procedure_type?: string | null;
+          suggested_severity?: string | null;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          category?: string;
+          citation_excerpt?: string;
+          citation_heading?: string | null;
+          confidence?: number;
+          created_at?: string;
+          description?: string;
+          edited_description?: string | null;
+          edited_justification?: string | null;
+          extraction_model?: string;
+          id?: string;
+          justification?: string;
+          metadata?: Json;
+          operator_contract_id?: string;
+          review_notes?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          source_chunk_ids?: string[];
+          status?: string;
+          suggested_guide_type?: string | null;
+          suggested_procedure_type?: string | null;
+          suggested_severity?: string | null;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_rule_proposals_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_rule_proposals_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contract_rule_versions: {
+        Row: {
+          approved_at: string;
+          approved_by: string;
+          category: string;
+          citation_excerpt: string;
+          citation_heading: string | null;
+          contract_label: string;
+          created_at: string;
+          description: string;
+          guide_type: string;
+          id: string;
+          justification: string;
+          operator_code: string;
+          operator_contract_id: string;
+          procedure_type: string;
+          proposal_id: string | null;
+          rule_id: string;
+          severity: string;
+          tenant_id: string;
+          version: number;
+        };
+        Insert: {
+          approved_at?: string;
+          approved_by: string;
+          category: string;
+          citation_excerpt: string;
+          citation_heading?: string | null;
+          contract_label: string;
+          created_at?: string;
+          description: string;
+          guide_type?: string;
+          id?: string;
+          justification: string;
+          operator_code: string;
+          operator_contract_id: string;
+          procedure_type?: string;
+          proposal_id?: string | null;
+          rule_id: string;
+          severity?: string;
+          tenant_id: string;
+          version?: number;
+        };
+        Update: {
+          approved_at?: string;
+          approved_by?: string;
+          category?: string;
+          citation_excerpt?: string;
+          citation_heading?: string | null;
+          contract_label?: string;
+          created_at?: string;
+          description?: string;
+          guide_type?: string;
+          id?: string;
+          justification?: string;
+          operator_code?: string;
+          operator_contract_id?: string;
+          procedure_type?: string;
+          proposal_id?: string | null;
+          rule_id?: string;
+          severity?: string;
+          tenant_id?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_rule_versions_approved_by_fkey";
+            columns: ["approved_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_rule_versions_proposal_fk";
+            columns: ["proposal_id"];
+            isOneToOne: false;
+            referencedRelation: "contract_rule_proposals";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_rule_versions_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -4181,6 +4446,7 @@ export type Database = {
           filter_domain?: string | null;
           filter_classification?: string | null;
           similarity_threshold?: number;
+          filter_document_id?: string | null;
         };
         Returns: {
           id: string;

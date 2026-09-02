@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  FileCheck2,
   FileStack,
   FileText,
   Flag,
@@ -214,6 +215,13 @@ export function buildNavGroups(): NavGroup[] {
         { id: "guias", to: "/tiss", label: "Guias", icon: ClipboardList },
         { id: "lotes", to: "/tiss", label: "Lotes", icon: Layers },
         { id: "convenios", to: "/tiss", label: "Convênios", icon: Building2 },
+        {
+          id: "revisao-contratos",
+          to: "/contratos",
+          label: "Revisão de Contratos",
+          icon: FileCheck2,
+          require: "financial",
+        },
         { id: "glosas", to: "/tiss", label: "Glosas", icon: Scale },
         {
           id: "financeiro",

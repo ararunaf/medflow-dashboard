@@ -22,6 +22,7 @@ import { Route as InstituicaoRouteImport } from './routes/instituicao'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as ExecutivoRouteImport } from './routes/executivo'
 import { Route as EscalasRouteImport } from './routes/escalas'
+import { Route as ContratosRouteImport } from './routes/contratos'
 import { Route as CentralRouteImport } from './routes/central'
 import { Route as CapturaRouteImport } from './routes/captura'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -33,6 +34,7 @@ import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/fi
 import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
 import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
 import { Route as Fase3SlugRouteImport } from './routes/fase3.$slug'
+import { Route as ContratosRevisaoContractIdRouteImport } from './routes/contratos/revisao.$contractId'
 import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
 
 const TissRoute = TissRouteImport.update({
@@ -100,6 +102,11 @@ const EscalasRoute = EscalasRouteImport.update({
   path: '/escalas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContratosRoute = ContratosRouteImport.update({
+  id: '/contratos',
+  path: '/contratos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CentralRoute = CentralRouteImport.update({
   id: '/central',
   path: '/central',
@@ -158,6 +165,12 @@ const Fase3SlugRoute = Fase3SlugRouteImport.update({
   path: '/fase3/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContratosRevisaoContractIdRoute =
+  ContratosRevisaoContractIdRouteImport.update({
+    id: '/revisao/$contractId',
+    path: '/revisao/$contractId',
+    getParentRoute: () => ContratosRoute,
+  } as any)
 const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
   id: '/revisao/$sessionId',
   path: '/revisao/$sessionId',
@@ -170,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/captura': typeof CapturaRouteWithChildren
   '/central': typeof CentralRoute
+  '/contratos': typeof ContratosRouteWithChildren
   '/escalas': typeof EscalasRoute
   '/executivo': typeof ExecutivoRoute
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -190,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
+  '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -197,6 +212,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/captura': typeof CapturaRouteWithChildren
   '/central': typeof CentralRoute
+  '/contratos': typeof ContratosRouteWithChildren
   '/escalas': typeof EscalasRoute
   '/executivo': typeof ExecutivoRoute
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -217,6 +233,7 @@ export interface FileRoutesByTo {
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
+  '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -225,6 +242,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/captura': typeof CapturaRouteWithChildren
   '/central': typeof CentralRoute
+  '/contratos': typeof ContratosRouteWithChildren
   '/escalas': typeof EscalasRoute
   '/executivo': typeof ExecutivoRoute
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -245,6 +263,7 @@ export interface FileRoutesById {
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
+  '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -254,6 +273,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/captura'
     | '/central'
+    | '/contratos'
     | '/escalas'
     | '/executivo'
     | '/financeiro'
@@ -274,6 +294,7 @@ export interface FileRouteTypes {
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/captura/revisao/$sessionId'
+    | '/contratos/revisao/$contractId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -281,6 +302,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/captura'
     | '/central'
+    | '/contratos'
     | '/escalas'
     | '/executivo'
     | '/financeiro'
@@ -301,6 +323,7 @@ export interface FileRouteTypes {
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/captura/revisao/$sessionId'
+    | '/contratos/revisao/$contractId'
   id:
     | '__root__'
     | '/'
@@ -308,6 +331,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/captura'
     | '/central'
+    | '/contratos'
     | '/escalas'
     | '/executivo'
     | '/financeiro'
@@ -328,6 +352,7 @@ export interface FileRouteTypes {
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/captura/revisao/$sessionId'
+    | '/contratos/revisao/$contractId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -336,6 +361,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   CapturaRoute: typeof CapturaRouteWithChildren
   CentralRoute: typeof CentralRoute
+  ContratosRoute: typeof ContratosRouteWithChildren
   EscalasRoute: typeof EscalasRoute
   ExecutivoRoute: typeof ExecutivoRoute
   FinanceiroRoute: typeof FinanceiroRouteWithChildren
@@ -445,6 +471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscalasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contratos': {
+      id: '/contratos'
+      path: '/contratos'
+      fullPath: '/contratos'
+      preLoaderRoute: typeof ContratosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/central': {
       id: '/central'
       path: '/central'
@@ -522,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Fase3SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contratos/revisao/$contractId': {
+      id: '/contratos/revisao/$contractId'
+      path: '/revisao/$contractId'
+      fullPath: '/contratos/revisao/$contractId'
+      preLoaderRoute: typeof ContratosRevisaoContractIdRouteImport
+      parentRoute: typeof ContratosRoute
+    }
     '/captura/revisao/$sessionId': {
       id: '/captura/revisao/$sessionId'
       path: '/revisao/$sessionId'
@@ -542,6 +582,18 @@ const CapturaRouteChildren: CapturaRouteChildren = {
 
 const CapturaRouteWithChildren =
   CapturaRoute._addFileChildren(CapturaRouteChildren)
+
+interface ContratosRouteChildren {
+  ContratosRevisaoContractIdRoute: typeof ContratosRevisaoContractIdRoute
+}
+
+const ContratosRouteChildren: ContratosRouteChildren = {
+  ContratosRevisaoContractIdRoute: ContratosRevisaoContractIdRoute,
+}
+
+const ContratosRouteWithChildren = ContratosRoute._addFileChildren(
+  ContratosRouteChildren,
+)
 
 interface FinanceiroRouteChildren {
   FinanceiroConciliacaoOperacionalRoute: typeof FinanceiroConciliacaoOperacionalRoute
@@ -577,6 +629,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   CapturaRoute: CapturaRouteWithChildren,
   CentralRoute: CentralRoute,
+  ContratosRoute: ContratosRouteWithChildren,
   EscalasRoute: EscalasRoute,
   ExecutivoRoute: ExecutivoRoute,
   FinanceiroRoute: FinanceiroRouteWithChildren,
