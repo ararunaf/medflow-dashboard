@@ -591,6 +591,65 @@ export type Database = {
           },
         ];
       };
+      capture_pipeline_jobs: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          session_id: string;
+          mode: string;
+          status: string;
+          attempts: number;
+          max_attempts: number;
+          run_at: string;
+          locked_by: string | null;
+          locked_at: string | null;
+          last_error: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          session_id: string;
+          mode?: string;
+          status?: string;
+          attempts?: number;
+          max_attempts?: number;
+          run_at?: string;
+          locked_by?: string | null;
+          locked_at?: string | null;
+          last_error?: string | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          session_id?: string;
+          mode?: string;
+          status?: string;
+          attempts?: number;
+          max_attempts?: number;
+          run_at?: string;
+          locked_by?: string | null;
+          locked_at?: string | null;
+          last_error?: string | null;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capture_pipeline_jobs_session_fk";
+            columns: ["tenant_id", "session_id"];
+            isOneToOne: false;
+            referencedRelation: "capture_sessions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       operational_errors: {
         Row: {
           id: string;
@@ -4083,6 +4142,25 @@ export type Database = {
       can_manage_tuss_catalog: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      claim_capture_pipeline_job: {
+        Args: { p_worker_id: string };
+        Returns: {
+          id: string;
+          tenant_id: string;
+          session_id: string;
+          mode: string;
+          status: string;
+          attempts: number;
+          max_attempts: number;
+          run_at: string;
+          locked_by: string | null;
+          locked_at: string | null;
+          last_error: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        }[];
       };
       get_operational_analytics_event_rollups: {
         Args: { p_from: string; p_to: string };

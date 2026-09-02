@@ -24,7 +24,7 @@ import {
   softDeleteCaptureSession,
   uploadCaptureDocument,
 } from "../infrastructure/capture-session-store";
-import { runCaptureOperationalPipelineBound } from "../enterprise/capture-runtime-binding";
+import { enqueueCapturePipelineJob } from "../infrastructure/capture-pipeline-queue";
 import {
   getCaptureStructuredGuideViaEnterprise,
   runCaptureParserViaEnterprise,
@@ -113,14 +113,8 @@ export const uploadCaptureFileFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // EPC-24E — pipeline operacional único sob getEnterpriseRuntime() (cutover).
-      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "full", {
-        intake: {
-          session: uploadResult.session,
-          document: uploadResult.document,
-          tenantId: ctx.tenantId,
-        },
-      });
+      // F1-S4 — enfileira o pipeline operacional (worker processa fora da requisição).
+      await enqueueCapturePipelineJob(ctx, data.sessionId, "full");
 
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };
@@ -200,14 +194,8 @@ export const retryCaptureUploadFn = createServerFn({ method: "POST" })
         fileBytes: bytes,
       });
 
-      // EPC-24E — retry sob o mesmo pipeline único (getEnterpriseRuntime).
-      await runCaptureOperationalPipelineBound(ctx, data.sessionId, "retry-upload", {
-        intake: {
-          session: uploadResult.session,
-          document: uploadResult.document,
-          tenantId: ctx.tenantId,
-        },
-      });
+      // F1-S4 — retry sob o mesmo pipeline, agora também assíncrono via fila.
+      await enqueueCapturePipelineJob(ctx, data.sessionId, "retry-upload");
 
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };
