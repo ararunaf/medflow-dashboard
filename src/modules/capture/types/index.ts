@@ -86,6 +86,9 @@ export const CAPTURE_PIPELINE_EVENT_TYPES = [
   "field_audit_started",
   "field_audit_finished",
   "field_audit_failed",
+  "semantic_fallback_started",
+  "semantic_fallback_finished",
+  "semantic_fallback_failed",
 ] as const;
 
 export type CapturePipelineEventType = (typeof CAPTURE_PIPELINE_EVENT_TYPES)[number];

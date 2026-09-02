@@ -56,3 +56,21 @@ export {
   getCaptureOcrResult,
   type RunCaptureOcrResult,
 } from "./services/ocr-service";
+
+export {
+  SEMANTIC_FALLBACK_CONFIDENCE_THRESHOLD,
+  selectLowConfidenceFields,
+  cropFieldRegion,
+  extractFieldViaVision,
+  parseVisionExtractResponse,
+  applySemanticFallback,
+  type SemanticFallbackDecision,
+  type ApplySemanticFallbackResult,
+} from "./fallback/semantic-fallback";
+
+export {
+  SemanticFallbackService,
+  getDefaultSemanticFallbackService,
+  runCaptureSemanticFallback,
+  type RunSemanticFallbackResult,
+} from "./services/semantic-fallback-service";

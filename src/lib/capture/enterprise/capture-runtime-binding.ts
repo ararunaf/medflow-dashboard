@@ -6,7 +6,7 @@
  *     → resolveCaptureEnterpriseRuntime()  [= getEnterpriseRuntime()]
  *     → Document Intake (canônico)
  *     → CanonicalExecutionOrchestratorPort (coordenação estrutural)
- *     → OCR → Parser/Extraction → Audit → Contract → Risk → Field Audit → Correction
+ *     → OCR → Parser/Extraction → Semantic Fallback → Audit → Contract → Risk → Field Audit → Correction
  *
  * Review / TISS/XML / Bloco C são coordenados via Runtime nos respectivos
  * Server Fns (review-server / tiss-server) — mesmo composition root.
@@ -24,6 +24,7 @@ import {
 } from "./register-capture-intake";
 import { runCaptureOcrViaEnterprise } from "./process-ocr-via-enterprise";
 import { runCaptureParserViaEnterprise } from "./process-parser-via-enterprise";
+import { runCaptureSemanticFallbackViaEnterprise } from "./process-semantic-fallback-via-enterprise";
 import { runCaptureAuditViaEnterprise } from "./process-audit-via-enterprise";
 import { runCaptureContractViaEnterprise } from "./process-contract-via-enterprise";
 import { runCaptureRiskViaEnterprise } from "./process-risk-via-enterprise";
@@ -168,6 +169,11 @@ export async function runCaptureOperationalPipelineBound(
     await runCaptureOcrViaEnterprise(ctx, sessionId);
     try {
       await runCaptureParserViaEnterprise(ctx, sessionId);
+      try {
+        await runCaptureSemanticFallbackViaEnterprise(ctx, sessionId);
+      } catch {
+        /* falha do fallback semântico registrada em metadata — parser permanece válido */
+      }
       try {
         await runCaptureAuditViaEnterprise(ctx, sessionId);
         try {
