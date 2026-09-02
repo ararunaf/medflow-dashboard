@@ -7,11 +7,23 @@
  *
  * Sem isto (ou sem Supabase configurado), o registro segue com o seed
  * hardcoded em default-contract-rules.ts — mesmo comportamento de hoje.
+ *
+ * F2-S4: além de tiss_contract_rules (curadoria manual), também hidrata a
+ * partir de contract_rule_versions — regras propostas pelo Contract
+ * Knowledge Agent (F2-S2) e aprovadas por humano no portão de revisão
+ * (F2-S3). É assim que uma regra aprovada passa a valer de verdade na
+ * auditoria de guias reais — fecha o loop PDF → chunks → proposta → revisão
+ * → regra viva. Mesma limitação da hidratação existente: só recarrega no
+ * boot do servidor, não em tempo real após uma aprovação.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAdminSupabase } from "@/lib/server/supabase-admin";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import { getDefaultContractRegistry } from "@/lib/capture/contract/registry/contract-knowledge-registry";
+import {
+  groupApprovedIntoVersions,
+  type ApprovedContractRuleVersionRow,
+} from "@/lib/capture/contract/registry/approved-contract-rule-mapper";
 import type {
   ContractRegistryVersion,
   ContractRule,
@@ -110,12 +122,23 @@ export function bindServerContractRulesStore(): Promise<{
       }
 
       const rows = (data ?? []) as ContractRuleRow[];
-      if (rows.length === 0) return { versionsLoaded: 0, rulesLoaded: 0 };
 
-      const versions = groupIntoVersions(rows);
+      const approved = await admin
+        .from("contract_rule_versions")
+        .select("rule_id, tenant_id, operator_code, contract_label, description, justification, citation_heading, guide_type, procedure_type, severity, approved_at");
+      if (approved.error) {
+        throw new Error(`CONTRACT-DATA: falha ao ler contract_rule_versions (${approved.error.message}).`);
+      }
+      const approvedRows = (approved.data ?? []) as ApprovedContractRuleVersionRow[];
+
+      if (rows.length === 0 && approvedRows.length === 0) {
+        return { versionsLoaded: 0, rulesLoaded: 0 };
+      }
+
+      const versions = [...groupIntoVersions(rows), ...groupApprovedIntoVersions(approvedRows)];
       getDefaultContractRegistry().loadVersions(versions);
 
-      return { versionsLoaded: versions.length, rulesLoaded: rows.length };
+      return { versionsLoaded: versions.length, rulesLoaded: rows.length + approvedRows.length };
     })().catch((error) => {
       hydratePromise = null;
       throw error;
