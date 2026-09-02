@@ -16,7 +16,7 @@ import {
 } from "../infrastructure/capture-session-store";
 import { getCaptureOcrResult } from "../ocr/services/ocr-service";
 import { getCaptureStructuredGuideViaEnterprise } from "../enterprise/process-parser-via-enterprise";
-import type { CaptureSessionStatus } from "../types";
+import type { CaptureSessionStatus, CaptureStatusHistoryEntry } from "../types";
 import { parseReviewMetadata } from "./review-workspace-service";
 import type {
   ReviewApprovalStatus,
@@ -95,6 +95,8 @@ export type ReviewWorkspaceSnapshot = {
   sessionStatus: CaptureSessionStatus;
   metadata: JsonObject;
   review: ReviewWorkspaceMetadata;
+  /** Transições de status da sessão — já persistidas em capture_sessions.status_history. */
+  statusHistory: CaptureStatusHistoryEntry[];
   file: {
     name: string;
     mimeType: string;
@@ -186,6 +188,7 @@ export async function getReviewWorkspaceSnapshot(
     sessionStatus: status.status,
     metadata: status.metadata,
     review,
+    statusHistory: detail.statusHistory,
     file: doc
       ? {
           name: doc.originalFilename,

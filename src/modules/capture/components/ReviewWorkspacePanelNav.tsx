@@ -8,6 +8,7 @@ import {
   Wrench,
   Brain,
   CheckSquare,
+  History,
 } from "lucide-react";
 import type { ReviewPanelId } from "@/lib/capture/review";
 import { REVIEW_PANEL_LABELS } from "@/lib/capture/review/review-workspace-service";
@@ -22,6 +23,7 @@ const PANEL_ICONS: Record<ReviewPanelId, typeof FileText> = {
   risco: ShieldAlert,
   correcoes: Wrench,
   learning: Brain,
+  historico: History,
   aprovacao: CheckSquare,
 };
 

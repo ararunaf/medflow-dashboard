@@ -102,6 +102,12 @@ export function buildPipelineSteps(
       active: activePanel === "learning",
     },
     {
+      id: "historico",
+      label: "Histórico",
+      completed: true,
+      active: activePanel === "historico",
+    },
+    {
       id: "aprovacao",
       label: "Aprovação",
       completed: approvalStatus === "aprovada" || approvalStatus === "reprovada",
@@ -167,5 +173,6 @@ export const REVIEW_PANEL_LABELS: Record<string, string> = {
   risco: "Risco de Glosa",
   correcoes: "Sugestões de Correção",
   learning: "Learning Loop",
+  historico: "Histórico",
   aprovacao: "Aprovação Final",
 };

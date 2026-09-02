@@ -45,6 +45,7 @@
     "capture:ocr:test": "npx tsx --test scripts/capture/tests/ocr-implementation.test.ts",
     "capture:parser:test": "npx tsx --test scripts/capture/tests/tiss-parser.test.ts",
     "capture:audit:test": "npx tsx --test scripts/capture/tests/preventive-audit.test.ts",
+    "capture:audit:regression:test": "npx tsx --test scripts/capture/tests/audit-regression-corpus.test.ts",
     "capture:correction:test": "npx tsx --test scripts/capture/tests/correction-assistant.test.ts",
     "capture:learning:test": "npx tsx --test scripts/capture/tests/learning-loop.test.ts",
     "capture:contract:test": "npx tsx --test scripts/capture/tests/contract-intelligence.test.ts",

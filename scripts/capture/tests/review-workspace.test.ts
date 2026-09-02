@@ -21,6 +21,7 @@ import {
   REVIEW_PANEL_LABELS,
 } from "../../../src/lib/capture/review/review-workspace-service.ts";
 import { isReviewPanelId } from "../../../src/modules/capture/components/ReviewWorkspace.tsx";
+import { buildCaptureHistoryTimeline } from "../../../src/lib/capture/review/history-timeline.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "../../..");
@@ -49,10 +50,12 @@ describe("Review workspace — tipos e labels", () => {
     assert.ok(REVIEW_APPROVAL_STATUSES.includes("reprovada"));
   });
 
-  it("expõe os 8 painéis do workspace", () => {
-    assert.equal(REVIEW_PANEL_IDS.length, 9);
+  it("expõe os 10 painéis do workspace", () => {
+    assert.equal(REVIEW_PANEL_IDS.length, 10);
     assert.ok(REVIEW_PANEL_IDS.includes("risco"));
+    assert.ok(REVIEW_PANEL_IDS.includes("historico"));
     assert.equal(REVIEW_PANEL_LABELS.contrato, "Conhecimento Contratual");
+    assert.equal(REVIEW_PANEL_LABELS.historico, "Histórico");
     assert.equal(REVIEW_PANEL_LABELS.aprovacao, "Aprovação Final");
     assert.equal(REVIEW_APPROVAL_LABELS.aprovada, "Aprovada");
   });
@@ -131,18 +134,49 @@ describe("Review workspace — sincronização dos painéis", () => {
         guideType: "consulta",
         auditedAt: "2026-07-06T12:00:00.000Z",
         engineVersion: "1",
-        score: { overall: 82, distribution: { critico: 0, alto: 1, medio: 2, baixo: 0 }, approved: true, blocking: false },
+        score: {
+          overall: 82,
+          distribution: { critico: 0, alto: 1, medio: 2, baixo: 0 },
+          approved: true,
+          blocking: false,
+        },
         findings: [],
         correctionProposals: [],
-        summary: { totalFindings: 3, criticalCount: 0, highCount: 1, mediumCount: 2, lowCount: 0, blockingCount: 0, approved: true },
+        summary: {
+          totalFindings: 3,
+          criticalCount: 0,
+          highCount: 1,
+          mediumCount: 2,
+          lowCount: 0,
+          blockingCount: 0,
+          approved: true,
+        },
       },
       correctionStore: {
         version: "correction_proposals_v1",
         sessionId: "sess-1",
         generatedAt: "2026-07-06T12:00:00.000Z",
         proposals: [
-          { id: "p1", status: "pending", field: "crm", suggestedValue: "123", confidence: 0.9, ruleId: "r1", severity: "medio", rationale: "test" },
-          { id: "p2", status: "accepted", field: "data", suggestedValue: "2026-01-01", confidence: 0.8, ruleId: "r2", severity: "baixo", rationale: "test" },
+          {
+            id: "p1",
+            status: "pending",
+            field: "crm",
+            suggestedValue: "123",
+            confidence: 0.9,
+            ruleId: "r1",
+            severity: "medio",
+            rationale: "test",
+          },
+          {
+            id: "p2",
+            status: "accepted",
+            field: "data",
+            suggestedValue: "2026-01-01",
+            confidence: 0.8,
+            ruleId: "r2",
+            severity: "baixo",
+            rationale: "test",
+          },
         ],
       },
       review: parseReviewMetadata({ review: { approvalStatus: "em_revisao", decisions: [] } }),
@@ -198,10 +232,7 @@ describe("Review workspace — mudança de status de aprovação", () => {
   });
 
   it("mantém em_revisao enquanto decisão não finalizada", () => {
-    const steps = buildPipelineSteps(
-      { ocr: { status: "completed" } },
-      "em_revisao",
-    );
+    const steps = buildPipelineSteps({ ocr: { status: "completed" } }, "em_revisao");
     const approvalStep = steps.find((s) => s.id === "aprovacao");
     assert.equal(approvalStep?.completed, false);
   });
@@ -268,6 +299,80 @@ describe("Review workspace — arquivos da sprint", () => {
     const content = readFileSync(path, "utf8");
     assert.ok(content.includes("getReviewWorkspaceFn"));
     assert.ok(content.includes("setReviewApprovalFn"));
+  });
+});
+
+describe("Review workspace — histórico unificado", () => {
+  it("mescla status_history, decisões e correções em ordem cronológica decrescente", () => {
+    const events = buildCaptureHistoryTimeline({
+      statusHistory: [
+        { from: null, to: "CREATED", at: "2026-01-01T10:00:00.000Z", actorProfileId: "prof-1" },
+        {
+          from: "CREATED",
+          to: "UPLOADED",
+          at: "2026-01-01T10:05:00.000Z",
+          actorProfileId: "prof-1",
+        },
+      ],
+      decisions: [
+        {
+          status: "aprovada",
+          at: "2026-01-01T10:10:00.000Z",
+          actorProfileId: "prof-2",
+        },
+      ],
+      correctionProposals: [
+        {
+          proposalId: "p1",
+          findingId: "f1",
+          ruleId: "PRC-003",
+          field: "procedure_code",
+          currentValue: "99999999",
+          suggestedValue: "10101012",
+          confidence: 0.8,
+          justification: "x",
+          source: "TUSS",
+          status: "accepted",
+          blocking: false,
+          severity: "alto",
+          decidedAt: "2026-01-01T10:07:00.000Z",
+        },
+        {
+          proposalId: "p2",
+          findingId: "f2",
+          ruleId: "DIA-001",
+          field: "cid_code",
+          currentValue: null,
+          suggestedValue: "J06.9",
+          confidence: 0.5,
+          justification: "y",
+          source: "TISS",
+          status: "pending",
+          blocking: false,
+          severity: "medio",
+        },
+      ],
+    });
+
+    // p2 está pending (sem decidedAt) — não deve entrar no timeline.
+    assert.equal(events.length, 4);
+    assert.equal(events[0]!.kind, "aprovacao");
+    assert.equal(events[1]!.kind, "correcao");
+    assert.equal(events[2]!.label, "Enviada");
+    assert.equal(events[3]!.label, "Criada");
+    // ordem estritamente decrescente por `at`
+    for (let i = 1; i < events.length; i++) {
+      assert.ok(new Date(events[i - 1]!.at).getTime() >= new Date(events[i]!.at).getTime());
+    }
+  });
+
+  it("retorna lista vazia quando não há histórico", () => {
+    const events = buildCaptureHistoryTimeline({
+      statusHistory: [],
+      decisions: [],
+      correctionProposals: [],
+    });
+    assert.deepEqual(events, []);
   });
 });
 

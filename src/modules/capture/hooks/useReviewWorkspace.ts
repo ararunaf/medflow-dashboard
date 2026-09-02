@@ -70,6 +70,7 @@ export function useReviewWorkspace(sessionId: string) {
   const correctionSummary =
     (snapshot?.correctionSummary as CorrectionProposalSummaryMeta | null) ?? null;
   const correctionStore = snapshot?.correctionStore ?? null;
+  const statusHistory = snapshot?.statusHistory ?? [];
 
   const headerMetrics = useMemo(() => {
     if (!snapshot) return null;
@@ -138,6 +139,7 @@ export function useReviewWorkspace(sessionId: string) {
     riskAssessmentReport: riskAssessmentReport as RiskAssessmentReport | null,
     correctionSummary,
     correctionStore: correctionStore as CorrectionProposalStore | null,
+    statusHistory,
     ocr: ocrResult as RawOcrResult | null,
     refresh,
     navigatePanel,

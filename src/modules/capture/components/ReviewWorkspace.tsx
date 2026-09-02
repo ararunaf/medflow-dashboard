@@ -7,6 +7,7 @@ import { CaptureContractPanel } from "./CaptureContractPanel";
 import { CaptureRiskPanel } from "./CaptureRiskPanel";
 import { CaptureCorrectionPanel } from "./CaptureCorrectionPanel";
 import { CaptureFileInfoPanel } from "./CaptureFileInfo";
+import { CaptureHistoryPanel } from "./CaptureHistoryPanel";
 import { CaptureImagePreview } from "./CaptureImagePreview";
 import { CaptureLearningPanel } from "./CaptureLearningPanel";
 import { CaptureOcrPanel } from "./CaptureOcrPanel";
@@ -24,7 +25,9 @@ import {
 } from "../services/correction-client";
 import { downloadOcrJson } from "../services/ocr-client";
 import { downloadStructuredGuideJson } from "../services/parser-client";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import type { ImagePreviewHighlight } from "./CaptureImagePreview";
+import { buildCaptureHistoryTimeline } from "@/lib/capture/review/history-timeline";
 
 type ReviewWorkspaceProps = {
   sessionId: string;
@@ -53,6 +56,7 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
     riskAssessmentReport,
     correctionSummary,
     correctionStore,
+    statusHistory,
     refresh,
     navigatePanel,
     setApprovalStatus,
@@ -67,6 +71,26 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
   const [contractBusy, setContractBusy] = useState(false);
   const [riskBusy, setRiskBusy] = useState(false);
   const [correctionBusy, setCorrectionBusy] = useState(false);
+  const [selectedFindingField, setSelectedFindingField] = useState<string | null>(null);
+
+  const findingHighlight = useMemo<ImagePreviewHighlight | null>(() => {
+    if (!selectedFindingField || !structuredGuide) return null;
+    const field = structuredGuide.fields[selectedFindingField];
+    if (!field?.position) return null;
+    const blocking =
+      auditReport?.findings.some((f) => f.field === selectedFindingField && f.blocking) ?? false;
+    return { ...field.position.normalized, page: field.position.page, blocking };
+  }, [selectedFindingField, structuredGuide, auditReport]);
+
+  const historyEvents = useMemo(
+    () =>
+      buildCaptureHistoryTimeline({
+        statusHistory,
+        decisions: snapshot?.review.decisions ?? [],
+        correctionProposals: correctionStore?.proposals ?? [],
+      }),
+    [statusHistory, snapshot?.review.decisions, correctionStore?.proposals],
+  );
 
   const handleDownloadOcr = useCallback(async () => {
     setOcrBusy(true);
@@ -176,6 +200,7 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
             alt={snapshot.file?.name ?? "Documento original"}
             mimeType={snapshot.file?.mimeType}
             onDownload={() => void downloadDocument()}
+            highlight={findingHighlight}
           />
           <CaptureFileInfoPanel
             file={
@@ -230,6 +255,8 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
               report={auditReport}
               busy={auditBusy}
               onDownloadJson={() => void handleDownloadAudit()}
+              selectedField={selectedFindingField}
+              onSelectFinding={setSelectedFindingField}
             />
           ) : null}
 
@@ -276,6 +303,8 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
 
           {activePanel === "learning" ? <CaptureLearningPanel /> : null}
 
+          {activePanel === "historico" ? <CaptureHistoryPanel events={historyEvents} /> : null}
+
           {activePanel === "aprovacao" ? (
             <ReviewApprovalPanel
               review={snapshot.review}
@@ -300,6 +329,7 @@ export function isReviewPanelId(value: string): value is ReviewPanelId {
     "risco",
     "correcoes",
     "learning",
+    "historico",
     "aprovacao",
   ].includes(value);
 }

@@ -21,6 +21,7 @@ export const REVIEW_PANEL_IDS = [
   "risco",
   "correcoes",
   "learning",
+  "historico",
   "aprovacao",
 ] as const;
 
@@ -50,6 +51,7 @@ export type ReviewPipelineStepId =
   | "risco"
   | "correcoes"
   | "learning"
+  | "historico"
   | "aprovacao";
 
 export type ReviewPipelineStep = {

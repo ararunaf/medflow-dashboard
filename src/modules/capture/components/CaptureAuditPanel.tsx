@@ -38,12 +38,17 @@ export function CaptureAuditPanel({
   report,
   onDownloadJson,
   busy,
+  selectedField,
+  onSelectFinding,
 }: {
   phase: CapturePhase;
   summary: AuditReportSummaryMeta | null;
   report: AuditReport | null;
   onDownloadJson?: () => void;
   busy?: boolean;
+  /** Campo do achado selecionado (realçado no documento) — ver ReviewWorkspace. */
+  selectedField?: string | null;
+  onSelectFinding?: (field: string | null) => void;
 }) {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
 
@@ -149,6 +154,12 @@ export function CaptureAuditPanel({
               key={`${finding.ruleId}-${finding.field}`}
               finding={finding}
               isBlockingField={blockingFields.has(finding.field)}
+              selected={selectedField === finding.field}
+              onSelect={
+                onSelectFinding
+                  ? () => onSelectFinding(selectedField === finding.field ? null : finding.field)
+                  : undefined
+              }
             />
           ))}
         </ul>
@@ -222,15 +233,33 @@ function MetricCard({
 function FindingRow({
   finding,
   isBlockingField,
+  selected,
+  onSelect,
 }: {
   finding: AuditFinding;
   isBlockingField: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
 }) {
   return (
     <li
       className={`rounded-md border p-3 text-sm space-y-1 ${
         finding.blocking ? "border-destructive/40 bg-destructive/5" : "border-border"
-      }`}
+      } ${selected ? "ring-2 ring-primary ring-offset-1" : ""} ${onSelect ? "cursor-pointer" : ""}`}
+      onClick={onSelect}
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onKeyDown={
+        onSelect
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSelect();
+              }
+            }
+          : undefined
+      }
+      aria-pressed={onSelect ? selected : undefined}
     >
       <div className="flex flex-wrap items-center gap-2">
         <span
@@ -244,6 +273,11 @@ function FindingRow({
           <span className="inline-flex items-center gap-0.5 text-xs text-destructive font-medium">
             <XCircle className="h-3 w-3" />
             Bloqueante
+          </span>
+        ) : null}
+        {onSelect ? (
+          <span className="ml-auto text-xs text-primary/80">
+            {selected ? "Ver no documento ▲" : "Ver no documento ▾"}
           </span>
         ) : null}
       </div>

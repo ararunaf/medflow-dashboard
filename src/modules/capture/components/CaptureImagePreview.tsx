@@ -2,14 +2,33 @@ import { Download, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+export type ImagePreviewHighlight = {
+  /** Coordenadas normalizadas 0–1 relativas à página (StructuredFieldPosition.normalized). */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  /** Página do campo (1-based) — a prévia hoje só mostra uma página; ver nota abaixo se != 1. */
+  page: number;
+  /** true quando o achado selecionado é bloqueante — muda a cor do realce. */
+  blocking?: boolean;
+};
+
 type CaptureImagePreviewProps = {
   src: string | null;
   alt: string;
   mimeType?: string;
   onDownload?: () => void;
+  highlight?: ImagePreviewHighlight | null;
 };
 
-export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureImagePreviewProps) {
+export function CaptureImagePreview({
+  src,
+  alt,
+  mimeType,
+  onDownload,
+  highlight,
+}: CaptureImagePreviewProps) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
 
@@ -40,6 +59,7 @@ export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureI
                 size="icon"
                 className="h-8 w-8"
                 onClick={zoomOut}
+                aria-label="Diminuir zoom"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -52,6 +72,7 @@ export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureI
                 size="icon"
                 className="h-8 w-8"
                 onClick={zoomIn}
+                aria-label="Aumentar zoom"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -61,6 +82,7 @@ export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureI
                 size="icon"
                 className="h-8 w-8"
                 onClick={rotate}
+                aria-label="Girar imagem"
               >
                 <RotateCw className="h-4 w-4" />
               </Button>
@@ -73,6 +95,7 @@ export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureI
               size="icon"
               className="h-8 w-8"
               onClick={onDownload}
+              aria-label="Baixar documento"
             >
               <Download className="h-4 w-4" />
             </Button>
@@ -88,18 +111,39 @@ export function CaptureImagePreview({ src, alt, mimeType, onDownload }: CaptureI
           />
         ) : (
           <div className="flex min-h-[280px] items-center justify-center">
-            <img
-              src={src}
-              alt={alt}
-              className="max-w-full transition-transform duration-200"
+            <div
+              className="relative inline-block transition-transform duration-200"
               style={{
                 transform: `scale(${zoom}) rotate(${rotation}deg)`,
                 transformOrigin: "center center",
               }}
-            />
+            >
+              <img src={src} alt={alt} className="block max-w-full" />
+              {highlight && highlight.page === 1 ? (
+                <div
+                  className={`pointer-events-none absolute rounded-sm border-2 ring-2 ring-offset-1 ${
+                    highlight.blocking
+                      ? "border-destructive ring-destructive/40"
+                      : "border-primary ring-primary/40"
+                  }`}
+                  style={{
+                    left: `${highlight.x * 100}%`,
+                    top: `${highlight.y * 100}%`,
+                    width: `${highlight.width * 100}%`,
+                    height: `${highlight.height * 100}%`,
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
         )}
       </div>
+      {highlight && highlight.page !== 1 ? (
+        <p className="border-t border-border px-3 py-1.5 text-xs text-muted-foreground">
+          Campo do achado selecionado está na página {highlight.page} — esta prévia mostra só a
+          primeira página.
+        </p>
+      ) : null}
     </div>
   );
 }
