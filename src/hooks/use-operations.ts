@@ -19,17 +19,21 @@ import {
   getDashboardFn,
   getMyAvailabilityFn,
   getMyContextFn,
+  listHospitalsFn,
   listMyAssignmentsFn,
   listMyShiftsFn,
   listMySwapsFn,
   listOpenShiftsFn,
   listPendingSwapsFn,
+  listProfessionalAffiliationsFn,
   listShiftsRangeFn,
   listSwapTargetProfessionalsFn,
   type AssignmentListItem,
   type AvailabilityWindowItem,
   type DashboardSummary,
+  type HospitalListItem,
   type MyContext,
+  type ProfessionalAffiliationSummary,
   type ShiftListItem,
   type SwapListItem,
   type SwapTargetProfessional,
@@ -61,15 +65,15 @@ export function useDashboardQuery(opts: ReadOpts = {}) {
 // -------------------------------------------------------------------------
 // Shifts
 
-export const openShiftsQueryOptions = () =>
+export const openShiftsQueryOptions = (hospitalId?: string) =>
   queryOptions<ShiftListItem[]>({
-    queryKey: opsKeys.shiftsOpen(),
-    queryFn: async () => unwrap(await listOpenShiftsFn()),
+    queryKey: opsKeys.shiftsOpen(hospitalId),
+    queryFn: async () => unwrap(await listOpenShiftsFn({ data: { hospitalId } })),
     staleTime: DEFAULT_STALE_MS,
   });
 
-export function useOpenShiftsQuery(opts: ReadOpts = {}) {
-  return useQuery({ ...openShiftsQueryOptions(), ...opts });
+export function useOpenShiftsQuery(hospitalId?: string, opts: ReadOpts = {}) {
+  return useQuery({ ...openShiftsQueryOptions(hospitalId), ...opts });
 }
 
 export const myShiftsQueryOptions = () =>
@@ -83,15 +87,46 @@ export function useMyShiftsQuery(opts: ReadOpts = {}) {
   return useQuery({ ...myShiftsQueryOptions(), ...opts });
 }
 
-export const shiftsRangeQueryOptions = (fromISO?: string, toISO?: string) =>
+export const shiftsRangeQueryOptions = (fromISO?: string, toISO?: string, hospitalId?: string) =>
   queryOptions<ShiftListItem[]>({
-    queryKey: opsKeys.shiftsRange(fromISO, toISO),
-    queryFn: async () => unwrap(await listShiftsRangeFn({ data: { fromISO, toISO } })),
+    queryKey: opsKeys.shiftsRange(fromISO, toISO, hospitalId),
+    queryFn: async () => unwrap(await listShiftsRangeFn({ data: { fromISO, toISO, hospitalId } })),
     staleTime: DEFAULT_STALE_MS,
   });
 
-export function useShiftsRangeQuery(fromISO?: string, toISO?: string, opts: ReadOpts = {}) {
-  return useQuery({ ...shiftsRangeQueryOptions(fromISO, toISO), ...opts });
+export function useShiftsRangeQuery(
+  fromISO?: string,
+  toISO?: string,
+  hospitalId?: string,
+  opts: ReadOpts = {},
+) {
+  return useQuery({ ...shiftsRangeQueryOptions(fromISO, toISO, hospitalId), ...opts });
+}
+
+// -------------------------------------------------------------------------
+// Instituições (hospitals) + afiliação profissional↔hospital
+
+export const hospitalsQueryOptions = () =>
+  queryOptions<HospitalListItem[]>({
+    queryKey: opsKeys.hospitals(),
+    queryFn: async () => unwrap(await listHospitalsFn()),
+    staleTime: 60_000,
+  });
+
+export function useHospitalsQuery(opts: ReadOpts = {}) {
+  return useQuery({ ...hospitalsQueryOptions(), ...opts });
+}
+
+/** Manager-only: matriz completa profissional × hospital, para a aba de administração. */
+export const professionalAffiliationsQueryOptions = () =>
+  queryOptions<ProfessionalAffiliationSummary[]>({
+    queryKey: opsKeys.professionalAffiliations(),
+    queryFn: async () => unwrap(await listProfessionalAffiliationsFn()),
+    staleTime: DEFAULT_STALE_MS,
+  });
+
+export function useProfessionalAffiliationsQuery(opts: ReadOpts = {}) {
+  return useQuery({ ...professionalAffiliationsQueryOptions(), ...opts });
 }
 
 // -------------------------------------------------------------------------

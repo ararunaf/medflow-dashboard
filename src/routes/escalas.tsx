@@ -113,12 +113,14 @@ function EscalasPage() {
   const { opsFocus } = Route.useSearch();
   const navigate = useNavigate({ from: "/escalas" });
 
-  const shiftsQuery = useShiftsRangeQuery(undefined, undefined, { enabled: viewMode === "dias" });
+  const shiftsQuery = useShiftsRangeQuery(undefined, undefined, undefined, {
+    enabled: viewMode === "dias",
+  });
 
   const monthGrid = useMemo(() => buildMonthGrid(visibleMonth), [visibleMonth]);
   const monthStartISO = monthGrid[0]![0]!.iso;
   const monthEndISO = monthGrid[monthGrid.length - 1]![6]!.iso;
-  const monthShiftsQuery = useShiftsRangeQuery(monthStartISO, monthEndISO, {
+  const monthShiftsQuery = useShiftsRangeQuery(monthStartISO, monthEndISO, undefined, {
     enabled: viewMode === "mes",
   });
 

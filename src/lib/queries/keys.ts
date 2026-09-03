@@ -25,11 +25,32 @@ export const opsKeys = {
   schedules: () => [...opsKeys.all, "schedules"] as const,
 
   // shifts
+  //
+  // `hospitalId` é sempre um sufixo OPCIONAL (só aparece no array quando
+  // presente) — assim `invalidateQueries({ queryKey: opsKeys.shiftsOpen() })`
+  // (sem filtro) continua batendo, por prefixo, em toda variante já cacheada
+  // com um hospitalId específico. Se virasse um elemento fixo (ex.: sempre
+  // incluir `hospitalId ?? null`), a invalidação ampla pararia de alcançar
+  // as variantes filtradas.
   shifts: () => [...opsKeys.all, "shifts"] as const,
-  shiftsOpen: () => [...opsKeys.shifts(), "open"] as const,
-  shiftsRange: (fromISO?: string, toISO?: string) =>
-    [...opsKeys.shifts(), "range", { from: fromISO ?? null, to: toISO ?? null }] as const,
+  shiftsOpen: (hospitalId?: string) =>
+    hospitalId
+      ? ([...opsKeys.shifts(), "open", hospitalId] as const)
+      : ([...opsKeys.shifts(), "open"] as const),
+  shiftsRange: (fromISO?: string, toISO?: string, hospitalId?: string) =>
+    hospitalId
+      ? ([
+          ...opsKeys.shifts(),
+          "range",
+          { from: fromISO ?? null, to: toISO ?? null },
+          hospitalId,
+        ] as const)
+      : ([...opsKeys.shifts(), "range", { from: fromISO ?? null, to: toISO ?? null }] as const),
   shiftsMine: () => [...opsKeys.shifts(), "mine"] as const,
+
+  // institutions (hospitals + afiliação profissional↔hospital)
+  hospitals: () => [...opsKeys.all, "hospitals"] as const,
+  professionalAffiliations: () => [...opsKeys.all, "professional-affiliations"] as const,
 
   // assignments
   assignments: () => [...opsKeys.all, "assignments"] as const,

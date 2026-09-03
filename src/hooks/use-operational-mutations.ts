@@ -30,8 +30,10 @@ import {
   rejectAssignmentFn,
   requestSwapFn,
   selfAssignOpenShiftFn,
+  setProfessionalHospitalAffiliationFn,
   updateAvailabilityFn,
   type RequestSwapInput,
+  type SetProfessionalHospitalAffiliationInput,
   type UpdateAvailabilityInput,
 } from "@/lib/operations/api";
 import type {
@@ -143,6 +145,33 @@ export function useRejectAssignment(
       await opts.onSuccess?.(...args);
     },
     onError: async (...args: OnErrorArgs<ShiftAssignmentRow, { assignmentId: string }>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useSetProfessionalHospitalAffiliation(
+  opts: MutationHookOptions<SetProfessionalHospitalAffiliationInput, void> = {},
+) {
+  const qc = useQueryClient();
+  return useMutation<void, Error, SetProfessionalHospitalAffiliationInput>({
+    mutationFn: async (input) => unwrap(await setProfessionalHospitalAffiliationFn({ data: input })),
+    onSuccess: async (
+      ...args: OnSuccessArgs<void, SetProfessionalHospitalAffiliationInput>
+    ) => {
+      const [, variables] = args;
+      toast.success(
+        variables.active ? "Profissional afiliado à instituição" : "Afiliação desativada",
+      );
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.professionalAffiliations() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsOpen() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<void, SetProfessionalHospitalAffiliationInput>) => {
       reportError(args[0]);
       await opts.onError?.(...args);
     },

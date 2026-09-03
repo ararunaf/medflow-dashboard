@@ -11,6 +11,7 @@ export * from "./shifts";
 export * from "./assignments";
 export * from "./swaps";
 export * from "./availability";
+export * from "./institutions";
 export * from "./recommendation-feedback";
 export * from "./operational-memory";
 export * from "./operational-copilot-gpt";

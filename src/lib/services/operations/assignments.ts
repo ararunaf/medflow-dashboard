@@ -28,6 +28,7 @@ import {
 } from "@/lib/operations/timeline";
 import type { ServiceCtx, ShiftAssignmentRow, ShiftRow } from "./types";
 import { recordOperationalEventSafe } from "./operational-event-service";
+import { getActiveAffiliatedHospitalIds } from "./institutions";
 
 export type CreateAssignmentInput = {
   shiftId: string;
@@ -69,6 +70,43 @@ async function assertProfessionalInTenant(ctx: ServiceCtx, professionalId: strin
   if (!data) throw new TenantMismatchError("Profissional");
 }
 
+async function loadHospitalIdForDepartment(
+  ctx: ServiceCtx,
+  departmentId: string,
+): Promise<string | null> {
+  const { data, error } = await ctx.client
+    .from("departments")
+    .select("unit:units!departments_tenant_unit_fk ( hospital_id )")
+    .eq("id", departmentId)
+    .eq("tenant_id", ctx.tenantId)
+    .maybeSingle();
+  if (error) throw mapPostgresError(error);
+  return data?.unit?.hospital_id ?? null;
+}
+
+/**
+ * Defesa em profundidade para a auto-atribuição: se o profissional tem
+ * afiliação institucional registrada (`professional_hospitals`), o plantão
+ * precisa pertencer a um hospital ao qual ele está ativamente afiliado.
+ * Sem nenhuma linha de afiliação, não há restrição (ver institutions.ts).
+ */
+async function assertSelfAssignRespectsHospitalAffiliation(
+  ctx: ServiceCtx,
+  professionalId: string,
+  shift: ShiftRow,
+): Promise<void> {
+  const affiliatedHospitalIds = await getActiveAffiliatedHospitalIds(ctx, professionalId);
+  if (affiliatedHospitalIds === null) return;
+
+  const hospitalId = await loadHospitalIdForDepartment(ctx, shift.department_id);
+  if (hospitalId === null || !affiliatedHospitalIds.includes(hospitalId)) {
+    throw new PermissionError(
+      "Você não está afiliado à instituição deste plantão.",
+      { shiftId: shift.id },
+    );
+  }
+}
+
 export async function createAssignment(
   ctx: ServiceCtx,
   input: CreateAssignmentInput,
@@ -77,7 +115,8 @@ export async function createAssignment(
   const professionalId = expectUuid(input.professionalId, "professionalId");
 
   // Quem pode atribuir? manager (qualquer) OU professional (apenas a si).
-  if (professionalId === ctx.professionalId) {
+  const isSelf = professionalId === ctx.professionalId;
+  if (isSelf) {
     assertCan(ctx.role, "assignments:assign:self");
   } else {
     assertCan(ctx.role, "assignments:assign:any");
@@ -93,6 +132,9 @@ export async function createAssignment(
   }
 
   await assertProfessionalInTenant(ctx, professionalId);
+  if (isSelf) {
+    await assertSelfAssignRespectsHospitalAffiliation(ctx, professionalId, shift);
+  }
 
   const { data, error } = await ctx.client
     .from("shift_assignments")

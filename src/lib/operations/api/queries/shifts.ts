@@ -9,12 +9,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { mapPostgresError } from "@/lib/domain/operations/errors";
 import { runQuery, type QueryResult } from "@/lib/server/fn-helpers";
+import { getActiveAffiliatedHospitalIds } from "@/lib/services/operations/institutions";
+import type { ServiceCtx } from "@/lib/services/operations/types";
 import type { Database } from "@/lib/database.types";
 
 type ShiftRow = Database["public"]["Tables"]["shifts"]["Row"];
 type ScheduleRow = Database["public"]["Tables"]["schedules"]["Row"];
 type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 type UnitRow = Database["public"]["Tables"]["units"]["Row"];
+type HospitalRow = Database["public"]["Tables"]["hospitals"]["Row"];
 type AssignmentRow = Database["public"]["Tables"]["shift_assignments"]["Row"];
 type ProfessionalRow = Database["public"]["Tables"]["professionals"]["Row"];
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -31,6 +34,8 @@ export type ShiftListItem = {
   departmentName: string;
   unitId: string | null;
   unitName: string | null;
+  hospitalId: string | null;
+  hospitalName: string | null;
   startsAt: string;
   endsAt: string;
   status: ShiftRow["status"];
@@ -52,7 +57,10 @@ export const SHIFT_LIST_SELECT = `
   schedule:schedules!shifts_tenant_schedule_fk ( id, name ),
   department:departments!shifts_tenant_department_fk (
     id, name,
-    unit:units!departments_tenant_unit_fk ( id, name )
+    unit:units!departments_tenant_unit_fk (
+      id, name,
+      hospital:hospitals!units_tenant_hospital_fk ( id, name )
+    )
   ),
   assignments:shift_assignments!shift_assignments_tenant_shift_fk (
     id, professional_id, assignment_status,
@@ -70,7 +78,11 @@ export type RawShiftRow = Pick<
   schedule: Pick<ScheduleRow, "id" | "name"> | null;
   department:
     | (Pick<DepartmentRow, "id" | "name"> & {
-        unit: Pick<UnitRow, "id" | "name"> | null;
+        unit:
+          | (Pick<UnitRow, "id" | "name"> & {
+              hospital: Pick<HospitalRow, "id" | "name"> | null;
+            })
+          | null;
       })
     | null;
   assignments: Array<
@@ -103,6 +115,8 @@ export function toShiftListItem(row: RawShiftRow): ShiftListItem {
     departmentName: row.department?.name ?? "—",
     unitId: row.department?.unit?.id ?? null,
     unitName: row.department?.unit?.name ?? null,
+    hospitalId: row.department?.unit?.hospital?.id ?? null,
+    hospitalName: row.department?.unit?.hospital?.name ?? null,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
     status: row.status,
@@ -116,13 +130,44 @@ export function toShiftListItem(row: RawShiftRow): ShiftListItem {
 }
 
 /**
+ * Filtra por instituição (hospital): aplica o `hospitalId` explícito da UI
+ * quando presente e, para profissionais, a afiliação institucional real
+ * (`professional_hospitals`) — sem nenhuma afiliação registrada, nada é
+ * restrito (ver institutions.ts). Gestores nunca são restritos por
+ * afiliação: eles enxergam todas as instituições do tenant por padrão.
+ */
+async function applyHospitalScope(
+  ctx: ServiceCtx,
+  items: ShiftListItem[],
+  hospitalIdFilter: string | undefined,
+): Promise<ShiftListItem[]> {
+  let scoped = items;
+  if (ctx.role === "professional" && ctx.professionalId) {
+    const affiliated = await getActiveAffiliatedHospitalIds(ctx, ctx.professionalId);
+    if (affiliated !== null) {
+      const allowed = new Set(affiliated);
+      scoped = scoped.filter((s) => s.hospitalId !== null && allowed.has(s.hospitalId));
+    }
+  }
+  if (hospitalIdFilter) {
+    scoped = scoped.filter((s) => s.hospitalId === hospitalIdFilter);
+  }
+  return scoped;
+}
+
+/**
  * Lista os plantões abertos (status='open') do tenant — vista do profissional
  * em busca de novos plantões. Ordenado por `starts_at` crescente, limitado.
  */
-export const listOpenShiftsFn = createServerFn({ method: "GET" }).handler(
-  async (): Promise<QueryResult<ShiftListItem[]>> => {
+export const listOpenShiftsFn = createServerFn({ method: "GET" })
+  .inputValidator((raw: unknown): { hospitalId?: string } => {
+    if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return {};
+    const obj = raw as Record<string, unknown>;
+    return { hospitalId: typeof obj.hospitalId === "string" ? obj.hospitalId : undefined };
+  })
+  .handler(async ({ data }): Promise<QueryResult<ShiftListItem[]>> => {
     return runQuery(async (ctx) => {
-      const { data, error } = await ctx.client
+      const { data: rows, error } = await ctx.client
         .from("shifts")
         .select(SHIFT_LIST_SELECT)
         .eq("tenant_id", ctx.tenantId)
@@ -131,10 +176,10 @@ export const listOpenShiftsFn = createServerFn({ method: "GET" }).handler(
         .limit(50)
         .returns<RawShiftRow[]>();
       if (error) throw mapPostgresError(error);
-      return (data ?? []).map(toShiftListItem);
+      const items = (rows ?? []).map(toShiftListItem);
+      return applyHospitalScope(ctx, items, data.hospitalId);
     });
-  },
-);
+  });
 
 /**
  * Lista os plantões com atribuição do profissional autenticado
@@ -175,13 +220,14 @@ export const listMyShiftsFn = createServerFn({ method: "GET" }).handler(
  * Faixa default: próximos 30 dias.
  */
 export const listShiftsRangeFn = createServerFn({ method: "GET" })
-  .inputValidator((raw: unknown): { fromISO?: string; toISO?: string } => {
+  .inputValidator((raw: unknown): { fromISO?: string; toISO?: string; hospitalId?: string } => {
     if (raw == null) return {};
     if (typeof raw !== "object" || Array.isArray(raw)) return {};
     const obj = raw as Record<string, unknown>;
     const fromISO = typeof obj.fromISO === "string" ? obj.fromISO : undefined;
     const toISO = typeof obj.toISO === "string" ? obj.toISO : undefined;
-    return { fromISO, toISO };
+    const hospitalId = typeof obj.hospitalId === "string" ? obj.hospitalId : undefined;
+    return { fromISO, toISO, hospitalId };
   })
   .handler(async ({ data }): Promise<QueryResult<ShiftListItem[]>> => {
     return runQuery(async (ctx) => {
@@ -201,6 +247,7 @@ export const listShiftsRangeFn = createServerFn({ method: "GET" })
         .limit(200)
         .returns<RawShiftRow[]>();
       if (error) throw mapPostgresError(error);
-      return (rows ?? []).map(toShiftListItem);
+      const items = (rows ?? []).map(toShiftListItem);
+      return applyHospitalScope(ctx, items, data.hospitalId);
     });
   });

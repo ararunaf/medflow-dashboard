@@ -19,8 +19,9 @@ export type CentralOpsSearch = {
 };
 
 export type PlantoesOpsSearch = {
-  tab?: "disponiveis" | "meus" | "swaps";
+  tab?: "disponiveis" | "meus" | "swaps" | "instituicoes";
   assignmentFilter?: "pending";
+  hospitalId?: string;
 };
 
 export type EscalasOpsSearch = {

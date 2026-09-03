@@ -4,13 +4,17 @@ import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, Check, Clock, MapPin, X } from "lucide-react";
+import { ArrowLeftRight, Building2, Check, Clock, MapPin, X } from "lucide-react";
+import { can } from "@/lib/auth/rbac";
 import {
+  hospitalsQueryOptions,
   myAssignmentsQueryOptions,
   openShiftsQueryOptions,
+  useHospitalsQuery,
   useMyAssignmentsQuery,
   useOpenShiftsQuery,
   usePendingSwapsQuery,
+  useProfessionalAffiliationsQuery,
   useSwapTargetProfessionalsQuery,
 } from "@/hooks/use-operations";
 import {
@@ -20,6 +24,7 @@ import {
   useRejectAssignment,
   useRequestSwap,
   useSelfAssignOpenShift,
+  useSetProfessionalHospitalAffiliation,
 } from "@/hooks/use-operational-mutations";
 import {
   assignmentStatusToBadge,
@@ -28,7 +33,13 @@ import {
   shiftStatusToBadge,
   swapStatusToBadge,
 } from "@/lib/queries/adapters";
-import type { AssignmentListItem, ShiftListItem, SwapListItem } from "@/lib/operations/api";
+import type {
+  AssignmentListItem,
+  HospitalListItem,
+  ProfessionalAffiliationSummary,
+  ShiftListItem,
+  SwapListItem,
+} from "@/lib/operations/api";
 import type { PlantoesOpsSearch } from "@/lib/operations/actions";
 import { describeError } from "@/lib/queries/result";
 import { toast } from "@/lib/toast/bus";
@@ -36,10 +47,13 @@ import { toast } from "@/lib/toast/bus";
 function parsePlantoesSearch(search: Record<string, unknown>): PlantoesOpsSearch {
   const t = search.tab;
   const tab: NonNullable<PlantoesOpsSearch["tab"]> =
-    t === "swaps" || t === "meus" || t === "disponiveis" ? t : "disponiveis";
+    t === "swaps" || t === "meus" || t === "instituicoes" || t === "disponiveis"
+      ? t
+      : "disponiveis";
   const rawFilter = search.assignmentFilter === "pending" ? ("pending" as const) : undefined;
   const assignmentFilter = tab === "meus" ? rawFilter : undefined;
-  return { tab, assignmentFilter };
+  const hospitalId = typeof search.hospitalId === "string" ? search.hospitalId : undefined;
+  return { tab, assignmentFilter, hospitalId };
 }
 
 export const Route = createFileRoute("/plantoes")({
@@ -55,16 +69,21 @@ export const Route = createFileRoute("/plantoes")({
     await Promise.all([
       context.queryClient.prefetchQuery(openShiftsQueryOptions()),
       context.queryClient.prefetchQuery(myAssignmentsQueryOptions()),
+      context.queryClient.prefetchQuery(hospitalsQueryOptions()),
     ]).catch(() => undefined);
   },
   component: PlantoesPage,
 });
 
 function PlantoesPage() {
-  const { tab, assignmentFilter } = Route.useSearch();
+  const { tab, assignmentFilter, hospitalId } = Route.useSearch();
   const navigate = useNavigate({ from: "/plantoes" });
+  const { auth } = Route.useRouteContext();
+  const role = auth.profile?.role ?? null;
+  const canManageInstitutions = can(role, "professional_hospitals:manage");
 
-  const openShifts = useOpenShiftsQuery({ enabled: tab === "disponiveis" });
+  const hospitals = useHospitalsQuery();
+  const openShifts = useOpenShiftsQuery(hospitalId, { enabled: tab === "disponiveis" });
   const myAssignments = useMyAssignmentsQuery({ enabled: tab === "meus" });
   const pendingSwaps = usePendingSwapsQuery({ enabled: tab === "swaps" });
 
@@ -81,18 +100,26 @@ function PlantoesPage() {
     });
   }
 
+  function setHospitalFilter(next: string | undefined) {
+    void navigate({
+      search: (prev) => ({ ...prev, hospitalId: next }),
+      replace: true,
+    });
+  }
+
+  const tabs: Array<[NonNullable<PlantoesOpsSearch["tab"]>, string]> = [
+    ["disponiveis", "Abertos"],
+    ["meus", "Meus plantões"],
+    ["swaps", "Swaps pendentes"],
+  ];
+  if (canManageInstitutions) tabs.push(["instituicoes", "Instituições"]);
+
   return (
     <AppShell>
       <PageHeader title="Plantões" subtitle="Workflow operacional" />
 
       <div className="inline-flex p-1 bg-muted rounded-lg mb-4 flex-wrap gap-1">
-        {(
-          [
-            ["disponiveis", "Abertos"],
-            ["meus", "Meus plantões"],
-            ["swaps", "Swaps pendentes"],
-          ] as const
-        ).map(([key, label]) => (
+        {tabs.map(([key, label]) => (
           <button
             key={key}
             type="button"
@@ -107,13 +134,63 @@ function PlantoesPage() {
       </div>
 
       {tab === "disponiveis" ? (
-        <DisponiveisList query={openShifts} onError={onError} />
+        <>
+          <HospitalFilterBar
+            hospitals={hospitals.data ?? []}
+            selected={hospitalId}
+            onSelect={setHospitalFilter}
+          />
+          <DisponiveisList query={openShifts} onError={onError} />
+        </>
       ) : tab === "meus" ? (
         <MeusList query={myAssignments} assignmentFilter={assignmentFilter} onError={onError} />
+      ) : tab === "instituicoes" ? (
+        <InstituicoesTab onError={onError} />
       ) : (
         <PendingSwapsList query={pendingSwaps} onError={onError} />
       )}
     </AppShell>
+  );
+}
+
+function HospitalFilterBar({
+  hospitals,
+  selected,
+  onSelect,
+}: {
+  hospitals: HospitalListItem[];
+  selected: string | undefined;
+  onSelect: (hospitalId: string | undefined) => void;
+}) {
+  if (hospitals.length <= 1) return null;
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        onClick={() => onSelect(undefined)}
+        className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 border ${
+          !selected
+            ? "border-primary text-primary bg-primary/5"
+            : "border-border text-muted-foreground"
+        }`}
+      >
+        <Building2 className="h-3 w-3" /> Todas as instituições
+      </button>
+      {hospitals.map((h) => (
+        <button
+          key={h.hospitalId}
+          type="button"
+          onClick={() => onSelect(h.hospitalId)}
+          className={`text-xs font-medium rounded-full px-2.5 py-1 border ${
+            selected === h.hospitalId
+              ? "border-primary text-primary bg-primary/5"
+              : "border-border text-muted-foreground"
+          }`}
+        >
+          {h.name}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -177,6 +254,11 @@ function OpenShiftCard({
             <div className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" /> {shift.unitName ?? "—"}
             </div>
+            {shift.hospitalName ? (
+              <div className="flex items-center gap-1.5">
+                <Building2 className="h-3.5 w-3.5" /> {shift.hospitalName}
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="text-right shrink-0">
@@ -435,6 +517,116 @@ function SwapRequestForm({
           <ArrowLeftRight className="h-4 w-4" />
           {requestSwap.isPending ? "Enviando…" : "Confirmar solicitação"}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function InstituicoesTab({ onError }: { onError: (err: unknown) => void }) {
+  const hospitals = useHospitalsQuery();
+  const affiliations = useProfessionalAffiliationsQuery();
+
+  if (hospitals.isLoading || affiliations.isLoading) {
+    return (
+      <div className="space-y-3">
+        <SkeletonRow height={80} />
+        <SkeletonRow height={80} />
+      </div>
+    );
+  }
+  if (hospitals.isError) {
+    return (
+      <ErrorState
+        message={describeError(hospitals.error).message}
+        onRetry={() => hospitals.refetch()}
+      />
+    );
+  }
+  if (affiliations.isError) {
+    return (
+      <ErrorState
+        message={describeError(affiliations.error).message}
+        onRetry={() => affiliations.refetch()}
+      />
+    );
+  }
+
+  const hospitalList = hospitals.data ?? [];
+  const professionalList = affiliations.data ?? [];
+
+  if (hospitalList.length === 0) {
+    return (
+      <EmptyState
+        title="Nenhuma instituição cadastrada"
+        description="Hospitais/clínicas conveniadas aparecem aqui assim que forem cadastrados."
+      />
+    );
+  }
+  if (professionalList.length === 0) {
+    return (
+      <EmptyState
+        title="Nenhum profissional cadastrado"
+        description="Vincule profissionais às instituições assim que houver cooperados no tenant."
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        Clique numa instituição para afiliar ou desafiliar o profissional. Sem nenhuma afiliação
+        ativa, o profissional continua vendo plantões abertos de todas as instituições — a
+        restrição só passa a valer a partir da primeira afiliação registrada.
+      </p>
+      {professionalList.map((p) => (
+        <ProfessionalAffiliationRow key={p.professionalId} professional={p} hospitals={hospitalList} onError={onError} />
+      ))}
+    </div>
+  );
+}
+
+function ProfessionalAffiliationRow({
+  professional,
+  hospitals,
+  onError,
+}: {
+  professional: ProfessionalAffiliationSummary;
+  hospitals: HospitalListItem[];
+  onError: (err: unknown) => void;
+}) {
+  const setAffiliation = useSetProfessionalHospitalAffiliation({ onError });
+  const activeByHospital = new Map(
+    professional.affiliations.map((a) => [a.hospitalId, a.active] as const),
+  );
+
+  return (
+    <div className="rounded-xl bg-card border border-border ring-soft p-4">
+      <h3 className="text-sm font-semibold mb-2">{professional.professionalName}</h3>
+      <div className="flex flex-wrap gap-2">
+        {hospitals.map((h) => {
+          const active = activeByHospital.get(h.hospitalId) ?? false;
+          return (
+            <button
+              key={h.hospitalId}
+              type="button"
+              disabled={setAffiliation.isPending}
+              onClick={() =>
+                setAffiliation.mutate({
+                  professionalId: professional.professionalId,
+                  hospitalId: h.hospitalId,
+                  active: !active,
+                })
+              }
+              className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 border transition-colors ${
+                active
+                  ? "border-[color:var(--success)] text-[color:var(--success)] bg-[color:var(--success)]/8"
+                  : "border-border text-muted-foreground"
+              }`}
+            >
+              <Building2 className="h-3 w-3" /> {h.name}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
