@@ -12,6 +12,7 @@ export * from "./assignments";
 export * from "./swaps";
 export * from "./availability";
 export * from "./institutions";
+export * from "./shift-matching";
 export * from "./recommendation-feedback";
 export * from "./operational-memory";
 export * from "./operational-copilot-gpt";

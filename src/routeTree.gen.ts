@@ -28,6 +28,7 @@ import { Route as CapturaRouteImport } from './routes/captura'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlantoesShiftIdRouteImport } from './routes/plantoes.$shiftId'
 import { Route as LoginRedefinirSenhaRouteImport } from './routes/login.redefinir-senha'
 import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-senha'
 import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
@@ -132,6 +133,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlantoesShiftIdRoute = PlantoesShiftIdRouteImport.update({
+  id: '/$shiftId',
+  path: '/$shiftId',
+  getParentRoute: () => PlantoesRoute,
+} as any)
 const LoginRedefinirSenhaRoute = LoginRedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
@@ -193,7 +199,7 @@ export interface FileRoutesByFullPath {
   '/operacao': typeof OperacaoRoute
   '/perfil': typeof PerfilRoute
   '/piloto': typeof PilotoRoute
-  '/plantoes': typeof PlantoesRoute
+  '/plantoes': typeof PlantoesRouteWithChildren
   '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
+  '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -222,7 +229,7 @@ export interface FileRoutesByTo {
   '/operacao': typeof OperacaoRoute
   '/perfil': typeof PerfilRoute
   '/piloto': typeof PilotoRoute
-  '/plantoes': typeof PlantoesRoute
+  '/plantoes': typeof PlantoesRouteWithChildren
   '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
+  '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -252,7 +260,7 @@ export interface FileRoutesById {
   '/operacao': typeof OperacaoRoute
   '/perfil': typeof PerfilRoute
   '/piloto': typeof PilotoRoute
-  '/plantoes': typeof PlantoesRoute
+  '/plantoes': typeof PlantoesRouteWithChildren
   '/processamento': typeof ProcessamentoRoute
   '/site': typeof SiteRoute
   '/tiss': typeof TissRoute
@@ -262,6 +270,7 @@ export interface FileRoutesById {
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
+  '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -293,6 +302,7 @@ export interface FileRouteTypes {
     | '/financeiro/fechamento-operacional'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
+    | '/plantoes/$shiftId'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesByTo: FileRoutesByTo
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/financeiro/fechamento-operacional'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
+    | '/plantoes/$shiftId'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   id:
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/financeiro/fechamento-operacional'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
+    | '/plantoes/$shiftId'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesById: FileRoutesById
@@ -371,7 +383,7 @@ export interface RootRouteChildren {
   OperacaoRoute: typeof OperacaoRoute
   PerfilRoute: typeof PerfilRoute
   PilotoRoute: typeof PilotoRoute
-  PlantoesRoute: typeof PlantoesRoute
+  PlantoesRoute: typeof PlantoesRouteWithChildren
   ProcessamentoRoute: typeof ProcessamentoRoute
   SiteRoute: typeof SiteRoute
   TissRoute: typeof TissRoute
@@ -513,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plantoes/$shiftId': {
+      id: '/plantoes/$shiftId'
+      path: '/$shiftId'
+      fullPath: '/plantoes/$shiftId'
+      preLoaderRoute: typeof PlantoesShiftIdRouteImport
+      parentRoute: typeof PlantoesRoute
+    }
     '/login/redefinir-senha': {
       id: '/login/redefinir-senha'
       path: '/redefinir-senha'
@@ -623,6 +642,18 @@ const LoginRouteChildren: LoginRouteChildren = {
 
 const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
 
+interface PlantoesRouteChildren {
+  PlantoesShiftIdRoute: typeof PlantoesShiftIdRoute
+}
+
+const PlantoesRouteChildren: PlantoesRouteChildren = {
+  PlantoesShiftIdRoute: PlantoesShiftIdRoute,
+}
+
+const PlantoesRouteWithChildren = PlantoesRoute._addFileChildren(
+  PlantoesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaRoute: AjudaRoute,
@@ -639,7 +670,7 @@ const rootRouteChildren: RootRouteChildren = {
   OperacaoRoute: OperacaoRoute,
   PerfilRoute: PerfilRoute,
   PilotoRoute: PilotoRoute,
-  PlantoesRoute: PlantoesRoute,
+  PlantoesRoute: PlantoesRouteWithChildren,
   ProcessamentoRoute: ProcessamentoRoute,
   SiteRoute: SiteRoute,
   TissRoute: TissRoute,

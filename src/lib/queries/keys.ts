@@ -47,6 +47,7 @@ export const opsKeys = {
         ] as const)
       : ([...opsKeys.shifts(), "range", { from: fromISO ?? null, to: toISO ?? null }] as const),
   shiftsMine: () => [...opsKeys.shifts(), "mine"] as const,
+  shiftDetail: (shiftId: string) => [...opsKeys.shifts(), "detail", shiftId] as const,
 
   // institutions (hospitals + afiliação profissional↔hospital)
   hospitals: () => [...opsKeys.all, "hospitals"] as const,

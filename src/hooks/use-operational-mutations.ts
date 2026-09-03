@@ -25,13 +25,17 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
 import {
   approveSwapFn,
+  cancelShiftFn,
   confirmAssignmentFn,
+  createAssignmentFn,
   denySwapFn,
   rejectAssignmentFn,
   requestSwapFn,
   selfAssignOpenShiftFn,
   setProfessionalHospitalAffiliationFn,
+  suggestProfessionalsForShiftFn,
   updateAvailabilityFn,
+  type CreateAssignmentInput,
   type RequestSwapInput,
   type SetProfessionalHospitalAffiliationInput,
   type UpdateAvailabilityInput,
@@ -39,8 +43,10 @@ import {
 import type {
   AvailabilityRow,
   ShiftAssignmentRow,
+  ShiftRow,
   ShiftSwapRequestRow,
 } from "@/lib/services/operations/types";
+import type { ShiftMatchSuggestion } from "@/lib/services/operations/shift-matching-agent";
 import { opsKeys } from "@/lib/queries/keys";
 import { describeError, unwrap } from "@/lib/queries/result";
 import { suppressOnce } from "@/lib/realtime/suppression";
@@ -118,6 +124,72 @@ export function useSelfAssignOpenShift(
       // Se o erro foi conflito (outro profissional já confirmou primeiro),
       // a vaga não está mais aberta — atualiza a lista para refletir isso.
       await qc.invalidateQueries({ queryKey: opsKeys.shiftsOpen() });
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+/** Gestor atribui (pending) um profissional específico a um plantão — fica pendente de aceite/recusa dele. */
+export function useAssignProfessionalToShift(
+  opts: MutationHookOptions<CreateAssignmentInput, ShiftAssignmentRow> = {},
+) {
+  const qc = useQueryClient();
+  return useMutation<ShiftAssignmentRow, Error, CreateAssignmentInput>({
+    mutationFn: async (input) => unwrap(await createAssignmentFn({ data: input })),
+    onSuccess: async (...args: OnSuccessArgs<ShiftAssignmentRow, CreateAssignmentInput>) => {
+      const [data] = args;
+      suppressOnce("shift_assignments", data.id);
+      toast.success("Profissional atribuído — aguardando aceite");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.dashboard() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsOpen() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shifts() }),
+        qc.invalidateQueries({ queryKey: opsKeys.timeline() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ShiftAssignmentRow, CreateAssignmentInput>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useCancelShift(opts: MutationHookOptions<{ shiftId: string }, ShiftRow> = {}) {
+  const qc = useQueryClient();
+  return useMutation<ShiftRow, Error, { shiftId: string }>({
+    mutationFn: async ({ shiftId }) => unwrap(await cancelShiftFn({ data: { shiftId } })),
+    onSuccess: async (...args: OnSuccessArgs<ShiftRow, { shiftId: string }>) => {
+      const [data] = args;
+      suppressOnce("shifts", data.id);
+      toast.warning("Plantão cancelado");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.dashboard() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsOpen() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shifts() }),
+        qc.invalidateQueries({ queryKey: opsKeys.timeline() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ShiftRow, { shiftId: string }>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+/** Shift Matching Agent (F4-S3): ação sob demanda, sem cache — cada clique é uma nova sugestão. */
+export function useSuggestProfessionalsForShift(
+  opts: MutationHookOptions<{ shiftId: string }, ShiftMatchSuggestion[]> = {},
+) {
+  return useMutation<ShiftMatchSuggestion[], Error, { shiftId: string }>({
+    mutationFn: async ({ shiftId }) =>
+      unwrap(await suggestProfessionalsForShiftFn({ data: { shiftId } })),
+    onError: async (...args: OnErrorArgs<ShiftMatchSuggestion[], { shiftId: string }>) => {
+      reportError(args[0]);
       await opts.onError?.(...args);
     },
     ...opts,

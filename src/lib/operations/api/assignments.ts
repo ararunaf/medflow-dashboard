@@ -13,6 +13,8 @@ import {
 } from "@/lib/services/operations/assignments";
 import type { ShiftAssignmentRow } from "@/lib/services/operations/types";
 
+export type { CreateAssignmentInput };
+
 export const createAssignmentFn = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown): CreateAssignmentInput => {
     const obj = requireObject(raw);

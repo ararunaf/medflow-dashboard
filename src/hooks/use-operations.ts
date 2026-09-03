@@ -19,6 +19,7 @@ import {
   getDashboardFn,
   getMyAvailabilityFn,
   getMyContextFn,
+  getShiftDetailFn,
   listHospitalsFn,
   listMyAssignmentsFn,
   listMyShiftsFn,
@@ -34,6 +35,7 @@ import {
   type HospitalListItem,
   type MyContext,
   type ProfessionalAffiliationSummary,
+  type ShiftDetail,
   type ShiftListItem,
   type SwapListItem,
   type SwapTargetProfessional,
@@ -101,6 +103,17 @@ export function useShiftsRangeQuery(
   opts: ReadOpts = {},
 ) {
   return useQuery({ ...shiftsRangeQueryOptions(fromISO, toISO, hospitalId), ...opts });
+}
+
+export const shiftDetailQueryOptions = (shiftId: string) =>
+  queryOptions<ShiftDetail | null>({
+    queryKey: opsKeys.shiftDetail(shiftId),
+    queryFn: async () => unwrap(await getShiftDetailFn({ data: { shiftId } })),
+    staleTime: DEFAULT_STALE_MS,
+  });
+
+export function useShiftDetailQuery(shiftId: string, opts: ReadOpts = {}) {
+  return useQuery({ ...shiftDetailQueryOptions(shiftId), ...opts });
 }
 
 // -------------------------------------------------------------------------

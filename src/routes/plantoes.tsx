@@ -265,7 +265,14 @@ function OpenShiftCard({
           <StatusBadge status={shiftStatusToBadge(shift.status, false)} />
         </div>
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link
+          to="/plantoes/$shiftId"
+          params={{ shiftId: shift.shiftId }}
+          className="inline-flex items-center justify-center h-8 rounded-md px-3 text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-accent/60"
+        >
+          Ver detalhes
+        </Link>
         <Button
           size="sm"
           className="gap-1.5"
@@ -379,7 +386,15 @@ function AssignmentCard({
     <div className="rounded-xl bg-card border border-border ring-soft p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold">{assignment.shift.departmentName}</h3>
+          <h3 className="text-sm font-semibold">
+            <Link
+              to="/plantoes/$shiftId"
+              params={{ shiftId: assignment.shiftId }}
+              className="hover:underline"
+            >
+              {assignment.shift.departmentName}
+            </Link>
+          </h3>
           <div className="mt-1.5 space-y-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" /> {formatDateShort(assignment.shift.startsAt)} ·{" "}

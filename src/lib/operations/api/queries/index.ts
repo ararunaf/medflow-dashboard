@@ -10,6 +10,7 @@ export * from "./command-center";
 export * from "./operational-analytics";
 export * from "./dashboard";
 export * from "./shifts";
+export * from "./shift-detail";
 export * from "./assignments";
 export * from "./swaps";
 export * from "./availability";

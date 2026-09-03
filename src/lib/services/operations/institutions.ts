@@ -61,6 +61,20 @@ export async function listHospitals(ctx: ServiceCtx): Promise<HospitalListItem[]
   }));
 }
 
+export async function loadHospitalIdForDepartment(
+  ctx: ServiceCtx,
+  departmentId: string,
+): Promise<string | null> {
+  const { data, error } = await ctx.client
+    .from("departments")
+    .select("unit:units!departments_tenant_unit_fk ( hospital_id )")
+    .eq("id", departmentId)
+    .eq("tenant_id", ctx.tenantId)
+    .maybeSingle();
+  if (error) throw mapPostgresError(error);
+  return data?.unit?.hospital_id ?? null;
+}
+
 /**
  * Hospitais aos quais um profissional está ativamente afiliado, ou `null`
  * se ele não tem nenhuma linha em `professional_hospitals` — distinção

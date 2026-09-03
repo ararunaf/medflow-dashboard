@@ -28,7 +28,7 @@ import {
 } from "@/lib/operations/timeline";
 import type { ServiceCtx, ShiftAssignmentRow, ShiftRow } from "./types";
 import { recordOperationalEventSafe } from "./operational-event-service";
-import { getActiveAffiliatedHospitalIds } from "./institutions";
+import { getActiveAffiliatedHospitalIds, loadHospitalIdForDepartment } from "./institutions";
 
 export type CreateAssignmentInput = {
   shiftId: string;
@@ -68,20 +68,6 @@ async function assertProfessionalInTenant(ctx: ServiceCtx, professionalId: strin
     .maybeSingle();
   if (error) throw mapPostgresError(error);
   if (!data) throw new TenantMismatchError("Profissional");
-}
-
-async function loadHospitalIdForDepartment(
-  ctx: ServiceCtx,
-  departmentId: string,
-): Promise<string | null> {
-  const { data, error } = await ctx.client
-    .from("departments")
-    .select("unit:units!departments_tenant_unit_fk ( hospital_id )")
-    .eq("id", departmentId)
-    .eq("tenant_id", ctx.tenantId)
-    .maybeSingle();
-  if (error) throw mapPostgresError(error);
-  return data?.unit?.hospital_id ?? null;
 }
 
 /**
