@@ -12,6 +12,7 @@ export * from "./assignments";
 export * from "./swaps";
 export * from "./availability";
 export * from "./institutions";
+export * from "./work-groups";
 export * from "./shift-matching";
 export * from "./attendance";
 export * from "./attendance-review";

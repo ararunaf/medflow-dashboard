@@ -31,6 +31,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlantoesShiftIdRouteImport } from './routes/plantoes.$shiftId'
 import { Route as LoginRedefinirSenhaRouteImport } from './routes/login.redefinir-senha'
 import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-senha'
+import { Route as FinanceiroGruposDeTrabalhoRouteImport } from './routes/financeiro.grupos-de-trabalho'
 import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
 import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
 import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
@@ -148,6 +149,12 @@ const LoginEsqueciSenhaRoute = LoginEsqueciSenhaRouteImport.update({
   path: '/esqueci-senha',
   getParentRoute: () => LoginRoute,
 } as any)
+const FinanceiroGruposDeTrabalhoRoute =
+  FinanceiroGruposDeTrabalhoRouteImport.update({
+    id: '/grupos-de-trabalho',
+    path: '/grupos-de-trabalho',
+    getParentRoute: () => FinanceiroRoute,
+  } as any)
 const FinanceiroFechamentoOperacionalRoute =
   FinanceiroFechamentoOperacionalRouteImport.update({
     id: '/fechamento-operacional',
@@ -207,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
   '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
+  '/financeiro/grupos-de-trabalho': typeof FinanceiroGruposDeTrabalhoRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
@@ -237,6 +245,7 @@ export interface FileRoutesByTo {
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
   '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
+  '/financeiro/grupos-de-trabalho': typeof FinanceiroGruposDeTrabalhoRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
@@ -268,6 +277,7 @@ export interface FileRoutesById {
   '/financeiro/conciliacao-operacional': typeof FinanceiroConciliacaoOperacionalRoute
   '/financeiro/dashboard-executivo': typeof FinanceiroDashboardExecutivoRoute
   '/financeiro/fechamento-operacional': typeof FinanceiroFechamentoOperacionalRoute
+  '/financeiro/grupos-de-trabalho': typeof FinanceiroGruposDeTrabalhoRoute
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/financeiro/conciliacao-operacional'
     | '/financeiro/dashboard-executivo'
     | '/financeiro/fechamento-operacional'
+    | '/financeiro/grupos-de-trabalho'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/financeiro/conciliacao-operacional'
     | '/financeiro/dashboard-executivo'
     | '/financeiro/fechamento-operacional'
+    | '/financeiro/grupos-de-trabalho'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
@@ -360,6 +372,7 @@ export interface FileRouteTypes {
     | '/financeiro/conciliacao-operacional'
     | '/financeiro/dashboard-executivo'
     | '/financeiro/fechamento-operacional'
+    | '/financeiro/grupos-de-trabalho'
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
@@ -546,6 +559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginEsqueciSenhaRouteImport
       parentRoute: typeof LoginRoute
     }
+    '/financeiro/grupos-de-trabalho': {
+      id: '/financeiro/grupos-de-trabalho'
+      path: '/grupos-de-trabalho'
+      fullPath: '/financeiro/grupos-de-trabalho'
+      preLoaderRoute: typeof FinanceiroGruposDeTrabalhoRouteImport
+      parentRoute: typeof FinanceiroRoute
+    }
     '/financeiro/fechamento-operacional': {
       id: '/financeiro/fechamento-operacional'
       path: '/fechamento-operacional'
@@ -618,12 +638,14 @@ interface FinanceiroRouteChildren {
   FinanceiroConciliacaoOperacionalRoute: typeof FinanceiroConciliacaoOperacionalRoute
   FinanceiroDashboardExecutivoRoute: typeof FinanceiroDashboardExecutivoRoute
   FinanceiroFechamentoOperacionalRoute: typeof FinanceiroFechamentoOperacionalRoute
+  FinanceiroGruposDeTrabalhoRoute: typeof FinanceiroGruposDeTrabalhoRoute
 }
 
 const FinanceiroRouteChildren: FinanceiroRouteChildren = {
   FinanceiroConciliacaoOperacionalRoute: FinanceiroConciliacaoOperacionalRoute,
   FinanceiroDashboardExecutivoRoute: FinanceiroDashboardExecutivoRoute,
   FinanceiroFechamentoOperacionalRoute: FinanceiroFechamentoOperacionalRoute,
+  FinanceiroGruposDeTrabalhoRoute: FinanceiroGruposDeTrabalhoRoute,
 }
 
 const FinanceiroRouteWithChildren = FinanceiroRoute._addFileChildren(

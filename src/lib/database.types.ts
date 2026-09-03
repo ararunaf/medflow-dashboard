@@ -1031,6 +1031,7 @@ export type Database = {
           crm: string;
           cbo_code: string | null;
           created_at: string;
+          work_group_id: string | null;
         };
         Insert: {
           id?: string;
@@ -1040,6 +1041,7 @@ export type Database = {
           crm?: string;
           cbo_code?: string | null;
           created_at?: string;
+          work_group_id?: string | null;
         };
         Update: {
           id?: string;
@@ -1049,6 +1051,7 @@ export type Database = {
           crm?: string;
           cbo_code?: string | null;
           created_at?: string;
+          work_group_id?: string | null;
         };
         Relationships: [
           {
@@ -1064,6 +1067,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "professionals_tenant_work_group_fk";
+            columns: ["tenant_id", "work_group_id"];
+            isOneToOne: false;
+            referencedRelation: "work_groups";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -1106,6 +1116,38 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "hospitals";
             referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      work_groups: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          name: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          name: string;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          name?: string;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "work_groups_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
           },
         ];
       };

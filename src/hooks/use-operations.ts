@@ -27,18 +27,22 @@ import {
   listOpenShiftsFn,
   listPendingSwapsFn,
   listProfessionalAffiliationsFn,
+  listProfessionalWorkGroupAssignmentsFn,
   listShiftsRangeFn,
   listSwapTargetProfessionalsFn,
+  listWorkGroupsFn,
   type AssignmentListItem,
   type AvailabilityWindowItem,
   type DashboardSummary,
   type HospitalListItem,
   type MyContext,
   type ProfessionalAffiliationSummary,
+  type ProfessionalWorkGroupAssignment,
   type ShiftDetail,
   type ShiftListItem,
   type SwapListItem,
   type SwapTargetProfessional,
+  type WorkGroupListItem,
 } from "@/lib/operations/api";
 
 const DEFAULT_STALE_MS = 10_000;
@@ -140,6 +144,32 @@ export const professionalAffiliationsQueryOptions = () =>
 
 export function useProfessionalAffiliationsQuery(opts: ReadOpts = {}) {
   return useQuery({ ...professionalAffiliationsQueryOptions(), ...opts });
+}
+
+// -------------------------------------------------------------------------
+// Grupos de trabalho (F5-S1)
+
+export const workGroupsQueryOptions = () =>
+  queryOptions<WorkGroupListItem[]>({
+    queryKey: opsKeys.workGroups(),
+    queryFn: async () => unwrap(await listWorkGroupsFn()),
+    staleTime: 60_000,
+  });
+
+export function useWorkGroupsQuery(opts: ReadOpts = {}) {
+  return useQuery({ ...workGroupsQueryOptions(), ...opts });
+}
+
+/** Manager-only: profissionais + grupo de trabalho atual de cada um, para a tela de administração. */
+export const professionalWorkGroupAssignmentsQueryOptions = () =>
+  queryOptions<ProfessionalWorkGroupAssignment[]>({
+    queryKey: [...opsKeys.workGroups(), "assignments"] as const,
+    queryFn: async () => unwrap(await listProfessionalWorkGroupAssignmentsFn()),
+    staleTime: DEFAULT_STALE_MS,
+  });
+
+export function useProfessionalWorkGroupAssignmentsQuery(opts: ReadOpts = {}) {
+  return useQuery({ ...professionalWorkGroupAssignmentsQueryOptions(), ...opts });
 }
 
 // -------------------------------------------------------------------------

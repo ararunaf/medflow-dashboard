@@ -53,6 +53,9 @@ export const opsKeys = {
   hospitals: () => [...opsKeys.all, "hospitals"] as const,
   professionalAffiliations: () => [...opsKeys.all, "professional-affiliations"] as const,
 
+  /** Grupos de trabalho (F5-S1). */
+  workGroups: () => [...opsKeys.all, "work-groups"] as const,
+
   // assignments
   assignments: () => [...opsKeys.all, "assignments"] as const,
   assignmentsMine: () => [...opsKeys.assignments(), "mine"] as const,
@@ -113,6 +116,10 @@ export const opsKeys = {
   /** Dashboard executivo (KPIs financeiros operacionais + notificações). */
   executiveDashboardBundle: (competenceMonth?: string) =>
     [...opsKeys.all, "executive-dashboard-bundle", competenceMonth ?? ""] as const,
+
+  /** Relatório de produção por grupo de trabalho (F5-S1). */
+  workGroupProduction: (competenceMonth: string) =>
+    [...opsKeys.all, "work-group-production", competenceMonth] as const,
 
   /** Parametrização institucional + readiness (server bundle). */
   operationalReadiness: () => [...opsKeys.all, "operational-readiness"] as const,

@@ -17,3 +17,4 @@ export * from "./availability";
 export * from "./profile";
 export * from "./operational-action-proposals";
 export * from "./institutions";
+export * from "./work-groups";

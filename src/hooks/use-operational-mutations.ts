@@ -30,18 +30,22 @@ import {
   checkOutFn,
   confirmAssignmentFn,
   createAssignmentFn,
+  createWorkGroupFn,
   denySwapFn,
   rejectAssignmentFn,
   requestSwapFn,
   reviewAttendanceFn,
   selfAssignOpenShiftFn,
   setProfessionalHospitalAffiliationFn,
+  setProfessionalWorkGroupFn,
   suggestProfessionalsForShiftFn,
   updateAvailabilityFn,
   type CreateAssignmentInput,
   type RequestSwapInput,
   type SetProfessionalHospitalAffiliationInput,
+  type SetProfessionalWorkGroupInput,
   type UpdateAvailabilityInput,
+  type WorkGroupListItem,
 } from "@/lib/operations/api";
 import type {
   AvailabilityRow,
@@ -248,6 +252,43 @@ export function useSetProfessionalHospitalAffiliation(
       await opts.onSuccess?.(...args);
     },
     onError: async (...args: OnErrorArgs<void, SetProfessionalHospitalAffiliationInput>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useCreateWorkGroup(opts: MutationHookOptions<{ name: string }, WorkGroupListItem> = {}) {
+  const qc = useQueryClient();
+  return useMutation<WorkGroupListItem, Error, { name: string }>({
+    mutationFn: async ({ name }) => unwrap(await createWorkGroupFn({ data: { name } })),
+    onSuccess: async (...args: OnSuccessArgs<WorkGroupListItem, { name: string }>) => {
+      const [data] = args;
+      toast.success(`Grupo "${data.name}" criado`);
+      await qc.invalidateQueries({ queryKey: opsKeys.workGroups() });
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<WorkGroupListItem, { name: string }>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useSetProfessionalWorkGroup(
+  opts: MutationHookOptions<SetProfessionalWorkGroupInput, void> = {},
+) {
+  const qc = useQueryClient();
+  return useMutation<void, Error, SetProfessionalWorkGroupInput>({
+    mutationFn: async (input) => unwrap(await setProfessionalWorkGroupFn({ data: input })),
+    onSuccess: async (...args: OnSuccessArgs<void, SetProfessionalWorkGroupInput>) => {
+      toast.success("Grupo de trabalho atualizado");
+      await qc.invalidateQueries({ queryKey: opsKeys.workGroups() });
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<void, SetProfessionalWorkGroupInput>) => {
       reportError(args[0]);
       await opts.onError?.(...args);
     },

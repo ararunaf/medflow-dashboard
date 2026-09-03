@@ -22,6 +22,8 @@ export type Capability =
   | "shifts:cancel"
   | "hospitals:read"
   | "professional_hospitals:manage"
+  | "work_groups:read"
+  | "work_groups:manage"
   | "assignments:read"
   | "assignments:assign:any"
   | "assignments:assign:self"
@@ -59,6 +61,7 @@ const READ_OPERATIONAL: readonly Capability[] = [
   "swaps:read",
   "availability:read",
   "hospitals:read",
+  "work_groups:read",
 ];
 
 /** Leitura de fechamento/repasses — perfis financeiros e gestão; não profissional clínico. */
@@ -79,6 +82,7 @@ const COORDINATOR_CAPS: readonly Capability[] = [
   "attendance:checkin:any",
   "attendance:review",
   "professional_hospitals:manage",
+  "work_groups:manage",
   "swaps:approve",
   "swaps:deny",
   "availability:update:any",

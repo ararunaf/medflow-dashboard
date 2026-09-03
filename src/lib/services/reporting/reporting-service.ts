@@ -4,6 +4,7 @@
  */
 import type { ExecutiveDashboardSnapshot } from "@/lib/services/executive-dashboard/executive-dashboard-service";
 import type { OperationalNotificationDigest } from "@/lib/services/operational-notifications/operational-notification-service";
+import type { WorkGroupProductionRow } from "./work-group-report-service";
 
 export type ReportTableSection = {
   title: string;
@@ -150,6 +151,30 @@ export function buildProductionReport(snap: ExecutiveDashboardSnapshot): Operati
           Guias: p.guide_count,
           Aprovado: money(p.total_approved),
           "Repasse líquido": money(p.payout_final_value),
+        })),
+      },
+    ],
+  };
+}
+
+export function buildWorkGroupProductionReport(
+  rows: readonly WorkGroupProductionRow[],
+  competenceMonth: string,
+  generatedAt: string,
+): OperationalReportPayload {
+  return {
+    report: "operacional",
+    generated_at: generatedAt,
+    sections: [
+      {
+        title: `Produção por grupo de trabalho — ${competenceMonth}`,
+        columns: ["Grupo de trabalho", "Profissionais", "Guias", "Aprovado", "Repasse líquido"],
+        rows: rows.map((r) => ({
+          "Grupo de trabalho": r.workGroupName,
+          Profissionais: r.professionalCount,
+          Guias: r.guideCount,
+          Aprovado: money(r.totalApproved),
+          "Repasse líquido": money(r.payoutFinalValue),
         })),
       },
     ],
