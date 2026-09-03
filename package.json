@@ -166,6 +166,7 @@
     "enterprise:tiss-xml-serializer:test": "npx tsx --test scripts/enterprise/tests/tiss-xml-serializer.test.ts",
     "enterprise:tiss-guide-classification:test": "npx tsx --test scripts/enterprise/tests/tiss-guide-classification.test.ts",
     "enterprise:tiss-xsd-validator:test": "npx tsx --test scripts/enterprise/tests/tiss-xsd-validator.test.ts",
+    "enterprise:tiss-billing-cycle-e2e:test": "npx tsx --test scripts/enterprise/tests/tiss-billing-cycle-e2e.test.ts",
     "auth-validate": "node scripts/auth-validate.mjs",
     "security-logs-validate": "node scripts/security-logs-validate.mjs",
     "security-headers-validate": "node scripts/security-headers-validate.mjs",
