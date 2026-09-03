@@ -110,6 +110,33 @@ export async function createAssignment(
   return data;
 }
 
+/**
+ * Auto-atribuição: profissional reivindica uma vaga aberta com um único
+ * clique. Reaproveita create+confirm (nenhuma regra nova) — a exclusividade
+ * continua garantida pelo índice parcial `one_confirmed_per_shift` no DB, o
+ * mesmo que já protege a confirmação feita por um gestor. Se outro
+ * profissional confirmou primeiro, a atribuição 'pending' recém-criada é
+ * liberada (rejeitada) para não sobrar órfã — o profissional só vê o
+ * conflito, não sobra lixo em `shift_assignments`.
+ */
+export async function selfAssignOpenShift(
+  ctx: ServiceCtx,
+  shiftId: string,
+): Promise<ShiftAssignmentRow> {
+  if (!ctx.professionalId) {
+    throw new PermissionError("Apenas profissionais vinculados podem se auto-atribuir a um plantão.");
+  }
+
+  const created = await createAssignment(ctx, { shiftId, professionalId: ctx.professionalId });
+
+  try {
+    return await confirmAssignment(ctx, created.id);
+  } catch (err) {
+    await rejectAssignment(ctx, created.id).catch(() => undefined);
+    throw err;
+  }
+}
+
 function assertCanActOnAssignment(
   ctx: ServiceCtx,
   assignment: ShiftAssignmentRow,

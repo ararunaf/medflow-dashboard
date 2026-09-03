@@ -19,6 +19,7 @@ import {
   useDenySwap,
   useRejectAssignment,
   useRequestSwap,
+  useSelfAssignOpenShift,
 } from "@/hooks/use-operational-mutations";
 import {
   assignmentStatusToBadge,
@@ -161,6 +162,8 @@ function OpenShiftCard({
   shift: ShiftListItem;
   onError: (err: unknown) => void;
 }) {
+  const selfAssign = useSelfAssignOpenShift({ onError });
+
   return (
     <div className="rounded-xl bg-card border border-border ring-soft p-4">
       <div className="flex items-start justify-between gap-3">
@@ -181,19 +184,14 @@ function OpenShiftCard({
         </div>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2">
-        <p className="text-xs text-muted-foreground">
-          Auto-atribuição via criação de atribuição confirmada requer ação do gestor. Solicite ao
-          coordenador para confirmar este plantão.
-        </p>
         <Button
-          variant="outline"
           size="sm"
           className="gap-1.5"
-          disabled
-          title="Disponível na próxima etapa (auto-atribuição direta)."
-          onClick={() => onError(new Error("Auto-atribuição direta indisponível."))}
+          disabled={selfAssign.isPending}
+          onClick={() => selfAssign.mutate({ shiftId: shift.shiftId })}
         >
-          <Check className="h-4 w-4" /> Solicitar cobertura
+          <Check className="h-4 w-4" />
+          {selfAssign.isPending ? "Atribuindo…" : "Assumir plantão"}
         </Button>
       </div>
     </div>

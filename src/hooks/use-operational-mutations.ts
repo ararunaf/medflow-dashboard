@@ -29,6 +29,7 @@ import {
   denySwapFn,
   rejectAssignmentFn,
   requestSwapFn,
+  selfAssignOpenShiftFn,
   updateAvailabilityFn,
   type RequestSwapInput,
   type UpdateAvailabilityInput,
@@ -85,6 +86,36 @@ export function useAcceptAssignment(
     },
     onError: async (...args: OnErrorArgs<ShiftAssignmentRow, { assignmentId: string }>) => {
       reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useSelfAssignOpenShift(
+  opts: MutationHookOptions<{ shiftId: string }, ShiftAssignmentRow> = {},
+) {
+  const qc = useQueryClient();
+  return useMutation<ShiftAssignmentRow, Error, { shiftId: string }>({
+    mutationFn: async ({ shiftId }) => unwrap(await selfAssignOpenShiftFn({ data: { shiftId } })),
+    onSuccess: async (...args: OnSuccessArgs<ShiftAssignmentRow, { shiftId: string }>) => {
+      const [data] = args;
+      suppressOnce("shift_assignments", data.id);
+      toast.success("Plantão atribuído a você");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.dashboard() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsOpen() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsMine() }),
+        qc.invalidateQueries({ queryKey: opsKeys.assignmentsMine() }),
+        qc.invalidateQueries({ queryKey: opsKeys.timeline() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ShiftAssignmentRow, { shiftId: string }>) => {
+      reportError(args[0]);
+      // Se o erro foi conflito (outro profissional já confirmou primeiro),
+      // a vaga não está mais aberta — atualiza a lista para refletir isso.
+      await qc.invalidateQueries({ queryKey: opsKeys.shiftsOpen() });
       await opts.onError?.(...args);
     },
     ...opts,
