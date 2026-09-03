@@ -79,6 +79,14 @@ export const TISS_CARATER_URGENCIA = "2";
 export const TISS_TIPO_CONSULTA_PRIMEIRA = "1";
 export const TISS_TIPO_CONSULTA_SEGUIMENTO = "2";
 
+/**
+ * dm_grauPart — "12" = Clínico. MedFlow associa um único profissional por
+ * guia (tiss_guides.professional_id), então toda guia de honorário
+ * individual usa este grau de participação — não há hoje modelagem de
+ * equipe cirúrgica com papéis distintos por procedimento.
+ */
+export const TISS_GRAU_PART_CLINICO = "12";
+
 /** st_data (xsd:date) — YYYY-MM-DD. */
 export function formatTissDate(iso: string | Date): string {
   const d = typeof iso === "string" ? new Date(iso) : iso;

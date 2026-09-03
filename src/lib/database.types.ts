@@ -350,6 +350,9 @@ export type Database = {
           support_phone: string;
           operational_timezone: string;
           currency: string;
+          default_regime_atendimento: string | null;
+          default_carater_atendimento: string | null;
+          cnpj: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -365,6 +368,9 @@ export type Database = {
           support_phone?: string;
           operational_timezone?: string;
           currency?: string;
+          default_regime_atendimento?: string | null;
+          default_carater_atendimento?: string | null;
+          cnpj?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -380,6 +386,9 @@ export type Database = {
           support_phone?: string;
           operational_timezone?: string;
           currency?: string;
+          default_regime_atendimento?: string | null;
+          default_carater_atendimento?: string | null;
+          cnpj?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -3018,8 +3027,13 @@ export type Database = {
           status: TissGuideStatus;
           batch_id: string | null;
           hospital_id: string | null;
+          guide_number: number;
           beneficiary_card_number: string | null;
           beneficiary_is_newborn: boolean;
+          regime_atendimento: string | null;
+          carater_atendimento: string | null;
+          tipo_atendimento: string | null;
+          tipo_consulta: string | null;
           total_value: number;
           created_at: string;
           updated_at: string;
@@ -3038,6 +3052,10 @@ export type Database = {
           hospital_id?: string | null;
           beneficiary_card_number?: string | null;
           beneficiary_is_newborn?: boolean;
+          regime_atendimento?: string | null;
+          carater_atendimento?: string | null;
+          tipo_atendimento?: string | null;
+          tipo_consulta?: string | null;
           total_value?: number;
           created_at?: string;
           updated_at?: string;
@@ -3056,6 +3074,10 @@ export type Database = {
           hospital_id?: string | null;
           beneficiary_card_number?: string | null;
           beneficiary_is_newborn?: boolean;
+          regime_atendimento?: string | null;
+          carater_atendimento?: string | null;
+          tipo_atendimento?: string | null;
+          tipo_consulta?: string | null;
           total_value?: number;
           created_at?: string;
           updated_at?: string;

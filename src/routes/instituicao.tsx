@@ -60,6 +60,9 @@ function InstituicaoPage() {
     support_phone: "",
     operational_timezone: "",
     currency: "",
+    default_regime_atendimento: "",
+    default_carater_atendimento: "",
+    cnpj: "",
   });
 
   useEffect(() => {
@@ -72,6 +75,9 @@ function InstituicaoPage() {
       support_phone: s.support_phone ?? "",
       operational_timezone: s.operational_timezone ?? "America/Sao_Paulo",
       currency: s.currency ?? "BRL",
+      default_regime_atendimento: s.default_regime_atendimento ?? "",
+      default_carater_atendimento: s.default_carater_atendimento ?? "",
+      cnpj: s.cnpj ?? "",
     });
   }, [s]);
 
@@ -379,6 +385,49 @@ function InstituicaoPage() {
                     }
                   />
 
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    CNPJ da cooperativa (identifica o prestador no XML TISS)
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    value={form.cnpj}
+                    onChange={(e) => setForm((p) => ({ ...p, cnpj: e.target.value }))}
+                    placeholder="00.000.000/0000-00"
+                  />
+
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    Regime de atendimento padrão (guias TISS)
+                  </label>
+                  <select
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    value={form.default_regime_atendimento}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, default_regime_atendimento: e.target.value }))
+                    }
+                  >
+                    <option value="">Sem default — exigir por guia</option>
+                    <option value="01">Ambulatorial</option>
+                    <option value="02">Domiciliar</option>
+                    <option value="03">Internação</option>
+                    <option value="04">Pronto Socorro</option>
+                    <option value="05">Telessaúde</option>
+                  </select>
+
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    Caráter de atendimento padrão (guias SP/SADT)
+                  </label>
+                  <select
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    value={form.default_carater_atendimento}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, default_carater_atendimento: e.target.value }))
+                    }
+                  >
+                    <option value="">Sem default — exigir por guia</option>
+                    <option value="1">Eletiva</option>
+                    <option value="2">Urgência/Emergência</option>
+                  </select>
+
                   <button
                     type="button"
                     disabled={save.isPending}
@@ -391,6 +440,9 @@ function InstituicaoPage() {
                         support_phone: form.support_phone,
                         operational_timezone: form.operational_timezone,
                         currency: form.currency,
+                        default_regime_atendimento: form.default_regime_atendimento || null,
+                        default_carater_atendimento: form.default_carater_atendimento || null,
+                        cnpj: form.cnpj || null,
                       })
                     }
                     className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 text-sm font-medium hover:bg-primary/90 disabled:opacity-50"

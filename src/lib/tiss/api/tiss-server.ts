@@ -136,6 +136,27 @@ function expectTissReturnStatus(v: unknown, field: string): TissReturnStatus {
   return v as TissReturnStatus;
 }
 
+const REGIME_ATENDIMENTO_CODES = new Set(["01", "02", "03", "04", "05"]);
+const CARATER_ATENDIMENTO_CODES = new Set(["1", "2"]);
+const TIPO_ATENDIMENTO_CODES = new Set(["01", "02", "03", "04", "08", "09", "10", "13", "23"]);
+const TIPO_CONSULTA_CODES = new Set(["1", "2", "3", "4"]);
+
+function expectOptionalCode(v: unknown, field: string, allowed: Set<string>): string | null {
+  if (v === undefined || v === null || v === "") return null;
+  if (typeof v !== "string" || !allowed.has(v)) {
+    throw new ValidationError(`Campo ${field} inválido (código TISS fora da tabela oficial).`, { field });
+  }
+  return v;
+}
+
+function expectOptionalTrimmedString(v: unknown, field: string, maxLength: number): string | null {
+  if (v === undefined || v === null || v === "") return null;
+  if (typeof v !== "string" || v.length > maxLength) {
+    throw new ValidationError(`Campo ${field} inválido.`, { field });
+  }
+  return v.trim() || null;
+}
+
 function expectOptionalCompetenceMonth(v: unknown, field: string): string | null {
   if (v === undefined || v === null || v === "") return null;
   if (typeof v !== "string") {
@@ -313,6 +334,12 @@ export const createTissGuideFn = createServerFn({ method: "POST" })
           : null,
       professionalId: expectUuid(o.professionalId, "professionalId"),
       attendanceDate: expectDateISO(o.attendanceDate, "attendanceDate"),
+      beneficiaryCardNumber: expectOptionalTrimmedString(o.beneficiaryCardNumber, "beneficiaryCardNumber", 20),
+      beneficiaryIsNewborn: o.beneficiaryIsNewborn === true,
+      regimeAtendimento: expectOptionalCode(o.regimeAtendimento, "regimeAtendimento", REGIME_ATENDIMENTO_CODES),
+      caraterAtendimento: expectOptionalCode(o.caraterAtendimento, "caraterAtendimento", CARATER_ATENDIMENTO_CODES),
+      tipoAtendimento: expectOptionalCode(o.tipoAtendimento, "tipoAtendimento", TIPO_ATENDIMENTO_CODES),
+      tipoConsulta: expectOptionalCode(o.tipoConsulta, "tipoConsulta", TIPO_CONSULTA_CODES),
     };
   })
   .handler(async ({ data }): Promise<MutationResult<Json>> => {
@@ -325,6 +352,12 @@ export const createTissGuideFn = createServerFn({ method: "POST" })
           insurance_contract_id: data.insuranceContractId,
           professional_id: data.professionalId,
           attendance_date: data.attendanceDate,
+          beneficiary_card_number: data.beneficiaryCardNumber,
+          beneficiary_is_newborn: data.beneficiaryIsNewborn,
+          regime_atendimento: data.regimeAtendimento,
+          carater_atendimento: data.caraterAtendimento,
+          tipo_atendimento: data.tipoAtendimento,
+          tipo_consulta: data.tipoConsulta,
         })) as Json,
     );
   });

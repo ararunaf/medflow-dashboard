@@ -502,6 +502,12 @@ function GuiasPanel({
   const [profId, setProfId] = useState("");
   const [gtype, setGtype] = useState("consulta");
   const [attDate, setAttDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [cardNumber, setCardNumber] = useState("");
+  const [isNewborn, setIsNewborn] = useState(false);
+  const [regimeAtendimento, setRegimeAtendimento] = useState("");
+  const [caraterAtendimento, setCaraterAtendimento] = useState("");
+  const [tipoAtendimento, setTipoAtendimento] = useState("");
+  const [tipoConsulta, setTipoConsulta] = useState("");
   const [itemGuide, setItemGuide] = useState<string | null>(null);
   const [procId, setProcId] = useState("");
   const [qty, setQty] = useState("1");
@@ -562,6 +568,72 @@ function GuiasPanel({
           value={attDate}
           onChange={(e) => setAttDate(e.target.value)}
         />
+        <input
+          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+          placeholder="Número da carteirinha"
+          value={cardNumber}
+          onChange={(e) => setCardNumber(e.target.value)}
+        />
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input type="checkbox" checked={isNewborn} onChange={(e) => setIsNewborn(e.target.checked)} />
+          Atendimento de recém-nascido
+        </label>
+        {gtype !== "honorario_individual" && (
+          <select
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={regimeAtendimento}
+            onChange={(e) => setRegimeAtendimento(e.target.value)}
+          >
+            <option value="">Regime de atendimento…</option>
+            <option value="01">Ambulatorial</option>
+            <option value="02">Domiciliar</option>
+            <option value="03">Internação</option>
+            <option value="04">Pronto Socorro</option>
+            <option value="05">Telessaúde</option>
+          </select>
+        )}
+        {gtype === "sadt" && (
+          <select
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={caraterAtendimento}
+            onChange={(e) => setCaraterAtendimento(e.target.value)}
+          >
+            <option value="">Caráter de atendimento…</option>
+            <option value="1">Eletiva</option>
+            <option value="2">Urgência/Emergência</option>
+          </select>
+        )}
+        {gtype === "sadt" && (
+          <select
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={tipoAtendimento}
+            onChange={(e) => setTipoAtendimento(e.target.value)}
+          >
+            <option value="">Tipo de atendimento…</option>
+            <option value="01">Remoção</option>
+            <option value="02">Pequena cirurgia</option>
+            <option value="03">Outras terapias</option>
+            <option value="04">Consulta</option>
+            <option value="08">Quimioterapia</option>
+            <option value="09">Radioterapia</option>
+            <option value="10">Terapia renal substitutiva</option>
+            <option value="13">Pequenos atendimentos</option>
+            <option value="23">Telessaúde</option>
+          </select>
+        )}
+        {gtype === "consulta" && (
+          <select
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={tipoConsulta}
+            onChange={(e) => setTipoConsulta(e.target.value)}
+          >
+            <option value="">Tipo de consulta…</option>
+            <option value="1">Primeira</option>
+            <option value="2">Seguimento</option>
+            <option value="3">Pré-natal</option>
+            <option value="4">Outras</option>
+          </select>
+        )}
         <button
           type="button"
           className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
@@ -574,6 +646,12 @@ function GuiasPanel({
               insuranceContractId: null,
               professionalId: profId,
               attendanceDate: attDate,
+              beneficiaryCardNumber: cardNumber.trim() || null,
+              beneficiaryIsNewborn: isNewborn,
+              regimeAtendimento: regimeAtendimento || null,
+              caraterAtendimento: caraterAtendimento || null,
+              tipoAtendimento: tipoAtendimento || null,
+              tipoConsulta: tipoConsulta || null,
             })
           }
         >

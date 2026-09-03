@@ -70,6 +70,15 @@ export const saveTenantSettingsFn = createServerFn({ method: "POST" })
       support_phone: optionalString(o.support_phone, "support_phone"),
       operational_timezone: optionalString(o.operational_timezone, "operational_timezone"),
       currency: optionalString(o.currency, "currency"),
+      default_regime_atendimento:
+        o.default_regime_atendimento === null
+          ? null
+          : optionalString(o.default_regime_atendimento, "default_regime_atendimento"),
+      default_carater_atendimento:
+        o.default_carater_atendimento === null
+          ? null
+          : optionalString(o.default_carater_atendimento, "default_carater_atendimento"),
+      cnpj: o.cnpj === null ? null : optionalString(o.cnpj, "cnpj"),
     };
   })
   .handler(
@@ -85,7 +94,10 @@ export const saveTenantSettingsFn = createServerFn({ method: "POST" })
           data.contact_email == null &&
           data.support_phone == null &&
           data.operational_timezone == null &&
-          data.currency == null
+          data.currency == null &&
+          data.default_regime_atendimento === undefined &&
+          data.default_carater_atendimento === undefined &&
+          data.cnpj === undefined
         ) {
           throw new ValidationError("Nenhum campo para atualizar.", { field: "payload" });
         }
@@ -101,6 +113,11 @@ export const saveTenantSettingsFn = createServerFn({ method: "POST" })
         if (data.operational_timezone !== undefined)
           patch.operational_timezone = data.operational_timezone;
         if (data.currency !== undefined) patch.currency = data.currency;
+        if (data.default_regime_atendimento !== undefined)
+          patch.default_regime_atendimento = data.default_regime_atendimento;
+        if (data.default_carater_atendimento !== undefined)
+          patch.default_carater_atendimento = data.default_carater_atendimento;
+        if (data.cnpj !== undefined) patch.cnpj = data.cnpj;
         return upsertTenantSettings(ctx, patch);
       });
     },

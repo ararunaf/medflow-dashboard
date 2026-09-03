@@ -8,6 +8,10 @@ export type TenantSettingsUpdate = Database["public"]["Tables"]["tenant_settings
 
 const HEX = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/;
 
+/** dm_regimeAtendimento / dm_caraterAtendimento — mesmos enums do XSD oficial ANS conferidos em F3-S1. */
+const REGIME_ATENDIMENTO_CODES = new Set(["01", "02", "03", "04", "05"]);
+const CARATER_ATENDIMENTO_CODES = new Set(["1", "2"]);
+
 export function normalizeHexColor(raw: string | undefined | null, fallback: string): string {
   const s = (raw ?? "").trim();
   if (!HEX.test(s)) return fallback;
@@ -75,11 +79,36 @@ export async function upsertTenantSettings(
         : (current?.operational_timezone ?? "America/Sao_Paulo"),
     currency:
       patch.currency !== undefined ? String(patch.currency).trim() : (current?.currency ?? "BRL"),
+    default_regime_atendimento:
+      patch.default_regime_atendimento !== undefined
+        ? patch.default_regime_atendimento
+        : (current?.default_regime_atendimento ?? null),
+    default_carater_atendimento:
+      patch.default_carater_atendimento !== undefined
+        ? patch.default_carater_atendimento
+        : (current?.default_carater_atendimento ?? null),
+    cnpj: patch.cnpj !== undefined ? patch.cnpj : (current?.cnpj ?? null),
   };
 
   const email = merged.contact_email;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new ValidationError("E-mail de contato inválido.", { field: "contact_email" });
+  }
+  if (merged.default_regime_atendimento && !REGIME_ATENDIMENTO_CODES.has(merged.default_regime_atendimento)) {
+    throw new ValidationError("Regime de atendimento padrão inválido.", { field: "default_regime_atendimento" });
+  }
+  if (
+    merged.default_carater_atendimento &&
+    !CARATER_ATENDIMENTO_CODES.has(merged.default_carater_atendimento)
+  ) {
+    throw new ValidationError("Caráter de atendimento padrão inválido.", { field: "default_carater_atendimento" });
+  }
+  if (merged.cnpj) {
+    const digits = merged.cnpj.replace(/\D/g, "");
+    if (digits.length !== 14) {
+      throw new ValidationError("CNPJ inválido (esperado 14 dígitos).", { field: "cnpj" });
+    }
+    merged.cnpj = digits;
   }
 
   const { data, error } = await ctx.client

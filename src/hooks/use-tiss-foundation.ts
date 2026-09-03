@@ -135,6 +135,12 @@ export function useTissMutations() {
       insuranceContractId?: string | null;
       professionalId: string;
       attendanceDate: string;
+      beneficiaryCardNumber?: string | null;
+      beneficiaryIsNewborn?: boolean;
+      regimeAtendimento?: string | null;
+      caraterAtendimento?: string | null;
+      tipoAtendimento?: string | null;
+      tipoConsulta?: string | null;
     }) => unwrap((await createTissGuideFn({ data: input })) as MutationResult<unknown>),
     onSuccess: () => inv(),
   });

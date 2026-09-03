@@ -53,6 +53,12 @@ export async function createTissGuide(
     insurance_contract_id?: string | null;
     professional_id: string;
     attendance_date: string;
+    beneficiary_card_number?: string | null;
+    beneficiary_is_newborn?: boolean;
+    regime_atendimento?: string | null;
+    carater_atendimento?: string | null;
+    tipo_atendimento?: string | null;
+    tipo_consulta?: string | null;
   },
 ): Promise<TissGuideRow> {
   assertCan(ctx.role, "tiss:write");
@@ -64,6 +70,12 @@ export async function createTissGuide(
     insurance_contract_id: input.insurance_contract_id ?? null,
     professional_id: input.professional_id,
     attendance_date: input.attendance_date,
+    beneficiary_card_number: input.beneficiary_card_number?.trim() || null,
+    beneficiary_is_newborn: input.beneficiary_is_newborn ?? false,
+    regime_atendimento: input.regime_atendimento || null,
+    carater_atendimento: input.carater_atendimento || null,
+    tipo_atendimento: input.tipo_atendimento || null,
+    tipo_consulta: input.tipo_consulta || null,
     status: "draft",
   };
   const { data, error } = await ctx.client.from("tiss_guides").insert(row).select("*").single();
@@ -92,6 +104,12 @@ export async function updateTissGuide(
       | "professional_id"
       | "attendance_date"
       | "status"
+      | "beneficiary_card_number"
+      | "beneficiary_is_newborn"
+      | "regime_atendimento"
+      | "carater_atendimento"
+      | "tipo_atendimento"
+      | "tipo_consulta"
     >
   >,
 ): Promise<TissGuideRow> {
