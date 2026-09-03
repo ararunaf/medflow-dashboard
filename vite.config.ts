@@ -86,18 +86,33 @@ function devServerFnErrorLogger(): Plugin {
  * polyfills that property, so the glue wrongly takes the Node branch and
  * calls `createRequire(import.meta.url)` — which throws at runtime because
  * `import.meta.url` doesn't resolve to a usable path in the bundled Workers
- * output (there is no real filesystem to require from). The wasm binary is
- * already embedded as base64 in the same file, so the Node branch (fs-based
- * loading, `require`) is never actually needed for this app — forcing the
- * detection to `false` makes the glue take its browser/worker-safe path
- * instead. Scoped to this one file via a targeted string replace so a
- * `libxml2-wasm` upgrade that changes this output fails loudly (build error)
- * rather than silently shipping the broken require call again.
+ * output (there is no real filesystem to require from).
+ *
+ * Disabling that detection alone isn't enough: the glue then falls back to
+ * asynchronously fetching/instantiating the wasm binary it has embedded as
+ * base64, and that async chain doesn't settle within Cloudflare's top-level
+ * `await` validation window ("Top-level await in module is unsettled",
+ * error 10021). The fix is to bypass Emscripten's own wasm loading entirely
+ * by supplying `instantiateWasm` ourselves: `src/lib/services/tiss/xml/vendor/libxml2.wasm`
+ * (the same bytes extracted from the embedded base64 — see the README next
+ * to it) is imported through `@cloudflare/vite-plugin`'s native CompiledWasm
+ * module support, which hands Workers a precompiled `WebAssembly.Module` at
+ * build time. Instantiating that synchronously (`new WebAssembly.Instance`)
+ * means the promise Emscripten wraps around `instantiateWasm` resolves in
+ * the same tick it's created, so there's no unsettled top-level await left.
+ *
+ * Scoped to this one file via targeted string replaces so a `libxml2-wasm`
+ * upgrade that changes this output fails loudly (build error) rather than
+ * silently shipping the broken require call, or the unsettled fetch, again.
  */
-function patchLibxml2WasmForWorkers(): Plugin {
-  const NEEDLE =
+function patchLibxml2WasmForWorkers(root: string): Plugin {
+  const NODE_DETECTION_NEEDLE =
     'h="object"==typeof process&&"object"==typeof process.versions&&"string"==typeof process.versions.node&&"renderer"!=process.type;if(h){const {createRequire:a}=await ((m)=>import(m))("module");var require=a(import.meta.url)}';
-  const REPLACEMENT = "h=false;";
+  const INSTANTIATE_WASM_NEEDLE = "if(f.instantiateWasm)return new Promise(d=>{f.instantiateWasm(b,(e,g)=>{d(a(e,g))})});";
+  const wasmAssetPath = path
+    .join(root, "src/lib/services/tiss/xml/vendor/libxml2.wasm")
+    .split(path.sep)
+    .join("/");
   return {
     name: "patch-libxml2-wasm-for-workers",
     enforce: "pre",
@@ -106,14 +121,22 @@ function patchLibxml2WasmForWorkers(): Plugin {
       if (!normalizedId.includes("libxml2-wasm/lib/libxml2raw.mjs")) {
         return null;
       }
-      if (!code.includes(NEEDLE)) {
+      if (!code.includes(NODE_DETECTION_NEEDLE) || !code.includes(INSTANTIATE_WASM_NEEDLE)) {
         throw new Error(
-          "patch-libxml2-wasm-for-workers: expected Node-detection snippet not found in " +
-            "libxml2raw.mjs — the libxml2-wasm package likely changed its build output. " +
-            "Update the NEEDLE in vite.config.ts to match the new source before deploying.",
+          "patch-libxml2-wasm-for-workers: expected snippet(s) not found in libxml2raw.mjs — " +
+            "the libxml2-wasm package likely changed its build output. Update the needles in " +
+            "vite.config.ts (and re-extract src/lib/services/tiss/xml/vendor/libxml2.wasm if the " +
+            "embedded wasm binary itself changed) before deploying.",
         );
       }
-      return code.replace(NEEDLE, REPLACEMENT);
+      const patched = code
+        .replace(NODE_DETECTION_NEEDLE, "h=false;")
+        .replace(
+          INSTANTIATE_WASM_NEEDLE,
+          "f.instantiateWasm=(b,cb)=>{const inst=new WebAssembly.Instance(__libxml2WasmModule,b);cb(inst,__libxml2WasmModule);return inst.exports};" +
+            INSTANTIATE_WASM_NEEDLE,
+        );
+      return `import __libxml2WasmModule from ${JSON.stringify(wasmAssetPath)};\n${patched}`;
     },
   };
 }
@@ -144,7 +167,7 @@ export default defineConfig(({ command, mode }) => {
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
     devServerFnErrorLogger(),
-    patchLibxml2WasmForWorkers(),
+    patchLibxml2WasmForWorkers(root),
   ];
 
   if (command === "build") {
