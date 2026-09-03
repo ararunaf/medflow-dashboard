@@ -4,6 +4,8 @@ import { recordOperationalEventSafe } from "@/lib/services/operations/operationa
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { markBatchExported } from "./batch-service";
 import { buildMensagemTissXml } from "./xml/tiss-xml-serializer";
+import { TissXsdValidator } from "./xml/tiss-xsd-validator";
+import { loadTissXsdFilesBundled } from "./xml/schemas/load-xsd-files.raw";
 import { formatTissTime } from "./xml/tiss-xml-simple-types";
 import {
   buildTissGuideExportInput,
@@ -13,6 +15,14 @@ import {
   type TissMappedGuide,
 } from "./xml/tiss-guide-export-mapper";
 import type { TissEnvelopeInput } from "./xml/tiss-xml-types";
+
+let cachedXsdValidator: TissXsdValidator | null = null;
+function getTissXsdValidator(): TissXsdValidator {
+  if (!cachedXsdValidator) {
+    cachedXsdValidator = TissXsdValidator.fromFiles(loadTissXsdFilesBundled());
+  }
+  return cachedXsdValidator;
+}
 
 async function sha256Hex(text: string): Promise<string> {
   const buf = new TextEncoder().encode(text);
@@ -188,7 +198,30 @@ export async function buildTissBatchXmlDocument(ctx: ServiceCtx, batchId: string
       .map((m) => m.input),
   };
 
-  return buildMensagemTissXml(envelope);
+  const xml = buildMensagemTissXml(envelope);
+
+  const validation = getTissXsdValidator().validate(xml);
+  if (!validation.valid) {
+    throw new TissXsdValidationError(validation.errors);
+  }
+
+  return xml;
+}
+
+/**
+ * F3-S2 — XML estruturalmente correto (F3-S1) mas que ainda assim viola o
+ * XSD oficial (tipo/enum/padrão errado num campo, por exemplo) é bloqueado
+ * aqui antes de chegar ao usuário — nunca exportado "torcendo para dar
+ * certo" na operadora.
+ */
+export class TissXsdValidationError extends Error {
+  readonly xsdErrors: string[];
+
+  constructor(xsdErrors: string[]) {
+    super(`XML TISS não validou contra o XSD oficial ANS: ${xsdErrors.join(" | ")}`);
+    this.name = "TissXsdValidationError";
+    this.xsdErrors = xsdErrors;
+  }
 }
 
 export async function exportTissBatchXml(
@@ -213,6 +246,9 @@ export async function exportTissBatchXml(
   } catch (err) {
     if (err instanceof TissGuideExportValidationError) {
       throw new ValidationError(err.message, { field: "guide_data", guideId: err.guideId });
+    }
+    if (err instanceof TissXsdValidationError) {
+      throw new ValidationError(err.message, { field: "xml_schema" });
     }
     throw err;
   }

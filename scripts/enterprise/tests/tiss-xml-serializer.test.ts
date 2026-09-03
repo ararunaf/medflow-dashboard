@@ -178,12 +178,18 @@ describe("buildMensagemTissXml — F3-S1 (estrutura oficial, campo a campo)", ()
     assert.match(xml, /<horaRegistroTransacao>14:30:00<\/horaRegistroTransacao>/);
   });
 
-  it("origem serializa a escolha certa (codigoPrestadorNaOperadora | CPF | CNPJ)", () => {
+  it("origem envolve a identificação em <identificacaoPrestador> (achado real da validação F3-S2 — origem não aceita CNPJ/CPF/código soltos como filho direto)", () => {
     const xmlCodigo = buildMensagemTissXml(baseEnvelope({ origemPrestador: { kind: "codigoNaOperadora", codigo: "X1" } }));
-    assert.match(xmlCodigo, /<origem>\s*<codigoPrestadorNaOperadora>X1<\/codigoPrestadorNaOperadora>\s*<\/origem>/);
+    assert.match(
+      xmlCodigo,
+      /<origem>\s*<identificacaoPrestador>\s*<codigoPrestadorNaOperadora>X1<\/codigoPrestadorNaOperadora>\s*<\/identificacaoPrestador>\s*<\/origem>/,
+    );
 
     const xmlCnpj = buildMensagemTissXml(baseEnvelope({ origemPrestador: { kind: "cnpj", cnpj: "12345678000199" } }));
-    assert.match(xmlCnpj, /<origem>\s*<CNPJ>12345678000199<\/CNPJ>\s*<\/origem>/);
+    assert.match(
+      xmlCnpj,
+      /<origem>\s*<identificacaoPrestador>\s*<CNPJ>12345678000199<\/CNPJ>\s*<\/identificacaoPrestador>\s*<\/origem>/,
+    );
   });
 
   it("registroANS de destino é normalizado para 6 dígitos", () => {

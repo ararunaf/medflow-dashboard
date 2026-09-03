@@ -31,6 +31,26 @@ export type TissPrestadorIdentificacaoInput =
   | { kind: "cpf"; cpf: string }
   | { kind: "cnpj"; cnpj: string };
 
+/**
+ * localContratado.codigoContratado (guiaHonorarios) — escolha DIFERENTE de
+ * ct_contratadoDados: só codigoNaOperadora ou cnpjLocalExecutante (achado
+ * real de F3-S2 — validação contra o XSD real rejeitou o reaproveitamento
+ * de TissContratadoDadosInput aqui, elementos têm nomes distintos).
+ */
+export type TissLocalContratadoCodigoInput =
+  | { kind: "codigoNaOperadora"; codigo: string }
+  | { kind: "cnpjLocalExecutante"; cnpj: string };
+
+/**
+ * codProfissional (guiaHonorarios.profissionais[]) — escolha DIFERENTE de
+ * ct_contratadoDados: só codigoPrestadorNaOperadora ou cpfContratado, sem
+ * opção de CNPJ (é a identificação de uma PESSOA, não de um contratado —
+ * outro achado real de F3-S2).
+ */
+export type TissCodProfissionalInput =
+  | { kind: "codigoNaOperadora"; codigo: string }
+  | { kind: "cpf"; cpf: string };
+
 /** ct_beneficiarioDados */
 export type TissBeneficiarioInput = {
   numeroCarteira: string;
@@ -134,7 +154,7 @@ export type TissProcedimentoExecutadoHonorarioInput = {
   profissionais: Array<{
     /** dm_grauPart — participação do profissional no procedimento (ex.: "1" clínico, ver dm_grauPart no XSD). */
     grauParticipacao: string;
-    codProfissional: TissContratadoDadosInput;
+    codProfissional: TissCodProfissionalInput;
     nomeProfissional: string;
     conselhoProfissional: string;
     numeroConselhoProfissional: string;
@@ -150,7 +170,7 @@ export type TissGuiaHonorarioInput = {
   senha?: string;
   numeroGuiaOperadora?: string;
   beneficiario: TissBeneficiarioInput;
-  localContratado: TissContratadoDadosInput & { nomeContratado: string; cnes: string };
+  localContratado: TissLocalContratadoCodigoInput & { nomeContratado: string; cnes: string };
   dadosContratadoExecutante: { codigoNaOperadora: string; cnesContratadoExecutante: string };
   dadosInternacao: { dataInicioFaturamento: string; dataFimFaturamento: string };
   procedimentosRealizados: TissProcedimentoExecutadoHonorarioInput[];

@@ -27,11 +27,13 @@ import {
 } from "./tiss-xml-simple-types";
 import type {
   TissBeneficiarioInput,
+  TissCodProfissionalInput,
   TissContratadoDadosInput,
   TissEnvelopeInput,
   TissGuiaConsultaInput,
   TissGuiaHonorarioInput,
   TissGuiaSadtInput,
+  TissLocalContratadoCodigoInput,
   TissPrestadorIdentificacaoInput,
   TissProcedimentoDadosInput,
   TissProfissionalInput,
@@ -49,6 +51,24 @@ function serializeContratadoDados(input: TissContratadoDadosInput): string {
       return el("cpfContratado", input.cpf);
     case "cnpj":
       return el("cnpjContratado", input.cnpj);
+  }
+}
+
+function serializeLocalContratadoCodigo(input: TissLocalContratadoCodigoInput): string {
+  switch (input.kind) {
+    case "codigoNaOperadora":
+      return el("codigoNaOperadora", input.codigo);
+    case "cnpjLocalExecutante":
+      return el("cnpjLocalExecutante", input.cnpj);
+  }
+}
+
+function serializeCodProfissional(input: TissCodProfissionalInput): string {
+  switch (input.kind) {
+    case "codigoNaOperadora":
+      return el("codigoPrestadorNaOperadora", input.codigo);
+    case "cpf":
+      return el("cpfContratado", input.cpf);
   }
 }
 
@@ -203,7 +223,7 @@ function serializeGuiaHonorario(g: TissGuiaHonorarioInput): string[] {
   lines.push(
     "<localContratado>",
     "<codigoContratado>",
-    serializeContratadoDados(g.localContratado),
+    serializeLocalContratadoCodigo(g.localContratado),
     "</codigoContratado>",
     el("nomeContratado", g.localContratado.nomeContratado),
     el("cnes", g.localContratado.cnes),
@@ -238,7 +258,7 @@ function serializeGuiaHonorario(g: TissGuiaHonorarioInput): string[] {
       lines.push(
         el("grauParticipacao", prof.grauParticipacao),
         "<codProfissional>",
-        serializeContratadoDados(prof.codProfissional),
+        serializeCodProfissional(prof.codProfissional),
         "</codProfissional>",
         el("nomeProfissional", prof.nomeProfissional),
         el("conselhoProfissional", prof.conselhoProfissional),
@@ -281,7 +301,13 @@ export function buildMensagemTissXml(input: TissEnvelopeInput): string {
     el("horaRegistroTransacao", formatTissTime(input.horaRegistroTransacao)),
     "</identificacaoTransacao>",
   );
-  lines.push("<origem>", serializePrestadorIdentificacao(input.origemPrestador), "</origem>");
+  lines.push(
+    "<origem>",
+    "<identificacaoPrestador>",
+    serializePrestadorIdentificacao(input.origemPrestador),
+    "</identificacaoPrestador>",
+    "</origem>",
+  );
   lines.push("<destino>", el("registroANS", formatTissRegistroAns(input.destinoRegistroANS)), "</destino>");
   lines.push(el("Padrao", TISS_PADRAO_VERSAO));
   lines.push("</cabecalho>");

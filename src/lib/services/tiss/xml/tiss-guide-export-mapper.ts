@@ -238,7 +238,7 @@ export function buildTissGuideExportInput(
     numeroGuiaPrestador,
     guiaSolicInternacao: numeroGuiaPrestador,
     beneficiario,
-    localContratado: { kind: "cnpj", cnpj, nomeContratado: hospitalName, cnes },
+    localContratado: { kind: "cnpjLocalExecutante", cnpj, nomeContratado: hospitalName, cnes },
     dadosContratadoExecutante: { codigoNaOperadora: cnpj, cnesContratadoExecutante: cnes },
     dadosInternacao: { dataInicioFaturamento: row.attendanceDate, dataFimFaturamento: row.attendanceDate },
     procedimentosRealizados: row.items.map((item, i) => ({
@@ -256,7 +256,11 @@ export function buildTissGuideExportInput(
       profissionais: [
         {
           grauParticipacao: TISS_GRAU_PART_CLINICO,
-          codProfissional: { kind: "cnpj", cnpj },
+          // codProfissional só aceita codigoPrestadorNaOperadora/CPF (é
+          // identificação de pessoa) — sem CPF do profissional cadastrado,
+          // reaproveita o CNPJ da cooperativa como "código" (achado real
+          // de F3-S2: cnpj não é opção válida aqui).
+          codProfissional: { kind: "codigoNaOperadora", codigo: cnpj },
           nomeProfissional: professionalName,
           conselhoProfissional: TISS_CONSELHO_CRM,
           numeroConselhoProfissional: crmNumero as string,
