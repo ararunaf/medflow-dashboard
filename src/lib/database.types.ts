@@ -928,6 +928,7 @@ export type Database = {
           cnpj: string | null;
           address: string | null;
           phone: string | null;
+          cnes: string | null;
           active: boolean;
           created_at: string;
           updated_at: string;
@@ -940,6 +941,7 @@ export type Database = {
           cnpj?: string | null;
           address?: string | null;
           phone?: string | null;
+          cnes?: string | null;
           active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -952,6 +954,7 @@ export type Database = {
           cnpj?: string | null;
           address?: string | null;
           phone?: string | null;
+          cnes?: string | null;
           active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -1015,6 +1018,7 @@ export type Database = {
           profile_id: string;
           specialty: string;
           crm: string;
+          cbo_code: string | null;
           created_at: string;
         };
         Insert: {
@@ -1023,6 +1027,7 @@ export type Database = {
           profile_id: string;
           specialty?: string;
           crm?: string;
+          cbo_code?: string | null;
           created_at?: string;
         };
         Update: {
@@ -1031,6 +1036,7 @@ export type Database = {
           profile_id?: string;
           specialty?: string;
           crm?: string;
+          cbo_code?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -3012,6 +3018,8 @@ export type Database = {
           status: TissGuideStatus;
           batch_id: string | null;
           hospital_id: string | null;
+          beneficiary_card_number: string | null;
+          beneficiary_is_newborn: boolean;
           total_value: number;
           created_at: string;
           updated_at: string;
@@ -3028,6 +3036,8 @@ export type Database = {
           status?: TissGuideStatus;
           batch_id?: string | null;
           hospital_id?: string | null;
+          beneficiary_card_number?: string | null;
+          beneficiary_is_newborn?: boolean;
           total_value?: number;
           created_at?: string;
           updated_at?: string;
@@ -3044,6 +3054,8 @@ export type Database = {
           status?: TissGuideStatus;
           batch_id?: string | null;
           hospital_id?: string | null;
+          beneficiary_card_number?: string | null;
+          beneficiary_is_newborn?: boolean;
           total_value?: number;
           created_at?: string;
           updated_at?: string;
