@@ -80,6 +80,44 @@ function devServerFnErrorLogger(): Plugin {
   };
 }
 
+/**
+ * libxml2-wasm's Emscripten glue (libxml2raw.mjs) feature-detects Node by
+ * checking `process.versions.node`. Cloudflare Workers' `nodejs_compat` flag
+ * polyfills that property, so the glue wrongly takes the Node branch and
+ * calls `createRequire(import.meta.url)` — which throws at runtime because
+ * `import.meta.url` doesn't resolve to a usable path in the bundled Workers
+ * output (there is no real filesystem to require from). The wasm binary is
+ * already embedded as base64 in the same file, so the Node branch (fs-based
+ * loading, `require`) is never actually needed for this app — forcing the
+ * detection to `false` makes the glue take its browser/worker-safe path
+ * instead. Scoped to this one file via a targeted string replace so a
+ * `libxml2-wasm` upgrade that changes this output fails loudly (build error)
+ * rather than silently shipping the broken require call again.
+ */
+function patchLibxml2WasmForWorkers(): Plugin {
+  const NEEDLE =
+    'h="object"==typeof process&&"object"==typeof process.versions&&"string"==typeof process.versions.node&&"renderer"!=process.type;if(h){const {createRequire:a}=await ((m)=>import(m))("module");var require=a(import.meta.url)}';
+  const REPLACEMENT = "h=false;";
+  return {
+    name: "patch-libxml2-wasm-for-workers",
+    enforce: "pre",
+    transform(code, id) {
+      const normalizedId = id.replace(/\\/g, "/");
+      if (!normalizedId.includes("libxml2-wasm/lib/libxml2raw.mjs")) {
+        return null;
+      }
+      if (!code.includes(NEEDLE)) {
+        throw new Error(
+          "patch-libxml2-wasm-for-workers: expected Node-detection snippet not found in " +
+            "libxml2raw.mjs — the libxml2-wasm package likely changed its build output. " +
+            "Update the NEEDLE in vite.config.ts to match the new source before deploying.",
+        );
+      }
+      return code.replace(NEEDLE, REPLACEMENT);
+    },
+  };
+}
+
 function applyWatchDebounceDefaults(config: UserConfig): UserConfig {
   const existingWatch = config.server?.watch ?? {};
   const existingAwaitWriteFinish = existingWatch.awaitWriteFinish;
@@ -106,6 +144,7 @@ export default defineConfig(({ command, mode }) => {
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
     devServerFnErrorLogger(),
+    patchLibxml2WasmForWorkers(),
   ];
 
   if (command === "build") {
