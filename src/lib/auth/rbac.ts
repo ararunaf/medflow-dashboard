@@ -29,6 +29,9 @@ export type Capability =
   | "assignments:confirm:self"
   | "assignments:reject:any"
   | "assignments:reject:self"
+  | "attendance:checkin:any"
+  | "attendance:checkin:self"
+  | "attendance:review"
   | "swaps:read"
   | "swaps:request:self"
   | "swaps:cancel:self"
@@ -73,6 +76,8 @@ const COORDINATOR_CAPS: readonly Capability[] = [
   "assignments:assign:any",
   "assignments:confirm:any",
   "assignments:reject:any",
+  "attendance:checkin:any",
+  "attendance:review",
   "professional_hospitals:manage",
   "swaps:approve",
   "swaps:deny",
@@ -90,6 +95,7 @@ const PROFESSIONAL_CAPS: readonly Capability[] = [
   "assignments:assign:self",
   "assignments:confirm:self",
   "assignments:reject:self",
+  "attendance:checkin:self",
   "swaps:request:self",
   "swaps:cancel:self",
   "availability:update:self",

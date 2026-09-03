@@ -4,7 +4,7 @@ import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, Building2, Check, Clock, MapPin, X } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, Building2, Check, Clock, MapPin, Sparkles, X } from "lucide-react";
 import { can } from "@/lib/auth/rbac";
 import {
   hospitalsQueryOptions,
@@ -23,6 +23,7 @@ import {
   useDenySwap,
   useRejectAssignment,
   useRequestSwap,
+  useReviewAttendance,
   useSelfAssignOpenShift,
   useSetProfessionalHospitalAffiliation,
 } from "@/hooks/use-operational-mutations";
@@ -41,13 +42,14 @@ import type {
   SwapListItem,
 } from "@/lib/operations/api";
 import type { PlantoesOpsSearch } from "@/lib/operations/actions";
+import type { AttendanceReviewSuggestion } from "@/lib/services/operations/checkin-confirmation-agent";
 import { describeError } from "@/lib/queries/result";
 import { toast } from "@/lib/toast/bus";
 
 function parsePlantoesSearch(search: Record<string, unknown>): PlantoesOpsSearch {
   const t = search.tab;
   const tab: NonNullable<PlantoesOpsSearch["tab"]> =
-    t === "swaps" || t === "meus" || t === "instituicoes" || t === "disponiveis"
+    t === "swaps" || t === "meus" || t === "instituicoes" || t === "checkins" || t === "disponiveis"
       ? t
       : "disponiveis";
   const rawFilter = search.assignmentFilter === "pending" ? ("pending" as const) : undefined;
@@ -113,6 +115,8 @@ function PlantoesPage() {
     ["swaps", "Swaps pendentes"],
   ];
   if (canManageInstitutions) tabs.push(["instituicoes", "Instituições"]);
+  const canReviewAttendance = can(role, "attendance:review");
+  if (canReviewAttendance) tabs.push(["checkins", "Presença"]);
 
   return (
     <AppShell>
@@ -146,6 +150,8 @@ function PlantoesPage() {
         <MeusList query={myAssignments} assignmentFilter={assignmentFilter} onError={onError} />
       ) : tab === "instituicoes" ? (
         <InstituicoesTab onError={onError} />
+      ) : tab === "checkins" ? (
+        <CheckinsTab onError={onError} />
       ) : (
         <PendingSwapsList query={pendingSwaps} onError={onError} />
       )}
@@ -644,6 +650,88 @@ function ProfessionalAffiliationRow({
         })}
       </div>
     </div>
+  );
+}
+
+function verdictRank(verdict: "ok" | "atencao" | "critico"): number {
+  return { critico: 0, atencao: 1, ok: 2 }[verdict];
+}
+
+function VerdictBadge({ verdict }: { verdict: "ok" | "atencao" | "critico" }) {
+  const map = {
+    ok: { className: "bg-[color:var(--success)]/15 text-[color:var(--success)]", label: "Ok" },
+    atencao: { className: "bg-[color:var(--warning)]/15 text-[color:var(--warning)]", label: "Atenção" },
+    critico: { className: "bg-destructive/10 text-destructive", label: "Crítico" },
+  } as const;
+  const v = map[verdict];
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${v.className}`}
+    >
+      {v.label}
+    </span>
+  );
+}
+
+function CheckinsTab({ onError }: { onError: (err: unknown) => void }) {
+  const review = useReviewAttendance({ onError });
+  const [items, setItems] = useState<AttendanceReviewSuggestion[] | null>(null);
+
+  return (
+    <section className="rounded-xl bg-card border border-border ring-soft p-4">
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <h3 className="text-sm font-semibold flex items-center gap-1.5">
+          <Sparkles className="h-4 w-4" /> Revisão de presença
+        </h3>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={review.isPending}
+          onClick={() => review.mutate(undefined, { onSuccess: (data) => setItems(data) })}
+        >
+          {review.isPending ? "Analisando…" : items ? "Atualizar revisão" : "Revisar presença"}
+        </Button>
+      </div>
+
+      {items === null ? (
+        <p className="text-xs text-muted-foreground">
+          Cruza check-in/check-out reais dos últimos 14 dias com o horário programado do plantão —
+          atraso, saída antecipada, falta e check-out ausente são calculados em código; a IA só
+          escreve a justificativa dos itens já sinalizados.
+        </p>
+      ) : items.length === 0 ? (
+        <EmptyState
+          title="Nenhum plantão concluído no período"
+          description="Assim que houver plantões com check-in/check-out nos últimos 14 dias, eles aparecem aqui."
+        />
+      ) : (
+        <div className="space-y-2">
+          {items
+            .slice()
+            .sort((a, b) => verdictRank(a.verdict) - verdictRank(b.verdict))
+            .map((item) => (
+              <div key={item.assignmentId} className="rounded-lg border border-border px-3 py-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{item.professionalName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.departmentName} · {formatDateShort(item.startsAt)} ·{" "}
+                      {formatTimeRange(item.startsAt, item.endsAt)}
+                    </p>
+                  </div>
+                  <VerdictBadge verdict={item.verdict} />
+                </div>
+                {item.rationale ? (
+                  <p className="text-xs text-muted-foreground mt-1.5 italic flex items-start gap-1">
+                    {item.verdict !== "ok" ? <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" /> : null}
+                    {item.rationale}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+        </div>
+      )}
+    </section>
   );
 }
 

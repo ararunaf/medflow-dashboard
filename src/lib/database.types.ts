@@ -68,6 +68,8 @@ export type OperationalEventType =
   | "assignment_created"
   | "assignment_confirmed"
   | "assignment_rejected"
+  | "assignment_checked_in"
+  | "assignment_checked_out"
   | "swap_requested"
   | "swap_approved"
   | "swap_denied"
@@ -1578,6 +1580,8 @@ export type Database = {
           professional_id: string;
           assignment_status: AssignmentStatus;
           assigned_at: string;
+          checked_in_at: string | null;
+          checked_out_at: string | null;
         };
         Insert: {
           id?: string;
@@ -1586,6 +1590,8 @@ export type Database = {
           professional_id: string;
           assignment_status?: AssignmentStatus;
           assigned_at?: string;
+          checked_in_at?: string | null;
+          checked_out_at?: string | null;
         };
         Update: {
           id?: string;
@@ -1594,6 +1600,8 @@ export type Database = {
           professional_id?: string;
           assignment_status?: AssignmentStatus;
           assigned_at?: string;
+          checked_in_at?: string | null;
+          checked_out_at?: string | null;
         };
         Relationships: [
           {

@@ -4,13 +4,15 @@ import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
-import { Building2, Check, Clock, MapPin, Sparkles, X } from "lucide-react";
+import { Building2, Check, Clock, LogIn, LogOut, MapPin, Sparkles, X } from "lucide-react";
 import { can } from "@/lib/auth/rbac";
 import { shiftDetailQueryOptions, useMyContextQuery, useShiftDetailQuery } from "@/hooks/use-operations";
 import {
   useAcceptAssignment,
   useAssignProfessionalToShift,
   useCancelShift,
+  useCheckIn,
+  useCheckOut,
   useRejectAssignment,
   useSelfAssignOpenShift,
   useSuggestProfessionalsForShift,
@@ -18,10 +20,12 @@ import {
 import {
   assignmentStatusToBadge,
   formatDateShort,
+  formatTime,
   formatTimeRange,
   shiftStatusToBadge,
   swapStatusToBadge,
 } from "@/lib/queries/adapters";
+import type { ShiftDetailAssignment } from "@/lib/operations/api";
 import type { ShiftMatchSuggestion } from "@/lib/services/operations/shift-matching-agent";
 import { describeError } from "@/lib/queries/result";
 import { toast } from "@/lib/toast/bus";
@@ -149,7 +153,15 @@ function ShiftDetailPage() {
                 key={a.assignmentId}
                 className="rounded-lg border border-border bg-card px-3 py-2 flex items-center justify-between gap-3"
               >
-                <span className="text-sm">{a.professionalName}</span>
+                <div>
+                  <span className="text-sm">{a.professionalName}</span>
+                  {a.checkedInAt ? (
+                    <p className="text-xs text-muted-foreground">
+                      Check-in {formatTime(a.checkedInAt)}
+                      {a.checkedOutAt ? ` · check-out ${formatTime(a.checkedOutAt)}` : " · sem check-out"}
+                    </p>
+                  ) : null}
+                </div>
                 <StatusBadge status={assignmentStatusToBadge(a.status)} />
               </div>
             ))}
@@ -188,13 +200,15 @@ function SelfServiceActions({
 }: {
   shiftId: string;
   shiftStatus: string;
-  myAssignment: { assignmentId: string; status: string } | undefined;
+  myAssignment: ShiftDetailAssignment | undefined;
   canSelfAssign: boolean;
   onError: (err: unknown) => void;
 }) {
   const selfAssign = useSelfAssignOpenShift({ onError });
   const accept = useAcceptAssignment({ onError });
   const reject = useRejectAssignment({ onError });
+  const checkIn = useCheckIn({ onError });
+  const checkOut = useCheckOut({ onError });
 
   if (!canSelfAssign) return null;
 
@@ -235,6 +249,45 @@ function SelfServiceActions({
           onClick={() => accept.mutate({ assignmentId: myAssignment.assignmentId })}
         >
           <Check className="h-4 w-4" /> Aceitar
+        </Button>
+      </div>
+    );
+  }
+
+  if (myAssignment.status === "confirmed") {
+    if (myAssignment.checkedOutAt) {
+      return (
+        <p className="mt-4 text-xs text-muted-foreground">
+          Check-in {formatTime(myAssignment.checkedInAt!)} · check-out {formatTime(myAssignment.checkedOutAt)} —
+          plantão concluído.
+        </p>
+      );
+    }
+    if (myAssignment.checkedInAt) {
+      return (
+        <div className="mt-4">
+          <Button
+            size="sm"
+            className="gap-1.5"
+            disabled={checkOut.isPending}
+            onClick={() => checkOut.mutate({ assignmentId: myAssignment.assignmentId })}
+          >
+            <LogOut className="h-4 w-4" />
+            {checkOut.isPending ? "Registrando…" : "Fazer check-out"}
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <div className="mt-4">
+        <Button
+          size="sm"
+          className="gap-1.5"
+          disabled={checkIn.isPending}
+          onClick={() => checkIn.mutate({ assignmentId: myAssignment.assignmentId })}
+        >
+          <LogIn className="h-4 w-4" />
+          {checkIn.isPending ? "Registrando…" : "Fazer check-in"}
         </Button>
       </div>
     );

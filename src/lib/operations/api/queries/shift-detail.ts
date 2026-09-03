@@ -28,6 +28,8 @@ export type ShiftDetailAssignment = {
   professionalName: string;
   status: AssignmentRow["assignment_status"];
   assignedAt: string;
+  checkedInAt: string | null;
+  checkedOutAt: string | null;
 };
 
 export type ShiftDetail = {
@@ -59,7 +61,7 @@ const SHIFT_DETAIL_SELECT = `
     )
   ),
   assignments:shift_assignments!shift_assignments_tenant_shift_fk (
-    id, professional_id, assignment_status, assigned_at,
+    id, professional_id, assignment_status, assigned_at, checked_in_at, checked_out_at,
     professional:professionals!shift_assignments_tenant_professional_fk (
       id, profile:profiles!professionals_profile_id_fkey ( id, full_name )
     )
@@ -81,7 +83,10 @@ type RawShiftDetailRow = Pick<
       })
     | null;
   assignments: Array<
-    Pick<AssignmentRow, "id" | "professional_id" | "assignment_status" | "assigned_at"> & {
+    Pick<
+      AssignmentRow,
+      "id" | "professional_id" | "assignment_status" | "assigned_at" | "checked_in_at" | "checked_out_at"
+    > & {
       professional:
         | (Pick<ProfessionalRow, "id"> & {
             profile: Pick<ProfileRow, "id" | "full_name"> | null;
@@ -124,6 +129,8 @@ export const getShiftDetailFn = createServerFn({ method: "GET" })
           professionalName: a.professional?.profile?.full_name ?? "—",
           status: a.assignment_status,
           assignedAt: a.assigned_at,
+          checkedInAt: a.checked_in_at,
+          checkedOutAt: a.checked_out_at,
         }))
         .sort((a, b) => (a.assignedAt < b.assignedAt ? 1 : -1));
 

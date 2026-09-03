@@ -26,11 +26,14 @@ import { useMutation, useQueryClient, type UseMutationOptions } from "@tanstack/
 import {
   approveSwapFn,
   cancelShiftFn,
+  checkInFn,
+  checkOutFn,
   confirmAssignmentFn,
   createAssignmentFn,
   denySwapFn,
   rejectAssignmentFn,
   requestSwapFn,
+  reviewAttendanceFn,
   selfAssignOpenShiftFn,
   setProfessionalHospitalAffiliationFn,
   suggestProfessionalsForShiftFn,
@@ -47,6 +50,7 @@ import type {
   ShiftSwapRequestRow,
 } from "@/lib/services/operations/types";
 import type { ShiftMatchSuggestion } from "@/lib/services/operations/shift-matching-agent";
+import type { AttendanceReviewSuggestion } from "@/lib/services/operations/checkin-confirmation-agent";
 import { opsKeys } from "@/lib/queries/keys";
 import { describeError, unwrap } from "@/lib/queries/result";
 import { suppressOnce } from "@/lib/realtime/suppression";
@@ -376,6 +380,71 @@ export function useUpdateAvailability(
       await opts.onSuccess?.(...args);
     },
     onError: async (...args: OnErrorArgs<AvailabilityRow[], UpdateAvailabilityInput>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+// -------------------------------------------------------------------------
+// Presença (check-in/check-out) — F4-S4
+
+export function useCheckIn(opts: MutationHookOptions<{ assignmentId: string }, ShiftAssignmentRow> = {}) {
+  const qc = useQueryClient();
+  return useMutation<ShiftAssignmentRow, Error, { assignmentId: string }>({
+    mutationFn: async ({ assignmentId }) => unwrap(await checkInFn({ data: { assignmentId } })),
+    onSuccess: async (...args: OnSuccessArgs<ShiftAssignmentRow, { assignmentId: string }>) => {
+      const [data] = args;
+      suppressOnce("shift_assignments", data.id);
+      toast.success("Check-in registrado");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsMine() }),
+        qc.invalidateQueries({ queryKey: opsKeys.assignmentsMine() }),
+        qc.invalidateQueries({ queryKey: opsKeys.timeline() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ShiftAssignmentRow, { assignmentId: string }>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useCheckOut(opts: MutationHookOptions<{ assignmentId: string }, ShiftAssignmentRow> = {}) {
+  const qc = useQueryClient();
+  return useMutation<ShiftAssignmentRow, Error, { assignmentId: string }>({
+    mutationFn: async ({ assignmentId }) => unwrap(await checkOutFn({ data: { assignmentId } })),
+    onSuccess: async (...args: OnSuccessArgs<ShiftAssignmentRow, { assignmentId: string }>) => {
+      const [data] = args;
+      suppressOnce("shift_assignments", data.id);
+      toast.success("Check-out registrado — plantão concluído");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.dashboard() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shifts() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shiftsMine() }),
+        qc.invalidateQueries({ queryKey: opsKeys.assignmentsMine() }),
+        qc.invalidateQueries({ queryKey: opsKeys.timeline() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ShiftAssignmentRow, { assignmentId: string }>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+/** Check-in Confirmation Agent (F4-S4): ação sob demanda, sem cache — cada clique é uma nova revisão. */
+export function useReviewAttendance(
+  opts: MutationHookOptions<void, AttendanceReviewSuggestion[]> = {},
+) {
+  return useMutation<AttendanceReviewSuggestion[], Error, void>({
+    mutationFn: async () => unwrap(await reviewAttendanceFn()),
+    onError: async (...args: OnErrorArgs<AttendanceReviewSuggestion[], void>) => {
       reportError(args[0]);
       await opts.onError?.(...args);
     },

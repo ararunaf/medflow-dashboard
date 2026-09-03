@@ -19,6 +19,8 @@ export type OperationalEventPayload = {
     | "assignment_created"
     | "assignment_confirmed"
     | "assignment_rejected"
+    | "assignment_checked_in"
+    | "assignment_checked_out"
     | "swap_requested"
     | "swap_approved"
     | "swap_denied"
@@ -125,6 +127,39 @@ export function assignmentRejectedEvent(row: ShiftAssignmentRow): OperationalEve
       assignment_id: row.id,
       shift_id: row.shift_id,
       professional_id: row.professional_id,
+    },
+  };
+}
+
+export function assignmentCheckedInEvent(row: ShiftAssignmentRow): OperationalEventPayload {
+  return {
+    entity_type: "assignment",
+    entity_id: row.id,
+    event_type: "assignment_checked_in",
+    severity: "info",
+    description: "Check-in registrado no plantão.",
+    metadata: {
+      assignment_id: row.id,
+      shift_id: row.shift_id,
+      professional_id: row.professional_id,
+      checked_in_at: row.checked_in_at,
+    },
+  };
+}
+
+export function assignmentCheckedOutEvent(row: ShiftAssignmentRow): OperationalEventPayload {
+  return {
+    entity_type: "assignment",
+    entity_id: row.id,
+    event_type: "assignment_checked_out",
+    severity: "info",
+    description: "Check-out registrado no plantão.",
+    metadata: {
+      assignment_id: row.id,
+      shift_id: row.shift_id,
+      professional_id: row.professional_id,
+      checked_in_at: row.checked_in_at,
+      checked_out_at: row.checked_out_at,
     },
   };
 }

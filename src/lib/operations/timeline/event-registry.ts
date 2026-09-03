@@ -47,6 +47,8 @@ export const OPERATIONAL_EVENT_TYPES: readonly OperationalEventType[] = [
   "assignment_created",
   "assignment_confirmed",
   "assignment_rejected",
+  "assignment_checked_in",
+  "assignment_checked_out",
   "swap_requested",
   "swap_approved",
   "swap_denied",
