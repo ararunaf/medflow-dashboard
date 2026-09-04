@@ -175,6 +175,8 @@
     "enterprise:work-group-report:test": "npx tsx --test scripts/enterprise/tests/work-group-report.test.ts",
     "enterprise:work-groups-e2e:test": "npx tsx --test scripts/enterprise/tests/work-groups-e2e.test.ts",
     "enterprise:tiss-guide-patient-name-encryption-e2e:test": "npx tsx --test scripts/enterprise/tests/tiss-guide-patient-name-encryption-e2e.test.ts",
+    "enterprise:medical-payout-rls-e2e:test": "npx tsx --test scripts/enterprise/tests/medical-payout-rls-e2e.test.ts",
+    "enterprise:tiss-peak-load-e2e:test": "npx tsx --test scripts/enterprise/tests/tiss-peak-load-e2e.test.ts",
     "enterprise:shift-checkin-attendance-e2e:test": "npx tsx --test scripts/enterprise/tests/shift-checkin-attendance-e2e.test.ts",
     "auth-validate": "node scripts/auth-validate.mjs",
     "security-logs-validate": "node scripts/security-logs-validate.mjs",
