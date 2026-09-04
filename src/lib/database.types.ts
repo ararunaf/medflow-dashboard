@@ -2864,6 +2864,9 @@ export type Database = {
           ans_code: string;
           active: boolean;
           created_at: string;
+          homologation_status: string;
+          homologation_notes: string | null;
+          homologated_at: string | null;
         };
         Insert: {
           id?: string;
@@ -2872,6 +2875,9 @@ export type Database = {
           ans_code?: string;
           active?: boolean;
           created_at?: string;
+          homologation_status?: string;
+          homologation_notes?: string | null;
+          homologated_at?: string | null;
         };
         Update: {
           id?: string;
@@ -2880,6 +2886,9 @@ export type Database = {
           ans_code?: string;
           active?: boolean;
           created_at?: string;
+          homologation_status?: string;
+          homologation_notes?: string | null;
+          homologated_at?: string | null;
         };
         Relationships: [
           {

@@ -10,3 +10,5 @@ export * from "./denial-service";
 export * from "./denial-appeal-service";
 export * from "./return-processing-service";
 export * from "./operational-loss-service";
+export * from "./homologation-readiness";
+export * from "./homologation-service";

@@ -28,14 +28,21 @@ import type {
 } from "@/lib/database.types";
 import { describeError } from "@/lib/queries/result";
 import {
+  useHomologationReadinessQuery,
+  useSetInsuranceProviderHomologationStatus,
+} from "@/hooks/use-tiss-foundation";
+import type { HomologationStatus } from "@/lib/services/tiss/homologation-readiness";
+import {
   Ban,
   Building2,
+  CheckCircle2,
   ClipboardList,
   Factory,
   HandCoins,
   Layers,
   LayoutDashboard,
   Scale,
+  ShieldCheck,
   Stethoscope,
   TrendingDown,
 } from "lucide-react";
@@ -67,6 +74,7 @@ const tabs = [
   { id: "glosas", label: "Glosas", icon: Ban },
   { id: "financeiro", label: "Perdas", icon: TrendingDown },
   { id: "recursos", label: "Recursos", icon: Scale },
+  { id: "homologacao", label: "Homologação", icon: ShieldCheck },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -227,7 +235,207 @@ function TissPage() {
         />
       ) : null}
       {tab === "recursos" ? <RecursosPanel data={d} m={m} /> : null}
+      {tab === "homologacao" ? (
+        <HomologacaoPanel canWrite={can(auth.profile?.role ?? null, "tiss:write")} />
+      ) : null}
     </AppShell>
+  );
+}
+
+function homologationStatusLabel(status: HomologationStatus): string {
+  const m: Record<HomologationStatus, string> = {
+    not_started: "Não iniciada",
+    in_progress: "Em andamento",
+    homologated: "Homologada",
+  };
+  return m[status];
+}
+
+function HomologationStatusBadge({ status }: { status: HomologationStatus }) {
+  const map: Record<HomologationStatus, string> = {
+    not_started: "bg-muted text-muted-foreground",
+    in_progress: "bg-[color:var(--warning)]/15 text-[color:var(--warning)]",
+    homologated: "bg-[color:var(--success)]/15 text-[color:var(--success)]",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+        map[status],
+      )}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {homologationStatusLabel(status)}
+    </span>
+  );
+}
+
+function ReadinessCheck({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <span
+        className={cn(
+          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full",
+          ok ? "bg-[color:var(--success)]/15 text-[color:var(--success)]" : "bg-destructive/10 text-destructive",
+        )}
+      >
+        {ok ? <CheckCircle2 className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+      </span>
+      <span className={ok ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+    </div>
+  );
+}
+
+function HomologacaoPanel({ canWrite }: { canWrite: boolean }) {
+  const q = useHomologationReadinessQuery();
+  const setStatus = useSetInsuranceProviderHomologationStatus();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftStatus, setDraftStatus] = useState<HomologationStatus>("not_started");
+  const [draftNotes, setDraftNotes] = useState("");
+
+  if (q.isError) {
+    return <ErrorState message={describeError(q.error).message} onRetry={() => void q.refetch()} />;
+  }
+  if (q.isLoading || !q.data) {
+    return <div className="h-40 rounded-xl bg-muted/40 animate-pulse" />;
+  }
+
+  const { tenant, operators } = q.data;
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+        <h2 className="text-sm font-semibold">Prontidão institucional do tenant</h2>
+        <p className="text-xs text-muted-foreground">
+          Checagens únicas, válidas para toda submissão de homologação — não variam por operadora.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-2">
+          <ReadinessCheck
+            ok={tenant.institutionalDataComplete}
+            label={
+              tenant.institutionalDataComplete
+                ? "Dados institucionais completos"
+                : `Dados institucionais incompletos: ${tenant.missingInstitutionalFields.join(", ")}`
+            }
+          />
+          <ReadinessCheck
+            ok={tenant.hasApprovedContractRule}
+            label={
+              tenant.hasApprovedContractRule
+                ? "Ao menos uma regra de contrato aprovada"
+                : "Nenhuma regra de contrato aprovada ainda"
+            }
+          />
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-4">
+        <h2 className="text-sm font-semibold mb-1">Homologação por operadora</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          Prontidão técnica (código ANS + guia emitida) e status do processo de homologação, que é uma
+          ação institucional externa junto à operadora.
+        </p>
+        {operators.length === 0 ? (
+          <EmptyState
+            title="Nenhuma operadora cadastrada"
+            description="Cadastre um convênio na aba Convênios para começar."
+          />
+        ) : (
+          <div className="space-y-3">
+            {operators.map((op) => {
+              const isEditing = editingId === op.providerId;
+              return (
+                <div key={op.providerId} className="rounded-lg border border-border p-3 space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="font-medium text-sm">{op.providerName}</div>
+                      <div className="text-xs text-muted-foreground">
+                        ANS: {op.ansCodeConfigured ? "configurado" : "não configurado"}
+                        {!op.active ? " · inativo" : ""}
+                      </div>
+                    </div>
+                    <HomologationStatusBadge status={op.homologationStatus} />
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <ReadinessCheck ok={op.ansCodeConfigured} label="Código ANS cadastrado" />
+                    <ReadinessCheck ok={op.hasBilledGuide} label="Ao menos uma guia TISS emitida" />
+                  </div>
+
+                  {op.homologationNotes ? (
+                    <p className="text-xs text-muted-foreground border-l-2 border-border pl-2">
+                      {op.homologationNotes}
+                    </p>
+                  ) : null}
+                  {op.homologatedAt ? (
+                    <p className="text-xs text-muted-foreground">
+                      Homologada em {new Date(op.homologatedAt).toLocaleDateString("pt-BR")}
+                    </p>
+                  ) : null}
+
+                  {canWrite ? (
+                    isEditing ? (
+                      <div className="space-y-2 pt-1">
+                        <select
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          value={draftStatus}
+                          onChange={(e) => setDraftStatus(e.target.value as HomologationStatus)}
+                        >
+                          <option value="not_started">Não iniciada</option>
+                          <option value="in_progress">Em andamento</option>
+                          <option value="homologated">Homologada</option>
+                        </select>
+                        <textarea
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          placeholder="Notas do processo (opcional)"
+                          rows={2}
+                          value={draftNotes}
+                          onChange={(e) => setDraftNotes(e.target.value)}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={setStatus.isPending}
+                            onClick={() =>
+                              setStatus.mutate(
+                                { providerId: op.providerId, status: draftStatus, notes: draftNotes },
+                                { onSuccess: () => setEditingId(null) },
+                              )
+                            }
+                            className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                          >
+                            Salvar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingId(null)}
+                            className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(op.providerId);
+                          setDraftStatus(op.homologationStatus);
+                          setDraftNotes(op.homologationNotes ?? "");
+                        }}
+                        className="rounded-md border border-border px-3 py-2 text-xs font-medium hover:bg-muted/50"
+                      >
+                        Atualizar status
+                      </button>
+                    )
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

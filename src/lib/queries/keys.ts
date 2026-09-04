@@ -96,6 +96,7 @@ export const opsKeys = {
   /** Fundação TISS / faturamento operacional. */
   tissFoundation: () => [...opsKeys.all, "tiss-foundation"] as const,
   tissBatchExports: (batchId: string) => [...opsKeys.tissFoundation(), "exports", batchId] as const,
+  tissHomologation: () => [...opsKeys.all, "tiss-homologation"] as const,
 
   /** Produção médica + repasses operacionais por competência. */
   medicalPayoutFoundation: (competenceMonth: string) =>

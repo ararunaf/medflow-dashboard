@@ -39,6 +39,7 @@ import {
   createTissGuide,
   createTissReturn,
   createTussProcedure,
+  isHomologationStatus,
   listInsuranceContracts,
   listInsuranceProviders,
   listInsuranceRules,
@@ -48,14 +49,17 @@ import {
   listTissGuides,
   listTissReturns,
   listTussProcedures,
+  loadHomologationReadiness,
   loadOperationalBillingSummary,
   loadOperationalLossSnapshot,
   removeGuideFromBatch,
   removeTissGuideItem,
+  setInsuranceProviderHomologationStatus,
   setTissGuideStatus,
   updateTissDenialAppealStatus,
   updateTissDenialStatus,
   updateTissReturnStatus,
+  type HomologationStatus,
 } from "@/lib/services/tiss";
 import {
   exportTissBatchXmlViaEnterprise,
@@ -666,5 +670,39 @@ export const updateTissDenialAppealStatusFn = createServerFn({ method: "POST" })
         (await updateTissDenialAppealStatus(ctx, data.appealId, {
           appeal_status: data.appealStatus,
         })) as Json,
+    );
+  });
+
+function expectHomologationStatus(v: unknown, field: string): HomologationStatus {
+  if (!isHomologationStatus(v)) {
+    throw new ValidationError(`Campo ${field} inválido (status de homologação).`, { field });
+  }
+  return v;
+}
+
+export type HomologationReadinessBundle = Awaited<ReturnType<typeof loadHomologationReadiness>>;
+
+export const loadHomologationReadinessFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<QueryResult<HomologationReadinessBundle>> => {
+    return runQuery((ctx) => loadHomologationReadiness(ctx));
+  },
+);
+
+export const setInsuranceProviderHomologationStatusFn = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => {
+    const o = requireObject(raw);
+    return {
+      providerId: expectUuid(o.providerId, "providerId"),
+      status: expectHomologationStatus(o.status, "status"),
+      notes: expectOptionalString(o.notes, "notes", 2000),
+    };
+  })
+  .handler(async ({ data }): Promise<MutationResult<Awaited<ReturnType<typeof setInsuranceProviderHomologationStatus>>>> => {
+    return runMutation((ctx) =>
+      setInsuranceProviderHomologationStatus(ctx, {
+        providerId: data.providerId,
+        status: data.status,
+        notes: data.notes,
+      }),
     );
   });

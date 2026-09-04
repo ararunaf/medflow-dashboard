@@ -18,15 +18,19 @@ import {
   listInsuranceContractsFn,
   listInsuranceRulesFn,
   listTissBatchExportsFn,
+  loadHomologationReadinessFn,
   loadTissFoundationBundleFn,
   removeGuideFromBatchFn,
   removeTissGuideItemFn,
+  setInsuranceProviderHomologationStatusFn,
   setTissGuideStatusFn,
   updateTissDenialAppealStatusFn,
   updateTissDenialStatusFn,
   updateTissReturnStatusFn,
+  type HomologationReadinessBundle,
   type TissFoundationBundle,
 } from "@/lib/tiss/api/tiss-server";
+import type { HomologationStatus } from "@/lib/services/tiss/homologation-readiness";
 import { opsKeys } from "@/lib/queries/keys";
 import { unwrap } from "@/lib/queries/result";
 
@@ -86,6 +90,28 @@ export function useInsuranceRulesQuery(contractId: string | null) {
       );
     },
     enabled: !!contractId,
+  });
+}
+
+export function useHomologationReadinessQuery() {
+  return useQuery({
+    queryKey: opsKeys.tissHomologation(),
+    queryFn: async (): Promise<HomologationReadinessBundle> =>
+      unwrap((await loadHomologationReadinessFn()) as QueryResult<HomologationReadinessBundle>),
+    staleTime: 20_000,
+  });
+}
+
+export function useSetInsuranceProviderHomologationStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { providerId: string; status: HomologationStatus; notes?: string }) =>
+      unwrap(
+        (await setInsuranceProviderHomologationStatusFn({ data: input })) as MutationResult<unknown>,
+      ),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: opsKeys.tissHomologation() });
+    },
   });
 }
 
