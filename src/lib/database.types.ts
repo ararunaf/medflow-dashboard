@@ -4492,6 +4492,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      encrypt_patient_name: {
+        Args: { plain: string };
+        Returns: string;
+      };
       claim_capture_pipeline_job: {
         Args: { p_worker_id: string };
         Returns: {

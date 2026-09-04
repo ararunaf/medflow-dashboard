@@ -10,15 +10,39 @@ type GuideInsert = Database["public"]["Tables"]["tiss_guides"]["Insert"];
 
 export type TissGuideWithItems = TissGuideRow & { items: TissGuideItemRow[] };
 
+/**
+ * F5-S2: `patient_name` é criptografado em repouso (pgcrypto, ver
+ * 20260903160000_encrypt_tiss_patient_name.sql) — a coluna bruta guarda
+ * ciphertext ilegível. `patient_name_decrypted` é o campo computado do
+ * PostgREST (função SECURITY DEFINER que decripta sob a RLS normal da
+ * tabela) que devolve o texto plano de verdade. Todo SELECT deste service
+ * pede `*, patient_name_decrypted` e substitui `patient_name` pelo valor
+ * decriptado antes de devolver — o resto do app nunca precisa saber que a
+ * coluna é criptografada, só continua lendo `.patient_name`.
+ */
+type RawGuideRow = TissGuideRow & { patient_name_decrypted: string };
+
+function withDecryptedName(row: RawGuideRow): TissGuideRow {
+  const { patient_name_decrypted, ...rest } = row;
+  return { ...rest, patient_name: patient_name_decrypted };
+}
+
+async function encryptPatientName(ctx: ServiceCtx, plain: string): Promise<string> {
+  const { data, error } = await ctx.client.rpc("encrypt_patient_name", { plain });
+  if (error) throw mapPostgresError(error);
+  return data as unknown as string;
+}
+
 export async function listTissGuides(ctx: ServiceCtx): Promise<TissGuideRow[]> {
   assertCan(ctx.role, "tiss:read");
   const { data, error } = await ctx.client
     .from("tiss_guides")
-    .select("*")
+    .select("*, patient_name_decrypted")
     .eq("tenant_id", ctx.tenantId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .returns<RawGuideRow[]>();
   if (error) throw mapPostgresError(error);
-  return data ?? [];
+  return (data ?? []).map(withDecryptedName);
 }
 
 export async function getTissGuideWithItems(
@@ -28,10 +52,11 @@ export async function getTissGuideWithItems(
   assertCan(ctx.role, "tiss:read");
   const { data: guide, error: gErr } = await ctx.client
     .from("tiss_guides")
-    .select("*")
+    .select("*, patient_name_decrypted")
     .eq("tenant_id", ctx.tenantId)
     .eq("id", guideId)
-    .maybeSingle();
+    .maybeSingle()
+    .returns<RawGuideRow | null>();
   if (gErr) throw mapPostgresError(gErr);
   if (!guide) return null;
   const { data: items, error: iErr } = await ctx.client
@@ -41,7 +66,7 @@ export async function getTissGuideWithItems(
     .eq("guide_id", guideId)
     .order("execution_date", { ascending: true });
   if (iErr) throw mapPostgresError(iErr);
-  return { ...guide, items: items ?? [] };
+  return { ...withDecryptedName(guide), items: items ?? [] };
 }
 
 export async function createTissGuide(
@@ -62,10 +87,11 @@ export async function createTissGuide(
   },
 ): Promise<TissGuideRow> {
   assertCan(ctx.role, "tiss:write");
+  const patientName = input.patient_name.trim();
   const row: GuideInsert = {
     tenant_id: ctx.tenantId,
     guide_type: input.guide_type,
-    patient_name: input.patient_name.trim(),
+    patient_name: await encryptPatientName(ctx, patientName),
     insurance_provider_id: input.insurance_provider_id,
     insurance_contract_id: input.insurance_contract_id ?? null,
     professional_id: input.professional_id,
@@ -80,15 +106,18 @@ export async function createTissGuide(
   };
   const { data, error } = await ctx.client.from("tiss_guides").insert(row).select("*").single();
   if (error) throw mapPostgresError(error);
+  // `data.patient_name` aqui é o ciphertext recém-gravado — já temos o
+  // texto plano em memória, não precisa de round-trip de decrypt.
+  const guide: TissGuideRow = { ...data, patient_name: patientName };
   await recordOperationalEventSafe(ctx, {
     entity_type: "tiss_guide",
-    entity_id: data.id,
+    entity_id: guide.id,
     event_type: "tiss_guide_created",
     severity: "info",
-    description: `Guia TISS criada (${data.guide_type}) — ${data.patient_name}`,
-    metadata: { guide_id: data.id, guide_type: data.guide_type },
+    description: `Guia TISS criada (${guide.guide_type}) — ${guide.patient_name}`,
+    metadata: { guide_id: guide.id, guide_type: guide.guide_type },
   });
-  return data;
+  return guide;
 }
 
 export async function updateTissGuide(
@@ -114,18 +143,25 @@ export async function updateTissGuide(
   >,
 ): Promise<TissGuideRow> {
   assertCan(ctx.role, "tiss:write");
+  const trimmedPatientName =
+    patch.patient_name !== undefined ? patch.patient_name.trim() : undefined;
   const { data, error } = await ctx.client
     .from("tiss_guides")
     .update({
       ...patch,
-      patient_name: patch.patient_name?.trim(),
+      patient_name:
+        trimmedPatientName !== undefined
+          ? await encryptPatientName(ctx, trimmedPatientName)
+          : undefined,
       updated_at: new Date().toISOString(),
     })
     .eq("tenant_id", ctx.tenantId)
     .eq("id", guideId)
-    .select("*")
-    .single();
+    .select("*, patient_name_decrypted")
+    .single()
+    .returns<RawGuideRow>();
   if (error) throw mapPostgresError(error);
+  const guide = withDecryptedName(data);
   await recordOperationalEventSafe(ctx, {
     entity_type: "tiss_guide",
     entity_id: guideId,
@@ -134,7 +170,7 @@ export async function updateTissGuide(
     description: "Guia TISS atualizada",
     metadata: { guide_id: guideId, patch },
   });
-  return data;
+  return guide;
 }
 
 export async function setTissGuideStatus(

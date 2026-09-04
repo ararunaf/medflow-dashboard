@@ -7,12 +7,21 @@
  * - `requireObject` / `requireString`: validators leves para o `inputValidator()`
  *   de `createServerFn`.
  *
+ * F5-S2: toda exceção INESPERADA (não `DomainError` — ou seja, um bug real,
+ * não uma regra de negócio rejeitando algo) que escapa de `fn(ctx)` é
+ * automaticamente registrada em `operational_errors`, não só devolvida ao
+ * cliente. Antes disso, um erro inesperado em qualquer server function
+ * virava um toast na tela do usuário e desaparecia — ninguém do lado do
+ * servidor jamais saberia que aconteceu. `DomainError` (validação, RBAC
+ * etc.) não é logado aqui — é comportamento esperado, não incidente.
+ *
  * Server-only — protegido pelo `importProtection` em `vite.config.ts`.
  */
 import { DomainError, ValidationError, isDomainError } from "@/lib/domain/operations/errors";
 import { sanitizeString } from "@/lib/security/sanitize-input";
 import { validateSessionState } from "@/lib/security/session-validation";
 import { writeSecurityAudit } from "@/lib/server/security-audit-writer";
+import { insertOperationalError } from "@/lib/services/operational-error/operational-error-service";
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import { requireOperationalAuth } from "./operational-auth";
 
@@ -37,6 +46,7 @@ function toMutationError(err: unknown): MutationError {
 }
 
 async function runWithCtx<T>(fn: (ctx: ServiceCtx) => Promise<T>): Promise<MutationResult<T>> {
+  let ctx: ServiceCtx | null = null;
   try {
     const auth = await requireOperationalAuth();
     const sessionCheck = validateSessionState({
@@ -62,7 +72,7 @@ async function runWithCtx<T>(fn: (ctx: ServiceCtx) => Promise<T>): Promise<Mutat
         },
       };
     }
-    const ctx: ServiceCtx = {
+    ctx = {
       client: auth.client,
       tenantId: auth.tenantId,
       role: auth.profile.role,
@@ -73,7 +83,20 @@ async function runWithCtx<T>(fn: (ctx: ServiceCtx) => Promise<T>): Promise<Mutat
     const data = await fn(ctx);
     return { ok: true, data };
   } catch (err) {
-    return { ok: false, error: toMutationError(err) };
+    const mutErr = toMutationError(err);
+    if (ctx && mutErr.code === "internal_error") {
+      // Aguardado (não fire-and-forget): em runtime serverless/edge (Cloudflare
+      // Workers), uma promise não aguardada pode ser cancelada assim que a
+      // resposta é enviada — sem await, o registro do incidente não teria
+      // garantia nenhuma de realmente acontecer.
+      await insertOperationalError(ctx, {
+        severity: "critical",
+        source: "server",
+        message: mutErr.message,
+        stackSnippet: err instanceof Error ? (err.stack ?? null) : null,
+      }).catch(() => undefined);
+    }
+    return { ok: false, error: mutErr };
   }
 }
 

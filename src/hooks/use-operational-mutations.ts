@@ -59,6 +59,7 @@ import { opsKeys } from "@/lib/queries/keys";
 import { describeError, unwrap } from "@/lib/queries/result";
 import { suppressOnce } from "@/lib/realtime/suppression";
 import { toast } from "@/lib/toast/bus";
+import { reportOperationalFailureClient } from "@/lib/observability/report-operational-failure-client";
 
 type MutationHookOptions<TInput, TOutput> = Omit<
   UseMutationOptions<TOutput, Error, TInput>,
@@ -74,8 +75,15 @@ type OnErrorArgs<TOutput, TInput> = Parameters<
 >;
 
 function reportError(err: unknown) {
-  const { message } = describeError(err);
+  const { message, code } = describeError(err);
   toast.error("Erro operacional", message);
+  // "internal_error" já é registrado do lado do servidor (fn-helpers.ts,
+  // runWithCtx) — reportar de novo aqui duplicaria o incidente. "unknown" é
+  // o que o servidor NUNCA vê (falha de rede, exceção só no cliente antes
+  // de completar o round-trip) — esse sim precisa ser registrado aqui.
+  if (code === "unknown") {
+    void reportOperationalFailureClient({ source: "client", err, severity: "operational" });
+  }
 }
 
 // -------------------------------------------------------------------------
