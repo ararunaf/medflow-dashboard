@@ -25,6 +25,7 @@ import type {
   CorrectionProposalStore,
   UpdateCorrectionProposalInput,
 } from "../correction/types/correction-proposal";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type RunCaptureCorrectionViaEnterpriseResult = GenerateCorrectionProposalsResult & {
@@ -67,6 +68,13 @@ export async function runCaptureCorrectionViaEnterprise(
   ctx: ServiceCtx,
   sessionId: string,
 ): Promise<RunCaptureCorrectionViaEnterpriseResult> {
+  const probe = await probeCaptureCorrectionViaEnterprise();
+  if (!probe || !probe.autoFillRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("correction", {
+      autoFillRuntimeOk: probe?.autoFillRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const autoFill = runtime.getAutoFillRuntimePort();
 

@@ -22,6 +22,7 @@ import {
   type RunCaptureParserResult,
 } from "../parser/services/tiss-parser-service";
 import type { StructuredGuide } from "../parser/types/structured-guide";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type RunCaptureParserViaEnterpriseResult = RunCaptureParserResult & {
@@ -64,6 +65,13 @@ export async function runCaptureParserViaEnterprise(
   ctx: ServiceCtx,
   sessionId: string,
 ): Promise<RunCaptureParserViaEnterpriseResult> {
+  const probe = await probeCaptureParserViaEnterprise();
+  if (!probe || !probe.extractionRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("parser", {
+      extractionRuntimeOk: probe?.extractionRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const extraction = runtime.getDocumentExtractionRuntimePort();
 

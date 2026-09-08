@@ -24,6 +24,7 @@ import {
   type RunContractIntelligenceResult,
 } from "../contract/services/contract-intelligence-service";
 import type { ContractIntelligenceReport } from "../contract/types/contract-intelligence-report";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type RunCaptureContractViaEnterpriseResult = RunContractIntelligenceResult & {
@@ -66,6 +67,13 @@ export async function runCaptureContractViaEnterprise(
   ctx: ServiceCtx,
   sessionId: string,
 ): Promise<RunCaptureContractViaEnterpriseResult> {
+  const probe = await probeCaptureContractViaEnterprise();
+  if (!probe || !probe.rulePackEngineOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("contract", {
+      rulePackEngineOk: probe?.rulePackEngineOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const rulePacks = runtime.getRulePackEnginePort();
 

@@ -24,6 +24,7 @@ import {
 } from "../review/review-workspace-store";
 import type { ReviewWorkspaceMetadata, SetReviewApprovalInput } from "../review/types";
 import type { CaptureSessionStatus } from "../types";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 import { coordinateBlocoCViaEnterprise } from "./process-bloco-c-via-enterprise";
 
@@ -82,6 +83,13 @@ export async function setReviewApprovalViaEnterprise(
   ctx: ServiceCtx,
   input: SetReviewApprovalInput,
 ): Promise<SetReviewApprovalViaEnterpriseResult> {
+  const probe = await probeCaptureReviewViaEnterprise();
+  if (!probe || !probe.validationRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("review", {
+      validationRuntimeOk: probe?.validationRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const validation = runtime.getValidationRuntimePort();
 

@@ -21,6 +21,7 @@ import {
   type RunCaptureAuditResult,
 } from "../audit/services/preventive-audit-service";
 import type { AuditReport } from "../audit/types/audit-report";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type RunCaptureAuditViaEnterpriseResult = RunCaptureAuditResult & {
@@ -63,6 +64,13 @@ export async function runCaptureAuditViaEnterprise(
   ctx: ServiceCtx,
   sessionId: string,
 ): Promise<RunCaptureAuditViaEnterpriseResult> {
+  const probe = await probeCaptureAuditViaEnterprise();
+  if (!probe || !probe.auditRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("audit", {
+      auditRuntimeOk: probe?.auditRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const audit = runtime.getAuditRuntimePort();
 

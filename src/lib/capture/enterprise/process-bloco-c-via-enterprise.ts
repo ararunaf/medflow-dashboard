@@ -19,6 +19,7 @@
  * Nenhum módulo de produto deve importar runtimes Bloco C diretamente —
  * apenas este módulo (e o composition root `getEnterpriseRuntime`).
  */
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type BlocoCCoordinationTrigger = "review-approved" | "probe" | "manual";
@@ -108,6 +109,19 @@ export async function probeCaptureBlocoCViaEnterprise(): Promise<CaptureBlocoCVi
 export async function coordinateBlocoCViaEnterprise(
   input: CoordinateBlocoCViaEnterpriseInput,
 ): Promise<CoordinateBlocoCViaEnterpriseResult> {
+  // Gate só nos Ports que esta função de fato usa (workflow/batch/protocol).
+  // Os demais campos do probe (authorization/operator/soap/return/
+  // reconciliation/xmlTiss) são diagnóstico geral do Bloco C, não
+  // dependência direta desta coordenação.
+  const probe = await probeCaptureBlocoCViaEnterprise();
+  if (!probe || !probe.workflowRuntimeOk || !probe.batchRuntimeOk || !probe.protocolRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("bloco-c", {
+      workflowRuntimeOk: probe?.workflowRuntimeOk ?? false,
+      batchRuntimeOk: probe?.batchRuntimeOk ?? false,
+      protocolRuntimeOk: probe?.protocolRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const workflow = runtime.getWorkflowRuntimePort();
   const batch = runtime.getBatchRuntimePort();

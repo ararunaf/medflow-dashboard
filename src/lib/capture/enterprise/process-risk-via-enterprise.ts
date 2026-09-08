@@ -25,6 +25,7 @@ import {
 } from "../risk/services/glosa-risk-service";
 import type { RiskDashboardView } from "../risk/engine/risk-dashboard";
 import type { RiskAssessmentReport } from "../risk/types/risk-assessment";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type RunCaptureRiskViaEnterpriseResult = RunGlosaRiskResult & {
@@ -67,6 +68,13 @@ export async function runCaptureRiskViaEnterprise(
   ctx: ServiceCtx,
   sessionId: string,
 ): Promise<RunCaptureRiskViaEnterpriseResult> {
+  const probe = await probeCaptureRiskViaEnterprise();
+  if (!probe || !probe.qualityRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("risk", {
+      qualityRuntimeOk: probe?.qualityRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const quality = runtime.getQualityRuntimePort();
 

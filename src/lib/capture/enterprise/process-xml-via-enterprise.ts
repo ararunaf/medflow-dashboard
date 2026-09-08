@@ -22,6 +22,7 @@ import {
   exportTissBatchXml,
   listTissBatchExports,
 } from "@/lib/services/tiss/xml-export-service";
+import { CaptureEnterpriseRuntimeUnavailableError } from "./capture-enterprise-runtime-unavailable-error";
 import { resolveCaptureEnterpriseRuntime } from "./resolve-enterprise-runtime";
 
 export type ExportTissBatchXmlViaEnterpriseResult = {
@@ -77,6 +78,17 @@ export async function exportTissBatchXmlViaEnterprise(
   ctx: ServiceCtx,
   batchId: string,
 ): Promise<ExportTissBatchXmlViaEnterpriseResult> {
+  // Gate só nos Ports que esta função de fato usa (generation + xmlTiss).
+  // xmlRuntimeOk fica no probe para diagnóstico geral da cadeia XML, mas
+  // não é dependência direta de exportTissBatchXmlViaEnterprise.
+  const probe = await probeCaptureXmlViaEnterprise();
+  if (!probe || !probe.xmlGenerationRuntimeOk || !probe.xmlTissRuntimeOk) {
+    throw new CaptureEnterpriseRuntimeUnavailableError("xml", {
+      xmlGenerationRuntimeOk: probe?.xmlGenerationRuntimeOk ?? false,
+      xmlTissRuntimeOk: probe?.xmlTissRuntimeOk ?? false,
+    });
+  }
+
   const runtime = resolveCaptureEnterpriseRuntime();
   const generation = runtime.getXMLGenerationRuntimePort();
   const xmlTiss = runtime.getXMLTISSRuntimePort();
