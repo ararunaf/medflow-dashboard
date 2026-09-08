@@ -12,70 +12,83 @@
 
 ## Status das Sprints
 
+> **Nota de auditoria (correção de legenda):** até esta revisão, toda linha
+> desta tabela usava o mesmo símbolo `✅`, independentemente de a sprint ser
+> Discovery (mapeamento sem implementação), Activation (infraestrutura
+> ativada) ou Production Certification (certificação de produção). Isso
+> misturava graus de maturidade muito diferentes sob um único selo. A coluna
+> abaixo agora usa o estágio que o próprio nome/descrição de cada sprint já
+> declarava — nenhum conteúdo foi reavaliado, só a representação visual do
+> que já estava escrito deixou de ser uniforme. Ver [`Legenda`](#legenda).
+
 | Sprint | Descrição | Status |
 |--------|-----------|--------|
-| **OPER-INF-Q** | Ativar backend persistente do `QueueRuntimePort` | ✅ Concluída |
-| **OPER-INF-W** | Ativar Worker operacional via `QueueRuntimePort` | ✅ Concluída |
-| **OPER-INF-S** | Ativar Scheduler operacional via `WorkerRuntimePort` | ✅ Concluída |
-| **OPER-INF-D** | Ativar Dead Letter operacional via `DeadLetterRuntimePort` → `QueueRuntimePort` | ✅ Concluída |
-| **OPER-INF-O** | Ativar Observability operacional via Ports existentes (somente leitura) | ✅ Concluída |
-| **ARC-25** | Documentar e congelar a arquitetura oficial do Enterprise Runtime | ✅ Concluída |
-| **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ✅ Concluída |
-| **TISS-RUNTIME-01D** | Discovery da arquitetura funcional do TISS Runtime | ✅ Concluída |
-| **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ✅ Concluída |
-| **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ✅ Concluída |
-| **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ✅ Concluída |
-| **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ✅ Concluída |
-| **TISS-RUNTIME-02B** | Ativar Enriquecimento operacional no Worker (consumo de `VALIDATED`) | ✅ Concluída |
-| **TISS-RUNTIME-03A** | Ativar XML TISS operacional no Worker (consumo de `ENRICHED`) | ✅ Concluída |
-| **TISS-RUNTIME-03B** | Ativar Lote operacional no Worker (consumo de `XML_GENERATED`) | ✅ Concluída |
-| **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ✅ Concluída |
-| **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ✅ Concluída |
-| **A8-FREEZE-01** | Congelar oficialmente a Enterprise Runtime Baseline v1.1 | ✅ Concluída |
-| **A8-ADL-01** | Criar Architectural Decision Log da Baseline v1.1 | ✅ Concluída |
-| **A9-01** | Audit Real Discovery — mapear arquitetura Audit sem implementação | ✅ Concluída |
-| **A9-02** | Audit Real Activation — ativar provider real-tiss do AuditRuntimePort | ✅ Concluída |
-| **A9-03** | Audit Real Production Certification — certificar provider real-tiss | ✅ Concluída |
-| **A10-01** | Completed Real Discovery — auditar arquitetura do Completed Runtime | ✅ Concluída |
-| **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ✅ Concluída |
-| **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ✅ Concluída |
-| **A10-FINAL-01** | Encerramento do Bloco A | ✅ Concluída |
-| **A10-DOC-02** | Sincronização da documentação do Bloco A | ✅ Concluída |
-| **S1-01** | Enterprise Security Discovery — mapear arquitetura de seguranca sem implementação | ✅ Concluída |
-| **S1-02** | Enterprise Security Activation — infraestrutura canônica do `SecurityRuntimePort` | ✅ Concluída |
-| **S1-03** | Enterprise Security Production Certification — certificação de produção do `real-tiss` e scaffolding | ✅ Concluída |
-| **S2-01** | Identity & Authentication Discovery — mapear identidade e autenticação existente sem implementação | ✅ Concluída |
-|| **S2-02** | Identity & Authentication Activation — infraestrutura canônica do `IdentityRuntimePort` | ✅ Concluída |
-| **S2-03** | Identity Runtime Production Certification — certificação de produção do `real-tiss` do `IdentityRuntimePort` | ✅ Concluída |
-| **S3-01** | Authorization & Access Control Discovery — mapear arquitetura de autorização e controle de acesso sem implementação | ✅ Concluída |
-|| **S3-02** | Authorization & Access Control Activation — infraestrutura canônica do `AuthorizationRuntimePort` | ✅ Concluída |
-|| **S3-03** | Authorization & Access Control Production Certification — certificação de produção do `real-tiss` do `AuthorizationRuntimePort` | ✅ Concluída |
+| **OPER-INF-Q** | Ativar backend persistente do `QueueRuntimePort` | ⚙️ A |
+| **OPER-INF-W** | Ativar Worker operacional via `QueueRuntimePort` | ⚙️ A |
+| **OPER-INF-S** | Ativar Scheduler operacional via `WorkerRuntimePort` | ⚙️ A |
+| **OPER-INF-D** | Ativar Dead Letter operacional via `DeadLetterRuntimePort` → `QueueRuntimePort` | ⚙️ A |
+| **OPER-INF-O** | Ativar Observability operacional via Ports existentes (somente leitura) | ⚙️ A |
+| **ARC-25** | Documentar e congelar a arquitetura oficial do Enterprise Runtime | 📕 G |
+| **OPER-INF-R** | Ativar Retry operacional (decisão de reenvio) | ⚙️ A |
+| **TISS-RUNTIME-01D** | Discovery da arquitetura funcional do TISS Runtime | 🔍 D |
+| **TISS-RUNTIME-01A** | Ativar entrada operacional do boletim no pipeline oficial (Intake → Queue) | ⚙️ A |
+| **TISS-RUNTIME-01B** | Ativar OCR operacional no Worker (consumo via `QueueRuntimePort`) | ⚙️ A |
+| **TISS-RUNTIME-01C** | Ativar Parser / Extraction operacional no mesmo pipeline | ⚙️ A |
+| **TISS-RUNTIME-02A** | Ativar Validação operacional no Worker (consumo de `PARSED`) | ⚙️ A |
+| **TISS-RUNTIME-02B** | Ativar Enriquecimento operacional no Worker (consumo de `VALIDATED`) | ⚙️ A |
+| **TISS-RUNTIME-03A** | Ativar XML TISS operacional no Worker (consumo de `ENRICHED`) | ⚙️ A |
+| **TISS-RUNTIME-03B** | Ativar Lote operacional no Worker (consumo de `XML_GENERATED`) | ⚙️ A |
+| **TISS-RUNTIME-04A** | Ativar Protocolo operacional no Worker (consumo de `BATCH_CREATED`) | ⚙️ A |
+| **TISS-RUNTIME-04B** | Ativar Persistência operacional no Worker (consumo de `PROTOCOL_SENT`) | ⚙️ A |
+| **A8-FREEZE-01** | Congelar oficialmente a Enterprise Runtime Baseline v1.1 | 📕 G |
+| **A8-ADL-01** | Criar Architectural Decision Log da Baseline v1.1 | 📕 G |
+| **A9-01** | Audit Real Discovery — mapear arquitetura Audit sem implementação | 🔍 D |
+| **A9-02** | Audit Real Activation — ativar provider real-tiss do AuditRuntimePort | ⚙️ A |
+| **A9-03** | Audit Real Production Certification — certificar provider real-tiss | 🏆 PC |
+| **A10-01** | Completed Real Discovery — auditar arquitetura do Completed Runtime | 🔍 D |
+| **TISS-RUNTIME-05A** | Ativar Auditoria operacional no Worker (consumo de `PERSISTED`) | ⚙️ A |
+| **TISS-RUNTIME-05B** | Ativar Completed operacional no Worker (consumo de `AUDITED`) | ⚙️ A |
+| **A10-FINAL-01** | Encerramento do Bloco A | 📕 G |
+| **A10-DOC-02** | Sincronização da documentação do Bloco A | 📕 G |
+| **S1-01** | Enterprise Security Discovery — mapear arquitetura de seguranca sem implementação | 🔍 D |
+| **S1-02** | Enterprise Security Activation — infraestrutura canônica do `SecurityRuntimePort` | ⚙️ A |
+| **S1-03** | Enterprise Security Production Certification — certificação de produção do `real-tiss` e scaffolding | 🏆 PC |
+| **S2-01** | Identity & Authentication Discovery — mapear identidade e autenticação existente sem implementação | 🔍 D |
+|| **S2-02** | Identity & Authentication Activation — infraestrutura canônica do `IdentityRuntimePort` | ⚙️ A |
+| **S2-03** | Identity Runtime Production Certification — certificação de produção do `real-tiss` do `IdentityRuntimePort` | 🏆 PC |
+| **S3-01** | Authorization & Access Control Discovery — mapear arquitetura de autorização e controle de acesso sem implementação | 🔍 D |
+|| **S3-02** | Authorization & Access Control Activation — infraestrutura canônica do `AuthorizationRuntimePort` | ⚙️ A |
+|| **S3-03** | Authorization & Access Control Production Certification — certificação de produção do `real-tiss` do `AuthorizationRuntimePort` | 🏆 PC |
 
-|||| **S4-01** | Enterprise Tenant Runtime Discovery — mapear arquitetura de tenants sem implementação | ✅ Concluída |
-|||| **S4-02** | Enterprise Tenant Runtime Activation — infraestrutura canônica do `TenantRuntimePort` | ✅ Concluída |
-||||| **S4-03** | Enterprise Tenant Runtime Production Certification — certificação de produção do `TenantRuntimePort` | ✅ Concluída |
-|||||| **S4-FINAL-01** | Enterprise Security Foundation Final Certification | ✅ Concluída |
-|| **S5-01** | Compliance & Governance Discovery — mapear arquitetura de compliance e governança sem implementação | ✅ Concluída |
-|| **S5-02** | Compliance & Governance Runtime Activation — infraestrutura canônica do `ComplianceRuntimePort` | ✅ Concluída |
+|||| **S4-01** | Enterprise Tenant Runtime Discovery — mapear arquitetura de tenants sem implementação | 🔍 D |
+|||| **S4-02** | Enterprise Tenant Runtime Activation — infraestrutura canônica do `TenantRuntimePort` | ⚙️ A |
+||||| **S4-03** | Enterprise Tenant Runtime Production Certification — certificação de produção do `TenantRuntimePort` | 🏆 PC |
+|||||| **S4-FINAL-01** | Enterprise Security Foundation Final Certification | 📕 G |
+|| **S5-01** | Compliance & Governance Discovery — mapear arquitetura de compliance e governança sem implementação | 🔍 D |
+|| **S5-02** | Compliance & Governance Runtime Activation — infraestrutura canônica do `ComplianceRuntimePort` | ⚙️ A |
 
-||| **S5-03** | Compliance Runtime Production Certification — certificação de produção do `ComplianceRuntimePort` | ✅ Concluída |
-|| **S5-FINAL-01** | Enterprise Compliance Foundation Final Certification | ✅ Concluída |
-|| **S6-01** | Enterprise Governance Discovery — mapear componentes de governança sem implementação | ✅ Concluída |
-|| **S6-02** | Enterprise Governance Runtime Activation — infraestrutura canônica do `GovernanceRuntimePort` | ✅ Concluída |
-|| **S6-03** | Governance Runtime Production Certification — certificação de produção do `GovernanceRuntimePort` | ✅ Concluída |
-|| **S6-FINAL-01** | Enterprise Governance Foundation Final Certification | ✅ Concluída |
+||| **S5-03** | Compliance Runtime Production Certification — certificação de produção do `ComplianceRuntimePort` | 🏆 PC |
+|| **S5-FINAL-01** | Enterprise Compliance Foundation Final Certification | 📕 G |
+|| **S6-01** | Enterprise Governance Discovery — mapear componentes de governança sem implementação | 🔍 D |
+|| **S6-02** | Enterprise Governance Runtime Activation — infraestrutura canônica do `GovernanceRuntimePort` | ⚙️ A |
+|| **S6-03** | Governance Runtime Production Certification — certificação de produção do `GovernanceRuntimePort` | 🏆 PC |
+|| **S6-FINAL-01** | Enterprise Governance Foundation Final Certification | 📕 G |
 
 ## Legenda
 
-| Símbolo | Significado |
-|---------|-------------|
-| ✅ | Concluído — Discovery, Activation e/ou Production Certification realizados. |
-| ⚡ | Activation concluído, mas Production Certification pendente. |
-| ⏸️ | Pendente — ainda sem provider real, sem Production Certification e aguardando sprint futura. |
-| 🔮 | Future Capability — previsto no roadmap, mas não iniciado. |
-| — | Não aplicável / não iniciado. |
+| Símbolo | Estágio | Significado |
+|---------|---------|-------------|
+| 🔍 D | Discovery | Mapeamento/análise da arquitetura concluído — **sem implementação**. |
+| ⚙️ A | Activation | Infraestrutura/implementação canônica ativada (inclui providers `real-tiss` funcionais). **Não é, por si só, certificação de produção nem prova E2E contra infraestrutura real** — ver ressalva abaixo. |
+| 🏆 PC | Production Certified | Teste de certificação de produção dedicado aprovado para esta capability específica. |
+| 📕 G | Governance | Marco documental/de governança (freeze de baseline, ADL, encerramento de bloco) — não é uma capability técnica isolada. |
+| ⏸️ | Pendente | Ainda sem provider real, aguardando sprint futura. |
+| 🔮 | Future | Capability prevista no roadmap, ainda não iniciada. |
+| — | N/A | Não aplicável. |
 
-**Roadmap vigente:** ✅ OPER-INF-Q · ✅ OPER-INF-W · ✅ OPER-INF-S · ✅ OPER-INF-D · ✅ OPER-INF-O · ✅ ARC-25 · ✅ OPER-INF-R · ✅ TISS-RUNTIME-01D · ✅ TISS-RUNTIME-01A · ✅ TISS-RUNTIME-01B · ✅ TISS-RUNTIME-01C · ✅ TISS-RUNTIME-02A · ✅ TISS-RUNTIME-02B · ✅ TISS-RUNTIME-03A · ✅ TISS-RUNTIME-03B · ✅ TISS-RUNTIME-04A · ✅ TISS-RUNTIME-04B · ✅ A8-FREEZE-01 · ✅ TISS-RUNTIME-05A · ✅ TISS-RUNTIME-05B · ✅ A10-FINAL-01 · ✅ A10-DOC-02 · ✅ S1-01 · ✅ S1-02 · ✅ S1-03 · ✅ S2-01 · ✅ S2-02 · ✅ S2-03 · ✅ S3-01 · ✅ S3-02 · ✅ S3-03 · ✅ S4-01 · ✅ S4-02 · ✅ S4-03 · ✅ S4-FINAL-01 · ✅ S5-01 · ✅ S5-02 · ✅ S5-03 · ✅ S5-FINAL-01 · ✅ S6-01 · ✅ S6-02 · ✅ S6-03 · ✅ S6-FINAL-01
+**Ressalva sobre `⚙️ Activation` e `🏆 PC`:** essas marcações registram que a sprint correspondente foi concluída e seu teste passou — não são, por si só, garantia de que a capability está pronta para produção real. Achados de auditoria já confirmaram casos concretos onde isso importa: `OPER-INF-Q` (Activation) pode cair silenciosamente para backend em memória fora do caminho feliz (mitigado em parte pelo fail-closed de `queue-runtime-backend.ts`), e testes de "Production Certification"/E2E historicamente usaram mocks/backends in-memory em pontos importantes da cadeia. Tratar `⚙️ A`/`🏆 PC` como prova de prontidão operacional sem ler o teste/código correspondente repete o mesmo erro que motivou esta correção de legenda.
+
+**Roadmap vigente:** OPER-INF-Q · OPER-INF-W · OPER-INF-S · OPER-INF-D · OPER-INF-O · ARC-25 · OPER-INF-R · TISS-RUNTIME-01D · TISS-RUNTIME-01A · TISS-RUNTIME-01B · TISS-RUNTIME-01C · TISS-RUNTIME-02A · TISS-RUNTIME-02B · TISS-RUNTIME-03A · TISS-RUNTIME-03B · TISS-RUNTIME-04A · TISS-RUNTIME-04B · A8-FREEZE-01 · TISS-RUNTIME-05A · TISS-RUNTIME-05B · A10-FINAL-01 · A10-DOC-02 · S1-01 · S1-02 · S1-03 · S2-01 · S2-02 · S2-03 · S3-01 · S3-02 · S3-03 · S4-01 · S4-02 · S4-03 · S4-FINAL-01 · S5-01 · S5-02 · S5-03 · S5-FINAL-01 · S6-01 · S6-02 · S6-03 · S6-FINAL-01 — ver estágio individual de cada uma na tabela acima, não presumir maturidade uniforme.
 
 **Baseline Oficial v1.1:** [`ENTERPRISE_BASELINE_V1_1.md`](./ENTERPRISE_BASELINE_V1_1.md)
 **Architectural Decision Log:** [`ARCHITECTURAL_DECISION_LOG.md`](./ARCHITECTURAL_DECISION_LOG.md)
