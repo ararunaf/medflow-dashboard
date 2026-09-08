@@ -17,6 +17,7 @@
 import sharp from "sharp";
 import type { AIProviderPort } from "../../../enterprise/ai-provider/ports/ai-provider-port";
 import type { StructuredField, StructuredFieldPosition, StructuredGuide } from "../../parser/types/structured-guide";
+import { evaluateExternalAiPiiGate } from "./pii-external-ai-gate";
 
 export const SEMANTIC_FALLBACK_CONFIDENCE_THRESHOLD = 0.7;
 
@@ -156,6 +157,19 @@ export async function applySemanticFallback(
         ...base,
         triggered: false,
         skippedReason: `Recorte não suportado para ${mimeType} nesta sprint (só imagem: jpeg/png/webp/tiff).`,
+        newValue: null,
+        newConfidence: null,
+        applied: false,
+      });
+      continue;
+    }
+
+    const gate = evaluateExternalAiPiiGate(field);
+    if (!gate.allowed) {
+      decisions.push({
+        ...base,
+        triggered: false,
+        skippedReason: gate.reason,
         newValue: null,
         newConfidence: null,
         applied: false,

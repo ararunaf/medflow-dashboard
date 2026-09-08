@@ -103,11 +103,16 @@ export class OcrService {
       const { storagePath } = await persistOcrResult(ctx, sessionId, orchestrated.result);
       const summary = buildOcrSummaryFromResult(orchestrated.result, storagePath);
 
+      // SEC-PII-01: nenhum texto bruto do OCR (nome, CPF, etc.) vai para
+      // capture_sessions.metadata — jsonb legível por qualquer membro do
+      // tenant com acesso a capture (ver policy de least privilege na
+      // migration 20260908090000). O texto completo já está em
+      // ocr_result.json (Storage, isolado por tenant), que é onde o Parser
+      // e a Review UI o consomem — este preview nunca teve um consumidor.
       metadata = {
         ...metadata,
         capturePhase: "ocr_completed",
         ocr: summary,
-        ocrFullTextPreview: orchestrated.result.fullText.slice(0, 2000),
       };
 
       await emitOcrEvent(ctx, sessionId, metadata, "provider_used", {

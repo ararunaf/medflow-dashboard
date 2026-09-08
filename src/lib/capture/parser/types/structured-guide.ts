@@ -39,9 +39,12 @@ export type StructuredFieldPosition = {
   normalized: { x: number; y: number; width: number; height: number };
 };
 
+/**
+ * Metadados de proveniência OCR do campo — sem o texto bruto da linha
+ * (SEC-PII-01: `lineText`/`wordTexts` duplicavam PII já presente em
+ * `rawValue`/`value` e não tinham consumidor além de dois asserts de teste).
+ */
 export type StructuredFieldOcrOrigin = {
-  lineText: string;
-  wordTexts: string[];
   provider: string;
   lineConfidence: number;
 };

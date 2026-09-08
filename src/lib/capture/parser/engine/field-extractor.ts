@@ -220,8 +220,6 @@ export function extractFields(
     const position: StructuredFieldPosition | null = best ? buildPosition(best.line) : null;
     const ocrOrigin = best
       ? {
-          lineText: best.line.text,
-          wordTexts: best.line.words,
           provider: ocr.provider,
           lineConfidence: best.line.confidence,
         }
@@ -318,8 +316,6 @@ function extractProcedureLines(
         confidence: line.confidence,
         position: buildPosition(line),
         ocrOrigin: {
-          lineText: line.text,
-          wordTexts: line.words,
           provider: ocr.provider,
           lineConfidence: line.confidence,
         },
@@ -339,8 +335,6 @@ function extractProcedureLines(
         confidence: line.confidence * 0.9,
         position: buildPosition(line),
         ocrOrigin: {
-          lineText: line.text,
-          wordTexts: line.words,
           provider: ocr.provider,
           lineConfidence: line.confidence,
         },
@@ -360,8 +354,6 @@ function extractProcedureLines(
         confidence: line.confidence * 0.85,
         position: buildPosition(line),
         ocrOrigin: {
-          lineText: line.text,
-          wordTexts: line.words,
           provider: ocr.provider,
           lineConfidence: line.confidence,
         },

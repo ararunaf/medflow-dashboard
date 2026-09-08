@@ -377,11 +377,13 @@ describe("TISS Parser — Persistência (estrutura)", () => {
     assert.equal(STRUCTURED_GUIDE_FILENAME, "structured_guide.json");
   });
 
-  it("StructuredGuide preserva origem OCR", () => {
+  it("StructuredGuide preserva origem OCR (sem duplicar texto bruto — SEC-PII-01)", () => {
     const guide = parseOcrToStructuredGuide(CONSULTA_OCR);
     const field = guide.fields.operator_ans_code!;
     assert.equal(field.ocrOrigin?.provider, "test_provider");
-    assert.ok(field.ocrOrigin?.lineText.includes("123456"));
+    assert.ok(typeof field.ocrOrigin?.lineConfidence === "number");
+    assert.ok(!("lineText" in (field.ocrOrigin ?? {})));
+    assert.ok(!("wordTexts" in (field.ocrOrigin ?? {})));
     assert.ok(field.position?.boundingBox != null);
   });
 

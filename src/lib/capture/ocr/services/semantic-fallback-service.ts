@@ -25,6 +25,19 @@ export type RunSemanticFallbackResult = {
   appliedCount: number;
 };
 
+/**
+ * SEC-PII-01: remove `newValue` (pode ser PII lida por IA externa, ex.
+ * CPF/nome do grupo "paciente") de cada decisão antes de persistir em
+ * capture_sessions.metadata — jsonb legível por qualquer membro do tenant
+ * com acesso a capture (ver policy de least privilege). Extraída como
+ * função pura para ser testável sem precisar de ServiceCtx/Supabase.
+ */
+export function redactSemanticFallbackDecisionsForMetadata(
+  decisions: SemanticFallbackDecision[],
+): Omit<SemanticFallbackDecision, "newValue">[] {
+  return decisions.map(({ newValue: _newValue, ...rest }) => rest);
+}
+
 async function persistSessionMetadata(
   ctx: ServiceCtx,
   sessionId: string,
@@ -73,11 +86,17 @@ export class SemanticFallbackService {
         await persistStructuredGuide(ctx, sessionId, updatedGuide);
       }
 
+      // SEC-PII-01: newValue pode ser o valor que a IA externa leu de um
+      // campo do grupo "paciente" (nome, CPF...). capture_sessions.metadata
+      // é jsonb legível por qualquer membro do tenant com acesso a capture
+      // (ver policy de least privilege) — não persistimos o valor ali. O
+      // resultado retornado por esta função (decisions, sem redação)
+      // continua completo para quem chama diretamente.
       metadata = {
         ...metadata,
         semanticFallback: {
           status: "completed",
-          decisions,
+          decisions: redactSemanticFallbackDecisionsForMetadata(decisions),
           triggeredCount: decisions.filter((d) => d.triggered).length,
           appliedCount,
         },

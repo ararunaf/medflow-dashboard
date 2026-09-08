@@ -74,11 +74,14 @@ class FakeVisionProvider implements AIProviderPort {
   }
 }
 
+// group default é "operadora" (não sensível) para não acoplar os testes de
+// confiança/recorte/aplicação ao PII/External-AI Gate (SEC-PII-01) — os
+// testes do gate abaixo passam group: "paciente"/"diagnostico" explicitamente.
 function field(overrides: Partial<StructuredField> = {}): StructuredField {
   return {
     code: "beneficiary_name",
     label: "Nome do Beneficiário",
-    group: "paciente",
+    group: "operadora",
     value: "J0AO SILVA",
     rawValue: "J0AO SILVA",
     confidence: 0.4,
@@ -88,7 +91,7 @@ function field(overrides: Partial<StructuredField> = {}): StructuredField {
       boundingBox: { x: 10, y: 10, width: 50, height: 10 },
       normalized: { x: 0.1, y: 0.1, width: 0.3, height: 0.1 },
     },
-    ocrOrigin: { lineText: "J0AO SILVA", wordTexts: ["J0AO", "SILVA"], provider: "azure", lineConfidence: 0.4 },
+    ocrOrigin: { provider: "azure", lineConfidence: 0.4 },
     status: "partial",
     normalized: false,
     ...overrides,
@@ -326,5 +329,96 @@ describe("applySemanticFallback — F2-S5 (orquestração + log de decisão, DoD
       decisions.map((d) => d.fieldCode).sort(),
       ["a", "b"],
     );
+  });
+});
+
+describe("applySemanticFallback — PII/External-AI Gate (SEC-PII-01)", () => {
+  const ORIGINAL_ENV = process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI;
+  function resetEnv() {
+    if (ORIGINAL_ENV === undefined) delete process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI;
+    else process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI = ORIGINAL_ENV;
+  }
+
+  it("bloqueia campo do grupo 'paciente' sem chamar o provider quando a política está ausente", async () => {
+    delete process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI;
+    let called = false;
+    const g = guide({ low: field({ group: "paciente", confidence: 0.3 }) });
+    const port = new FakeVisionProvider(() => {
+      called = true;
+      return { ok: true, provider: "test", content: '{"value":"x","confidence":0.9}' };
+    });
+    const { decisions, guide: result } = await applySemanticFallback(port, g, await makeTestPng(), "image/png");
+    resetEnv();
+
+    assert.equal(called, false, "AIProviderPort não deve ser chamado com o gate fechado");
+    assert.equal(decisions.length, 1);
+    assert.equal(decisions[0]!.triggered, false);
+    assert.equal(decisions[0]!.applied, false);
+    assert.match(decisions[0]!.skippedReason ?? "", /PII\/External-AI Gate/);
+    assert.match(decisions[0]!.skippedReason ?? "", /paciente/);
+    assert.equal(result.fields.low!.confidence, 0.3);
+  });
+
+  it("bloqueia campo do grupo 'diagnostico' sem chamar o provider quando a política está ausente", async () => {
+    delete process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI;
+    let called = false;
+    const g = guide({ low: field({ group: "diagnostico", confidence: 0.3 }) });
+    const port = new FakeVisionProvider(() => {
+      called = true;
+      return { ok: true, provider: "test", content: '{"value":"x","confidence":0.9}' };
+    });
+    const { decisions } = await applySemanticFallback(port, g, await makeTestPng(), "image/png");
+    resetEnv();
+
+    assert.equal(called, false);
+    assert.equal(decisions[0]!.triggered, false);
+    assert.match(decisions[0]!.skippedReason ?? "", /PII\/External-AI Gate/);
+  });
+
+  it("qualquer valor diferente de 'true' (vazio, 'false', '1') continua bloqueando — fail-closed", async () => {
+    let called = false;
+    const port = new FakeVisionProvider(() => {
+      called = true;
+      return { ok: true, provider: "test", content: '{"value":"x","confidence":0.9}' };
+    });
+    for (const value of ["", "false", "1", "TRUE", "yes"]) {
+      process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI = value;
+      const g = guide({ low: field({ group: "paciente", confidence: 0.3 }) });
+      const { decisions } = await applySemanticFallback(port, g, await makeTestPng(), "image/png");
+      assert.equal(decisions[0]!.triggered, false, `valor "${value}" não deveria abrir o gate`);
+    }
+    resetEnv();
+    assert.equal(called, false);
+  });
+
+  it("permite campo do grupo 'paciente' quando a política explícita está habilitada", async () => {
+    process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI = "true";
+    const g = guide({ low: field({ group: "paciente", confidence: 0.3 }) });
+    const port = new FakeVisionProvider(() => ({
+      ok: true,
+      provider: "test",
+      content: '{"value":"JOÃO SILVA","confidence":0.9}',
+    }));
+    const { decisions, guide: result } = await applySemanticFallback(port, g, await makeTestPng(), "image/png");
+    resetEnv();
+
+    assert.equal(decisions[0]!.triggered, true);
+    assert.equal(decisions[0]!.applied, true);
+    assert.equal(result.fields.beneficiary_name!.value, "JOÃO SILVA");
+  });
+
+  it("não afeta grupos não sensíveis — sempre chama o provider independente da política", async () => {
+    delete process.env.MEDICFLOW_ALLOW_PII_EXTERNAL_AI;
+    let called = false;
+    const g = guide({ low: field({ group: "operadora", confidence: 0.3 }) });
+    const port = new FakeVisionProvider(() => {
+      called = true;
+      return { ok: true, provider: "test", content: '{"value":"x","confidence":0.9}' };
+    });
+    const { decisions } = await applySemanticFallback(port, g, await makeTestPng(), "image/png");
+    resetEnv();
+
+    assert.equal(called, true);
+    assert.equal(decisions[0]!.triggered, true);
   });
 });
