@@ -15,10 +15,12 @@ export function useProcessingCenter(initialQueue?: ProcessingQueueId) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Sincroniza sempre com a URL (?queue=), inclusive para limpar o filtro
+  // quando initialQueue volta a ser undefined (ex.: sidebar "Processamento
+  // de Guias" depois de "Auditoria de Guias"/"Correções Pendentes") — um
+  // guard `if (initialQueue)` aqui deixava a fila anterior "presa".
   useEffect(() => {
-    if (initialQueue) {
-      setActiveQueue(initialQueue);
-    }
+    setActiveQueue(initialQueue);
   }, [initialQueue]);
 
   const refresh = useCallback(async () => {
