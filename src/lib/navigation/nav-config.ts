@@ -212,9 +212,15 @@ export function buildNavGroups(): NavGroup[] {
       label: "Faturamento",
       defaultOpen: true,
       items: [
-        { id: "guias", to: "/tiss", label: "Guias", icon: ClipboardList },
-        { id: "lotes", to: "/tiss", label: "Lotes", icon: Layers },
-        { id: "convenios", to: "/tiss", label: "Convênios", icon: Building2 },
+        { id: "guias", to: "/tiss", label: "Guias", icon: ClipboardList, search: { tab: "guias" } },
+        { id: "lotes", to: "/tiss", label: "Lotes", icon: Layers, search: { tab: "lotes" } },
+        {
+          id: "convenios",
+          to: "/tiss",
+          label: "Convênios",
+          icon: Building2,
+          search: { tab: "convenios" },
+        },
         {
           id: "revisao-contratos",
           to: "/contratos",
@@ -222,7 +228,7 @@ export function buildNavGroups(): NavGroup[] {
           icon: FileCheck2,
           require: "financial",
         },
-        { id: "glosas", to: "/tiss", label: "Glosas", icon: Scale },
+        { id: "glosas", to: "/tiss", label: "Glosas", icon: Scale, search: { tab: "glosas" } },
         {
           id: "financeiro",
           to: "/financeiro",
@@ -271,6 +277,7 @@ export function buildNavGroups(): NavGroup[] {
           label: "Filas",
           icon: Layers,
           require: "financial",
+          search: { queue: "ocr_pendente" },
         },
         {
           id: "processamentos",
@@ -278,6 +285,7 @@ export function buildNavGroups(): NavGroup[] {
           label: "Processamentos",
           icon: FileText,
           require: "financial",
+          search: { queue: "parser" },
         },
         {
           id: "analytics",

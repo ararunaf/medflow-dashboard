@@ -367,12 +367,14 @@ export function ExecutiveDashboardView({ auth }: Props) {
         </span>
         <Link
           to="/tiss"
+          search={{ tab: undefined }}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
         >
           Criar guia
         </Link>
         <Link
           to="/tiss"
+          search={{ tab: undefined }}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
         >
           Gerar lote
@@ -385,6 +387,7 @@ export function ExecutiveDashboardView({ auth }: Props) {
         </Link>
         <Link
           to="/tiss"
+          search={{ tab: undefined }}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
         >
           Recalcular repasse

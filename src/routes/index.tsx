@@ -322,7 +322,11 @@ function HomePage() {
                 >
                   Abrir filas →
                 </Link>
-                <Link to="/tiss" className="block font-medium text-primary hover:underline">
+                <Link
+                  to="/tiss"
+                  search={{ tab: undefined }}
+                  className="block font-medium text-primary hover:underline"
+                >
                   Guias TISS →
                 </Link>
                 <Link

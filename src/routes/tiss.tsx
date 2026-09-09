@@ -1,6 +1,6 @@
 ﻿import { createFileRoute } from "@tanstack/react-router";
 import { brandPageTitle } from "@/lib/assets";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { MedicalPayoutPanels } from "@/components/tiss/medical-payout-panels";
 import { EmptyState, ErrorState, PageHeader, StatCard } from "@/components/ui-kit";
@@ -47,22 +47,6 @@ import {
   TrendingDown,
 } from "lucide-react";
 
-export const Route = createFileRoute("/tiss")({
-  head: () => ({
-    meta: [
-      { title: brandPageTitle("TISS / Faturamento") },
-      { name: "description", content: "Convênios, guias, lotes e exportação XML operacional." },
-    ],
-  }),
-  loader: async ({ context }) => {
-    await context.queryClient.prefetchQuery(tissFoundationQueryOptions()).catch(() => undefined);
-    await context.queryClient
-      .prefetchQuery(medicalPayoutFoundationQueryOptions(defaultCompetenceMonthUtc()))
-      .catch(() => undefined);
-  },
-  component: TissPage,
-});
-
 const tabs = [
   { id: "resumo", label: "Resumo", icon: LayoutDashboard },
   { id: "convenios", label: "Convênios", icon: Building2 },
@@ -78,6 +62,30 @@ const tabs = [
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
+const TAB_IDS: readonly string[] = tabs.map((t) => t.id);
+
+export const Route = createFileRoute("/tiss")({
+  validateSearch: (search: Record<string, unknown>) => {
+    const tab =
+      typeof search.tab === "string" && TAB_IDS.includes(search.tab)
+        ? (search.tab as TabId)
+        : undefined;
+    return { tab };
+  },
+  head: () => ({
+    meta: [
+      { title: brandPageTitle("TISS / Faturamento") },
+      { name: "description", content: "Convênios, guias, lotes e exportação XML operacional." },
+    ],
+  }),
+  loader: async ({ context }) => {
+    await context.queryClient.prefetchQuery(tissFoundationQueryOptions()).catch(() => undefined);
+    await context.queryClient
+      .prefetchQuery(medicalPayoutFoundationQueryOptions(defaultCompetenceMonthUtc()))
+      .catch(() => undefined);
+  },
+  component: TissPage,
+});
 
 function moneyBrl(n: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -105,7 +113,14 @@ function batchStatusLabel(s: TissBatchStatus): string {
 }
 
 function TissPage() {
-  const [tab, setTab] = useState<TabId>("resumo");
+  const { tab: initialTab } = Route.useSearch();
+  const [tab, setTab] = useState<TabId>(initialTab ?? "resumo");
+  // Sincroniza sempre com a URL (?tab=), inclusive de volta para "resumo"
+  // quando o item da sidebar não define tab (ex.: "TISS / Faturamento"
+  // genérico depois de "Guias"/"Lotes"/"Convênios"/"Glosas").
+  useEffect(() => {
+    setTab(initialTab ?? "resumo");
+  }, [initialTab]);
   const [payoutCompetence, setPayoutCompetence] = useState(() => defaultCompetenceMonthUtc());
   const { auth } = Route.useRouteContext();
   const canPayoutWrite = can(auth.profile?.role ?? null, "payouts:write");
