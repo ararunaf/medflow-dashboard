@@ -27,6 +27,7 @@ import type { AuthContext } from "@/lib/auth/types";
 import { logStartupDiagnostics } from "@/lib/env/startup-diagnostics";
 import { logClient } from "@/lib/monitoring/channels/client";
 import { initClientErrorMonitoring } from "@/lib/monitoring/client-bootstrap";
+import { initStaleChunkRecovery } from "@/lib/monitoring/stale-chunk-recovery";
 import { BRANDING, getBrandingHeadExtras } from "@/lib/assets";
 import appCss from "../styles.css?url";
 
@@ -157,6 +158,7 @@ function RootComponent() {
 
   useEffect(() => {
     initClientErrorMonitoring();
+    initStaleChunkRecovery();
     if (import.meta.env.DEV) {
       logStartupDiagnostics("client");
     }
