@@ -3,7 +3,7 @@ import { brandPageTitle } from "@/lib/assets";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { MedicalPayoutPanels } from "@/components/tiss/medical-payout-panels";
-import { EmptyState, ErrorState, PageHeader, StatCard } from "@/components/ui-kit";
+import { ConfirmDialog, EmptyState, ErrorState, PageHeader, StatCard } from "@/components/ui-kit";
 import { can } from "@/lib/auth/rbac";
 import {
   tissFoundationQueryOptions,
@@ -736,150 +736,194 @@ function GuiasPanel({
   const [qty, setQty] = useState("1");
   const [unit, setUnit] = useState("");
   const [execDate, setExecDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [denyGuideId, setDenyGuideId] = useState<string | null>(null);
 
   const providers = useMemo(
     () => data.insuranceProviders.filter((x) => x.active),
     [data.insuranceProviders],
   );
 
+  const missingGuideFields = [
+    !patient.trim() ? "Paciente" : null,
+    !providerId ? "Convênio" : null,
+    !profId ? "Profissional" : null,
+  ].filter((x): x is string => x !== null);
+
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-card p-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         <h2 className="text-sm font-semibold md:col-span-2 lg:col-span-3">Nova guia</h2>
-        <input
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          placeholder="Paciente"
-          value={patient}
-          onChange={(e) => setPatient(e.target.value)}
-        />
-        <select
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          value={providerId}
-          onChange={(e) => setProviderId(e.target.value)}
-        >
-          <option value="">Convênio…</option>
-          {providers.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          value={profId}
-          onChange={(e) => setProfId(e.target.value)}
-        >
-          <option value="">Profissional…</option>
-          {data.professionals.map((pr: { id: string; crm: string; specialty: string }) => (
-            <option key={pr.id} value={pr.id}>
-              {pr.crm} — {pr.specialty || "—"}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          value={gtype}
-          onChange={(e) => setGtype(e.target.value)}
-        >
-          <option value="consulta">Consulta</option>
-          <option value="sadt">SADT</option>
-          <option value="honorario_individual">Honorário individual</option>
-        </select>
-        <input
-          type="date"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          value={attDate}
-          onChange={(e) => setAttDate(e.target.value)}
-        />
-        <input
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          placeholder="Número da carteirinha"
-          value={cardNumber}
-          onChange={(e) => setCardNumber(e.target.value)}
-        />
+        <label className="block text-xs text-muted-foreground">
+          Paciente
+          <input
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            placeholder="Nome do paciente"
+            value={patient}
+            onChange={(e) => setPatient(e.target.value)}
+          />
+        </label>
+        <label className="block text-xs text-muted-foreground">
+          Convênio
+          <select
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={providerId}
+            onChange={(e) => setProviderId(e.target.value)}
+          >
+            <option value="">Selecione…</option>
+            {providers.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-xs text-muted-foreground">
+          Profissional
+          <select
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={profId}
+            onChange={(e) => setProfId(e.target.value)}
+          >
+            <option value="">Selecione…</option>
+            {data.professionals.map((pr: { id: string; crm: string; specialty: string }) => (
+              <option key={pr.id} value={pr.id}>
+                {pr.crm} — {pr.specialty || "—"}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-xs text-muted-foreground">
+          Tipo de guia
+          <select
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={gtype}
+            onChange={(e) => setGtype(e.target.value)}
+          >
+            <option value="consulta">Consulta</option>
+            <option value="sadt">SADT</option>
+            <option value="honorario_individual">Honorário individual</option>
+          </select>
+        </label>
+        <label className="block text-xs text-muted-foreground">
+          Data de atendimento
+          <input
+            type="date"
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={attDate}
+            onChange={(e) => setAttDate(e.target.value)}
+          />
+        </label>
+        <label className="block text-xs text-muted-foreground">
+          Número da carteirinha
+          <input
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            placeholder="Opcional"
+            value={cardNumber}
+            onChange={(e) => setCardNumber(e.target.value)}
+          />
+        </label>
         <label className="flex items-center gap-2 text-sm text-muted-foreground">
           <input type="checkbox" checked={isNewborn} onChange={(e) => setIsNewborn(e.target.checked)} />
           Atendimento de recém-nascido
         </label>
         {gtype !== "honorario_individual" && (
-          <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-            value={regimeAtendimento}
-            onChange={(e) => setRegimeAtendimento(e.target.value)}
-          >
-            <option value="">Regime de atendimento…</option>
-            <option value="01">Ambulatorial</option>
-            <option value="02">Domiciliar</option>
-            <option value="03">Internação</option>
-            <option value="04">Pronto Socorro</option>
-            <option value="05">Telessaúde</option>
-          </select>
+          <label className="block text-xs text-muted-foreground">
+            Regime de atendimento
+            <select
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={regimeAtendimento}
+              onChange={(e) => setRegimeAtendimento(e.target.value)}
+            >
+              <option value="">Selecione…</option>
+              <option value="01">Ambulatorial</option>
+              <option value="02">Domiciliar</option>
+              <option value="03">Internação</option>
+              <option value="04">Pronto Socorro</option>
+              <option value="05">Telessaúde</option>
+            </select>
+          </label>
         )}
         {gtype === "sadt" && (
-          <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-            value={caraterAtendimento}
-            onChange={(e) => setCaraterAtendimento(e.target.value)}
-          >
-            <option value="">Caráter de atendimento…</option>
-            <option value="1">Eletiva</option>
-            <option value="2">Urgência/Emergência</option>
-          </select>
+          <label className="block text-xs text-muted-foreground">
+            Caráter de atendimento
+            <select
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={caraterAtendimento}
+              onChange={(e) => setCaraterAtendimento(e.target.value)}
+            >
+              <option value="">Selecione…</option>
+              <option value="1">Eletiva</option>
+              <option value="2">Urgência/Emergência</option>
+            </select>
+          </label>
         )}
         {gtype === "sadt" && (
-          <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-            value={tipoAtendimento}
-            onChange={(e) => setTipoAtendimento(e.target.value)}
-          >
-            <option value="">Tipo de atendimento…</option>
-            <option value="01">Remoção</option>
-            <option value="02">Pequena cirurgia</option>
-            <option value="03">Outras terapias</option>
-            <option value="04">Consulta</option>
-            <option value="08">Quimioterapia</option>
-            <option value="09">Radioterapia</option>
-            <option value="10">Terapia renal substitutiva</option>
-            <option value="13">Pequenos atendimentos</option>
-            <option value="23">Telessaúde</option>
-          </select>
+          <label className="block text-xs text-muted-foreground">
+            Tipo de atendimento
+            <select
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={tipoAtendimento}
+              onChange={(e) => setTipoAtendimento(e.target.value)}
+            >
+              <option value="">Selecione…</option>
+              <option value="01">Remoção</option>
+              <option value="02">Pequena cirurgia</option>
+              <option value="03">Outras terapias</option>
+              <option value="04">Consulta</option>
+              <option value="08">Quimioterapia</option>
+              <option value="09">Radioterapia</option>
+              <option value="10">Terapia renal substitutiva</option>
+              <option value="13">Pequenos atendimentos</option>
+              <option value="23">Telessaúde</option>
+            </select>
+          </label>
         )}
         {gtype === "consulta" && (
-          <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-            value={tipoConsulta}
-            onChange={(e) => setTipoConsulta(e.target.value)}
-          >
-            <option value="">Tipo de consulta…</option>
-            <option value="1">Primeira</option>
-            <option value="2">Seguimento</option>
-            <option value="3">Pré-natal</option>
-            <option value="4">Outras</option>
-          </select>
+          <label className="block text-xs text-muted-foreground">
+            Tipo de consulta
+            <select
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={tipoConsulta}
+              onChange={(e) => setTipoConsulta(e.target.value)}
+            >
+              <option value="">Selecione…</option>
+              <option value="1">Primeira</option>
+              <option value="2">Seguimento</option>
+              <option value="3">Pré-natal</option>
+              <option value="4">Outras</option>
+            </select>
+          </label>
         )}
-        <button
-          type="button"
-          className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
-          disabled={m.createGuide.isPending || !patient.trim() || !providerId || !profId}
-          onClick={() =>
-            m.createGuide.mutate({
-              guideType: gtype,
-              patientName: patient.trim(),
-              insuranceProviderId: providerId,
-              insuranceContractId: null,
-              professionalId: profId,
-              attendanceDate: attDate,
-              beneficiaryCardNumber: cardNumber.trim() || null,
-              beneficiaryIsNewborn: isNewborn,
-              regimeAtendimento: regimeAtendimento || null,
-              caraterAtendimento: caraterAtendimento || null,
-              tipoAtendimento: tipoAtendimento || null,
-              tipoConsulta: tipoConsulta || null,
-            })
-          }
-        >
-          Criar guia
-        </button>
+        <div className="md:col-span-2 lg:col-span-3 flex items-center gap-3">
+          <button
+            type="button"
+            className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
+            disabled={m.createGuide.isPending || missingGuideFields.length > 0}
+            onClick={() =>
+              m.createGuide.mutate({
+                guideType: gtype,
+                patientName: patient.trim(),
+                insuranceProviderId: providerId,
+                insuranceContractId: null,
+                professionalId: profId,
+                attendanceDate: attDate,
+                beneficiaryCardNumber: cardNumber.trim() || null,
+                beneficiaryIsNewborn: isNewborn,
+                regimeAtendimento: regimeAtendimento || null,
+                caraterAtendimento: caraterAtendimento || null,
+                tipoAtendimento: tipoAtendimento || null,
+                tipoConsulta: tipoConsulta || null,
+              })
+            }
+          >
+            {m.createGuide.isPending ? "Criando…" : "Criar guia"}
+          </button>
+          {missingGuideFields.length > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Preencha: {missingGuideFields.join(", ")}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -910,7 +954,8 @@ function GuiasPanel({
                     {g.status === "draft" ? (
                       <button
                         type="button"
-                        className="text-xs text-primary font-medium"
+                        className="text-xs text-primary font-medium disabled:opacity-50"
+                        disabled={m.setGuideStatus.isPending}
                         onClick={() =>
                           m.setGuideStatus.mutate({ guideId: g.id, status: "pending_review" })
                         }
@@ -922,7 +967,8 @@ function GuiasPanel({
                       <>
                         <button
                           type="button"
-                          className="text-xs text-[color:var(--success)] font-medium"
+                          className="text-xs text-[color:var(--success)] font-medium disabled:opacity-50"
+                          disabled={m.setGuideStatus.isPending}
                           onClick={() =>
                             m.setGuideStatus.mutate({ guideId: g.id, status: "approved" })
                           }
@@ -931,10 +977,9 @@ function GuiasPanel({
                         </button>
                         <button
                           type="button"
-                          className="text-xs text-destructive font-medium"
-                          onClick={() =>
-                            m.setGuideStatus.mutate({ guideId: g.id, status: "denied" })
-                          }
+                          className="text-xs text-destructive font-medium disabled:opacity-50"
+                          disabled={m.setGuideStatus.isPending}
+                          onClick={() => setDenyGuideId(g.id)}
                         >
                           Negar
                         </button>
@@ -959,38 +1004,50 @@ function GuiasPanel({
         <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="text-sm font-semibold">Itens da guia {itemGuide.slice(0, 8)}…</div>
           <div className="flex flex-wrap gap-2 items-end">
-            <select
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={procId}
-              onChange={(e) => setProcId(e.target.value)}
-            >
-              <option value="">Procedimento…</option>
-              {data.tussProcedures.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.code}
-                </option>
-              ))}
-            </select>
-            <input
-              className="w-20 rounded-md border border-input bg-background px-2 py-2 text-sm"
-              value={qty}
-              onChange={(e) => setQty(e.target.value)}
-            />
-            <input
-              className="w-28 rounded-md border border-input bg-background px-2 py-2 text-sm"
-              placeholder="Valor unit."
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-            />
-            <input
-              type="date"
-              className="rounded-md border border-input px-2 py-2 text-sm"
-              value={execDate}
-              onChange={(e) => setExecDate(e.target.value)}
-            />
+            <label className="block text-xs text-muted-foreground">
+              Procedimento
+              <select
+                className="mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={procId}
+                onChange={(e) => setProcId(e.target.value)}
+              >
+                <option value="">Selecione…</option>
+                {data.tussProcedures.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.code}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Quantidade
+              <input
+                className="mt-1 w-20 rounded-md border border-input bg-background px-2 py-2 text-sm"
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+              />
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Valor unit.
+              <input
+                className="mt-1 w-28 rounded-md border border-input bg-background px-2 py-2 text-sm"
+                placeholder="0,00"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+              />
+            </label>
+            <label className="block text-xs text-muted-foreground">
+              Data de execução
+              <input
+                type="date"
+                className="mt-1 rounded-md border border-input px-2 py-2 text-sm"
+                value={execDate}
+                onChange={(e) => setExecDate(e.target.value)}
+              />
+            </label>
             <button
               type="button"
-              className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+              className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
               disabled={!procId || m.addGuideItem.isPending}
               onClick={() =>
                 m.addGuideItem.mutate({
@@ -1002,11 +1059,28 @@ function GuiasPanel({
                 })
               }
             >
-              Adicionar item
+              {m.addGuideItem.isPending ? "Adicionando…" : "Adicionar item"}
             </button>
           </div>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={denyGuideId !== null}
+        title="Negar esta guia?"
+        description="A guia voltará ao status recusado e precisará ser corrigida antes de nova revisão."
+        confirmLabel="Negar guia"
+        tone="destructive"
+        confirming={m.setGuideStatus.isPending}
+        onCancel={() => setDenyGuideId(null)}
+        onConfirm={() => {
+          if (!denyGuideId) return;
+          m.setGuideStatus.mutate(
+            { guideId: denyGuideId, status: "denied" },
+            { onSuccess: () => setDenyGuideId(null) },
+          );
+        }}
+      />
     </div>
   );
 }

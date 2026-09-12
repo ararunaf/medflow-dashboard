@@ -160,7 +160,7 @@ function EscalasPage() {
         title="Escalas"
         subtitle={viewMode === "dias" ? "Próximos 14 dias" : formatMonthYear(visibleMonth)}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex p-1 bg-muted rounded-lg gap-1">
               <button
                 type="button"

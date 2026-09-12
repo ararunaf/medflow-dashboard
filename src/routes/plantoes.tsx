@@ -2,7 +2,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { brandPageTitle } from "@/lib/assets";
 import { AppShell } from "@/components/app-shell";
-import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
+import {
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  SkeletonRow,
+  StatusBadge,
+} from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ArrowLeftRight, Building2, Check, Clock, MapPin, Sparkles, X } from "lucide-react";
 import { can } from "@/lib/auth/rbac";
@@ -271,7 +278,7 @@ function OpenShiftCard({
           <StatusBadge status={shiftStatusToBadge(shift.status, false)} />
         </div>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Link
           to="/plantoes/$shiftId"
           params={{ shiftId: shift.shiftId }}
@@ -387,6 +394,7 @@ function AssignmentCard({
   const isBusy = accept.isPending || reject.isPending;
   const isFinal = assignment.status !== "pending";
   const [swapOpen, setSwapOpen] = useState(false);
+  const [confirmReject, setConfirmReject] = useState(false);
 
   return (
     <div className="rounded-xl bg-card border border-border ring-soft p-4">
@@ -441,7 +449,7 @@ function AssignmentCard({
               size="sm"
               className="gap-1.5"
               disabled={isBusy || isFinal}
-              onClick={() => reject.mutate({ assignmentId: assignment.assignmentId })}
+              onClick={() => setConfirmReject(true)}
             >
               <X className="h-4 w-4" />
               {reject.isPending ? "Recusando…" : "Recusar"}
@@ -458,6 +466,21 @@ function AssignmentCard({
           </>
         )}
       </div>
+      <ConfirmDialog
+        open={confirmReject}
+        title="Recusar este plantão?"
+        description="A atribuição será liberada e o plantão volta a ficar disponível para outro profissional."
+        confirmLabel="Recusar plantão"
+        tone="destructive"
+        confirming={reject.isPending}
+        onCancel={() => setConfirmReject(false)}
+        onConfirm={() =>
+          reject.mutate(
+            { assignmentId: assignment.assignmentId },
+            { onSuccess: () => setConfirmReject(false) },
+          )
+        }
+      />
     </div>
   );
 }
@@ -744,6 +767,7 @@ function PendingSwapsList({
 }) {
   const approve = useApproveSwap();
   const deny = useDenySwap();
+  const [confirmDenyId, setConfirmDenyId] = useState<string | null>(null);
 
   if (query.isLoading) {
     return (
@@ -775,9 +799,25 @@ function PendingSwapsList({
           swap={s}
           busy={approve.isPending || deny.isPending}
           onApprove={() => approve.mutate({ swapId: s.swapId }, { onError: (e) => onError(e) })}
-          onDeny={() => deny.mutate({ swapId: s.swapId }, { onError: (e) => onError(e) })}
+          onDeny={() => setConfirmDenyId(s.swapId)}
         />
       ))}
+      <ConfirmDialog
+        open={confirmDenyId !== null}
+        title="Recusar esta troca?"
+        description="A solicitação de troca será negada e o plantão permanece com o profissional atual."
+        confirmLabel="Recusar troca"
+        tone="destructive"
+        confirming={deny.isPending}
+        onCancel={() => setConfirmDenyId(null)}
+        onConfirm={() => {
+          if (!confirmDenyId) return;
+          deny.mutate(
+            { swapId: confirmDenyId },
+            { onSuccess: () => setConfirmDenyId(null), onError: (e) => onError(e) },
+          );
+        }}
+      />
     </div>
   );
 }

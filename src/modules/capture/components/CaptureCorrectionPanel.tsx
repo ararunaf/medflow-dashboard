@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Check, FileJson, Pencil, Sparkles, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui-kit";
 import type {
   CorrectionProposal,
   CorrectionProposalStore,
@@ -192,6 +193,7 @@ function ProposalRow({
 }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(proposal.editedValue ?? proposal.suggestedValue ?? "");
+  const [confirmReject, setConfirmReject] = useState(false);
 
   const isPending = proposal.status === "pending";
   const displayValue =
@@ -320,7 +322,7 @@ function ProposalRow({
               variant="ghost"
               className="gap-1 text-destructive hover:text-destructive"
               disabled={busy}
-              onClick={onReject}
+              onClick={() => setConfirmReject(true)}
             >
               <X className="h-3.5 w-3.5" />
               Rejeitar
@@ -332,6 +334,19 @@ function ProposalRow({
           Decidido em {new Date(proposal.decidedAt).toLocaleString("pt-BR")}
         </p>
       ) : null}
+      <ConfirmDialog
+        open={confirmReject}
+        title="Rejeitar esta correção?"
+        description="A proposta de correção será marcada como rejeitada e não poderá mais ser aceita ou editada."
+        confirmLabel="Rejeitar correção"
+        tone="destructive"
+        confirming={busy}
+        onCancel={() => setConfirmReject(false)}
+        onConfirm={() => {
+          onReject();
+          setConfirmReject(false);
+        }}
+      />
     </li>
   );
 }

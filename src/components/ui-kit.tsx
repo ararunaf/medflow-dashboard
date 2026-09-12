@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
@@ -11,7 +12,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 mb-6">
+    <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
       <div>
         <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground">
           {title}
@@ -134,5 +135,89 @@ export function StatusBadge({
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {label}
     </span>
+  );
+}
+
+/**
+ * Diálogo de confirmação reutilizável para ações irreversíveis/consequentes
+ * (negar, rejeitar, cancelar). Segue o mesmo padrão de overlay/escape usado
+ * nos drawers do app, mas centralizado e sem estado próprio de formulário.
+ */
+export function ConfirmDialog({
+  open,
+  title,
+  description,
+  confirmLabel = "Confirmar",
+  cancelLabel = "Cancelar",
+  tone = "default",
+  confirming = false,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  description?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  tone?: "default" | "destructive";
+  confirming?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onCancel]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] grid place-items-center p-4"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/40"
+        aria-label="Fechar"
+        onClick={onCancel}
+      />
+      <div className="relative w-full max-w-sm rounded-xl border border-border bg-card shadow-xl p-5">
+        <h2 id="confirm-dialog-title" className="text-sm font-semibold text-foreground">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{description}</p>
+        ) : null}
+        <div className="mt-5 flex gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            disabled={confirming}
+            onClick={onConfirm}
+            className={cn(
+              "flex-1 rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
+              tone === "destructive"
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                : "bg-primary text-primary-foreground hover:bg-primary/90",
+            )}
+          >
+            {confirming ? "Confirmando…" : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

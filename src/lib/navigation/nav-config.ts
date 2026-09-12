@@ -274,7 +274,7 @@ export function buildNavGroups(): NavGroup[] {
         {
           id: "filas",
           to: "/processamento",
-          label: "Filas",
+          label: "Fila — OCR Pendente",
           icon: Layers,
           require: "financial",
           search: { queue: "ocr_pendente" },
@@ -282,7 +282,7 @@ export function buildNavGroups(): NavGroup[] {
         {
           id: "processamentos",
           to: "/processamento",
-          label: "Processamentos",
+          label: "Fila — Parser",
           icon: FileText,
           require: "financial",
           search: { queue: "parser" },
