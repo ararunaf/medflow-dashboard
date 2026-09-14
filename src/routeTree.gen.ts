@@ -38,6 +38,7 @@ import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/f
 import { Route as Fase3SlugRouteImport } from './routes/fase3.$slug'
 import { Route as ContratosRevisaoContractIdRouteImport } from './routes/contratos/revisao.$contractId'
 import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
+import { Route as ApiCaptureProcessBatchRouteImport } from './routes/api.capture.process-batch'
 
 const TissRoute = TissRouteImport.update({
   id: '/tiss',
@@ -189,6 +190,11 @@ const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
   path: '/revisao/$sessionId',
   getParentRoute: () => CapturaRoute,
 } as any)
+const ApiCaptureProcessBatchRoute = ApiCaptureProcessBatchRouteImport.update({
+  id: '/api/capture/process-batch',
+  path: '/api/capture/process-batch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
+  '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
+  '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/login/esqueci-senha': typeof LoginEsqueciSenhaRoute
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
+  '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
+    | '/api/capture/process-batch'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesByTo: FileRoutesByTo
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
+    | '/api/capture/process-batch'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   id:
@@ -376,6 +387,7 @@ export interface FileRouteTypes {
     | '/login/esqueci-senha'
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
+    | '/api/capture/process-batch'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesById: FileRoutesById
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   SiteRoute: typeof SiteRoute
   TissRoute: typeof TissRoute
   Fase3SlugRoute: typeof Fase3SlugRoute
+  ApiCaptureProcessBatchRoute: typeof ApiCaptureProcessBatchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -608,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CapturaRevisaoSessionIdRouteImport
       parentRoute: typeof CapturaRoute
     }
+    '/api/capture/process-batch': {
+      id: '/api/capture/process-batch'
+      path: '/api/capture/process-batch'
+      fullPath: '/api/capture/process-batch'
+      preLoaderRoute: typeof ApiCaptureProcessBatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -697,6 +717,7 @@ const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRoute,
   TissRoute: TissRoute,
   Fase3SlugRoute: Fase3SlugRoute,
+  ApiCaptureProcessBatchRoute: ApiCaptureProcessBatchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

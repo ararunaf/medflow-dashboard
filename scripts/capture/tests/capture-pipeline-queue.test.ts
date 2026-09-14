@@ -156,15 +156,26 @@ describe("capture-server.ts — upload enfileira e não roda o pipeline inline",
   });
 });
 
-describe("worker script — existe e reivindica jobs via RPC", () => {
+describe("worker script — existe e usa o núcleo compartilhado de claim/process", () => {
   const workerPath = resolve(root, "scripts/capture/worker/capture-pipeline-worker.ts");
+  const runtimePath = resolve(root, "src/lib/capture/infrastructure/capture-pipeline-runtime.ts");
 
   it("existe", () => {
     assert.ok(existsSync(workerPath), `worker não encontrado em ${workerPath}`);
   });
 
-  it("reivindica jobs via claim_capture_pipeline_job e nunca deixa um job travado sem desfecho", () => {
+  it("processo persistente delega ao mesmo núcleo usado por /api/capture/process-batch", () => {
     const src = readFileSync(workerPath, "utf8");
+    assert.match(
+      src,
+      /import \{ claimAndProcessOneCapturePipelineJob \} from "@\/lib\/capture\/infrastructure\/capture-pipeline-runtime"/,
+    );
+    assert.match(src, /claimAndProcessOneCapturePipelineJob\(/);
+  });
+
+  it("núcleo compartilhado reivindica via RPC e nunca deixa um job travado sem desfecho", () => {
+    assert.ok(existsSync(runtimePath), `runtime compartilhado não encontrado em ${runtimePath}`);
+    const src = readFileSync(runtimePath, "utf8");
     assert.match(src, /\.rpc\("claim_capture_pipeline_job"/);
     assert.match(src, /status: "succeeded"/);
     assert.match(src, /status: "queued"/);
