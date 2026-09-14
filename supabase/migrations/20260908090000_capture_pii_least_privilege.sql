@@ -42,6 +42,7 @@
 -- capture_sessions
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS capture_sessions_select_tenant ON public.capture_sessions;
+DROP POLICY IF EXISTS capture_sessions_select_self_or_manager ON public.capture_sessions;
 CREATE POLICY capture_sessions_select_self_or_manager
   ON public.capture_sessions FOR SELECT TO authenticated
   USING (
@@ -51,6 +52,7 @@ CREATE POLICY capture_sessions_select_self_or_manager
   );
 
 DROP POLICY IF EXISTS capture_sessions_update_billing ON public.capture_sessions;
+DROP POLICY IF EXISTS capture_sessions_update_self_or_manager ON public.capture_sessions;
 CREATE POLICY capture_sessions_update_self_or_manager
   ON public.capture_sessions FOR UPDATE TO authenticated
   USING (
@@ -67,6 +69,7 @@ CREATE POLICY capture_sessions_update_self_or_manager
 -- capture_documents (SEC-PII-01C — fora do hardening original, corrigido agora)
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS capture_documents_select_tenant ON public.capture_documents;
+DROP POLICY IF EXISTS capture_documents_select_self_or_manager ON public.capture_documents;
 CREATE POLICY capture_documents_select_self_or_manager
   ON public.capture_documents FOR SELECT TO authenticated
   USING (
@@ -76,6 +79,7 @@ CREATE POLICY capture_documents_select_self_or_manager
   );
 
 DROP POLICY IF EXISTS capture_documents_update_billing ON public.capture_documents;
+DROP POLICY IF EXISTS capture_documents_update_self_or_manager ON public.capture_documents;
 CREATE POLICY capture_documents_update_self_or_manager
   ON public.capture_documents FOR UPDATE TO authenticated
   USING (
@@ -91,6 +95,7 @@ CREATE POLICY capture_documents_update_self_or_manager
 -- capture_pages (SEC-PII-01C — fora do hardening original, corrigido agora)
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS capture_pages_select_tenant ON public.capture_pages;
+DROP POLICY IF EXISTS capture_pages_select_self_or_manager ON public.capture_pages;
 CREATE POLICY capture_pages_select_self_or_manager
   ON public.capture_pages FOR SELECT TO authenticated
   USING (
@@ -99,6 +104,7 @@ CREATE POLICY capture_pages_select_self_or_manager
   );
 
 DROP POLICY IF EXISTS capture_pages_update_billing ON public.capture_pages;
+DROP POLICY IF EXISTS capture_pages_update_self_or_manager ON public.capture_pages;
 CREATE POLICY capture_pages_update_self_or_manager
   ON public.capture_pages FOR UPDATE TO authenticated
   USING (
@@ -114,6 +120,7 @@ CREATE POLICY capture_pages_update_self_or_manager
 -- capture_fields
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS capture_fields_select_tenant ON public.capture_fields;
+DROP POLICY IF EXISTS capture_fields_select_self_or_manager ON public.capture_fields;
 CREATE POLICY capture_fields_select_self_or_manager
   ON public.capture_fields FOR SELECT TO authenticated
   USING (
@@ -123,6 +130,7 @@ CREATE POLICY capture_fields_select_self_or_manager
   );
 
 DROP POLICY IF EXISTS capture_fields_update_billing ON public.capture_fields;
+DROP POLICY IF EXISTS capture_fields_update_self_or_manager ON public.capture_fields;
 CREATE POLICY capture_fields_update_self_or_manager
   ON public.capture_fields FOR UPDATE TO authenticated
   USING (
@@ -138,6 +146,7 @@ CREATE POLICY capture_fields_update_self_or_manager
 -- capture_findings
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS capture_findings_select_tenant ON public.capture_findings;
+DROP POLICY IF EXISTS capture_findings_select_self_or_manager ON public.capture_findings;
 CREATE POLICY capture_findings_select_self_or_manager
   ON public.capture_findings FOR SELECT TO authenticated
   USING (
@@ -146,6 +155,7 @@ CREATE POLICY capture_findings_select_self_or_manager
   );
 
 DROP POLICY IF EXISTS capture_findings_update_billing ON public.capture_findings;
+DROP POLICY IF EXISTS capture_findings_update_self_or_manager ON public.capture_findings;
 CREATE POLICY capture_findings_update_self_or_manager
   ON public.capture_findings FOR UPDATE TO authenticated
   USING (
@@ -161,6 +171,7 @@ CREATE POLICY capture_findings_update_self_or_manager
 -- capture_corrections (só SELECT — nunca teve UPDATE/DELETE policy)
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS capture_corrections_select_tenant ON public.capture_corrections;
+DROP POLICY IF EXISTS capture_corrections_select_self_or_manager ON public.capture_corrections;
 CREATE POLICY capture_corrections_select_self_or_manager
   ON public.capture_corrections FOR SELECT TO authenticated
   USING (
