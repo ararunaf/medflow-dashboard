@@ -23,6 +23,7 @@ export const OPENAI_AI_PROVIDER_ADAPTER_ID = "openai-chat-completions";
 
 const OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions";
 const OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
+const OPENAI_REQUEST_TIMEOUT_MS = 30_000;
 
 const CAPABILITIES: readonly AICapabilityId[] = [
   "text-generation",
@@ -90,6 +91,28 @@ function resolveEmbeddingModel(): string {
       process.env.MEDFLOW_OPENAI_EMBEDDING_MODEL) ||
     "text-embedding-3-small";
   return typeof m === "string" && m.length > 0 ? m : "text-embedding-3-small";
+}
+
+/** Chamada HTTP com teto de tempo — sem isso, um travamento da OpenAI trava o job indefinidamente. */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function describeError(err: unknown, timeoutMs: number): string {
+  if (err instanceof Error && err.name === "AbortError") {
+    return `Timeout ao chamar a OpenAI após ${timeoutMs}ms`;
+  }
+  return err instanceof Error ? err.message : String(err);
 }
 
 function buildMessages(request: AIRequest, opaque: OpenAiChatInput | undefined): unknown[] {
@@ -240,14 +263,18 @@ export class OpenAIAIProviderAdapter implements AIProviderPort {
     }
 
     try {
-      const res = await fetch(OPENAI_CHAT_COMPLETIONS_URL, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${apiKey}`,
-          "content-type": "application/json",
+      const res = await fetchWithTimeout(
+        OPENAI_CHAT_COMPLETIONS_URL,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${apiKey}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(body),
         },
-        body: JSON.stringify(body),
-      });
+        OPENAI_REQUEST_TIMEOUT_MS,
+      );
 
       const raw = (await res.json()) as OpenAiChatResponse;
       if (!res.ok) {
@@ -291,7 +318,7 @@ export class OpenAIAIProviderAdapter implements AIProviderPort {
         },
       };
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = describeError(err, OPENAI_REQUEST_TIMEOUT_MS);
       return {
         ok: false,
         requestId: request.requestId,
@@ -329,14 +356,18 @@ export class OpenAIAIProviderAdapter implements AIProviderPort {
     }
 
     try {
-      const res = await fetch(OPENAI_EMBEDDINGS_URL, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${apiKey}`,
-          "content-type": "application/json",
+      const res = await fetchWithTimeout(
+        OPENAI_EMBEDDINGS_URL,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${apiKey}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ model, input }),
         },
-        body: JSON.stringify({ model, input }),
-      });
+        OPENAI_REQUEST_TIMEOUT_MS,
+      );
 
       const raw = (await res.json()) as OpenAiEmbeddingsResponse;
       if (!res.ok) {
@@ -375,7 +406,7 @@ export class OpenAIAIProviderAdapter implements AIProviderPort {
           : { vector: vectors[0] ?? [], dimensions },
       };
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = describeError(err, OPENAI_REQUEST_TIMEOUT_MS);
       return {
         ok: false,
         requestId: request.requestId,
