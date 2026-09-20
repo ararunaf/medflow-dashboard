@@ -7,9 +7,9 @@
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import {
   captureStorageDownload,
-  captureStorageSignedUrl,
   captureStorageUpload,
 } from "../../infrastructure/enterprise-storage-bridge";
+import { buildCaptureReportDownloadUrl } from "../../infrastructure/report-download-url";
 import type { RiskAssessmentReport, RiskAssessmentSummaryMeta } from "../types/risk-assessment";
 
 export const RISK_ASSESSMENT_FILENAME = "risk_assessment.json";
@@ -32,6 +32,7 @@ export async function persistRiskAssessmentReport(
     contentType: "application/json",
     upsert: true,
     sessionId,
+    encrypt: true,
   });
   return { storagePath };
 }
@@ -41,7 +42,7 @@ export async function loadRiskAssessmentReport(
   sessionId: string,
 ): Promise<RiskAssessmentReport | null> {
   const storagePath = buildRiskAssessmentStoragePath(ctx.tenantId, sessionId);
-  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId, encrypted: true });
   if (!body) return null;
   const text = new TextDecoder().decode(body);
   return JSON.parse(text) as RiskAssessmentReport;
@@ -52,17 +53,10 @@ export async function getRiskAssessmentSignedUrl(
   sessionId: string,
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
-  const storagePath = buildRiskAssessmentStoragePath(ctx.tenantId, sessionId);
-  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
-    key: storagePath,
-    expiresInSeconds: ttlSeconds,
-    downloadFilename: RISK_ASSESSMENT_FILENAME,
-    sessionId,
-  });
-
+  void ctx;
   return {
-    signedUrl,
-    expiresAt,
+    signedUrl: buildCaptureReportDownloadUrl(sessionId, "risk"),
+    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
     filename: RISK_ASSESSMENT_FILENAME,
   };
 }

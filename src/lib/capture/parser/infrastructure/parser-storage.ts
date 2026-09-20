@@ -5,9 +5,9 @@
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import {
   captureStorageDownload,
-  captureStorageSignedUrl,
   captureStorageUpload,
 } from "../../infrastructure/enterprise-storage-bridge";
+import { buildCaptureReportDownloadUrl } from "../../infrastructure/report-download-url";
 import type { StructuredGuide, StructuredGuideSummary } from "../types/structured-guide";
 
 export const STRUCTURED_GUIDE_FILENAME = "structured_guide.json";
@@ -30,6 +30,7 @@ export async function persistStructuredGuide(
     contentType: "application/json",
     upsert: true,
     sessionId,
+    encrypt: true,
   });
   return { storagePath };
 }
@@ -39,7 +40,7 @@ export async function loadStructuredGuide(
   sessionId: string,
 ): Promise<StructuredGuide | null> {
   const storagePath = buildStructuredGuideStoragePath(ctx.tenantId, sessionId);
-  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId, encrypted: true });
   if (!body) return null;
   const text = new TextDecoder().decode(body);
   return JSON.parse(text) as StructuredGuide;
@@ -50,17 +51,10 @@ export async function getStructuredGuideSignedUrl(
   sessionId: string,
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
-  const storagePath = buildStructuredGuideStoragePath(ctx.tenantId, sessionId);
-  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
-    key: storagePath,
-    expiresInSeconds: ttlSeconds,
-    downloadFilename: STRUCTURED_GUIDE_FILENAME,
-    sessionId,
-  });
-
+  void ctx;
   return {
-    signedUrl,
-    expiresAt,
+    signedUrl: buildCaptureReportDownloadUrl(sessionId, "structured-guide"),
+    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
     filename: STRUCTURED_GUIDE_FILENAME,
   };
 }

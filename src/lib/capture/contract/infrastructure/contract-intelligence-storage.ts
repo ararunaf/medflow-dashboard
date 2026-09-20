@@ -7,9 +7,9 @@
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import {
   captureStorageDownload,
-  captureStorageSignedUrl,
   captureStorageUpload,
 } from "../../infrastructure/enterprise-storage-bridge";
+import { buildCaptureReportDownloadUrl } from "../../infrastructure/report-download-url";
 import type {
   ContractIntelligenceReport,
   ContractIntelligenceSummaryMeta,
@@ -35,6 +35,7 @@ export async function persistContractIntelligenceReport(
     contentType: "application/json",
     upsert: true,
     sessionId,
+    encrypt: true,
   });
   return { storagePath };
 }
@@ -44,7 +45,7 @@ export async function loadContractIntelligenceReport(
   sessionId: string,
 ): Promise<ContractIntelligenceReport | null> {
   const storagePath = buildContractIntelligenceStoragePath(ctx.tenantId, sessionId);
-  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId, encrypted: true });
   if (!body) return null;
   const text = new TextDecoder().decode(body);
   return JSON.parse(text) as ContractIntelligenceReport;
@@ -55,17 +56,10 @@ export async function getContractIntelligenceSignedUrl(
   sessionId: string,
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
-  const storagePath = buildContractIntelligenceStoragePath(ctx.tenantId, sessionId);
-  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
-    key: storagePath,
-    expiresInSeconds: ttlSeconds,
-    downloadFilename: CONTRACT_INTELLIGENCE_FILENAME,
-    sessionId,
-  });
-
+  void ctx;
   return {
-    signedUrl,
-    expiresAt,
+    signedUrl: buildCaptureReportDownloadUrl(sessionId, "contract"),
+    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
     filename: CONTRACT_INTELLIGENCE_FILENAME,
   };
 }

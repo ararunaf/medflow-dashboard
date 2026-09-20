@@ -4,9 +4,9 @@
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import {
   captureStorageDownload,
-  captureStorageSignedUrl,
   captureStorageUpload,
 } from "../../infrastructure/enterprise-storage-bridge";
+import { buildCaptureReportDownloadUrl } from "../../infrastructure/report-download-url";
 import type { OcrResultSummary, RawOcrResult } from "../types/raw-ocr-result";
 
 export const OCR_RESULT_FILENAME = "ocr_result.json";
@@ -29,6 +29,7 @@ export async function persistOcrResult(
     contentType: "application/json",
     upsert: true,
     sessionId,
+    encrypt: true,
   });
 
   return { storagePath };
@@ -39,7 +40,7 @@ export async function loadOcrResult(
   sessionId: string,
 ): Promise<RawOcrResult | null> {
   const storagePath = buildOcrResultStoragePath(ctx.tenantId, sessionId);
-  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId, encrypted: true });
   if (!body) return null;
   const text = new TextDecoder().decode(body);
   return JSON.parse(text) as RawOcrResult;
@@ -50,17 +51,10 @@ export async function getOcrResultSignedUrl(
   sessionId: string,
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
-  const storagePath = buildOcrResultStoragePath(ctx.tenantId, sessionId);
-  const signed = await captureStorageSignedUrl(ctx, {
-    key: storagePath,
-    expiresInSeconds: ttlSeconds,
-    downloadFilename: OCR_RESULT_FILENAME,
-    sessionId,
-  });
-
+  void ctx;
   return {
-    signedUrl: signed.signedUrl,
-    expiresAt: signed.expiresAt,
+    signedUrl: buildCaptureReportDownloadUrl(sessionId, "ocr"),
+    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
     filename: OCR_RESULT_FILENAME,
   };
 }

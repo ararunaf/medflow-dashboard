@@ -38,6 +38,7 @@ import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/f
 import { Route as Fase3SlugRouteImport } from './routes/fase3.$slug'
 import { Route as ContratosRevisaoContractIdRouteImport } from './routes/contratos/revisao.$contractId'
 import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
+import { Route as ApiCaptureReportDownloadRouteImport } from './routes/api.capture.report-download'
 import { Route as ApiCaptureProcessBatchRouteImport } from './routes/api.capture.process-batch'
 
 const TissRoute = TissRouteImport.update({
@@ -190,6 +191,12 @@ const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
   path: '/revisao/$sessionId',
   getParentRoute: () => CapturaRoute,
 } as any)
+const ApiCaptureReportDownloadRoute =
+  ApiCaptureReportDownloadRouteImport.update({
+    id: '/api/capture/report-download',
+    path: '/api/capture/report-download',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCaptureProcessBatchRoute = ApiCaptureProcessBatchRouteImport.update({
   id: '/api/capture/process-batch',
   path: '/api/capture/process-batch',
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
+  '/api/capture/report-download': typeof ApiCaptureReportDownloadRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -257,6 +265,7 @@ export interface FileRoutesByTo {
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
+  '/api/capture/report-download': typeof ApiCaptureReportDownloadRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -290,6 +299,7 @@ export interface FileRoutesById {
   '/login/redefinir-senha': typeof LoginRedefinirSenhaRoute
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
+  '/api/capture/report-download': typeof ApiCaptureReportDownloadRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
     | '/api/capture/process-batch'
+    | '/api/capture/report-download'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesByTo: FileRoutesByTo
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
     | '/api/capture/process-batch'
+    | '/api/capture/report-download'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   id:
@@ -388,6 +400,7 @@ export interface FileRouteTypes {
     | '/login/redefinir-senha'
     | '/plantoes/$shiftId'
     | '/api/capture/process-batch'
+    | '/api/capture/report-download'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesById: FileRoutesById
@@ -414,6 +427,7 @@ export interface RootRouteChildren {
   TissRoute: typeof TissRoute
   Fase3SlugRoute: typeof Fase3SlugRoute
   ApiCaptureProcessBatchRoute: typeof ApiCaptureProcessBatchRoute
+  ApiCaptureReportDownloadRoute: typeof ApiCaptureReportDownloadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -621,6 +635,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CapturaRevisaoSessionIdRouteImport
       parentRoute: typeof CapturaRoute
     }
+    '/api/capture/report-download': {
+      id: '/api/capture/report-download'
+      path: '/api/capture/report-download'
+      fullPath: '/api/capture/report-download'
+      preLoaderRoute: typeof ApiCaptureReportDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/capture/process-batch': {
       id: '/api/capture/process-batch'
       path: '/api/capture/process-batch'
@@ -718,6 +739,7 @@ const rootRouteChildren: RootRouteChildren = {
   TissRoute: TissRoute,
   Fase3SlugRoute: Fase3SlugRoute,
   ApiCaptureProcessBatchRoute: ApiCaptureProcessBatchRoute,
+  ApiCaptureReportDownloadRoute: ApiCaptureReportDownloadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

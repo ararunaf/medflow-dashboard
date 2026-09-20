@@ -19,6 +19,7 @@ import {
   type SupabaseStorageClientLike,
 } from "@/lib/enterprise/storage-provider";
 import type { ServiceCtx } from "@/lib/services/operations/types";
+import { decryptStorageBytes, encryptStorageBytes } from "@/lib/security/storage-encryption";
 import { CLINICAL_DOCUMENTS_BUCKET } from "./storage-paths";
 import { resolveCaptureEnterpriseRuntime } from "../enterprise/resolve-enterprise-runtime";
 
@@ -40,13 +41,26 @@ export async function captureStorageUpload(
     documentId?: string;
     sessionId?: string;
     container?: string;
+    /**
+     * SEC-PII-02: criptografa o conteúdo (AES-256-GCM) antes do upload.
+     * Reservado para os artefatos JSON derivados do pipeline (OCR, guia
+     * estruturada, auditoria, contrato, risco, correção) — onde CPF/nome
+     * do paciente ficam em texto pleno. NÃO usar para o documento
+     * original (é servido como preview inline `<img>`/signed URL direto,
+     * que não descriptografa).
+     */
+    encrypt?: boolean;
   },
 ): Promise<void> {
   const port = resolveCaptureStorageProvider(ctx);
+  const body = input.encrypt ? encryptStorageBytes(input.body) : input.body;
+  // Cifrado deixa de ser JSON/o que quer que fosse — marcar como binário
+  // genérico é o correto, independente do content-type original do chamador.
+  const contentType = input.encrypt ? "application/octet-stream" : input.contentType;
   const result = await port.upload({
     key: input.key,
-    body: input.body,
-    contentType: input.contentType,
+    body,
+    contentType,
     container: input.container ?? CLINICAL_DOCUMENTS_BUCKET ?? DEFAULT_STORAGE_PROVIDER_BUCKET,
     upsert: input.upsert,
     documentId: input.documentId,
@@ -60,7 +74,14 @@ export async function captureStorageUpload(
 
 export async function captureStorageDownload(
   ctx: ServiceCtx,
-  input: { key: string; documentId?: string; sessionId?: string; container?: string },
+  input: {
+    key: string;
+    documentId?: string;
+    sessionId?: string;
+    container?: string;
+    /** SEC-PII-02: descriptografa o conteúdo baixado — ver captureStorageUpload. */
+    encrypted?: boolean;
+  },
 ): Promise<Uint8Array | null> {
   const port = resolveCaptureStorageProvider(ctx);
   const result = await port.download({
@@ -71,7 +92,7 @@ export async function captureStorageDownload(
     tenantRef: ctx.tenantId,
   });
   if (!result.ok || !result.body) return null;
-  return result.body;
+  return input.encrypted ? decryptStorageBytes(result.body) : result.body;
 }
 
 export async function captureStorageSignedUrl(

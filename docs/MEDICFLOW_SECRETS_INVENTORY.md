@@ -64,6 +64,8 @@
 | `VITE_MEDFLOW_CONTACT_EMAIL` | E-mail de contato institucional | Opcional | `startup-checks.ts`, `public-env-validation.ts`, branding |
 | `VITE_MEDFLOW_DEBUG` | Flag de diagnóstico | Opcional (proibido prod) | `security-validation-service.ts`, `validate-env.mjs` |
 | `MEDFLOW_AUDIT_HASH_SALT` | Pepper para hash de e-mail/IP em audit logs | Recomendado (servidor) | `src/lib/security/security-audit-hash.ts`, `nitro.config.ts` |
+| `MEDFLOW_STORAGE_ENCRYPTION_KEY` | Chave AES-256-GCM (32B hex/base64) — criptografa em repouso os 6 artefatos JSON do pipeline de captura (OCR/guia estruturada/auditoria/contrato/risco/correção). SEC-PII-02. Nunca rotacionar sem plano — invalida conteúdo já gravado. | **Sim** (servidor) | `src/lib/security/storage-encryption.ts`, `enterprise-storage-bridge.ts` |
+| `CAPTURE_PIPELINE_WORKER_SECRET` | Segredo do header `x-capture-worker-secret` — autentica o pg_cron chamando `/api/capture/process-batch`. F1-S4-DEPLOY. | **Sim** (servidor, se pg_cron ativo) | `src/routes/api.capture.process-batch.ts` |
 | `MEDFLOW_DEPLOY_TARGET` | Alvo de deploy (`vercel`) | Opcional | `vite.config.ts`, `scripts/build-vercel.mjs` |
 | `MEDFLOW_ERROR_TRACKING_DSN` | DSN error tracking (servidor) | Opcional | `src/lib/monitoring/sinks/error-tracker.ts` |
 | `VITE_MEDFLOW_ERROR_TRACKING_DSN` | DSN error tracking (client) | Opcional | `error-tracker.ts` |

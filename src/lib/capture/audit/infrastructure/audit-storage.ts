@@ -7,9 +7,9 @@
 import type { ServiceCtx } from "@/lib/services/operations/types";
 import {
   captureStorageDownload,
-  captureStorageSignedUrl,
   captureStorageUpload,
 } from "../../infrastructure/enterprise-storage-bridge";
+import { buildCaptureReportDownloadUrl } from "../../infrastructure/report-download-url";
 import type { AuditReport, AuditReportSummaryMeta } from "../types/audit-report";
 
 export const AUDIT_REPORT_FILENAME = "audit_report.json";
@@ -32,6 +32,7 @@ export async function persistAuditReport(
     contentType: "application/json",
     upsert: true,
     sessionId,
+    encrypt: true,
   });
   return { storagePath };
 }
@@ -41,7 +42,7 @@ export async function loadAuditReport(
   sessionId: string,
 ): Promise<AuditReport | null> {
   const storagePath = buildAuditReportStoragePath(ctx.tenantId, sessionId);
-  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId });
+  const body = await captureStorageDownload(ctx, { key: storagePath, sessionId, encrypted: true });
   if (!body) return null;
   const text = new TextDecoder().decode(body);
   return JSON.parse(text) as AuditReport;
@@ -52,17 +53,10 @@ export async function getAuditReportSignedUrl(
   sessionId: string,
   ttlSeconds = 3600,
 ): Promise<{ signedUrl: string; expiresAt: string; filename: string }> {
-  const storagePath = buildAuditReportStoragePath(ctx.tenantId, sessionId);
-  const { signedUrl, expiresAt } = await captureStorageSignedUrl(ctx, {
-    key: storagePath,
-    expiresInSeconds: ttlSeconds,
-    downloadFilename: AUDIT_REPORT_FILENAME,
-    sessionId,
-  });
-
+  void ctx;
   return {
-    signedUrl,
-    expiresAt,
+    signedUrl: buildCaptureReportDownloadUrl(sessionId, "audit"),
+    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
     filename: AUDIT_REPORT_FILENAME,
   };
 }
