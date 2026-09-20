@@ -181,6 +181,7 @@
     "enterprise:medical-payout-rls-e2e:test": "npx tsx --test scripts/enterprise/tests/medical-payout-rls-e2e.test.ts",
     "enterprise:capture-pii-rls-e2e:test": "npx tsx --test scripts/enterprise/tests/capture-pii-rls-e2e.test.ts",
     "enterprise:tiss-peak-load-e2e:test": "npx tsx --test scripts/enterprise/tests/tiss-peak-load-e2e.test.ts",
+    "enterprise:capture-pipeline-postgres-load-e2e:test": "npx tsx --test scripts/enterprise/tests/capture-pipeline-postgres-load-e2e.test.ts",
     "enterprise:shift-checkin-attendance-e2e:test": "npx tsx --test scripts/enterprise/tests/shift-checkin-attendance-e2e.test.ts",
     "enterprise:homologation-readiness:test": "npx tsx --test scripts/enterprise/tests/homologation-readiness.test.ts",
     "enterprise:homologation-readiness-e2e:test": "npx tsx --test scripts/enterprise/tests/homologation-readiness-e2e.test.ts",

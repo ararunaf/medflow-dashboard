@@ -4,15 +4,24 @@
  * Fluxo oficial único:
  *   Produto → resolveCaptureEnterpriseRuntime() [= getEnterpriseRuntime()]
  *     → getOCRRuntimePort().health() (gate real — falha aqui bloqueia a execução)
- *     → runCaptureOcr (implementação interna: OcrOrchestrator → Azure)
+ *     → runCaptureOcr → OcrOrchestrator → AzureDocumentIntelligenceProvider.extract()
+ *       → processCaptureOcrViaEnterprise() [src/lib/capture/ocr/enterprise/process-ocr-via-enterprise.ts]
+ *       → getCaptureEngineRuntimePort().processOcr()
+ *       → getOCRRuntimePort().process() → OCRProviderPort (Azure real)
  *
- * Nota honesta de arquitetura: a extração real (bytes → texto) roda hoje em
- * `OcrOrchestrator`/`AzureDocumentIntelligenceProvider`, NÃO em
- * `getOCRRuntimePort().process()` — esse método canônico do Port existe mas
- * não tem caller em produção (só em teste). Por isso `viaEnterpriseRuntime`
- * não significa "execução roteada pelo Port": significa "o composition root
- * foi resolvido e verificado saudável antes de autorizar a execução". Se o
- * Port reportar não-saudável, a execução é bloqueada — não apenas logada.
+ * Correção (2026-09-19): o comentário anterior deste arquivo afirmava que a
+ * extração real NÃO passava por `getOCRRuntimePort().process()` — isso está
+ * errado. `AzureDocumentIntelligenceProvider` (o provider "azure_document_intelligence"
+ * registrado em `createDefaultOcrProviders()`) não chama Azure/HTTP direto:
+ * seu `.extract()` delega para `processCaptureOcrViaEnterprise()` (um segundo
+ * arquivo de nome quase idêntico, em `capture/ocr/enterprise/`, não confundir
+ * com este), que por sua vez chama `getCaptureEngineRuntimePort().processOcr()`
+ * — e essa implementação (`DefaultCaptureEngineRuntimeAdapter.processOcr`)
+ * chama `getOCRRuntimePort().process()` de verdade. Rastreado ponta a ponta
+ * (composition root em `enterprise-runtime.ts`: `ocrProviderPort` usa
+ * `provider: "azure"`, `captureEngineRuntimePort` usa `provider: "default"` →
+ * `DefaultCaptureEngineRuntimeAdapter`) — não há bypass nem fallback nesse
+ * caminho em produção. `.process()` tem, sim, caller em produção.
  *
  * Não altera o engine OCR. Não cria pipeline paralelo.
  * Server Fns e o binding operacional NÃO importam `ocr-service` para execução —
