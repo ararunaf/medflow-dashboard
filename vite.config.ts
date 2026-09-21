@@ -167,8 +167,19 @@ export default defineConfig(({ command, mode }) => {
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
     devServerFnErrorLogger(),
-    patchLibxml2WasmForWorkers(root),
   ];
+
+  if (!isVercelDeployTarget()) {
+    // Scoped to the Cloudflare target only: this patch relies on
+    // @cloudflare/vite-plugin's CompiledWasm import support (a real
+    // WebAssembly.Module at build time) to make `new WebAssembly.Instance`
+    // work synchronously. The Vercel/Nitro build doesn't have that plugin,
+    // so the same raw `.wasm` import resolves to something else there (an
+    // asset URL string, not a Module) — passing it to `instantiateWasm`
+    // throws at module-load time, taking down every TISS server function on
+    // cold start (Guias/Lotes/Convênios/Glosas all share this module).
+    plugins.push(patchLibxml2WasmForWorkers(root));
+  }
 
   if (command === "build") {
     if (isVercelDeployTarget()) {
