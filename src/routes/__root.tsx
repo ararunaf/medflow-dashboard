@@ -23,6 +23,7 @@ import { RealtimeProvider } from "@/components/realtime-provider";
 import { ToastHost } from "@/components/toast-host";
 import { getAuthContext } from "@/lib/auth/get-auth-context";
 import { evaluateRouteGuard } from "@/lib/auth/route-guard";
+import { isTenantAdmin } from "@/lib/auth/rbac";
 import type { AuthContext } from "@/lib/auth/types";
 import { logStartupDiagnostics } from "@/lib/env/startup-diagnostics";
 import { logClient } from "@/lib/monitoring/channels/client";
@@ -171,7 +172,9 @@ function RootComponent() {
         <RealtimeProvider enabled={!!auth.user} />
         <OperationalHeartbeat enabled={!!auth.user} />
         <PilotAdoptionTracker enabled={!!auth.user} />
-        <ProductionWarningBanner />
+        <ProductionWarningBanner
+          visible={!!auth.user && isTenantAdmin(auth.profile?.role ?? null)}
+        />
         <OfflineFallback />
         <DeploymentFallback />
         <GlobalErrorBoundary>
