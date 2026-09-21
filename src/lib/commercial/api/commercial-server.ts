@@ -20,6 +20,7 @@ import { buildDeploymentReadinessItems } from "@/lib/services/deployment-readine
 import { runOperationalHealthChecks } from "@/lib/services/operational-health/operational-health-service";
 import { buildOperationalReadinessChecklist } from "@/lib/services/readiness-check/readiness-check-service";
 import { loadPilotDeploymentSnapshot } from "@/lib/services/pilot-deployment/pilot-deployment-snapshot-service";
+import { isProductionRampTargetPct } from "@/lib/services/executive-dashboard/production-ramp";
 
 export type OperationalReadinessPayload = {
   settings: Awaited<ReturnType<typeof getTenantSettings>>;
@@ -79,6 +80,20 @@ export const saveTenantSettingsFn = createServerFn({ method: "POST" })
           ? null
           : optionalString(o.default_carater_atendimento, "default_carater_atendimento"),
       cnpj: o.cnpj === null ? null : optionalString(o.cnpj, "cnpj"),
+      production_ramp_target_pct:
+        o.production_ramp_target_pct === undefined
+          ? undefined
+          : (() => {
+              if (!isProductionRampTargetPct(o.production_ramp_target_pct)) {
+                throw new ValidationError(
+                  "Meta de rampa de produção inválida (use 10, 50 ou 100).",
+                  {
+                    field: "production_ramp_target_pct",
+                  },
+                );
+              }
+              return o.production_ramp_target_pct;
+            })(),
     };
   })
   .handler(
@@ -97,7 +112,8 @@ export const saveTenantSettingsFn = createServerFn({ method: "POST" })
           data.currency == null &&
           data.default_regime_atendimento === undefined &&
           data.default_carater_atendimento === undefined &&
-          data.cnpj === undefined
+          data.cnpj === undefined &&
+          data.production_ramp_target_pct === undefined
         ) {
           throw new ValidationError("Nenhum campo para atualizar.", { field: "payload" });
         }
@@ -118,6 +134,8 @@ export const saveTenantSettingsFn = createServerFn({ method: "POST" })
         if (data.default_carater_atendimento !== undefined)
           patch.default_carater_atendimento = data.default_carater_atendimento;
         if (data.cnpj !== undefined) patch.cnpj = data.cnpj;
+        if (data.production_ramp_target_pct !== undefined)
+          patch.production_ramp_target_pct = data.production_ramp_target_pct;
         return upsertTenantSettings(ctx, patch);
       });
     },

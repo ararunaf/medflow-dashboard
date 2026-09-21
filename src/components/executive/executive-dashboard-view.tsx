@@ -648,6 +648,62 @@ export function ExecutiveDashboardView({ auth }: Props) {
             </div>
           </div>
 
+          {dash.production_ramp && (
+            <div className="rounded-xl border border-border bg-card p-4 ring-soft">
+              <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  Rampa de produção — meta atual: {dash.production_ramp.targetPct}% do volume pleno
+                </h3>
+                <Link to="/instituicao" className="text-xs text-primary hover:underline shrink-0">
+                  Ajustar meta
+                </Link>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">Guias faturáveis</span>
+                    <span className="tabular-nums font-medium">
+                      {dash.total_guides.toLocaleString("pt-BR")} /{" "}
+                      {dash.production_ramp.targetGuides.toLocaleString("pt-BR")} (
+                      {dash.production_ramp.guidesProgressPct}%)
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary/80"
+                      style={{ width: `${Math.min(100, dash.production_ramp.guidesProgressPct)}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">Faturamento</span>
+                    <span className="tabular-nums font-medium">
+                      {moneyBrl(dash.consolidated_billing)} /{" "}
+                      {moneyBrl(dash.production_ramp.targetRevenueBRL)} (
+                      {dash.production_ramp.revenueProgressPct}%)
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[color:var(--success)]/80"
+                      style={{
+                        width: `${Math.min(100, dash.production_ramp.revenueProgressPct)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                Meta calculada sobre a escala plena da cooperativa (20.000 boletins / R$ 30 milhões
+                por mês, roadmap Fase 6). Progresso do mês foco (
+                {competenceLabel(dash.competence_focus)}) — subir a meta é decisão institucional,
+                feita em Instituição.
+              </p>
+            </div>
+          )}
+
           <div className="rounded-xl border border-border bg-card overflow-hidden ring-soft">
             <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Grade operacional</h3>

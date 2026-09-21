@@ -355,6 +355,7 @@ export type Database = {
           default_regime_atendimento: string | null;
           default_carater_atendimento: string | null;
           cnpj: string | null;
+          production_ramp_target_pct: number;
           created_at: string;
           updated_at: string;
         };
@@ -373,6 +374,7 @@ export type Database = {
           default_regime_atendimento?: string | null;
           default_carater_atendimento?: string | null;
           cnpj?: string | null;
+          production_ramp_target_pct?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -391,6 +393,7 @@ export type Database = {
           default_regime_atendimento?: string | null;
           default_carater_atendimento?: string | null;
           cnpj?: string | null;
+          production_ramp_target_pct?: number;
           created_at?: string;
           updated_at?: string;
         };

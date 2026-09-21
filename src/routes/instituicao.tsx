@@ -63,6 +63,7 @@ function InstituicaoPage() {
     default_regime_atendimento: "",
     default_carater_atendimento: "",
     cnpj: "",
+    production_ramp_target_pct: 10,
   });
 
   useEffect(() => {
@@ -78,6 +79,7 @@ function InstituicaoPage() {
       default_regime_atendimento: s.default_regime_atendimento ?? "",
       default_carater_atendimento: s.default_carater_atendimento ?? "",
       cnpj: s.cnpj ?? "",
+      production_ramp_target_pct: s.production_ramp_target_pct ?? 10,
     });
   }, [s]);
 
@@ -428,6 +430,24 @@ function InstituicaoPage() {
                     <option value="2">Urgência/Emergência</option>
                   </select>
 
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    Meta de rampa de produção (Fase 6 — % do volume mensal pleno da cooperativa)
+                  </label>
+                  <select
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    value={form.production_ramp_target_pct}
+                    onChange={(e) =>
+                      setForm((p) => ({
+                        ...p,
+                        production_ramp_target_pct: Number(e.target.value) as 10 | 50 | 100,
+                      }))
+                    }
+                  >
+                    <option value={10}>10% do volume pleno</option>
+                    <option value={50}>50% do volume pleno</option>
+                    <option value={100}>100% do volume pleno (go-live)</option>
+                  </select>
+
                   <button
                     type="button"
                     disabled={save.isPending}
@@ -443,6 +463,7 @@ function InstituicaoPage() {
                         default_regime_atendimento: form.default_regime_atendimento || null,
                         default_carater_atendimento: form.default_carater_atendimento || null,
                         cnpj: form.cnpj || null,
+                        production_ramp_target_pct: form.production_ramp_target_pct,
                       })
                     }
                     className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 text-sm font-medium hover:bg-primary/90 disabled:opacity-50"

@@ -2,6 +2,7 @@ import { assertCan } from "@/lib/auth/rbac";
 import { mapPostgresError, ValidationError } from "@/lib/domain/operations/errors";
 import type { Database } from "@/lib/database.types";
 import type { ServiceCtx } from "@/lib/services/operations/types";
+import { isProductionRampTargetPct } from "@/lib/services/executive-dashboard/production-ramp";
 
 export type TenantSettingsRow = Database["public"]["Tables"]["tenant_settings"]["Row"];
 export type TenantSettingsUpdate = Database["public"]["Tables"]["tenant_settings"]["Update"];
@@ -88,20 +89,31 @@ export async function upsertTenantSettings(
         ? patch.default_carater_atendimento
         : (current?.default_carater_atendimento ?? null),
     cnpj: patch.cnpj !== undefined ? patch.cnpj : (current?.cnpj ?? null),
+    production_ramp_target_pct:
+      patch.production_ramp_target_pct !== undefined
+        ? patch.production_ramp_target_pct
+        : (current?.production_ramp_target_pct ?? 10),
   };
 
   const email = merged.contact_email;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new ValidationError("E-mail de contato inválido.", { field: "contact_email" });
   }
-  if (merged.default_regime_atendimento && !REGIME_ATENDIMENTO_CODES.has(merged.default_regime_atendimento)) {
-    throw new ValidationError("Regime de atendimento padrão inválido.", { field: "default_regime_atendimento" });
+  if (
+    merged.default_regime_atendimento &&
+    !REGIME_ATENDIMENTO_CODES.has(merged.default_regime_atendimento)
+  ) {
+    throw new ValidationError("Regime de atendimento padrão inválido.", {
+      field: "default_regime_atendimento",
+    });
   }
   if (
     merged.default_carater_atendimento &&
     !CARATER_ATENDIMENTO_CODES.has(merged.default_carater_atendimento)
   ) {
-    throw new ValidationError("Caráter de atendimento padrão inválido.", { field: "default_carater_atendimento" });
+    throw new ValidationError("Caráter de atendimento padrão inválido.", {
+      field: "default_carater_atendimento",
+    });
   }
   if (merged.cnpj) {
     const digits = merged.cnpj.replace(/\D/g, "");
@@ -109,6 +121,11 @@ export async function upsertTenantSettings(
       throw new ValidationError("CNPJ inválido (esperado 14 dígitos).", { field: "cnpj" });
     }
     merged.cnpj = digits;
+  }
+  if (!isProductionRampTargetPct(merged.production_ramp_target_pct)) {
+    throw new ValidationError("Meta de rampa de produção inválida (use 10, 50 ou 100).", {
+      field: "production_ramp_target_pct",
+    });
   }
 
   const { data, error } = await ctx.client

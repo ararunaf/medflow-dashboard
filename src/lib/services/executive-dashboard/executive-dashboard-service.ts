@@ -9,6 +9,16 @@ import { listFinancialClosings } from "@/lib/services/financial-closing/financia
 import { loadOperationalConsolidationBundle } from "@/lib/services/financial-closing/operational-consolidation-service";
 import { listOperationalReconciliations } from "@/lib/services/reconciliation/reconciliation-service";
 import { normalizeCompetenceMonth } from "@/lib/services/medical-payout/production-service";
+import { getTenantSettings } from "@/lib/services/tenant-settings/tenant-settings-service";
+import {
+  computeProductionRampProgress,
+  isProductionRampTargetPct,
+  type ProductionRampProgress,
+} from "./production-ramp";
+import {
+  PRODUCTION_FULL_SCALE_GUIDES_PER_MONTH,
+  PRODUCTION_FULL_SCALE_REVENUE_PER_MONTH_BRL,
+} from "@/lib/operational/constants";
 import type { FinancialClosingRow } from "@/lib/services/financial-closing/types";
 import type { OperationalReconciliationRow } from "@/lib/services/reconciliation/types";
 
@@ -62,6 +72,10 @@ export type ExecutiveDashboardSnapshot = {
   kpis: ExecutiveDashboardKpis;
   /** Merge por competência (últimos meses com dado) */
   rollups: ExecutiveCompetenceRollup[];
+  /** Guias da competência foco (bundle real, não amostra dos fechamentos) */
+  total_guides: number;
+  /** Progresso do mês foco contra a meta de rampa (F6-O2) — null sem bundle. */
+  production_ramp: ProductionRampProgress | null;
 };
 
 function pickCompetenceFocus(
@@ -120,7 +134,7 @@ export async function loadExecutiveDashboardSnapshot(
 ): Promise<ExecutiveDashboardSnapshot> {
   assertCan(ctx.role, "financial_closing:read");
 
-  const [closings, recons, issuesOpen] = await Promise.all([
+  const [closings, recons, issuesOpen, tenantSettings] = await Promise.all([
     listFinancialClosings(ctx, { limit: CLOSING_LIST_LIMIT }),
     listOperationalReconciliations(ctx, { limit: RECON_LIST_LIMIT }),
     ctx.client
@@ -128,6 +142,7 @@ export async function loadExecutiveDashboardSnapshot(
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", ctx.tenantId)
       .eq("resolved", false),
+    getTenantSettings(ctx),
   ]);
 
   if (issuesOpen.error) throw mapPostgresError(issuesOpen.error);
@@ -177,6 +192,19 @@ export async function loadExecutiveDashboardSnapshot(
   const operational_loss_estimate =
     denied + Math.max(0, Number(bundle?.operational_difference ?? 0));
 
+  const targetPct = isProductionRampTargetPct(tenantSettings?.production_ramp_target_pct)
+    ? tenantSettings!.production_ramp_target_pct
+    : 10;
+  const production_ramp: ProductionRampProgress | null = bundle
+    ? computeProductionRampProgress({
+        targetPct,
+        fullScaleGuidesPerMonth: PRODUCTION_FULL_SCALE_GUIDES_PER_MONTH,
+        fullScaleRevenuePerMonthBRL: PRODUCTION_FULL_SCALE_REVENUE_PER_MONTH_BRL,
+        actualGuides: bundle.total_guides,
+        actualBilledBRL: bundle.total_billed,
+      })
+    : null;
+
   return {
     as_of: new Date().toISOString(),
     competence_focus,
@@ -198,5 +226,7 @@ export async function loadExecutiveDashboardSnapshot(
       open_closings,
     },
     rollups: mergeRollups(closings, recons),
+    total_guides: bundle?.total_guides ?? 0,
+    production_ramp,
   };
 }
