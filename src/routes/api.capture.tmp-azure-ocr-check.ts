@@ -28,8 +28,12 @@ const MIN_PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAIAAAAiOjnJAAACEElEQVR4nO3SQQkAMAzAwPo3vaoIg3KnII/Mg8D8DuAmY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBaJBcLKBp7i8n+mAAAAAElFTkSuQmCC";
 
 async function handle({ request }: { request: Request }): Promise<Response> {
+  // Autenticado por variável de ambiente própria (TMP_DIAG_TOKEN), não pelo
+  // CAPTURE_PIPELINE_WORKER_SECRET — esse também autentica o cron de produção
+  // do pipeline de captura e não deve ser tocado por causa de um teste pontual.
   const secret = request.headers.get("x-capture-worker-secret");
-  if (!secret || secret !== process.env.CAPTURE_PIPELINE_WORKER_SECRET) {
+  const expected = process.env.TMP_DIAG_TOKEN;
+  if (!secret || !expected || secret !== expected) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
