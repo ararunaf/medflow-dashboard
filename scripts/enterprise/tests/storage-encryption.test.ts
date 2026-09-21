@@ -94,6 +94,22 @@ describe("storage-encryption — SEC-PII-02", () => {
     });
   });
 
+  it("tolera espaço/quebra de linha grudados ao colar num painel web (acidente comum)", async () => {
+    await withKey(`  ${TEST_KEY_HEX}\n`, async () => {
+      const plaintext = new TextEncoder().encode("valor colado com espaço/newline sobrando");
+      assertBytesEqual(await decryptStorageBytes(await encryptStorageBytes(plaintext)), plaintext);
+    });
+  });
+
+  it("mensagem de erro inclui o comprimento bruto e após trim, pra diagnosticar cola errada", async () => {
+    await withKey("deadbeef\n", async () => {
+      await assert.rejects(
+        () => encryptStorageBytes(new TextEncoder().encode("x")),
+        /recebido 9 caracteres brutos, 8 após trim/,
+      );
+    });
+  });
+
   it("isStorageEncryptionConfigured reflete a presença da variável", async () => {
     await withKey(undefined, async () => {
       assert.equal(isStorageEncryptionConfigured(), false);

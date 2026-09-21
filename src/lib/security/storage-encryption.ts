@@ -40,12 +40,16 @@ function toArrayBufferView(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
 }
 
 function decodeKeyBytes(raw: string): Uint8Array<ArrayBuffer> {
-  const decoded = /^[0-9a-fA-F]{64}$/.test(raw)
-    ? Buffer.from(raw, "hex")
-    : Buffer.from(raw, "base64");
+  // Colar num painel web é a via mais comum de configurar isso — espaço/
+  // quebra de linha grudado no fim é um acidente comum demais pra tratar
+  // como erro do operador em vez de corrigir aqui.
+  const trimmed = raw.trim();
+  const decoded = /^[0-9a-fA-F]{64}$/.test(trimmed)
+    ? Buffer.from(trimmed, "hex")
+    : Buffer.from(trimmed, "base64");
   if (decoded.length !== 32) {
     throw new Error(
-      "MEDFLOW_STORAGE_ENCRYPTION_KEY inválida: precisa decodificar para 32 bytes (256 bits) em hex ou base64.",
+      `MEDFLOW_STORAGE_ENCRYPTION_KEY inválida: precisa decodificar para 32 bytes (256 bits) em hex ou base64 (recebido ${raw.length} caracteres brutos, ${trimmed.length} após trim).`,
     );
   }
   return toArrayBufferView(decoded);
@@ -53,7 +57,7 @@ function decodeKeyBytes(raw: string): Uint8Array<ArrayBuffer> {
 
 async function resolveKey(): Promise<CryptoKey | null> {
   const raw = process.env.MEDFLOW_STORAGE_ENCRYPTION_KEY;
-  if (typeof raw !== "string" || raw.length === 0) return null;
+  if (typeof raw !== "string" || raw.trim().length === 0) return null;
 
   const keyBytes = decodeKeyBytes(raw);
   return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, [
@@ -65,7 +69,7 @@ async function resolveKey(): Promise<CryptoKey | null> {
 /** true se a chave estiver configurada — usar antes de decidir se pode criptografar. */
 export function isStorageEncryptionConfigured(): boolean {
   const raw = process.env.MEDFLOW_STORAGE_ENCRYPTION_KEY;
-  return typeof raw === "string" && raw.length > 0;
+  return typeof raw === "string" && raw.trim().length > 0;
 }
 
 export async function encryptStorageBytes(plaintext: Uint8Array): Promise<Uint8Array> {
