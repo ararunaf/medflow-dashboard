@@ -4,7 +4,6 @@ import type { TenantSettingsRow } from "@/lib/services/tenant-settings/tenant-se
 const BRAND_PRIMARY = "--primary";
 const BRAND_SECONDARY = "--secondary";
 const BRAND_ACCENT = "--accent";
-const BRAND_SIDEBAR_PRIMARY = "--sidebar-primary";
 
 export type TenantBrandingSnapshot = Pick<
   TenantSettingsRow,
@@ -42,7 +41,6 @@ export function applyTenantBrandingToDocument(
     root.style.removeProperty(BRAND_PRIMARY);
     root.style.removeProperty(BRAND_SECONDARY);
     root.style.removeProperty(BRAND_ACCENT);
-    root.style.removeProperty(BRAND_SIDEBAR_PRIMARY);
     document.title = defaultTitle;
     return;
   }
@@ -50,7 +48,6 @@ export function applyTenantBrandingToDocument(
   root.style.setProperty(BRAND_PRIMARY, row.primary_color);
   root.style.setProperty(BRAND_SECONDARY, row.secondary_color);
   root.style.setProperty(BRAND_ACCENT, row.secondary_color);
-  root.style.setProperty(BRAND_SIDEBAR_PRIMARY, row.primary_color);
 
   const inst = row.institution_name?.trim();
   document.title = inst ? `${inst} · ${BRANDING.shortName}` : defaultTitle;
@@ -72,6 +69,5 @@ export function revokeTenantBrandingFromDocument(root: HTMLElement): void {
   root.style.removeProperty(BRAND_PRIMARY);
   root.style.removeProperty(BRAND_SECONDARY);
   root.style.removeProperty(BRAND_ACCENT);
-  root.style.removeProperty(BRAND_SIDEBAR_PRIMARY);
   document.querySelector("link[data-tenant-favicon]")?.remove();
 }
