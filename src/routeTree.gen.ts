@@ -38,6 +38,7 @@ import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/f
 import { Route as Fase3SlugRouteImport } from './routes/fase3.$slug'
 import { Route as ContratosRevisaoContractIdRouteImport } from './routes/contratos/revisao.$contractId'
 import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
+import { Route as ApiCaptureTmpAzureOcrCheckRouteImport } from './routes/api.capture.tmp-azure-ocr-check'
 import { Route as ApiCaptureReportDownloadRouteImport } from './routes/api.capture.report-download'
 import { Route as ApiCaptureProcessBatchRouteImport } from './routes/api.capture.process-batch'
 
@@ -191,6 +192,12 @@ const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
   path: '/revisao/$sessionId',
   getParentRoute: () => CapturaRoute,
 } as any)
+const ApiCaptureTmpAzureOcrCheckRoute =
+  ApiCaptureTmpAzureOcrCheckRouteImport.update({
+    id: '/api/capture/tmp-azure-ocr-check',
+    path: '/api/capture/tmp-azure-ocr-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCaptureReportDownloadRoute =
   ApiCaptureReportDownloadRouteImport.update({
     id: '/api/capture/report-download',
@@ -233,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
   '/api/capture/report-download': typeof ApiCaptureReportDownloadRoute
+  '/api/capture/tmp-azure-ocr-check': typeof ApiCaptureTmpAzureOcrCheckRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -266,6 +274,7 @@ export interface FileRoutesByTo {
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
   '/api/capture/report-download': typeof ApiCaptureReportDownloadRoute
+  '/api/capture/tmp-azure-ocr-check': typeof ApiCaptureTmpAzureOcrCheckRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -300,6 +309,7 @@ export interface FileRoutesById {
   '/plantoes/$shiftId': typeof PlantoesShiftIdRoute
   '/api/capture/process-batch': typeof ApiCaptureProcessBatchRoute
   '/api/capture/report-download': typeof ApiCaptureReportDownloadRoute
+  '/api/capture/tmp-azure-ocr-check': typeof ApiCaptureTmpAzureOcrCheckRoute
   '/captura/revisao/$sessionId': typeof CapturaRevisaoSessionIdRoute
   '/contratos/revisao/$contractId': typeof ContratosRevisaoContractIdRoute
 }
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/plantoes/$shiftId'
     | '/api/capture/process-batch'
     | '/api/capture/report-download'
+    | '/api/capture/tmp-azure-ocr-check'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesByTo: FileRoutesByTo
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/plantoes/$shiftId'
     | '/api/capture/process-batch'
     | '/api/capture/report-download'
+    | '/api/capture/tmp-azure-ocr-check'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   id:
@@ -401,6 +413,7 @@ export interface FileRouteTypes {
     | '/plantoes/$shiftId'
     | '/api/capture/process-batch'
     | '/api/capture/report-download'
+    | '/api/capture/tmp-azure-ocr-check'
     | '/captura/revisao/$sessionId'
     | '/contratos/revisao/$contractId'
   fileRoutesById: FileRoutesById
@@ -428,6 +441,7 @@ export interface RootRouteChildren {
   Fase3SlugRoute: typeof Fase3SlugRoute
   ApiCaptureProcessBatchRoute: typeof ApiCaptureProcessBatchRoute
   ApiCaptureReportDownloadRoute: typeof ApiCaptureReportDownloadRoute
+  ApiCaptureTmpAzureOcrCheckRoute: typeof ApiCaptureTmpAzureOcrCheckRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -635,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CapturaRevisaoSessionIdRouteImport
       parentRoute: typeof CapturaRoute
     }
+    '/api/capture/tmp-azure-ocr-check': {
+      id: '/api/capture/tmp-azure-ocr-check'
+      path: '/api/capture/tmp-azure-ocr-check'
+      fullPath: '/api/capture/tmp-azure-ocr-check'
+      preLoaderRoute: typeof ApiCaptureTmpAzureOcrCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/capture/report-download': {
       id: '/api/capture/report-download'
       path: '/api/capture/report-download'
@@ -740,6 +761,7 @@ const rootRouteChildren: RootRouteChildren = {
   Fase3SlugRoute: Fase3SlugRoute,
   ApiCaptureProcessBatchRoute: ApiCaptureProcessBatchRoute,
   ApiCaptureReportDownloadRoute: ApiCaptureReportDownloadRoute,
+  ApiCaptureTmpAzureOcrCheckRoute: ApiCaptureTmpAzureOcrCheckRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
