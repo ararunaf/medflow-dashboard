@@ -76,7 +76,9 @@ function pickCompetenceFocus(
   if (fromClosing) return normalizeCompetenceMonth(fromClosing);
   const fromRecon = recons[0]?.competence_month;
   if (fromRecon) return normalizeCompetenceMonth(fromRecon);
-  return normalizeCompetenceMonth(new Date().toISOString().slice(0, 10));
+  const now = new Date();
+  const firstOfMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  return normalizeCompetenceMonth(firstOfMonth);
 }
 
 function mergeRollups(
