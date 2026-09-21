@@ -7,10 +7,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AzureDocumentIntelligenceAdapter } from "@/lib/enterprise/ocr-provider/adapters/azure-document-intelligence-adapter";
 
-// PNG 1x1 válido mínimo (68 bytes) — só para provar que o Azure aceita a
-// requisição, autentica e roda o modelo; não precisa ter texto legível.
+// PNG 200x200 branco válido — a imagem 1x1 original foi rejeitada pelo
+// Azure com "Invalid request" (tamanho mínimo de imagem). Não precisa ter
+// texto legível, só respeitar as dimensões mínimas que o Azure exige.
 const MIN_PNG_BASE64 =
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  "iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAIAAAAiOjnJAAACEElEQVR4nO3SQQkAMAzAwPo3vaoIg3KnII/Mg8D8DuAmY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBYJY5EwFgljkTAWCWORMBaJBcLKBp7i8n+mAAAAAElFTkSuQmCC";
 
 async function handle({ request }: { request: Request }): Promise<Response> {
   const secret = request.headers.get("x-capture-worker-secret");
