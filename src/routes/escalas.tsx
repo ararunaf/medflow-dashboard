@@ -263,12 +263,12 @@ function EscalasPage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-muted-foreground mb-1">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-[10px] font-medium text-muted-foreground mb-1">
             {WEEKDAY_HEADERS.map((w) => (
               <div key={w}>{w}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
             {monthGrid.flat().map((cell) => {
               const info = monthDayInfo.get(cell.iso);
               const active = cell.iso === selectedISO;

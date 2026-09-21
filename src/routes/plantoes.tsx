@@ -282,12 +282,12 @@ function OpenShiftCard({
         <Link
           to="/plantoes/$shiftId"
           params={{ shiftId: shift.shiftId }}
-          className="inline-flex items-center justify-center h-8 rounded-md px-3 text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-accent/60"
+          className="inline-flex items-center justify-center h-9 rounded-md px-3 text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-accent/60"
         >
           Ver detalhes
         </Link>
         <Button
-          size="sm"
+          size="default"
           className="gap-1.5"
           disabled={selfAssign.isPending}
           onClick={() => selfAssign.mutate({ shiftId: shift.shiftId })}
@@ -435,7 +435,7 @@ function AssignmentCard({
           ) : (
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               className="col-span-2 gap-1.5"
               onClick={() => setSwapOpen(true)}
             >
@@ -446,7 +446,7 @@ function AssignmentCard({
           <>
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               className="gap-1.5"
               disabled={isBusy || isFinal}
               onClick={() => setConfirmReject(true)}
@@ -455,7 +455,7 @@ function AssignmentCard({
               {reject.isPending ? "Recusando…" : "Recusar"}
             </Button>
             <Button
-              size="sm"
+              size="default"
               className="gap-1.5"
               disabled={isBusy || isFinal}
               onClick={() => accept.mutate({ assignmentId: assignment.assignmentId })}
@@ -545,7 +545,7 @@ function SwapRequestForm({
       <div className="flex gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="default"
           className="flex-1"
           disabled={requestSwap.isPending}
           onClick={onCancel}
@@ -553,7 +553,7 @@ function SwapRequestForm({
           Cancelar
         </Button>
         <Button
-          size="sm"
+          size="default"
           className="flex-1 gap-1.5"
           disabled={!targetId || requestSwap.isPending}
           onClick={() => requestSwap.mutate({ shiftId, targetProfessionalId: targetId })}
@@ -851,10 +851,10 @@ function PendingSwapCard({
         <StatusBadge status={swapStatusToBadge(swap.status)} />
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" disabled={busy} onClick={onDeny}>
+        <Button variant="outline" size="default" disabled={busy} onClick={onDeny}>
           Recusar
         </Button>
-        <Button size="sm" disabled={busy} onClick={onApprove}>
+        <Button size="default" disabled={busy} onClick={onApprove}>
           Aprovar
         </Button>
         <Link

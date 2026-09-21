@@ -271,7 +271,7 @@ export function AppShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 pb-24 lg:pb-8 px-4 lg:px-8 py-4 lg:py-8 max-w-7xl w-full mx-auto motion-safe:transition-opacity motion-safe:duration-200 focus:outline-none"
+          className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-8 px-4 lg:px-8 py-4 lg:py-8 max-w-7xl w-full mx-auto motion-safe:transition-opacity motion-safe:duration-200 focus:outline-none"
         >
           {showBreadcrumbs ? <Breadcrumbs crumbs={crumbs} /> : null}
           {children}
@@ -282,7 +282,7 @@ export function AppShell({
 
         {/* Mobile bottom nav — primários + Mais */}
         <nav
-          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-border"
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-border pb-[env(safe-area-inset-bottom)]"
           aria-label="Navegação móvel"
         >
           <ul className="grid grid-cols-6">
@@ -336,7 +336,7 @@ export function AppShell({
             />
             <div
               id="mobile-more-nav"
-              className="absolute bottom-0 inset-x-0 max-h-[75vh] overflow-y-auto rounded-t-2xl bg-surface border-t border-border shadow-xl pb-20"
+              className="absolute bottom-0 inset-x-0 max-h-[75vh] overflow-y-auto rounded-t-2xl bg-surface border-t border-border shadow-xl pb-[calc(5rem+env(safe-area-inset-bottom))]"
             >
               <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-border bg-surface">
                 <div className="flex items-center gap-2 text-sm font-semibold">

@@ -217,7 +217,7 @@ function SelfServiceActions({
     return (
       <div className="mt-4">
         <Button
-          size="sm"
+          size="default"
           className="gap-1.5"
           disabled={selfAssign.isPending}
           onClick={() => selfAssign.mutate({ shiftId })}
@@ -235,7 +235,7 @@ function SelfServiceActions({
       <div className="mt-4 flex gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="default"
           className="gap-1.5"
           disabled={busy}
           onClick={() => reject.mutate({ assignmentId: myAssignment.assignmentId })}
@@ -243,7 +243,7 @@ function SelfServiceActions({
           <X className="h-4 w-4" /> Recusar
         </Button>
         <Button
-          size="sm"
+          size="default"
           className="gap-1.5"
           disabled={busy}
           onClick={() => accept.mutate({ assignmentId: myAssignment.assignmentId })}
@@ -267,7 +267,7 @@ function SelfServiceActions({
       return (
         <div className="mt-4">
           <Button
-            size="sm"
+            size="default"
             className="gap-1.5"
             disabled={checkOut.isPending}
             onClick={() => checkOut.mutate({ assignmentId: myAssignment.assignmentId })}
@@ -281,7 +281,7 @@ function SelfServiceActions({
     return (
       <div className="mt-4">
         <Button
-          size="sm"
+          size="default"
           className="gap-1.5"
           disabled={checkIn.isPending}
           onClick={() => checkIn.mutate({ assignmentId: myAssignment.assignmentId })}
@@ -313,7 +313,7 @@ function CoordinatorActions({
     <div className="mt-4 pt-4 border-t border-border">
       <Button
         variant="destructive"
-        size="sm"
+        size="default"
         className="gap-1.5"
         disabled={cancelShift.isPending}
         onClick={() => {
