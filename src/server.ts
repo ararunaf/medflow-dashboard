@@ -140,7 +140,7 @@ export default {
 
     const url = new URL(request.url);
     if (isHealthPath(url.pathname)) {
-      const healthResponse = await resolveHealthResponse(url.pathname);
+      const healthResponse = await resolveHealthResponse(url.pathname, request);
       return applySecurityHeaders(healthResponse, isProduction);
     }
 
