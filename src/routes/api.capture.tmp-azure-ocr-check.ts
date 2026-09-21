@@ -39,8 +39,55 @@ async function handle({ request }: { request: Request }): Promise<Response> {
 
   const url = new URL(request.url);
   const raw = url.searchParams.get("raw") === "1";
+  const poll = url.searchParams.get("raw") === "2";
 
   const fileBytes = Uint8Array.from(Buffer.from(MIN_PNG_BASE64, "base64"));
+
+  if (poll) {
+    const config = resolveAzureDocumentIntelligenceConfig();
+    if (!config) {
+      return Response.json({ ok: false, stage: "config", error: "endpoint/key ausentes" });
+    }
+    const analyzeUrl = `${config.endpoint}/documentintelligence/documentModels/prebuilt-layout:analyze?api-version=${AZURE_DOCUMENT_INTELLIGENCE_API_VERSION}`;
+    const submitRes = await fetch(analyzeUrl, {
+      method: "POST",
+      headers: {
+        "Ocp-Apim-Subscription-Key": config.apiKey,
+        "Content-Type": "image/png",
+      },
+      body: fileBytes as unknown as BodyInit,
+    });
+    if (submitRes.status !== 202) {
+      const errBody = await submitRes.text();
+      return Response.json({ stage: "submit", status: submitRes.status, body: errBody });
+    }
+    const operationLocation = submitRes.headers.get("operation-location");
+    if (!operationLocation) {
+      return Response.json({ stage: "submit", error: "sem operation-location" });
+    }
+
+    const attempts: unknown[] = [];
+    for (let i = 0; i < 10; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const pollRes = await fetch(operationLocation, {
+        headers: { "Ocp-Apim-Subscription-Key": config.apiKey },
+      });
+      const pollBody = (await pollRes.json().catch(() => ({}))) as {
+        status?: string;
+        error?: unknown;
+      };
+      attempts.push({
+        i,
+        httpStatus: pollRes.status,
+        azureStatus: pollBody.status,
+        error: pollBody.error,
+      });
+      if (pollBody.status === "succeeded" || pollBody.status === "failed") {
+        return Response.json({ operationLocation, attempts });
+      }
+    }
+    return Response.json({ operationLocation, attempts, timedOut: true });
+  }
 
   if (raw) {
     const config = resolveAzureDocumentIntelligenceConfig();
