@@ -53,7 +53,7 @@ export async function captureStorageUpload(
   },
 ): Promise<void> {
   const port = resolveCaptureStorageProvider(ctx);
-  const body = input.encrypt ? encryptStorageBytes(input.body) : input.body;
+  const body = input.encrypt ? await encryptStorageBytes(input.body) : input.body;
   // Cifrado deixa de ser JSON/o que quer que fosse — marcar como binário
   // genérico é o correto, independente do content-type original do chamador.
   const contentType = input.encrypt ? "application/octet-stream" : input.contentType;
@@ -92,7 +92,7 @@ export async function captureStorageDownload(
     tenantRef: ctx.tenantId,
   });
   if (!result.ok || !result.body) return null;
-  return input.encrypted ? decryptStorageBytes(result.body) : result.body;
+  return input.encrypted ? await decryptStorageBytes(result.body) : result.body;
 }
 
 export async function captureStorageSignedUrl(
