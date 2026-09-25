@@ -69,6 +69,10 @@ export function buildContractExtractionMessages(
   ];
 }
 
+function collapseWhitespace(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
 type RawProposal = {
   description?: unknown;
   justification?: unknown;
@@ -88,6 +92,11 @@ export function parseContractExtractionResponse(
     parsed = JSON.parse(raw);
   } catch {
     return [];
+  }
+  // O modo JSON do provedor sempre devolve um objeto na raiz — o array pedido
+  // no prompt chega embrulhado (ex.: { "rules": [...] }).
+  if (!Array.isArray(parsed) && parsed && typeof parsed === "object") {
+    parsed = Object.values(parsed as Record<string, unknown>).find(Array.isArray) ?? null;
   }
   if (!Array.isArray(parsed)) return [];
 
@@ -109,7 +118,10 @@ export function parseContractExtractionResponse(
     }
 
     const citation = item.citationExcerpt.trim();
-    const sourceChunk = chunks.find((c) => c.content.includes(citation));
+    // Texto extraído de PDF preserva as quebras de linha do layout; a citação
+    // continua tendo de ser literal, mas sem depender de espaços/quebras.
+    const normalizedCitation = collapseWhitespace(citation);
+    const sourceChunk = chunks.find((c) => collapseWhitespace(c.content).includes(normalizedCitation));
     if (!sourceChunk) {
       // Anti-alucinação: descarta qualquer regra cuja citação não seja uma
       // cópia literal de um trecho realmente fornecido ao modelo.

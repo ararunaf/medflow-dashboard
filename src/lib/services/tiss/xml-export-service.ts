@@ -6,7 +6,6 @@ import { markBatchExported } from "./batch-service";
 import { buildMensagemTissXml } from "./xml/tiss-xml-serializer";
 import { TissXsdValidator } from "./xml/tiss-xsd-validator";
 import { loadTissXsdFilesBundled } from "./xml/schemas/load-xsd-files.raw";
-import { formatTissTime } from "./xml/tiss-xml-simple-types";
 import {
   buildTissGuideExportInput,
   TissGuideExportValidationError,
@@ -180,7 +179,8 @@ export async function buildTissBatchXmlDocument(ctx: ServiceCtx, batchId: string
   const envelope: TissEnvelopeInput = {
     sequencialTransacao: batch.batch_number,
     dataRegistroTransacao: now.toISOString(),
-    horaRegistroTransacao: formatTissTime(now),
+    // O serializer já aplica formatTissTime — passar ISO, não "HH:MM:SS".
+    horaRegistroTransacao: now.toISOString(),
     origemPrestador: { kind: "cnpj", cnpj: exportCtx.tenantCnpj as string },
     destinoRegistroANS: mapped[0]!.input.registroANS,
     numeroLote: batch.batch_number,

@@ -19,10 +19,10 @@ import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import {
   CONTRACT_CATEGORY_RETRIEVAL_QUERIES,
-  CONTRACT_RULE_CATEGORIES,
   extractContractRulesForCategory,
   type ContractKnowledgeChunk,
 } from "../../../src/lib/capture/contract/engine/contract-knowledge-agent.ts";
+import { CONTRACT_RULE_CATEGORIES } from "../../../src/lib/capture/contract/types/contract-rule-proposal.ts";
 import { createAIProviderFactory } from "../../../src/lib/enterprise/ai-provider/factory/ai-provider-factory.ts";
 import { embedQuery } from "../../../src/lib/rag/embed-texts.ts";
 
