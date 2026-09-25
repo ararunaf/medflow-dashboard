@@ -34,8 +34,13 @@ const TITLES = {
   honorario: "GUIA DE HONORÁRIO INDIVIDUAL",
 };
 
-function box(n, label, value, flex = 1) {
-  return `<div class="box" style="flex:${flex}"><div class="lbl">${n} - ${esc(label)}</div><div class="val">${esc(value) || "&nbsp;"}</div></div>`;
+/**
+ * Campo em linha única "Rótulo: valor" — o parser TISS da Captura casa rótulo
+ * e valor na mesma linha do OCR; com o rótulo acima do valor (layout do
+ * formulário impresso) ele perde carteirinha, CNPJ, CID etc.
+ */
+function box(_n, label, value, flex = 1) {
+  return `<div class="box" style="flex:${flex}"><span class="lbl">${esc(label)}:</span> <span class="val">${esc(value)}</span></div>`;
 }
 
 function guideHtml(g) {
@@ -65,8 +70,9 @@ function guideHtml(g) {
     .ans{font-size:12px;text-align:right}
     .row{display:flex;gap:6px;margin-top:6px}
     .box{border:1px solid #444;padding:4px 6px;min-height:34px}
-    .lbl{font-size:10px;color:#333}
-    .val{font-size:15px;font-family:"Courier New",monospace;margin-top:2px;color:#0b2a6f}
+    .box{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .lbl{font-size:13px;color:#333}
+    .val{font-size:15px;font-family:"Courier New",monospace;color:#0b2a6f}
     .section{background:#e6e6e6;border:1px solid #444;font-size:12px;font-weight:bold;padding:3px 6px;margin-top:10px}
     table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
     th,td{border:1px solid #444;padding:5px 6px;text-align:left}
@@ -90,8 +96,7 @@ function guideHtml(g) {
   <div class="section">Dados do Executante</div>
   <div class="row">${box(20, g.type === "consulta" ? "Nome do Profissional" : "Nome do Executante", g.executor.name, 3)}${box(21, "CRM Executante", g.executor.crm)}${box(22, "Data de Execução", g.date)}</div>
   <div class="section">Procedimentos Realizados</div>
-  <table><thead><tr><th>Tabela</th><th>Código TUSS</th><th>Descrição</th><th>Qtde</th><th>Valor Unitário</th><th>Valor Total</th></tr></thead>
-  <tbody>${rows.map((r) => `<tr><td>22</td><td class="code">${r.code}</td><td>${esc(r.desc)}</td><td class="num">${r.qty}</td><td class="num">${brl(r.unit)}</td><td class="num">${brl(r.total)}</td></tr>`).join("")}</tbody></table>
+  ${rows.map((r) => `<div class="row">${box("", "Código TUSS", r.code)}${`<div class="box" style="flex:3"><span class="val">${esc(r.desc)}</span></div>`}${box("", "Qtde", String(r.qty), 0.5)}${box("", "Valor", brl(r.total))}</div>`).join("")}
   <div class="row" style="justify-content:flex-end">${box(30, "Valor Total", brl(total))}</div>
   <div class="row">${box(31, "Observações", g.type === "honorario" ? "Procedimento realizado em caráter eletivo." : "", 1)}</div>
   <div class="sign"><div><div class="stamp">${esc(g.executor.name.replace(/^Dr[a]?\. /, ""))}</div>Assinatura do Profissional Executante</div>

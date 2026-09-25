@@ -58,9 +58,8 @@ import { ensureDraftClosingForCompetence, refreshClosingTotalsFromOperationalDat
 import { ensureDraftReconciliationForCompetence, linkReconciliationToClosing } from "@/lib/services/reconciliation/reconciliation-service";
 import { runOperationalMatching } from "@/lib/services/reconciliation/reconciliation-matching-service";
 import { applyCsvImportToReconciliation } from "@/lib/services/reconciliation/reconciliation-import-service";
-import { createCaptureSession, uploadCaptureDocument, getCaptureSession } from "@/lib/capture/infrastructure/capture-session-store";
+import { createCaptureSession, uploadCaptureDocument, getCaptureSession, transitionCaptureSession } from "@/lib/capture/infrastructure/capture-session-store";
 import { enqueueCapturePipelineJob } from "@/lib/capture/infrastructure/capture-pipeline-queue";
-import { processCapturePipelineJob } from "@/lib/capture/infrastructure/capture-pipeline-runtime";
 import { setReviewApprovalViaEnterprise } from "@/lib/capture/enterprise/process-review-via-enterprise";
 import { getCaptureCorrectionProposalsViaEnterprise, updateCaptureCorrectionProposalViaEnterprise } from "@/lib/capture/enterprise/process-correction-via-enterprise";
 import { recordCaptureLearningDecision } from "@/lib/capture/learning/services/learning-loop-service";
@@ -1019,6 +1018,59 @@ async function phaseResetTiss(env: Env): Promise<void> {
   log(`reset eventos de faturamento: ${count ?? 0}`);
 }
 
+/**
+ * O pipeline de produção conclui OCR → parser → auditoria → risco, mas deixa
+ * capture_sessions.status em PARSING, e a decisão de revisão não pula etapas
+ * (transições lineares). Avança as sessões processadas pelo service:
+ * aprovadas até APPROVED, as demais até REVIEW.
+ */
+async function phaseCaptureStatus(env: Env): Promise<void> {
+  const { admin, tenantId, fin } = env;
+  const rows = await must(admin.from("capture_sessions").select("id, status, metadata").eq("tenant_id", tenantId).is("deleted_at", null), "sessions");
+  const order = ["PARSING", "AUDITING", "REVIEW", "APPROVED"] as const;
+  for (const r of rows) {
+    const meta = r.metadata as Record<string, any>;
+    if (meta?.parser?.status !== "completed") continue;
+    const target = meta?.review?.approvalStatus === "aprovada" ? "APPROVED" : "REVIEW";
+    let idx = order.indexOf(r.status as (typeof order)[number]);
+    if (idx < 0) continue;
+    while (order[idx] !== target) {
+      idx++;
+      await transitionCaptureSession(fin, r.id, order[idx]!, "demo_seed_status_sync");
+    }
+    const final = await getCaptureSession(fin, r.id);
+    log(`sessão ${r.id.slice(0, 8)}: ${r.status} → ${final.status} (fila ${resolveProcessingQueue(final.status, final.metadata as Record<string, unknown>)})`);
+  }
+}
+
+/** Apaga as sessões de Captura do tenant demo (linhas, jobs, arquivos e eventos) para refazer a fase capture. */
+async function phaseResetCapture(env: Env): Promise<void> {
+  const { admin, tenantId } = env;
+  const sessions = await must(admin.from("capture_sessions").select("id").eq("tenant_id", tenantId), "sessions");
+  const ids = sessions.map((s) => s.id);
+  if (!ids.length) return log("reset-capture: nada a apagar");
+  const paths: string[] = [];
+  const walk = async (prefix: string): Promise<void> => {
+    const { data } = await admin.storage.from("clinical-documents").list(prefix, { limit: 100 });
+    for (const o of data ?? []) {
+      if (o.id) paths.push(`${prefix}/${o.name}`);
+      else await walk(`${prefix}/${o.name}`);
+    }
+  };
+  for (const id of ids) await walk(`${tenantId}/${id}`);
+  if (paths.length) {
+    const { error } = await admin.storage.from("clinical-documents").remove(paths);
+    if (error) throw new Error(`reset-capture storage: ${error.message}`);
+  }
+  for (const t of ["capture_pipeline_jobs", "capture_corrections", "capture_findings", "capture_fields", "capture_pages", "capture_documents"] as const) {
+    await maybe(admin.from(t as "capture_documents").delete().eq("tenant_id", tenantId).in("session_id", ids), `reset ${t}`);
+  }
+  await maybe(admin.from("operational_events").delete().eq("tenant_id", tenantId).in("entity_id", ids), "reset events");
+  await maybe(admin.from("operational_events").delete().eq("tenant_id", tenantId).in("metadata->>sessionId" as never, ids), "reset events meta");
+  await maybe(admin.from("capture_sessions").delete().eq("tenant_id", tenantId).in("id", ids), "reset sessions");
+  log(`reset-capture: ${ids.length} sessões e ${paths.length} arquivos removidos`);
+}
+
 /** (Re)gera o XML TISS dos lotes já enviados que ainda não têm exportação registrada. */
 async function phaseXml(env: Env): Promise<void> {
   const { admin, tenantId, fin } = env;
@@ -1204,22 +1256,20 @@ async function phaseCapture(env: Env): Promise<void> {
       continue;
     }
 
-    // Enfileira como o upload real faz e processa já (lock antes do cron).
+    // Enfileira como o upload real faz. O processamento fica com o worker de
+    // produção (pg_cron → /api/capture/process-batch), que tem as credenciais
+    // do OCR (Azure). Uma guia por vez: o plano F0 do Azure limita chamadas
+    // por minuto, e a decisão de revisão só é aplicada depois do pipeline.
     const job = await enqueueCapturePipelineJob(fin, session.id, "full");
-    const locked = await must(
-      admin.from("capture_pipeline_jobs").update({ status: "processing", locked_by: "demo-seed", locked_at: new Date().toISOString(), attempts: 1 }).eq("id", job.id).eq("status", "queued").select("*"),
-      "lock job",
-    );
     const t0 = Date.now();
-    if (locked.length) {
-      await processCapturePipelineJob(admin, locked[0]!);
-    } else {
-      log(`captura ${g.file}: job assumido pelo worker de produção — aguardando…`);
-      for (let i = 0; i < 60; i++) {
-        const j = await must(admin.from("capture_pipeline_jobs").select("status").eq("id", job.id).single(), "job");
-        if (j.status === "succeeded" || j.status === "dead_letter") break;
-        await new Promise((r) => setTimeout(r, 5000));
-      }
+    let jobStatus = "queued";
+    for (let i = 0; i < 120 && jobStatus !== "succeeded" && jobStatus !== "dead_letter"; i++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      jobStatus = (await must(admin.from("capture_pipeline_jobs").select("status").eq("id", job.id).single(), "job")).status;
+    }
+    if (jobStatus !== "succeeded") {
+      log(`captura ${g.file}: job terminou como ${jobStatus} — revisão NÃO aplicada`);
+      continue;
     }
 
     const after = await getCaptureSession(fin, session.id);
@@ -1256,6 +1306,8 @@ async function phaseCapture(env: Env): Promise<void> {
     }
     const final = await getCaptureSession(fin, session.id);
     log(`  → fila: ${resolveProcessingQueue(final.status, final.metadata as Record<string, unknown>)} (${final.status})`);
+    // Folga para o limite de chamadas por minuto do OCR (Azure F0).
+    await new Promise((r) => setTimeout(r, 65_000));
   }
 }
 
@@ -1264,7 +1316,7 @@ async function phaseCapture(env: Env): Promise<void> {
 async function main() {
   loadEnv();
   const arg = process.argv.find((a) => a.startsWith("--phase="));
-  const phases = arg ? arg.slice(8).split(",") : ["base", "shifts", "tiss", "xml", "contract", "contract-review", "capture"];
+  const phases = arg ? arg.slice(8).split(",") : ["base", "shifts", "tiss", "xml", "contract", "contract-review", "capture", "capture-status"];
   const dryRun = process.argv.includes("--dry-run");
   const env = await buildEnv();
   log(`senha dos usuários demo: ${DEMO_PASSWORD} (domínio @${D.DEMO_EMAIL_DOMAIN})`);
@@ -1276,6 +1328,8 @@ async function main() {
     else if (phase === "tiss") await phaseTiss(env);
     else if (phase === "xml") await phaseXml(env);
     else if (phase === "reset-tiss") await phaseResetTiss(env);
+    else if (phase === "reset-capture") await phaseResetCapture(env);
+    else if (phase === "capture-status") await phaseCaptureStatus(env);
     else if (phase === "contract") await phaseContract(env);
     else if (phase === "contract-review") await phaseContractReview(env);
     else if (phase === "capture") await phaseCapture(env);
