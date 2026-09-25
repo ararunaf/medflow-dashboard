@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   ProcessingCenterFilters,
   ProcessingCenterListResult,
@@ -23,7 +23,13 @@ export function useProcessingCenter(initialQueue?: ProcessingQueueId) {
     setActiveQueue(initialQueue);
   }, [initialQueue]);
 
+  // Trocas rápidas de fila disparam requisições concorrentes; só a mais
+  // recente pode atualizar a tela — senão uma resposta atrasada de outra fila
+  // (ex.: "Parser", 0 guias) sobrescreve a de "Todas" e a lista aparece zerada.
+  const requestSeq = useRef(0);
+
   const refresh = useCallback(async () => {
+    const seq = ++requestSeq.current;
     setBusy(true);
     setError(null);
     try {
@@ -31,12 +37,14 @@ export function useProcessingCenter(initialQueue?: ProcessingQueueId) {
         fetchProcessingCenter({ filters, queue: activeQueue }),
         fetchProcessingDashboard(filters),
       ]);
+      if (seq !== requestSeq.current) return;
       setList(listResult);
       setDashboard(dashboardResult);
     } catch (err) {
+      if (seq !== requestSeq.current) return;
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setBusy(false);
+      if (seq === requestSeq.current) setBusy(false);
     }
   }, [filters, activeQueue]);
 

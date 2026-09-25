@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Layers, RefreshCw, ScanLine } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ type ProcessingCenterPageProps = {
 
 export function ProcessingCenterPage({ initialQueue }: ProcessingCenterPageProps) {
   const center = useProcessingCenter(initialQueue);
+  const navigate = useNavigate();
 
   return (
     <AppShell>
@@ -71,7 +72,11 @@ export function ProcessingCenterPage({ initialQueue }: ProcessingCenterPageProps
         <ProcessingQueueTabs
           activeQueue={center.activeQueue}
           queueCounts={center.list?.queueCounts}
-          onSelect={center.selectQueue}
+          onSelect={(queue) => {
+            center.selectQueue(queue);
+            // Mantém ?queue= (e o breadcrumb) coerente com a aba selecionada.
+            void navigate({ to: "/processamento", search: { queue }, replace: true });
+          }}
         />
 
         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
