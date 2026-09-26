@@ -5,27 +5,56 @@ import { logClient } from "@/lib/monitoring/channels/client";
 
 type Props = { children: ReactNode };
 
-type State = { error: Error | null };
+/**
+ * `hasError` separado de `error`: um componente pode lançar um valor falsy
+ * (`throw undefined` — o roteador faz isso quando uma rota fica presa em
+ * "pending/redirected"). Checar só `if (error)` tratava isso como "sem erro",
+ * re-renderizava, o erro escapava de todos os boundaries e o React desmontava
+ * a app inteira: tela branca, sem nenhuma mensagem.
+ */
+type State = { hasError: boolean; error: Error | null; wasErrorInstance: boolean };
+
+function toError(thrown: unknown): Error {
+  if (thrown instanceof Error) return thrown;
+  return new Error(
+    thrown === undefined || thrown === null
+      ? "Não foi possível carregar esta página."
+      : `Falha inesperada ao carregar a página (${String(thrown).slice(0, 120)}).`,
+  );
+}
 
 /**
  * Captura erros de renderização abaixo da árvore principal (complementa o errorComponent de rotas).
  */
 export class GlobalErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  state: State = { hasError: false, error: null, wasErrorInstance: true };
 
-  static getDerivedStateFromError(error: Error): State {
-    return { error };
+  static getDerivedStateFromError(thrown: unknown): State {
+    return { hasError: true, error: toError(thrown), wasErrorInstance: thrown instanceof Error };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo): void {
+  componentDidCatch(thrown: unknown, info: ErrorInfo): void {
     logClient("react_error_boundary", {
-      err: error,
-      metadata: { component_stack: info.componentStack },
+      err: toError(thrown),
+      metadata: {
+        component_stack: info.componentStack,
+        thrown_type: thrown === null ? "null" : typeof thrown,
+      },
     });
   }
 
+  private retry = (): void => {
+    // Valor não-Error (ex.: rota presa em laço) não se resolve re-renderizando
+    // a mesma árvore — recarrega a página para reiniciar o roteador.
+    if (!this.state.wasErrorInstance && typeof window !== "undefined") {
+      window.location.reload();
+      return;
+    }
+    this.setState({ hasError: false, error: null, wasErrorInstance: true });
+  };
+
   render(): ReactNode {
-    if (this.state.error) {
+    if (this.state.hasError && this.state.error) {
       const { message, kind } = classifyError(this.state.error);
       const isOffline = kind === "offline";
       return (
@@ -48,7 +77,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                onClick={() => this.setState({ error: null })}
+                onClick={this.retry}
               >
                 <RefreshCw className="h-4 w-4" />
                 Tentar de novo
