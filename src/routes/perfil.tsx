@@ -194,7 +194,8 @@ function PerfilPage() {
             teardownOperationalRealtime();
             try {
               const supabase = getBrowserSupabase();
-              await supabase.auth.signOut();
+              // "local": sair aqui não desconecta as outras abas/aparelhos do usuário.
+              await supabase.auth.signOut({ scope: "local" });
             } catch {
               // sem config -> apenas redireciona
             }

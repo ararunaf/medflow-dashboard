@@ -162,7 +162,10 @@ function LoginPage() {
                       tenantSlug: tenant.slug,
                     },
                   });
-                  await supabase.auth.signOut();
+                  // "local": encerra só a sessão recém-criada neste navegador. O
+                  // padrão ("global") revogava TODAS as sessões do usuário — errar a
+                  // instituição derrubava o login de outras abas/aparelhos.
+                  await supabase.auth.signOut({ scope: "local" });
                   return;
                 }
                 const { data: profile, error: profileError } = await supabase
@@ -181,7 +184,10 @@ function LoginPage() {
                       profileId: userId,
                     },
                   });
-                  await supabase.auth.signOut();
+                  // "local": encerra só a sessão recém-criada neste navegador. O
+                  // padrão ("global") revogava TODAS as sessões do usuário — errar a
+                  // instituição derrubava o login de outras abas/aparelhos.
+                  await supabase.auth.signOut({ scope: "local" });
                   setError(
                     `Seu usuário ainda não possui perfil vinculado. Solicite ao administrador do ${BRANDING.shortName}.`,
                   );
@@ -198,7 +204,10 @@ function LoginPage() {
                       profileId: userId,
                     },
                   });
-                  await supabase.auth.signOut();
+                  // "local": encerra só a sessão recém-criada neste navegador. O
+                  // padrão ("global") revogava TODAS as sessões do usuário — errar a
+                  // instituição derrubava o login de outras abas/aparelhos.
+                  await supabase.auth.signOut({ scope: "local" });
                   setError("Este usuário não pertence à instituição selecionada.");
                   return;
                 }
