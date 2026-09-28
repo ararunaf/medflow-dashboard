@@ -12,9 +12,18 @@ import type { Database } from "@/lib/database.types";
 import { DomainError, UnauthenticatedError } from "@/lib/domain/operations/errors";
 import { assertValidSessionState } from "@/lib/security/session-validation";
 import { writeSecurityAudit } from "@/lib/server/security-audit-writer";
+import { getCookies } from "@tanstack/react-start/server";
 import { getServerSupabase, type ServerSupabaseClient } from "./supabase";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
+function authCookieNames(): string[] {
+  try {
+    return Object.keys(getCookies()).filter((name) => name.startsWith("sb-"));
+  } catch {
+    return ["(cookies indisponíveis)"];
+  }
+}
 
 export type OperationalAuthContext = {
   client: ServerSupabaseClient;
@@ -40,7 +49,9 @@ export async function requireOperationalAuth(): Promise<OperationalAuthContext> 
         eventType: "get_user_failed",
         outcome: "error",
         message: userErr.message,
-        metadata: { source: "requireOperationalAuth" },
+        // Diagnóstico de "Auth session missing" logo após o login: só os
+        // nomes dos cookies de sessão recebidos (nunca os valores).
+        metadata: { source: "requireOperationalAuth", auth_cookies: authCookieNames() },
       });
     }
     throw new UnauthenticatedError();
