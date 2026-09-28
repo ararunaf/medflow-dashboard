@@ -16,6 +16,19 @@ export function AuthSync() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      // Nas telas de /login o próprio formulário conduz o fluxo: faz signIn,
+      // valida a instituição (signOut se não bater) e navega para "/". Reagir
+      // aqui atrapalhava:
+      //  - SIGNED_IN → invalidate() reavaliava /login, o guard redirecionava
+      //    para "/" em paralelo ao navigate do formulário; as duas navegações
+      //    se cruzavam, a rota ficava presa e o roteador lançava `undefined`
+      //    (tela branca intermitente após o login);
+      //  - SIGNED_OUT do tenant_mismatch virava "Sessão expirada", escondendo
+      //    o aviso "Este usuário não pertence à instituição selecionada".
+      if (window.location.pathname === "/login" || window.location.pathname.startsWith("/login/")) {
+        return;
+      }
+
       void router.invalidate();
 
       const lostSession =
