@@ -50,8 +50,8 @@ describe("Review workspace — tipos e labels", () => {
     assert.ok(REVIEW_APPROVAL_STATUSES.includes("reprovada"));
   });
 
-  it("expõe os 10 painéis do workspace", () => {
-    assert.equal(REVIEW_PANEL_IDS.length, 10);
+  it("expõe os 11 painéis do workspace", () => {
+    assert.equal(REVIEW_PANEL_IDS.length, 11);
     assert.ok(REVIEW_PANEL_IDS.includes("risco"));
     assert.ok(REVIEW_PANEL_IDS.includes("historico"));
     assert.equal(REVIEW_PANEL_LABELS.contrato, "Conhecimento Contratual");
@@ -203,6 +203,7 @@ describe("Review workspace — sincronização dos painéis", () => {
         contractIntelligence: { status: "completed" },
         riskAssessment: { status: "completed" },
         correction: { status: "completed" },
+        fieldAudit: { status: "completed" },
       },
       "aprovada",
     );

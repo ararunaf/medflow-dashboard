@@ -9,6 +9,7 @@ import {
   Brain,
   CheckSquare,
   History,
+  ListChecks,
 } from "lucide-react";
 import type { ReviewPanelId } from "@/lib/capture/review";
 import { REVIEW_PANEL_LABELS } from "@/lib/capture/review/review-workspace-service";
@@ -21,6 +22,7 @@ const PANEL_ICONS: Record<ReviewPanelId, typeof FileText> = {
   auditoria: ShieldCheck,
   contrato: BookOpen,
   risco: ShieldAlert,
+  parecer: ListChecks,
   correcoes: Wrench,
   learning: Brain,
   historico: History,

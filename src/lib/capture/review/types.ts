@@ -19,6 +19,7 @@ export const REVIEW_PANEL_IDS = [
   "auditoria",
   "contrato",
   "risco",
+  "parecer",
   "correcoes",
   "learning",
   "historico",
@@ -32,6 +33,8 @@ export type ReviewApprovalDecision = {
   note?: string;
   at: string;
   actorProfileId: string;
+  /** Achados bloqueantes ("ruleId:campo") aprovados por cima, com justificativa em note. */
+  overriddenBlockingFindings?: string[];
 };
 
 export type ReviewWorkspaceMetadata = {
@@ -49,6 +52,7 @@ export type ReviewPipelineStepId =
   | "auditoria"
   | "contrato"
   | "risco"
+  | "parecer"
   | "correcoes"
   | "learning"
   | "historico"

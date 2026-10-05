@@ -3,6 +3,11 @@ import { CheckCircle2, Clock, AlertTriangle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ReviewApprovalStatus, ReviewWorkspaceMetadata } from "@/lib/capture/review";
 import { REVIEW_APPROVAL_LABELS } from "@/lib/capture/review/review-workspace-service";
+import {
+  evaluateApprovalGate,
+  MIN_BLOCKING_OVERRIDE_JUSTIFICATION,
+  type BlockingFinding,
+} from "@/lib/capture/review/approval-gate";
 
 const STATUS_OPTIONS: Array<{
   status: ReviewApprovalStatus;
@@ -43,13 +48,22 @@ const STATUS_OPTIONS: Array<{
 
 type ReviewApprovalPanelProps = {
   review: ReviewWorkspaceMetadata;
+  /** Achados bloqueantes em aberto (auditoria + cláusula de contrato) — ver approval-gate. */
+  blockingFindings?: BlockingFinding[];
   busy: boolean;
   onSubmit: (status: ReviewApprovalStatus, note?: string) => Promise<void>;
 };
 
-export function ReviewApprovalPanel({ review, busy, onSubmit }: ReviewApprovalPanelProps) {
+export function ReviewApprovalPanel({
+  review,
+  blockingFindings = [],
+  busy,
+  onSubmit,
+}: ReviewApprovalPanelProps) {
   const [note, setNote] = useState("");
   const [selected, setSelected] = useState<ReviewApprovalStatus>(review.approvalStatus);
+  const gate = evaluateApprovalGate(selected, blockingFindings, note);
+  const overriding = selected === "aprovada" && blockingFindings.length > 0;
 
   return (
     <section className="rounded-lg border bg-card p-4 shadow-sm space-y-4">
@@ -59,6 +73,33 @@ export function ReviewApprovalPanel({ review, busy, onSubmit }: ReviewApprovalPa
           Registre a decisão de revisão. Nenhuma automação é disparada nesta sprint.
         </p>
       </div>
+
+      {blockingFindings.length > 0 ? (
+        <div
+          className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm"
+          data-testid="approval-blocking-findings"
+        >
+          <p className="flex items-center gap-1.5 font-medium text-destructive">
+            <AlertTriangle className="h-4 w-4" />
+            {blockingFindings.length} achado(s) bloqueante(s) em aberto
+          </p>
+          <ul className="mt-2 space-y-1 text-xs">
+            {blockingFindings.map((b) => (
+              <li key={b.key}>
+                <span className="font-mono">{b.ruleId}</span>{" "}
+                <span className="text-muted-foreground">
+                  ({b.source === "contrato" ? "contrato" : "auditoria"} · {b.field})
+                </span>{" "}
+                — {b.message}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Corrija a guia, ou aprove mesmo assim com justificativa registrada (mínimo{" "}
+            {MIN_BLOCKING_OVERRIDE_JUSTIFICATION} caracteres).
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid gap-2 sm:grid-cols-2">
         {STATUS_OPTIONS.map((opt) => {
@@ -94,7 +135,7 @@ export function ReviewApprovalPanel({ review, busy, onSubmit }: ReviewApprovalPa
 
       <div>
         <label htmlFor="review-note" className="text-xs font-medium text-muted-foreground">
-          Observação (opcional)
+          {overriding ? "Justificativa da aprovação com pendência bloqueante (obrigatória)" : "Observação (opcional)"}
         </label>
         <textarea
           id="review-note"
@@ -108,7 +149,7 @@ export function ReviewApprovalPanel({ review, busy, onSubmit }: ReviewApprovalPa
 
       <Button
         type="button"
-        disabled={busy || selected === review.approvalStatus}
+        disabled={busy || selected === review.approvalStatus || !gate.allowed}
         onClick={() => void onSubmit(selected, note.trim() || undefined)}
       >
         {busy ? "Salvando…" : "Persistir decisão"}
@@ -129,6 +170,11 @@ export function ReviewApprovalPanel({ review, busy, onSubmit }: ReviewApprovalPa
                   </time>
                 </div>
                 {d.note ? <p className="mt-1 text-xs text-muted-foreground">{d.note}</p> : null}
+                {d.overriddenBlockingFindings?.length ? (
+                  <p className="mt-1 text-xs text-destructive">
+                    Aprovada sobre pendência bloqueante: {d.overriddenBlockingFindings.join(", ")}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>

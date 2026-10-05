@@ -4,6 +4,7 @@ import { ErrorState } from "@/components/ui-kit";
 import type { ReviewPanelId } from "@/lib/capture/review";
 import { CaptureAuditPanel } from "./CaptureAuditPanel";
 import { CaptureContractPanel } from "./CaptureContractPanel";
+import { CaptureFieldAuditPanel } from "./CaptureFieldAuditPanel";
 import { CaptureRiskPanel } from "./CaptureRiskPanel";
 import { CaptureCorrectionPanel } from "./CaptureCorrectionPanel";
 import { CaptureFileInfoPanel } from "./CaptureFileInfo";
@@ -28,6 +29,7 @@ import { downloadStructuredGuideJson } from "../services/parser-client";
 import { useCallback, useMemo, useState } from "react";
 import type { ImagePreviewHighlight } from "./CaptureImagePreview";
 import { buildCaptureHistoryTimeline } from "@/lib/capture/review/history-timeline";
+import { collectBlockingFindings } from "@/lib/capture/review/approval-gate";
 
 type ReviewWorkspaceProps = {
   sessionId: string;
@@ -56,6 +58,8 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
     riskAssessmentReport,
     correctionSummary,
     correctionStore,
+    fieldAuditSummary,
+    fieldAuditReport,
     statusHistory,
     refresh,
     navigatePanel,
@@ -73,14 +77,18 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
   const [correctionBusy, setCorrectionBusy] = useState(false);
   const [selectedFindingField, setSelectedFindingField] = useState<string | null>(null);
 
+  const blockingFindings = useMemo(
+    () => collectBlockingFindings(auditReport, contractIntelligenceReport),
+    [auditReport, contractIntelligenceReport],
+  );
+
   const findingHighlight = useMemo<ImagePreviewHighlight | null>(() => {
     if (!selectedFindingField || !structuredGuide) return null;
     const field = structuredGuide.fields[selectedFindingField];
     if (!field?.position) return null;
-    const blocking =
-      auditReport?.findings.some((f) => f.field === selectedFindingField && f.blocking) ?? false;
+    const blocking = blockingFindings.some((f) => f.field === selectedFindingField);
     return { ...field.position.normalized, page: field.position.page, blocking };
-  }, [selectedFindingField, structuredGuide, auditReport]);
+  }, [selectedFindingField, structuredGuide, blockingFindings]);
 
   const historyEvents = useMemo(
     () =>
@@ -280,6 +288,17 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
             />
           ) : null}
 
+          {activePanel === "parecer" ? (
+            <CaptureFieldAuditPanel
+              phase={phase}
+              summary={fieldAuditSummary}
+              report={fieldAuditReport}
+              guide={structuredGuide}
+              selectedField={selectedFindingField}
+              onSelectField={setSelectedFindingField}
+            />
+          ) : null}
+
           {activePanel === "correcoes" ? (
             <CaptureCorrectionPanel
               sessionId={sessionId}
@@ -308,6 +327,7 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
           {activePanel === "aprovacao" ? (
             <ReviewApprovalPanel
               review={snapshot.review}
+              blockingFindings={blockingFindings}
               busy={approvalBusy}
               onSubmit={setApprovalStatus}
             />
@@ -327,6 +347,7 @@ export function isReviewPanelId(value: string): value is ReviewPanelId {
     "auditoria",
     "contrato",
     "risco",
+    "parecer",
     "correcoes",
     "learning",
     "historico",

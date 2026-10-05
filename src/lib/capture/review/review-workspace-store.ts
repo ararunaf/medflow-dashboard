@@ -19,6 +19,7 @@ import { getCaptureOcrResult } from "../ocr/services/ocr-service";
 import { getCaptureStructuredGuideViaEnterprise } from "../enterprise/process-parser-via-enterprise";
 import type { CaptureSessionStatus, CaptureStatusHistoryEntry } from "../types";
 import { parseReviewMetadata } from "./review-workspace-service";
+import { collectBlockingFindings, evaluateApprovalGate } from "./approval-gate";
 import type {
   ReviewApprovalStatus,
   ReviewWorkspaceMetadata,
@@ -233,6 +234,25 @@ export async function setReviewApprovalDecision(
     throw new ValidationError("Status de aprovação inválido.", { status: input.status });
   }
 
+  // Portão de aprovação: achado bloqueante (auditoria ou cláusula de
+  // contrato) só é sobreposto com justificativa registrada.
+  let overriddenBlockingFindings: string[] = [];
+  if (input.status === "aprovada") {
+    const [auditReport, contractReport] = await Promise.all([
+      getCaptureAuditReportViaEnterprise(ctx, input.sessionId),
+      getCaptureContractIntelligenceReportViaEnterprise(ctx, input.sessionId),
+    ]);
+    const gate = evaluateApprovalGate(
+      input.status,
+      collectBlockingFindings(auditReport, contractReport),
+      input.note,
+    );
+    if (!gate.allowed) {
+      throw new ValidationError(gate.reason, { blocking: gate.blocking.map((b) => b.key).join(", ") });
+    }
+    overriddenBlockingFindings = gate.overriddenBlockingFindings;
+  }
+
   const status = await getCaptureSessionStatus(ctx, input.sessionId);
   let sessionStatus = status.status;
 
@@ -245,6 +265,7 @@ export async function setReviewApprovalDecision(
     note: input.note,
     at: now,
     actorProfileId: ctx.actorProfileId,
+    ...(overriddenBlockingFindings.length ? { overriddenBlockingFindings } : {}),
   };
 
   const review: ReviewWorkspaceMetadata = {

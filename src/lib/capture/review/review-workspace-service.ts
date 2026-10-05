@@ -90,6 +90,12 @@ export function buildPipelineSteps(
       active: activePanel === "risco",
     },
     {
+      id: "parecer",
+      label: "Parecer por Campo",
+      completed: stageCompleted(metadata, "fieldAudit"),
+      active: activePanel === "parecer",
+    },
+    {
       id: "correcoes",
       label: "Correções",
       completed: correctionDone,
@@ -171,6 +177,7 @@ export const REVIEW_PANEL_LABELS: Record<string, string> = {
   auditoria: "Auditoria Preventiva",
   contrato: "Conhecimento Contratual",
   risco: "Risco de Glosa",
+  parecer: "Parecer por Campo",
   correcoes: "Sugestões de Correção",
   learning: "Learning Loop",
   historico: "Histórico",
