@@ -115,16 +115,30 @@ async function rejectDuplicateCaptureUpload(
   ctx: ServiceCtx,
   input: { sessionId: string; checksumSha256: string },
 ): Promise<void> {
-  const { data, error } = await ctx.client
+  const { data: candidates, error } = await ctx.client
     .from("capture_documents")
     .select("id, session_id, original_filename, created_at")
     .eq("tenant_id", ctx.tenantId)
     .eq("checksum_sha256", input.checksumSha256)
     .neq("session_id", input.sessionId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(20);
   if (error) throw error;
+  if (!candidates?.length) return;
+
+  // Sessão cancelada (ARCHIVED) não conta como envio anterior — senão quem
+  // cancela uma captura nunca mais consegue reenviar o mesmo arquivo.
+  const { data: live, error: liveErr } = await ctx.client
+    .from("capture_sessions")
+    .select("id")
+    .eq("tenant_id", ctx.tenantId)
+    .in("id", [...new Set(candidates.map((c) => c.session_id))])
+    .neq("status", "ARCHIVED")
+    .is("deleted_at", null);
+  if (liveErr) throw liveErr;
+  const liveIds = new Set((live ?? []).map((s) => s.id));
+  const data = candidates.find((c) => liveIds.has(c.session_id));
   if (data) {
     throw new ValidationError(
       `Este arquivo já foi enviado anteriormente (sessão ${data.session_id}, "${data.original_filename}"). Reenvio com conteúdo idêntico foi bloqueado para evitar processamento duplicado.`,

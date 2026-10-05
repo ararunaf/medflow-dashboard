@@ -74,6 +74,11 @@ export function describeError(err: unknown): {
   kind?: AppErrorKind;
 } {
   if (isOperationalError(err)) {
+    // Validação: a mensagem do servidor diz o que corrigir (ex.: arquivo já
+    // enviado, limite de tamanho) — o texto genérico escondia o motivo.
+    if (err.code === "validation_failed" && err.message.trim()) {
+      return { code: err.code, message: err.message };
+    }
     return {
       code: err.code,
       message: FRIENDLY_MESSAGES[err.code] ?? err.message,
