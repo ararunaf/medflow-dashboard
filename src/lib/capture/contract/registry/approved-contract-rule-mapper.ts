@@ -20,6 +20,7 @@ export type ApprovedContractRuleVersionRow = {
   description: string;
   justification: string;
   citation_heading: string | null;
+  citation_excerpt: string;
   guide_type: string;
   procedure_type: string;
   severity: string;
@@ -35,25 +36,81 @@ export type ApprovedContractRuleVersionRow = {
  */
 export const AI_APPROVED_RULE_PRIORITY = 50;
 
-/**
- * Categoria da proposta (contract_rule_versions.category) → categorias de
- * finding da auditoria preventiva (AUDIT_RULE_CATEGORIES). Sem isso a regra
- * aprovada nunca casa com nenhum finding (finding-enricher só casa por
- * auditRuleIds/auditFields/auditCategories) e não chega ao Field Audit Agent.
- */
-export const APPROVED_CATEGORY_TO_AUDIT_CATEGORIES: Record<string, string[]> = {
-  cobertura: ["procedimentos"],
-  preco: ["procedimentos"],
-  pre_autorizacao: ["autorizacoes"],
-  prazo: ["datas"],
-  campo_obrigatorio: ["paciente", "operadora", "solicitante", "executante", "diagnostico"],
+/** Minúsculas e sem acento — o texto vem do PDF/LLM com acentuação variável. */
+function normalizeText(text: string): string {
+  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+/** Campos fixos por categoria — a cláusula dessas categorias sempre recai sobre o mesmo campo. */
+const FIXED_FIELDS_BY_CATEGORY: Record<string, string[]> = {
+  pre_autorizacao: ["authorization_password"],
+  prazo: ["attendance_date"],
+  preco: ["procedure_code", "total_value"],
+  cobertura: ["procedure_code"],
 };
 
+/**
+ * Campos de guia citados num trecho de "campo obrigatório". Avalia por
+ * segmento (separado por vírgula/ponto e vírgula/dois-pontos) para que
+ * "nome e CRM do profissional solicitante" vire requesting_name +
+ * requesting_crm, sem confundir com o executante citado em outro segmento.
+ */
+function fieldsMentionedIn(text: string): string[] {
+  const fields = new Set<string>();
+  for (const segment of normalizeText(text).split(/[,;:]/)) {
+    const has = (re: RegExp) => re.test(segment);
+    if (has(/assinatura/)) {
+      if (has(/benefici|responsavel/)) fields.add("beneficiary_signature");
+      if (has(/profissional|executante|medico/)) fields.add("professional_signature");
+      continue;
+    }
+    if (has(/solicitante/)) {
+      if (has(/\bnome\b/)) fields.add("requesting_name");
+      if (has(/\bcrm\b/)) fields.add("requesting_crm");
+    }
+    if (has(/executante/)) {
+      if (has(/\bnome\b/)) fields.add("executing_name");
+      if (has(/\bcrm\b/)) fields.add("executing_crm");
+    }
+    if (has(/carteir/)) fields.add("beneficiary_card_number");
+    if (has(/nome do benefici/)) fields.add("beneficiary_name");
+    if (has(/\bcpf\b/)) fields.add("beneficiary_cpf");
+    if (has(/\bcid\b/)) fields.add("cid_code");
+    if (has(/indicacao clinica/)) fields.add("clinical_indication");
+    if (has(/codigo tuss|codigo do procedimento/)) fields.add("procedure_code");
+    if (has(/data do atendimento/)) fields.add("attendance_date");
+    if (has(/data de execucao/)) fields.add("execution_date");
+    if (has(/\bsenha\b/)) fields.add("authorization_password");
+    if (has(/numero da guia/)) fields.add("guide_number");
+    if (has(/\bcnpj\b/)) fields.add("provider_cnpj");
+    if (has(/registro ans/)) fields.add("operator_ans_code");
+  }
+  return [...fields];
+}
+
+/**
+ * Campos de auditoria (AuditFinding.field) sobre os quais a regra aprovada
+ * incide — associação campo a campo, nunca por categoria inteira. Lê a
+ * citação literal e a descrição aprovada. Regra sem campo identificável
+ * fica sem auditFields: aparece em appliedRules, mas não enriquece finding.
+ */
+export function resolveApprovedRuleAuditFields(
+  category: string,
+  description: string,
+  citationExcerpt: string,
+): string[] {
+  const fixed = FIXED_FIELDS_BY_CATEGORY[category];
+  if (fixed) return [...fixed];
+  if (category !== "campo_obrigatorio") return [];
+  return fieldsMentionedIn(`${citationExcerpt} , ${description}`);
+}
+
 export function rowToApprovedRule(row: ApprovedContractRuleVersionRow): ContractRule {
-  const auditCategories = APPROVED_CATEGORY_TO_AUDIT_CATEGORIES[row.category];
+  const auditFields = resolveApprovedRuleAuditFields(row.category, row.description, row.citation_excerpt);
   return {
     origin: "ai_approved",
-    ...(auditCategories ? { auditCategories } : {}),
+    citationExcerpt: row.citation_excerpt,
+    ...(auditFields.length ? { auditFields } : {}),
     ruleId: row.rule_id,
     operator: normalizeOperatorCode(row.operator_code),
     contract: row.contract_label,

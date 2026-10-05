@@ -9,8 +9,8 @@ import assert from "node:assert/strict";
 import { ContractKnowledgeEngine } from "../../../src/lib/capture/contract/engine/contract-knowledge-engine.ts";
 import {
   AI_APPROVED_RULE_PRIORITY,
-  APPROVED_CATEGORY_TO_AUDIT_CATEGORIES,
   groupApprovedIntoVersions,
+  resolveApprovedRuleAuditFields,
   normalizeOperatorCode,
   rowToApprovedRule,
   type ApprovedContractRuleVersionRow,
@@ -26,6 +26,7 @@ function row(overrides: Partial<ApprovedContractRuleVersionRow> = {}): ApprovedC
     description: "Cobertura de consultas eletivas",
     justification: "Cláusula segunda do contrato",
     citation_heading: "CLÁUSULA SEGUNDA",
+    citation_excerpt: "2.1. Estão cobertos os procedimentos relacionados no Anexo I.",
     guide_type: "*",
     procedure_type: "*",
     severity: "medio",
@@ -84,21 +85,23 @@ describe("rowToApprovedRule — F2-S4", () => {
     assert.equal(rowToApprovedRule(row()).origin, "ai_approved");
   });
 
-  it("deriva auditCategories da categoria para casar com findings da auditoria", () => {
-    assert.deepEqual(rowToApprovedRule(row({ category: "pre_autorizacao" })).auditCategories, ["autorizacoes"]);
-    assert.deepEqual(rowToApprovedRule(row({ category: "prazo" })).auditCategories, ["datas"]);
-    assert.deepEqual(rowToApprovedRule(row({ category: "preco" })).auditCategories, ["procedimentos"]);
-    assert.ok(rowToApprovedRule(row({ category: "campo_obrigatorio" })).auditCategories!.includes("paciente"));
+  it("associa a regra a campos (auditFields), nunca a categorias inteiras", () => {
+    const rule = rowToApprovedRule(row({ category: "pre_autorizacao" }));
+    assert.deepEqual(rule.auditFields, ["authorization_password"]);
+    assert.equal(rule.auditCategories, undefined);
   });
 
-  it("toda categoria de proposta tem mapeamento", () => {
-    for (const c of ["cobertura", "preco", "pre_autorizacao", "prazo", "campo_obrigatorio"]) {
-      assert.ok(APPROVED_CATEGORY_TO_AUDIT_CATEGORIES[c]?.length, c);
-    }
+  it("carrega a citação literal para as verificações por campo", () => {
+    assert.match(rowToApprovedRule(row()).citationExcerpt!, /Anexo I/);
   });
 
-  it("categoria desconhecida não inventa auditCategories", () => {
-    assert.equal(rowToApprovedRule(row({ category: "outra" })).auditCategories, undefined);
+  it("regra sem campo identificável fica sem auditFields", () => {
+    const rule = rowToApprovedRule(row({ category: "campo_obrigatorio", description: "Regras gerais", citation_excerpt: "Cumprir o contrato." }));
+    assert.equal(rule.auditFields, undefined);
+  });
+
+  it("categoria desconhecida não inventa auditFields", () => {
+    assert.equal(rowToApprovedRule(row({ category: "outra" })).auditFields, undefined);
   });
 
   it("normaliza o operator_code ao mapear", () => {
@@ -149,5 +152,45 @@ describe("resolveConflicts com regras aprovadas — F2-S4", () => {
     const { rules: kept, conflictsResolved } = new ContractKnowledgeEngine().resolveConflicts(rules);
     assert.equal(kept.length, 3);
     assert.equal(conflictsResolved, 0);
+  });
+});
+
+describe("resolveApprovedRuleAuditFields — campo a campo", () => {
+  const sorted = (a: string[]) => [...a].sort();
+
+  it("prazo, pré-autorização, preço e cobertura têm campos fixos", () => {
+    assert.deepEqual(resolveApprovedRuleAuditFields("prazo", "", ""), ["attendance_date"]);
+    assert.deepEqual(resolveApprovedRuleAuditFields("pre_autorizacao", "", ""), ["authorization_password"]);
+    assert.deepEqual(sorted(resolveApprovedRuleAuditFields("preco", "", "")), ["procedure_code", "total_value"]);
+    assert.deepEqual(resolveApprovedRuleAuditFields("cobertura", "", ""), ["procedure_code"]);
+  });
+
+  it("cláusula 6.1 (Vitalis) → só os campos citados", () => {
+    const fields = resolveApprovedRuleAuditFields(
+      "campo_obrigatorio",
+      "Campos obrigatórios precisam ser preenchidos em todas as guias.",
+      "6.1. São de preenchimento obrigatório em todas as guias, inclusive na guia de consulta: número da carteirinha e respectiva validade, nome do beneficiário, CID-10, nome e CRM com UF do profissional executante, código TUSS e data do atendimento.",
+    );
+    assert.deepEqual(sorted(fields), sorted([
+      "beneficiary_card_number", "beneficiary_name", "cid_code", "executing_name", "executing_crm", "procedure_code", "attendance_date",
+    ]));
+  });
+
+  it("cláusula 6.2 (Vitalis) → solicitante e indicação clínica, não executante", () => {
+    const fields = resolveApprovedRuleAuditFields(
+      "campo_obrigatorio",
+      "Guias SP/SADT devem conter informações adicionais obrigatórias.",
+      "6.2. Nas guias SP/SADT é obrigatório informar nome e CRM do profissional solicitante e a indicação clínica.",
+    );
+    assert.deepEqual(sorted(fields), ["clinical_indication", "requesting_crm", "requesting_name"]);
+  });
+
+  it("cláusula 6.3 (Vitalis) → só assinatura do beneficiário (não confunde com nome do beneficiário)", () => {
+    const fields = resolveApprovedRuleAuditFields(
+      "campo_obrigatorio",
+      "As guias devem conter a assinatura do beneficiário ou responsável.",
+      "6.3. A guia deverá conter a assinatura do beneficiário ou de seu responsável; guias sem assinatura serão devolvidas.",
+    );
+    assert.deepEqual(fields, ["beneficiary_signature"]);
   });
 });

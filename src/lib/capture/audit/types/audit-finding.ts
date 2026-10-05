@@ -20,6 +20,8 @@ export type AuditFinding = {
   confidence: number;
   suggestedCorrection: string;
   blocking: boolean;
+  /** "contract" = gerado por verificação de cláusula aprovada (contract-field-checks), não pela auditoria genérica. */
+  source?: "contract";
 };
 
 export type CorrectionProposal = {

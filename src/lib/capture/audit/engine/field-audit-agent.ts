@@ -52,6 +52,19 @@ export function groupFindingsByField(
     byField.set(f.field, bundle);
   }
   for (const e of enrichedFindings) {
+    // Achado de cláusula contratual (contract-field-checks) é determinístico:
+    // entra como sinal estrutural do campo, mesmo sem achado da auditoria genérica.
+    if (e.finding.source === "contract") {
+      const bundle = byField.get(e.finding.field) ?? {
+        field: e.finding.field,
+        category: e.finding.category,
+        structuralFindings: [],
+        enrichments: [],
+        riskScores: [],
+      };
+      bundle.structuralFindings.push(e.finding);
+      byField.set(e.finding.field, bundle);
+    }
     const bundle = byField.get(e.finding.field);
     if (bundle) bundle.enrichments.push(e);
   }

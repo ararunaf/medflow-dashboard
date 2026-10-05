@@ -32,6 +32,8 @@ export type ContractRule = {
    * aprovada por humano (contract_rule_versions); ausente = curadoria manual.
    */
   origin?: "ai_approved";
+  /** Trecho literal da cláusula (só regras ai_approved) — base das verificações por campo. */
+  citationExcerpt?: string;
 };
 
 export type ContractRegistryVersion = {

@@ -9,6 +9,8 @@ import type { EnrichedAuditFinding } from "./enriched-finding";
 
 export type ContractIntelligenceSummary = {
   totalFindings: number;
+  /** Achados gerados por verificação de cláusula aprovada (source="contract"). */
+  contractFindingsCount?: number;
   enrichedCount: number;
   appliedRulesCount: number;
   totalEstimatedFinancialImpactCents: number;

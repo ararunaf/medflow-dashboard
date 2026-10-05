@@ -17,6 +17,7 @@ import {
   enrichFindings,
 } from "./finding-enricher";
 import type { ContractIntelligenceReport } from "../types/contract-intelligence-report";
+import { evaluateContractFieldChecks } from "./contract-field-checks";
 
 export type ContractIntelligenceOptions = ContractKnowledgeEngineOptions & {
   sessionId?: string;
@@ -39,7 +40,10 @@ export class ContractIntelligenceEngine {
     options: ContractIntelligenceOptions = {},
   ): ContractIntelligenceResult {
     const context = this.knowledgeEngine.buildContext(guide, options);
-    const enrichedFindings = enrichFindings(findings, context);
+    // Achados das cláusulas aprovadas que a auditoria genérica não cobre
+    // (prazo, campo obrigatório específico da operadora) — campo a campo.
+    const contractFindings = evaluateContractFieldChecks(guide, context.applicableRules, findings);
+    const enrichedFindings = enrichFindings([...findings, ...contractFindings], context);
 
     const report: ContractIntelligenceReport = {
       version: "contract_intelligence_v1",
@@ -51,7 +55,8 @@ export class ContractIntelligenceEngine {
       appliedRules: context.applicableRules,
       findings: enrichedFindings,
       summary: {
-        totalFindings: findings.length,
+        totalFindings: findings.length + contractFindings.length,
+        contractFindingsCount: contractFindings.length,
         enrichedCount: countEnriched(enrichedFindings),
         appliedRulesCount: context.applicableRules.length,
         totalEstimatedFinancialImpactCents: computeTotalFinancialImpact(enrichedFindings),
