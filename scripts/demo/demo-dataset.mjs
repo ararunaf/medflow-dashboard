@@ -219,3 +219,39 @@ export function operatorByKey(key) {
 
 /** CNPJ fictício (DV válido) da cooperativa demo — usado no envelope do XML TISS. */
 export const DEMO_TENANT_CNPJ = "41582736000445";
+
+/** Contrato fictício da Vitalis — segunda operadora com regras próprias (ver generate-demo-assets.mjs). */
+export const DEMO_CONTRACT_VITALIS = {
+  operator: "vitalis",
+  label: "VITALIS-2026",
+  file: "contrato-vitalis-2026.pdf",
+};
+
+/** Tabela de valores do Anexo I do contrato Vitalis (difere da Horizonte). */
+export const VITALIS_PRICE_TABLE = {
+  "10101012": 110, "10101039": 135, "40304361": 32, "40302040": 11, "40301630": 13,
+  "40101010": 50, "40805026": 58, "40901122": 165, "41001010": 395,
+};
+
+/**
+ * Guias de teste da Vitalis para envio manual na Captura Inteligente — fora de
+ * DEMO_CAPTURE_GUIDES para não entrarem na fase `capture` do seed.
+ *   - conforme: cumpre as cláusulas do contrato Vitalis;
+ *   - nao-conforme: TC sem senha, sem CID, sem solicitante e apresentada fora do prazo de 30 dias.
+ */
+export const DEMO_VITALIS_TEST_GUIDES = [
+  {
+    file: "guia-teste-vitalis-conforme.png", type: "sadt", operator: "vitalis",
+    patient: "Juliana Reis Montenegro", card: "398765.3307.1182-40", date: "02/10/2026", guideNumber: "2026100211",
+    requester: { name: "Dr. Felipe Andrade", crm: "678901/SP" }, executor: { name: "Dr. Felipe Andrade", crm: "678901/SP" },
+    cid: "K80.2", indication: "Dor em hipocôndrio direito — investigação de colelitíase", authorization: "VT55120",
+    items: [["40901122", 1], ["40304361", 1]],
+  },
+  {
+    file: "guia-teste-vitalis-nao-conforme.png", type: "sadt", operator: "vitalis",
+    patient: "Otávio Pires Damasceno", card: "398765.2209.4471-18", date: "18/08/2026", guideNumber: "2026081807",
+    requester: { name: "", crm: "" }, executor: { name: "Dr. Nicolas Barros", crm: "445566/SP" },
+    cid: "", indication: "Cefaleia persistente", authorization: "",
+    items: [["41001010", 1], ["40304361", 1]],
+  },
+];

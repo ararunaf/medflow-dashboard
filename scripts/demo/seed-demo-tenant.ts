@@ -19,6 +19,7 @@
  * Uso:
  *   npx tsx scripts/demo/seed-demo-tenant.ts --phase=base,shifts,tiss
  *   npx tsx scripts/demo/seed-demo-tenant.ts --phase=contract,contract-review
+ *   npx tsx scripts/demo/seed-demo-tenant.ts --phase=contract --contract=vitalis
  *   npx tsx scripts/demo/seed-demo-tenant.ts --phase=capture
  *   (sem --phase = todas, nesta ordem). --dry-run só imprime o plano de plantões.
  */
@@ -1112,9 +1113,15 @@ function appealReason(code: string): string {
 // fases: contract / contract-review (esteira RAG real)
 // ---------------------------------------------------------------------------
 
+/** --contract=vitalis indexa o contrato da Vitalis; padrão = Horizonte. */
+function demoContract(): { operator: string; label: string; file: string } {
+  return process.argv.includes("--contract=vitalis") ? D.DEMO_CONTRACT_VITALIS : D.DEMO_CONTRACT;
+}
+
 async function phaseContract(env: Env): Promise<void> {
-  const op = D.operatorByKey(D.DEMO_CONTRACT.operator);
-  const existing = await maybe(env.admin.from("operator_contracts").select("id, status").eq("tenant_id", env.tenantId).eq("contract_label", D.DEMO_CONTRACT.label).maybeSingle(), "operator contract");
+  const contract = demoContract();
+  const op = D.operatorByKey(contract.operator);
+  const existing = await maybe(env.admin.from("operator_contracts").select("id, status").eq("tenant_id", env.tenantId).eq("contract_label", contract.label).maybeSingle(), "operator contract");
   const run = (args: string[]) => {
     const r = spawnSync("npx", ["tsx", ...args], { cwd: root, stdio: "inherit", shell: true });
     if (r.status !== 0) throw new Error(`falhou: ${args.join(" ")}`);
@@ -1123,14 +1130,14 @@ async function phaseContract(env: Env): Promise<void> {
   if (!existing) {
     run([
       "scripts/rag/cli/index-operator-contract.ts",
-      "--pdf", join(__dirname, "assets", D.DEMO_CONTRACT.file),
+      "--pdf", join(__dirname, "assets", contract.file),
       "--tenant-id", env.tenantId,
       "--operator-code", op.ans,
       "--operator-name", `"${op.name}"`,
-      "--contract-label", D.DEMO_CONTRACT.label,
+      "--contract-label", contract.label,
       "--created-by", env.fin.actorProfileId,
     ]);
-    contractId = (await must(env.admin.from("operator_contracts").select("id").eq("tenant_id", env.tenantId).eq("contract_label", D.DEMO_CONTRACT.label).single(), "contract")).id;
+    contractId = (await must(env.admin.from("operator_contracts").select("id").eq("tenant_id", env.tenantId).eq("contract_label", contract.label).single(), "contract")).id;
   }
   const proposals = await must(env.admin.from("contract_rule_proposals").select("id").eq("operator_contract_id", contractId!).limit(1), "proposals");
   if (!proposals.length) await extractContractProposals(env, contractId!);

@@ -27,6 +27,11 @@ export type ContractRule = {
   estimatedFinancialImpactCents?: number;
   /** Risco base de glosa 0–100 */
   baseDenialRisk?: number;
+  /**
+   * Origem da regra. "ai_approved" = proposta do Contract Knowledge Agent
+   * aprovada por humano (contract_rule_versions); ausente = curadoria manual.
+   */
+  origin?: "ai_approved";
 };
 
 export type ContractRegistryVersion = {

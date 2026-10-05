@@ -4,9 +4,11 @@
  *   - PNG de guias TISS preenchidas (consulta, SP/SADT, honorário individual)
  *     para enviar à Captura Inteligente;
  *   - PDF do contrato fictício da operadora Horizonte Saúde para a esteira
- *     RAG → propostas de regra contratual.
+ *     RAG → propostas de regra contratual;
+ *   - PDF do contrato fictício da Vitalis + 2 guias de teste (conforme e
+ *     não conforme) para envio manual.
  *
- * Uso: node scripts/demo/generate-demo-assets.mjs
+ * Uso: node scripts/demo/generate-demo-assets.mjs [--only=vitalis]
  * Saída: scripts/demo/assets/
  */
 import { mkdirSync } from "node:fs";
@@ -16,7 +18,10 @@ import { chromium } from "playwright";
 import {
   DEMO_CAPTURE_GUIDES,
   DEMO_CONTRACT,
+  DEMO_CONTRACT_VITALIS,
   DEMO_INSTITUTIONS,
+  DEMO_VITALIS_TEST_GUIDES,
+  VITALIS_PRICE_TABLE,
   DEMO_PROCEDURES,
   operatorByKey,
   procedureByCode,
@@ -48,7 +53,7 @@ function guideHtml(g) {
   const hospital = DEMO_INSTITUTIONS[g.type === "consulta" && g.operator === "vitalis" ? 2 : 0];
   const rows = g.items.map(([code, qty]) => {
     const p = procedureByCode(code);
-    const unit = p ? p.value : 150;
+    const unit = g.priceTable?.[code] ?? (p ? p.value : 150);
     return { code, desc: p ? p.description : "Procedimento não identificado", qty, unit, total: unit * qty };
   });
   const total = rows.reduce((s, r) => s + r.total, 0);
@@ -155,22 +160,81 @@ function contractHtml() {
   </body></html>`;
 }
 
+function vitalisContractHtml() {
+  const op = operatorByKey(DEMO_CONTRACT_VITALIS.operator);
+  const table = Object.entries(VITALIS_PRICE_TABLE)
+    .map(([code, value]) => `<tr><td>${code}</td><td>${esc(procedureByCode(code)?.description ?? "")}</td><td style="text-align:right">${brl(value)}</td></tr>`)
+    .join("");
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+    body{font-family:Georgia,serif;font-size:12.5px;line-height:1.55;margin:48px 60px;color:#111}
+    h1{font-size:18px;text-align:center;margin-bottom:4px} .sub{text-align:center;font-size:12px;margin-bottom:24px}
+    h2{font-size:14px;margin-top:22px} table{border-collapse:collapse;width:100%;font-size:11.5px}
+    td,th{border:1px solid #555;padding:4px 6px} th{background:#eee}
+  </style></head><body>
+  <h1>CONTRATO DE CREDENCIAMENTO DE PRESTADOR DE SERVIÇOS DE SAÚDE Nº ${op.contract}</h1>
+  <div class="sub">que entre si celebram ${esc(op.name)} (Registro ANS nº ${op.ans}) e a COOPERATIVA MEDICFLOW DEMONSTRAÇÃO — documento fictício para demonstração</div>
+
+  <h2>CLÁUSULA PRIMEIRA — DO OBJETO</h2>
+  <p>1.1. O presente contrato tem por objeto o credenciamento da CONTRATADA para prestação de consultas médicas e serviços auxiliares de diagnóstico e terapia (SP/SADT) aos beneficiários da OPERADORA, exclusivamente nas unidades Hospital Santa Luzia (CNES 9912345) e Clínica Vida Plena (CNES 9934567).</p>
+  <p>1.2. O faturamento seguirá o padrão TISS versão 4.01.00, em lotes eletrônicos com no máximo 100 (cem) guias por lote.</p>
+
+  <h2>CLÁUSULA SEGUNDA — DA COBERTURA</h2>
+  <p>2.1. Estão cobertos os procedimentos relacionados no Anexo I deste contrato, observado o Rol da ANS vigente.</p>
+  <p>2.2. Não estão cobertos: teleconsultas, procedimentos realizados na UPA 24h Jardim América e procedimentos cirúrgicos de qualquer natureza, que são objeto de contrato próprio.</p>
+  <p>2.3. A consulta de retorno realizada em até 15 (quinze) dias da consulta anterior, pelo mesmo profissional e para o mesmo beneficiário, não é remunerada separadamente.</p>
+
+  <h2>CLÁUSULA TERCEIRA — DA AUTORIZAÇÃO PRÉVIA</h2>
+  <p>3.1. Exigem autorização prévia (senha) da OPERADORA: tomografia computadorizada (grupo TUSS 41001), ultrassonografia (grupo TUSS 40901) e qualquer guia SP/SADT cujo valor total ultrapasse R$ 300,00 (trezentos reais).</p>
+  <p>3.2. A senha de autorização tem validade de 30 (trinta) dias contados da sua emissão e deve ser informada no campo "Senha" da guia. Procedimento executado sem senha válida será glosado integralmente.</p>
+  <p>3.3. Consultas eletivas, ECG (40101010), radiografias (grupo 40805) e exames laboratoriais (grupos 40301, 40302 e 40304) dispensam autorização prévia.</p>
+
+  <h2>CLÁUSULA QUARTA — DOS PREÇOS E DA REMUNERAÇÃO</h2>
+  <p>4.1. Os procedimentos serão remunerados exclusivamente pelos valores da Tabela do Anexo I. Valores cobrados acima da tabela serão glosados na diferença.</p>
+  <p>4.2. Será remunerada no máximo 1 (uma) consulta por beneficiário por dia, por especialidade.</p>
+  <p>4.3. Os valores do Anexo I serão reajustados anualmente em 1º de março pelo índice IPCA acumulado.</p>
+
+  <h2>CLÁUSULA QUINTA — DOS PRAZOS</h2>
+  <p>5.1. As guias deverão ser apresentadas à OPERADORA em até 30 (trinta) dias corridos contados da data do atendimento. Guias apresentadas após este prazo serão glosadas por decurso de prazo, sem direito a recurso.</p>
+  <p>5.2. O pagamento será efetuado em até 45 (quarenta e cinco) dias após o recebimento do lote sem pendências.</p>
+  <p>5.3. O recurso de glosa deverá ser interposto em até 15 (quinze) dias do recebimento do demonstrativo de análise de conta.</p>
+
+  <h2>CLÁUSULA SEXTA — DOS CAMPOS OBRIGATÓRIOS</h2>
+  <p>6.1. São de preenchimento obrigatório em todas as guias, inclusive na guia de consulta: número da carteirinha e respectiva validade, nome do beneficiário, CID-10, nome e CRM com UF do profissional executante, código TUSS e data do atendimento.</p>
+  <p>6.2. Nas guias SP/SADT é obrigatório informar nome e CRM do profissional solicitante e a indicação clínica.</p>
+  <p>6.3. A guia deverá conter a assinatura do beneficiário ou de seu responsável; guias sem assinatura serão devolvidas.</p>
+
+  <h2>CLÁUSULA SÉTIMA — DA VIGÊNCIA</h2>
+  <p>7.1. Este contrato vigora de 01/02/2026 a 31/01/2027, renovável mediante termo aditivo.</p>
+
+  <h2>ANEXO I — TABELA DE VALORES</h2>
+  <table><thead><tr><th>Código TUSS</th><th>Descrição</th><th>Valor</th></tr></thead><tbody>${table}</tbody></table>
+  <p style="margin-top:30px">Campinas/SP, 26 de janeiro de 2026.</p>
+  </body></html>`;
+}
+
 async function main() {
+  const onlyVitalis = process.argv.includes("--only=vitalis");
   mkdirSync(outDir, { recursive: true });
   const browser = await chromium.launch(
     process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
   );
   const page = await browser.newPage({ viewport: { width: 1184, height: 900 }, deviceScaleFactor: 1.5 });
 
-  for (const g of DEMO_CAPTURE_GUIDES) {
+  const vitalisGuides = DEMO_VITALIS_TEST_GUIDES.map((g) => ({ ...g, priceTable: VITALIS_PRICE_TABLE }));
+  for (const g of onlyVitalis ? vitalisGuides : [...DEMO_CAPTURE_GUIDES, ...vitalisGuides]) {
     await page.setContent(guideHtml(g), { waitUntil: "load" });
     await page.screenshot({ path: join(outDir, g.file), fullPage: true });
     console.log("guia:", g.file);
   }
 
-  await page.setContent(contractHtml(), { waitUntil: "load" });
-  await page.pdf({ path: join(outDir, DEMO_CONTRACT.file), format: "A4", printBackground: true });
-  console.log("contrato:", DEMO_CONTRACT.file);
+  if (!onlyVitalis) {
+    await page.setContent(contractHtml(), { waitUntil: "load" });
+    await page.pdf({ path: join(outDir, DEMO_CONTRACT.file), format: "A4", printBackground: true });
+    console.log("contrato:", DEMO_CONTRACT.file);
+  }
+  await page.setContent(vitalisContractHtml(), { waitUntil: "load" });
+  await page.pdf({ path: join(outDir, DEMO_CONTRACT_VITALIS.file), format: "A4", printBackground: true });
+  console.log("contrato:", DEMO_CONTRACT_VITALIS.file);
 
   await browser.close();
 }

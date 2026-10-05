@@ -125,7 +125,7 @@ export function bindServerContractRulesStore(): Promise<{
 
       const approved = await admin
         .from("contract_rule_versions")
-        .select("rule_id, tenant_id, operator_code, contract_label, description, justification, citation_heading, guide_type, procedure_type, severity, approved_at");
+        .select("rule_id, tenant_id, operator_code, contract_label, category, description, justification, citation_heading, guide_type, procedure_type, severity, approved_at");
       if (approved.error) {
         throw new Error(`CONTRACT-DATA: falha ao ler contract_rule_versions (${approved.error.message}).`);
       }

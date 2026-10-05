@@ -6,8 +6,10 @@
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { ContractKnowledgeEngine } from "../../../src/lib/capture/contract/engine/contract-knowledge-engine.ts";
 import {
   AI_APPROVED_RULE_PRIORITY,
+  APPROVED_CATEGORY_TO_AUDIT_CATEGORIES,
   groupApprovedIntoVersions,
   normalizeOperatorCode,
   rowToApprovedRule,
@@ -20,6 +22,7 @@ function row(overrides: Partial<ApprovedContractRuleVersionRow> = {}): ApprovedC
     tenant_id: "tenant-1",
     operator_code: "123456",
     contract_label: "UNIMED-NACIONAL-2026",
+    category: "cobertura",
     description: "Cobertura de consultas eletivas",
     justification: "Cláusula segunda do contrato",
     citation_heading: "CLÁUSULA SEGUNDA",
@@ -77,6 +80,27 @@ describe("rowToApprovedRule — F2-S4", () => {
     assert.match(rule.legalReference, /sem referência legal/i);
   });
 
+  it("marca origin=ai_approved", () => {
+    assert.equal(rowToApprovedRule(row()).origin, "ai_approved");
+  });
+
+  it("deriva auditCategories da categoria para casar com findings da auditoria", () => {
+    assert.deepEqual(rowToApprovedRule(row({ category: "pre_autorizacao" })).auditCategories, ["autorizacoes"]);
+    assert.deepEqual(rowToApprovedRule(row({ category: "prazo" })).auditCategories, ["datas"]);
+    assert.deepEqual(rowToApprovedRule(row({ category: "preco" })).auditCategories, ["procedimentos"]);
+    assert.ok(rowToApprovedRule(row({ category: "campo_obrigatorio" })).auditCategories!.includes("paciente"));
+  });
+
+  it("toda categoria de proposta tem mapeamento", () => {
+    for (const c of ["cobertura", "preco", "pre_autorizacao", "prazo", "campo_obrigatorio"]) {
+      assert.ok(APPROVED_CATEGORY_TO_AUDIT_CATEGORIES[c]?.length, c);
+    }
+  });
+
+  it("categoria desconhecida não inventa auditCategories", () => {
+    assert.equal(rowToApprovedRule(row({ category: "outra" })).auditCategories, undefined);
+  });
+
   it("normaliza o operator_code ao mapear", () => {
     const rule = rowToApprovedRule(row({ operator_code: "42" }));
     assert.equal(rule.operator, "000042");
@@ -112,5 +136,18 @@ describe("groupApprovedIntoVersions — F2-S4", () => {
 
   it("retorna vazio para lista vazia", () => {
     assert.deepEqual(groupApprovedIntoVersions([]), []);
+  });
+});
+
+describe("resolveConflicts com regras aprovadas — F2-S4", () => {
+  it("não colapsa regras aprovadas distintas da mesma categoria", () => {
+    const rules = [
+      rowToApprovedRule(row({ rule_id: "prop-1", category: "pre_autorizacao" })),
+      rowToApprovedRule(row({ rule_id: "prop-2", category: "pre_autorizacao" })),
+      rowToApprovedRule(row({ rule_id: "prop-3", category: "prazo" })),
+    ];
+    const { rules: kept, conflictsResolved } = new ContractKnowledgeEngine().resolveConflicts(rules);
+    assert.equal(kept.length, 3);
+    assert.equal(conflictsResolved, 0);
   });
 });

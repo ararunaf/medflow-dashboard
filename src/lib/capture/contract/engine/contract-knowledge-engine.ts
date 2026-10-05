@@ -165,6 +165,9 @@ export class ContractKnowledgeEngine {
         rule.auditCategories?.join(",") ?? "",
         rule.guideType,
         rule.procedureType,
+        // Cada regra aprovada por humano é uma cláusula distinta do contrato —
+        // não "concorre" com outra aprovada que caia na mesma categoria.
+        rule.origin === "ai_approved" ? rule.ruleId : "",
       ].join("|");
 
       const existing = byKey.get(key);

@@ -16,6 +16,7 @@ export type ApprovedContractRuleVersionRow = {
   tenant_id: string;
   operator_code: string;
   contract_label: string;
+  category: string;
   description: string;
   justification: string;
   citation_heading: string | null;
@@ -34,8 +35,25 @@ export type ApprovedContractRuleVersionRow = {
  */
 export const AI_APPROVED_RULE_PRIORITY = 50;
 
+/**
+ * Categoria da proposta (contract_rule_versions.category) → categorias de
+ * finding da auditoria preventiva (AUDIT_RULE_CATEGORIES). Sem isso a regra
+ * aprovada nunca casa com nenhum finding (finding-enricher só casa por
+ * auditRuleIds/auditFields/auditCategories) e não chega ao Field Audit Agent.
+ */
+export const APPROVED_CATEGORY_TO_AUDIT_CATEGORIES: Record<string, string[]> = {
+  cobertura: ["procedimentos"],
+  preco: ["procedimentos"],
+  pre_autorizacao: ["autorizacoes"],
+  prazo: ["datas"],
+  campo_obrigatorio: ["paciente", "operadora", "solicitante", "executante", "diagnostico"],
+};
+
 export function rowToApprovedRule(row: ApprovedContractRuleVersionRow): ContractRule {
+  const auditCategories = APPROVED_CATEGORY_TO_AUDIT_CATEGORIES[row.category];
   return {
+    origin: "ai_approved",
+    ...(auditCategories ? { auditCategories } : {}),
     ruleId: row.rule_id,
     operator: normalizeOperatorCode(row.operator_code),
     contract: row.contract_label,
