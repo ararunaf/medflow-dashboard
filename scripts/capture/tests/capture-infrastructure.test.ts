@@ -15,6 +15,7 @@ import {
   isValidCapturePhaseTransition,
   assertCapturePhaseTransition,
   nextCapturePhase,
+  prepareMachineForUpload,
 } from "../../../src/modules/capture/services/state-machine.ts";
 import {
   buildCaptureEvent,
@@ -266,5 +267,43 @@ describe("Capture pipeline — integration", () => {
       return;
     }
     assert.ok(process.env.VITE_SUPABASE_URL?.includes("vbfulflzekrnejwetcyr"));
+  });
+});
+
+describe("Capture upload — preparo da máquina (regressão idle → uploaded)", () => {
+  const runUpload = (machine: CapturePhaseMachine, isRetry = false) => {
+    prepareMachineForUpload(machine, isRetry);
+    machine.transition("uploaded", "storage_complete");
+    machine.transition("preprocessing", "auto_preprocess");
+    machine.transition("waiting_ocr", "ready_for_ocr");
+  };
+
+  it("primeiro envio parte de idle", () => {
+    const machine = new CapturePhaseMachine();
+    runUpload(machine);
+    assert.equal(machine.current, "waiting_ocr");
+  });
+
+  it("segundo envio na mesma página recomeça do zero (antes: waiting_ocr → uploaded inválido)", () => {
+    const machine = new CapturePhaseMachine();
+    runUpload(machine);
+    assert.doesNotThrow(() => runUpload(machine));
+    assert.equal(machine.current, "waiting_ocr");
+  });
+
+  it("envio após cancelar recomeça do zero", () => {
+    const machine = new CapturePhaseMachine();
+    prepareMachineForUpload(machine, false);
+    machine.transition("cancelled", "user_cancelled");
+    assert.doesNotThrow(() => runUpload(machine));
+  });
+
+  it("reenvio parte de failed sem perder o histórico", () => {
+    const machine = new CapturePhaseMachine();
+    prepareMachineForUpload(machine, false);
+    machine.transition("failed", "erro");
+    runUpload(machine, true);
+    assert.equal(machine.current, "waiting_ocr");
+    assert.ok(machine.history.some((t) => t.to === "failed"));
   });
 });

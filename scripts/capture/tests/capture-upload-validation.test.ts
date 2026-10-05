@@ -132,3 +132,35 @@ describe("validateCaptureUpload — assinatura binária (magic bytes)", () => {
     );
   });
 });
+
+describe("requireBase64Content — upload pela UI (regressão truncamento em 6.144 bytes)", () => {
+  // Antes: o base64 passava por requireString/sanitizeString (corta em 8.192
+  // caracteres) e todo arquivo maior que ~6 KB era gravado truncado.
+  it("preserva arquivo grande inteiro (150 KB)", async () => {
+    const { requireBase64Content, decodeBase64ToBytes } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const original = new Uint8Array(150 * 1024).map((_, i) => i % 251);
+    const b64 = Buffer.from(original).toString("base64");
+    assert.ok(b64.length > 8192);
+    const bytes = decodeBase64ToBytes(requireBase64Content(b64, "file.base64Content", 25 * 1024 * 1024));
+    assert.equal(bytes.length, original.length);
+    assert.deepEqual(bytes.slice(-16), original.slice(-16));
+  });
+
+  it("recusa arquivo acima do limite em vez de cortar", async () => {
+    const { requireBase64Content } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const b64 = Buffer.alloc(2048).toString("base64");
+    assert.throws(() => requireBase64Content(b64, "file.base64Content", 1024), /excede o limite/);
+  });
+
+  it("recusa conteúdo que não é base64 e campo vazio", async () => {
+    const { requireBase64Content } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    assert.throws(() => requireBase64Content("não é base64!", "f", 1024), /base64 válido/);
+    assert.throws(() => requireBase64Content("", "f", 1024), /obrigatório/);
+  });
+
+  it("tolera quebras de linha no base64", async () => {
+    const { requireBase64Content } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const b64 = Buffer.from("guia TISS").toString("base64");
+    assert.equal(requireBase64Content(`${b64.slice(0, 4)}\n${b64.slice(4)}`, "f", 1024), b64);
+  });
+});

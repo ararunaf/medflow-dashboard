@@ -100,6 +100,16 @@ export class CapturePhaseMachine {
   }
 }
 
+/**
+ * Prepara a máquina para um novo envio. Envio novo sempre recomeça do zero
+ * (a guia anterior pode ter parado em waiting_ocr, completed ou cancelled);
+ * reenvio (retry) parte de "failed", que já admite failed → uploading.
+ */
+export function prepareMachineForUpload(machine: CapturePhaseMachine, isRetry: boolean): void {
+  if (!isRetry && machine.current !== "idle") machine.reset();
+  if (machine.current !== "uploading") machine.transition("uploading", isRetry ? "retry" : "file_selected");
+}
+
 export const CAPTURE_PHASE_LABELS: Record<CapturePhase, string> = {
   idle: "Aguardando",
   uploading: "Enviando",

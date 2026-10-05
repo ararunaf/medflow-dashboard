@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createCaptureSessionFn } from "@/lib/capture/api/capture-server";
 import type { CaptureSessionDetail } from "@/lib/capture/types";
 import type { MutationResult } from "@/lib/operations/api";
@@ -11,7 +11,7 @@ import {
 } from "../services/storage-service";
 import { createLocalPreviewUrl, fileToBase64, revokeLocalPreviewUrl } from "../utils/file-format";
 import type { CapturePhase } from "../types";
-import { CapturePhaseMachine } from "../services/state-machine";
+import { CapturePhaseMachine, prepareMachineForUpload } from "../services/state-machine";
 
 export function useCaptureUpload(options: {
   onSessionCreated?: (sessionId: string) => void;
@@ -22,6 +22,10 @@ export function useCaptureUpload(options: {
   const [busy, setBusy] = useState(false);
   const [machine] = useState(() => new CapturePhaseMachine());
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  // Ref espelha a prévia para o cleanup ser estável: se cleanup dependesse de
+  // localPreview, o efeito de desmontagem da página rodaria a cada upload
+  // (setLocalPreview no início) e resetaria a máquina no meio do envio.
+  const localPreviewRef = useRef<string | null>(null);
 
   const processFile = useCallback(
     async (file: File, channel: "file_upload" | "mobile_camera", retrySessionId?: string) => {
@@ -29,16 +33,13 @@ export function useCaptureUpload(options: {
       options.onError?.(null);
 
       const blobUrl = createLocalPreviewUrl(file);
-      setLocalPreview((prev) => {
-        if (prev) revokeLocalPreviewUrl(prev);
-        return blobUrl;
-      });
+      if (localPreviewRef.current) revokeLocalPreviewUrl(localPreviewRef.current);
+      localPreviewRef.current = blobUrl;
+      setLocalPreview(blobUrl);
       options.onPreviewUrl?.(blobUrl);
 
       try {
-        if (machine.current === "idle") {
-          machine.transition("uploading", "file_selected");
-        }
+        prepareMachineForUpload(machine, Boolean(retrySessionId));
         options.onPhaseChange?.("uploading");
 
         let sessionId = retrySessionId;
@@ -110,10 +111,11 @@ export function useCaptureUpload(options: {
   );
 
   const cleanup = useCallback(() => {
-    if (localPreview) revokeLocalPreviewUrl(localPreview);
+    if (localPreviewRef.current) revokeLocalPreviewUrl(localPreviewRef.current);
+    localPreviewRef.current = null;
     setLocalPreview(null);
     machine.reset();
-  }, [localPreview, machine]);
+  }, [machine]);
 
   return {
     busy,

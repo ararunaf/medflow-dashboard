@@ -13,7 +13,8 @@ import {
   type MutationResult,
   type QueryResult,
 } from "@/lib/server/fn-helpers";
-import { decodeBase64ToBytes } from "../infrastructure/base64";
+import { decodeBase64ToBytes, requireBase64Content } from "../infrastructure/base64";
+import { CAPTURE_MAX_BYTES } from "../types";
 import {
   cancelCaptureSession,
   createCaptureSession,
@@ -88,7 +89,7 @@ function parseUploadInput(raw: unknown) {
     file: {
       name: requireString(fileObj.name, "file.name"),
       mimeType: requireString(fileObj.mimeType, "file.mimeType"),
-      base64Content: requireString(fileObj.base64Content, "file.base64Content"),
+      base64Content: requireBase64Content(fileObj.base64Content, "file.base64Content", CAPTURE_MAX_BYTES),
     },
   };
 }
