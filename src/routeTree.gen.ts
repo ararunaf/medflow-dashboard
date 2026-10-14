@@ -9,121 +9,41 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TissRouteImport } from './routes/tiss'
-import { Route as SiteRouteImport } from './routes/site'
-import { Route as ProcessamentoRouteImport } from './routes/processamento'
-import { Route as PlantoesRouteImport } from './routes/plantoes'
-import { Route as PilotoRouteImport } from './routes/piloto'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as OperacaoRouteImport } from './routes/operacao'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LancamentoRouteImport } from './routes/lancamento'
-import { Route as InstituicaoRouteImport } from './routes/instituicao'
-import { Route as FinanceiroRouteImport } from './routes/financeiro'
-import { Route as ExecutivoRouteImport } from './routes/executivo'
-import { Route as EscalasRouteImport } from './routes/escalas'
-import { Route as ContratosRouteImport } from './routes/contratos'
-import { Route as CentralRouteImport } from './routes/central'
-import { Route as CapturaRouteImport } from './routes/captura'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PlantoesShiftIdRouteImport } from './routes/plantoes.$shiftId'
-import { Route as LoginRedefinirSenhaRouteImport } from './routes/login.redefinir-senha'
-import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-senha'
-import { Route as FinanceiroGruposDeTrabalhoRouteImport } from './routes/financeiro.grupos-de-trabalho'
-import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
-import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
-import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
+import { Route as AjudaRouteImport } from './routes/ajuda'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as CapturaRouteImport } from './routes/captura'
+import { Route as CentralRouteImport } from './routes/central'
+import { Route as ContratosRouteImport } from './routes/contratos'
+import { Route as EscalasRouteImport } from './routes/escalas'
+import { Route as ExecutivoRouteImport } from './routes/executivo'
+import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as InstituicaoRouteImport } from './routes/instituicao'
+import { Route as LancamentoRouteImport } from './routes/lancamento'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OperacaoRouteImport } from './routes/operacao'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PilotoRouteImport } from './routes/piloto'
+import { Route as PlantoesRouteImport } from './routes/plantoes'
+import { Route as ProcessamentoRouteImport } from './routes/processamento'
+import { Route as SiteRouteImport } from './routes/site'
+import { Route as TissRouteImport } from './routes/tiss'
 import { Route as Fase3SlugRouteImport } from './routes/fase3.$slug'
-import { Route as ContratosRevisaoContractIdRouteImport } from './routes/contratos/revisao.$contractId'
-import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
-import { Route as ApiCaptureReportDownloadRouteImport } from './routes/api.capture.report-download'
+import { Route as FinanceiroConciliacaoOperacionalRouteImport } from './routes/financeiro.conciliacao-operacional'
+import { Route as FinanceiroDashboardExecutivoRouteImport } from './routes/financeiro.dashboard-executivo'
+import { Route as FinanceiroFechamentoOperacionalRouteImport } from './routes/financeiro.fechamento-operacional'
+import { Route as FinanceiroGruposDeTrabalhoRouteImport } from './routes/financeiro.grupos-de-trabalho'
+import { Route as LoginEsqueciSenhaRouteImport } from './routes/login.esqueci-senha'
+import { Route as LoginRedefinirSenhaRouteImport } from './routes/login.redefinir-senha'
+import { Route as PlantoesShiftIdRouteImport } from './routes/plantoes.$shiftId'
 import { Route as ApiCaptureProcessBatchRouteImport } from './routes/api.capture.process-batch'
+import { Route as ApiCaptureReportDownloadRouteImport } from './routes/api.capture.report-download'
+import { Route as CapturaRevisaoSessionIdRouteImport } from './routes/captura/revisao.$sessionId'
+import { Route as ContratosRevisaoContractIdRouteImport } from './routes/contratos/revisao.$contractId'
 
-const TissRoute = TissRouteImport.update({
-  id: '/tiss',
-  path: '/tiss',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SiteRoute = SiteRouteImport.update({
-  id: '/site',
-  path: '/site',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProcessamentoRoute = ProcessamentoRouteImport.update({
-  id: '/processamento',
-  path: '/processamento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlantoesRoute = PlantoesRouteImport.update({
-  id: '/plantoes',
-  path: '/plantoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PilotoRoute = PilotoRouteImport.update({
-  id: '/piloto',
-  path: '/piloto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OperacaoRoute = OperacaoRouteImport.update({
-  id: '/operacao',
-  path: '/operacao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LancamentoRoute = LancamentoRouteImport.update({
-  id: '/lancamento',
-  path: '/lancamento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InstituicaoRoute = InstituicaoRouteImport.update({
-  id: '/instituicao',
-  path: '/instituicao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FinanceiroRoute = FinanceiroRouteImport.update({
-  id: '/financeiro',
-  path: '/financeiro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExecutivoRoute = ExecutivoRouteImport.update({
-  id: '/executivo',
-  path: '/executivo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EscalasRoute = EscalasRouteImport.update({
-  id: '/escalas',
-  path: '/escalas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContratosRoute = ContratosRouteImport.update({
-  id: '/contratos',
-  path: '/contratos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CentralRoute = CentralRouteImport.update({
-  id: '/central',
-  path: '/central',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CapturaRoute = CapturaRouteImport.update({
-  id: '/captura',
-  path: '/captura',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AjudaRoute = AjudaRouteImport.update({
@@ -131,36 +51,100 @@ const AjudaRoute = AjudaRouteImport.update({
   path: '/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlantoesShiftIdRoute = PlantoesShiftIdRouteImport.update({
-  id: '/$shiftId',
-  path: '/$shiftId',
-  getParentRoute: () => PlantoesRoute,
+const CapturaRoute = CapturaRouteImport.update({
+  id: '/captura',
+  path: '/captura',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRedefinirSenhaRoute = LoginRedefinirSenhaRouteImport.update({
-  id: '/redefinir-senha',
-  path: '/redefinir-senha',
-  getParentRoute: () => LoginRoute,
+const CentralRoute = CentralRouteImport.update({
+  id: '/central',
+  path: '/central',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const LoginEsqueciSenhaRoute = LoginEsqueciSenhaRouteImport.update({
-  id: '/esqueci-senha',
-  path: '/esqueci-senha',
-  getParentRoute: () => LoginRoute,
+const ContratosRoute = ContratosRouteImport.update({
+  id: '/contratos',
+  path: '/contratos',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const FinanceiroGruposDeTrabalhoRoute =
-  FinanceiroGruposDeTrabalhoRouteImport.update({
-    id: '/grupos-de-trabalho',
-    path: '/grupos-de-trabalho',
-    getParentRoute: () => FinanceiroRoute,
-  } as any)
-const FinanceiroFechamentoOperacionalRoute =
-  FinanceiroFechamentoOperacionalRouteImport.update({
-    id: '/fechamento-operacional',
-    path: '/fechamento-operacional',
+const EscalasRoute = EscalasRouteImport.update({
+  id: '/escalas',
+  path: '/escalas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExecutivoRoute = ExecutivoRouteImport.update({
+  id: '/executivo',
+  path: '/executivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroRoute = FinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstituicaoRoute = InstituicaoRouteImport.update({
+  id: '/instituicao',
+  path: '/instituicao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LancamentoRoute = LancamentoRouteImport.update({
+  id: '/lancamento',
+  path: '/lancamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OperacaoRoute = OperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PilotoRoute = PilotoRouteImport.update({
+  id: '/piloto',
+  path: '/piloto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlantoesRoute = PlantoesRouteImport.update({
+  id: '/plantoes',
+  path: '/plantoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessamentoRoute = ProcessamentoRouteImport.update({
+  id: '/processamento',
+  path: '/processamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteRoute = SiteRouteImport.update({
+  id: '/site',
+  path: '/site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TissRoute = TissRouteImport.update({
+  id: '/tiss',
+  path: '/tiss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Fase3SlugRoute = Fase3SlugRouteImport.update({
+  id: '/fase3/$slug',
+  path: '/fase3/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroConciliacaoOperacionalRoute =
+  FinanceiroConciliacaoOperacionalRouteImport.update({
+    id: '/conciliacao-operacional',
+    path: '/conciliacao-operacional',
     getParentRoute: () => FinanceiroRoute,
   } as any)
 const FinanceiroDashboardExecutivoRoute =
@@ -169,27 +153,37 @@ const FinanceiroDashboardExecutivoRoute =
     path: '/dashboard-executivo',
     getParentRoute: () => FinanceiroRoute,
   } as any)
-const FinanceiroConciliacaoOperacionalRoute =
-  FinanceiroConciliacaoOperacionalRouteImport.update({
-    id: '/conciliacao-operacional',
-    path: '/conciliacao-operacional',
+const FinanceiroFechamentoOperacionalRoute =
+  FinanceiroFechamentoOperacionalRouteImport.update({
+    id: '/fechamento-operacional',
+    path: '/fechamento-operacional',
     getParentRoute: () => FinanceiroRoute,
   } as any)
-const Fase3SlugRoute = Fase3SlugRouteImport.update({
-  id: '/fase3/$slug',
-  path: '/fase3/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContratosRevisaoContractIdRoute =
-  ContratosRevisaoContractIdRouteImport.update({
-    id: '/revisao/$contractId',
-    path: '/revisao/$contractId',
-    getParentRoute: () => ContratosRoute,
+const FinanceiroGruposDeTrabalhoRoute =
+  FinanceiroGruposDeTrabalhoRouteImport.update({
+    id: '/grupos-de-trabalho',
+    path: '/grupos-de-trabalho',
+    getParentRoute: () => FinanceiroRoute,
   } as any)
-const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
-  id: '/revisao/$sessionId',
-  path: '/revisao/$sessionId',
-  getParentRoute: () => CapturaRoute,
+const LoginEsqueciSenhaRoute = LoginEsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => LoginRoute,
+} as any)
+const LoginRedefinirSenhaRoute = LoginRedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => LoginRoute,
+} as any)
+const PlantoesShiftIdRoute = PlantoesShiftIdRouteImport.update({
+  id: '/$shiftId',
+  path: '/$shiftId',
+  getParentRoute: () => PlantoesRoute,
+} as any)
+const ApiCaptureProcessBatchRoute = ApiCaptureProcessBatchRouteImport.update({
+  id: '/api/capture/process-batch',
+  path: '/api/capture/process-batch',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCaptureReportDownloadRoute =
   ApiCaptureReportDownloadRouteImport.update({
@@ -197,11 +191,17 @@ const ApiCaptureReportDownloadRoute =
     path: '/api/capture/report-download',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiCaptureProcessBatchRoute = ApiCaptureProcessBatchRouteImport.update({
-  id: '/api/capture/process-batch',
-  path: '/api/capture/process-batch',
-  getParentRoute: () => rootRouteImport,
+const CapturaRevisaoSessionIdRoute = CapturaRevisaoSessionIdRouteImport.update({
+  id: '/revisao/$sessionId',
+  path: '/revisao/$sessionId',
+  getParentRoute: () => CapturaRoute,
 } as any)
+const ContratosRevisaoContractIdRoute =
+  ContratosRevisaoContractIdRouteImport.update({
+    id: '/revisao/$contractId',
+    path: '/revisao/$contractId',
+    getParentRoute: () => ContratosRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -432,123 +432,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tiss': {
-      id: '/tiss'
-      path: '/tiss'
-      fullPath: '/tiss'
-      preLoaderRoute: typeof TissRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/site': {
-      id: '/site'
-      path: '/site'
-      fullPath: '/site'
-      preLoaderRoute: typeof SiteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/processamento': {
-      id: '/processamento'
-      path: '/processamento'
-      fullPath: '/processamento'
-      preLoaderRoute: typeof ProcessamentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plantoes': {
-      id: '/plantoes'
-      path: '/plantoes'
-      fullPath: '/plantoes'
-      preLoaderRoute: typeof PlantoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/piloto': {
-      id: '/piloto'
-      path: '/piloto'
-      fullPath: '/piloto'
-      preLoaderRoute: typeof PilotoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/operacao': {
-      id: '/operacao'
-      path: '/operacao'
-      fullPath: '/operacao'
-      preLoaderRoute: typeof OperacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lancamento': {
-      id: '/lancamento'
-      path: '/lancamento'
-      fullPath: '/lancamento'
-      preLoaderRoute: typeof LancamentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/instituicao': {
-      id: '/instituicao'
-      path: '/instituicao'
-      fullPath: '/instituicao'
-      preLoaderRoute: typeof InstituicaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/financeiro': {
-      id: '/financeiro'
-      path: '/financeiro'
-      fullPath: '/financeiro'
-      preLoaderRoute: typeof FinanceiroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/executivo': {
-      id: '/executivo'
-      path: '/executivo'
-      fullPath: '/executivo'
-      preLoaderRoute: typeof ExecutivoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/escalas': {
-      id: '/escalas'
-      path: '/escalas'
-      fullPath: '/escalas'
-      preLoaderRoute: typeof EscalasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contratos': {
-      id: '/contratos'
-      path: '/contratos'
-      fullPath: '/contratos'
-      preLoaderRoute: typeof ContratosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/central': {
-      id: '/central'
-      path: '/central'
-      fullPath: '/central'
-      preLoaderRoute: typeof CentralRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/captura': {
-      id: '/captura'
-      path: '/captura'
-      fullPath: '/captura'
-      preLoaderRoute: typeof CapturaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ajuda': {
@@ -558,46 +446,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/plantoes/$shiftId': {
-      id: '/plantoes/$shiftId'
-      path: '/$shiftId'
-      fullPath: '/plantoes/$shiftId'
-      preLoaderRoute: typeof PlantoesShiftIdRouteImport
-      parentRoute: typeof PlantoesRoute
+    '/captura': {
+      id: '/captura'
+      path: '/captura'
+      fullPath: '/captura'
+      preLoaderRoute: typeof CapturaRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/login/redefinir-senha': {
-      id: '/login/redefinir-senha'
-      path: '/redefinir-senha'
-      fullPath: '/login/redefinir-senha'
-      preLoaderRoute: typeof LoginRedefinirSenhaRouteImport
-      parentRoute: typeof LoginRoute
+    '/central': {
+      id: '/central'
+      path: '/central'
+      fullPath: '/central'
+      preLoaderRoute: typeof CentralRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/login/esqueci-senha': {
-      id: '/login/esqueci-senha'
-      path: '/esqueci-senha'
-      fullPath: '/login/esqueci-senha'
-      preLoaderRoute: typeof LoginEsqueciSenhaRouteImport
-      parentRoute: typeof LoginRoute
+    '/contratos': {
+      id: '/contratos'
+      path: '/contratos'
+      fullPath: '/contratos'
+      preLoaderRoute: typeof ContratosRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/financeiro/grupos-de-trabalho': {
-      id: '/financeiro/grupos-de-trabalho'
-      path: '/grupos-de-trabalho'
-      fullPath: '/financeiro/grupos-de-trabalho'
-      preLoaderRoute: typeof FinanceiroGruposDeTrabalhoRouteImport
-      parentRoute: typeof FinanceiroRoute
+    '/escalas': {
+      id: '/escalas'
+      path: '/escalas'
+      fullPath: '/escalas'
+      preLoaderRoute: typeof EscalasRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/financeiro/fechamento-operacional': {
-      id: '/financeiro/fechamento-operacional'
-      path: '/fechamento-operacional'
-      fullPath: '/financeiro/fechamento-operacional'
-      preLoaderRoute: typeof FinanceiroFechamentoOperacionalRouteImport
+    '/executivo': {
+      id: '/executivo'
+      path: '/executivo'
+      fullPath: '/executivo'
+      preLoaderRoute: typeof ExecutivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro': {
+      id: '/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof FinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instituicao': {
+      id: '/instituicao'
+      path: '/instituicao'
+      fullPath: '/instituicao'
+      preLoaderRoute: typeof InstituicaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lancamento': {
+      id: '/lancamento'
+      path: '/lancamento'
+      fullPath: '/lancamento'
+      preLoaderRoute: typeof LancamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operacao': {
+      id: '/operacao'
+      path: '/operacao'
+      fullPath: '/operacao'
+      preLoaderRoute: typeof OperacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/piloto': {
+      id: '/piloto'
+      path: '/piloto'
+      fullPath: '/piloto'
+      preLoaderRoute: typeof PilotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plantoes': {
+      id: '/plantoes'
+      path: '/plantoes'
+      fullPath: '/plantoes'
+      preLoaderRoute: typeof PlantoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/processamento': {
+      id: '/processamento'
+      path: '/processamento'
+      fullPath: '/processamento'
+      preLoaderRoute: typeof ProcessamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site': {
+      id: '/site'
+      path: '/site'
+      fullPath: '/site'
+      preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tiss': {
+      id: '/tiss'
+      path: '/tiss'
+      fullPath: '/tiss'
+      preLoaderRoute: typeof TissRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fase3/$slug': {
+      id: '/fase3/$slug'
+      path: '/fase3/$slug'
+      fullPath: '/fase3/$slug'
+      preLoaderRoute: typeof Fase3SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro/conciliacao-operacional': {
+      id: '/financeiro/conciliacao-operacional'
+      path: '/conciliacao-operacional'
+      fullPath: '/financeiro/conciliacao-operacional'
+      preLoaderRoute: typeof FinanceiroConciliacaoOperacionalRouteImport
       parentRoute: typeof FinanceiroRoute
     }
     '/financeiro/dashboard-executivo': {
@@ -607,33 +586,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceiroDashboardExecutivoRouteImport
       parentRoute: typeof FinanceiroRoute
     }
-    '/financeiro/conciliacao-operacional': {
-      id: '/financeiro/conciliacao-operacional'
-      path: '/conciliacao-operacional'
-      fullPath: '/financeiro/conciliacao-operacional'
-      preLoaderRoute: typeof FinanceiroConciliacaoOperacionalRouteImport
+    '/financeiro/fechamento-operacional': {
+      id: '/financeiro/fechamento-operacional'
+      path: '/fechamento-operacional'
+      fullPath: '/financeiro/fechamento-operacional'
+      preLoaderRoute: typeof FinanceiroFechamentoOperacionalRouteImport
       parentRoute: typeof FinanceiroRoute
     }
-    '/fase3/$slug': {
-      id: '/fase3/$slug'
-      path: '/fase3/$slug'
-      fullPath: '/fase3/$slug'
-      preLoaderRoute: typeof Fase3SlugRouteImport
+    '/financeiro/grupos-de-trabalho': {
+      id: '/financeiro/grupos-de-trabalho'
+      path: '/grupos-de-trabalho'
+      fullPath: '/financeiro/grupos-de-trabalho'
+      preLoaderRoute: typeof FinanceiroGruposDeTrabalhoRouteImport
+      parentRoute: typeof FinanceiroRoute
+    }
+    '/login/esqueci-senha': {
+      id: '/login/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/login/esqueci-senha'
+      preLoaderRoute: typeof LoginEsqueciSenhaRouteImport
+      parentRoute: typeof LoginRoute
+    }
+    '/login/redefinir-senha': {
+      id: '/login/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/login/redefinir-senha'
+      preLoaderRoute: typeof LoginRedefinirSenhaRouteImport
+      parentRoute: typeof LoginRoute
+    }
+    '/plantoes/$shiftId': {
+      id: '/plantoes/$shiftId'
+      path: '/$shiftId'
+      fullPath: '/plantoes/$shiftId'
+      preLoaderRoute: typeof PlantoesShiftIdRouteImport
+      parentRoute: typeof PlantoesRoute
+    }
+    '/api/capture/process-batch': {
+      id: '/api/capture/process-batch'
+      path: '/api/capture/process-batch'
+      fullPath: '/api/capture/process-batch'
+      preLoaderRoute: typeof ApiCaptureProcessBatchRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/contratos/revisao/$contractId': {
-      id: '/contratos/revisao/$contractId'
-      path: '/revisao/$contractId'
-      fullPath: '/contratos/revisao/$contractId'
-      preLoaderRoute: typeof ContratosRevisaoContractIdRouteImport
-      parentRoute: typeof ContratosRoute
-    }
-    '/captura/revisao/$sessionId': {
-      id: '/captura/revisao/$sessionId'
-      path: '/revisao/$sessionId'
-      fullPath: '/captura/revisao/$sessionId'
-      preLoaderRoute: typeof CapturaRevisaoSessionIdRouteImport
-      parentRoute: typeof CapturaRoute
     }
     '/api/capture/report-download': {
       id: '/api/capture/report-download'
@@ -642,12 +635,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCaptureReportDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/capture/process-batch': {
-      id: '/api/capture/process-batch'
-      path: '/api/capture/process-batch'
-      fullPath: '/api/capture/process-batch'
-      preLoaderRoute: typeof ApiCaptureProcessBatchRouteImport
-      parentRoute: typeof rootRouteImport
+    '/captura/revisao/$sessionId': {
+      id: '/captura/revisao/$sessionId'
+      path: '/revisao/$sessionId'
+      fullPath: '/captura/revisao/$sessionId'
+      preLoaderRoute: typeof CapturaRevisaoSessionIdRouteImport
+      parentRoute: typeof CapturaRoute
+    }
+    '/contratos/revisao/$contractId': {
+      id: '/contratos/revisao/$contractId'
+      path: '/revisao/$contractId'
+      fullPath: '/contratos/revisao/$contractId'
+      preLoaderRoute: typeof ContratosRevisaoContractIdRouteImport
+      parentRoute: typeof ContratosRoute
     }
   }
 }

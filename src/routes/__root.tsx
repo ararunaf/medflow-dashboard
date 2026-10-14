@@ -55,7 +55,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   logClient("route_error_component", { err: error });
   const router = useRouter();
 
@@ -93,7 +93,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient; auth: AuthContext }>()({
   pendingComponent: RoutePendingFallback,
-  beforeLoad: async ({ location }) => {
+  // Retorno anotado: sem ele, o `throw redirect(...)` faz o TS inferir o tipo
+  // passando pela própria árvore de rotas (ciclo → `never`) no router ≥ 1.170.
+  beforeLoad: async ({ location }): Promise<{ auth: AuthContext }> => {
     const auth = await getAuthContext();
     const guard = evaluateRouteGuard(location.pathname, auth);
     if (!guard.allowed) {
