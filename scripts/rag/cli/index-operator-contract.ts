@@ -31,16 +31,17 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "../../../src/lib/database.types.ts";
 import { createAIProviderFactory } from "../../../src/lib/enterprise/ai-provider/factory/ai-provider-factory.ts";
-import { chunkContractText } from "../../../src/lib/rag/chunk-contract-text.ts";
-import { embedTexts } from "../../../src/lib/rag/embed-texts.ts";
-import { extractPdfText } from "../../../src/lib/rag/extract-pdf-text.ts";
+import {
+  CONTRACT_STORAGE_BUCKET,
+  findIndexedContractByChecksum,
+  indexOperatorContract,
+  operatorContractStoragePath,
+} from "../../../src/lib/rag/operator-contract-ingestion.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..", "..", "..");
-
-const CONTRACT_STORAGE_BUCKET = "clinical-documents";
-const KNOWLEDGE_INSERT_BATCH_SIZE = 100;
 
 type Args = {
   pdf?: string;
@@ -83,9 +84,9 @@ async function main() {
   }
 
   const args = parseArgs(process.argv.slice(2));
-  const missing = (["pdf", "tenantId", "operatorCode", "contractLabel", "createdBy"] as const).filter(
-    (k) => !args[k],
-  );
+  const missing = (
+    ["pdf", "tenantId", "operatorCode", "contractLabel", "createdBy"] as const
+  ).filter((k) => !args[k]);
   if (missing.length > 0) {
     console.error(
       `F2-S1: parâmetros obrigatórios ausentes: ${missing.join(", ")}.\n` +
@@ -102,7 +103,9 @@ async function main() {
   const url = process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
-    console.error("F2-S1: defina VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (.env.local ou ambiente).");
+    console.error(
+      "F2-S1: defina VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (.env.local ou ambiente).",
+    );
     process.exit(1);
   }
   if (!process.env.MEDFLOW_OPENAI_API_KEY && !process.env.OPENAI_API_KEY) {
@@ -110,21 +113,13 @@ async function main() {
     process.exit(1);
   }
 
-  const client = createClient(url, serviceKey, { auth: { persistSession: false } });
+  const client = createClient<Database>(url, serviceKey, { auth: { persistSession: false } });
   const aiProvider = createAIProviderFactory().create({ provider: "openai" });
 
-  const pdfBytes = readFileSync(args.pdf!);
+  const pdfBytes = new Uint8Array(readFileSync(args.pdf!));
   const checksum = createHash("sha256").update(pdfBytes).digest("hex");
 
-  const { data: existing, error: existingErr } = await client
-    .from("operator_contracts")
-    .select("id, status, chunk_count")
-    .eq("tenant_id", args.tenantId!)
-    .eq("checksum_sha256", checksum)
-    .eq("status", "indexed")
-    .maybeSingle();
-  if (existingErr) throw new Error(`Falha ao consultar operator_contracts: ${existingErr.message}`);
-
+  const existing = await findIndexedContractByChecksum(client, args.tenantId!, checksum);
   if (existing && !args.force) {
     console.log(
       `F2-S1: contrato já indexado (id=${existing.id}, ${existing.chunk_count} chunks) — mesmo checksum. ` +
@@ -134,106 +129,21 @@ async function main() {
   }
 
   console.log(`F2-S1: extraindo texto de ${args.pdf}...`);
-  const { text, pageCount } = await extractPdfText(new Uint8Array(pdfBytes));
-  if (text.trim().length === 0) {
-    throw new Error("PDF sem texto extraível (provável scan de imagem sem OCR — fora do escopo desta sprint).");
-  }
-
-  const chunks = chunkContractText(text);
-  if (chunks.length === 0) {
-    throw new Error("Nenhum chunk gerado a partir do texto extraído.");
-  }
-  console.log(`F2-S1: ${pageCount} página(s), ${chunks.length} chunk(s) (${chunks[0]!.heading ? "por cláusula" : "por parágrafo"}).`);
-
-  const contractId = existing?.id ?? randomUUID();
-  const storagePath = `${args.tenantId}/contracts/${contractId}/original.pdf`;
-
-  const upload = await client.storage.from(CONTRACT_STORAGE_BUCKET).upload(storagePath, pdfBytes, {
-    contentType: "application/pdf",
-    upsert: true,
+  const result = await indexOperatorContract(client, aiProvider, {
+    tenantId: args.tenantId!,
+    contractId: existing?.id ?? randomUUID(),
+    pdfBytes,
+    operatorCode: args.operatorCode!,
+    operatorName: args.operatorName ?? null,
+    contractLabel: args.contractLabel!,
+    createdBy: args.createdBy!,
+    onProgress: (message) => console.log(`F2-S1: ${message}`),
   });
-  if (upload.error) throw new Error(`Falha ao subir PDF para storage: ${upload.error.message}`);
 
-  const upsertContract = await client.from("operator_contracts").upsert(
-    {
-      id: contractId,
-      tenant_id: args.tenantId,
-      operator_code: args.operatorCode,
-      operator_name: args.operatorName ?? null,
-      contract_label: args.contractLabel,
-      byte_length: pdfBytes.byteLength,
-      checksum_sha256: checksum,
-      storage_bucket: CONTRACT_STORAGE_BUCKET,
-      storage_path: storagePath,
-      page_count: pageCount,
-      status: "indexing",
-      created_by: args.createdBy,
-    },
-    { onConflict: "id" },
+  console.log(
+    `F2-S1: contrato indexado — id=${result.contractId}, ${result.chunkCount} chunks, modelo=${result.embeddingModel}, ` +
+      `bucket=${CONTRACT_STORAGE_BUCKET}/${operatorContractStoragePath(args.tenantId!, result.contractId)}.`,
   );
-  if (upsertContract.error) {
-    throw new Error(`Falha ao gravar operator_contracts: ${upsertContract.error.message}`);
-  }
-
-  try {
-    console.log(`F2-S1: gerando embeddings para ${chunks.length} chunk(s)...`);
-    const { vectors, model } = await embedTexts(
-      aiProvider,
-      chunks.map((c) => c.content),
-    );
-
-    const del = await client.from("knowledge_embeddings").delete().eq("document_id", contractId);
-    if (del.error) throw new Error(`Falha ao limpar chunks antigos: ${del.error.message}`);
-
-    const rows = chunks.map((chunk, i) => ({
-      id: randomUUID(),
-      tenant_id: args.tenantId,
-      document_id: contractId,
-      domain: "contract",
-      classification: args.operatorCode,
-      agent_affinity: ["contract-knowledge"],
-      source_path: storagePath,
-      chunk_index: chunk.index,
-      content: chunk.content,
-      content_hash: createHash("sha256").update(chunk.content).digest("hex"),
-      embedding: vectors[i],
-      embedding_model: model,
-      metadata: {
-        operatorCode: args.operatorCode,
-        operatorName: args.operatorName ?? null,
-        contractLabel: args.contractLabel,
-        heading: chunk.heading,
-      },
-      version: "contract_ingestion_v1",
-      indexed_at: new Date().toISOString(),
-    }));
-
-    for (let i = 0; i < rows.length; i += KNOWLEDGE_INSERT_BATCH_SIZE) {
-      const batch = rows.slice(i, i + KNOWLEDGE_INSERT_BATCH_SIZE);
-      const insert = await client.from("knowledge_embeddings").insert(batch);
-      if (insert.error) throw new Error(`Falha ao gravar knowledge_embeddings: ${insert.error.message}`);
-    }
-
-    const finish = await client
-      .from("operator_contracts")
-      .update({
-        status: "indexed",
-        chunk_count: rows.length,
-        embedding_model: model,
-        indexed_at: new Date().toISOString(),
-        error_message: null,
-      })
-      .eq("id", contractId);
-    if (finish.error) throw new Error(`Falha ao finalizar operator_contracts: ${finish.error.message}`);
-
-    console.log(
-      `F2-S1: contrato indexado — id=${contractId}, ${rows.length} chunks, modelo=${model}, bucket=${CONTRACT_STORAGE_BUCKET}/${storagePath}.`,
-    );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    await client.from("operator_contracts").update({ status: "failed", error_message: message }).eq("id", contractId);
-    throw err;
-  }
 }
 
 main().catch((err) => {

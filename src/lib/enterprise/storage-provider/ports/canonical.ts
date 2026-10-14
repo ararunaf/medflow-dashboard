@@ -56,6 +56,8 @@ export type CanonicalStorageResult = {
   body?: Uint8Array;
   /** URL assinada (apenas signedUrl bem-sucedido). */
   signedUrl?: string;
+  /** Token de upload direto (apenas signedUploadUrl bem-sucedido). */
+  uploadToken?: string;
   expiresAt?: string;
   message?: string;
   code?: string;

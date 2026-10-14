@@ -28,6 +28,7 @@ import {
   listPendingSwapsFn,
   listProfessionalAffiliationsFn,
   listProfessionalWorkGroupAssignmentsFn,
+  listSchedulingTreeFn,
   listShiftsRangeFn,
   listSwapTargetProfessionalsFn,
   listWorkGroupsFn,
@@ -38,6 +39,7 @@ import {
   type MyContext,
   type ProfessionalAffiliationSummary,
   type ProfessionalWorkGroupAssignment,
+  type SchedulingTree,
   type ShiftDetail,
   type ShiftListItem,
   type SwapListItem,
@@ -248,4 +250,18 @@ export const myContextQueryOptions = () =>
 
 export function useMyContextQuery(opts: ReadOpts = {}) {
   return useQuery({ ...myContextQueryOptions(), ...opts });
+}
+
+// -------------------------------------------------------------------------
+// Montador de escala (manager-only)
+
+export const schedulingTreeQueryOptions = () =>
+  queryOptions<SchedulingTree>({
+    queryKey: opsKeys.schedulingTree(),
+    queryFn: async () => unwrap(await listSchedulingTreeFn()),
+    staleTime: 30_000,
+  });
+
+export function useSchedulingTreeQuery(opts: ReadOpts = {}) {
+  return useQuery({ ...schedulingTreeQueryOptions(), ...opts });
 }

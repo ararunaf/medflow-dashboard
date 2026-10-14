@@ -13,10 +13,13 @@ import { requireObject, runMutation, type MutationResult } from "@/lib/server/fn
 import {
   cancelShift,
   createShift,
+  createShiftSeries,
   updateShift,
   type CreateShiftInput,
+  type CreateShiftSeriesInput,
   type UpdateShiftInput,
 } from "@/lib/services/operations/shifts";
+import { SHIFT_SERIES_MAX } from "@/lib/domain/operations/shift-series";
 import type { ShiftRow } from "@/lib/services/operations/types";
 
 export const createShiftFn = createServerFn({ method: "POST" })
@@ -34,6 +37,35 @@ export const createShiftFn = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<MutationResult<ShiftRow>> => {
     return runMutation((ctx) => createShift(ctx, data));
+  });
+
+export const createShiftSeriesFn = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown): CreateShiftSeriesInput => {
+    const obj = requireObject(raw);
+    const scheduleId = expectUuid(obj.scheduleId, "scheduleId");
+    if (!Array.isArray(obj.intervals) || obj.intervals.length === 0) {
+      throw new ValidationError("Informe ao menos um plantão.", { field: "intervals" });
+    }
+    if (obj.intervals.length > SHIFT_SERIES_MAX) {
+      throw new ValidationError(`No máximo ${SHIFT_SERIES_MAX} plantões por vez.`, {
+        field: "intervals",
+      });
+    }
+    const intervals = obj.intervals.map((rawInterval, i) => {
+      const interval = requireObject(rawInterval, `intervals[${i}]`);
+      const startsAt = expectTimestamp(interval.startsAt, `intervals[${i}].startsAt`);
+      const endsAt = expectTimestamp(interval.endsAt, `intervals[${i}].endsAt`);
+      expectInterval(startsAt, endsAt, `intervals[${i}]`);
+      return { startsAt, endsAt };
+    });
+    const roleRequired =
+      obj.roleRequired === undefined || obj.roleRequired === ""
+        ? undefined
+        : expectOptionalString(obj.roleRequired, "roleRequired", 60);
+    return { scheduleId, roleRequired, intervals };
+  })
+  .handler(async ({ data }): Promise<MutationResult<ShiftRow[]>> => {
+    return runMutation((ctx) => createShiftSeries(ctx, data));
   });
 
 export const updateShiftFn = createServerFn({ method: "POST" })

@@ -12,19 +12,14 @@
  * Uso:
  *   npx tsx scripts/rag/cli/extract-contract-rules.ts --contract-id <uuid> [--top-k 6]
  */
-import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
-import {
-  CONTRACT_CATEGORY_RETRIEVAL_QUERIES,
-  extractContractRulesForCategory,
-  type ContractKnowledgeChunk,
-} from "../../../src/lib/capture/contract/engine/contract-knowledge-agent.ts";
 import { CONTRACT_RULE_CATEGORIES } from "../../../src/lib/capture/contract/types/contract-rule-proposal.ts";
+import type { Database } from "../../../src/lib/database.types.ts";
 import { createAIProviderFactory } from "../../../src/lib/enterprise/ai-provider/factory/ai-provider-factory.ts";
-import { embedQuery } from "../../../src/lib/rag/embed-texts.ts";
+import { extractContractRulesForContractCategory } from "../../../src/lib/rag/operator-contract-ingestion.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..", "..", "..");
@@ -67,7 +62,9 @@ async function main() {
   const url = process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
-    console.error("F2-S2: defina VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (.env.local ou ambiente).");
+    console.error(
+      "F2-S2: defina VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (.env.local ou ambiente).",
+    );
     process.exit(1);
   }
   if (!process.env.MEDFLOW_OPENAI_API_KEY && !process.env.OPENAI_API_KEY) {
@@ -75,71 +72,27 @@ async function main() {
     process.exit(1);
   }
 
-  const client = createClient(url, serviceKey, { auth: { persistSession: false } });
+  const client = createClient<Database>(url, serviceKey, { auth: { persistSession: false } });
   const aiProvider = createAIProviderFactory().create({ provider: "openai" });
 
-  const { data: contract, error: contractErr } = await client
-    .from("operator_contracts")
-    .select("id, tenant_id, operator_code, contract_label, status")
-    .eq("id", args.contractId)
-    .maybeSingle();
-  if (contractErr) throw new Error(`Falha ao consultar operator_contracts: ${contractErr.message}`);
-  if (!contract) throw new Error(`Contrato não encontrado: ${args.contractId}`);
-  if (contract.status !== "indexed") {
-    throw new Error(
-      `Contrato ${args.contractId} está com status '${contract.status}' — rode rag:contract:index primeiro (precisa estar 'indexed').`,
-    );
-  }
-
-  console.log(`F2-S2: extraindo regras de ${contract.contract_label} (operadora ${contract.operator_code})...`);
+  console.log(`F2-S2: extraindo regras do contrato ${args.contractId}...`);
 
   let totalProposals = 0;
   for (const category of CONTRACT_RULE_CATEGORIES) {
-    const queryEmbedding = await embedQuery(aiProvider, CONTRACT_CATEGORY_RETRIEVAL_QUERIES[category]);
-
-    const { data, error } = await client.rpc("match_knowledge_embeddings", {
-      query_embedding: queryEmbedding,
-      match_count: args.topK,
-      filter_domain: "contract",
-      filter_classification: null,
-      similarity_threshold: 0,
-      filter_document_id: contract.id,
-    });
-    if (error) throw new Error(`Falha na busca RAG (${category}): ${error.message}`);
-
-    const rows = (data ?? []) as Array<{ id: string; content: string; metadata: { heading?: string | null } }>;
-    const chunks: ContractKnowledgeChunk[] = rows.map((row) => ({
-      id: row.id,
-      heading: row.metadata?.heading ?? null,
-      content: row.content,
-    }));
-
-    const proposals = await extractContractRulesForCategory(aiProvider, category, chunks);
-    console.log(
-      `F2-S2: [${category}] ${chunks.length} chunk(s) recuperado(s) — ${proposals.length} proposta(s) validada(s).`,
+    const { chunkCount, proposalCount } = await extractContractRulesForContractCategory(
+      client,
+      aiProvider,
+      { contractId: args.contractId, category, topK: args.topK },
     );
-
-    if (proposals.length > 0) {
-      const insertRows = proposals.map((p) => ({
-        id: randomUUID(),
-        tenant_id: contract.tenant_id,
-        operator_contract_id: contract.id,
-        category: p.category,
-        description: p.description,
-        justification: p.justification,
-        citation_heading: p.citationHeading,
-        citation_excerpt: p.citationExcerpt,
-        source_chunk_ids: p.sourceChunkIds,
-        confidence: p.confidence,
-        extraction_model: p.extractionModel,
-      }));
-      const insert = await client.from("contract_rule_proposals").insert(insertRows);
-      if (insert.error) throw new Error(`Falha ao gravar contract_rule_proposals (${category}): ${insert.error.message}`);
-      totalProposals += proposals.length;
-    }
+    console.log(
+      `F2-S2: [${category}] ${chunkCount} chunk(s) recuperado(s) — ${proposalCount} proposta(s) validada(s).`,
+    );
+    totalProposals += proposalCount;
   }
 
-  console.log(`F2-S2: ${totalProposals} proposta(s) de regra gravada(s), pendentes de revisão humana (F2-S3).`);
+  console.log(
+    `F2-S2: ${totalProposals} proposta(s) de regra gravada(s), pendentes de revisão humana (F2-S3).`,
+  );
 }
 
 main().catch((err) => {

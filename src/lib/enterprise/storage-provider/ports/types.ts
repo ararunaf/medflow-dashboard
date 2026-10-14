@@ -162,6 +162,16 @@ export type StorageSignedUrlInput = StorageProviderOperationControls & {
   downloadFilename?: string;
 };
 
+/** Input de signedUploadUrl() — autoriza um único PUT do cliente no `key`. */
+export type StorageSignedUploadUrlInput = StorageProviderOperationControls & {
+  key: string;
+  container?: string;
+  documentId?: string;
+  sessionId?: string;
+  tenantRef?: string;
+  upsert?: boolean;
+};
+
 /**
  * Resultado de operação no Port — promove CanonicalStorageResult.
  * Sem modelos paralelos de domínio.
@@ -222,6 +232,11 @@ export type StorageProviderBackend = {
     key: string;
     container?: string;
   }): Promise<{ ok: boolean; url?: string; message?: string }>;
+  signedUploadUrl?(input: {
+    key: string;
+    container?: string;
+    upsert?: boolean;
+  }): Promise<{ ok: boolean; url?: string; token?: string; message?: string }>;
   health?(): Promise<{ ok: boolean; message?: string }>;
 };
 

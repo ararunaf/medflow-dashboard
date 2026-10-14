@@ -72,6 +72,29 @@ function matchesDeclaredMimeType(bytes: Uint8Array, mimeType: string): boolean {
   }
 }
 
+/** Valida só o que o cliente declara — usado antes de emitir URL de upload direto. */
+export function validateCaptureUploadDeclaration(input: {
+  mimeType: string;
+  byteLength: number;
+  filename: string;
+}): void {
+  if (!CAPTURE_ALLOWED_MIME_TYPES.includes(input.mimeType as CaptureAllowedMimeType)) {
+    throw new ValidationError(
+      `Tipo de arquivo não permitido: ${input.mimeType}. Use PDF ou imagem.`,
+      { mimeType: input.mimeType },
+    );
+  }
+  if (input.byteLength <= 0 || input.byteLength > CAPTURE_MAX_BYTES) {
+    throw new ValidationError(
+      `Tamanho inválido (máx. ${Math.round(CAPTURE_MAX_BYTES / 1024 / 1024)}MB).`,
+      { byteLength: input.byteLength },
+    );
+  }
+  if (!input.filename.trim()) {
+    throw new ValidationError("Nome do arquivo é obrigatório.", { field: "filename" });
+  }
+}
+
 export function validateCaptureUpload(input: {
   mimeType: string;
   byteLength: number;

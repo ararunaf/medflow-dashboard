@@ -3096,6 +3096,7 @@ export type Database = {
           carater_atendimento: string | null;
           tipo_atendimento: string | null;
           tipo_consulta: string | null;
+          capture_session_id: string | null;
           total_value: number;
           created_at: string;
           updated_at: string;
@@ -3118,6 +3119,7 @@ export type Database = {
           carater_atendimento?: string | null;
           tipo_atendimento?: string | null;
           tipo_consulta?: string | null;
+          capture_session_id?: string | null;
           total_value?: number;
           created_at?: string;
           updated_at?: string;
@@ -3140,6 +3142,7 @@ export type Database = {
           carater_atendimento?: string | null;
           tipo_atendimento?: string | null;
           tipo_consulta?: string | null;
+          capture_session_id?: string | null;
           total_value?: number;
           created_at?: string;
           updated_at?: string;

@@ -84,6 +84,8 @@ export async function createTissGuide(
     carater_atendimento?: string | null;
     tipo_atendimento?: string | null;
     tipo_consulta?: string | null;
+    /** Ponte captura → faturamento: sessão de captura que originou a guia. */
+    capture_session_id?: string | null;
   },
 ): Promise<TissGuideRow> {
   assertCan(ctx.role, "tiss:write");
@@ -103,6 +105,7 @@ export async function createTissGuide(
     tipo_atendimento: input.tipo_atendimento || null,
     tipo_consulta: input.tipo_consulta || null,
     status: "draft",
+    ...(input.capture_session_id ? { capture_session_id: input.capture_session_id } : {}),
   };
   const { data, error } = await ctx.client.from("tiss_guides").insert(row).select("*").single();
   if (error) throw mapPostgresError(error);

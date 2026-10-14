@@ -11,7 +11,12 @@
  * - shifts em estado terminal (`completed`, `cancelled`) não são editáveis.
  */
 import { assertCan } from "@/lib/auth/rbac";
-import { DomainError, NotFoundError, mapPostgresError } from "@/lib/domain/operations/errors";
+import {
+  DomainError,
+  NotFoundError,
+  ValidationError,
+  mapPostgresError,
+} from "@/lib/domain/operations/errors";
 import {
   shiftCancelledEvent,
   shiftCreatedEvent,
@@ -98,6 +103,60 @@ export async function createShift(ctx: ServiceCtx, input: CreateShiftInput): Pro
   if (error) throw mapPostgresError(error);
   await recordOperationalEventSafe(ctx, shiftCreatedEvent(data));
   return data;
+}
+
+export type CreateShiftSeriesInput = {
+  scheduleId: string;
+  roleRequired?: string;
+  intervals: ReadonlyArray<{ startsAt: string; endsAt: string }>;
+};
+
+/** Cria vários plantões da mesma escala num único insert (tudo ou nada). */
+export async function createShiftSeries(
+  ctx: ServiceCtx,
+  input: CreateShiftSeriesInput,
+): Promise<ShiftRow[]> {
+  assertCan(ctx.role, "shifts:create");
+
+  const scheduleId = expectUuid(input.scheduleId, "scheduleId");
+  const roleRequired = expectOptionalString(input.roleRequired, "roleRequired", 60);
+  if (input.intervals.length === 0) {
+    throw new ValidationError("Informe ao menos um plantão.", { field: "intervals" });
+  }
+  const intervals = input.intervals.map((interval, i) => {
+    const startsAt = expectTimestamp(interval.startsAt, `intervals[${i}].startsAt`);
+    const endsAt = expectTimestamp(interval.endsAt, `intervals[${i}].endsAt`);
+    expectInterval(startsAt, endsAt, `intervals[${i}]`);
+    return { startsAt, endsAt };
+  });
+
+  const schedule = await loadSchedule(ctx, scheduleId);
+  if (schedule.status === "archived") {
+    throw new DomainError("schedule_archived", "Escala arquivada não aceita novos plantões.", {
+      scheduleId,
+    });
+  }
+
+  const { data, error } = await ctx.client
+    .from("shifts")
+    .insert(
+      intervals.map((interval) => ({
+        tenant_id: ctx.tenantId,
+        schedule_id: schedule.id,
+        department_id: schedule.department_id,
+        starts_at: interval.startsAt,
+        ends_at: interval.endsAt,
+        role_required: roleRequired,
+        status: "open" as const,
+      })),
+    )
+    .select("*");
+
+  if (error) throw mapPostgresError(error);
+  for (const row of data ?? []) {
+    await recordOperationalEventSafe(ctx, shiftCreatedEvent(row));
+  }
+  return data ?? [];
 }
 
 export async function updateShift(ctx: ServiceCtx, input: UpdateShiftInput): Promise<ShiftRow> {

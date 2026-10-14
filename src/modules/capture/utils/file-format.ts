@@ -30,6 +30,12 @@ export function fileToBase64(file: File): Promise<string> {
   });
 }
 
+/** SHA-256 hex do arquivo (Web Crypto) — o servidor confere contra o objeto gravado. */
+export async function sha256Hex(file: Blob): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export function createLocalPreviewUrl(file: File): string {
   return URL.createObjectURL(file);
 }

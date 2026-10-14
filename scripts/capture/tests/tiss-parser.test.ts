@@ -8,7 +8,11 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildRawOcrResult } from "../../../src/lib/capture/ocr/providers/shared.ts";
-import type { OcrLine, OcrPage, RawOcrResult } from "../../../src/lib/capture/ocr/types/raw-ocr-result.ts";
+import type {
+  OcrLine,
+  OcrPage,
+  RawOcrResult,
+} from "../../../src/lib/capture/ocr/types/raw-ocr-result.ts";
 import {
   TissParser,
   detectGuideType,
@@ -407,5 +411,97 @@ describe("TISS Parser — Módulo (estrutura de arquivos)", () => {
     const result = applyNormalizer("cpf", "123.456.789-01");
     assert.equal(result.value, "12345678901");
     assert.equal(result.normalized, true);
+  });
+});
+
+/**
+ * Formulário TISS impresso: rótulos numerados em faixas e valor na linha de
+ * baixo, na mesma coluna. O OCR devolve as linhas em ordem de leitura —
+ * todos os rótulos da faixa e depois todos os valores —, então "a próxima
+ * linha" depois de um rótulo costuma ser o rótulo vizinho, não o valor.
+ */
+function boxLine(text: string, x: number, y: number, width: number): OcrLine {
+  return {
+    text,
+    confidence: 0.93,
+    coordinates: { boundingBox: { x, y, width, height: 16 } },
+    words: [],
+  };
+}
+
+function buildGridOcr(lines: OcrLine[]): RawOcrResult {
+  const page: OcrPage = {
+    pageNumber: 1,
+    width: 1000,
+    height: 1000,
+    unit: "pixel",
+    lines,
+    words: [],
+    rawText: lines.map((l) => l.text).join("\n"),
+  };
+  return buildRawOcrResult({
+    fullText: page.rawText,
+    pages: [page],
+    provider: "test_provider",
+    providerVersion: "test@v1",
+    processingTimeMs: 500,
+    metadata: { test: true },
+  });
+}
+
+const PRINTED_CONSULTA_OCR = buildGridOcr([
+  boxLine("GUIA DE CONSULTA", 350, 20, 300),
+  // faixa 1 — rótulos, depois valores
+  boxLine("1 - Registro ANS", 20, 100, 150),
+  boxLine("2 - Nº Guia no Prestador", 300, 100, 220),
+  boxLine("4 - Número da Carteira", 600, 100, 200),
+  boxLine("398765", 20, 122, 80),
+  boxLine("20260001", 300, 122, 100),
+  boxLine("0012345678901234", 600, 122, 190),
+  // faixa 2
+  boxLine("7 - Nome", 20, 200, 90),
+  boxLine("8 - Cartão Nacional de Saúde", 600, 200, 250),
+  boxLine("MARIA DA SILVA SANTOS", 20, 222, 260),
+  boxLine("898001234567890", 600, 222, 170),
+  // faixa 3
+  boxLine("12 - Nome do Profissional Executante", 20, 400, 330),
+  boxLine("14 - Número no Conselho", 600, 400, 210),
+  boxLine("JOAO PEREIRA", 20, 422, 150),
+  boxLine("123456", 600, 422, 80),
+  // faixa 4
+  boxLine("18 - Data do Atendimento", 20, 520, 220),
+  boxLine("21 - Código do Procedimento", 300, 520, 250),
+  boxLine("22 - Valor do Procedimento", 600, 520, 240),
+  boxLine("15/03/2026", 20, 542, 110),
+  boxLine("10101012", 300, 542, 100),
+  boxLine("250,00", 600, 542, 80),
+]);
+
+describe("TISS Parser — formulário impresso (rótulo acima do valor)", () => {
+  const guide = parseOcrToStructuredGuide(PRINTED_CONSULTA_OCR);
+  const value = (code: string) => guide.fields[code]?.value ?? null;
+
+  it("lê o valor que está logo abaixo do rótulo, na mesma coluna", () => {
+    assert.equal(value("operator_ans_code"), "398765");
+    assert.equal(value("attendance_date"), "2026-03-15");
+  });
+
+  it("não confunde o rótulo vizinho com o valor", () => {
+    assert.notEqual(guide.fields.operator_ans_code?.rawValue, "2 - Nº Guia no Prestador");
+    assert.equal(guide.fields.guide_number?.rawValue, "20260001");
+  });
+
+  it("reconhece os rótulos oficiais do formulário de consulta", () => {
+    assert.equal(guide.fields.beneficiary_card_number?.rawValue, "0012345678901234");
+    assert.equal(guide.fields.beneficiary_name?.rawValue, "MARIA DA SILVA SANTOS");
+    assert.equal(guide.fields.executing_crm?.rawValue, "123456");
+    assert.equal(guide.fields.procedure_code?.rawValue, "10101012");
+    assert.equal(guide.fields.total_value?.rawValue, "250,00");
+  });
+
+  it("continua lendo guias com rótulo e valor na mesma linha", () => {
+    const inline = parseOcrToStructuredGuide(CONSULTA_OCR);
+    assert.equal(inline.fields.operator_ans_code?.value, "123456");
+    assert.equal(inline.fields.guide_number?.rawValue, "987654");
   });
 });

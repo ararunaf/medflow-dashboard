@@ -28,6 +28,7 @@ import type {
   StorageProviderOperationResult,
   StorageProviderPortCapabilities,
   StorageProviderStructuredLog,
+  StorageSignedUploadUrlInput,
   StorageSignedUrlInput,
   StorageUploadInput,
 } from "../ports/types";
@@ -61,7 +62,8 @@ function readSignal(
     | StorageDownloadInput
     | StorageDeleteInput
     | StorageMetadataInput
-    | StorageSignedUrlInput,
+    | StorageSignedUrlInput
+    | StorageSignedUploadUrlInput,
 ): AbortSignal | undefined {
   if (input.signal instanceof AbortSignal) return input.signal;
   const attr = input.attributes?.signal;
@@ -384,6 +386,41 @@ export class DefaultStorageProviderAdapter implements StorageProviderPort {
     });
   }
 
+  async signedUploadUrl(
+    input: StorageSignedUploadUrlInput,
+  ): Promise<StorageProviderOperationResult> {
+    return this.runOperation("signedUrl", input, async () => {
+      if (!this.backend.signedUploadUrl) {
+        throw new Error("Signed upload URL not supported by storage backend.");
+      }
+      const result = await this.backend.signedUploadUrl({
+        key: input.key,
+        container: input.container ?? this.defaultContainer,
+        upsert: input.upsert,
+      });
+      if (!result.ok || !result.token) {
+        throw new Error(result.message ?? "Signed upload URL failed.");
+      }
+      const metadata = this.buildMetadata(input, {});
+      const storedDocument = this.buildStoredDocument(input, { metadata });
+      return {
+        ok: true,
+        operation: "signedUrl" as const,
+        storedDocument,
+        metadata,
+        signedUrl: result.url,
+        uploadToken: result.token,
+        message: result.message ?? "Signed upload URL completed.",
+        code: "STORAGE_SIGNED_UPLOAD_URL",
+        realStorageExecuted: true,
+        realUploadExecuted: false,
+        realDownloadExecuted: false,
+        realDeleteExecuted: false,
+        bytes: 0,
+      };
+    });
+  }
+
   async publicUrl(input: StorageMetadataInput): Promise<StorageProviderOperationResult> {
     return this.runOperation("signedUrl", input, async () => {
       if (!this.backend.publicUrl) {
@@ -460,7 +497,8 @@ export class DefaultStorageProviderAdapter implements StorageProviderPort {
       | StorageDownloadInput
       | StorageDeleteInput
       | StorageMetadataInput
-      | StorageSignedUrlInput,
+      | StorageSignedUrlInput
+      | StorageSignedUploadUrlInput,
     execute: () => Promise<{
       ok: true;
       operation: "upload" | "download" | "delete" | "metadata" | "signedUrl";
@@ -468,6 +506,7 @@ export class DefaultStorageProviderAdapter implements StorageProviderPort {
       metadata?: CanonicalStorageMetadata;
       body?: Uint8Array;
       signedUrl?: string;
+      uploadToken?: string;
       expiresAt?: string;
       message?: string;
       code?: string;
@@ -581,6 +620,7 @@ export class DefaultStorageProviderAdapter implements StorageProviderPort {
           metadata: outcome.metadata,
           body: outcome.body,
           signedUrl: outcome.signedUrl,
+          uploadToken: outcome.uploadToken,
           expiresAt: outcome.expiresAt,
           message: outcome.message,
           code: outcome.code,
@@ -641,6 +681,7 @@ export class DefaultStorageProviderAdapter implements StorageProviderPort {
       metadata?: CanonicalStorageMetadata;
       body?: Uint8Array;
       signedUrl?: string;
+      uploadToken?: string;
       expiresAt?: string;
       message?: string;
       code?: string;

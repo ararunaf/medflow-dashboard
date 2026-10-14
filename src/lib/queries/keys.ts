@@ -51,6 +51,7 @@ export const opsKeys = {
 
   // institutions (hospitals + afiliação profissional↔hospital)
   hospitals: () => [...opsKeys.all, "hospitals"] as const,
+  schedulingTree: () => [...opsKeys.all, "scheduling-tree"] as const,
   professionalAffiliations: () => [...opsKeys.all, "professional-affiliations"] as const,
 
   /** Grupos de trabalho (F5-S1). */

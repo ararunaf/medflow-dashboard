@@ -14,6 +14,7 @@ import { CaptureLearningPanel } from "./CaptureLearningPanel";
 import { CaptureOcrPanel } from "./CaptureOcrPanel";
 import { CaptureStructuredGuidePanel } from "./CaptureStructuredGuidePanel";
 import { ReviewApprovalPanel } from "./ReviewApprovalPanel";
+import { CaptureBillingPanel } from "./CaptureBillingPanel";
 import { ReviewWorkspaceHeader } from "./ReviewWorkspaceHeader";
 import { ReviewWorkspacePanelNav } from "./ReviewWorkspacePanelNav";
 import type { ReviewWorkspaceController } from "../hooks/useReviewWorkspace";
@@ -325,12 +326,17 @@ export function ReviewWorkspace({ sessionId, workspace }: ReviewWorkspaceProps) 
           {activePanel === "historico" ? <CaptureHistoryPanel events={historyEvents} /> : null}
 
           {activePanel === "aprovacao" ? (
-            <ReviewApprovalPanel
-              review={snapshot.review}
-              blockingFindings={blockingFindings}
-              busy={approvalBusy}
-              onSubmit={setApprovalStatus}
-            />
+            <>
+              <ReviewApprovalPanel
+                review={snapshot.review}
+                blockingFindings={blockingFindings}
+                busy={approvalBusy}
+                onSubmit={setApprovalStatus}
+              />
+              {snapshot.review.approvalStatus === "aprovada" ? (
+                <CaptureBillingPanel sessionId={sessionId} />
+              ) : null}
+            </>
           ) : null}
         </main>
       </div>

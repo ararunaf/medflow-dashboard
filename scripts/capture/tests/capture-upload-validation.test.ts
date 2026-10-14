@@ -9,7 +9,11 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { ValidationError } from "@/lib/domain/operations/errors";
-import { validateCaptureUpload } from "@/lib/capture/infrastructure/storage-paths";
+import {
+  validateCaptureUpload,
+  validateCaptureUploadDeclaration,
+} from "@/lib/capture/infrastructure/storage-paths";
+import { createBoundStorageProviderPort } from "@/lib/enterprise/storage-provider";
 
 function bytes(...values: number[]): Uint8Array {
   return new Uint8Array(values);
@@ -91,10 +95,7 @@ describe("validateCaptureUpload — assinatura binária (magic bytes)", () => {
   });
 
   it("rejeita arquivo vazio", () => {
-    assert.throws(
-      () => validateCaptureUpload(baseInput("image/jpeg", bytes())),
-      ValidationError,
-    );
+    assert.throws(() => validateCaptureUpload(baseInput("image/jpeg", bytes())), ValidationError);
   });
 
   it("rejeita quando byteLength declarado não bate com o tamanho real recebido", () => {
@@ -137,30 +138,116 @@ describe("requireBase64Content — upload pela UI (regressão truncamento em 6.1
   // Antes: o base64 passava por requireString/sanitizeString (corta em 8.192
   // caracteres) e todo arquivo maior que ~6 KB era gravado truncado.
   it("preserva arquivo grande inteiro (150 KB)", async () => {
-    const { requireBase64Content, decodeBase64ToBytes } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const { requireBase64Content, decodeBase64ToBytes } =
+      await import("../../../src/lib/capture/infrastructure/base64.ts");
     const original = new Uint8Array(150 * 1024).map((_, i) => i % 251);
     const b64 = Buffer.from(original).toString("base64");
     assert.ok(b64.length > 8192);
-    const bytes = decodeBase64ToBytes(requireBase64Content(b64, "file.base64Content", 25 * 1024 * 1024));
+    const bytes = decodeBase64ToBytes(
+      requireBase64Content(b64, "file.base64Content", 25 * 1024 * 1024),
+    );
     assert.equal(bytes.length, original.length);
     assert.deepEqual(bytes.slice(-16), original.slice(-16));
   });
 
   it("recusa arquivo acima do limite em vez de cortar", async () => {
-    const { requireBase64Content } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const { requireBase64Content } =
+      await import("../../../src/lib/capture/infrastructure/base64.ts");
     const b64 = Buffer.alloc(2048).toString("base64");
     assert.throws(() => requireBase64Content(b64, "file.base64Content", 1024), /excede o limite/);
   });
 
   it("recusa conteúdo que não é base64 e campo vazio", async () => {
-    const { requireBase64Content } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const { requireBase64Content } =
+      await import("../../../src/lib/capture/infrastructure/base64.ts");
     assert.throws(() => requireBase64Content("não é base64!", "f", 1024), /base64 válido/);
     assert.throws(() => requireBase64Content("", "f", 1024), /obrigatório/);
   });
 
   it("tolera quebras de linha no base64", async () => {
-    const { requireBase64Content } = await import("../../../src/lib/capture/infrastructure/base64.ts");
+    const { requireBase64Content } =
+      await import("../../../src/lib/capture/infrastructure/base64.ts");
     const b64 = Buffer.from("guia TISS").toString("base64");
     assert.equal(requireBase64Content(`${b64.slice(0, 4)}\n${b64.slice(4)}`, "f", 1024), b64);
+  });
+});
+
+describe("upload direto navegador → storage (arquivos acima de ~4,5 MB)", () => {
+  it("validateCaptureUploadDeclaration aceita 20 MB declarados — o limite é o do bucket, não o da Vercel", () => {
+    assert.doesNotThrow(() =>
+      validateCaptureUploadDeclaration({
+        mimeType: "application/pdf",
+        byteLength: 20 * 1024 * 1024,
+        filename: "lote.pdf",
+      }),
+    );
+  });
+
+  it("validateCaptureUploadDeclaration recusa acima de 25 MB, tipo proibido e nome vazio", () => {
+    const ok = { mimeType: "image/png", byteLength: 1000, filename: "g.png" };
+    assert.throws(
+      () => validateCaptureUploadDeclaration({ ...ok, byteLength: 26 * 1024 * 1024 }),
+      ValidationError,
+    );
+    assert.throws(
+      () => validateCaptureUploadDeclaration({ ...ok, mimeType: "text/html" }),
+      ValidationError,
+    );
+    assert.throws(
+      () => validateCaptureUploadDeclaration({ ...ok, filename: "  " }),
+      ValidationError,
+    );
+  });
+
+  it("backend Supabase emite token de upload assinado para o caminho pedido", async () => {
+    const calls: Array<{ bucket: string; path: string; upsert?: boolean }> = [];
+    const client = {
+      storage: {
+        from: (bucket: string) => ({
+          upload: async () => ({ data: null, error: null }),
+          download: async () => ({ data: null, error: null }),
+          remove: async () => ({ data: null, error: null }),
+          createSignedUrl: async () => ({ data: null, error: null }),
+          getPublicUrl: () => ({ data: { publicUrl: "" } }),
+          createSignedUploadUrl: async (path: string, options?: { upsert?: boolean }) => {
+            calls.push({ bucket, path, upsert: options?.upsert });
+            return {
+              data: { signedUrl: `https://x/${path}?token=t1`, token: "t1", path },
+              error: null,
+            };
+          },
+        }),
+      },
+    };
+    const port = createBoundStorageProviderPort(client, { provider: "supabase" });
+    assert.ok(port.signedUploadUrl, "port deve expor signedUploadUrl");
+    const result = await port.signedUploadUrl!({
+      key: "tenant/sessao/original/guia.pdf",
+      container: "clinical-documents",
+      upsert: true,
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.uploadToken, "t1");
+    assert.deepEqual(calls, [
+      { bucket: "clinical-documents", path: "tenant/sessao/original/guia.pdf", upsert: true },
+    ]);
+  });
+
+  it("backend sem suporte a upload assinado falha de forma explícita", async () => {
+    const client = {
+      storage: {
+        from: () => ({
+          upload: async () => ({ data: null, error: null }),
+          download: async () => ({ data: null, error: null }),
+          remove: async () => ({ data: null, error: null }),
+          createSignedUrl: async () => ({ data: null, error: null }),
+          getPublicUrl: () => ({ data: { publicUrl: "" } }),
+        }),
+      },
+    };
+    const port = createBoundStorageProviderPort(client, { provider: "supabase" });
+    const result = await port.signedUploadUrl!({ key: "a/b/original/c.pdf" });
+    assert.equal(result.ok, false);
+    assert.equal(result.uploadToken, undefined);
   });
 });

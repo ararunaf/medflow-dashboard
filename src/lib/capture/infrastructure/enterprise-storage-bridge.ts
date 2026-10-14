@@ -122,6 +122,28 @@ export async function captureStorageSignedUrl(
   return { signedUrl: result.signedUrl, expiresAt: result.expiresAt };
 }
 
+/** Token para o navegador gravar o original direto no storage (upload > 4,5 MB). */
+export async function captureStorageSignedUploadUrl(
+  ctx: ServiceCtx,
+  input: { key: string; upsert?: boolean; sessionId?: string; container?: string },
+): Promise<{ token: string }> {
+  const port = resolveCaptureStorageProvider(ctx);
+  if (!port.signedUploadUrl) {
+    throw new Error("Storage provider sem suporte a upload assinado.");
+  }
+  const result = await port.signedUploadUrl({
+    key: input.key,
+    container: input.container ?? CLINICAL_DOCUMENTS_BUCKET ?? DEFAULT_STORAGE_PROVIDER_BUCKET,
+    upsert: input.upsert,
+    sessionId: input.sessionId,
+    tenantRef: ctx.tenantId,
+  });
+  if (!result.ok || !result.uploadToken) {
+    throw new Error(result.message ?? "StorageProviderPort.signedUploadUrl falhou.");
+  }
+  return { token: result.uploadToken };
+}
+
 export async function captureStorageDelete(
   ctx: ServiceCtx,
   input: { key: string; documentId?: string; sessionId?: string; container?: string },

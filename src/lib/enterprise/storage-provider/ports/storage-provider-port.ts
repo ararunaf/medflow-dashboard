@@ -21,6 +21,7 @@ import type {
   StorageProviderInfo,
   StorageProviderOperationResult,
   StorageProviderPortCapabilities,
+  StorageSignedUploadUrlInput,
   StorageSignedUrlInput,
   StorageUploadInput,
 } from "./types";
@@ -49,6 +50,13 @@ export interface StorageProviderPort {
    * Retorna CanonicalStorageResult com signedUrl preenchido com a URL pública.
    */
   publicUrl(input: StorageMetadataInput): Promise<StorageProviderOperationResult>;
+
+  /**
+   * Token de upload direto cliente → storage para um `key` decidido pelo
+   * servidor (evita trafegar o arquivo pelo corpo da requisição da app).
+   * Opcional: só adapters com backend que suporta upload assinado.
+   */
+  signedUploadUrl?(input: StorageSignedUploadUrlInput): Promise<StorageProviderOperationResult>;
 
   /** Verificação leve de prontidão. */
   health(): Promise<StorageProviderHealth>;

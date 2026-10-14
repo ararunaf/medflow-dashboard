@@ -24,8 +24,14 @@ import {
   buildAuditManifestKey,
   buildOriginalObjectKey,
   validateCaptureUpload,
+  validateCaptureUploadDeclaration,
 } from "./storage-paths";
-import { captureStorageSignedUrl, captureStorageUpload } from "./enterprise-storage-bridge";
+import {
+  captureStorageDownload,
+  captureStorageSignedUploadUrl,
+  captureStorageSignedUrl,
+  captureStorageUpload,
+} from "./enterprise-storage-bridge";
 import { buildVersionedObjectKey, nextDocumentVersion } from "./versioning";
 
 const SIGNED_URL_TTL_SECONDS = 3600;
@@ -159,6 +165,16 @@ async function persistSessionMetadata(
     .eq("id", sessionId)
     .is("deleted_at", null);
   if (error) throw error;
+}
+
+/** Mescla chaves de topo no metadata da sessão (ex.: `billing` da ponte captura → TISS). */
+export async function mergeCaptureSessionMetadata(
+  ctx: ServiceCtx,
+  sessionId: string,
+  patch: JsonObject,
+): Promise<void> {
+  const session = await getCaptureSession(ctx, sessionId);
+  await persistSessionMetadata(ctx, sessionId, { ...session.metadata, ...patch });
 }
 
 async function emitPipelineEvent(
@@ -367,6 +383,15 @@ export async function advancePostUploadPipeline(
   };
 }
 
+function documentStoragePath(
+  ctx: ServiceCtx,
+  input: { sessionId: string; filename: string; version: number },
+): string {
+  return input.version > 1
+    ? buildVersionedObjectKey(ctx.tenantId, input.sessionId, input.filename, input.version)
+    : buildOriginalObjectKey(ctx.tenantId, input.sessionId, input.filename);
+}
+
 async function storeDocumentFile(
   ctx: ServiceCtx,
   input: {
@@ -379,11 +404,7 @@ async function storeDocumentFile(
     version: number;
   },
 ): Promise<{ session: CaptureSessionRecord; document: CaptureDocumentRecord }> {
-  const storagePath =
-    input.version > 1
-      ? buildVersionedObjectKey(ctx.tenantId, input.sessionId, input.filename, input.version)
-      : buildOriginalObjectKey(ctx.tenantId, input.sessionId, input.filename);
-  const auditPath = buildAuditManifestKey(ctx.tenantId, input.sessionId);
+  const storagePath = documentStoragePath(ctx, input);
 
   await captureStorageUpload(ctx, {
     key: storagePath,
@@ -392,6 +413,25 @@ async function storeDocumentFile(
     upsert: input.version > 1,
     sessionId: input.sessionId,
   });
+
+  return registerStoredDocument(ctx, { ...input, storagePath });
+}
+
+/** Grava manifesto de auditoria + linhas do documento para um original já no storage. */
+async function registerStoredDocument(
+  ctx: ServiceCtx,
+  input: {
+    sessionId: string;
+    filename: string;
+    mimeType: string;
+    byteLength: number;
+    checksumSha256: string;
+    version: number;
+    storagePath: string;
+  },
+): Promise<{ session: CaptureSessionRecord; document: CaptureDocumentRecord }> {
+  const storagePath = input.storagePath;
+  const auditPath = buildAuditManifestKey(ctx.tenantId, input.sessionId);
 
   const auditManifest = JSON.stringify({
     sessionId: input.sessionId,
@@ -547,6 +587,124 @@ export async function retryCaptureDocumentUpload(
     );
     await persistSessionMetadata(ctx, input.sessionId, metadata);
     throw err;
+  }
+}
+
+/**
+ * Upload direto (navegador → Storage) — passo 1.
+ *
+ * O arquivo não passa mais pelo corpo da server function (a Vercel corta em
+ * ~4,5 MB). O servidor valida o que foi declarado, decide o caminho do objeto
+ * e devolve um token de upload assinado para esse caminho exato.
+ */
+export async function prepareCaptureDirectUpload(
+  ctx: ServiceCtx,
+  input: {
+    sessionId: string;
+    filename: string;
+    mimeType: string;
+    byteLength: number;
+    checksumSha256: string;
+    mode: "initial" | "retry";
+  },
+): Promise<{ storagePath: string; token: string; version: number }> {
+  assertBillingAccess(ctx);
+  validateCaptureUploadDeclaration(input);
+  await rejectDuplicateCaptureUpload(ctx, input);
+
+  const session = await getCaptureSession(ctx, input.sessionId);
+  assertDirectUploadAllowed(session, input.mode);
+
+  const version = nextDocumentVersion(session.metadata);
+  const storagePath = documentStoragePath(ctx, { ...input, version });
+  const { token } = await captureStorageSignedUploadUrl(ctx, {
+    key: storagePath,
+    upsert: version > 1,
+    sessionId: input.sessionId,
+  });
+  return { storagePath, token, version };
+}
+
+/**
+ * Upload direto — passo 2. Baixa o objeto que o navegador gravou e confere
+ * tamanho, SHA-256 e assinatura do tipo antes de registrar o documento — o
+ * servidor nunca confia no que o cliente diz ter enviado.
+ */
+export async function finalizeCaptureDirectUpload(
+  ctx: ServiceCtx,
+  input: {
+    sessionId: string;
+    filename: string;
+    mimeType: string;
+    byteLength: number;
+    checksumSha256: string;
+    version: number;
+    mode: "initial" | "retry";
+  },
+): Promise<{ session: CaptureSessionRecord; document: CaptureDocumentRecord }> {
+  assertBillingAccess(ctx);
+  validateCaptureUploadDeclaration(input);
+
+  const session = await getCaptureSession(ctx, input.sessionId);
+  assertDirectUploadAllowed(session, input.mode);
+  if (input.version !== nextDocumentVersion(session.metadata)) {
+    throw new ValidationError("Versão do documento desatualizada — reenvie o arquivo.", {
+      version: input.version,
+    });
+  }
+
+  const storagePath = documentStoragePath(ctx, input);
+  const fileBytes = await captureStorageDownload(ctx, {
+    key: storagePath,
+    sessionId: input.sessionId,
+  });
+  if (!fileBytes) {
+    throw new ValidationError("Arquivo não encontrado no storage — o envio não terminou.", {
+      storagePath,
+    });
+  }
+
+  validateCaptureUpload({ ...input, fileBytes });
+  // Web Crypto (não node:crypto): este módulo também entra no bundle do cliente.
+  const digest = await crypto.subtle.digest("SHA-256", new Uint8Array(fileBytes));
+  const checksum = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
+  if (checksum !== input.checksumSha256) {
+    throw new ValidationError("O arquivo recebido não confere com o enviado (checksum).", {
+      declared: input.checksumSha256,
+      actual: checksum,
+    });
+  }
+  await rejectDuplicateCaptureUpload(ctx, input);
+
+  if (input.mode === "retry" && session.status !== "CREATED") {
+    await persistSessionMetadata(ctx, input.sessionId, {
+      ...session.metadata,
+      capturePhase: "uploading",
+      lastRetryAt: new Date().toISOString(),
+      documentVersion: input.version,
+    });
+  }
+
+  return registerStoredDocument(ctx, { ...input, storagePath });
+}
+
+function assertDirectUploadAllowed(session: CaptureSessionRecord, mode: "initial" | "retry"): void {
+  if (mode === "initial") {
+    if (session.status !== "CREATED" && session.status !== "UPLOADED") {
+      throw new ValidationError("Upload permitido apenas em sessões CREATED ou UPLOADED.", {
+        status: session.status,
+      });
+    }
+    return;
+  }
+  const canRetry =
+    session.metadata.capturePhase === "failed" ||
+    session.status === "OCR_PENDING" ||
+    session.status === "CREATED";
+  if (!canRetry) {
+    throw new ValidationError("Retry não permitido neste estado.", { status: session.status });
   }
 }
 

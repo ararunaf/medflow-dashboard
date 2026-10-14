@@ -75,6 +75,13 @@ function buildPosition(line: IndexedOcrLine): StructuredFieldPosition {
   };
 }
 
+/** Rótulo de formulário TISS impresso: "1 - Registro ANS", "21 - Código do Procedimento". */
+const FORM_LABEL_RE = /^\s*\d{1,3}\s*[-–—]\s*\S/;
+
+function isFormLabel(text: string): boolean {
+  return FORM_LABEL_RE.test(text);
+}
+
 function extractValueFromLine(
   lineText: string,
   labelPattern: RegExp,
@@ -91,7 +98,55 @@ function extractValueFromLine(
       const valMatch = afterLabel.match(valuePattern);
       if (valMatch) return valMatch[0]!.trim();
     }
-    if (afterLabel.length >= 2) return afterLabel;
+    // Num rótulo de formulário o resto da linha é o resto do rótulo
+    // ("2 - Nº Guia no Prestador" → "no Prestador"), não o valor.
+    if (afterLabel.length >= 2 && !isFormLabel(lineText)) return afterLabel;
+  }
+  return null;
+}
+
+/**
+ * Formulário impresso: o valor fica na caixa logo abaixo do rótulo, na mesma
+ * coluna. Como o OCR devolve as linhas em ordem de leitura (todos os rótulos
+ * da faixa, depois todos os valores), a busca é pela geometria, não pelo
+ * índice da linha.
+ */
+function findValueBelow(
+  lines: IndexedOcrLine[],
+  labelIdx: number,
+  valuePattern?: RegExp,
+): { rawValue: string; line: IndexedOcrLine; confidence: number } | null {
+  const label = lines[labelIdx]!;
+  const lb = label.boundingBox;
+  if (!lb || lb.height <= 0) return null;
+  const labelBottom = lb.y + lb.height;
+
+  const ranked = lines
+    .filter((cand, idx) => {
+      if (idx === labelIdx || cand.pageNumber !== label.pageNumber) return false;
+      const cb = cand.boundingBox;
+      if (!cb || cb.y <= lb.y + lb.height * 0.5) return false;
+      const gap = cb.y - labelBottom;
+      if (gap > lb.height * 3) return false;
+      const overlap = Math.min(cb.x + cb.width, lb.x + lb.width) - Math.max(cb.x, lb.x);
+      return overlap > 0 || Math.abs(cb.x - lb.x) <= lb.height * 2;
+    })
+    .map((cand) => ({
+      cand,
+      score: cand.boundingBox.y - labelBottom + Math.abs(cand.boundingBox.x - lb.x) * 0.5,
+    }))
+    .sort((a, b) => a.score - b.score);
+
+  for (const { cand } of ranked) {
+    const text = cand.text.trim();
+    if (!text) continue;
+    if (valuePattern) {
+      const match = text.match(valuePattern);
+      if (match) return { rawValue: match[0]!.trim(), line: cand, confidence: cand.confidence };
+      continue;
+    }
+    if (isFormLabel(text) || looksLikeLabel(text)) continue;
+    return { rawValue: text, line: cand, confidence: cand.confidence * 0.95 };
   }
   return null;
 }
@@ -171,6 +226,15 @@ export function extractFields(
           let rawValue = extractValueFromLine(line.text, pattern, def.valuePattern);
           let matchLine = line;
           let conf = line.confidence;
+
+          if (!rawValue) {
+            const below = findValueBelow(lines, i, def.valuePattern);
+            if (below) {
+              rawValue = below.rawValue;
+              matchLine = below.line;
+              conf = below.confidence;
+            }
+          }
 
           if (!rawValue) {
             const nextVal = findValueOnNextLine(lines, i, def.valuePattern);

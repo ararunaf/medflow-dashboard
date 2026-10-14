@@ -4,6 +4,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createHash } from "node:crypto";
 import type { JsonObject } from "@/lib/database.types";
+import { ValidationError } from "@/lib/domain/operations/errors";
 import {
   optionalString,
   requireObject,
@@ -18,9 +19,11 @@ import { CAPTURE_MAX_BYTES } from "../types";
 import {
   cancelCaptureSession,
   createCaptureSession,
+  finalizeCaptureDirectUpload,
   getCaptureDocumentSignedUrl,
   getCaptureSession,
   getCaptureSessionStatus,
+  prepareCaptureDirectUpload,
   retryCaptureDocumentUpload,
   softDeleteCaptureSession,
   uploadCaptureDocument,
@@ -202,6 +205,57 @@ export const retryCaptureUploadFn = createServerFn({ method: "POST" })
       // F1-S4 — retry sob o mesmo pipeline, agora também assíncrono via fila.
       await enqueueCapturePipelineJob(ctx, data.sessionId, "retry-upload");
 
+      const session = await getCaptureSession(ctx, data.sessionId);
+      return { session, document: uploadResult.document };
+    });
+  });
+
+function parseDirectUploadInput(raw: unknown) {
+  const obj = requireObject(raw);
+  const byteLength = Number(obj.byteLength);
+  if (!Number.isInteger(byteLength) || byteLength <= 0) {
+    throw new ValidationError("byteLength inválido.", { field: "byteLength" });
+  }
+  const checksumSha256 = requireString(obj.checksumSha256, "checksumSha256").toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(checksumSha256)) {
+    throw new ValidationError("checksumSha256 inválido.", { field: "checksumSha256" });
+  }
+  const mode = obj.mode === "retry" ? ("retry" as const) : ("initial" as const);
+  return {
+    sessionId: requireString(obj.sessionId, "sessionId"),
+    filename: requireString(obj.filename, "filename"),
+    mimeType: requireString(obj.mimeType, "mimeType"),
+    byteLength,
+    checksumSha256,
+    mode,
+  };
+}
+
+/** Upload direto, passo 1: valida e devolve o token para o navegador gravar no storage. */
+export const prepareCaptureDirectUploadFn = createServerFn({ method: "POST" })
+  .inputValidator(parseDirectUploadInput)
+  .handler(async ({ data }) => {
+    return runMutation((ctx) => prepareCaptureDirectUpload(ctx, data));
+  });
+
+/** Upload direto, passo 2: confere o objeto gravado, registra e enfileira o pipeline. */
+export const finalizeCaptureDirectUploadFn = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => {
+    const base = parseDirectUploadInput(raw);
+    const version = Number(requireObject(raw).version);
+    if (!Number.isInteger(version) || version < 1) {
+      throw new ValidationError("version inválida.", { field: "version" });
+    }
+    return { ...base, version };
+  })
+  .handler(async ({ data }) => {
+    return runMutation(async (ctx) => {
+      const uploadResult = await finalizeCaptureDirectUpload(ctx, data);
+      await enqueueCapturePipelineJob(
+        ctx,
+        data.sessionId,
+        data.mode === "retry" ? "retry-upload" : "full",
+      );
       const session = await getCaptureSession(ctx, data.sessionId);
       return { session, document: uploadResult.document };
     });

@@ -33,6 +33,7 @@ export type {
   StorageProviderStatus,
   StorageProviderStructuredLog,
   StorageProviderTelemetry,
+  StorageSignedUploadUrlInput,
   StorageSignedUrlInput,
   StorageUploadInput,
 } from "./ports";

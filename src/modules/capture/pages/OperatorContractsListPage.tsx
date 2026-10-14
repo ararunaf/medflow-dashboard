@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/ui-kit";
+import { can } from "@/lib/auth/rbac";
+import { useRouteContext } from "@tanstack/react-router";
+import { ContractUploadPanel } from "../components/ContractUploadPanel";
 import { useOperatorContractsForReview } from "../hooks/useOperatorContractsForReview";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -12,7 +15,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function OperatorContractsListPage() {
-  const { contracts, busy, error } = useOperatorContractsForReview();
+  const { contracts, busy, error, refresh } = useOperatorContractsForReview();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const canIngest = can(auth.profile?.role ?? null, "tiss:write");
 
   return (
     <AppShell>
@@ -20,6 +25,8 @@ export function OperatorContractsListPage() {
         title="Contratos de Operadora"
         subtitle="Contratos indexados e suas propostas de regra aguardando revisão humana."
       />
+
+      {canIngest ? <ContractUploadPanel onIngested={() => void refresh()} /> : null}
 
       {error ? (
         <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
@@ -32,9 +39,7 @@ export function OperatorContractsListPage() {
       ) : null}
 
       {!busy && contracts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nenhum contrato de operadora enviado ainda (rag:contract:index).
-        </p>
+        <p className="text-sm text-muted-foreground">Nenhum contrato de operadora enviado ainda.</p>
       ) : null}
 
       <ul className="space-y-2">

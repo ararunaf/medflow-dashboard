@@ -30,6 +30,13 @@ export type SupabaseStorageClientLike = {
         options?: { download?: string | boolean },
       ) => Promise<{ data: { signedUrl: string } | null; error: { message: string } | null }>;
       getPublicUrl: (path: string) => { data: { publicUrl: string } };
+      createSignedUploadUrl?: (
+        path: string,
+        options?: { upsert?: boolean },
+      ) => Promise<{
+        data: { signedUrl: string; token: string; path: string } | null;
+        error: { message: string } | null;
+      }>;
       list?: (
         path?: string,
         options?: { search?: string; limit?: number },
@@ -148,6 +155,25 @@ export function createSupabaseStorageBackend(
       const { data } = client.storage.from(bucket).getPublicUrl(input.key);
       if (!data?.publicUrl) return { ok: false, message: "public url unavailable" };
       return { ok: true, url: data.publicUrl, message: "public url via supabase storage" };
+    },
+    async signedUploadUrl(input) {
+      const bucket = input.container ?? defaultBucket;
+      const bucketApi = client.storage.from(bucket);
+      if (!bucketApi.createSignedUploadUrl) {
+        return { ok: false, message: "signed upload url unsupported by client" };
+      }
+      const { data, error } = await bucketApi.createSignedUploadUrl(input.key, {
+        upsert: input.upsert ?? false,
+      });
+      if (error || !data?.token) {
+        return { ok: false, message: error?.message ?? "signed upload url failed" };
+      }
+      return {
+        ok: true,
+        url: data.signedUrl,
+        token: data.token,
+        message: "signed upload url via supabase storage",
+      };
     },
     async health() {
       return { ok: true, message: "supabase storage backend bound" };

@@ -16,7 +16,7 @@
 import { assertCan, isOperationalManager } from "@/lib/auth/rbac";
 import { PermissionError, TenantMismatchError, mapPostgresError } from "@/lib/domain/operations/errors";
 import { expectUuid } from "@/lib/domain/operations/validation";
-import type { ServiceCtx } from "./types";
+import type { ScheduleRow, ServiceCtx } from "./types";
 
 export type HospitalListItem = {
   hospitalId: string;
@@ -170,4 +170,75 @@ export async function setProfessionalHospitalAffiliation(
     { onConflict: "tenant_id,professional_id,hospital_id" },
   );
   if (error) throw mapPostgresError(error);
+}
+
+export type SchedulingDepartment = {
+  departmentId: string;
+  departmentName: string;
+  unitName: string;
+  hospitalId: string;
+  hospitalName: string;
+};
+
+export type SchedulingSchedule = {
+  scheduleId: string;
+  departmentId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: ScheduleRow["status"];
+};
+
+export type SchedulingTree = {
+  departments: SchedulingDepartment[];
+  schedules: SchedulingSchedule[];
+};
+
+/** Setores (com hospital/unidade) e escalas não arquivadas — base do montador de escala. */
+export async function listSchedulingTree(ctx: ServiceCtx): Promise<SchedulingTree> {
+  assertCan(ctx.role, "schedules:create");
+
+  const [deptRes, schedRes] = await Promise.all([
+    ctx.client
+      .from("departments")
+      .select(
+        "id, name, unit:units!departments_tenant_unit_fk ( name, hospital:hospitals!units_tenant_hospital_fk ( id, name ) )",
+      )
+      .eq("tenant_id", ctx.tenantId)
+      .order("name", { ascending: true }),
+    ctx.client
+      .from("schedules")
+      .select("id, department_id, name, start_date, end_date, status")
+      .eq("tenant_id", ctx.tenantId)
+      .neq("status", "archived")
+      .order("start_date", { ascending: false }),
+  ]);
+  if (deptRes.error) throw mapPostgresError(deptRes.error);
+  if (schedRes.error) throw mapPostgresError(schedRes.error);
+
+  const departments = (deptRes.data ?? [])
+    .filter((d) => d.unit?.hospital)
+    .map((d) => ({
+      departmentId: d.id,
+      departmentName: d.name,
+      unitName: d.unit!.name,
+      hospitalId: d.unit!.hospital!.id,
+      hospitalName: d.unit!.hospital!.name,
+    }))
+    .sort(
+      (a, b) =>
+        a.hospitalName.localeCompare(b.hospitalName, "pt-BR") ||
+        a.departmentName.localeCompare(b.departmentName, "pt-BR"),
+    );
+
+  const schedules = (schedRes.data ?? []).map((s) => ({
+    scheduleId: s.id,
+    departmentId: s.department_id,
+    name: s.name,
+    startDate: s.start_date,
+    endDate: s.end_date,
+    status: s.status,
+  }));
+
+  return { departments, schedules };
 }

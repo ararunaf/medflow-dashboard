@@ -30,6 +30,8 @@ import {
   checkOutFn,
   confirmAssignmentFn,
   createAssignmentFn,
+  createScheduleFn,
+  createShiftSeriesFn,
   createWorkGroupFn,
   denySwapFn,
   rejectAssignmentFn,
@@ -49,6 +51,7 @@ import {
 } from "@/lib/operations/api";
 import type {
   AvailabilityRow,
+  ScheduleRow,
   ShiftAssignmentRow,
   ShiftRow,
   ShiftSwapRequestRow,
@@ -60,6 +63,13 @@ import { describeError, unwrap } from "@/lib/queries/result";
 import { suppressOnce } from "@/lib/realtime/suppression";
 import { toast } from "@/lib/toast/bus";
 import { reportOperationalFailureClient } from "@/lib/observability/report-operational-failure-client";
+
+type CreateScheduleVars = {
+  departmentId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+};
 
 type MutationHookOptions<TInput, TOutput> = Omit<
   UseMutationOptions<TOutput, Error, TInput>,
@@ -494,6 +504,58 @@ export function useReviewAttendance(
   return useMutation<AttendanceReviewSuggestion[], Error, void>({
     mutationFn: async () => unwrap(await reviewAttendanceFn()),
     onError: async (...args: OnErrorArgs<AttendanceReviewSuggestion[], void>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export type CreateShiftSeriesVars = {
+  scheduleId: string;
+  roleRequired?: string;
+  intervals: ReadonlyArray<{ startsAt: string; endsAt: string }>;
+};
+
+export function useCreateSchedule(opts: MutationHookOptions<CreateScheduleVars, ScheduleRow> = {}) {
+  const qc = useQueryClient();
+  return useMutation<ScheduleRow, Error, CreateScheduleVars>({
+    mutationFn: async (vars) => unwrap(await createScheduleFn({ data: vars })),
+    onSuccess: async (...args: OnSuccessArgs<ScheduleRow, CreateScheduleVars>) => {
+      const [data] = args;
+      toast.success(`Escala "${data.name}" criada`);
+      await qc.invalidateQueries({ queryKey: opsKeys.schedulingTree() });
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ScheduleRow, CreateScheduleVars>) => {
+      reportError(args[0]);
+      await opts.onError?.(...args);
+    },
+    ...opts,
+  });
+}
+
+export function useCreateShiftSeries(
+  opts: MutationHookOptions<CreateShiftSeriesVars, ShiftRow[]> = {},
+) {
+  const qc = useQueryClient();
+  return useMutation<ShiftRow[], Error, CreateShiftSeriesVars>({
+    mutationFn: async (vars) =>
+      unwrap(await createShiftSeriesFn({ data: { ...vars, intervals: [...vars.intervals] } })),
+    onSuccess: async (...args: OnSuccessArgs<ShiftRow[], CreateShiftSeriesVars>) => {
+      const [data] = args;
+      toast.success(
+        data.length === 1 ? "1 plantão criado" : `${data.length} plantões criados`,
+        "Já aparecem como vagas abertas no Pega Plantão.",
+      );
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: opsKeys.dashboard() }),
+        qc.invalidateQueries({ queryKey: opsKeys.shifts() }),
+        qc.invalidateQueries({ queryKey: opsKeys.timeline() }),
+      ]);
+      await opts.onSuccess?.(...args);
+    },
+    onError: async (...args: OnErrorArgs<ShiftRow[], CreateShiftSeriesVars>) => {
       reportError(args[0]);
       await opts.onError?.(...args);
     },

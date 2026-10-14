@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, ChevronLeft, ChevronRight, Filter, Rows3 } from "lucide-react";
+import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Filter, Rows3 } from "lucide-react";
+import { ScheduleBuilderPanel } from "@/components/operational/schedule-builder-panel";
+import { can } from "@/lib/auth/rbac";
 import { shiftsRangeQueryOptions, useShiftsRangeQuery } from "@/hooks/use-operations";
 import type { ShiftListItem } from "@/lib/operations/api";
 import type { EscalasOpsSearch } from "@/lib/operations/actions";
@@ -112,6 +114,9 @@ function EscalasPage() {
   });
   const { opsFocus } = Route.useSearch();
   const navigate = useNavigate({ from: "/escalas" });
+  const { auth } = Route.useRouteContext();
+  const canBuild = can(auth.profile?.role ?? null, "shifts:create");
+  const [builderOpen, setBuilderOpen] = useState(false);
 
   const shiftsQuery = useShiftsRangeQuery(undefined, undefined, undefined, {
     enabled: viewMode === "dias",
@@ -188,9 +193,16 @@ function EscalasPage() {
             <Button variant="outline" size="sm" className="gap-2">
               <Filter className="h-4 w-4" /> Filtros
             </Button>
+            {canBuild ? (
+              <Button size="sm" className="gap-2" onClick={() => setBuilderOpen((v) => !v)}>
+                <CalendarPlus className="h-4 w-4" /> Montar escala
+              </Button>
+            ) : null}
           </div>
         }
       />
+
+      {builderOpen ? <ScheduleBuilderPanel onClose={() => setBuilderOpen(false)} /> : null}
 
       {opsFocus ? (
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-[color:var(--warning)]/30 bg-[color:var(--warning)]/5 px-3 py-2 text-xs">
