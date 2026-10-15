@@ -36,10 +36,12 @@ import {
   Home,
   Bot,
   HeartPulse,
+  Map as MapIcon,
   CalendarClock,
   ScrollText,
 } from "lucide-react";
 import { can, isOperationalManager } from "@/lib/auth/rbac";
+import { HELP_CENTER_ASSETS } from "@/lib/assets/help-center";
 import type { NavGroup, NavItem, NavRole, NavRequire } from "./types";
 
 /** Catálogo de placeholders Fase 3 (rota `/fase3/$slug`). */
@@ -349,6 +351,13 @@ export function buildNavGroups(): NavGroup[] {
           require: "tenant_settings_read",
         },
         { id: "ajuda", to: "/ajuda", label: "Ajuda", icon: HelpCircle },
+        {
+          id: "mapa-recursos",
+          to: HELP_CENTER_ASSETS.resourceMapPath,
+          label: "Mapa de recursos",
+          icon: MapIcon,
+          external: true,
+        },
         { id: "perfil", to: "/perfil", label: "Perfil", icon: User },
       ],
     },

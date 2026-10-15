@@ -2,6 +2,8 @@
 export const HELP_CENTER_ASSETS = {
   workflowImage: "/help/fluxo-operacional-completo-medicflow.png",
   workflowDownloadName: "Fluxo Operacional Completo MedicFlow.png",
+  /** Mapa de recursos por nível (versão de apresentação do artifact "Mapa de Recursos"). */
+  resourceMapPath: "/help/mapa-recursos-medicflow.html",
   presentation: {
     title: "MedicFlow-AI Corporativo Premium",
     fileName: "medicflow-ai-corporativo-premium",

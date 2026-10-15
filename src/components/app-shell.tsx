@@ -1,5 +1,5 @@
 import { Link, useLocation, useRouteContext } from "@tanstack/react-router";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, ExternalLink, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRANDING, defaultLogoUrl as defaultLogo } from "@/lib/assets";
 import type { ReactNode } from "react";
@@ -41,6 +41,27 @@ function NavLinkRow({
     surface === "sidebar"
       ? "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
       : "text-foreground/80 hover:bg-muted hover:text-foreground";
+
+  if (item.external) {
+    return (
+      <a
+        href={item.to}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onNavigate}
+        className={cn(
+          "flex items-center gap-3 rounded-lg text-sm font-medium transition-colors motion-safe:duration-150",
+          compact ? "px-2.5 py-2" : "px-3 py-2.5",
+          idleClass,
+        )}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="truncate flex-1">{item.label}</span>
+        <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden="true" />
+        <span className="sr-only">(abre em nova aba)</span>
+      </a>
+    );
+  }
 
   return (
     <Link

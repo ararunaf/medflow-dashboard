@@ -15,6 +15,8 @@ export type NavItem = {
   search?: Record<string, string>;
   /** Item reservado para Fase 3 — rota placeholder, sem funcionalidade. */
   placeholder?: boolean;
+  /** `to` é um arquivo estático (ex.: /help/…html), aberto em nova aba fora do router. */
+  external?: boolean;
 };
 
 export type NavGroupId =

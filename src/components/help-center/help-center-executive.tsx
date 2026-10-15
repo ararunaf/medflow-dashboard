@@ -11,6 +11,7 @@ import {
   ExternalLink,
   FileSliders,
   GitBranch,
+  Map as MapIcon,
   Presentation,
   Rocket,
   Sparkles,
@@ -69,7 +70,7 @@ const FIRST_STEPS = [
   },
 ] as const;
 
-const { workflowImage, workflowDownloadName, presentation } = HELP_CENTER_ASSETS;
+const { workflowImage, workflowDownloadName, presentation, resourceMapPath } = HELP_CENTER_ASSETS;
 
 export function HelpCenterExecutive() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -109,6 +110,30 @@ export function HelpCenterExecutive() {
           downloadName={workflowDownloadName}
           onExpand={() => setLightboxOpen(true)}
         />
+      </HelpSection>
+
+      <HelpSection
+        id="mapa-recursos"
+        icon={<MapIcon className="h-4 w-4" />}
+        title="Mapa de Recursos"
+        subtitle="O que a plataforma faz, em três níveis"
+      >
+        <div className="rounded-xl border border-border bg-muted/20 p-5">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Guia visual dos recursos — do plantão escalado ao fechamento da competência. Cada nível
+            traz um cenário de uso e os fluxos passo a passo, com quem faz cada etapa e o caminho no
+            menu.
+          </p>
+          <a
+            href={resourceMapPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Abrir mapa de recursos
+          </a>
+        </div>
       </HelpSection>
 
       <HelpSection
