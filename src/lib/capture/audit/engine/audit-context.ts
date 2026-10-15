@@ -3,6 +3,11 @@
  * MEDICFLOW-PREVENTIVE-AUDIT-01
  */
 import type { StructuredField, StructuredGuide } from "../../parser/types/structured-guide";
+import {
+  recognizeExecutingProfessional,
+  type ExecutingProfessionalRecognition,
+  type TenantProfessional,
+} from "../data/tenant-professionals";
 
 export type AuditRuleContext = {
   guide: StructuredGuide;
@@ -14,11 +19,17 @@ export type AuditRuleContext = {
   isPresent: (code: string) => boolean;
   isGuideType: (...types: StructuredGuide["guideType"][]) => boolean;
   allProcedureCodes: () => string[];
+  /** Executante lido na guia × cadastro da instituição ("unavailable" sem cadastro carregado). */
+  executingProfessional: ExecutingProfessionalRecognition;
 };
 
 export function buildAuditContext(
   guide: StructuredGuide,
-  options: { sessionId?: string } = {},
+  options: {
+    sessionId?: string;
+    /** Cadastro de profissionais do tenant; ausente = regras de cadastro não avaliam. */
+    tenantProfessionals?: readonly TenantProfessional[];
+  } = {},
 ): AuditRuleContext {
   const getField = (code: string) => guide.fields[code];
 
@@ -50,6 +61,16 @@ export function buildAuditContext(
     return [...new Set(codes)];
   };
 
+  const executingProfessional = recognizeExecutingProfessional(options.tenantProfessionals, {
+    crm: isPresent("executing_crm")
+      ? (getField("executing_crm")?.rawValue ?? getValue("executing_crm"))
+      : null,
+    name:
+      isPresent("executing_name") && !/\d/.test(getValue("executing_name") ?? "")
+        ? getValue("executing_name")
+        : null,
+  });
+
   return {
     guide,
     sessionId: options.sessionId,
@@ -60,6 +81,7 @@ export function buildAuditContext(
     isPresent,
     isGuideType,
     allProcedureCodes,
+    executingProfessional,
   };
 }
 

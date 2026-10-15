@@ -141,7 +141,11 @@ export async function getCaptureBillingState(
   const professionals = professionalsRes.data ?? [];
   const draft = buildCaptureGuideDraft(guide, corrections?.proposals ?? [], {
     providers: providers.map((p) => ({ id: p.id, ansCode: p.ans_code })),
-    professionals: professionals.map((p) => ({ id: p.id, crm: p.crm })),
+    professionals: professionals.map((p) => ({
+      id: p.id,
+      crm: p.crm,
+      fullName: p.profile?.full_name ?? null,
+    })),
     procedures: [...procedureRows.values()].map((p) => ({
       id: p.id,
       code: p.code,

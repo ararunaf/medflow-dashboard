@@ -15,7 +15,13 @@ export const PRV_001: AuditRule = {
   field: "provider_cnpj",
   message: "CNPJ do prestador contratado não informado.",
   suggestedCorrection: "Informe o CNPJ do prestador contratado.",
-  evaluate: (ctx) => (ctx.isMissing("provider_cnpj") ? missingFieldFinding(PRV_001, ctx) : null),
+  evaluate: (ctx) => {
+    if (!ctx.isMissing("provider_cnpj")) return null;
+    // A guia de consulta oficial não tem caixa de CNPJ: o contratado é
+    // identificado por "Código na Operadora"/nome/CNES.
+    if (ctx.isGuideType("guia_consulta") && ctx.isPresent("provider_name")) return null;
+    return missingFieldFinding(PRV_001, ctx);
+  },
 };
 
 export const PRV_002: AuditRule = {

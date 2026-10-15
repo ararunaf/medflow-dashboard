@@ -1,0 +1,438 @@
+{
+  "guide": "B-consulta-cadastrado-codigo-06",
+  "scenario": "Executante cadastrado, conselho pelo código ANS (06)",
+  "expect": {
+    "status": "recognized",
+    "professional": "camila.rocha",
+    "findings": []
+  },
+  "page": {
+    "width": 1184,
+    "height": 900
+  },
+  "lines": [
+    {
+      "text": "GUIA DE CONSULTA",
+      "boundingBox": {
+        "x": 38,
+        "y": 34,
+        "width": 176.671875,
+        "height": 21
+      }
+    },
+    {
+      "text": "Horizonte Saúde",
+      "boundingBox": {
+        "x": 1049.15625,
+        "y": 37,
+        "width": 96.84375,
+        "height": 15
+      }
+    },
+    {
+      "text": "1 - Registro ANS",
+      "boundingBox": {
+        "x": 31,
+        "y": 75,
+        "width": 78.203125,
+        "height": 12
+      }
+    },
+    {
+      "text": "412345",
+      "boundingBox": {
+        "x": 31,
+        "y": 100,
+        "width": 57.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "2 - Nº Guia no Prestador",
+      "boundingBox": {
+        "x": 321.5,
+        "y": 75,
+        "width": 114.734375,
+        "height": 12
+      }
+    },
+    {
+      "text": "2026091104",
+      "boundingBox": {
+        "x": 321.5,
+        "y": 100,
+        "width": 96.015625,
+        "height": 19
+      }
+    },
+    {
+      "text": "3 - Número da Guia Atribuído pela Operadora",
+      "boundingBox": {
+        "x": 612,
+        "y": 75,
+        "width": 212.46875,
+        "height": 12
+      }
+    },
+    {
+      "text": "4 - Número da Carteira",
+      "boundingBox": {
+        "x": 31,
+        "y": 165,
+        "width": 107.375,
+        "height": 12
+      }
+    },
+    {
+      "text": "0412345008722310",
+      "boundingBox": {
+        "x": 31,
+        "y": 190,
+        "width": 153.625,
+        "height": 19
+      }
+    },
+    {
+      "text": "5 - Validade da Carteira",
+      "boundingBox": {
+        "x": 592,
+        "y": 165,
+        "width": 110.125,
+        "height": 12
+      }
+    },
+    {
+      "text": "31/12/2027",
+      "boundingBox": {
+        "x": 592,
+        "y": 190,
+        "width": 96.015625,
+        "height": 19
+      }
+    },
+    {
+      "text": "6 - Atendimento a RN",
+      "boundingBox": {
+        "x": 882.5,
+        "y": 165,
+        "width": 100.390625,
+        "height": 12
+      }
+    },
+    {
+      "text": "N",
+      "boundingBox": {
+        "x": 882.5,
+        "y": 190,
+        "width": 9.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "7 - Nome",
+      "boundingBox": {
+        "x": 31,
+        "y": 225,
+        "width": 43.1875,
+        "height": 12
+      }
+    },
+    {
+      "text": "BEATRIZ GOMES CARDOSO",
+      "boundingBox": {
+        "x": 31,
+        "y": 250,
+        "width": 201.640625,
+        "height": 19
+      }
+    },
+    {
+      "text": "8 - Cartão Nacional de Saúde",
+      "boundingBox": {
+        "x": 712.203125,
+        "y": 225,
+        "width": 138.34375,
+        "height": 12
+      }
+    },
+    {
+      "text": "898001234567802",
+      "boundingBox": {
+        "x": 712.203125,
+        "y": 250,
+        "width": 144.03125,
+        "height": 19
+      }
+    },
+    {
+      "text": "9 - Código na Operadora",
+      "boundingBox": {
+        "x": 31,
+        "y": 315,
+        "width": 116.15625,
+        "height": 12
+      }
+    },
+    {
+      "text": "0045123",
+      "boundingBox": {
+        "x": 31,
+        "y": 340,
+        "width": 67.21875,
+        "height": 19
+      }
+    },
+    {
+      "text": "10 - Nome do Contratado",
+      "boundingBox": {
+        "x": 267.390625,
+        "y": 315,
+        "width": 118.484375,
+        "height": 12
+      }
+    },
+    {
+      "text": "CLÍNICA VIDA PLENA",
+      "boundingBox": {
+        "x": 267.390625,
+        "y": 340,
+        "width": 172.828125,
+        "height": 19
+      }
+    },
+    {
+      "text": "11 - Código CNES",
+      "boundingBox": {
+        "x": 936.59375,
+        "y": 315,
+        "width": 85.609375,
+        "height": 12
+      }
+    },
+    {
+      "text": "9934567",
+      "boundingBox": {
+        "x": 936.59375,
+        "y": 340,
+        "width": 67.21875,
+        "height": 19
+      }
+    },
+    {
+      "text": "12 - Nome do Profissional Executante",
+      "boundingBox": {
+        "x": 31,
+        "y": 375,
+        "width": 176.265625,
+        "height": 12
+      }
+    },
+    {
+      "text": "DRA. CAMILA ROCHA",
+      "boundingBox": {
+        "x": 31,
+        "y": 400,
+        "width": 163.234375,
+        "height": 19
+      }
+    },
+    {
+      "text": "13 - Conselho Profissional",
+      "boundingBox": {
+        "x": 563.46875,
+        "y": 375,
+        "width": 122.578125,
+        "height": 12
+      }
+    },
+    {
+      "text": "06",
+      "boundingBox": {
+        "x": 563.46875,
+        "y": 400,
+        "width": 19.203125,
+        "height": 19
+      }
+    },
+    {
+      "text": "14 - Número no Conselho",
+      "boundingBox": {
+        "x": 720.125,
+        "y": 375,
+        "width": 120.234375,
+        "height": 12
+      }
+    },
+    {
+      "text": "345678",
+      "boundingBox": {
+        "x": 720.125,
+        "y": 400,
+        "width": 57.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "15 - UF",
+      "boundingBox": {
+        "x": 910.9375,
+        "y": 375,
+        "width": 35.015625,
+        "height": 12
+      }
+    },
+    {
+      "text": "SP",
+      "boundingBox": {
+        "x": 910.9375,
+        "y": 400,
+        "width": 19.203125,
+        "height": 19
+      }
+    },
+    {
+      "text": "16 - Código CBO",
+      "boundingBox": {
+        "x": 1016.34375,
+        "y": 375,
+        "width": 79.96875,
+        "height": 12
+      }
+    },
+    {
+      "text": "225124",
+      "boundingBox": {
+        "x": 1016.34375,
+        "y": 400,
+        "width": 57.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "17 - Indicação de Acidente",
+      "boundingBox": {
+        "x": 31,
+        "y": 465,
+        "width": 123.765625,
+        "height": 12
+      }
+    },
+    {
+      "text": "9",
+      "boundingBox": {
+        "x": 31,
+        "y": 490,
+        "width": 9.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "18 - Data do Atendimento",
+      "boundingBox": {
+        "x": 224.546875,
+        "y": 465,
+        "width": 119.09375,
+        "height": 12
+      }
+    },
+    {
+      "text": "11/09/2026",
+      "boundingBox": {
+        "x": 224.546875,
+        "y": 490,
+        "width": 96.015625,
+        "height": 19
+      }
+    },
+    {
+      "text": "19 - Tipo de Consulta",
+      "boundingBox": {
+        "x": 437.375,
+        "y": 465,
+        "width": 99.8125,
+        "height": 12
+      }
+    },
+    {
+      "text": "1",
+      "boundingBox": {
+        "x": 437.375,
+        "y": 490,
+        "width": 9.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "20 - Tabela",
+      "boundingBox": {
+        "x": 611.640625,
+        "y": 465,
+        "width": 51.765625,
+        "height": 12
+      }
+    },
+    {
+      "text": "22",
+      "boundingBox": {
+        "x": 611.640625,
+        "y": 490,
+        "width": 19.203125,
+        "height": 19
+      }
+    },
+    {
+      "text": "21 - Código do Procedimento",
+      "boundingBox": {
+        "x": 747.34375,
+        "y": 465,
+        "width": 136.59375,
+        "height": 12
+      }
+    },
+    {
+      "text": "10101012",
+      "boundingBox": {
+        "x": 747.34375,
+        "y": 490,
+        "width": 76.8125,
+        "height": 19
+      }
+    },
+    {
+      "text": "22 - Valor do Procedimento",
+      "boundingBox": {
+        "x": 960.171875,
+        "y": 465,
+        "width": 127.046875,
+        "height": 12
+      }
+    },
+    {
+      "text": "100,00",
+      "boundingBox": {
+        "x": 960.171875,
+        "y": 490,
+        "width": 57.609375,
+        "height": 19
+      }
+    },
+    {
+      "text": "23 - Observação / Justificativa",
+      "boundingBox": {
+        "x": 31,
+        "y": 525,
+        "width": 140.65625,
+        "height": 12
+      }
+    },
+    {
+      "text": "Consulta em consultório (no horário normal ou preestabelecido)",
+      "boundingBox": {
+        "x": 31,
+        "y": 550,
+        "width": 595.296875,
+        "height": 19
+      }
+    }
+  ]
+}

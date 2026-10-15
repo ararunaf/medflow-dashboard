@@ -6,6 +6,7 @@
  * chegam prontos do service. Nada aqui grava; a pessoa confere o rascunho na
  * tela antes de criar a guia.
  */
+import { matchTenantProfessional } from "../audit/data/tenant-professionals";
 import type { CorrectionProposal } from "../correction/types/correction-proposal";
 import type { StructuredField, StructuredGuide } from "../parser/types/structured-guide";
 
@@ -13,7 +14,7 @@ export type BillingGuideType = "consulta" | "sadt" | "honorario_individual";
 
 export type DraftCatalogs = {
   providers: ReadonlyArray<{ id: string; ansCode: string | null }>;
-  professionals: ReadonlyArray<{ id: string; crm: string | null }>;
+  professionals: ReadonlyArray<{ id: string; crm: string | null; fullName?: string | null }>;
   procedures: ReadonlyArray<{
     id: string;
     code: string;
@@ -79,16 +80,6 @@ function digits(value: string | null | undefined): string {
   return (value ?? "").replace(/\D/g, "");
 }
 
-/** CRM "SP-012345", "12345/SP", "012345" — compara número sem zeros à esquerda e UF quando ambos têm. */
-function sameCrm(a: string, b: string): boolean {
-  const numA = digits(a).replace(/^0+/, "");
-  const numB = digits(b).replace(/^0+/, "");
-  if (!numA || numA !== numB) return false;
-  const ufA = a.toUpperCase().match(/[A-Z]{2}/)?.[0];
-  const ufB = b.toUpperCase().match(/[A-Z]{2}/)?.[0];
-  return !ufA || !ufB || ufA === ufB;
-}
-
 function toIsoDate(value: string | null): string | null {
   if (!value) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
@@ -140,12 +131,24 @@ export function buildCaptureGuideDraft(
   }
 
   const executingCrm = f("executing_crm");
-  const professional = executingCrm
-    ? catalogs.professionals.find((p) => p.crm && sameCrm(p.crm, executingCrm))
-    : undefined;
-  if (!executingCrm) warnings.push("CRM do executante não foi lido — escolha o profissional.");
+  const executingName = f("executing_name");
+  const match = matchTenantProfessional(
+    catalogs.professionals.map((p) => ({ id: p.id, crm: p.crm, fullName: p.fullName ?? null })),
+    { crm: executingCrm, name: executingName },
+  );
+  const professional = match.professional;
+  if (!executingCrm && !professional)
+    warnings.push("CRM do executante não foi lido — escolha o profissional.");
+  else if (!executingCrm && professional)
+    warnings.push(
+      `CRM do executante não foi lido — profissional reconhecido pelo nome (${professional.fullName}); confira.`,
+    );
   else if (!professional)
     warnings.push(`Nenhum profissional cadastrado com o CRM ${executingCrm}.`);
+  else if (match.nameMismatch)
+    warnings.push(
+      `O CRM ${executingCrm} é de ${professional.fullName}, mas a guia traz "${executingName}" — confira o executante.`,
+    );
 
   const procedureByCode = new Map(catalogs.procedures.map((p) => [digits(p.code), p]));
   const seen = new Set<string>();

@@ -8,9 +8,16 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildRawOcrResult } from "../../../src/lib/capture/ocr/providers/shared.ts";
-import type { OcrLine, OcrPage, RawOcrResult } from "../../../src/lib/capture/ocr/types/raw-ocr-result.ts";
+import type {
+  OcrLine,
+  OcrPage,
+  RawOcrResult,
+} from "../../../src/lib/capture/ocr/types/raw-ocr-result.ts";
 import { parseOcrToStructuredGuide } from "../../../src/lib/capture/parser/index.ts";
-import type { StructuredField, StructuredGuide } from "../../../src/lib/capture/parser/types/structured-guide.ts";
+import type {
+  StructuredField,
+  StructuredGuide,
+} from "../../../src/lib/capture/parser/types/structured-guide.ts";
 import {
   PreventiveAuditEngine,
   auditStructuredGuide,
@@ -116,11 +123,7 @@ function cloneGuide(guide: StructuredGuide): StructuredGuide {
   return JSON.parse(JSON.stringify(guide)) as StructuredGuide;
 }
 
-function patchField(
-  guide: StructuredGuide,
-  code: string,
-  patch: Partial<StructuredField>,
-): void {
+function patchField(guide: StructuredGuide, code: string, patch: Partial<StructuredField>): void {
   const existing = guide.fields[code];
   if (!existing) return;
   guide.fields[code] = { ...existing, ...patch };
@@ -403,5 +406,91 @@ describe("Preventive Audit — Modularidade", () => {
     const { findings } = customEngine.audit(perfectGuide);
     assert.equal(findings.length, 1);
     assert.equal(findings[0]!.ruleId, "CUSTOM-001");
+  });
+});
+describe("Preventive Audit — Reconhecimento do executante no cadastro", () => {
+  const cadastro = [
+    { id: "prof-joao", crm: "SP-012345", fullName: "João Carlos Pereira" },
+    { id: "prof-ana", crm: "RJ-054321", fullName: "Ana Maria Costa" },
+  ];
+  const ids = (findings: { ruleId: string }[]) => findings.map((f) => f.ruleId);
+
+  it("parser lê o nome do executante, não a linha do CRM", () => {
+    assert.equal(perfectGuide.fields.executing_name?.value, "Dr Joao Pereira");
+    assert.equal(perfectGuide.fields.executing_name?.status, "found");
+  });
+
+  it("reconhece pelo CRM (12345/SP × SP-012345) e não gera achado de cadastro", async () => {
+    const { report, findings } = await auditStructuredGuide(perfectGuide, {
+      tenantProfessionals: cadastro,
+    });
+    assert.equal(report.executingProfessional?.status, "recognized");
+    assert.equal(report.executingProfessional?.professionalId, "prof-joao");
+    assert.equal(report.executingProfessional?.matchedBy, "crm");
+    assert.equal(report.executingProfessional?.nameMismatch, false);
+    assert.deepEqual(ids(findings), []);
+  });
+
+  it("sem cadastro carregado, regras de cadastro não avaliam (status unavailable)", async () => {
+    const { report, findings } = await auditStructuredGuide(perfectGuide);
+    assert.equal(report.executingProfessional?.status, "unavailable");
+    assert.equal(findings.length, 0);
+  });
+
+  it("EXE-004 quando o CRM lido não está no cadastro", async () => {
+    const guide = cloneGuide(perfectGuide);
+    patchField(guide, "executing_crm", { value: "SP-099999", rawValue: "99999/SP" });
+    const { report, findings } = await auditStructuredGuide(guide, {
+      tenantProfessionals: cadastro,
+    });
+    assert.equal(report.executingProfessional?.status, "not_registered");
+    const f = findings.find((x) => x.ruleId === "EXE-004");
+    assert.ok(f, "EXE-004 deve ser emitido");
+    assert.equal(f.severity, "alto");
+    assert.equal(f.blocking, false);
+  });
+
+  it("CRM malformado fica só no EXE-002, sem EXE-004", async () => {
+    const guide = cloneGuide(perfectGuide);
+    patchField(guide, "executing_crm", { value: "INVALIDO", rawValue: "INVALIDO" });
+    const { findings } = await auditStructuredGuide(guide, { tenantProfessionals: cadastro });
+    assert.ok(ids(findings).includes("EXE-002"));
+    assert.ok(!ids(findings).includes("EXE-004"));
+  });
+
+  it("EXE-005 quando o CRM é de outra pessoa", async () => {
+    const guide = cloneGuide(perfectGuide);
+    patchField(guide, "executing_name", { value: "Dra Ana Costa", rawValue: "Dra Ana Costa" });
+    const { findings } = await auditStructuredGuide(guide, { tenantProfessionals: cadastro });
+    const f = findings.find((x) => x.ruleId === "EXE-005");
+    assert.ok(f, "EXE-005 deve ser emitido");
+    assert.equal(f.expectedValue, "João Carlos Pereira");
+  });
+
+  it("EXE-006 reconhece pelo nome quando o CRM não foi lido", async () => {
+    const guide = cloneGuide(perfectGuide);
+    patchField(guide, "executing_crm", { value: null, rawValue: null, status: "missing" });
+    const { report, findings } = await auditStructuredGuide(guide, {
+      tenantProfessionals: cadastro,
+    });
+    assert.equal(report.executingProfessional?.matchedBy, "name");
+    assert.equal(report.executingProfessional?.professionalId, "prof-joao");
+    const f = findings.find((x) => x.ruleId === "EXE-006");
+    assert.ok(f, "EXE-006 deve ser emitido");
+    assert.equal(f.expectedValue, "SP-012345");
+    assert.ok(ids(findings).includes("EXE-001"), "CRM ausente continua sendo apontado");
+  });
+
+  it("homônimos no cadastro: não reconhece só pelo nome", async () => {
+    const guide = cloneGuide(perfectGuide);
+    patchField(guide, "executing_crm", { value: null, rawValue: null, status: "missing" });
+    const { report, findings } = await auditStructuredGuide(guide, {
+      tenantProfessionals: [
+        ...cadastro,
+        { id: "prof-joao-2", crm: "MG-11111", fullName: "João Pereira" },
+      ],
+    });
+    assert.equal(report.executingProfessional?.status, "not_registered");
+    assert.ok(!ids(findings).includes("EXE-006"));
   });
 });

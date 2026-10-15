@@ -101,7 +101,13 @@ const COMMON_PRESTADOR: TemplateFieldDef[] = [
     code: "provider_cnpj",
     label: "CNPJ Contratado",
     group: "prestador",
-    labelPatterns: [/cnpj/i, /cnpj\s*(do\s*)?contratado/i, /cnpj\s*(do\s*)?prestador/i],
+    labelPatterns: [
+      /cnpj/i,
+      /cnpj\s*(do\s*)?contratado/i,
+      /cnpj\s*(do\s*)?prestador/i,
+      // Formulário oficial: "9 - Código na Operadora" aceita CPF/CNPJ (o valuePattern só casa CNPJ).
+      /c[oó]digo\s*na\s*operadora/i,
+    ],
     valuePattern: /\d{2}[.\s]?\d{3}[.\s]?\d{3}[/\\]?\d{4}[-.\s]?\d{2}/,
     normalizer: "cnpj",
     expectedRegion: { yMin: 0.05, yMax: 0.35 },
@@ -216,7 +222,8 @@ export const TEMPLATE_CONSULTA_V1: TissTemplate = {
       code: "cid_code",
       label: "CID-10",
       group: "diagnostico",
-      labelPatterns: [/cid/i, /cid-?10/i, /diagn[oó]stico/i],
+      // \b: sem ele "preestabele-cid-o" (descrição da consulta) virava rótulo de CID.
+      labelPatterns: [/\bcid\b/i, /cid-?10/i, /diagn[oó]stico/i],
       valuePattern: /[A-Z]\d{2}(\.\d)?/i,
       normalizer: "cid",
       expectedRegion: { yMin: 0.35, yMax: 0.8 },
@@ -293,7 +300,7 @@ export const TEMPLATE_SADT_V1: TissTemplate = {
       code: "cid_code",
       label: "CID-10",
       group: "diagnostico",
-      labelPatterns: [/cid/i, /cid-?10/i],
+      labelPatterns: [/\bcid\b/i, /cid-?10/i],
       valuePattern: /[A-Z]\d{2}(\.\d)?/i,
       normalizer: "cid",
       expectedRegion: { yMin: 0.35, yMax: 0.7 },

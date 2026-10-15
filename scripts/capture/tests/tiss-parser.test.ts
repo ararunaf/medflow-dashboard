@@ -505,3 +505,42 @@ describe("TISS Parser — formulário impresso (rótulo acima do valor)", () => 
     assert.equal(inline.fields.guide_number?.rawValue, "987654");
   });
 });
+
+describe("TISS Parser — caixas do executante no formulário oficial", () => {
+  const officialExecutor = (council: string, number: string) =>
+    buildGridOcr([
+      boxLine("GUIA DE CONSULTA", 350, 20, 300),
+      boxLine("1 - Registro ANS", 20, 100, 150),
+      boxLine("398765", 20, 122, 80),
+      boxLine("9 - Código na Operadora", 20, 300, 200),
+      boxLine("10 - Nome do Contratado", 300, 300, 220),
+      boxLine("0045123", 20, 322, 80),
+      boxLine("CLINICA VIDA PLENA", 300, 322, 200),
+      boxLine("12 - Nome do Profissional Executante", 20, 400, 330),
+      boxLine("13 - Conselho Profissional", 400, 400, 200),
+      boxLine("14 - Número no Conselho", 620, 400, 200),
+      boxLine("15 - UF", 840, 400, 60),
+      boxLine("DRA. CAMILA ROCHA", 20, 422, 200),
+      boxLine(council, 400, 422, 40),
+      ...(number ? [boxLine(number, 620, 422, 80)] : []),
+      boxLine("SP", 840, 422, 30),
+      boxLine("23 - Observação / Justificativa", 20, 600, 260),
+      boxLine("Consulta em consultório (no horário normal ou preestabelecido)", 20, 622, 600),
+    ]);
+
+  it("código do conselho (06) não é lido como número do CRM", () => {
+    const guide = parseOcrToStructuredGuide(officialExecutor("06", "345678"));
+    assert.equal(guide.fields.executing_crm?.rawValue, "345678");
+    assert.equal(guide.fields.executing_name?.rawValue, "DRA. CAMILA ROCHA");
+  });
+
+  it("número no conselho em branco fica ausente, sem ler o rótulo vizinho", () => {
+    const guide = parseOcrToStructuredGuide(officialExecutor("CRM", ""));
+    assert.equal(guide.fields.executing_crm?.status, "missing");
+  });
+
+  it("'preestabelecido' na descrição não vira rótulo de CID", () => {
+    const guide = parseOcrToStructuredGuide(officialExecutor("CRM", "345678"));
+    assert.equal(guide.fields.cid_code?.status, "missing");
+  });
+});

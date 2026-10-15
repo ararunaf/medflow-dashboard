@@ -16,6 +16,7 @@ import {
   persistAuditReport,
 } from "../infrastructure/audit-storage";
 import type { AuditReport } from "../types/audit-report";
+import type { TenantProfessional } from "../data/tenant-professionals";
 
 export type RunCaptureAuditResult = {
   sessionId: string;
@@ -37,6 +38,28 @@ async function persistSessionMetadata(
   if (error) throw error;
 }
 
+/**
+ * Cadastro de profissionais do tenant para reconhecer o executante.
+ * Best-effort: se a leitura falhar, a auditoria segue sem as regras de cadastro
+ * (EXE-004..006 ficam "unavailable") em vez de derrubar a pipeline.
+ */
+async function loadTenantProfessionals(ctx: ServiceCtx): Promise<TenantProfessional[] | undefined> {
+  const { data, error } = await ctx.client
+    .from("professionals")
+    .select("id, crm, specialty, profile:profiles ( full_name )")
+    .eq("tenant_id", ctx.tenantId);
+  if (error) {
+    console.warn("[capture-audit] cadastro de profissionais indisponível:", error.message);
+    return undefined;
+  }
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    crm: p.crm || null,
+    fullName: p.profile?.full_name ?? null,
+    specialty: p.specialty || null,
+  }));
+}
+
 export class PreventiveAuditService {
   private readonly engine = getDefaultPreventiveAuditEngine();
 
@@ -53,7 +76,9 @@ export class PreventiveAuditService {
 
     try {
       // TISS-CONV-01: conhecimento TUSS exclusivamente via Enterprise Foundation.
-      const { report } = await this.engine.auditAsync(guide, { sessionId });
+      const tenantProfessionals = await loadTenantProfessionals(ctx);
+      const { report } = await this.engine.auditAsync(guide, { sessionId, tenantProfessionals });
+      const executing = report.executingProfessional;
       const auditDurationMs = Date.now() - start;
       const { storagePath } = await persistAuditReport(ctx, sessionId, report);
       const summary = buildAuditReportSummaryFromResult(report, storagePath, auditDurationMs);
@@ -71,6 +96,15 @@ export class PreventiveAuditService {
           mediumCount: report.summary.mediumCount,
           totalFindings: report.summary.totalFindings,
         },
+        executingProfessional: executing
+          ? {
+              status: executing.status,
+              professionalId: executing.professionalId,
+              fullName: executing.fullName,
+              crm: executing.crm,
+              matchedBy: executing.matchedBy,
+            }
+          : null,
       };
 
       metadata = appendCaptureEvent(

@@ -91,3 +91,13 @@ export {
   ensureCaptureTissKnowledge,
   getEnterpriseTissVersionLabel,
 } from "./data/tuss-catalog";
+
+export {
+  matchTenantProfessional,
+  recognizeExecutingProfessional,
+  sameCrm,
+  samePersonName,
+  type ExecutingProfessionalRecognition,
+  type ProfessionalMatch,
+  type TenantProfessional,
+} from "./data/tenant-professionals";

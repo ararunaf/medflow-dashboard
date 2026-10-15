@@ -5,6 +5,8 @@ import {
   FileJson,
   ShieldAlert,
   ShieldCheck,
+  UserCheck,
+  UserX,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,7 @@ import type {
   AuditReport,
   AuditReportSummaryMeta,
   AuditSeverity,
+  ExecutingProfessionalRecognition,
 } from "@/lib/capture/audit";
 import type { CapturePhase } from "../types";
 
@@ -110,6 +113,10 @@ export function CaptureAuditPanel({
         <MetricCard label="Alertas (alto)" value={highCount} variant="warning" />
         <MetricCard label="Sugestões (médio/baixo)" value={mediumCount + lowCount} />
       </div>
+
+      {report?.executingProfessional ? (
+        <ExecutingProfessionalCard recognition={report.executingProfessional} />
+      ) : null}
 
       {report ? (
         <div className="flex flex-wrap gap-2">
@@ -299,5 +306,57 @@ function FindingRow({
       </p>
       <p className="text-xs text-primary/80">{finding.suggestedCorrection}</p>
     </li>
+  );
+}
+
+function ExecutingProfessionalCard({
+  recognition: r,
+}: {
+  recognition: ExecutingProfessionalRecognition;
+}) {
+  if (r.status === "unavailable") return null;
+  const recognized = r.status === "recognized";
+  const warn = !recognized || r.nameMismatch || r.matchedBy === "name";
+  const read = [r.readName, r.readCrm ? `CRM ${r.readCrm}` : null].filter(Boolean).join(" · ");
+  return (
+    <div
+      className={`flex items-start gap-2 rounded-md border p-3 text-sm ${
+        warn ? "border-orange-500/30 bg-orange-500/5" : "border-emerald-500/30 bg-emerald-500/5"
+      }`}
+    >
+      {recognized ? (
+        <UserCheck
+          className={`mt-0.5 h-4 w-4 shrink-0 ${warn ? "text-orange-600" : "text-emerald-600"}`}
+        />
+      ) : (
+        <UserX className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />
+      )}
+      <div className="min-w-0 space-y-0.5">
+        <p className="text-xs text-muted-foreground">Profissional executante</p>
+        {recognized ? (
+          <p className="font-medium">
+            {r.fullName ?? "Profissional cadastrado"}
+            {r.crm ? <span className="text-muted-foreground"> · CRM {r.crm}</span> : null}
+          </p>
+        ) : (
+          <p className="font-medium">
+            {r.status === "not_read"
+              ? "Não identificado na guia"
+              : "Não encontrado no cadastro da instituição"}
+          </p>
+        )}
+        {read ? <p className="text-xs text-muted-foreground">Lido na guia: {read}</p> : null}
+        {recognized && r.matchedBy === "name" ? (
+          <p className="text-xs text-orange-700 dark:text-orange-400">
+            Reconhecido pelo nome — o CRM não foi lido.
+          </p>
+        ) : null}
+        {r.nameMismatch ? (
+          <p className="text-xs text-orange-700 dark:text-orange-400">
+            O nome na guia não confere com o cadastro deste CRM.
+          </p>
+        ) : null}
+      </div>
+    </div>
   );
 }

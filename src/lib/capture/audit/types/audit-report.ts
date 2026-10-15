@@ -3,6 +3,7 @@
  * MEDICFLOW-PREVENTIVE-AUDIT-01
  */
 import type { TissGuideType } from "../../parser/types/tiss-guide-type";
+import type { ExecutingProfessionalRecognition } from "../data/tenant-professionals";
 import type { AuditFinding, CorrectionProposal } from "./audit-finding";
 
 export type AuditScoreDistribution = {
@@ -42,6 +43,8 @@ export type AuditReport = {
   findings: AuditFinding[];
   correctionProposals: CorrectionProposal[];
   summary: AuditReportSummary;
+  /** Reconhecimento do executante no cadastro (ausente em relatórios anteriores). */
+  executingProfessional?: ExecutingProfessionalRecognition;
 };
 
 export type AuditReportSummaryMeta = {

@@ -169,4 +169,30 @@ describe("buildCaptureGuideDraft", () => {
     g.fields.executing_crm = field("executing_crm", "12345/MG");
     assert.equal(buildCaptureGuideDraft(g, [], catalogs).professionalId, null);
   });
+
+  it("sem CRM lido, reconhece o profissional pelo nome e avisa para conferir", () => {
+    const g = guide();
+    g.fields.executing_crm = field("executing_crm", null);
+    g.fields.executing_name = field("executing_name", "Dr. João Pereira");
+    const draft = buildCaptureGuideDraft(g, [], {
+      ...catalogs,
+      professionals: [
+        { id: "prof-joao", crm: "12345-SP", fullName: "João Carlos Pereira" },
+        { id: "prof-rj", crm: "12345-RJ", fullName: "Ana Costa" },
+      ],
+    });
+    assert.equal(draft.professionalId, "prof-joao");
+    assert.ok(draft.warnings.some((w) => w.includes("reconhecido pelo nome")));
+  });
+
+  it("CRM casa mas o nome é de outra pessoa: mantém o CRM e avisa", () => {
+    const g = guide();
+    g.fields.executing_name = field("executing_name", "Ana Costa");
+    const draft = buildCaptureGuideDraft(g, [], {
+      ...catalogs,
+      professionals: [{ id: "prof-joao", crm: "12345-SP", fullName: "João Carlos Pereira" }],
+    });
+    assert.equal(draft.professionalId, "prof-joao");
+    assert.ok(draft.warnings.some((w) => w.includes("confira o executante")));
+  });
 });

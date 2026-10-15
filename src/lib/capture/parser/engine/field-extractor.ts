@@ -268,7 +268,18 @@ export function extractFields(
 
     const prevMatches = matchedLineIndices.get(def.code) ?? [];
 
-    const uniqueCandidates = dedupeCandidatesByLine(candidates);
+    // Nome de pessoa não tem dígitos: sem isto, /executante/i do nome do
+    // executante capturava a linha "CRM Executante: 12345/SP".
+    // CRM/CRO têm ao menos 4 dígitos: no formulário oficial a caixa
+    // "13 - Conselho Profissional" traz "06"/"CRM", e com "14 - Número no
+    // Conselho" em branco o rótulo vizinho era lido como valor.
+    const plausibleCandidates =
+      def.normalizer === "name"
+        ? candidates.filter((c) => !/\d/.test(c.rawValue))
+        : def.normalizer === "crm" || def.normalizer === "cro"
+          ? candidates.filter((c) => (c.rawValue.match(/\d/g)?.length ?? 0) >= 4)
+          : candidates;
+    const uniqueCandidates = dedupeCandidatesByLine(plausibleCandidates);
     const distinctLineCandidates = uniqueCandidates.filter(
       (c, idx, arr) =>
         arr.findIndex((x) => x.line.lineIndex === c.line.lineIndex && x.rawValue === c.rawValue) ===

@@ -10,6 +10,7 @@ import { ensureCaptureTissKnowledge } from "../../enterprise/tiss-knowledge-gate
 import type { AuditFinding, CorrectionProposal } from "../types/audit-finding";
 import type { AuditReport } from "../types/audit-report";
 import type { AuditRule } from "../types/audit-rule";
+import type { TenantProfessional } from "../data/tenant-professionals";
 import { buildAuditContext } from "./audit-context";
 import { calculateAuditScore, buildReportSummary } from "./score-calculator";
 import { ALL_AUDIT_RULES } from "../rules";
@@ -19,6 +20,8 @@ export const AUDIT_ENGINE_VERSION = "preventive_audit_v1";
 export type PreventiveAuditOptions = {
   sessionId?: string;
   rules?: AuditRule[];
+  /** Cadastro do tenant para reconhecer o executante (EXE-004..006). */
+  tenantProfessionals?: readonly TenantProfessional[];
 };
 
 export type PreventiveAuditResult = {
@@ -54,7 +57,10 @@ export class PreventiveAuditEngine {
    */
   audit(guide: StructuredGuide, options: PreventiveAuditOptions = {}): PreventiveAuditResult {
     const start = Date.now();
-    const ctx = buildAuditContext(guide, { sessionId: options.sessionId });
+    const ctx = buildAuditContext(guide, {
+      sessionId: options.sessionId,
+      tenantProfessionals: options.tenantProfessionals,
+    });
     const rules = options.rules ?? this.rules;
 
     const findings: AuditFinding[] = [];
@@ -79,6 +85,7 @@ export class PreventiveAuditEngine {
       findings,
       correctionProposals: proposals,
       summary,
+      executingProfessional: ctx.executingProfessional,
     };
 
     void start; // duration tracked by service layer
