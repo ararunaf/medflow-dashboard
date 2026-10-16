@@ -1,0 +1,71 @@
+# Vigia o deploy de produção na Vercel.
+#
+# A Vercel pode recusar um build (ex.: dependência com CVE bloqueada) sem que
+# ninguém perceba: o site continua no deploy anterior. Entre 05/10 e 14/10/2026
+# todo deploy falhou assim. Este workflow espera o status "Vercel" do commit
+# enviado e, se o deploy falhar, fica vermelho e abre uma issue (o GitHub avisa
+# por e-mail nos dois casos).
+name: Vigia de deploy (Vercel)
+
+on:
+  push:
+    branches: [feat/epc-24e-enterprise-runtime-final-cutover]
+
+permissions:
+  contents: read
+  statuses: read
+  issues: write
+
+concurrency:
+  group: vercel-deploy-watch-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    name: Deploy de produção concluiu?
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const sha = context.sha;
+            const deadline = Date.now() + 20 * 60 * 1000;
+            let vercel = null;
+
+            while (Date.now() < deadline) {
+              const { data } = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: sha });
+              vercel = data.statuses.find((s) => s.context === "Vercel") ?? null;
+              if (vercel && vercel.state !== "pending") break;
+              core.info(`Aguardando a Vercel (${vercel ? vercel.description : "status ainda não criado"})…`);
+              await new Promise((r) => setTimeout(r, 20000));
+            }
+
+            if (vercel?.state === "success") {
+              core.info(`Deploy concluído: ${vercel.target_url}`);
+              return;
+            }
+
+            const motivo = !vercel
+              ? "A Vercel não registrou deploy para este commit em 20 minutos."
+              : vercel.state === "pending"
+                ? "O deploy não terminou em 20 minutos."
+                : `A Vercel marcou o deploy como "${vercel.state}": ${vercel.description}`;
+            const body = [
+              `O commit ${sha.slice(0, 7)} não chegou à produção.`,
+              "",
+              `**Motivo:** ${motivo}`,
+              vercel?.target_url ? `**Deploy:** ${vercel.target_url}` : "",
+              "",
+              "A produção continua no último deploy que deu certo. Para ver o log:",
+              "`npx vercel inspect <id-do-deploy> --logs`",
+            ].join("\n");
+
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title: `Deploy de produção falhou — ${sha.slice(0, 7)}`,
+              body,
+            });
+            core.setFailed(motivo);

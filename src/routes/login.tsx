@@ -4,6 +4,7 @@ import { AuthFallback } from "@/components/auth-fallback";
 import { LoginBrandingPanel } from "@/components/login-branding-panel";
 import { Button } from "@/components/ui/button";
 import { parseLoginReason } from "@/lib/errors/auth-actions";
+import type { AppErrorKind } from "@/lib/errors/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Database } from "@/lib/database.types";
@@ -14,9 +15,12 @@ import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import { BRANDING, brandPageTitle, defaultLogoUrl as logo } from "@/lib/assets";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    reason: parseLoginReason(search),
-  }),
+  // Sem motivo, a chave fica fora: `{ reason: null }` fazia o router reescrever a
+  // URL para /login?reason=null (redirect 307 em todo acesso ao login).
+  validateSearch: (search: Record<string, unknown>): { reason?: AppErrorKind } => {
+    const reason = parseLoginReason(search);
+    return reason ? { reason } : {};
+  },
   head: () => ({
     meta: [
       { title: brandPageTitle("Entrar") },
@@ -264,7 +268,7 @@ function LoginPage() {
                 <Label htmlFor="password">Senha</Label>
                 <Link
                   to="/login/esqueci-senha"
-                  search={{ reason: null }}
+                  search={{}}
                   className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap"
                 >
                   Esqueci minha senha?

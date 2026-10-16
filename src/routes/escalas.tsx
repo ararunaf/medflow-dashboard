@@ -1,6 +1,6 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { brandPageTitle } from "@/lib/assets";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { EmptyState, ErrorState, PageHeader, SkeletonRow, StatusBadge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,17 @@ function buildDays(): { iso: string; day: number; monthShort: string; isToday: b
   return out;
 }
 
+const FILTER_OPTIONS: Array<{
+  value: EscalasOpsSearch["opsFocus"] | null;
+  label: string;
+  hint: string;
+}> = [
+  { value: null, label: "Todos os plantões", hint: "Sem filtro" },
+  { value: "abertos", label: "Abertos", hint: "Vagas ainda sem profissional" },
+  { value: "sem-confirmacao", label: "Sem confirmação", hint: "Ninguém confirmado no plantão" },
+  { value: "conflicts", label: "Conflitos", hint: "Sinal de conflito operacional" },
+];
+
 const WEEKDAY_HEADERS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 type MonthCell = { iso: string; day: number; inMonth: boolean; isToday: boolean };
@@ -117,6 +128,24 @@ function EscalasPage() {
   const { auth } = Route.useRouteContext();
   const canBuild = can(auth.profile?.role ?? null, "shifts:create");
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!filtersRef.current?.contains(e.target as Node)) setFiltersOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [filtersOpen]);
 
   const shiftsQuery = useShiftsRangeQuery(undefined, undefined, undefined, {
     enabled: viewMode === "dias",
@@ -190,9 +219,49 @@ function EscalasPage() {
                 <CalendarDays className="h-3.5 w-3.5" /> Mês
               </button>
             </div>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" /> Filtros
-            </Button>
+            <div className="relative" ref={filtersRef}>
+              <Button
+                variant={opsFocus ? "secondary" : "outline"}
+                size="sm"
+                className="gap-2"
+                aria-expanded={filtersOpen}
+                aria-controls="escalas-filtros"
+                onClick={() => setFiltersOpen((v) => !v)}
+              >
+                <Filter className="h-4 w-4" /> Filtros{filterLabel ? `: ${filterLabel}` : ""}
+              </Button>
+              {filtersOpen ? (
+                <div
+                  id="escalas-filtros"
+                  className="absolute right-0 z-20 mt-1 w-56 rounded-lg border border-border bg-surface p-1 shadow-lg"
+                >
+                  {FILTER_OPTIONS.map((option) => {
+                    const active = (opsFocus ?? null) === option.value;
+                    return (
+                      <button
+                        key={option.label}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => {
+                          setFiltersOpen(false);
+                          void navigate({
+                            search: option.value ? { opsFocus: option.value } : {},
+                            replace: true,
+                          });
+                        }}
+                        className={cn(
+                          "flex w-full flex-col items-start rounded-md px-3 py-2 text-left text-sm hover:bg-muted",
+                          active && "bg-primary/10 text-primary",
+                        )}
+                      >
+                        <span className="font-medium">{option.label}</span>
+                        <span className="text-xs text-muted-foreground">{option.hint}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
             {canBuild ? (
               <Button size="sm" className="gap-2" onClick={() => setBuilderOpen((v) => !v)}>
                 <CalendarPlus className="h-4 w-4" /> Montar escala

@@ -98,7 +98,7 @@ function ResetPasswordPage() {
               </p>
               <Link
                 to="/login/esqueci-senha"
-                search={{ reason: null }}
+                search={{}}
                 className="block text-center text-sm text-primary hover:text-primary/90"
               >
                 Solicitar novo link
@@ -136,7 +136,7 @@ function ResetPasswordPage() {
                     return;
                   }
                   await supabase.auth.signOut({ scope: "local" });
-                  await navigate({ to: "/login", search: { reason: null } });
+                  await navigate({ to: "/login", search: {} });
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Erro ao redefinir senha.");
                 } finally {
@@ -183,7 +183,7 @@ function ResetPasswordPage() {
 
           <Link
             to="/login"
-            search={{ reason: null }}
+            search={{}}
             className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground"
           >
             Voltar para login

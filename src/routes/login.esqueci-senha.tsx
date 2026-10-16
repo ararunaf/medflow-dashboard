@@ -128,7 +128,7 @@ function ForgotPasswordPage() {
 
           <Link
             to="/login"
-            search={{ reason: null }}
+            search={{}}
             className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground"
           >
             Voltar para login
