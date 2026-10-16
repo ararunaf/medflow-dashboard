@@ -4,7 +4,7 @@ import { ClipboardCheck, RotateCcw, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { ErrorState, PageHeader } from "@/components/ui-kit";
-import { CaptureDropZone } from "../components/CaptureDropZone";
+import { CAPTURE_FILE_ACCEPT, CaptureDropZone } from "../components/CaptureDropZone";
 import { CaptureFileInfoPanel } from "../components/CaptureFileInfo";
 import { CaptureImagePreview } from "../components/CaptureImagePreview";
 import { CaptureOcrPanel } from "../components/CaptureOcrPanel";
@@ -16,6 +16,7 @@ import { CaptureRiskDashboard } from "../components/CaptureRiskDashboard";
 import { CaptureStatusTimeline } from "../components/CaptureStatusTimeline";
 import { useCaptureSession } from "../hooks/useCaptureSession";
 import { useCaptureUpload } from "../hooks/useCaptureUpload";
+import { normalizeCaptureFile } from "../utils/image-normalize";
 import { downloadOcrJson, fetchCaptureOcr } from "../services/ocr-client";
 import {
   downloadStructuredGuideJson,
@@ -43,6 +44,8 @@ export function CapturaPage() {
   const [filename, setFilename] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const [prepareNote, setPrepareNote] = useState<string | null>(null);
   const [ocrSummary, setOcrSummary] = useState<OcrResultSummary | null>(null);
   const [ocrResult, setOcrResult] = useState<RawOcrResult | null>(null);
   const [parserSummary, setParserSummary] = useState<StructuredGuideSummary | null>(null);
@@ -121,9 +124,26 @@ export function CapturaPage() {
 
   const handleFiles = useCallback(
     async (files: FileList | null, channel: "file_upload" | "mobile_camera") => {
-      const file = files?.[0];
-      if (!file) return;
+      const original = files?.[0];
+      if (!original) return;
       setError(null);
+      setPrepareNote(null);
+      setFilename(original.name);
+
+      // Foto de iPhone (HEIC), deitada (EXIF) ou acima de 4 MB → JPEG em pé e leve.
+      let file: File;
+      setPreparing(true);
+      try {
+        const prepared = await normalizeCaptureFile(original);
+        file = prepared.file;
+        if (prepared.note) setPrepareNote(prepared.note);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+        return;
+      } finally {
+        setPreparing(false);
+      }
+
       setFilename(file.name);
       setFile({
         name: file.name,
@@ -269,7 +289,9 @@ export function CapturaPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
           <CaptureDropZone
-            busy={busy}
+            busy={busy || preparing}
+            busyLabel={preparing ? "Preparando a imagem…" : undefined}
+            note={prepareNote}
             dragOver={dragOver}
             filename={filename}
             onDragOver={setDragOver}
@@ -349,7 +371,7 @@ export function CapturaPage() {
   function fileInputRetry() {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "application/pdf,image/jpeg,image/png,image/webp,image/tiff";
+    input.accept = CAPTURE_FILE_ACCEPT;
     input.onchange = () => void handleFiles(input.files, "file_upload");
     input.click();
   }

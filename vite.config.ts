@@ -236,6 +236,9 @@ export default defineConfig(({ command, mode }) => {
         output: {
           manualChunks(id) {
             if (!id.includes("node_modules")) return;
+            // Decodificador HEIC (~3 MB): fica no chunk próprio do import() dinâmico,
+            // baixado só quando alguém envia foto HEIC — nunca no "vendor" comum.
+            if (id.includes("heic-to")) return;
             if (id.includes("@tanstack")) return "tanstack";
             if (id.includes("@supabase")) return "supabase";
             if (id.includes("lucide-react")) return "icons";

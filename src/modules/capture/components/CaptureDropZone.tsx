@@ -2,8 +2,16 @@ import { Camera, FileUp, Loader2, Upload } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 
+/** HEIC/HEIF (iPhone) é aceito no seletor e convertido para JPEG no navegador antes do envio. */
+export const CAPTURE_FILE_ACCEPT =
+  "application/pdf,image/jpeg,image/png,image/webp,image/tiff,image/heic,image/heif,.heic,.heif";
+
 type CaptureDropZoneProps = {
   busy: boolean;
+  /** Texto do indicador de ocupado (padrão: "Enviando…"). */
+  busyLabel?: string;
+  /** Aviso de conversão da imagem (ex.: HEIC → JPEG). */
+  note?: string | null;
   dragOver: boolean;
   filename: string | null;
   onDragOver: (over: boolean) => void;
@@ -12,6 +20,8 @@ type CaptureDropZoneProps = {
 
 export function CaptureDropZone({
   busy,
+  busyLabel,
+  note,
   dragOver,
   filename,
   onDragOver,
@@ -38,7 +48,12 @@ export function CaptureDropZone({
     >
       <Upload className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="mt-3 text-sm font-medium">Arraste arquivos aqui</p>
-      <p className="mt-1 text-xs text-muted-foreground">PDF, JPEG, PNG, WebP ou TIFF — até 25 MB</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        PDF, JPEG, PNG, WebP, TIFF ou foto do iPhone (HEIC) — até 25 MB
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Na foto: guia inteira, de cima, com boa luz e sem sombra.
+      </p>
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Button
@@ -66,7 +81,7 @@ export function CaptureDropZone({
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/pdf,image/jpeg,image/png,image/webp,image/tiff"
+        accept={CAPTURE_FILE_ACCEPT}
         className="hidden"
         onChange={(e) => onFiles(e.target.files, "file_upload")}
       />
@@ -85,9 +100,10 @@ export function CaptureDropZone({
       {busy ? (
         <p className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          Enviando…
+          {busyLabel ?? "Enviando…"}
         </p>
       ) : null}
+      {note ? <p className="mt-2 text-xs text-primary">{note}</p> : null}
       {filename ? (
         <p className="mt-2 text-xs text-muted-foreground truncate max-w-md mx-auto">
           Arquivo: {filename}

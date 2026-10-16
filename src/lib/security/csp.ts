@@ -6,6 +6,8 @@ export function buildContentSecurityPolicy(isProduction: boolean): string {
   return [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
+    // Decodificador de HEIC (heic-to/csp) roda num Worker criado de blob: — fotos de iPhone.
+    "worker-src 'self' blob:",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https://*.supabase.co",
